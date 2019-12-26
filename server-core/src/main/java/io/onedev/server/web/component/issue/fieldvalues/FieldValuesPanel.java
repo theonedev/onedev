@@ -13,6 +13,9 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
@@ -22,10 +25,12 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -33,20 +38,27 @@ import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 @SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext {
 
-	public FieldValuesPanel(String id) {
+	private final Mode userFieldDisplayMode;
+	
+	public FieldValuesPanel(String id, Mode userFieldDisplayMode) {
 		super(id);
+		this.userFieldDisplayMode = userFieldDisplayMode;
 	}
 
 	private GlobalIssueSetting getIssueSetting() {
@@ -66,7 +78,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					String value = item.getModelObject();
 					if (getField().getType().equals(FieldSpec.USER)) {
 						User user = User.from(OneDev.getInstance(UserManager.class).findByName(value), value);
-						item.add(new UserIdentPanel("value", user, Mode.NAME));
+						item.add(new UserIdentPanel("value", user, userFieldDisplayMode));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));
@@ -83,7 +95,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					} else if (getField().getType().equals(FieldSpec.BUILD)) {
 						Build build = OneDev.getInstance(BuildManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));
-						if (build != null) {
+						if (build != null && SecurityUtils.canAccess(build)) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", 
 									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
@@ -96,7 +108,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					} else if (getField().getType().equals(FieldSpec.PULLREQUEST)) {
 						PullRequest request = OneDev.getInstance(PullRequestManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));
-						if (request != null) {
+						if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
 									PullRequestActivitiesPage.paramsOf(request, null));
@@ -105,6 +117,28 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							item.add(linkFrag);
 						} else {
 							item.add(new Label("value", "#" + value));
+						}
+					} else if (getField().getType().equals(FieldSpec.COMMIT)) {
+						if (ObjectId.isId(value)) {
+							if (SecurityUtils.canReadCode(getIssue().getProject())) {
+								Fragment fragment = new Fragment("value", "commitFrag", FieldValuesPanel.this);
+								Project project = getIssue().getProject();
+								CommitDetailPage.State commitState = new CommitDetailPage.State();
+								commitState.revision = value;
+								PageParameters params = CommitDetailPage.paramsOf(project, commitState);
+								Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
+								fragment.add(hashLink);
+								hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
+								fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(value))));
+								item.add(fragment);
+							} else {
+								Fragment fragment = new Fragment("value", "notAccessibleCommitFrag", FieldValuesPanel.this);
+								fragment.add(new Label("hash", GitUtils.abbreviateSHA(value)));
+								fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(value))));
+								item.add(fragment);
+							}
+						} else {
+							item.add(new Label("value", value));
 						}
 					} else {
 						Label label;

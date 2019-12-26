@@ -37,13 +37,13 @@ public class RoleMultiChoiceEditor extends PropertyEditor<List<String>> {
 		for (Role role: OneDev.getInstance(RoleManager.class).query())
 			roleNames.put(role.getName(), role.getName());
 		
-		Collection<String> selected = new ArrayList<>();
+		Collection<String> selections = new ArrayList<>();
 		if (getModelObject() != null)
-			selected.addAll(getModelObject());
+			selections.addAll(getModelObject());
 		
-		selected.retainAll(roleNames.keySet());
+		selections.retainAll(roleNames.keySet());
 		
-		input = new StringMultiChoice("input", Model.of(selected), Model.ofMap(roleNames)) {
+		input = new StringMultiChoice("input", Model.of(selections), Model.ofMap(roleNames)) {
 
 			@Override
 			protected void onInitialize() {

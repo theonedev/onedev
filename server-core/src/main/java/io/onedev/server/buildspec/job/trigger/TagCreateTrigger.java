@@ -48,7 +48,7 @@ public class TagCreateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());
 			if (pushedTag != null && !refUpdated.getNewCommitId().equals(ObjectId.zeroId()) 
-					&& (getTags() == null || PatternSet.fromString(getTags()).matches(new PathMatcher(), pushedTag))) {
+					&& (getTags() == null || PatternSet.parse(getTags()).matches(new PathMatcher(), pushedTag))) {
 				return true;
 			}
 		}

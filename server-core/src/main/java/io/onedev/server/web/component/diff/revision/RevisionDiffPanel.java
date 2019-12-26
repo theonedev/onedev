@@ -204,7 +204,7 @@ public class RevisionDiffPanel extends Panel {
     		String patternSetString = pathFilterModel.getObject();
     		if (StringUtils.isNotBlank(patternSetString)) {
     			try {
-    				PatternSet patternSet = PatternSet.fromString(patternSetString.toLowerCase());
+    				PatternSet patternSet = PatternSet.parse(patternSetString.toLowerCase());
     				Matcher matcher = new PathMatcher();
     				for (BlobChange change: changes) {
 	        			String oldPath = change.getOldBlobIdent().path;
@@ -623,7 +623,7 @@ public class RevisionDiffPanel extends Panel {
 				super.onConfigure();
 				try {
 					if (StringUtils.isNotBlank(pathFilterModel.getObject()))
-						PatternSet.fromString(pathFilterModel.getObject());
+						PatternSet.parse(pathFilterModel.getObject());
 					setVisible(false);
 				} catch (Exception e) {
 					setVisible(true);

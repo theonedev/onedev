@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.CodeCommentQueryConstants;
@@ -36,10 +35,10 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_PATH) + " " 
+	public String asString() {
+		return quote(CodeCommentQueryConstants.FIELD_PATH) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " 
-				+ CodeCommentQuery.quote(value);
+				+ quote(value);
 	}
 
 }

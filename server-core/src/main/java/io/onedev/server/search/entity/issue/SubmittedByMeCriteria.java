@@ -33,7 +33,7 @@ public class SubmittedByMeCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return IssueQuery.getRuleName(IssueQueryLexer.SubmittedByMe);
 	}
 

@@ -41,13 +41,13 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			project = null;
 		
-		Project facade;
+		Project selection;
 		if (project != null && choices.contains(project))
-			facade = project;
+			selection = project;
 		else
-			facade = null;
+			selection = null;
 		
-    	input = new ProjectSingleChoice("input", Model.of(facade), new ProjectChoiceProvider(choices)) {
+    	input = new ProjectSingleChoice("input", Model.of(selection), new ProjectChoiceProvider(choices)) {
 
 			@Override
 			protected void onInitialize() {

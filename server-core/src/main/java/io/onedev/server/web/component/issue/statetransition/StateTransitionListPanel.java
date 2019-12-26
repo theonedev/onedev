@@ -41,7 +41,6 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.ConfirmOnClick;
 
@@ -144,7 +143,24 @@ public abstract class StateTransitionListPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, EditableUtils.getDisplayName(transition.getTrigger().getClass()));
+						return new Label(componentId, transition.getTrigger().getDescription());
+					}
+					
+				});
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("Applicable Issues")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
+				TransitionSpec transition = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, transition) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, transition.getTrigger().getIssueQuery());
 					}
 					
 				});

@@ -10,12 +10,16 @@ public interface ServerConfig {
 	 * Get http port configured for the server.
 	 * <p> 
 	 * @return
-	 * 			http port of the server, or <i>0</i> if http port is not defined. 
-	 * 			In case http port is not defined, {@link #getSslConfig()} must 
-	 * 			not return <tt>null</tt>
+	 * 			http port of the server, or <i>0</i> if http port is not defined
 	 */
 	int getHttpPort();
 	
+	/**
+	 * Get https port configured for the server.
+	 * <p> 
+	 * @return
+	 * 			https port of the server, or <i>0</i> if https port is not defined
+	 */
 	int getHttpsPort();
 	
 	@Nullable

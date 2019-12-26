@@ -9,7 +9,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.BuildQueryConstants;
 
@@ -41,8 +40,10 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.quote(BuildQueryConstants.FIELD_COMMIT) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(commitId.name());
+	public String asString() {
+		return quote(BuildQueryConstants.FIELD_COMMIT) + " " 
+				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ quote(commitId.name());
 	}
 
 }

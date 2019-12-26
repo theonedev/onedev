@@ -39,9 +39,10 @@ public class CommentCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(IssueQueryConstants.FIELD_COMMENT) + " " 
-				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
+	public String asString() {
+		return quote(IssueQueryConstants.FIELD_COMMENT) + " " 
+				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
+				+ quote(value);
 	}
 
 }

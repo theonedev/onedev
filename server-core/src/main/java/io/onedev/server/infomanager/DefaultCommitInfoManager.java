@@ -41,15 +41,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
@@ -61,7 +58,6 @@ import io.onedev.server.git.command.ListNumStatsCommand;
 import io.onedev.server.git.command.LogCommand;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
@@ -282,10 +278,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private final SessionManager sessionManager;
 	
-	private final ListenerRegistry listenerRegistry;
-	
-	private final IssueManager issueManager;
-	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Integer> totalCommitCountCache = new ConcurrentHashMap<>();
@@ -294,14 +286,11 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, SessionManager sessionManager,  
-			ListenerRegistry listenerRegistry, IssueManager issueManager) {
+			BatchWorkManager batchWorkManager, SessionManager sessionManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
-		this.listenerRegistry = listenerRegistry;
-		this.issueManager = issueManager;
 	}
 	
 	private boolean isCommitCollected(byte[] commitBytes) {
@@ -329,8 +318,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		
 		Repository repository = project.getRepository();
 
-		Map<Long, List<ObjectId>> fixedIssueNumbers = new HashMap<>();
-		
 		Pair<byte[], ObjectId> result = env.computeInTransaction(new TransactionalComputable<Pair<byte[], ObjectId>>() {
 			
 			@Override
@@ -495,27 +482,13 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 											ObjectId fixCommit = it.next();
 											if (GitUtils.isMergedInto(project.getRepository(), null, fixCommit, currentCommitId)) { 
 												it.remove();
-												Collection<ObjectId> newFixingCommits = fixedIssueNumbers.get(issueNumber);
-												if (newFixingCommits != null) {
-													newFixingCommits.remove(fixCommit);
-													if (newFixingCommits.isEmpty())
-														fixedIssueNumbers.remove(issueNumber);
-												}
-												
 											} else if (GitUtils.isMergedInto(project.getRepository(), null, currentCommitId, fixCommit)) {
 												addNextCommit = false;
 												break;
 											}
 										}
-										if (addNextCommit) {
+										if (addNextCommit)
 											fixingCommits.add(currentCommitId);
-											List<ObjectId> newFixingCommits = fixedIssueNumbers.get(issueNumber);
-											if (newFixingCommits == null) {
-												newFixingCommits = new ArrayList<>();
-												fixedIssueNumbers.put(issueNumber, newFixingCommits);
-											}
-											newFixingCommits.add(currentCommitId);
-										}
 										writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
 									}
 									
@@ -761,12 +734,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			}		
 		}		
 		
-		for (Map.Entry<Long, List<ObjectId>> entry: fixedIssueNumbers.entrySet()) {
-			Issue issue = issueManager.find(project, entry.getKey());
-			if (issue != null)
-				listenerRegistry.post(new IssueCommitted(issue, entry.getValue()));
-		}
-
 		logger.debug("Collected commit information (project: {}, ref: {})", project.getName(), refName);
 	}
 	

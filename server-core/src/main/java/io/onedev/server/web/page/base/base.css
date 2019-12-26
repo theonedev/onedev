@@ -2,12 +2,14 @@ body {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	background: white;
 }
-
 a {
 	color: #1f3b7b;
 }
 a.embedded-reference {
 	color: #0d87e9;
+}
+.head .actions a {
+	color: #333;
 }
 .pointer {
 	cursor: pointer;

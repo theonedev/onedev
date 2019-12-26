@@ -29,7 +29,7 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 
 	@Override
 	public String getDefaultValue() {
-		return (String) GroovyUtils.evalScript(scriptName);
+		return (String) GroovyUtils.evalScriptByName(scriptName);
 	}
 
 }

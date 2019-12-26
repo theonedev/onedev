@@ -27,6 +27,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -107,7 +109,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				for (Project project: projectManager.query()) {
 					permissions.add(new ProjectPermission(project, new ReadCode()));
 					for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs())
-						permissions.add(new ProjectPermission(project, new EditIssueField(field.getName())));
+						permissions.add(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(field.getName()))));
 					permissions.add(new ProjectPermission(project, new JobPermission("*", new AccessBuildLog())));
 				}
 			}

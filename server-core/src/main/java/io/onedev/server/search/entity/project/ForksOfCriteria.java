@@ -7,8 +7,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.ProjectQueryConstants;
 
@@ -43,8 +43,8 @@ public class ForksOfCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public String toString() {
-		return ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " + ProjectQuery.quote(projectName);
+	public String asString() {
+		return ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " + Criteria.quote(projectName);
 	}
 
 }

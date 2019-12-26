@@ -44,8 +44,8 @@ public class DependenciesOfCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.DependenciesOf) + " " + BuildQuery.quote(value);
+	public String asString() {
+		return BuildQuery.getRuleName(BuildQueryLexer.DependenciesOf) + " " + quote(value);
 	}
 
 }

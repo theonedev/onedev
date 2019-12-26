@@ -1,6 +1,5 @@
 package io.onedev.server.util.validation;
 
-import javax.lang.model.SourceVersion;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -22,15 +21,7 @@ public class ParamNameValidator implements ConstraintValidator<ParamName, String
 			return true;
 
 		String message = this.message;
-		if (!SourceVersion.isIdentifier(value) || value.contains("$")) { 
-			constraintContext.disableDefaultConstraintViolation();
-			if (message.length() == 0) {
-				message = "param name should start with letter and can only consist of "
-						+ "alphanumeric and underscore characters";
-			}
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;
-		} else if (BuildQueryConstants.ALL_FIELDS.contains(value)) {
+		if (BuildQueryConstants.ALL_FIELDS.contains(value)) {
 			constraintContext.disableDefaultConstraintViolation();
 			if (message.length() == 0)
 				message = "'" + value + "' is reserved";

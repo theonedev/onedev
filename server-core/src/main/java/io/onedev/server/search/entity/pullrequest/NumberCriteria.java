@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -62,10 +61,10 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_NUMBER) + " " 
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_NUMBER) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
-				+ PullRequestQuery.quote(value);
+				+ quote(value);
 	}
 
 }

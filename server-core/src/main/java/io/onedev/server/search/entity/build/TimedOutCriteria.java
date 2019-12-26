@@ -26,7 +26,7 @@ public class TimedOutCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return BuildQuery.getRuleName(BuildQueryLexer.TimedOut);
 	}
 

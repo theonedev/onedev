@@ -41,12 +41,9 @@ public class AutoDiscoveredJobExecutor extends JobExecutor {
 			context.getLogger().log("Discovered job executor type: " 
 					+ EditableUtils.getDisplayName(jobExecutor.getClass()));
 			jobExecutor.setName(getName());
-			jobExecutor.setApplicableBranches(getApplicableBranches());
 			jobExecutor.setCacheTTL(getCacheTTL());
 			jobExecutor.setEnabled(isEnabled());
-			jobExecutor.setApplicableJobImages(getApplicableJobImages());
-			jobExecutor.setApplicableJobNames(getApplicableJobNames());
-			jobExecutor.setApplicableProjects(getApplicableProjects());
+			jobExecutor.setJobMatch(getJobMatch());
 			jobExecutor.execute(jobToken, context);
 		} else {
 			throw new OneException("No job executors discovered");

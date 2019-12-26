@@ -196,8 +196,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 						descendants.add(getCommit().getId());
 					
 						List<RefInfo> refs = new ArrayList<>();
-						refs.addAll(getProject().getBranches());
-						refs.addAll(getProject().getTags());
+						refs.addAll(getProject().getBranchRefInfos());
+						refs.addAll(getProject().getTagRefInfos());
 						return refs.stream().filter(ref->descendants.contains(ref.getPeeledObj())).collect(Collectors.toList());
 					}
 					

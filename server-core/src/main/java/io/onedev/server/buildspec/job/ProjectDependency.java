@@ -99,7 +99,7 @@ public class ProjectDependency implements Serializable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into job workspace. "
+	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(suggester="suggestArtifacts", interpolative=true)

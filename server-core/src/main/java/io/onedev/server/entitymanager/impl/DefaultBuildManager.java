@@ -64,6 +64,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BuildPreservation;
 import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -105,6 +106,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final TaskScheduler taskScheduler;
 	
+	private final SessionManager sessionManager;
+	
 	private final TransactionManager transactionManager;
 	
 	private final Map<Long, BuildFacade> builds = new HashMap<>();
@@ -121,7 +124,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
 			GroupManager groupManager, StorageManager storageManager, 
-			ProjectManager projectManager, TransactionManager transactionManager) {
+			ProjectManager projectManager, SessionManager sessionManager, 
+			TransactionManager transactionManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -129,6 +133,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		this.groupManager = groupManager;
 		this.projectManager = projectManager;
 		this.taskScheduler = taskScheduler;
+		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
 	}
 
@@ -541,30 +546,38 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public void execute() {
 		long maxId = getMaxId();
 		Collection<Long> idsToPreserve = new HashSet<>();
-		for (Project project: projectManager.query()) {
-			logger.debug("Populating preserved build ids of project '" + project.getName() + "'...");
-			List<BuildPreservation> preservations = project.getBuildSetting().getHierarchyBuildPreservations(project);
-			if (preservations.isEmpty()) {
-				idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
-			} else {
-				for (BuildPreservation preservation: preservations) {
-					try {
-						BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
-						int count;
-						if (preservation.getCount() != null)
-							count = preservation.getCount();
-						else
-							count = Integer.MAX_VALUE;
-						idsToPreserve.addAll(queryIds(project, query, 0, count));
-					} catch (Exception e) {
-						String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
-								project.getName(), preservation.getCondition());
-						logger.error(message, e);
+		
+		sessionManager.run(new Runnable() {
+
+			@Override
+			public void run() {
+				for (Project project: projectManager.query()) {
+					logger.debug("Populating preserved build ids of project '" + project.getName() + "'...");
+					List<BuildPreservation> preservations = project.getBuildSetting().getHierarchyBuildPreservations(project);
+					if (preservations.isEmpty()) {
 						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+					} else {
+						for (BuildPreservation preservation: preservations) {
+							try {
+								BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
+								int count;
+								if (preservation.getCount() != null)
+									count = preservation.getCount();
+								else
+									count = Integer.MAX_VALUE;
+								idsToPreserve.addAll(queryIds(project, query, 0, count));
+							} catch (Exception e) {
+								String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
+										project.getName(), preservation.getCondition());
+								logger.error(message, e);
+								idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+							}
+						}
 					}
 				}
 			}
-		}
+			
+		});
 
 		EntityCriteria<Build> criteria = newCriteria();
 		AtomicInteger firstResult = new AtomicInteger(0);
@@ -741,7 +754,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		} else {
 			StringMatcher matcher = new StringMatcher();
 			for (JobPrivilege jobPrivilege: role.getJobPrivileges()) {
-				PatternSet patternSet = PatternSet.fromString(jobPrivilege.getJobNames());
+				PatternSet patternSet = PatternSet.parse(jobPrivilege.getJobNames());
 				for (String jobName: jobNames) {
 					if (patternSet.matches(matcher, jobName))
 						accessibleJobNames.add(jobName);

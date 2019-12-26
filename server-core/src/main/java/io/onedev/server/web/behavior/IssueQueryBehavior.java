@@ -1,15 +1,15 @@
 package io.onedev.server.web.behavior;
 
 import static io.onedev.server.search.entity.EntityQuery.getValue;
-import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
 import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
+import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsCurrent;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsPrevious;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.OrderBy;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_COMMENT;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_COMMENT_COUNT;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_DESCRIPTION;
@@ -49,6 +49,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.BooleanField;
 import io.onedev.server.issue.fieldspec.BuildChoiceField;
 import io.onedev.server.issue.fieldspec.ChoiceField;
+import io.onedev.server.issue.fieldspec.CommitField;
 import io.onedev.server.issue.fieldspec.DateField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.fieldspec.GroupChoiceField;
@@ -73,16 +74,26 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
+	private final boolean withOrder;
+	
 	private final boolean withCurrentUserCriteria;
 	
 	private final boolean withCurrentBuildCriteria;
 	
-	public IssueQueryBehavior(IModel<Project> projectModel, 
-			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria) {
+	private final boolean withCurrentPullRequestCriteria;
+	
+	private final boolean withCurrentCommitCriteria;
+	
+	public IssueQueryBehavior(IModel<Project> projectModel, boolean withOrder,
+			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
+			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
 		super(IssueQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withOrder = withOrder;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 		this.withCurrentBuildCriteria = withCurrentBuildCriteria;
+		this.withCurrentPullRequestCriteria = withCurrentPullRequestCriteria;
+		this.withCurrentCommitCriteria = withCurrentCommitCriteria;
 	}
 
 	@Override
@@ -146,13 +157,18 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if (fieldElements.isEmpty()) {
 								if (operator == SubmittedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
-								else 
+								else if (operator == FixedInCurrentBuild)
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+								else if (operator == FixedInCurrentPullRequest) 
+									return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+								else
+									return SuggestionUtils.suggestCommits(project, matchWith);
 							} else {
 								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								
 								try {
-									checkField(fieldName, operator);
+									checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
+											withCurrentPullRequestCriteria, withCurrentCommitCriteria);
 									FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 									if (fieldSpec instanceof DateField || fieldName.equals(FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(FIELD_UPDATE_DATE)) {
@@ -164,6 +180,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldSpec instanceof BuildChoiceField) {
 										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+									} else if (fieldSpec instanceof CommitField) {
+										return SuggestionUtils.suggestCommits(project, matchWith);
 									} else if (fieldSpec instanceof PullRequestChoiceField) {
 										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldSpec instanceof BooleanField) {
@@ -224,16 +242,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (!withCurrentUserCriteria) {
-			if (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(IsMe)))
-				return null;
-		}
-		if (!withCurrentBuildCriteria) {
-			if (suggestedLiteral.equals(getRuleName(FixedInCurrentBuild)) 
-					|| suggestedLiteral.equals(getRuleName(IsCurrent))
-					|| suggestedLiteral.equals(getRuleName(IsPrevious))) {
-				return null;
-			}
+		if (!withOrder && suggestedLiteral.equals(getRuleName(OrderBy))
+				|| !withCurrentUserCriteria && suggestedLiteral.equals(getRuleName(SubmittedByMe))
+				|| !withCurrentBuildCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentBuild))
+				|| !withCurrentPullRequestCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentPullRequest))
+				|| !withCurrentCommitCriteria && suggestedLiteral.equals(getRuleName(FixedInCurrentCommit))) {
+			return null;
 		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
@@ -241,7 +255,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			if (!fieldElements.isEmpty()) {
 				String fieldName = getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					checkField(fieldName, getOperator(suggestedLiteral));
+					checkField(fieldName, getOperator(suggestedLiteral), 
+							withCurrentUserCriteria, withCurrentBuildCriteria, 
+							withCurrentPullRequestCriteria, withCurrentCommitCriteria);
 				} catch (OneException e) {
 					return null;
 				}

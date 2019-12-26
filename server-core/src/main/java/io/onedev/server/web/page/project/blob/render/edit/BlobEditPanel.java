@@ -19,7 +19,10 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
+import org.eclipse.jgit.lib.FileMode;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -72,7 +75,17 @@ public abstract class BlobEditPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.onModeChange(target, Mode.VIEW, null);
+				if (context.getMode() == Mode.EDIT && context.isEditFromFolder()) {
+					BlobIdent blobIdent = new BlobIdent(context.getBlobIdent());
+					if (blobIdent.path.contains("/"))
+						blobIdent.path = StringUtils.substringBeforeLast(blobIdent.path, "/");
+					else
+						blobIdent.path = null;
+					blobIdent.mode = FileMode.TREE.getBits();
+					context.onSelect(target, blobIdent, null);
+				} else {
+					context.onModeChange(target, Mode.VIEW, null);
+				}
 			}
 			
 		});
@@ -108,8 +121,10 @@ public abstract class BlobEditPanel extends Panel {
 						target.appendJavaScript(script);
 						
 						currentTab = tab;
-						
+
+						target.prependJavaScript(String.format("onedev.server.blobEdit.recordFormFlags('%s');", form.getMarkupId()));
 						target.add(form);
+						target.appendJavaScript(String.format("onedev.server.blobEdit.restoreFormFlags('%s');", form.getMarkupId()));
 					}
 
 					@Override
@@ -166,7 +181,7 @@ public abstract class BlobEditPanel extends Panel {
 			protected String getPosition() {
 				return BlobEditPanel.this.getPosition();
 			}
-			
+
 		});
 		
 		add(recreateBehavior = new AbstractPostAjaxBehavior() {

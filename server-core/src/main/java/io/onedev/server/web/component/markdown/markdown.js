@@ -810,7 +810,7 @@ onedev.server.markdown = {
 		if (autosaveKey) {
 			onedev.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
 			var autosaveValue = localStorage.getItem(autosaveKey);
-			if (autosaveValue) {
+			if (autosaveValue && $input.val() != autosaveValue) {
 				$input.val(autosaveValue);
 				$warning.show();		
 				if (!$resizeHandles.is(":visible"))

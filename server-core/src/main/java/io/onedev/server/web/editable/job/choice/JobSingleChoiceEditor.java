@@ -1,9 +1,13 @@
 package io.onedev.server.web.editable.job.choice;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.web.component.job.JobSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -13,8 +17,7 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 	
 	private JobSingleChoice input;
 	
-	public JobSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<String> propertyModel) {
+	public JobSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -22,7 +25,15 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new JobSingleChoice("input", Model.of(getModelObject()));
+		Map<String, String> choices = new LinkedHashMap<>();
+		for (String jobName: Project.get().getJobNames())
+			choices.put(jobName, jobName);
+		
+		String selection = getModelObject();
+		if (!choices.containsKey(selection))
+			selection = null;
+		
+		input = new JobSingleChoice("input", Model.of(selection), Model.ofMap(choices));
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

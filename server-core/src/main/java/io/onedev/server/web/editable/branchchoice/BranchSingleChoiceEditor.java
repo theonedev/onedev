@@ -1,18 +1,20 @@
 package io.onedev.server.web.editable.branchchoice;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class BranchSingleChoiceEditor extends PropertyEditor<String> {
@@ -27,19 +29,19 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Project>() {
-
-			@Override
-			protected Project load() {
-				if (getPage() instanceof ProjectPage)
-					return ((ProjectPage) getPage()).getProject();
-				else
-					return null;
+		Map<String, String> choices = new LinkedHashMap<>();
+		if (Project.get() != null) {
+			for (RefInfo ref: Project.get().getBranchRefInfos()) {
+				String branch = GitUtils.ref2branch(ref.getRef().getName());
+				choices.put(branch, branch);
 			}
-    		
-    	});
+		}
+		
+		String selection = getModelObject();
+		if (!choices.containsKey(selection))
+			selection = null;
 
-    	input = new BranchSingleChoice("input", getModel(), branchProvider) {
+    	input = new BranchSingleChoice("input", Model.of(selection), Model.ofMap(choices)) {
     		
 			@Override
 			protected void onInitialize() {

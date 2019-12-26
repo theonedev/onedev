@@ -1333,4 +1333,48 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate30(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key"); 
+					if (key.equals("JOB_EXECUTORS")) 
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate31(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element editableIssueFieldsElement = element.element("editableIssueFields");
+					editableIssueFieldsElement.detach();
+					element.addElement("editableIssueFields").addAttribute(
+							"class", "io.onedev.server.model.support.role.AllIssueFields");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void migrate32(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key"); 
+					if (key.equals("ISSUE"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) { 
+				FileUtils.deleteFile(file);
+			}
+		}
+	}
 }

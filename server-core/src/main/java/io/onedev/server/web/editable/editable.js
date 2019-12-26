@@ -53,7 +53,7 @@ onedev.server.editable = {
 			$group.hide();
 	},
 };
-$(document).on("elementReplaced", function(event, componentId) {
+$(document).on("afterElementReplace", function(event, componentId) {
 	var $component = $("#" + componentId);
 	var $group = $component.closest(".bean-properties.group");
 	if ($group.length != 0 && $group.children("a").length != 0) 

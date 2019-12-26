@@ -18,7 +18,6 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -74,8 +73,8 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.FixedIssue) + " " + BuildQuery.quote(value);
+	public String asString() {
+		return BuildQuery.getRuleName(BuildQueryLexer.FixedIssue) + " " + quote(value);
 	}
 
 }

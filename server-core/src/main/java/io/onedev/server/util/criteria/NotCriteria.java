@@ -1,18 +1,53 @@
 package io.onedev.server.util.criteria;
 
-import java.util.function.Predicate;
+public class NotCriteria<T> extends Criteria<T> {
+	
+	private static final long serialVersionUID = 1L;
 
-public class NotCriteria<T> implements Predicate<T> {
+	protected final Criteria<T> criteria;
 	
-	private final Predicate<T> predicate;
-	
-	public NotCriteria(Predicate<T> predicate) {
-		this.predicate = predicate;
+	public NotCriteria(Criteria<T> criteria) {
+		this.criteria = criteria;
 	}
 
 	@Override
-	public boolean test(T t) {
-		return !predicate.test(t);
+	public boolean matches(T entity) {
+		return !criteria.matches(entity);
 	}
 
+	@Override
+	public void onRenameUser(String oldName, String newName) {
+		criteria.onRenameUser(oldName, newName);
+	}
+
+	@Override
+	public void onRenameProject(String oldName, String newName) {
+		criteria.onRenameProject(oldName, newName);
+	}
+
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
+		criteria.onRenameGroup(oldName, newName);
+	}
+
+	@Override
+	public boolean isUsingUser(String userName) {
+		return criteria.isUsingUser(userName);
+	}
+
+	@Override
+	public boolean isUsingProject(String projectName) {
+		return criteria.isUsingProject(projectName);
+	}
+
+	@Override
+	public boolean isUsingGroup(String groupName) {
+		return criteria.isUsingGroup(groupName);
+	}
+	
+	@Override
+	public String asString() {
+		return "not(" + criteria.toString() + ")";
+	}
+	
 }

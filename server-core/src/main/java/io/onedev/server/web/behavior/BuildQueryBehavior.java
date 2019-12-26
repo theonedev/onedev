@@ -38,14 +38,17 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
+	private final boolean withOrder;
+	
 	private final boolean withCurrentUserCriteria;
 	
 	private final boolean withUnfinishedCriteria;
 	
-	public BuildQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, 
-			boolean withUnfinishedCriteria) {
+	public BuildQueryBehavior(IModel<Project> projectModel, boolean withOrder, 
+			boolean withCurrentUserCriteria, boolean withUnfinishedCriteria) {
 		super(BuildQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withOrder = withOrder;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
 		this.withUnfinishedCriteria = withUnfinishedCriteria;
 	}
@@ -150,6 +153,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (!withOrder && suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.OrderBy)))
+			return null;
 		if (!withCurrentUserCriteria) {
 			if (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
 					|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe))) {

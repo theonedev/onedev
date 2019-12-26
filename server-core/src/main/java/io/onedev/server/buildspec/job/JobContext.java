@@ -46,6 +46,8 @@ public abstract class JobContext {
 	
 	private final int cacheTTL;
 	
+	private final int retried;
+	
 	private final JobLogger logger;	
 	
 	private final Collection<String> allocatedCaches = new HashSet<>();
@@ -56,7 +58,8 @@ public abstract class JobContext {
 			File workspace, List<String> commands, boolean retrieveSource, Integer cloneDepth,
 			List<SubmoduleCredential> submoduleCredentials, String cpuRequirement, String 
 			memoryRequirement, ObjectId commitId, Collection<CacheSpec> caches, 
-			PatternSet collectFiles, int cacheTTL, List<JobService> services, JobLogger logger) {
+			PatternSet collectFiles, int cacheTTL, int retried, List<JobService> services, 
+			JobLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
@@ -72,6 +75,7 @@ public abstract class JobContext {
 		this.cacheSpecs = caches;
 		this.collectFiles = collectFiles;
 		this.cacheTTL = cacheTTL;
+		this.retried = retried;
 		this.services = services;
 		this.logger = logger;
 	}
@@ -138,6 +142,10 @@ public abstract class JobContext {
 	
 	public int getCacheTTL() {
 		return cacheTTL;
+	}
+
+	public int getRetried() {
+		return retried;
 	}
 
 	public Collection<String> getAllocatedCaches() {

@@ -28,7 +28,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.ProjectAwareCommitId;
+import io.onedev.server.util.ProjectAwareCommit;
 import io.onedev.server.util.ProjectAwareRevision;
 import io.onedev.server.util.ProjectScopedNumber;
 
@@ -92,10 +92,10 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		return dateValue;
 	}
 	
-	public static ProjectAwareCommitId getCommitId(@Nullable Project project, String value) {
+	public static ProjectAwareCommit getCommitId(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":"))
 			value = project.getName() + ":" + value;
-		ProjectAwareCommitId commitId = ProjectAwareCommitId.from(value);
+		ProjectAwareCommit commitId = ProjectAwareCommit.from(value);
 		if (commitId != null && commitId.getCommitId() != null)
 			return commitId;
 		else
@@ -191,10 +191,6 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 				builder.append(sort.toString()).append(" ");
 		}
 		return builder.toString().trim();
-	}
-	
-	public static String quote(String value) {
-		return "\"" + StringUtils.escape(value, "\"") + "\"";
 	}
 	
 	public static <T> Path<T> getPath(Path<?> root, String pathName) {

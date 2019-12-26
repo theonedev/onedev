@@ -38,8 +38,8 @@ public class SubmittedByCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.getRuleName(IssueQueryLexer.SubmittedBy) + " " + IssueQuery.quote(value);
+	public String asString() {
+		return IssueQuery.getRuleName(IssueQueryLexer.SubmittedBy) + " " + quote(value);
 	}
 
 }

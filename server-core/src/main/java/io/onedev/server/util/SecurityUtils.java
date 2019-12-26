@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
@@ -140,7 +141,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canEditIssueField(Project project, String fieldName) {
-		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueField(fieldName)));
+		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(fieldName))));
 	}
 	
 	public static boolean canScheduleIssues(Project project) {

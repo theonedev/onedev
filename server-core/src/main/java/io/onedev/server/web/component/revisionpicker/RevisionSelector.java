@@ -89,10 +89,10 @@ public abstract class RevisionSelector extends Panel {
 		List<String> names = new ArrayList<>();
 		
 		if (branchesActive) {
-			for (RefInfo ref: projectModel.getObject().getBranches())
+			for (RefInfo ref: projectModel.getObject().getBranchRefInfos())
 				names.add(GitUtils.ref2branch(ref.getRef().getName()));
 		} else {
-			for (RefInfo ref: projectModel.getObject().getTags())
+			for (RefInfo ref: projectModel.getObject().getTagRefInfos())
 				names.add(GitUtils.ref2tag(ref.getRef().getName()));
 		}
 		return names;

@@ -8,6 +8,7 @@ query
 
 criteria
 	: operator=(Successful|Failed|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
+    | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|AssociatedWithPullRequest|RequiredByPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -103,6 +104,10 @@ OrderBy
 Is
 	: 'is'
 	;
+	
+IsEmpty
+	: 'is' WS+ 'empty'
+	;	
 	
 IsGreaterThan
 	: 'is' WS+ 'greater' WS+ 'than'

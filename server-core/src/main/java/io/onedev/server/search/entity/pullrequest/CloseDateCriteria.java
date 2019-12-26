@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -51,9 +50,10 @@ public class CloseDateCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_CLOSE_DATE) + " " 
-				+ PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(value);
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_CLOSE_DATE) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
+				+ quote(value);
 	}
 
 }

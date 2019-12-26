@@ -10,8 +10,11 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -51,6 +54,11 @@ public abstract class FieldCriteria extends IssueCriteria {
 			undefinedFields.add(fieldName);
 		}
 		return undefinedFields;
+	}
+	
+	public FieldSpec getFieldSpec() {
+		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+		return Preconditions.checkNotNull(settingManager.getIssueSetting().getFieldSpec(fieldName));
 	}
 
 	@Override

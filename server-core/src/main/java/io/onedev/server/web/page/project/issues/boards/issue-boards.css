@@ -131,12 +131,14 @@
 #issue-boards>.body .card .head>* {
 	margin: 0 8px 8px 0;
 }
+#issue-boards>.body .card .head .issue-state {
+	font-size: 11px;
+}
 #issue-boards>.body .card .head .field-values .value span {
 	background: #EEE;
 	padding: .2em .6em .3em;
 	border-radius: .25em;
-	font-size: 75%;
-	font-weight: bold;
+	font-size: 11px;
 	line-height: 1;
 	white-space: nowrap;
 	vertical-align: baseline;
@@ -176,7 +178,7 @@
 	color: #666;
 	text-decoration: none;
 	font-size: 14px;
-	margin-top: -2px;
+	line-height: 18px;
 }
 .board-card-detail>.modal-header {
 	padding-right: 30px;

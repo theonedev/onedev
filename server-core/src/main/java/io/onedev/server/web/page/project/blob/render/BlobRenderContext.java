@@ -22,11 +22,6 @@ public interface BlobRenderContext extends Serializable {
 
 	public enum Mode {
 		VIEW, 
-		/*
-		 * Some blob can be rendered in a way for easier understanding, such as .onedev-buildspec, 
-		 * In these cases, the VIEW_PLAIN mode enables to view plain text of the blob
-		 */
-		VIEW_PLAIN, 
 		BLAME, 
 		ADD, 
 		EDIT, 
@@ -69,6 +64,10 @@ public interface BlobRenderContext extends Serializable {
 	
 	Mode getMode();
 	
+	boolean isViewPlain();
+	
+	boolean isEditFromFolder();
+	
 	boolean isOnBranch();
 	
 	void pushState(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
@@ -78,6 +77,9 @@ public interface BlobRenderContext extends Serializable {
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
 	void onModeChange(AjaxRequestTarget target, Mode mode, @Nullable String newPath);
+	
+	void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, 
+			boolean editFromFolder, @Nullable String newPath);
 	
 	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position);
 	

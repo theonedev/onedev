@@ -355,7 +355,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 
 		for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
 			BranchProtection protection = it.next();
-			PatternSet patternSet = PatternSet.fromString(protection.getBranches());
+			PatternSet patternSet = PatternSet.parse(protection.getBranches());
 			patternSet.getIncludes().remove(branchName);
 			patternSet.getExcludes().remove(branchName);
 			protection.setBranches(patternSet.toString());
@@ -407,7 +407,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		Usage usage = new Usage();
 		for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) { 
 			TagProtection protection = it.next();
-			PatternSet patternSet = PatternSet.fromString(protection.getTags());
+			PatternSet patternSet = PatternSet.parse(protection.getTags());
 			patternSet.getIncludes().remove(tagName);
 			patternSet.getExcludes().remove(tagName);
 			protection.setTags(patternSet.toString());

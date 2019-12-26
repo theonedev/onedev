@@ -61,10 +61,10 @@ public class NumberCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(IssueQueryConstants.FIELD_NUMBER) + " " 
+	public String asString() {
+		return quote(IssueQueryConstants.FIELD_NUMBER) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
-				+ IssueQuery.quote(value);
+				+ quote(value);
 	}
 
 }

@@ -60,7 +60,7 @@ public class UserMatch implements Serializable {
 		return false;
 	}
 	
-	private static UserMatchCriteria getUserMatcherCriteria(CriteriaContext criteriaContext) {
+	private static UserMatchCriteria getUserMatchCriteria(CriteriaContext criteriaContext) {
 		if (criteriaContext.Anyone() != null) {
 			return new Anyone();
 		} else if (criteriaContext.userCriteria() != null) {
@@ -74,22 +74,22 @@ public class UserMatch implements Serializable {
 			specifiedGroup.setGroupName(groupName);
 			return specifiedGroup;
 		} else {
-			throw new OneException("Unrecognized user matcher criteria");
+			throw new OneException("Unrecognized user match criteria");
 		}
 	}
 	
-	public static UserMatch fromString(@Nullable String userMatcherString) {
+	public static UserMatch fromString(@Nullable String userMatchString) {
 		List<UserMatchCriteria> criterias = new ArrayList<>();
 		List<UserMatchCriteria> exceptCriterias = new ArrayList<>();
 		
-		if (userMatcherString != null) {
-			UserMatchContext userMatcherContext = parse(userMatcherString);
+		if (userMatchString != null) {
+			UserMatchContext userMatchContext = parse(userMatchString);
 			
-			for (CriteriaContext criteriaContext: userMatcherContext.criteria())
-				criterias.add(getUserMatcherCriteria(criteriaContext));
+			for (CriteriaContext criteriaContext: userMatchContext.criteria())
+				criterias.add(getUserMatchCriteria(criteriaContext));
 			
-			for (ExceptCriteriaContext exceptCriteriaContext: userMatcherContext.exceptCriteria()) {
-				exceptCriterias.add(getUserMatcherCriteria(exceptCriteriaContext.criteria()));
+			for (ExceptCriteriaContext exceptCriteriaContext: userMatchContext.exceptCriteria()) {
+				exceptCriterias.add(getUserMatchCriteria(exceptCriteriaContext.criteria()));
 			}
 		}
 		
@@ -100,8 +100,8 @@ public class UserMatch implements Serializable {
 		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
 	}
 	
-	public static UserMatchContext parse(String userMatcherString) {
-		CharStream is = CharStreams.fromString(userMatcherString); 
+	public static UserMatchContext parse(String userMatchString) {
+		CharStream is = CharStreams.fromString(userMatchString); 
 		UserMatchLexer lexer = new UserMatchLexer(is);
 		lexer.removeErrorListeners();
 		lexer.addErrorListener(new BaseErrorListener() {
@@ -109,7 +109,7 @@ public class UserMatch implements Serializable {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed user matcher");
+				throw new OneException("Malformed user match");
 			}
 			
 		});
@@ -149,11 +149,11 @@ public class UserMatch implements Serializable {
 		}
 	}
 	
-	public static String onRenameGroup(String userMatcherString, String oldName, String newName) {
-		UserMatch userMatcher = fromString(userMatcherString);
-		onRenameGroup(userMatcher.getCriterias(), oldName, newName);
-		onRenameGroup(userMatcher.getExceptCriterias(), oldName, newName);
-		return userMatcher.toString();
+	public static String onRenameGroup(String userMatchString, String oldName, String newName) {
+		UserMatch userMatch = fromString(userMatchString);
+		onRenameGroup(userMatch.getCriterias(), oldName, newName);
+		onRenameGroup(userMatch.getExceptCriterias(), oldName, newName);
+		return userMatch.toString();
 	}
 
 	private static void onRenameUser(List<UserMatchCriteria> criterias, String oldName, String newName) {
@@ -166,11 +166,11 @@ public class UserMatch implements Serializable {
 		}
 	}
 	
-	public static String onRenameUser(String userMatcherString, String oldName, String newName) {
-		UserMatch userMatcher = fromString(userMatcherString);
-		onRenameUser(userMatcher.getCriterias(), oldName, newName);
-		onRenameUser(userMatcher.getExceptCriterias(), oldName, newName);
-		return userMatcher.toString();
+	public static String onRenameUser(String userMatchString, String oldName, String newName) {
+		UserMatch userMatch = fromString(userMatchString);
+		onRenameUser(userMatch.getCriterias(), oldName, newName);
+		onRenameUser(userMatch.getExceptCriterias(), oldName, newName);
+		return userMatch.toString();
 	}
 
 	private static boolean isUsingUser(List<UserMatchCriteria> criterias, String userName) {
@@ -184,10 +184,10 @@ public class UserMatch implements Serializable {
 		return false;
 	}
 	
-	public static boolean isUsingUser(String userMatcherString, String userName) {
-		UserMatch userMatcher = fromString(userMatcherString);
-		return isUsingUser(userMatcher.getCriterias(), userName) 
-				|| isUsingUser(userMatcher.getExceptCriterias(), userName);
+	public static boolean isUsingUser(String userMatchString, String userName) {
+		UserMatch userMatch = fromString(userMatchString);
+		return isUsingUser(userMatch.getCriterias(), userName) 
+				|| isUsingUser(userMatch.getExceptCriterias(), userName);
 	}
 	
 	private static boolean isUsingGroup(List<UserMatchCriteria> criterias, String groupName) {
@@ -201,10 +201,10 @@ public class UserMatch implements Serializable {
 		return false;
 	}
 	
-	public static boolean isUsingGroup(String userMatcherString, String groupName) {
-		UserMatch userMatcher = fromString(userMatcherString);
-		return isUsingGroup(userMatcher.getCriterias(), groupName) 
-				|| isUsingGroup(userMatcher.getExceptCriterias(), groupName);
+	public static boolean isUsingGroup(String userMatchString, String groupName) {
+		UserMatch userMatch = fromString(userMatchString);
+		return isUsingGroup(userMatch.getCriterias(), groupName) 
+				|| isUsingGroup(userMatch.getExceptCriterias(), groupName);
 	}
 	
 }

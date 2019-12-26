@@ -32,15 +32,16 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.AndCriteriaHelper;
+import io.onedev.server.search.entity.AndEntityCriteria;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotCriteriaHelper;
-import io.onedev.server.search.entity.OrCriteriaHelper;
+import io.onedev.server.search.entity.NotEntityCriteria;
+import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.build.BuildQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.CriteriaContext;
+import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.NotCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OperatorCriteriaContext;
@@ -49,7 +50,7 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
-import io.onedev.server.util.ProjectAwareCommitId;
+import io.onedev.server.util.ProjectAwareCommit;
 
 public class BuildQuery extends EntityQuery<Build> {
 
@@ -79,7 +80,7 @@ public class BuildQuery extends EntityQuery<Build> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 				}
 				
 			});
@@ -94,7 +95,7 @@ public class BuildQuery extends EntityQuery<Build> {
 				if (e instanceof OneException)
 					throw e;
 				else
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<Build> buildCriteria;
@@ -164,9 +165,20 @@ public class BuildQuery extends EntityQuery<Build> {
 					
 					@Override
 					public EntityCriteria<Build> visitParensCriteria(ParensCriteriaContext ctx) {
-						return visit(ctx.criteria());
+						return (EntityCriteria<Build>) visit(ctx.criteria()).withParens(true);
 					}
 
+					@Override
+					public EntityCriteria<Build> visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
+						String fieldName = getValue(ctx.Quoted().getText());
+						int operator = ctx.operator.getType();
+						checkField(project, fieldName, operator);
+						if (fieldName.equals(FIELD_VERSION))
+							return new VersionIsEmptyCriteria();
+						else
+							return new ParamIsEmptyCriteria(fieldName);
+					}
+					
 					@Override
 					public EntityCriteria<Build> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted(0).getText());
@@ -192,7 +204,7 @@ public class BuildQuery extends EntityQuery<Build> {
 							case FIELD_PROJECT:
 								return new ProjectCriteria(value);
 							case FIELD_COMMIT:
-								ProjectAwareCommitId commitId = getCommitId(project, value); 
+								ProjectAwareCommit commitId = getCommitId(project, value); 
 								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());
 							case FIELD_JOB:
 								return new JobCriteria(value);
@@ -216,7 +228,7 @@ public class BuildQuery extends EntityQuery<Build> {
 						List<EntityCriteria<Build>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteriaHelper<Build>(childCriterias);
+						return new OrEntityCriteria<Build>(childCriterias);
 					}
 
 					@Override
@@ -224,12 +236,12 @@ public class BuildQuery extends EntityQuery<Build> {
 						List<EntityCriteria<Build>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteriaHelper<Build>(childCriterias);
+						return new AndEntityCriteria<Build>(childCriterias);
 					}
 
 					@Override
 					public EntityCriteria<Build> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteriaHelper<Build>(visit(ctx.criteria()));
+						return new NotEntityCriteria<Build>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);
@@ -278,6 +290,10 @@ public class BuildQuery extends EntityQuery<Build> {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
+		case BuildQueryLexer.IsEmpty:
+			if (!fieldName.equals(FIELD_VERSION) && !paramNames.contains(fieldName))
+				throw newOperatorException(fieldName, operator);
+			break;
 		case BuildQueryLexer.IsLessThan:
 		case BuildQueryLexer.IsGreaterThan:
 			if (!fieldName.equals(FIELD_NUMBER))
@@ -319,7 +335,7 @@ public class BuildQuery extends EntityQuery<Build> {
 		sorts.addAll(query2.getSorts());
 
 		if (criterias.size() > 1)
-			return new BuildQuery(new AndCriteriaHelper<Build>(criterias), sorts);
+			return new BuildQuery(new AndEntityCriteria<Build>(criterias), sorts);
 		else if (criterias.size() == 1)
 			return new BuildQuery(criterias.iterator().next(), sorts);
 		else

@@ -10,9 +10,9 @@ public class JobExecution {
 
 	private final Future<?> future;
 	
-	private final long beginTime;
-	
 	private final long timeout;
+	
+	private volatile long beginTime;
 	
 	private volatile Long cancellerId;
 	
@@ -33,6 +33,10 @@ public class JobExecution {
 
 	public boolean isTimedout() {
 		return System.currentTimeMillis() - beginTime > timeout;
+	}
+	
+	public void updateBeginTime() {
+		beginTime = System.currentTimeMillis();
 	}
 	
 	public boolean isDone() {

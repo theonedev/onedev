@@ -40,12 +40,14 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
 @SuppressWarnings("serial")
 public class FolderViewPanel extends Panel {
@@ -249,7 +251,26 @@ public class FolderViewPanel extends Panel {
 			}
 			
 		}));
-		
+		readmeContainer.add(new AjaxLink<Void>("edit") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				ProjectBlobPage.State state = new ProjectBlobPage.State();
+				state.blobIdent = readmeModel.getObject();
+				state.mode = Mode.EDIT;
+				state.editFromFolder = true;
+				setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(context.getProject(), state));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				BlobIdent blobIdent = readmeModel.getObject();
+				setVisible(context.isOnBranch()
+						&& SecurityUtils.canModify(context.getProject(), blobIdent.revision, blobIdent.path));
+			}
+			
+		});
 		readmeContainer.add(new MarkdownViewer("body", new LoadableDetachableModel<String>() {
 
 			@Override

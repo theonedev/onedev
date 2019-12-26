@@ -22,7 +22,7 @@ public class ReviewRequirementValidator implements ConstraintValidator<ReviewReq
 			return true;
 		} else {
 			try {
-				io.onedev.server.util.reviewrequirement.ReviewRequirement.fromString(value);
+				io.onedev.server.util.reviewrequirement.ReviewRequirement.parse(value, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

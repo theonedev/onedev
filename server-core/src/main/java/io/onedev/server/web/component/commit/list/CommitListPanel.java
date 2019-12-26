@@ -198,8 +198,8 @@ public abstract class CommitListPanel extends Panel {
 		@Override
 		protected Map<String, List<String>> load() {
 			Map<String, List<String>> labels = new HashMap<>();
-			List<RefInfo> refInfos = getProject().getBranches();
-			refInfos.addAll(getProject().getTags());
+			List<RefInfo> refInfos = getProject().getBranchRefInfos();
+			refInfos.addAll(getProject().getTagRefInfos());
 			for (RefInfo refInfo: refInfos) {
 				if (refInfo.getPeeledObj() instanceof RevCommit) {
 					RevCommit commit = (RevCommit) refInfo.getPeeledObj();

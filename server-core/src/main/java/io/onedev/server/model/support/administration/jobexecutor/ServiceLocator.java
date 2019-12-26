@@ -63,8 +63,8 @@ public class ServiceLocator implements Serializable {
 	
 	public final boolean isApplicable(JobService service) {
 		Matcher matcher = new PathMatcher();
-		return (getServiceNames() == null || PatternSet.fromString(getServiceNames()).matches(matcher, service.getName()))
-				&& (getServiceImages() == null || PatternSet.fromString(getServiceImages()).matches(matcher, service.getImage()));
+		return (getServiceNames() == null || PatternSet.parse(getServiceNames()).matches(matcher, service.getName()))
+				&& (getServiceImages() == null || PatternSet.parse(getServiceImages()).matches(matcher, service.getImage()));
 	}
 	
 }

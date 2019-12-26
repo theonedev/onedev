@@ -2,12 +2,15 @@ package io.onedev.server.web.editable.job.choice;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.web.component.job.JobMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -26,13 +29,19 @@ public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<String> jobNames;
-		if (getModelObject() != null)
-			jobNames = getModelObject();
-		else
-			jobNames = new ArrayList<>();
+		Map<String, String> choices = new LinkedHashMap<>();
+		for (String jobName: Project.get().getJobNames())
+			choices.put(jobName, jobName);
 		
-		input = new JobMultiChoice("input", Model.of(jobNames));
+    	List<String> selections = new ArrayList<>();
+		if (getModelObject() != null) {
+			for (String selection: getModelObject()) {
+				if (choices.containsKey(selection))
+					selections.add(selection);
+			}
+		}
+		
+		input = new JobMultiChoice("input", Model.of(selections), Model.ofMap(choices));
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

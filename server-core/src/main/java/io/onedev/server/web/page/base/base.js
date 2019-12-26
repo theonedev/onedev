@@ -130,7 +130,7 @@ onedev.server = {
 			});
 		},
 		dirtyChanged: function($form) {
-			$dirtyAware = $form.find(".dirty-aware");
+			var $dirtyAware = $form.find(".dirty-aware");
 			if ($dirtyAware.length != 0) {
 				if ($form.hasClass("dirty")) {
 					$dirtyAware.removeAttr("disabled");
@@ -144,7 +144,7 @@ onedev.server = {
 				onedev.server.form.trackDirty(this);
 			});
 			
-			$(document).on("elementReplaced", function(event, componentId) {
+			$(document).on("afterElementReplace", function(event, componentId) {
 				var $component = $("#" + componentId);
 				$component.find("form").each(function() {
 					onedev.server.form.trackDirty(this);
@@ -219,12 +219,17 @@ onedev.server = {
 		
 		doAutosize($("textarea"));
 		
-		$(document).on("elementReplaced", function(event, componentId) {
-			var $component = $("#" + componentId);
-			var $textarea = $component.find("textarea");
-			if ($component.is("textarea"))
-				$textarea = $textarea.add($component);
-			doAutosize($textarea);
+		$(document).on("beforeElementReplace", function(event, componentId) {
+			var $textarea = $("#" + componentId).find("textarea").addBack("textarea");
+			$textarea.each(function() {
+				if ($(this).closest(".no-autosize").length == 0) {
+					autosize.destroy($(this));					
+				}
+			});
+		});
+		
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doAutosize($("#" + componentId).find("textarea").addBack("textarea"));
 		});
 	},	
 
@@ -301,7 +306,7 @@ onedev.server = {
                 }
 				if ($inError.length != 0) {
 					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
-					if ($focusable.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
+					if ($focusable.hasClass("CodeMirror") && $focusable[0].CodeMirror.options.readOnly == false) {
 						$focusable[0].CodeMirror.focus();					
                     } else if ($focusable.length != 0 
                             && $focusable.closest(".select2-container").length == 0 
@@ -348,7 +353,7 @@ onedev.server = {
 
 			onedev.server.focus.doFocus($(document));
 
-			$(document).on("elementReplaced", function(event, componentId) {
+			$(document).on("afterElementReplace", function(event, componentId) {
 				if (onedev.server.focus.$components != null)
 					onedev.server.focus.$components = onedev.server.focus.$components.add("#" + componentId);
 			});			
@@ -632,7 +637,7 @@ onedev.server = {
 				}, 0);
 			});
 		}
-		$(document).on("elementReplaced", function(event, componentId) {
+		$(document).on("afterElementReplace", function(event, componentId) {
 			installListener($("#" + componentId));
 		});
 		installListener($(document));
@@ -665,7 +670,7 @@ onedev.server = {
 				}
 			});
 		}
-		$(document).on("elementReplaced", function(event, componentId) {
+		$(document).on("afterElementReplace", function(event, componentId) {
 			installClearer($("#" + componentId));
 		});
 		installClearer($(document));

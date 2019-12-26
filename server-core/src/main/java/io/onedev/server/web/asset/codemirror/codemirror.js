@@ -173,3 +173,15 @@ onedev.server.codemirror = {
 		}
 	}
 };
+
+$(document).on("beforeElementReplace", function(event, componentId) {
+	var $component = $("#" + componentId);
+	$component.find(".CodeMirror").each(function() {
+		var cm = this.CodeMirror;
+		if (cm.toTextArea)
+			cm.toTextArea();
+	}).remove();
+	$component.find("form").addBack("form").each(function() {
+		this.submit = undefined;
+	});
+});

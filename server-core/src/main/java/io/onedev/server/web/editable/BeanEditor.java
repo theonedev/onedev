@@ -98,14 +98,26 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			PropertyUpdating propertyUpdating = (PropertyUpdating) event.getPayload();
 			for (Component groupContainer: groupsView) {
 				RepeatingView propertiesView = (RepeatingView) groupContainer.get("content").get("properties");
-				for (Component item: propertiesView) {
+				for (Component propertyContainer: propertiesView) {
 					@SuppressWarnings("unchecked")
-					PropertyContext<Serializable> propertyContext = (PropertyContext<Serializable>) item.getDefaultModelObject(); 
+					PropertyContext<Serializable> propertyContext = 
+							(PropertyContext<Serializable>) propertyContainer.getDefaultModelObject(); 
 					Set<String> checkedPropertyNames = new HashSet<>();
 					if (hasTransitiveDependency(propertyContext.getPropertyName(), 
 							propertyUpdating.getPropertyName(), checkedPropertyNames)) {
-						propertyUpdating.getHandler().add(item);
-						String script = String.format("$('#%s').addClass('no-autofocus');", item.getMarkupId());
+						/*
+						 * Create new property container instead of simply refreshing it as some dependent 
+						 * properties may only take effect when re-create the property container. For instance
+						 * If default value of an issue field depends on input value of another issue field  
+						 */
+						PropertyContainer newPropertyContainer = 
+								newPropertyContainer(propertyContainer.getId(), propertyContext);
+						propertyContainer.replaceWith(newPropertyContainer);
+						componentContexts.put(propertyContext.getPropertyName(), 
+								new ComponentContext(newPropertyContainer));
+						propertyUpdating.getHandler().add(newPropertyContainer);
+						String script = String.format("$('#%s').addClass('no-autofocus');", 
+								newPropertyContainer.getMarkupId());
 						propertyUpdating.getHandler().appendJavaScript(script);
 					}
 				}

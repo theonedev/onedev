@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -35,10 +34,10 @@ public class VersionCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.quote(BuildQueryConstants.FIELD_VERSION) + " " 
+	public String asString() {
+		return quote(BuildQueryConstants.FIELD_VERSION) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
-				+ BuildQuery.quote(value);
+				+ quote(value);
 	}
 
 }

@@ -1,6 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 
 import java.io.IOException;
@@ -26,10 +25,9 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.ProjectAwareCommitId;
+import io.onedev.server.util.ProjectAwareCommit;
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FixedBetweenCriteria extends IssueCriteria {
@@ -57,8 +55,8 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		this.secondType = secondType;
 		this.secondValue = secondValue;
 
-		ProjectAwareCommitId first = getCommitId(project, firstType, firstValue);
-		ProjectAwareCommitId second = getCommitId(project, secondType, secondValue);
+		ProjectAwareCommit first = getCommitId(project, firstType, firstValue);
+		ProjectAwareCommit second = getCommitId(project, secondType, secondValue);
 		firstCommitId = first.getCommitId();
 		secondCommitId = second.getCommitId();
 		if (first.getProject().equals(second.getProject())) { 
@@ -69,10 +67,10 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		}
 	}
 	
-	private static ProjectAwareCommitId getCommitId(@Nullable Project project, int type, String value) {
+	private static ProjectAwareCommit getCommitId(@Nullable Project project, int type, String value) {
 		if (type == IssueQueryLexer.Build) {
 			Build build = EntityQuery.getBuild(project, value);
-			return new ProjectAwareCommitId(build.getProject(), build.getCommitId());
+			return new ProjectAwareCommit(build.getProject(), build.getCommitId());
 		} else {
 			return EntityQuery.getCommitId(project, value);
 		}
@@ -139,7 +137,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return getRuleName(IssueQueryLexer.FixedBetween) + " " 
 				+ getRuleName(firstType) + " " + quote(firstValue) + " " 
 				+ getRuleName(IssueQueryLexer.And) + " " 

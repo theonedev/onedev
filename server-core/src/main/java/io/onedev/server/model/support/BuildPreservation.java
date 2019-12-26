@@ -18,7 +18,7 @@ public class BuildPreservation implements Serializable {
 	private Integer count;
 
 	@Editable(order=100, description="Specify the condition preserved builds must match")
-	@BuildQuery(withCurrentUserCriteria = false, withUnfinishedCriteria = false)
+	@BuildQuery(withOrder = false, withCurrentUserCriteria = false, withUnfinishedCriteria = false)
 	@NotEmpty
 	public String getCondition() {
 		return condition;

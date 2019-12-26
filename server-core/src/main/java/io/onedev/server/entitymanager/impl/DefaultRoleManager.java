@@ -7,15 +7,18 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
+import io.onedev.server.model.support.role.AllIssueFields;
+import io.onedev.server.model.support.role.ExcludeIssueFields;
 import io.onedev.server.model.support.role.CodePrivilege;
+import io.onedev.server.model.support.role.IssueFieldSet;
 import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.model.support.role.NoneIssueFields;
+import io.onedev.server.model.support.role.IncludeIssueFields;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -94,7 +97,7 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 		developer.setName("Developer");
 		developer.setCodePrivilege(CodePrivilege.WRITE);
 		developer.setScheduleIssues(true);
-		developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+		developer.setEditableIssueFields(new AllIssueFields());
 		
 		JobPrivilege jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
@@ -107,7 +110,7 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 		tester.setName("Tester");
 		tester.setCodePrivilege(CodePrivilege.READ);
 		tester.setScheduleIssues(true);
-		tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+		tester.setEditableIssueFields(new AllIssueFields());
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
@@ -119,7 +122,9 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 		Role reporter = new Role();
 		reporter.setName("Reporter");
 		reporter.setCodePrivilege(CodePrivilege.NONE);
-		reporter.setEditableIssueFields(Lists.newArrayList("Type", "Priority"));
+		ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+		allfieldsExcept.getExcludeFields().add("Assignee");
+		reporter.setEditableIssueFields(allfieldsExcept);
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
@@ -127,4 +132,43 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 
 		save(reporter, null);					
 	}
+
+	@Override
+	public void onRenameIssueField(String oldName, String newName) {
+		for (Role role: query()) {
+			IssueFieldSet fieldSet = role.getEditableIssueFields();
+			if (fieldSet instanceof ExcludeIssueFields) {
+				ExcludeIssueFields allIssueFieldsExcept = (ExcludeIssueFields) fieldSet;
+				if (allIssueFieldsExcept.getExcludeFields().remove(oldName))
+					allIssueFieldsExcept.getExcludeFields().add(newName);
+				if (allIssueFieldsExcept.getExcludeFields().isEmpty())
+					role.setEditableIssueFields(new AllIssueFields());
+			} else if (fieldSet instanceof IncludeIssueFields) {
+				IncludeIssueFields specifiedIssueFields = (IncludeIssueFields) fieldSet;
+				if (specifiedIssueFields.getIncludeFields().remove(oldName))
+					specifiedIssueFields.getIncludeFields().add(newName);
+				if (specifiedIssueFields.getIncludeFields().isEmpty())
+					role.setEditableIssueFields(new NoneIssueFields());
+			}
+		}
+	}
+
+	@Override
+	public void onDeleteIssueField(String fieldName) {
+		for (Role role: query()) {
+			IssueFieldSet fieldSet = role.getEditableIssueFields();
+			if (fieldSet instanceof ExcludeIssueFields) {
+				ExcludeIssueFields exludeIssueFields = (ExcludeIssueFields) fieldSet;
+				exludeIssueFields.getExcludeFields().remove(fieldName);
+				if (exludeIssueFields.getExcludeFields().isEmpty())
+					role.setEditableIssueFields(new AllIssueFields());
+			} else if (fieldSet instanceof IncludeIssueFields) {
+				IncludeIssueFields includeIssueFields = (IncludeIssueFields) fieldSet;
+				includeIssueFields.getIncludeFields().remove(fieldName);
+				if (includeIssueFields.getIncludeFields().isEmpty())
+					role.setEditableIssueFields(new NoneIssueFields());
+			}
+		}
+	}
+	
 }

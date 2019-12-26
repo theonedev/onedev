@@ -43,10 +43,10 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " 
+	public String asString() {
+		return quote(getFieldName()) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
-				+ IssueQuery.quote(value);
+				+ quote(value);
 	}
 
 }

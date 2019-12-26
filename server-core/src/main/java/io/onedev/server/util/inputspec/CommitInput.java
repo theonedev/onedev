@@ -17,6 +17,7 @@ public class CommitInput {
 		StringBuffer buffer = new StringBuffer();
 		inputSpec.appendField(buffer, index, "String");
 		inputSpec.appendCommonAnnotations(buffer, index);
+		buffer.append("    @CommitHash\n");
 		if (!inputSpec.isAllowEmpty())
 			buffer.append("    @NotEmpty\n");
 		inputSpec.appendMethods(buffer, index, "String", null, null);

@@ -7,9 +7,9 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class OwnedByCriteria extends EntityCriteria<Project> {
@@ -37,8 +37,8 @@ public class OwnedByCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public String toString() {
-		return ProjectQuery.getRuleName(ProjectQueryLexer.OwnedBy) + " " + ProjectQuery.quote(value);
+	public String asString() {
+		return ProjectQuery.getRuleName(ProjectQueryLexer.OwnedBy) + " " + Criteria.quote(value);
 	}
 
 }

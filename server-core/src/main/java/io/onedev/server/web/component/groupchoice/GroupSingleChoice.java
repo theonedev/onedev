@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.groupchoice;
 
+import java.util.Collection;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
@@ -10,9 +12,8 @@ import io.onedev.server.web.component.select2.Select2Choice;
 @SuppressWarnings("serial")
 public class GroupSingleChoice extends Select2Choice<Group> {
 
-	public GroupSingleChoice(String id, IModel<Group> groupModel, 
-			AbstractGroupChoiceProvider choiceProvider) {
-		super(id, groupModel, choiceProvider);
+	public GroupSingleChoice(String id, IModel<Group> selectionModel, IModel<Collection<Group>> choicesModel) {
+		super(id, selectionModel, new GroupChoiceProvider(choicesModel));
 	}
 
 	@Override

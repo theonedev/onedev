@@ -6,10 +6,17 @@
 	padding-right: 30px;
 	position: relative;
 }
-.issue-operations>.state-and-actions>.issue-state {
+.issue-operations>.state-and-actions>.state {
+	margin-right: 16px;
+	padding-right: 16px;
+}
+.issue-operations>.state-and-actions>.state.with-separator {
+	border-right: 1px solid #E0E0E0;
+}
+.issue-operations>.state-and-actions>.state>.issue-state {
 	font-size: 16px;
 	padding: 7px 24px;
-	margin-right: 32px;
+	display: block;
 }
 .issue-operations>.state-and-actions>* {
 	margin-right: 10px;

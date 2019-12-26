@@ -38,9 +38,8 @@ public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String toString() {
-		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.CreatedBy) 
-				+ " " + CodeCommentQuery.quote(value);
+	public String asString() {
+		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.CreatedBy) + " " + quote(value);
 	}
 
 }

@@ -42,8 +42,8 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public String toString() {
-		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.OnCommit) + " " + CodeCommentQuery.quote(commitId.name());
+	public String asString() {
+		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.OnCommit) + " " + quote(commitId.name());
 	}
 
 }

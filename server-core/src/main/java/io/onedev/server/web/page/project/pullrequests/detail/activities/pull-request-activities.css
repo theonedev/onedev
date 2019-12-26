@@ -43,6 +43,8 @@
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status {
 	width: 170px;
+	/* in order align embedded buttons */ 
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span {
 	margin-left: 4px;

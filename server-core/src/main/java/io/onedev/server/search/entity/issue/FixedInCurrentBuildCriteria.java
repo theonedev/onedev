@@ -8,7 +8,6 @@ import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 
-
 public class FixedInCurrentBuildCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
@@ -16,7 +15,7 @@ public class FixedInCurrentBuildCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		if (Build.get() != null)
-			return new FixedInCriteria(Build.get()).getPredicate(root, builder);
+			return new FixedInBuildCriteria(Build.get()).getPredicate(root, builder);
 		else
 			throw new OneException("No build in query context");
 	}
@@ -24,13 +23,13 @@ public class FixedInCurrentBuildCriteria extends IssueCriteria {
 	@Override
 	public boolean matches(Issue issue) {
 		if (Build.get() != null)
-			return new FixedInCriteria(Build.get()).matches(issue);
+			return new FixedInBuildCriteria(Build.get()).matches(issue);
 		else
 			throw new OneException("No build in query context");
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return IssueQuery.getRuleName(IssueQueryLexer.FixedInCurrentBuild);
 	}
 

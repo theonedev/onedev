@@ -1,8 +1,9 @@
 package io.onedev.server.web.component.user.choice;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
+
+import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.User;
 import io.onedev.server.util.match.MatchScoreProvider;
@@ -15,16 +16,21 @@ public class UserChoiceProvider extends AbstractUserChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final List<User> choices;
+	private final IModel<Collection<User>> choicesModel;
 	
-	public UserChoiceProvider(List<User> choices) {
-		this.choices = new ArrayList<>(choices);
-		this.choices.sort(Comparator.comparing(User::getDisplayName));
+	public UserChoiceProvider(IModel<Collection<User>> choicesModel) {
+		this.choicesModel = choicesModel;
 	}
 	
 	@Override
+	public void detach() {
+		choicesModel.detach();
+		super.detach();
+	}
+
+	@Override
 	public void query(String term, int page, Response<User> response) {
-		List<User> matched = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<User>() {
+		List<User> matched = MatchScoreUtils.filterAndSort(choicesModel.getObject(), new MatchScoreProvider<User>() {
 
 			@Override
 			public double getMatchScore(User object) {

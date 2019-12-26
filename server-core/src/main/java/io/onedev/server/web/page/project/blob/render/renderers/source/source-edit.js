@@ -31,7 +31,7 @@ onedev.server.sourceEdit = {
 		 * mark it as dirty explicitly. So we use no-dirtytrack class to 
 		 * disable automatic dirty track
 		 */
-		$sourceEdit.closest("form").find("textarea").addClass("no-dirtytrack");
+		$sourceEdit.closest("form").find("textarea").addClass("no-dirtytrack").addClass("no-autosize");
 		
 		if (mark)
 			onedev.server.codemirror.mark(cm, mark);
@@ -46,9 +46,11 @@ onedev.server.sourceEdit = {
 			if (doneTimer) 
 				clearTimeout(doneTimer);
 			doneTimer = setTimeout(function() {
+				var cm = onedev.server.sourceEdit.getCodeMirror(containerId);
 				var content = cm.doc.getValue();
 				if (content.trim().length != 0)
 					localStorage.setItem(autosaveKey, content);
+				cm = null;
 			}, 500);
 		});
 		

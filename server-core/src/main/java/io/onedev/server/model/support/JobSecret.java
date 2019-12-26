@@ -103,7 +103,7 @@ public class JobSecret implements Serializable {
 	
 	public boolean isAuthorized(Project project, String branch) {
 		return authorizedBranches == null 
-				|| PatternSet.fromString(authorizedBranches).matches(new PathMatcher(), branch);
+				|| PatternSet.parse(authorizedBranches).matches(new PathMatcher(), branch);
 	}
 	
 }

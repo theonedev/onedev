@@ -103,7 +103,8 @@ body.ProjectBlobPage.additionalWidth3 {
 }
 #project-blob>.build-support-note {
 	padding: 8px;
-	border-bottom: 1px solid #DDD;
+	border-top: 1px solid #68D056;
+	border-bottom: 1px solid #68D056;
 	background: #E5FBE5;
 	color: #399529; 
 }

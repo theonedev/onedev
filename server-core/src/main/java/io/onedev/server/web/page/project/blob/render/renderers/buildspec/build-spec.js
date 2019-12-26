@@ -139,7 +139,9 @@ onedev.server.buildSpec = {
             var index = $nav.index();
             var $nav = $navs.children().eq(index);
             $nav.remove();
-            $contents.children().eq(index).remove();
+            var $content = $contents.children().eq(index);
+            $content.find(".deletion-aware").trigger("beforeDelete");
+            $content.remove();
 
             if ($nav.hasClass("active")) 
                 onedev.server.buildSpec.showJob(0);

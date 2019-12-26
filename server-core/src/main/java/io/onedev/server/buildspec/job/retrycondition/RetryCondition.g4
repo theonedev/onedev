@@ -5,7 +5,8 @@ condition
     ;
 
 criteria
-    : criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    : criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -24,6 +25,10 @@ Is
 	: 'is'
 	;	
 
+IsEmpty
+	: 'is' WS+ 'empty'
+	;	
+	
 And
 	: 'and'
 	;

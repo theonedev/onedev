@@ -87,7 +87,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the branch matches criteria specified here")
-	@io.onedev.server.web.editable.annotation.UserMatcher
+	@io.onedev.server.web.editable.annotation.UserMatch
 	@NotEmpty(message="may not be empty")
 	public String getUserMatch() {
 		return userMatch;
@@ -138,7 +138,7 @@ public class BranchProtection implements Serializable {
 
 	public ReviewRequirement getParsedReviewRequirement() {
 		if (parsedReviewRequirement == null)
-			parsedReviewRequirement = ReviewRequirement.fromString(reviewRequirement);
+			parsedReviewRequirement = ReviewRequirement.parse(reviewRequirement, true);
 		return parsedReviewRequirement;
 	}
 	
@@ -171,9 +171,9 @@ public class BranchProtection implements Serializable {
 	
 	public FileProtection getFileProtection(String file) {
 		Set<String> jobNames = new HashSet<>();
-		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(null);
+		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
 		for (FileProtection protection: fileProtections) {
-			if (PatternSet.fromString(protection.getPaths()).matches(new PathMatcher(), file)) {
+			if (PatternSet.parse(protection.getPaths()).matches(new PathMatcher(), file)) {
 				jobNames.addAll(protection.getJobNames());
 				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
 			}

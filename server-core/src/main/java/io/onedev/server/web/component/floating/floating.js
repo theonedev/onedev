@@ -43,7 +43,7 @@ onedev.server.floating = {
 		}
 		
 		var openTriggered = false;
-		$floating.data("elementReplaced", function() {
+		$floating.data("afterElementReplace", function() {
 			if ($floating.data("alignment"))
 				$floating.align($floating.data("alignment"));
 			if (!openTriggered) {
@@ -51,7 +51,7 @@ onedev.server.floating = {
 				openTriggered = true;
 			}
 		});
-		$(document).on("elementReplaced", $floating.data("elementReplaced"));
+		$(document).on("afterElementReplace", $floating.data("afterElementReplace"));
 	}, 
 	
 	close: function($floating, callCloseCallback) {
@@ -66,7 +66,7 @@ onedev.server.floating = {
 			
 			$(document).off("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 			$(document).off("keydown", $floating.data("keydown"));
-			$(document).off("elementReplaced", $floating.data("elementReplaced"));
+			$(document).off("afterElementReplace", $floating.data("afterElementReplace"));
 			
 			$floating.trigger("close");
 			

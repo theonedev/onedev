@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.userchoice;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -16,7 +17,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.user.choice.UserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -25,8 +25,6 @@ import io.onedev.server.web.editable.annotation.UserChoice;
 @SuppressWarnings("serial")
 public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
-	private final List<User> choices = new ArrayList<>();
-	
 	private UserSingleChoice input;
 	
 	public UserSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
@@ -39,8 +37,9 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		ComponentContext componentContext = new ComponentContext(this);
+		List<User> choices = new ArrayList<>();
 		
+		ComponentContext componentContext = new ComponentContext(this);
 		ComponentContext.push(componentContext);
 		try {
 			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
@@ -50,21 +49,22 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
 				choices.addAll(OneDev.getInstance(UserManager.class).query());
+				choices.sort(Comparator.comparing(User::getName));
 			}
 		} finally {
 			ComponentContext.pop();
 		}
 		
-		User user;
+		User selection;
 		if (getModelObject() != null)
-			user = OneDev.getInstance(UserManager.class).findByName(getModelObject());
+			selection = OneDev.getInstance(UserManager.class).findByName(getModelObject());
 		else
-			user = null;
+			selection = null;
 		
-		if (user != null && !choices.contains(user))
-			user = null;
+		if (selection != null && !choices.contains(selection))
+			selection = null;
 		
-    	input = new UserSingleChoice("input", Model.of(user), new UserChoiceProvider(choices)) {
+    	input = new UserSingleChoice("input", Model.of(selection), Model.of(choices)) {
 
 			@Override
 			protected void onInitialize() {

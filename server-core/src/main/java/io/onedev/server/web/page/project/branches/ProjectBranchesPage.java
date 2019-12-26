@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -73,7 +74,6 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
@@ -108,7 +108,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 		@Override
 		protected List<RefInfo> load() {
-			List<RefInfo> refs = getProject().getBranches();
+			List<RefInfo> refs = getProject().getBranchRefInfos();
 			if (query != null) {
 				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
 					String branch = GitUtils.ref2branch(it.next().getRef().getName());
@@ -302,7 +302,19 @@ public class ProjectBranchesPage extends ProjectPage {
 				baseBranch = object;
 			}
 			
-		}, new BranchChoiceProvider(projectModel)));
+		}, new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> branches = new LinkedHashMap<>();
+				for (RefInfo ref: getProject().getBranchRefInfos()) {
+					String branch = GitUtils.ref2branch(ref.getRef().getName());
+					branches.put(branch, branch);
+				}
+				return branches;
+			}
+			
+		}));
 		
 		baseChoice.setRequired(true);
 		

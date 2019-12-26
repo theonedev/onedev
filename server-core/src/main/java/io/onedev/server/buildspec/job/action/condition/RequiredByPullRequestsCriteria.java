@@ -1,13 +1,20 @@
 package io.onedev.server.buildspec.job.action.condition;
 
-import java.util.function.Predicate;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.criteria.Criteria;
 
-public class RequiredByPullRequestsCriteria implements Predicate<Build> {
+public class RequiredByPullRequestsCriteria extends Criteria<Build> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean test(Build build) {
+	public boolean matches(Build build) {
 		return build.getPullRequestBuilds().stream().anyMatch(it->it.isRequired());
 	}
 
+	@Override
+	public String asString() {
+		return ActionCondition.getRuleName(ActionConditionLexer.RequiredByPullRequests);
+	}
+	
 }

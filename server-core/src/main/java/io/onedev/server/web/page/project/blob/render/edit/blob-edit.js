@@ -67,7 +67,7 @@ onedev.server.blobEdit = {
 
 	},
 	selectTab: function($tab) {
-    	var $active = $tab.parent().find(".tab.active");
+		var $active = $tab.parent().find(".tab.active");
     	$active.removeClass("active");
     	$tab.addClass("active");
     	var $blobEdit = $tab.closest(".blob-edit");
@@ -91,6 +91,22 @@ onedev.server.blobEdit = {
         
         if (!$tab.hasClass("save"))
         	onedev.server.viewState.getFromHistoryAndSetToView();        	
+	},
+	recordFormFlags: function(formId) {
+		var $form = $("#" + formId);
+		if ($form.hasClass("dirty"))
+			$form.parent().addClass("dirty");
+		else
+			$form.parent().removeClass("dirty");
+		$form.parent().data("autosaveKey", $form.data("autosaveKey"));
+	},
+	restoreFormFlags: function(formId) {
+		var $form = $("#" + formId);
+		if ($form.parent().hasClass("dirty"))
+			$form.addClass("dirty");
+		else
+			$form.removeClass("dirty");
+		$form.data("autosaveKey", $form.parent().data("autosaveKey"));
 	},
 	onNameChanging: function(containerId, addingFile, recreateCallback) {
 		var $body = $("#" + containerId + ">.blob-edit>.body");

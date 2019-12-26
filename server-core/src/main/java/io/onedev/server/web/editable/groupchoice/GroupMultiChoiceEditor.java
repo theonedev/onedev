@@ -1,8 +1,8 @@
 package io.onedev.server.web.editable.groupchoice;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -17,7 +17,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -26,20 +25,19 @@ import io.onedev.server.web.editable.annotation.GroupChoice;
 @SuppressWarnings("serial")
 public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	
-	private final List<Group> choices = new ArrayList<>();
-	
 	private GroupMultiChoice input;
 	
 	public GroupMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Collection<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		List<Group> choices = new ArrayList<>();
 		
-    	List<Group> groups = new ArrayList<>();
 		GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
 		Preconditions.checkNotNull(groupChoice);
 		if (groupChoice.value().length() != 0) {
@@ -47,19 +45,20 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 					.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 		} else {
 			choices.addAll(OneDev.getInstance(GroupManager.class).query());
+			choices.sort(Comparator.comparing(Group::getName));
 		}
 	
-    	groups = new ArrayList<>();
+    	List<Group> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 			for (String groupName: getModelObject()) {
 				Group group = groupManager.find(groupName);
 				if (group != null && choices.contains(group))
-					groups.add(group);
+					selections.add(group);
 			}
 		} 
 		
-		input = new GroupMultiChoice("input", new Model((Serializable)groups), new GroupChoiceProvider(choices)) {
+		input = new GroupMultiChoice("input", Model.of(selections), Model.of(choices)) {
 
 			@Override
 			protected void onInitialize() {

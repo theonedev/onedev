@@ -40,7 +40,7 @@ public class SomeoneRequestedForChangesCriteria extends EntityCriteria<PullReque
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SomeoneRequestedForChanges);
 	}
 

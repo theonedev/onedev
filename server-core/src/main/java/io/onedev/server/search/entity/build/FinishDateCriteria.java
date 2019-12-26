@@ -47,9 +47,9 @@ public class FinishDateCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.quote(BuildQueryConstants.FIELD_FINISH_DATE) + " " 
-				+ BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(value);
+	public String asString() {
+		return quote(BuildQueryConstants.FIELD_FINISH_DATE) + " " 
+				+ BuildQuery.getRuleName(operator) + " " + quote(value);
 	}
 
 }

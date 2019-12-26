@@ -1,6 +1,5 @@
 package io.onedev.server.buildspec.job;
 
-import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
@@ -34,6 +33,7 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Code;
@@ -150,8 +150,8 @@ public class Job implements Serializable, Validatable {
 	}
 	
 	@Editable(order=120, name="Commands", description="Specify content of Linux shell script or Windows command batch to execute in above image. "
-			+ "It will be executed under job workspace, which may contain files of your repository and other "
-			+ "dependencies based on your configuration below. "
+			+ "It will be executed under <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, which may contain files of your repository and "
+			+ "dependency artifacts based on your configuration below. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative
 	@Code(language = Code.SHELL, variableProvider="getVariables")
@@ -198,7 +198,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9000, group="Source Retrieval", description="Whether or not to retrieve files under the repository "
-			+ "into job workspace")
+			+ "into <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
@@ -268,7 +268,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
-			+ "Artifact files are relative to job workspace, and may use * or ? for pattern match. "
+			+ "Artifact files are relative to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, and may use * or ? for pattern match. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(interpolative = true)
@@ -348,10 +348,9 @@ public class Job implements Serializable, Validatable {
 		this.memoryRequirement = memoryRequirement;
 	}
 
-	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. For instance for node.js "
-			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
-			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
-			+ "build script should always consider that cache might not be available")
+	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. "
+			+ "For instance for node.js projects, you may cache folder <tt>/root/.npm</tt> to avoid downloading "
+			+ "node modules for subsequent job executions")
 	@Valid
 	public List<CacheSpec> getCaches() {
 		return caches;
@@ -463,9 +462,9 @@ public class Job implements Serializable, Validatable {
 	
 	public static String getBuildQuery(ObjectId commitId, String jobName) {
 		return "" 
-				+ quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + quote(commitId.name()) 
+				+ Criteria.quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + Criteria.quote(commitId.name()) 
 				+ " " + getRuleName(And) + " "
-				+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
+				+ Criteria.quote(FIELD_JOB) + " " + getRuleName(Is) + " " + Criteria.quote(jobName);
 	}
 	
 	public static List<String> getChoices() {

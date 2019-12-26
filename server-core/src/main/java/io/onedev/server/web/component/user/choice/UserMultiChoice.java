@@ -13,8 +13,8 @@ public class UserMultiChoice extends Select2MultiChoice<User> {
 
 	private static final long serialVersionUID = 1L;
 
-	public UserMultiChoice(String id, IModel<Collection<User>> model, AbstractUserChoiceProvider choiceProvider) {
-		super(id, model, choiceProvider);
+	public UserMultiChoice(String id, IModel<Collection<User>> selectionsModel, IModel<Collection<User>>choicesModel) {
+		super(id, selectionsModel, new UserChoiceProvider(choicesModel));
 	}
 
 	@Override

@@ -65,7 +65,7 @@ public class FileProtection implements Serializable, Validatable {
 	
 	public ReviewRequirement getParsedReviewRequirement() {
 		if (parsedReviewRequirement == null)
-			parsedReviewRequirement = ReviewRequirement.fromString(reviewRequirement);
+			parsedReviewRequirement = ReviewRequirement.parse(reviewRequirement, true);
 		return parsedReviewRequirement;
 	}
 	

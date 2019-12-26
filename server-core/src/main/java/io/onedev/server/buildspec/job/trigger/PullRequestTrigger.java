@@ -69,7 +69,7 @@ public class PullRequestTrigger extends JobTrigger {
 		if (getPaths() != null) {
 			Collection<String> changedFiles = GitUtils.getChangedFiles(request.getTargetProject().getRepository(), 
 					request.getTarget().getObjectId(), ObjectId.fromString(request.getLastMergePreview().getMerged()));
-			PatternSet patternSet = PatternSet.fromString(getPaths());
+			PatternSet patternSet = PatternSet.parse(getPaths());
 			Matcher matcher = new PathMatcher();
 			for (String changedFile: changedFiles) {
 				if (patternSet.matches(matcher, changedFile))
@@ -87,7 +87,7 @@ public class PullRequestTrigger extends JobTrigger {
 			PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
 			String branch = pullRequestMergePreviewCalculated.getRequest().getTargetBranch();
 			if (branch != null) {
-				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new PathMatcher(), branch)) 
+				if ((getBranches() == null || PatternSet.parse(getBranches()).matches(new PathMatcher(), branch)) 
 						&& touchedFile(pullRequestMergePreviewCalculated.getRequest())) {
 					return true;
 				}

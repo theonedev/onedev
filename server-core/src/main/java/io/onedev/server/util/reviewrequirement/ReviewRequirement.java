@@ -39,12 +39,28 @@ public class ReviewRequirement {
 		this.groups = groups;
 	}
 	
-	public static ReviewRequirement fromString(@Nullable String requirementString) {
+	public static ReviewRequirement parse(@Nullable String requirementString, boolean validate) {
 		List<User> users = new ArrayList<>();
 		Map<Group, Integer> groups = new LinkedHashMap<>();
 		
 		if (requirementString != null) {
-			RequirementContext requirement = parse(requirementString);
+			CharStream is = CharStreams.fromString(requirementString); 
+			ReviewRequirementLexer lexer = new ReviewRequirementLexer(is);
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(new BaseErrorListener() {
+
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+						int charPositionInLine, String msg, RecognitionException e) {
+					throw new OneException("Malformed review requirement");
+				}
+				
+			});
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			ReviewRequirementParser parser = new ReviewRequirementParser(tokens);
+			parser.removeErrorListeners();
+			parser.setErrorHandler(new BailErrorStrategy());
+			RequirementContext requirement = parser.requirement();
 			
 			for (CriteriaContext criteria: requirement.criteria()) {
 				if (criteria.userCriteria() != null) {
@@ -53,9 +69,9 @@ public class ReviewRequirement {
 					if (user != null) {
 						if (!users.contains(user)) 
 							users.add(user);
-						else  
+						else if (validate)
 							throw new OneException("User '" + userName + "' is included multiple times");
-					} else {
+					} else if (validate) {
 						throw new OneException("Unable to find user '" + userName + "'");
 					}
 				} else if (criteria.groupCriteria() != null) {
@@ -72,10 +88,10 @@ public class ReviewRequirement {
 							} else {
 								groups.put(group, 1);
 							}
-						} else {
+						} else if (validate) {
 							throw new OneException("Group '" + groupName + "' is included multiple times");
 						}
-					} else {
+					} else if (validate) {
 						throw new OneException("Unable to find group '" + groupName + "'");
 					}
 				}
@@ -85,26 +101,6 @@ public class ReviewRequirement {
 		return new ReviewRequirement(users, groups);
 	}
 
-	public static RequirementContext parse(String requirementString) {
-		CharStream is = CharStreams.fromString(requirementString); 
-		ReviewRequirementLexer lexer = new ReviewRequirementLexer(is);
-		lexer.removeErrorListeners();
-		lexer.addErrorListener(new BaseErrorListener() {
-
-			@Override
-			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed review requirement");
-			}
-			
-		});
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		ReviewRequirementParser parser = new ReviewRequirementParser(tokens);
-		parser.removeErrorListeners();
-		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.requirement();
-	}
-	
 	private static String getValue(TerminalNode terminal) {
 		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
 	}
@@ -136,7 +132,7 @@ public class ReviewRequirement {
 	
 	@Nullable
 	public static String onRenameGroup(@Nullable String reviewRequirementString, String oldName, String newName) {
-		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		ReviewRequirement reviewRequirement = parse(reviewRequirementString, false);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
 			if (group.getName().equals(oldName))
 				group.setName(newName);
@@ -145,7 +141,7 @@ public class ReviewRequirement {
 	}
 
 	public static String onRenameUser(@Nullable String reviewRequirementString, String oldName, String newName) {
-		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		ReviewRequirement reviewRequirement = parse(reviewRequirementString, false);
 		for (User user: reviewRequirement.getUsers()) {
 			if (user.getName().equals(oldName))
 				user.setName(newName);
@@ -154,7 +150,7 @@ public class ReviewRequirement {
 	}
 	
 	public static boolean isUsingUser(@Nullable String reviewRequirementString, String userName) {
-		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		ReviewRequirement reviewRequirement = parse(reviewRequirementString, false);
 		for (User user: reviewRequirement.getUsers()) {
 			if (user.getName().equals(userName))
 				return true;
@@ -163,7 +159,7 @@ public class ReviewRequirement {
 	}
 	
 	public static boolean isUsingGroup(@Nullable String reviewRequirementString, String groupName) {
-		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		ReviewRequirement reviewRequirement = parse(reviewRequirementString, false);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
 			if (group.getName().equals(groupName))
 				return true;

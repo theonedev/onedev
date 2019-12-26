@@ -44,8 +44,8 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.RequiredByPullRequest) + " " + BuildQuery.quote(value);
+	public String asString() {
+		return BuildQuery.getRuleName(BuildQueryLexer.RequiredByPullRequest) + " " + quote(value);
 	}
 
 }

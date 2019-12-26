@@ -78,7 +78,7 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
-					List<String> branchNames = project.getBranches()
+					List<String> branchNames = project.getBranchRefInfos()
 							.stream()
 							.map(it->GitUtils.ref2branch(it.getRef().getName()))
 							.sorted()
@@ -98,7 +98,7 @@ public class SuggestionUtils {
 			@Override
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
-					List<String> tagNames = project.getTags()
+					List<String> tagNames = project.getTagRefInfos()
 							.stream()
 							.map(it->GitUtils.ref2tag(it.getRef().getName()))
 							.sorted()

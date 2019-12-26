@@ -33,7 +33,7 @@ public class OwnedByMeCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return ProjectQuery.getRuleName(ProjectQueryLexer.OwnedByMe);
 	}
 

@@ -11,7 +11,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.IssueQueryConstants;
 
@@ -43,10 +42,10 @@ public class BuildFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " 
+	public String asString() {
+		return quote(getFieldName()) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
-				+ IssueQuery.quote(value);
+				+ quote(value);
 	}
 
 }

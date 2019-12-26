@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -45,8 +44,10 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_COMMENT_COUNT) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_COMMENT_COUNT) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
+				+ quote(String.valueOf(value));
 	}
 
 }

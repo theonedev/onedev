@@ -49,9 +49,10 @@ public class NumericFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " 
-				+ IssueQuery.quote(String.valueOf(value));
+	public String asString() {
+		return quote(getFieldName()) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
+				+ quote(String.valueOf(value));
 	}
 
 	@Override

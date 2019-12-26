@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -81,6 +82,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private static final String CACHE_LABEL_PREFIX = "onedev-cache/";
 	
 	private static final int LABEL_UPDATE_BATCH = 100;
+	
+	private static final long NAMESPACE_DELETION_TIMEOUT = 120;
 	
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
@@ -236,31 +239,40 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void deleteNamespace(String namespace, JobLogger jobLogger) {
-		Commandline cmd = newKubeCtl();
-		cmd.addArgs("delete", "namespace", namespace);
-		cmd.execute(new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				logger.debug(line);
-			}
-			
-		}, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				jobLogger.log("Kubernetes: " + line);
-			}
-			
-		}).checkReturnCode();
+		try {
+			Commandline cmd = newKubeCtl();
+			cmd.timeout(NAMESPACE_DELETION_TIMEOUT).addArgs("delete", "namespace", namespace);
+			cmd.execute(new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					logger.debug(line);
+				}
+				
+			}, new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					jobLogger.log("Kubernetes: " + line);
+				}
+				
+			}).checkReturnCode();
+		} catch (Exception e) {
+			if (ExceptionUtils.find(e, TimeoutException.class) == null)
+				throw ExceptionUtils.unchecked(e);
+			else
+				jobLogger.log("Timed out deleting namespace");
+		}
 	}
 	
 	private String createNamespace(@Nullable JobContext jobContext, JobLogger jobLogger) {
 		String namespace = getName() + "-";
-		if (jobContext != null)
-			namespace += jobContext.getProjectName().replace('.', '-').replace('_', '-') + "-" + jobContext.getBuildNumber();
-		else
+		if (jobContext != null) {
+			namespace += jobContext.getProjectName().replace('.', '-').replace('_', '-') + "-" 
+					+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
+		} else {
 			namespace += "executor-test";
+		}
 		
 		AtomicBoolean namespaceExists = new AtomicBoolean(false);
 		Commandline cmd = newKubeCtl();
@@ -1258,57 +1270,17 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private void collectContainerLog(String namespace, String podName, String containerName, 
 			@Nullable String logEndMessage, JobLogger jobLogger) {
-		if (logEndMessage != null) {
-			AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);
-			AtomicBoolean endOfLogSeenRef = new AtomicBoolean(false);
-			
-			while (true) {
-				Commandline kubectl = newKubeCtl();
-				kubectl.addArgs("logs", podName, "-c", containerName, "-n", namespace, "--follow", "--timestamps=true");
-				if (lastInstantRef.get() != null)
-					kubectl.addArgs("--since-time=" + DateTimeFormatter.ISO_INSTANT.format(lastInstantRef.get()));
-				
-				LineConsumer logConsumer = new LineConsumer() {
-
-					@Override
-					public void consume(String line) {
-						if (line.contains("rpc error:") && line.contains("No such container:") 
-								|| line.contains("Unable to retrieve container logs for")) { 
-							logger.debug(line);
-						} else if (line.contains(logEndMessage)) {
-							endOfLogSeenRef.set(true);
-						} else if (line.contains(" ")) {
-							String timestamp = StringUtils.substringBefore(line, " ");
-							try {
-								Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
-								if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
-									lastInstantRef.set(instant);
-								jobLogger.log(StringUtils.substringAfter(line, " "));
-							} catch (DateTimeParseException e) {
-								jobLogger.log(line);
-							}
-						} else {
-							jobLogger.log(line);
-						}
-					}
-					
-				};
-				
-				kubectl.execute(logConsumer, logConsumer).checkReturnCode();
-				
-				if (endOfLogSeenRef.get()) {
-					break;
-				} else {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		} else {
+		Thread thread = Thread.currentThread();
+		AtomicReference<String> errorMessageRef = new AtomicReference<>(null);
+		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);
+		AtomicBoolean endOfLogSeenRef = new AtomicBoolean(false);
+		
+		while (true) {
 			Commandline kubectl = newKubeCtl();
-			kubectl.addArgs("logs", podName, "-c", containerName, "-n", namespace, "--follow");
+			kubectl.addArgs("logs", podName, "-c", containerName, "-n", namespace, "--follow", "--timestamps=true");
+			if (lastInstantRef.get() != null)
+				kubectl.addArgs("--since-time=" + DateTimeFormatter.ISO_INSTANT.format(lastInstantRef.get()));
+			
 			LineConsumer logConsumer = new LineConsumer() {
 
 				@Override
@@ -1316,6 +1288,22 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					if (line.contains("rpc error:") && line.contains("No such container:") 
 							|| line.contains("Unable to retrieve container logs for")) { 
 						logger.debug(line);
+					} else if (logEndMessage != null && line.contains(logEndMessage)) {
+						endOfLogSeenRef.set(true);
+					} else if (line.contains("Error from server") && line.contains("containerLogs")
+							&& (line.contains("EOF") || line.contains("Connection refused"))) {
+						errorMessageRef.set(line);
+						thread.interrupt();
+					} else if (line.contains(" ")) {
+						String timestamp = StringUtils.substringBefore(line, " ");
+						try {
+							Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
+							if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
+								lastInstantRef.set(instant);
+							jobLogger.log(StringUtils.substringAfter(line, " "));
+						} catch (DateTimeParseException e) {
+							jobLogger.log(line);
+						}
 					} else {
 						jobLogger.log(line);
 					}
@@ -1323,7 +1311,24 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 			};
 			
-			kubectl.execute(logConsumer, logConsumer).checkReturnCode();
+			try {
+				kubectl.execute(logConsumer, logConsumer).checkReturnCode();
+			} catch (Exception e) {
+				if (errorMessageRef.get() != null) 
+					throw new OneException(errorMessageRef.get());
+				else
+					throw ExceptionUtils.unchecked(e);
+			}		
+			
+			if (logEndMessage == null || endOfLogSeenRef.get()) {
+				break;
+			} else {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 	}
 	
@@ -1434,7 +1439,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (kernelVersion.contains(entry.getKey()))
 					return entry.getValue();
 			}
-			throw new RuntimeException("Unsupported windows kernel version: " + kernelVersion);
+			throw new OneException("Unsupported windows kernel version: " + kernelVersion);
 		}
 		
 		public String getHelperImageSuffix() {

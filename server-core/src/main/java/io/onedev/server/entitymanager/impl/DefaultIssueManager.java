@@ -62,7 +62,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.issue.AndCriteria;
+import io.onedev.server.search.entity.issue.AndIssueCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
@@ -277,7 +277,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 				List<IssueCriteria> criterias = new ArrayList<>();
 				criterias.add(new MilestoneCriteria(milestone.getName()));
 				criterias.add(criteria);
-				return count(milestone.getProject(), new AndCriteria(criterias));
+				return count(milestone.getProject(), new AndIssueCriteria(criterias));
 			} else {
 				return 0;
 			}
@@ -315,7 +315,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedStates());
+				undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -345,7 +345,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 				namedQuery.setQuery(query.toString());
@@ -410,7 +410,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedFields());
+				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -447,7 +447,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 				boolean remove = false;
 				for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldResolution resolution = entry.getValue();
@@ -484,7 +484,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 
 		for (Project project: projectManager.query())
-			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues());
+			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues(project));
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
 			populateUndefinedFieldValues(undefinedFieldValues, setting.getProject(), setting.getUserQueries());
@@ -499,7 +499,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
-				undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedFieldValues());
+				undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
 		}
@@ -526,7 +526,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 		for (Project project: projectManager.query()) {
-			project.getIssueSetting().fixUndefinedFieldValues(valueSetEdits);
+			project.getIssueSetting().fixUndefinedFieldValues(project, valueSetEdits);
 		}
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
@@ -541,7 +541,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.fixUndefinedFieldValues(valueSetEdits))
 					it.remove();
 				else

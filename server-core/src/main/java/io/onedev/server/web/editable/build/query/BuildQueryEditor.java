@@ -43,7 +43,7 @@ public class BuildQueryEditor extends PropertyEditor<String> {
 					return null;
 			}
     		
-    	}, buildQuery.withCurrentUserCriteria(), buildQuery.withUnfinishedCriteria()));
+    	}, buildQuery.withOrder(), buildQuery.withCurrentUserCriteria(), buildQuery.withUnfinishedCriteria()));
         
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

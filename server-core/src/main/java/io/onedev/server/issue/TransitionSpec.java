@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -17,18 +18,14 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
-import io.onedev.server.issue.transitionprerequisite.TransitionPrerequisite;
-import io.onedev.server.issue.transitionprerequisite.ValueIsNotAnyOf;
-import io.onedev.server.issue.transitionprerequisite.ValueIsOneOf;
-import io.onedev.server.issue.transitionprerequisite.ValueMatcher;
+import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.Input;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -45,8 +42,6 @@ public class TransitionSpec implements Serializable {
 	private List<String> fromStates;
 	
 	private String toState;
-	
-	private TransitionPrerequisite prerequisite;
 	
 	private TransitionTrigger trigger;
 	
@@ -72,17 +67,6 @@ public class TransitionSpec implements Serializable {
 
 	public void setToState(String toState) {
 		this.toState = toState;
-	}
-
-	@Editable(order=300, description="Enable if applicability of this transition depends on "
-			+ "value of particular field")
-	@NameOfEmptyValue("No prerequisite")
-	public TransitionPrerequisite getPrerequisite() {
-		return prerequisite;
-	}
-
-	public void setPrerequisite(TransitionPrerequisite prerequisite) {
-		this.prerequisite = prerequisite;
 	}
 
 	@Editable(order=400, name="Do Transition When")
@@ -115,7 +99,7 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public Usage onDeleteBranch(String branchName) {
-		return getTrigger().onDeleteBranch(branchName).prefix("transitions: " + fromStates + "->" + toState);
+		return getTrigger().onDeleteBranch(branchName).prefix("trigger");
 	}
 	
 	public void onRenameRole(String oldName, String newName) {
@@ -123,7 +107,7 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public Usage onDeleteRole(String roleName) {
-		return trigger.onDeleteRole(roleName).prefix("transitions: " + fromStates + "->" + toState);
+		return trigger.onDeleteRole(roleName).prefix("trigger");
 	}
 	
 	public void onRenameState(String oldName, String newName) {
@@ -140,8 +124,6 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public void onRenameField(String oldName, String newName) {
-		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(oldName))
-			getPrerequisite().setInputName(newName);
 		int index = getRemoveFields().indexOf(oldName);
 		if (index != -1) {
 			if (getRemoveFields().contains(newName))				
@@ -153,9 +135,6 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public boolean onDeleteField(String fieldName) {
-		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName)) 
-			setPrerequisite(null);
-		
 		if (getTrigger().onDeleteField(fieldName))
 			return true;
 		
@@ -178,8 +157,6 @@ public class TransitionSpec implements Serializable {
 	public Collection<String> getUndefinedFields(Project project) {
 		Collection<String> undefinedFields = new HashSet<>();
 		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		if (getPrerequisite() != null && setting.getFieldSpec(getPrerequisite().getInputName()) == null)
-			undefinedFields.add(getPrerequisite().getInputName());
 		undefinedFields.addAll(getTrigger().getUndefinedFields());
 		for (String field: getRemoveFields()) {
 			if (setting.getFieldSpec(field) == null)
@@ -199,37 +176,6 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName)) {
-			if (getPrerequisite().getValueMatcher() instanceof ValueIsOneOf) {
-				ValueIsOneOf valueIsOneOf = (ValueIsOneOf) getPrerequisite().getValueMatcher(); 
-				valueIsOneOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
-					int index = valueIsOneOf.getValues().indexOf(entry.getKey());
-					if (index != -1) {
-						if (valueIsOneOf.getValues().contains(entry.getValue()))
-							valueIsOneOf.getValues().remove(index);
-						else
-							valueIsOneOf.getValues().set(index, entry.getValue());
-					}
-				}
-				if (valueIsOneOf.getValues().isEmpty())
-					setPrerequisite(null);
-			} else if (getPrerequisite().getValueMatcher() instanceof ValueIsNotAnyOf) {
-				ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) getPrerequisite().getValueMatcher();
-				valueIsNotAnyOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
-					int index = valueIsNotAnyOf.getValues().indexOf(entry.getKey());
-					if (index != -1) {
-						if (valueIsNotAnyOf.getValues().contains(entry.getValue()))
-							valueIsNotAnyOf.getValues().remove(index);
-						else
-							valueIsNotAnyOf.getValues().set(index, entry.getValue());
-					}
-				}
-				if (valueIsNotAnyOf.getValues().isEmpty())
-					setPrerequisite(null);
-			}
-		}
 		return trigger.onEditFieldValues(fieldName, valueSetEdit);
 	}
 	
@@ -254,19 +200,15 @@ public class TransitionSpec implements Serializable {
 		return StringUtils.join(getFromStates()) + "-->" + getToState();		
 	}
 
-	public boolean canTransite(Issue issue) {
-		if (getFromStates().contains(issue.getState())) {
-			if (getPrerequisite() == null) {
-				return true;
-			} else {
-				Input field = issue.getFieldInputs().get(getPrerequisite().getInputName());
-				List<String> fieldValues;
-				if (field != null)
-					fieldValues = field.getValues();
-				else
-					fieldValues = new ArrayList<>();
-				if (getPrerequisite().matches(fieldValues))
-					return true;
+	public boolean canTransitManually(Issue issue, @Nullable String toState) {
+		if (getFromStates().contains(issue.getState()) 
+				&& (toState == null || toState.equals(getToState())) 
+				&& getTrigger() instanceof PressButtonTrigger) {
+			PressButtonTrigger pressButton = (PressButtonTrigger) getTrigger();
+			if (pressButton.isAuthorized(issue.getProject())) {
+				IssueQuery parsedQuery = IssueQuery.parse(issue.getProject(), 
+						getTrigger().getIssueQuery(), true, true, true, true, true);
+				return parsedQuery.matches(issue);
 			}
 		}
 		return false;
@@ -277,28 +219,7 @@ public class TransitionSpec implements Serializable {
 	}
 
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
-		if (prerequisite != null) {
-			ValueMatcher valueMatcher = prerequisite.getValueMatcher(); 
-			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getIssueSetting().getFieldSpec(prerequisite.getInputName()));
-			if (specifiedChoices != null) {
-				if (valueMatcher instanceof ValueIsOneOf) {
-					ValueIsOneOf valueIsOneOf = (ValueIsOneOf) valueMatcher;
-					for (String value: valueIsOneOf.getValues()) {
-						if (!specifiedChoices.getChoiceValues().contains(value))
-							undefinedFieldValues.add(new UndefinedFieldValue(prerequisite.getInputName(), value));
-					}
-				} else if (valueMatcher instanceof ValueIsNotAnyOf) {
-					ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) valueMatcher;
-					for (String value: valueIsNotAnyOf.getValues()) {
-						if (!specifiedChoices.getChoiceValues().contains(value))
-							undefinedFieldValues.add(new UndefinedFieldValue(prerequisite.getInputName(), value));
-					}
-				}
-			}
-		}
-		undefinedFieldValues.addAll(trigger.getUndefinedFieldValues());
-		return undefinedFieldValues;
+		return trigger.getUndefinedFieldValues();
 	}
 
 	public Collection<? extends String> getUndefinedStates() {

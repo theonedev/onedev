@@ -43,7 +43,7 @@ public abstract class JobReport implements Serializable {
 
 	public PatternSet getPatternSet() {
 		if (patternSet == null)
-			patternSet = PatternSet.fromString(getFilePatterns());
+			patternSet = PatternSet.parse(getFilePatterns());
 		return patternSet;
 	}
 	

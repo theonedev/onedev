@@ -8,9 +8,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class UpdateDateCriteria extends EntityCriteria<Project> {
@@ -47,9 +47,10 @@ public class UpdateDateCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public String toString() {
-		return ProjectQuery.quote(ProjectQueryConstants.FIELD_UPDATE_DATE) + " " 
-				+ ProjectQuery.getRuleName(operator) + " " + ProjectQuery.quote(value);
+	public String asString() {
+		return Criteria.quote(ProjectQueryConstants.FIELD_UPDATE_DATE) + " " 
+				+ ProjectQuery.getRuleName(operator) + " " 
+				+ Criteria.quote(value);
 	}
 
 }

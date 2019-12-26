@@ -5,15 +5,18 @@ import java.util.Date;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.util.BuildCommitAware;
+import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectAwareCommit;
 
-public class RefUpdated extends ProjectEvent implements BuildCommitAware {
+public class RefUpdated extends ProjectEvent implements CommitAware {
 	
 	private final String refName;
 	
 	private final ObjectId oldCommitId;
 	
 	private final ObjectId newCommitId;
+	
+	private transient ProjectAwareCommit commit;
 	
 	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
 		super(null, new Date(), project);
@@ -35,8 +38,10 @@ public class RefUpdated extends ProjectEvent implements BuildCommitAware {
 	}
 
 	@Override
-	public ObjectId getBuildCommit() {
-		return newCommitId;
+	public ProjectAwareCommit getCommit() {
+		if (commit == null)
+			commit = new ProjectAwareCommit(getProject(), newCommitId);
+		return commit;
 	}
 	
 }

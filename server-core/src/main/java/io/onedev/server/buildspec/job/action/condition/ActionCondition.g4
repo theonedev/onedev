@@ -6,6 +6,7 @@ condition
 
 criteria
     : operator=(Successful|Failed|Cancelled|TimedOut|PreviousIsSuccessful|PreviousIsFailed|PreviousIsCancelled|PreviousIsTimedOut|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
+    | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
     | operator=OnBranch WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -68,6 +69,10 @@ Contains
 	
 Is
 	: 'is'
+	;
+	
+IsEmpty
+	: 'is' WS+ 'empty'
 	;
 	
 And

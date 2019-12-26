@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
@@ -48,6 +48,7 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.Referenceable;
@@ -55,6 +56,8 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
+import io.onedev.server.web.util.PullRequestAware;
+import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(
@@ -82,6 +85,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
+	private static ThreadLocal<Stack<PullRequest>> stack =  new ThreadLocal<Stack<PullRequest>>() {
+
+		@Override
+		protected Stack<PullRequest> initialValue() {
+			return new Stack<PullRequest>();
+		}
+	
+	};
+	
 	@Embedded
 	private CloseInfo closeInfo;
 
@@ -176,7 +188,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private transient Boolean valid;
 	
-	private transient Collection<Issue> fixedIssues;
+	private transient Collection<Long> fixedIssueNumbers;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	private String checkError;
@@ -789,18 +801,13 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return PullRequest.class.getName() + ":" + requestId;
 	}
 	
-	public Collection<Issue> getFixedIssues() {
-		if (fixedIssues == null) {
-			fixedIssues = new HashSet<>();
-			for (RevCommit commit: getCommits()) {
-				for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(commit.getFullMessage())) {
-					Issue issue = OneDev.getInstance(IssueManager.class).find(getTargetProject(), issueNumber);
-					if (issue != null)
-						fixedIssues.add(issue);
-				}
-			}
+	public Collection<Long> getFixedIssueNumbers() {
+		if (fixedIssueNumbers == null) {
+			fixedIssueNumbers = new HashSet<>();
+			for (RevCommit commit: getCommits())
+				fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
 		}
-		return fixedIssues;
+		return fixedIssueNumbers;
 	}
 	
 	public boolean isAllReviewsApproved() {
@@ -870,6 +877,30 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public String getFQN() {
 		return getTargetProject() + "#" + getNumber();
+	}
+	
+	public static void push(PullRequest request) {
+		stack.get().push(request);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+	
+	@Nullable
+	public static PullRequest get() {
+		if (!stack.get().isEmpty()) { 
+			return stack.get().peek();
+		} else {
+			ComponentContext componentContext = ComponentContext.get();
+			if (componentContext != null) {
+				PullRequestAware pullRequestAware = WicketUtils.findInnermost(
+						componentContext.getComponent(), PullRequestAware.class);
+				if (pullRequestAware != null) 
+					return pullRequestAware.getPullRequest();
+			}
+			return null;
+		}
 	}
 	
 }

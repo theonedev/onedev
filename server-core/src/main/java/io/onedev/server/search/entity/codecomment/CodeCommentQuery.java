@@ -27,13 +27,13 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.AndCriteriaHelper;
+import io.onedev.server.search.entity.AndEntityCriteria;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.NotCriteriaHelper;
-import io.onedev.server.search.entity.OrCriteriaHelper;
+import io.onedev.server.search.entity.NotEntityCriteria;
+import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.FieldOperatorValueCriteriaContext;
@@ -44,7 +44,7 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCrite
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
-import io.onedev.server.util.ProjectAwareCommitId;
+import io.onedev.server.util.ProjectAwareCommit;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
@@ -73,7 +73,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 				}
 				
 			});
@@ -88,7 +88,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				if (e instanceof OneException)
 					throw e;
 				else
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<CodeComment> commentCriteria;
@@ -107,14 +107,14 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						if (operator == CodeCommentQueryLexer.CreatedBy) {
 							return new CreatedByCriteria(value);
 						} else {
-							ProjectAwareCommitId commitId = getCommitId(project, value); 
+							ProjectAwareCommit commitId = getCommitId(project, value); 
 							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());
 						}
 					}
 					
 					@Override
 					public EntityCriteria<CodeComment> visitParensCriteria(ParensCriteriaContext ctx) {
-						return visit(ctx.criteria());
+						return (EntityCriteria<CodeComment>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
@@ -167,7 +167,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						List<EntityCriteria<CodeComment>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteriaHelper<CodeComment>(childCriterias);
+						return new OrEntityCriteria<CodeComment>(childCriterias);
 					}
 
 					@Override
@@ -175,12 +175,12 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						List<EntityCriteria<CodeComment>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteriaHelper<CodeComment>(childCriterias);
+						return new AndEntityCriteria<CodeComment>(childCriterias);
 					}
 
 					@Override
 					public EntityCriteria<CodeComment> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteriaHelper<CodeComment>(visit(ctx.criteria()));
+						return new NotEntityCriteria<CodeComment>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);

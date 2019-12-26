@@ -212,7 +212,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(new ResourceLink<Void>("raw", new RawBlobDownloadResourceReference(), 
 				RawBlobDownloadResource.paramsOf(context.getProject(), context.getBlobIdent())));
-		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW_PLAIN)) {
+		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW && context.isViewPlain())) {
 			
 			@Override
 			protected void onConfigure() {
@@ -232,10 +232,7 @@ public abstract class BlobViewPanel extends Panel {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				if (context.getMode() == Mode.VIEW)
-					context.onModeChange(target, Mode.VIEW_PLAIN, null);
-				else
-					context.onModeChange(target, Mode.VIEW, null);
+				context.onModeChange(target, Mode.VIEW, !context.isViewPlain(), false, null);
 			}
 			
 		}));

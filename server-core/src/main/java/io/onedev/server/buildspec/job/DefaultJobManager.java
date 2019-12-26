@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
@@ -68,6 +69,7 @@ import io.onedev.server.event.Event;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildPending;
+import io.onedev.server.event.build.BuildRetrying;
 import io.onedev.server.event.build.BuildRunning;
 import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -89,7 +91,7 @@ import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.util.BuildCommitAware;
+import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.SecurityUtils;
@@ -309,9 +311,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	@Nullable
-	private JobExecutor getJobExecutor(Project project, ObjectId commitId, String jobName, String image) {
+	private JobExecutor getJobExecutor(Build build) {
 		for (JobExecutor executor: jobExecutors) {
-			if (executor.isApplicable(project, commitId, jobName, image))
+			if (executor.isApplicable(build))
 				return executor;
 		}
 		return null;
@@ -338,17 +340,18 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Interpolated.pop();
 			}
 			
-			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getImage());
+			JobExecutor executor = getJobExecutor(build);
 			if (executor != null) {
 				JobLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
 				
+				ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 				Long buildId = build.getId();
 				Long buildNumber = build.getNumber();
 				String projectName = build.getProject().getName();
 				File projectGitDir = build.getProject().getGitDir();
 				
-				JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
+				AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
+				executionRef.set(new JobExecution(executorService.submit(new Runnable() {
 
 					@Override
 					public void run() {
@@ -373,12 +376,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									}
 
 									if (job.getArtifacts() != null) {
-										PatternSet patternSet = PatternSet.fromString(job.getArtifacts());
+										PatternSet patternSet = PatternSet.parse(job.getArtifacts());
 										includeFiles.addAll(patternSet.getIncludes());
 										excludeFiles.addAll(patternSet.getExcludes());
 									}
 									for (JobReport report: job.getReports()) {
-										PatternSet patternSet = PatternSet.fromString(report.getFilePatterns());
+										PatternSet patternSet = PatternSet.parse(report.getFilePatterns());
 										includeFiles.addAll(patternSet.getIncludes());
 										excludeFiles.addAll(patternSet.getExcludes());
 									}
@@ -398,34 +401,34 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								
 							});
 
-							JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
-									serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
-									job.getSubmoduleCredentials(), job.getCpuRequirement(), job.getMemoryRequirement(), 
-									commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
-									executor.getCacheTTL(), job.getServices(), jobLogger) {
-
-								@Override
-								public void notifyJobRunning() {
-									transactionManager.run(new Runnable() {
-
-										@Override
-										public void run() {
-											Build build = buildManager.load(buildId);
-											build.setStatus(Build.Status.RUNNING);
-											build.setRunningDate(new Date());
-											buildManager.save(build);
-											listenerRegistry.post(new BuildRunning(build));
-										}
-										
-									});
-								}
-
-							};
-							
-							jobContexts.put(jobToken, jobContext);
-							
 							int retried = 0;
 							while (true) {
+								JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
+										serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
+										job.getSubmoduleCredentials(), job.getCpuRequirement(), job.getMemoryRequirement(), 
+										commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
+										executor.getCacheTTL(), retried, job.getServices(), jobLogger) {
+
+									@Override
+									public void notifyJobRunning() {
+										transactionManager.run(new Runnable() {
+
+											@Override
+											public void run() {
+												Build build = buildManager.load(buildId);
+												build.setStatus(Build.Status.RUNNING);
+												build.setRunningDate(new Date());
+												buildManager.save(build);
+												listenerRegistry.post(new BuildRunning(build));
+											}
+											
+										});
+									}
+
+								};
+								
+								jobContexts.put(jobToken, jobContext);
+								
 								try {
 									executor.execute(jobToken, jobContext);
 									break;
@@ -438,18 +441,33 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											@Override
 											public Boolean call() {
 												Build build = buildManager.load(buildId);
-												if (e.getMessage() != null)
+												if (e instanceof OneException)
 													build.setErrorMessage(e.getMessage());
 												else
 													build.setErrorMessage(Throwables.getStackTraceAsString(e));
 												buildManager.save(build);
 												RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-												return retryCondition.test(build);
+												return retryCondition.matches(build);
 											}
 											
 										})) {
 											log(e, jobLogger);
 											jobLogger.log("Job will be retried after a while...");
+											transactionManager.run(new Runnable() {
+
+												@Override
+												public void run() {
+													Build build = buildManager.load(buildId);
+													build.setErrorMessage(null);
+													build.setRunningDate(null);
+													build.setPendingDate(null);
+													build.setRetryDate(new Date());
+													build.setStatus(Build.Status.WAITING);
+													listenerRegistry.post(new BuildRetrying(build));
+													buildManager.save(build);
+												}
+												
+											});
 											try {						
 												Thread.sleep(job.getRetryDelay() * (long)(Math.pow(2, retried)) * 1000L);
 											} catch (InterruptedException e2) {
@@ -459,9 +477,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 												@Override
 												public void run() {
+													JobExecution execution = executionRef.get();
+													if (execution != null)
+														execution.updateBeginTime();
 													Build build = buildManager.load(buildId);
-													build.setErrorMessage(null);
-													build.setRetryDate(new Date());
+													build.setPendingDate(new Date());
+													build.setStatus(Build.Status.PENDING);
+													listenerRegistry.post(new BuildPending(build));
 													buildManager.save(build);
 												}
 												
@@ -470,14 +492,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											throw e;
 										}
 									}
+								} finally {
+									jobContexts.remove(jobToken);
 								}
 							}
 						} catch (Throwable e) {
-							if (ExceptionUtils.find(e, InterruptedException.class) == null)
-								log(e, jobLogger);
 							throw maskSecrets(e, jobSecretsToMask);
 						} finally {
-							jobContexts.remove(jobToken);
 							try {
 								sessionManager.run(new Runnable() {
 	
@@ -497,17 +518,15 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								});
 								FileUtils.deleteDir(serverWorkspace);
 							} catch (Throwable e) {
-								if (ExceptionUtils.find(e, InterruptedException.class) == null) 
-									log(e, jobLogger);
 								throw maskSecrets(e, jobSecretsToMask);
 							} 
 							jobLogger.log("Job finished");
 						}
 					}
 					
-				}), job.getTimeout() * 1000L);
+				}), job.getTimeout() * 1000L));
 				
-				JobExecution prevExecution = jobExecutions.put(build.getId(), execution);
+				JobExecution prevExecution = jobExecutions.put(build.getId(), executionRef.get());
 				
 				if (prevExecution != null)
 					prevExecution.cancel(null);
@@ -515,7 +534,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				markBuildError(build, "No applicable job executor");
 			}
 		} catch (Throwable e) {
-			if (e.getMessage() != null)
+			if (e instanceof OneException)
 				markBuildError(build, e.getMessage());
 			else
 				markBuildError(build, Throwables.getStackTraceAsString(e));
@@ -561,8 +580,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void on(ProjectEvent event) {
 		Event.push(event);
 		try {
-			if (event instanceof BuildCommitAware) {
-				ObjectId commitId = ((BuildCommitAware) event).getBuildCommit();
+			if (event instanceof CommitAware) {
+				ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
 				if (!commitId.equals(ObjectId.zeroId())) {
 					ScriptIdentity.push(new JobIdentity(event.getProject(), commitId));
 					try {
@@ -628,9 +647,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
 			build.setPendingDate(null);
+			build.setRetryDate(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setSubmitter(SecurityUtils.getUser());
+			build.setCanceller(null);
+			build.setCancellerName(null);
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
@@ -725,7 +747,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								} else {
 									markBuildError(build, "Stopped for unknown reason");
 								}
-							} else if (build.getStatus() == Build.Status.WAITING) {
+							} else if (build.getStatus() == Build.Status.WAITING && build.getRetryDate() == null) {
 								if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() 
 										&& it.getDependency().isFinished() 
 										&& it.getDependency().getStatus() != Build.Status.SUCCESSFUL)) {
@@ -744,7 +766,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							Map.Entry<Long, JobExecution> entry = it.next();
 							Build build = buildManager.get(entry.getKey());
 							JobExecution execution = entry.getValue();
-							if (build == null || build.getStatus() != Build.Status.PENDING && build.getStatus() != Build.Status.RUNNING) {
+							if (build == null || build.isFinished()) {
 								it.remove();
 								execution.cancel(null);
 							} else if (execution.isDone()) {
@@ -798,7 +820,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Build build = event.getBuild();
 		try {
 			for (PostBuildAction action: build.getJob().getPostBuildActions()) {
-				if (ActionCondition.parse(build.getJob(), action.getCondition()).test(build))
+				if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
 					action.execute(build);
 			}
 		} catch (Throwable e) {

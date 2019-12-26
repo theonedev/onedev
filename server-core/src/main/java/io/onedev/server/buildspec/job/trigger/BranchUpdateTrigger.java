@@ -73,7 +73,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 			} else {
 				Collection<String> changedFiles = GitUtils.getChangedFiles(refUpdated.getProject().getRepository(), 
 						refUpdated.getOldCommitId(), refUpdated.getNewCommitId());
-				PatternSet patternSet = PatternSet.fromString(getPaths());
+				PatternSet patternSet = PatternSet.parse(getPaths());
 				Matcher matcher = new PathMatcher();
 				for (String changedFile: changedFiles) {
 					if (patternSet.matches(matcher, changedFile))
@@ -92,7 +92,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String branch = GitUtils.ref2branch(refUpdated.getRefName());
 			if (branch != null) {
-				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new PathMatcher(), branch)) 
+				if ((getBranches() == null || PatternSet.parse(getBranches()).matches(new PathMatcher(), branch)) 
 						&& touchedFile(refUpdated)) {
 					return true;
 				}

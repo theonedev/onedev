@@ -289,9 +289,28 @@ public class Build extends AbstractEntity implements Referenceable {
 		setErrorMessage(errorMessage);
 	}
 	
+	public Date getStatusDate() {
+		switch (status) {
+		case FAILED:
+		case CANCELLED:
+		case SUCCESSFUL:
+		case TIMED_OUT:
+			return getFinishDate();
+		case WAITING:
+			return getRetryDate()!=null?getRetryDate():getSubmitDate();
+		case RUNNING:
+			return getRunningDate();
+		case PENDING:
+			return getPendingDate();
+		default:
+			throw new RuntimeException("Unexpected build status: " + status);
+		}
+	}
+	
 	public boolean isFinished() {
 		return status == Status.FAILED 
-				|| status == Status.CANCELLED || status == Status.SUCCESSFUL
+				|| status == Status.CANCELLED 
+				|| status == Status.SUCCESSFUL
 				|| status == Status.TIMED_OUT;
 	}
 	
@@ -595,7 +614,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			public Void call() throws Exception {
 				File artifactsDir = getArtifactsDir();
 				FileUtils.createDir(artifactsDir);
-				PatternSet patternSet = PatternSet.fromString(artifacts);
+				PatternSet patternSet = PatternSet.parse(artifacts);
 				int baseLen = workspaceDir.getAbsolutePath().length() + 1;
 				for (File file: patternSet.listFiles(workspaceDir)) {
 					try {
@@ -637,7 +656,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			public Void call() throws Exception {
 				File artifactsDir = dependency.getArtifactsDir();
 				if (artifactsDir.exists()) {
-					PatternSet patternSet = PatternSet.fromString(artifacts);
+					PatternSet patternSet = PatternSet.parse(artifacts);
 					int baseLen = artifactsDir.getAbsolutePath().length() + 1;
 					for (File file: patternSet.listFiles(artifactsDir)) {
 						try {
@@ -710,7 +729,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		descendants.add(getCommitId());
 	
 		Collection<String> branches = new ArrayList<>();
-		for (RefInfo ref: getProject().getBranches()) {
+		for (RefInfo ref: getProject().getBranchRefInfos()) {
 			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
 			if (descendants.contains(ref.getPeeledObj()))
 				branches.add(branchName);

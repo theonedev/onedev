@@ -159,10 +159,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								if (identifyField.equals(IssueQueryConstants.FIELD_STATE)) {
 									issue = SerializationUtils.clone(issue);
 									for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
-										if (transition.canTransite(issue) 
-												&& transition.getTrigger() instanceof PressButtonTrigger
-												&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized(getProject())
-												&& transition.getToState().equals(getColumn())) {
+										if (transition.canTransitManually(issue, getColumn())) {
 											issue.setState(getColumn());
 											break;
 										}
@@ -347,10 +344,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					ProjectIssueSetting workflow = getProject().getIssueSetting();
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
 					for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
-						if (transition.canTransite(issue) 
-								&& transition.getTrigger() instanceof PressButtonTrigger 
-								&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized(getProject()) 
-								&& transition.getToState().equals(getColumn())) {
+						if (transition.canTransitManually(issue, getColumn())) {
 							transitionRef.set(transition);
 							break;
 						}

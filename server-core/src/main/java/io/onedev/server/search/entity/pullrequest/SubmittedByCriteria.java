@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -39,9 +38,8 @@ public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + 
-				" " + PullRequestQuery.quote(value);
+	public String asString() {
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + " " + quote(value);
 	}
 
 }

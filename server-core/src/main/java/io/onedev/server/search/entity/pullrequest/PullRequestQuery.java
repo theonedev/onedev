@@ -18,10 +18,13 @@ import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.search.entity.AndEntityCriteria;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.NotEntityCriteria;
+import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
@@ -61,7 +64,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 				}
 				
 			});
@@ -76,7 +79,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				if (e instanceof OneException)
 					throw e;
 				else
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<PullRequest> requestCriteria;
@@ -142,7 +145,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					
 					@Override
 					public EntityCriteria<PullRequest> visitParensCriteria(ParensCriteriaContext ctx) {
-						return visit(ctx.criteria());
+						return (EntityCriteria<PullRequest>) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
@@ -215,7 +218,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						List<EntityCriteria<PullRequest>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria(childCriterias);
+						return new OrEntityCriteria<PullRequest>(childCriterias);
 					}
 
 					@Override
@@ -223,12 +226,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						List<EntityCriteria<PullRequest>> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria(childCriterias);
+						return new AndEntityCriteria<PullRequest>(childCriterias);
 					}
 
 					@Override
 					public EntityCriteria<PullRequest> visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria(visit(ctx.criteria()));
+						return new NotEntityCriteria<PullRequest>(visit(ctx.criteria()));
 					}
 
 				}.visit(criteriaContext);

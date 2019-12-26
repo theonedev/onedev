@@ -19,7 +19,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -70,7 +72,8 @@ public abstract class ProjectInfoPanel extends Panel {
 			
 		}.setVisible(SecurityUtils.canCreateProjects() &&  SecurityUtils.canReadCode(getProject())));
 		
-		String query = "forks of " + ProjectQuery.quote(getProject().getName());
+		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
+				+ Criteria.quote(getProject().getName());
 		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
 		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params) {
 

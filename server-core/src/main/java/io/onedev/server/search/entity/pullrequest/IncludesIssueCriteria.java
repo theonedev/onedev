@@ -16,7 +16,6 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -60,9 +59,8 @@ public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.IncludesIssue) + " " 
-				+ PullRequestQuery.quote(value);
+	public String asString() {
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.IncludesIssue) + " " + quote(value);
 	}
 
 }

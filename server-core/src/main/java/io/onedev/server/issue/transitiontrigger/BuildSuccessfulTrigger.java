@@ -1,18 +1,15 @@
 package io.onedev.server.issue.transitiontrigger;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.util.Usage;
-import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -28,7 +25,10 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	
 	private String branches;
 	
-	private String issueQuery = "fixed in current build";
+	public BuildSuccessfulTrigger() {
+		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
+				.getRuleName(IssueQueryLexer.FixedInCurrentBuild));		
+	}
 	
 	@Editable(order=100, name="Applicable Jobs", description="Optionally specify space-separated jobs "
 			+ "applicable for this trigger. Use * or ? for wildcard match")
@@ -72,124 +72,40 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 			return new ArrayList<>();
 	}
 	
-	@Editable(order=300, description="Specify an issue query to filter issues eligible for this transition."
-			+ "This query will be combined with 'from states' criteria of this transition")
-	@IssueQuery(withCurrentUserCriteria = false, withCurrentBuildCriteria = true)
+	@Editable(order=1000, name="Applicable Issues", description="Specify criteria of issues applicable for this transition")
+	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = true, 
+			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
 	@NotEmpty
+	@Override
 	public String getIssueQuery() {
-		return issueQuery;
+		return super.getIssueQuery();
 	}
 
 	public void setIssueQuery(String issueQuery) {
-		this.issueQuery = issueQuery;
+		super.setIssueQuery(issueQuery);
 	}
 
 	@Override
 	public Usage onDeleteBranch(String branchName) {
-		Usage usage = new Usage();
-		PatternSet patternSet = PatternSet.fromString(getBranches());
+		Usage usage = super.onDeleteBranch(branchName);
+		PatternSet patternSet = PatternSet.parse(getBranches());
 		if (patternSet.getIncludes().contains(branchName) || patternSet.getExcludes().contains(branchName))
 			usage.add("applicable branches");
-		return usage.prefix("build successful trigger");
+		return usage;
 	}
-
+	
 	@Override
-	public void onRenameState(String oldName, String newName) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
-			query.onRenameState(oldName, newName);
-			issueQuery = query.toString();
-		} catch (Exception e) {
-		}
-	}
-
-	@Override
-	public boolean onDeleteState(String stateName) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
-			if (query.onDeleteState(stateName)) {
-				return true;
-			} else {
-				issueQuery = query.toString();
-				return false;
-			}
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	@Override
-	public void onRenameField(String oldName, String newName) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
-			query.onRenameField(oldName, newName);
-			issueQuery = query.toString();
-		} catch (Exception e) {
-		}
-	}
-
-	@Override
-	public boolean onDeleteField(String fieldName) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
-			if (query.onDeleteField(fieldName)) {
-				return true;
-			} else {
-				issueQuery = query.toString();
-				return false;
-			}
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	@Override
-	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		try {
-			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
-			if (query.onEditFieldValues(fieldName, valueSetEdit)) {
-				return true;
-			} else {
-				issueQuery = query.toString();
-				return false;
-			}
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	@Override
-	public Collection<String> getUndefinedStates() {
-		try {
-			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true).getUndefinedStates();
-		} catch (Exception e) {
-			return new HashSet<>();
-		}
-	}
-
-	@Override
-	public Collection<String> getUndefinedFields() {
-		try {
-			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true).getUndefinedFields();
-		} catch (Exception e) {
-			return new HashSet<>();
-		}
-	}
-
-	@Override
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		try {
-			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false, true, true).getUndefinedFieldValues();
-		} catch (Exception e) {
-			return new HashSet<>();
+	public String getDescription() {
+		if (jobNames != null) {
+			if (branches != null)
+				return "Build is successful for jobs '" + jobNames + "' on branches '" + branches + "'";
+			else
+				return "Build is successful for jobs '" + jobNames + "' on any branch";
+		} else {
+			if (branches != null)
+				return "Build is successful for any job on branches '" + branches + "'";
+			else
+				return "Build is successful for any job and branch";
 		}
 	}
 	

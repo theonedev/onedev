@@ -12,4 +12,9 @@ public interface RoleManager extends EntityManager<Role> {
 	Role find(String name);
 	
 	void setupDefaults();
+	
+	void onRenameIssueField(String oldName, String newName);
+	
+	void onDeleteIssueField(String fieldName);
+	
 }

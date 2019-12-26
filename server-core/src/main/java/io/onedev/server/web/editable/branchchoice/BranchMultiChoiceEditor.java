@@ -2,21 +2,22 @@ package io.onedev.server.web.editable.branchchoice;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
 import io.onedev.server.web.component.branch.choice.BranchMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -27,28 +28,27 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	BranchChoiceProvider branchProvider = new BranchChoiceProvider(new LoadableDetachableModel<Project>() {
-
-			@Override
-			protected Project load() {
-				if (getPage() instanceof ProjectPage)
-					return ((ProjectPage) getPage()).getProject();
-				else
-					return null;
+		Map<String, String> choices = new LinkedHashMap<>();
+		if (Project.get() != null) {
+			for (RefInfo ref: Project.get().getBranchRefInfos()) {
+				String branch = GitUtils.ref2branch(ref.getRef().getName());
+				choices.put(branch, branch);
 			}
-    		
-    	});
+		}
 
-    	ArrayList<String> projectAndBranches = new ArrayList<>();
-		if (getModelObject() != null) 
-			projectAndBranches.addAll(getModelObject());
+    	Collection<String> selections = new ArrayList<>();
+		if (getModelObject() != null) {
+			for (String selection: getModelObject()) {
+				if (choices.containsKey(selection))
+					selections.add(selection);
+			}
+		}
 		
-		input = new BranchMultiChoice("input", new Model(projectAndBranches), branchProvider) {
+		input = new BranchMultiChoice("input", Model.of(selections), Model.ofMap(choices)) {
 
 			@Override
 			protected void onInitialize() {

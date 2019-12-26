@@ -40,10 +40,10 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_COMMENT) + " " 
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_COMMENT) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
-				+ PullRequestQuery.quote(value);
+				+ quote(value);
 	}
 
 }

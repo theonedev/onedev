@@ -33,8 +33,10 @@ public class BooleanFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(String.valueOf(value));
+	public String asString() {
+		return quote(getFieldName()) + " " 
+				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
+				+ quote(String.valueOf(value));
 	}
 
 	@Override

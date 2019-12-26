@@ -123,7 +123,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	private String suggestSourceBranch() {
 		User user = getLoginUser();
 		List<Pair<String, Integer>> branchUpdates = new ArrayList<>(); 
-		for (RefInfo refInfo: getProject().getBranches()) {
+		for (RefInfo refInfo: getProject().getBranchRefInfos()) {
 			RevCommit commit = (RevCommit) refInfo.getPeeledObj();
 			if (commit.getAuthorIdent().getEmailAddress().equals(user.getEmail()))
 				branchUpdates.add(new Pair<>(GitUtils.ref2branch(refInfo.getRef().getName()), commit.getCommitTime()));

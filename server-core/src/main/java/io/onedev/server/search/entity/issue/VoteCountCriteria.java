@@ -44,10 +44,10 @@ public class VoteCountCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(IssueQueryConstants.FIELD_VOTE_COUNT) + " " 
+	public String asString() {
+		return quote(IssueQueryConstants.FIELD_VOTE_COUNT) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
-				+ IssueQuery.quote(String.valueOf(value));
+				+ quote(String.valueOf(value));
 	}
 
 }

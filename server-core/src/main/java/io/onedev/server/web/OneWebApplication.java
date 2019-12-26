@@ -130,7 +130,8 @@ public class OneWebApplication extends WebApplication {
 					target.add(page.getSessionFeedback());
 				
 				for (Component component: map.values()) {
-					target.appendJavaScript((String.format("$(document).trigger('elementReplaced', '%s');", component.getMarkupId())));
+					target.prependJavaScript((String.format("$(document).trigger('beforeElementReplace', '%s');", component.getMarkupId())));
+					target.appendJavaScript((String.format("$(document).trigger('afterElementReplace', '%s');", component.getMarkupId())));
 				}
 			}
 

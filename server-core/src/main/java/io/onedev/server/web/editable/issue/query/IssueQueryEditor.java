@@ -43,7 +43,8 @@ public class IssueQueryEditor extends PropertyEditor<String> {
 					return null;
 			}
     		
-    	}, issueQuery.withCurrentUserCriteria(), issueQuery.withCurrentBuildCriteria()));
+    	}, issueQuery.withOrder(), issueQuery.withCurrentUserCriteria(), issueQuery.withCurrentBuildCriteria(), 
+        		issueQuery.withCurrentPullRequestCriteria(), issueQuery.withCurrentCommitCriteria()));
         
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

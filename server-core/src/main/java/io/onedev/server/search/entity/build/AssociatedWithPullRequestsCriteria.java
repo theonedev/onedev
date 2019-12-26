@@ -24,7 +24,7 @@ public class AssociatedWithPullRequestsCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequests);
 	}
 

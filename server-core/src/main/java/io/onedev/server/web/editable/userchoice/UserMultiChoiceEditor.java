@@ -1,8 +1,8 @@
 package io.onedev.server.web.editable.userchoice;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,7 +18,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.user.choice.UserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -27,8 +26,6 @@ import io.onedev.server.web.editable.annotation.UserChoice;
 @SuppressWarnings("serial")
 public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
-	private final List<User> choices = new ArrayList<>();
-	
 	private UserMultiChoice input;
 	
 	public UserMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
@@ -36,13 +33,14 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"unchecked" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		List<User> choices = new ArrayList<>();
 		
 		ComponentContext componentContext = new ComponentContext(this);
-		
 		ComponentContext.push(componentContext);
 		try {
 			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
@@ -52,22 +50,23 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
 				choices.addAll(OneDev.getInstance(UserManager.class).query());
+				choices.sort(Comparator.comparing(User::getName));
 			}
 		} finally {
 			ComponentContext.pop();
 		}
 
-		List<User> users = new ArrayList<>();
+		List<User> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (String userName: getModelObject()) {
 				User user = userManager.findByName(userName);
 				if (user != null && choices.contains(user))
-					users.add(user);
+					selections.add(user);
 			}
 		} 
 		
-		input = new UserMultiChoice("input", new Model((Serializable)users), new UserChoiceProvider(choices)) {
+		input = new UserMultiChoice("input", Model.of(selections), Model.of(choices)) {
 
 			@Override
 			protected void onInitialize() {

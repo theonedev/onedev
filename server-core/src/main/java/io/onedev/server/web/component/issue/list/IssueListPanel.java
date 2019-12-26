@@ -99,7 +99,7 @@ public abstract class IssueListPanel extends Panel {
 		@Override
 		protected IssueQuery load() {
 			try {
-				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true, true, false);
+				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true, true, false, false, false);
 				return IssueQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing issue query: " + query, e);
@@ -221,7 +221,7 @@ public abstract class IssueListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true, false));
+		}, true, true, false, false, false));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
@@ -597,7 +597,7 @@ public abstract class IssueListPanel extends Panel {
 
 				RepeatingView fieldsView = new RepeatingView("fields");
 				for (String field: getListFields()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
+					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME) {
 
 						@Override
 						protected Issue getIssue() {

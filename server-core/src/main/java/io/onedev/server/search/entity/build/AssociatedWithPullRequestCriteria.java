@@ -42,8 +42,8 @@ public class AssociatedWithPullRequestCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequest) + " " + BuildQuery.quote(value);
+	public String asString() {
+		return BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequest) + " " + quote(value);
 	}
 
 }

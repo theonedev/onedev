@@ -52,23 +52,7 @@ onedev.server.sourceView = {
 		onedev.server.sourceView.highlightCommentTrigger();	
 
 		onedev.server.codemirror.bindShortcuts(cm);
-
-		if (!($(document).data("SourceViewShortcutsBinded"))) {
-			$(document).data("SourceViewShortcutsBinded", true);
-
-			/*
-			 * Do not use hotkey plugin here as otherwise codemirror search will not function 
-			 * properly in readonly mode
-			 */
-			$(document).on("keydown", function(e) {
-				if ($(".modal:visible").length == 0 && !onedev.server.util.canInput(e.target) 
-						&& e.keyCode == 79) {
-					var $sourceView = $(".source-view");
-					if ($sourceView.length != 0 && $(".outline-toggle").length != 0)
-						$sourceView.data("callback")("outlineSearch");
-				}
-			});
-		}
+		onedev.server.sourceView.checkShortcutsBinding();
 	    
 	    $code.selectionPopover("init", function(e) {
 	    	if ($(e.target).closest(".selection-popover").length != 0)
@@ -83,7 +67,7 @@ onedev.server.sourceView = {
 	    	}
 	    });
 	    
-	    $code.find("textarea").addClass("readonly");
+	    $code.find("textarea").addClass("readonly").addClass("no-autosize");
 	    
 	    $code.mouseover(function(e) {
 			var node = e.target || e.srcElement, $node = $(node);
@@ -106,10 +90,12 @@ onedev.server.sourceView = {
 			if (cursorActivityTimer) 
 				clearTimeout(cursorActivityTimer);
 			cursorActivityTimer = setTimeout(function() {
-				var $outline = $sourceView.children(".outline");
+				var $outline = $(".source-view>.outline");
 				if ($outline.is(":visible")) {
+					var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 					var cursor = cm.getCursor();
 					callback("syncOutline", cursor.line, cursor.ch);
+					cm = null;
 				}
 			}, 500);
 		});
@@ -178,6 +164,24 @@ onedev.server.sourceView = {
 							});
 						}
 					}
+				}
+			});
+		}
+	},
+	checkShortcutsBinding() {
+		if (!($(document).data("SourceViewShortcutsBinded"))) {
+			$(document).data("SourceViewShortcutsBinded", true);
+
+			/*
+			 * Do not use hotkey plugin here as otherwise codemirror search will not function 
+			 * properly in readonly mode
+			 */
+			$(document).on("keydown", function(e) {
+				if ($(".modal:visible").length == 0 && !onedev.server.util.canInput(e.target) 
+						&& e.keyCode == 79) {
+					var $sourceView = $(".source-view");
+					if ($sourceView.length != 0 && $(".outline-toggle").length != 0)
+						$sourceView.data("callback")("outlineSearch");
 				}
 			});
 		}

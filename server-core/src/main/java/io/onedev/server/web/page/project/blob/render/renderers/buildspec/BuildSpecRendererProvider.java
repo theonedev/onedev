@@ -57,7 +57,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 					return 0;
 				}
 			};
-		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.VIEW_PLAIN || context.getMode() == Mode.BLAME) 
+		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
 				&& isBuildSpec(context.getBlobIdent().path)) {
 			return new PrioritizedComponentRenderer() {
@@ -68,7 +68,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 				public Component render(String componentId) {
 					if (SourceRendererProvider.getRange(context.getPosition()) != null || context.getMode() == Mode.BLAME)
 						return new SourceViewPanel(componentId, context, false);
-					else if (context.getMode() == Mode.VIEW_PLAIN) 
+					else if (context.isViewPlain()) 
 						return new SourceViewPanel(componentId, context, true);
 					else
 						return new BuildSpecBlobViewPanel(componentId, context);

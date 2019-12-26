@@ -43,7 +43,9 @@ public class GroovyUtils {
 					return logger;
 				else if (variables.containsKey(name))
 					return variables.get(name);
-				else 
+				else if (name.equals("editContext")) 
+					return EditContext.get();
+				else
 					return super.getVariable(name);
 			}
 			

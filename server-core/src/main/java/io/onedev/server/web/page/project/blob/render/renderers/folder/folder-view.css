@@ -33,14 +33,15 @@
 .folder-view>table tr.parent td a span {
 	font-size: 18px;
 }
-.folder-view>.readme {
-	border-top: 1px solid #E0E0E0;
-}
 .folder-view>.readme>.head {
 	padding: 6px 12px;
-	background: #F2F2F2;
+	background: #F9F9F9;
 	font-weight: bold;	
-	border-bottom: 1px solid #E0E0E0;
+	border-top: 1px solid #E0E0E0;
+	border-bottom: 1px solid #EEE;
+}
+.folder-view>.readme>.head>.title {
+	margin-right: 4px;
 }
 .folder-view>.readme>.body {
 	padding: 20px;

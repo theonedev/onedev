@@ -59,7 +59,7 @@ public class TagProtection implements Serializable {
 	}
 	
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the tag matches criteria specified here")
-	@io.onedev.server.web.editable.annotation.UserMatcher
+	@io.onedev.server.web.editable.annotation.UserMatch
 	@NotEmpty(message="may not be empty")
 	public String getUserMatch() {
 		return userMatch;
@@ -120,7 +120,7 @@ public class TagProtection implements Serializable {
 
 	public Usage getTagUsage(String tagName) {
 		Usage usage = new Usage();
-		PatternSet patternSet = PatternSet.fromString(getTags());
+		PatternSet patternSet = PatternSet.parse(getTags());
 		if (patternSet.getIncludes().contains(tagName) || patternSet.getExcludes().contains(tagName))
 			usage.add("tag protection '" + getTags() + "'");
 		return usage;

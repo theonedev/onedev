@@ -1,8 +1,9 @@
 package io.onedev.server.web.component.groupchoice;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
+
+import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.util.match.MatchScoreProvider;
@@ -15,16 +16,21 @@ public class GroupChoiceProvider extends AbstractGroupChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 
-	private final List<Group> choices;
+	private final IModel<Collection<Group>> choicesModel;
 	
-	public GroupChoiceProvider(List<Group> choices) {
-		this.choices = new ArrayList<>(choices);
-		this.choices.sort(Comparator.comparing(Group::getName));
+	public GroupChoiceProvider(IModel<Collection<Group>> choicesModel) {
+		this.choicesModel = choicesModel;
 	}
 	
 	@Override
+	public void detach() {
+		choicesModel.detach();
+		super.detach();
+	}
+
+	@Override
 	public void query(String term, int page, Response<Group> response) {
-		List<Group> matched = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<Group>() {
+		List<Group> matched = MatchScoreUtils.filterAndSort(choicesModel.getObject(), new MatchScoreProvider<Group>() {
 
 			@Override
 			public double getMatchScore(Group object) {

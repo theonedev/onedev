@@ -35,7 +35,8 @@ public class NamedIssueQuery implements NamedQuery {
 	}
 
 	@Editable
-	@IssueQuery(withCurrentUserCriteria = true, withCurrentBuildCriteria = false)
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentBuildCriteria = false, 
+			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
 	@NotEmpty
 	@Override
 	public String getQuery() {

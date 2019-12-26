@@ -129,6 +129,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	
 	private static final String PARAM_MODE = "mode";
 	
+	private static final String PARAM_VIEW_PLAIN = "view-plain";
+	
+	private static final String PARAM_EDIT_FROM_FOLDER = "edit-from-folder";
+	
 	private static final String PARAM_QUERY = "query";
 	
 	private static final String PARAM_POSITION = "position";
@@ -176,6 +180,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		String modeStr = params.get(PARAM_MODE).toString();
 		if (modeStr != null)
 			state.mode = Mode.valueOf(modeStr.toUpperCase());
+		
+		String viewPlain = params.get(PARAM_VIEW_PLAIN).toString();
+		state.viewPlain = "true".equals(viewPlain);
+		
+		String editFromFolder = params.get(PARAM_EDIT_FROM_FOLDER).toString();
+		state.editFromFolder = "true".equals(editFromFolder);
 
 		if (state.blobIdent.revision != null)
 			resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
@@ -456,7 +466,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				super.onConfigure();
 				
 				Project project = getProject();
-				if ((state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.BLAME) 
+				if ((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project)) {
 					setVisible(true);
@@ -892,6 +902,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			params.add(PARAM_COMMENT, state.commentId);
 		if (state.mode != Mode.VIEW)
 			params.add(PARAM_MODE, state.mode.name().toLowerCase());
+		if (state.mode == Mode.VIEW && state.viewPlain)
+			params.add(PARAM_VIEW_PLAIN, true);
+		if (state.mode == Mode.EDIT && state.editFromFolder)
+			params.add(PARAM_EDIT_FROM_FOLDER, true);
+			
 		if (state.query != null)
 			params.add(PARAM_QUERY, state.query);
 		if (state.initialNewPath != null)
@@ -988,6 +1003,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	public Mode getMode() {
 		return state.mode;
+	}
+
+	@Override
+	public boolean isViewPlain() {
+		return state.viewPlain;
+	}
+
+	@Override
+	public boolean isEditFromFolder() {
+		return state.editFromFolder;
 	}
 
 	@Override
@@ -1110,6 +1135,19 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		
 		public Mode mode = Mode.VIEW;
 		
+		/*
+		 * Some blob can be rendered in a way for easier understanding, such as .onedev-buildspec, 
+		 * In these cases, the VIEW_PLAIN mode enables to view plain text of the blob. Applicable
+		 * only when mode is VIEW 
+		 */
+		public boolean viewPlain;
+		
+		/*
+		 * Whether or not current editing is triggered from folder view, for instance, clicking 
+		 * edit link of folder readme. Applicable only when mode is EDIT
+		 */
+		public boolean editFromFolder;
+		
 		public boolean renderSource;
 		
 		public String query;
@@ -1128,6 +1166,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 	@Override
 	public void onModeChange(AjaxRequestTarget target, Mode mode, @Nullable String newPath) {
+		onModeChange(target, mode, false, false, newPath);
+	}
+	
+	@Override
+	public void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, 
+			boolean editFromFolder, @Nullable String newPath) {
+		state.viewPlain = viewPlain;
+		state.editFromFolder = editFromFolder;
 		state.initialNewPath = newPath;
 		
 		/*
@@ -1137,7 +1183,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		if (mode != Mode.ADD || state.mode != Mode.ADD) {
 			state.mode = mode;
 			pushState(target);
-			if (state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.EDIT || state.mode == Mode.ADD) {
+			if (state.mode == Mode.VIEW || state.mode == Mode.EDIT || state.mode == Mode.ADD) {
 				newBlobNavigator(target);
 				newBlobOperations(target);
 			}
@@ -1200,8 +1246,19 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}	
-			} else if (state.mode == Mode.ADD || state.mode == Mode.EDIT) {
+			} else if (state.mode == Mode.ADD) {
 				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+			} else if (state.mode == Mode.EDIT) {
+				if (state.editFromFolder) {
+					newBlobIdent = new BlobIdent(state.blobIdent);
+					if (newBlobIdent.path.contains("/"))
+						newBlobIdent.path = StringUtils.substringBeforeLast(newBlobIdent.path, "/");
+					else
+						newBlobIdent.path = null;
+					newBlobIdent.mode = FileMode.TREE.getBits();
+				} else {
+					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+				}
 			} else {
 				// We've uploaded some files
 				newBlobIdent = null;

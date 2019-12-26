@@ -9,5 +9,4 @@ spec:
     spec:
       containers:
       - name: onedev
-        image: 1dev/server
         command: ["/root/bin/idle.sh"]

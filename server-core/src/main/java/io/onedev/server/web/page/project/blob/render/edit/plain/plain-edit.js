@@ -28,7 +28,7 @@ onedev.server.plainEdit = {
 		 * mark it as dirty explicitly. So we use no-dirtytrack class to 
 		 * disable automatic dirty track
 		 */
-		$plainEdit.closest("form").find("textarea").addClass("no-dirtytrack");
+		$plainEdit.closest("form").find("textarea").addClass("no-dirtytrack").addClass("no-autosize");
 		
 		cm.on("change", function() {
 			$plainEdit.closest("form").addClass("dirty");

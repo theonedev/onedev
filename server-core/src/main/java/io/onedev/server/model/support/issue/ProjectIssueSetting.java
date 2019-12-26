@@ -126,8 +126,11 @@ public class ProjectIssueSetting implements Serializable {
 	public Usage onDeleteBranch(String branchName) {
 		Usage usage = new Usage();
 		if (transitionSpecs != null) {
-			for (TransitionSpec transitionSpec: transitionSpecs)
-				usage.add(transitionSpec.onDeleteBranch(branchName));
+			int index = 1;
+			for (TransitionSpec transitionSpec: transitionSpecs) {
+				usage.add(transitionSpec.onDeleteBranch(branchName)).prefix("transition #" + index);
+				index++;
+			}
 		}
 		return usage.prefix("issue setting");
 	}
@@ -136,10 +139,7 @@ public class ProjectIssueSetting implements Serializable {
 		Usage usage = new Usage();
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) { 
-				Usage usageInBoard = it.next().onDeleteUser(getGlobalSetting(), userName);
-				if (usageInBoard != null)
-					usage.add(usageInBoard);
-				else
+				if (it.next().onDeleteUser(getGlobalSetting(), userName))
 					it.remove();
 			}
 		}
@@ -156,8 +156,11 @@ public class ProjectIssueSetting implements Serializable {
 	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
 		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs) 
-				usage.add(transition.onDeleteRole(roleName));
+			int index = 1;
+			for (TransitionSpec transition: transitionSpecs) { 
+				usage.add(transition.onDeleteRole(roleName).prefix("transition #" + index));
+				index ++;
+			}
 		}
 		return usage.prefix("issue setting");
 	}
@@ -183,7 +186,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedFields());
+					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFields());
 				} catch (Exception e) {
 				}
 			}
@@ -212,7 +215,7 @@ public class ProjectIssueSetting implements Serializable {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 					boolean remove = false;
 					for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 						UndefinedFieldResolution resolution = entry.getValue();
@@ -253,7 +256,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedStates());
+					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedStates());
 				} catch (Exception e) {
 				}
 			}
@@ -276,7 +279,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 					namedQuery.setQuery(query.toString());
@@ -296,19 +299,19 @@ public class ProjectIssueSetting implements Serializable {
 		}
 	}
 	
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false, true, true).getUndefinedFieldValues());
+					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFieldValues());
 				} catch (Exception e) {
 				}
 			}
 		}
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				undefinedFieldValues.addAll(board.getUndefinedFieldValues());
+				undefinedFieldValues.addAll(board.getUndefinedFieldValues(project));
 		}
 		if (transitionSpecs != null) {
 			for (TransitionSpec transition: transitionSpecs)
@@ -317,13 +320,13 @@ public class ProjectIssueSetting implements Serializable {
 		return undefinedFieldValues;
 	}
 	
-	public void fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
+	public void fixUndefinedFieldValues(Project project, Map<String, ValueSetEdit> valueSetEdits) {
 		if (namedQueries != null) {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
 					boolean remove = false;
-					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 					for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 						if (query.onEditFieldValues(entry.getKey(), entry.getValue())) {
 							remove = true;
@@ -340,7 +343,7 @@ public class ProjectIssueSetting implements Serializable {
 		}
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFieldValues(valueSetEdits)) {
+				if (it.next().fixUndefinedFieldValues(project, valueSetEdits)) {
 					it.remove();
 					break;
 				}

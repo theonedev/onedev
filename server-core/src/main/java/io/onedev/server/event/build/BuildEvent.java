@@ -7,9 +7,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
-import io.onedev.server.util.BuildCommitAware;
+import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.ProjectAwareCommit;
 
-public class BuildEvent extends ProjectEvent implements BuildCommitAware {
+public class BuildEvent extends ProjectEvent implements CommitAware {
 
 	private Build build;
 	
@@ -27,8 +28,8 @@ public class BuildEvent extends ProjectEvent implements BuildCommitAware {
 	}
 
 	@Override
-	public ObjectId getBuildCommit() {
-		return ObjectId.fromString(build.getCommitHash());
+	public ProjectAwareCommit getCommit() {
+		return new ProjectAwareCommit(build.getProject(), ObjectId.fromString(build.getCommitHash()));
 	}
 
 }

@@ -38,7 +38,7 @@ public class PatternsValidator implements ConstraintValidator<Patterns, String> 
 			return true; // will be handled by interpolative validator
 		}
 		try {
-			PatternSet.fromString(value);
+			PatternSet.parse(value);
 			return true;
 		} catch (Exception e) {
 			constraintContext.disableDefaultConstraintViolation();

@@ -1,14 +1,20 @@
 package io.onedev.server.buildspec.job.action.condition;
 
-import java.util.function.Predicate;
-
 import io.onedev.server.model.Build;
+import io.onedev.server.util.criteria.Criteria;
 
-public class CancelledCriteria implements Predicate<Build> {
+public class CancelledCriteria extends Criteria<Build> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean test(Build build) {
+	public boolean matches(Build build) {
 		return build.getStatus() == Build.Status.CANCELLED;
+	}
+
+	@Override
+	public String asString() {
+		return ActionCondition.getRuleName(ActionConditionLexer.Cancelled);
 	}
 
 }

@@ -7,8 +7,8 @@ query
     ;
 
 criteria
-    : operator=(SubmittedByMe|FixedInCurrentBuild)	#OperatorCriteria
-    | operator=(SubmittedBy|FixedInBuild) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    : operator=(SubmittedByMe|FixedInCurrentCommit|FixedInCurrentBuild|FixedInCurrentPullRequest) #OperatorCriteria
+    | operator=(SubmittedBy|FixedInCommit|FixedInBuild|FixedInPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
@@ -38,12 +38,28 @@ SubmittedBy
 	: 'submitted' WS+ 'by'
 	;
 	
+FixedInCommit
+	: 'fixed' WS+ 'in' WS+ 'commit'
+	;							
+
+FixedInCurrentCommit
+	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'commit'
+	;
+	
 FixedInBuild
 	: 'fixed' WS+ 'in' WS+ 'build'
 	;							
 
 FixedInCurrentBuild
 	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'build'
+	;
+
+FixedInPullRequest
+	: 'fixed' WS+ 'in' WS+ 'pull' WS+ 'request'
+	;							
+
+FixedInCurrentPullRequest
+	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'pull' WS+ 'request'
 	;
 
 IsCurrent

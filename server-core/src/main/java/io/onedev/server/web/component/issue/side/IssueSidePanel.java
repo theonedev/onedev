@@ -88,7 +88,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(getProject(), queryString, true, true, false);
+				return IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
 			}
 
 			@Override
@@ -168,7 +168,7 @@ public abstract class IssueSidePanel extends Panel {
 			protected void populateItem(ListItem<Input> item) {
 				Input field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
-				item.add(new FieldValuesPanel("values") {
+				item.add(new FieldValuesPanel("values", Mode.NAME) {
 
 					@Override
 					protected Issue getIssue() {

@@ -16,8 +16,6 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -50,8 +48,7 @@ import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
-import io.onedev.server.web.component.sideinfo.SideInfoClosed;
-import io.onedev.server.web.component.sideinfo.SideInfoOpened;
+import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -265,26 +262,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}.add(new ConfirmOnClick("Do you really want to cancel this build?")));
 		
-		summary.add(new AjaxLink<Void>("moreInfo") {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (event.getPayload() instanceof SideInfoClosed) {
-					SideInfoClosed moreInfoSideClosed = (SideInfoClosed) event.getPayload();
-					setVisible(true);
-					moreInfoSideClosed.getHandler().add(this);
-				}
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				setVisible(false);
-				target.add(this);
-				send(getPage(), Broadcast.BREADTH, new SideInfoOpened(target));
-			}
-			
-		}.setOutputMarkupPlaceholderTag(true));
+		summary.add(new SideInfoLink("moreInfo"));
 		
 		add(new Label("errorMessage", new AbstractReadOnlyModel<String>() {
 

@@ -5,10 +5,10 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["namespaces"]
-  verbs: ["get", "list", "create", "delete"]
+  verbs: ["get", "list", "create", "delete"] #require this permission to run builds in isolated namespaces
 - apiGroups: [""]
   resources: ["nodes"]
-  verbs: ["get", "list", "patch"]
+  verbs: ["get", "list", "patch"] #require this permission to label nodes with build cache properties to increase cache hit rate
 - apiGroups: [""]
   resources: ["services", "pods", "pods/log", "pods/exec", "secrets", "configmaps", "events"]
-  verbs: ["get", "list", "watch", "create", "delete"]
+  verbs: ["get", "list", "watch", "create", "delete"] #require this permission to run builds as pods 

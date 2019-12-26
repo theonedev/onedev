@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -34,10 +33,10 @@ public class TitleCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_TITLE) + " " 
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_TITLE) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
-				+ PullRequestQuery.quote(value);
+				+ quote(value);
 	}
 
 }

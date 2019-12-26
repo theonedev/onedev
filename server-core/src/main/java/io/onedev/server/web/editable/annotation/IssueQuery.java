@@ -18,6 +18,12 @@ public @interface IssueQuery {
 	
 	boolean withCurrentBuildCriteria();
 	
+	boolean withCurrentPullRequestCriteria();
+	
+	boolean withCurrentCommitCriteria();
+	
+	boolean withOrder() default true;
+	
     String message() default "";
 
     Class<?>[] groups() default {};

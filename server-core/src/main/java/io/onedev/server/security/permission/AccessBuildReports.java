@@ -17,7 +17,7 @@ public class AccessBuildReports implements Permission {
 
 	private PatternSet getReportNamesPatternSet() {
 		if (reportNamesPatternSet == null)
-			reportNamesPatternSet = PatternSet.fromString(reportNames);
+			reportNamesPatternSet = PatternSet.parse(reportNames);
 		return reportNamesPatternSet;
 	}
 	@Override

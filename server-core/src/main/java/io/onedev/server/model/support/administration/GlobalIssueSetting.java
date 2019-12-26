@@ -16,7 +16,9 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.issue.StateSpec;
 import io.onedev.server.issue.TransitionSpec;
@@ -27,10 +29,11 @@ import io.onedev.server.issue.fieldspec.IssueChoiceField;
 import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.OrCriteria;
+import io.onedev.server.search.entity.issue.OrIssueCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
@@ -365,7 +368,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.onDeleteState(stateName))
 					it.remove();
 				else
@@ -382,7 +385,7 @@ public class GlobalIssueSetting implements Serializable {
 			board.onRenameState(oldName, newName);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				query.onRenameState(oldName, newName);
 				namedQuery.setQuery(query.toString());
 			} catch (Exception e) {
@@ -400,21 +403,21 @@ public class GlobalIssueSetting implements Serializable {
 		return getFieldSpecMap(null).get(fieldName);
 	}
 
-	public void onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
+	public void onEditFieldValues(@Nullable Project project, String fieldName, ValueSetEdit valueSetEdit) {
 		for (Iterator<TransitionSpec> it = getDefaultTransitionSpecs().iterator(); it.hasNext();) {
 			TransitionSpec transition = it.next();
 			if (transition.onEditFieldValues(fieldName, valueSetEdit))
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) {
-			if (it.next().onEditFieldValues(fieldName, valueSetEdit))
+			if (it.next().onEditFieldValues(project, fieldName, valueSetEdit))
 				it.remove();
 		}
 		
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.onEditFieldValues(fieldName, valueSetEdit))
 					it.remove();
 				else
@@ -430,8 +433,10 @@ public class GlobalIssueSetting implements Serializable {
 				deletedFields.add(field.getName());
 			}
 		}
-		for (String deletedField: deletedFields)
+		for (String deletedField: deletedFields) {
 			onDeleteField(deletedField);
+			OneDev.getInstance(RoleManager.class).onDeleteIssueField(deletedField);
+		}
 	}
 	
 	public void onRenameField(String oldName, String newName) {
@@ -440,10 +445,10 @@ public class GlobalIssueSetting implements Serializable {
 		for (FieldSpec field: getFieldSpecs())
 			field.onRenameInput(oldName, newName);
 		for (BoardSpec board: getDefaultBoardSpecs())
-			board.onRenameField(this, oldName, newName);
+			board.onRenameField(oldName, newName);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				query.onRenameField(oldName, newName);
 				namedQuery.setQuery(query.toString());
 			} catch (Exception e) {
@@ -458,14 +463,14 @@ public class GlobalIssueSetting implements Serializable {
 		}
 		
 		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) {
-			if (it.next().onDeleteField(this, fieldName))
+			if (it.next().onDeleteField(fieldName))
 				it.remove();
 		}
 
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.onDeleteField(fieldName))
 					it.remove();
 				else
@@ -488,10 +493,7 @@ public class GlobalIssueSetting implements Serializable {
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) { 
-			Usage usageInBoard = it.next().onDeleteUser(this, userName);
-			if (usageInBoard != null)
-				usage.add(usageInBoard);
-			else
+			if (it.next().onDeleteUser(this, userName))
 				it.remove();
 		}
 		for (FieldSpec field: getFieldSpecs())
@@ -541,7 +543,7 @@ public class GlobalIssueSetting implements Serializable {
 			if (category == state.getCategory())
 				criterias.add(new StateCriteria(state.getName()));
 		}
-		return new OrCriteria(criterias);
+		return new OrIssueCriteria(criterias);
 	}
 
 	public List<BoardSpec> getDefaultBoardSpecs() {

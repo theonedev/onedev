@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
+import java.nio.channels.IllegalSelectorException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -11,12 +12,18 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneException;
+import io.onedev.server.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.issue.fieldspec.CommitField;
+import io.onedev.server.issue.fieldspec.PullRequestChoiceField;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.ProjectAwareCommit;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
@@ -31,29 +38,66 @@ public class FieldOperatorCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<?> attribute = field.get(IssueField.ATTR_VALUE);
+		Path<?> valueAttribute = field.get(IssueField.ATTR_VALUE);
+		Path<?> projectAttribute = field.getParent().get(IssueQueryConstants.ATTR_PROJECT);		
 		if (operator == IssueQueryLexer.IsEmpty) {
-			return builder.isNull(attribute);
+			return builder.isNull(valueAttribute);
 		} else if (operator == IssueQueryLexer.IsMe) {
 			if (User.get() != null)
-				return builder.equal(attribute, User.get().getName());
+				return builder.equal(valueAttribute, User.get().getName());
 			else
 				throw new OneException("Please login to perform this query");
-		} else {
-			Build build = Build.get();
-			if (build != null) {
-				if (operator == IssueQueryLexer.IsCurrent) { 
-					return builder.equal(attribute, String.valueOf(build.getNumber()));
+		} else if (operator == IssueQueryLexer.IsCurrent) {
+			if (getFieldSpec() instanceof BuildChoiceField) {
+				Build build = Build.get();
+				if (build != null) { 
+					return builder.and(
+							builder.equal(projectAttribute, build.getProject()),
+							builder.equal(valueAttribute, String.valueOf(build.getNumber())));
 				} else {
-					Collection<Long> numbersOfStreamPrevious = build.getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT);
-					if (!numbersOfStreamPrevious.isEmpty())
-						return attribute.in(numbersOfStreamPrevious.stream().map(it->it.toString()).collect(Collectors.toSet()));
-					else
-						return builder.disjunction();
+					throw new OneException("No current build in query context");
+				}
+			} else if (getFieldSpec() instanceof PullRequestChoiceField) {
+				PullRequest request = PullRequest.get();
+				if (request != null) {
+					return builder.and(
+							builder.equal(projectAttribute, request.getTargetProject()),
+							builder.equal(valueAttribute, String.valueOf(request.getNumber())));
+				} else {
+					throw new OneException("No current pull request in query context");
+				}
+			} else if (getFieldSpec() instanceof CommitField) {
+				ProjectAwareCommit commit = ProjectAwareCommit.get();
+				if (commit != null) {
+					return builder.and(
+							builder.equal(projectAttribute, commit.getProject()),
+							builder.equal(valueAttribute, commit.getCommitId().name()));
+				} else {
+					throw new OneException("No current commit in query context");
 				}
 			} else {
-				throw new OneException("No build in query context");
+				throw new IllegalStateException();
 			}
+		} else if (operator == IssueQueryLexer.IsPrevious) {
+			if (getFieldSpec() instanceof BuildChoiceField) {
+				Build build = Build.get();
+				if (build != null) { 
+					Collection<Long> numbersOfStreamPrevious = Build.get().getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT);
+					if (!numbersOfStreamPrevious.isEmpty()) {
+						return builder.and(
+								builder.equal(projectAttribute, build.getProject()),
+								valueAttribute.in(numbersOfStreamPrevious.stream().map(it->it.toString()).collect(Collectors.toSet())));
+					} else {
+						return builder.equal(projectAttribute, build.getProject());
+					}
+				} else {
+					throw new OneException("No current build in query context");
+				}
+			} else {
+				throw new IllegalStateException();
+			}
+		} else {
+			throw new IllegalStateException();
 		}
 	}
 
@@ -67,25 +111,50 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				return Objects.equals(fieldValue, User.get().getName());
 			else
 				throw new OneException("Please login to perform this query");
-		} else {
-			Build build = Build.get();
-			if (build != null) { 
-				if (operator == IssueQueryLexer.IsCurrent) { 
-					return build.getId().toString().equals(fieldValue);
-				} else { 
-					return build.getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT)
-							.stream()
-							.anyMatch(it->it.equals(fieldValue));
-				}
-			} else { 
-				throw new OneException("No build in query context");
+		} else if (operator == IssueQueryLexer.IsCurrent) {
+			if (getFieldSpec() instanceof BuildChoiceField) {
+				Build build = Build.get();
+				if (build != null) 
+					return build.getProject().equals(issue.getProject()) && build.getId().toString().equals(fieldValue);
+				else  
+					throw new OneException("No build in query context");
+			} else if (getFieldSpec() instanceof PullRequestChoiceField) {
+				PullRequest request = PullRequest.get();
+				if (request != null) 
+					return request.getTargetProject().equals(issue.getProject()) && request.getId().toString().equals(fieldValue);
+				else  
+					throw new OneException("No pull request in query context");
+			} else if (getFieldSpec() instanceof CommitField) {
+				ProjectAwareCommit commit = ProjectAwareCommit.get();
+				if (commit != null) 
+					return commit.getProject().equals(issue.getProject()) && commit.getCommitId().name().equals(fieldValue);
+				else  
+					throw new OneException("No commit in query context");
+			} else {
+				throw new IllegalStateException();
 			}
+		} else if (operator == IssueQueryLexer.IsPrevious) {
+			if (getFieldSpec() instanceof BuildChoiceField) {
+				Build build = Build.get();
+				if (build != null) {
+					return build.getProject().equals(issue.getProject()) 
+							&& build.getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT)
+								.stream()
+								.anyMatch(it->it.equals(fieldValue));
+				} else {
+					throw new OneException("No build in query context");
+				}
+			} else {
+				throw new IllegalStateException();
+			}
+		} else {
+			throw new IllegalSelectorException();
 		}
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator);
+	public String asString() {
+		return quote(getFieldName()) + " " + IssueQuery.getRuleName(operator);
 	}
 
 	@Override

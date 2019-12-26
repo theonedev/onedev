@@ -48,9 +48,9 @@ public class ApprovedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ApprovedBy) + " " 
-				+ PullRequestQuery.quote(value);
+				+ quote(value);
 	}
 
 }

@@ -168,7 +168,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 
 	private String createNetwork(JobContext jobContext, boolean isWindows, JobLogger jobLogger) {
-		String network = getName() + "-" + jobContext.getProjectName() + "-" + jobContext.getBuildNumber();
+		String network = getName() + "-" + jobContext.getProjectName() + "-" 
+				+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
 		
 		AtomicBoolean networkExists = new AtomicBoolean(false);
 		Commandline docker = newDocker();
@@ -938,7 +939,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					if (argument.startsWith(option))
 						return true;
 				} else {
-					throw new RuntimeException("Invalid option: " + option);
+					throw new OneException("Invalid option: " + option);
 				}
 			}
 		}
@@ -964,11 +965,11 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		}
 		if (getRunOptions() != null) {
 			String[] arguments = StringUtils.parseQuoteTokens(getRunOptions());
-			String invalidOptions[] = new String[] {"-w", "--workdir", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
+			String reservedOptions[] = new String[] {"-w", "--workdir", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
 					"-i", "--interactive", "--rm", "--restart", "--name"}; 
-			if (hasOptions(arguments, invalidOptions)) {
+			if (hasOptions(arguments, reservedOptions)) {
 				StringBuilder errorMessage = new StringBuilder("Can not use options: "
-						+ Joiner.on(", ").join(invalidOptions));
+						+ Joiner.on(", ").join(reservedOptions));
 				context.buildConstraintViolationWithTemplate(errorMessage.toString())
 						.addPropertyNode("runOptions").addConstraintViolation();
 				isValid = false;

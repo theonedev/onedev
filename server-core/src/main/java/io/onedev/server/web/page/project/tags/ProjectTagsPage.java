@@ -85,7 +85,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 		@Override
 		protected List<RefInfo> load() {
-			List<RefInfo> refs = getProject().getTags();
+			List<RefInfo> refs = getProject().getTagRefInfos();
 			if (query != null) {
 				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
 					String tag = GitUtils.ref2tag(it.next().getRef().getName());

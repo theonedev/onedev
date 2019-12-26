@@ -24,8 +24,8 @@ public class MilestoneIsEmptyCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
+	public String asString() {
+		return quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 

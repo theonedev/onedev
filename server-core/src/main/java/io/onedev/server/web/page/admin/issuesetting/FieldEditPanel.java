@@ -17,6 +17,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
@@ -107,6 +108,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 						displayInList = getSetting().getListFields().remove(oldField.getName());
 						if (!field.getName().equals(oldField.getName())) {
 							getSetting().onRenameField(oldField.getName(), field.getName());
+							OneDev.getInstance(RoleManager.class).onRenameIssueField(oldField.getName(), field.getName());
 							getSetting().setReconciled(false);
 						}
 						if (oldField instanceof ChoiceField && field instanceof ChoiceField) {
@@ -142,7 +144,8 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 										getSetting().setReconciled(false);
 								}
 								if (!valueRenames.isEmpty() || !valueDeletions.isEmpty()) {
-									getSetting().onEditFieldValues(field.getName(), new ValueSetEdit(valueRenames, valueDeletions));
+									getSetting().onEditFieldValues(null, field.getName(), 
+											new ValueSetEdit(valueRenames, valueDeletions));
 								}
 							}
 						}

@@ -61,7 +61,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 							int operator = AntlrUtils.getLexerRule(ActionConditionLexer.ruleNames, operatorName);							
 							if (operator == ActionConditionLexer.OnBranch) {
 								List<String> branchNames = new ArrayList<>();
-								for (RefInfo refInfo: Project.get().getBranches())
+								for (RefInfo refInfo: Project.get().getBranchRefInfos())
 									branchNames.add(GitUtils.ref2branch(refInfo.getRef().getName()));
 								return SuggestionUtils.suggest(branchNames, matchWith);
 							} else if (operator == ActionConditionLexer.Is) {

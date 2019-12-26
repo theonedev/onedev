@@ -42,10 +42,10 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_REPLY) + " " 
+	public String asString() {
+		return quote(CodeCommentQueryConstants.FIELD_REPLY) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " 
-				+ CodeCommentQuery.quote(value);
+				+ quote(value);
 	}
 
 }

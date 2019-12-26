@@ -4,11 +4,11 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
-import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.util.criteria.Criteria.quote;
 import static io.onedev.server.util.query.BuildQueryConstants.FIELD_JOB;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DELETE_SOURCE_BRANCH;
@@ -115,8 +115,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.review.ReviewListPanel;
-import io.onedev.server.web.component.sideinfo.SideInfoClosed;
-import io.onedev.server.web.component.sideinfo.SideInfoOpened;
+import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
@@ -134,6 +133,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRe
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
+import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -141,7 +141,7 @@ import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
-public abstract class PullRequestDetailPage extends ProjectPage {
+public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
 
 	public static final String PARAM_REQUEST = "request";
 	
@@ -644,7 +644,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				getPullRequestManager().check(getPullRequest());
-				if (getPullRequest().getCheckError() == null)
+				if (getPullRequest().getCheckError() == null) 
 					Session.get().success("Pull request is synchronized");
 			}
 			
@@ -808,26 +808,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			});
 		}
 		
-		statusAndBranchesContainer.add(new AjaxLink<Void>("moreInfo") {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (event.getPayload() instanceof SideInfoClosed) {
-					SideInfoClosed moreInfoSideClosed = (SideInfoClosed) event.getPayload();
-					setVisible(true);
-					moreInfoSideClosed.getHandler().add(this);
-				}
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				setVisible(false);
-				target.add(this);
-				send(getPage(), Broadcast.BREADTH, new SideInfoOpened(target));
-			}
-			
-		}.setOutputMarkupPlaceholderTag(true));
+		statusAndBranchesContainer.add(new SideInfoLink("moreInfo"));
 		
 		return statusAndBranchesContainer;
 	}
@@ -1259,6 +1240,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		return params;
 	}
 	
+	@Override
 	public PullRequest getPullRequest() {
 		return requestModel.getObject();
 	}

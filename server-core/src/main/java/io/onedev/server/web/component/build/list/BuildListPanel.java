@@ -61,6 +61,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -328,7 +329,7 @@ public abstract class BuildListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true, true));
+		}, true, true, true));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
@@ -469,19 +470,12 @@ public abstract class BuildListPanel extends Panel {
 						return getBuildManager().load(buildId).getStatus();
 					}
 					
-				}) {
-					
-					@Override
-					protected Collection<String> getWebSocketObservables() {
-						return Sets.newHashSet(Build.getWebSocketObservable(buildId));
-					}
-					
-				});
+				}));
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
 						BuildDashboardPage.paramsOf(build, getQueryPosition(cellItem)));
 				
-				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
+				link.add(new Label("name", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -498,7 +492,17 @@ public abstract class BuildListPanel extends Panel {
 					}
 					
 				});
+				link.add(new Label("date", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
+					}
+					
+				}));
 				fragment.add(link);
+				fragment.add(newBuildObserver(buildId));
+				fragment.setOutputMarkupId(true);
 				cellItem.add(fragment);
 			}
 		});

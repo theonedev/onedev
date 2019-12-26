@@ -44,6 +44,10 @@ onedev.server.codeSupport = {
 			}
 		});
 		
+		$input.on("beforeDelete", function() {
+			cm.toTextArea();
+		});
+		
 	    onedev.server.codeSupport.trackWidth(inputId);
     },
     showVariables: function(inputId, variables, line, start, end) {
@@ -75,13 +79,14 @@ onedev.server.codeSupport = {
         onedev.server.codeSupport.trackWidth(inputId);
 	},
     trackWidth: function(inputId) {
-        var $cm = $("#" + inputId).next();
-        var cm = $cm[0].CodeMirror;
         function setWidth() {
-            var $cm = $("#"+inputId).next();
-            cm.setSize(1, null);  // shrink temporarily in order to get original parent width
-            cm.setSize($cm.parent().width(), null);
-            cm.refresh();
+            var $cm = $("#" + inputId).next();
+            if ($cm.length != 0) {
+                var cm = $cm[0].CodeMirror;
+                cm.setSize(1, null);  // shrink temporarily in order to get original parent width
+                cm.setSize($cm.parent().width(), null);
+                cm.refresh();
+            }
         }
         setWidth();
         $(window).resize(setWidth);

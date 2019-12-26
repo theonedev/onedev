@@ -38,17 +38,14 @@ public class ParamCriteria extends EntityCriteria<Build> {
 	@Override
 	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
-		if (paramValues == null || paramValues.isEmpty())
-			return value == null;
-		else 
-			return paramValues.contains(value);
+		return paramValues != null && paramValues.contains(value);
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.quote(name) + " " 
-				+ BuildQuery.getRuleName(BuildQueryLexer.Is) 
-				+ " " + BuildQuery.quote(value);
+	public String asString() {
+		return quote(name) + " " 
+				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ quote(value);
 	}
 	
 }

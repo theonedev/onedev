@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -34,10 +33,10 @@ public class TargetBranchCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_TARGET_BRANCH) + " " 
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_TARGET_BRANCH) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
-				+ PullRequestQuery.quote(branch);
+				+ quote(branch);
 	}
 
 }

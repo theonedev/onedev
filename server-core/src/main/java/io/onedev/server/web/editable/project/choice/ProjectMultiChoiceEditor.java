@@ -1,6 +1,5 @@
 package io.onedev.server.web.editable.project.choice;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,24 +30,23 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		choices.addAll(OneDev.getInstance(ProjectManager.class).query());
 
-		List<Project> projects = new ArrayList<>();
+		List<Project> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 			for (String projectName: getModelObject()) {
 				Project project = projectManager.find(projectName);
 				if (project != null && choices.contains(project))
-					projects.add(project);
+					selections.add(project);
 			}
 		} 
 		
-		input = new ProjectMultiChoice("input", new Model((Serializable)projects), new ProjectChoiceProvider(choices)) {
+		input = new ProjectMultiChoice("input", Model.of(selections), new ProjectChoiceProvider(choices)) {
 
 			@Override
 			protected void onInitialize() {

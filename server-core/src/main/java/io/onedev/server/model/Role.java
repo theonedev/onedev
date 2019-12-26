@@ -22,7 +22,9 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.role.AllIssueFields;
 import io.onedev.server.model.support.role.CodePrivilege;
+import io.onedev.server.model.support.role.IssueFieldSet;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
@@ -42,7 +44,6 @@ import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -75,7 +76,7 @@ public class Role extends AbstractEntity implements Permission {
 	
 	@Lob
 	@Column(length=65535, nullable=false)
-	private ArrayList<String> editableIssueFields = new ArrayList<>();
+	private IssueFieldSet editableIssueFields = new AllIssueFields();
 	
 	private boolean manageBuilds;
 	
@@ -178,14 +179,14 @@ public class Role extends AbstractEntity implements Permission {
 	}
 
 	@Editable(order=600, description="Optionally specify custom fields allowed to edit when open new issues")
-	@ChoiceProvider("getIssueFieldChoices")
 	@ShowCondition("isManageIssuesDisabled")
-	public List<String> getEditableIssueFields() {
+	@NotNull
+	public IssueFieldSet getEditableIssueFields() {
 		return editableIssueFields;
 	}
 
-	public void setEditableIssueFields(List<String> editableIssueFields) {
-		this.editableIssueFields = (ArrayList<String>)editableIssueFields;
+	public void setEditableIssueFields(IssueFieldSet editableIssueFields) {
+		this.editableIssueFields = editableIssueFields;
 	}
 
 	@SuppressWarnings("unused")
@@ -261,8 +262,7 @@ public class Role extends AbstractEntity implements Permission {
 				permissions.add(new ManageIssues());
 			if (scheduleIssues)
 				permissions.add(new ScheduleIssues());
-			for (String issueField: editableIssueFields)
-				permissions.add(new EditIssueField(issueField));
+			permissions.add(new EditIssueField(editableIssueFields.getIncludeFields()));
 			if (manageBuilds)
 				permissions.add(new ManageBuilds());
 			for (JobPrivilege jobPrivilege: jobPrivileges) {

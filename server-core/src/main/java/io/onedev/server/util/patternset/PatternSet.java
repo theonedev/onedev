@@ -76,12 +76,28 @@ public class PatternSet implements Serializable {
 		return files;
 	}
 	
-	public static PatternSet fromString(@Nullable String patternSetString) {
+	public static PatternSet parse(@Nullable String patternSetString) {
 		Set<String> includes = new HashSet<>();
 		Set<String> excludes = new HashSet<>();
 		
 		if (patternSetString != null) {
-			PatternsContext patterns = parse(patternSetString);
+			CharStream is = CharStreams.fromString(patternSetString); 
+			PatternSetLexer lexer = new PatternSetLexer(is);
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(new BaseErrorListener() {
+
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+						int charPositionInLine, String msg, RecognitionException e) {
+					throw new OneException("Malformed patterns");
+				}
+				
+			});
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			PatternSetParser parser = new PatternSetParser(tokens);
+			parser.removeErrorListeners();
+			parser.setErrorHandler(new BailErrorStrategy());
+			PatternsContext patterns = parser.patterns();
 			
 			for (PatternContext pattern: patterns.pattern()) {
 				String value;
@@ -98,26 +114,6 @@ public class PatternSet implements Serializable {
 		}
 		
 		return new PatternSet(includes, excludes);
-	}
-
-	public static PatternsContext parse(String patternSetString) {
-		CharStream is = CharStreams.fromString(patternSetString); 
-		PatternSetLexer lexer = new PatternSetLexer(is);
-		lexer.removeErrorListeners();
-		lexer.addErrorListener(new BaseErrorListener() {
-
-			@Override
-			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed patterns");
-			}
-			
-		});
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		PatternSetParser parser = new PatternSetParser(tokens);
-		parser.removeErrorListeners();
-		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.patterns();
 	}
 
 	public static String quoteIfNecessary(String pattern) {

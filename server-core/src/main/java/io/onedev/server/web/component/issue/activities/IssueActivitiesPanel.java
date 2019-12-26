@@ -27,7 +27,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
@@ -132,12 +131,8 @@ public abstract class IssueActivitiesPanel extends Panel {
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueCommittedData && SecurityUtils.canReadCode(getIssue().getProject())) {
 					IssueCommittedData issueCommittedData = (IssueCommittedData) change.getData();
-					for (String commitHash: issueCommittedData.getCommitHashes()) {
-						if (getIssue().getProject().getRepository().hasObject(ObjectId.fromString(commitHash))) {
-							otherActivities.add(new IssueChangeActivity(change));
-							break;
-						}
-					}
+					if (getIssue().getProject().getRevCommit(issueCommittedData.getCommitHash(), false) != null)
+						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssuePullRequestData && SecurityUtils.canReadCode(getIssue().getProject())) {
 					IssuePullRequestData issuePullRequestData = (IssuePullRequestData) change.getData();
 					if (issuePullRequestData.getPullRequest() != null)

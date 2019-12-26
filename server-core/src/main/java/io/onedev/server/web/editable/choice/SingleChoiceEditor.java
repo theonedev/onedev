@@ -64,18 +64,10 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			
 		};
 		
-		input = new StringSingleChoice("input", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				String selection = SingleChoiceEditor.this.getModelObject();
-				if (choicesModel.getObject().containsKey(selection))
-					return selection;
-				else
-					return null;
-			}
-			
-		}, choicesModel) {
+		String selection = getModelObject();
+		if (!choicesModel.getObject().containsKey(selection))
+			selection = null;
+		input = new StringSingleChoice("input", Model.of(selection), choicesModel) {
 
 			@Override
 			protected void onInitialize() {

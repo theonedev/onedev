@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -47,9 +46,10 @@ public class SubmitDateCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String toString() {
-		return BuildQuery.quote(BuildQueryConstants.FIELD_SUBMIT_DATE) + " " 
-				+ BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(value);
+	public String asString() {
+		return quote(BuildQueryConstants.FIELD_SUBMIT_DATE) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
+				+ quote(value);
 	}
 
 }

@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable.groupchoice;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -15,7 +16,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -23,8 +23,6 @@ import io.onedev.server.web.editable.annotation.GroupChoice;
 
 @SuppressWarnings("serial")
 public class GroupSingleChoiceEditor extends PropertyEditor<String> {
-	
-	private final List<Group> choices = new ArrayList<>();
 	
 	private GroupSingleChoice input;
 	
@@ -37,6 +35,8 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		List<Group> choices = new ArrayList<>();
+		
 		GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
 		Preconditions.checkNotNull(groupChoice);
 		if (groupChoice.value().length() != 0) {
@@ -44,6 +44,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 					.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 		} else {
 			choices.addAll(OneDev.getInstance(GroupManager.class).query());
+			choices.sort(Comparator.comparing(Group::getName));
 		}
 		
 		Group group;
@@ -55,7 +56,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 		if (group != null && !choices.contains(group))
 			group = null;
 
-    	input = new GroupSingleChoice("input", Model.of(group), new GroupChoiceProvider(choices)) {
+    	input = new GroupSingleChoice("input", Model.of(group), Model.of(choices)) {
 
     		@Override
 			protected void onInitialize() {

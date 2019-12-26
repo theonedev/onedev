@@ -2,6 +2,7 @@ onedev.server.buildLog = {
     onDomReady: function(containerId, logEntries, maxNumOfLogEntries) {
         var $buildLog = $("#" + containerId + ">.build-log");
         var ps = new PerfectScrollbar($buildLog[0]);
+        $buildLog.data("ps", ps);
         $(window).resize(function() {
             ps.update();
         });
@@ -35,7 +36,7 @@ onedev.server.buildLog = {
         } else {
             $buildLog.children(".no-entries").remove();
         }
-
+        $buildLog.data("ps").update();
         $buildLog.scrollTop($buildLog[0].scrollHeight);
     }
 

@@ -114,7 +114,7 @@ public class GroovyScript implements Serializable {
 		} else if (isCanBeUsedByBuildJobs() && identity instanceof JobIdentity) {
 			JobIdentity jobIdentity = (JobIdentity) identity;
 			Matcher matcher = new PathMatcher();
-			return (getAllowedProjects() == null || PatternSet.fromString(getAllowedProjects()).matches(matcher, jobIdentity.getProject().getName()))
+			return (getAllowedProjects() == null || PatternSet.parse(getAllowedProjects()).matches(matcher, jobIdentity.getProject().getName()))
 					&& (getAllowedBranches() == null || jobIdentity.getProject().isCommitOnBranches(jobIdentity.getCommitId(), getAllowedBranches()));
 		} else {
 			return false;
@@ -124,7 +124,7 @@ public class GroovyScript implements Serializable {
 	public Usage onDeleteProject(String projectName, int index) {
 		Usage usage = new Usage();
 		if (getAllowedProjects() != null) {
-			PatternSet patternSet = PatternSet.fromString(getAllowedProjects());
+			PatternSet patternSet = PatternSet.parse(getAllowedProjects());
 			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
 				usage.add("allowed projects");
 		} 
@@ -132,7 +132,7 @@ public class GroovyScript implements Serializable {
 	}
 	
 	public void onRenameProject(String oldName, String newName) {
-		PatternSet patternSet = PatternSet.fromString(getAllowedProjects());
+		PatternSet patternSet = PatternSet.parse(getAllowedProjects());
 		if (patternSet.getIncludes().remove(oldName))
 			patternSet.getIncludes().add(newName);
 		if (patternSet.getExcludes().remove(oldName))

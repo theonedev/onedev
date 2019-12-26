@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -13,15 +12,11 @@ import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Project;
+import io.onedev.server.model.Build;
 import io.onedev.server.util.Usage;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.editable.annotation.JobMatch;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @ExtensionPoint
@@ -34,14 +29,8 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String name;
 	
-	private String applicableProjects;
+	private String jobMatch = "all";
 	
-	private String applicableBranches;
-	
-	private String applicableJobNames;
-	
-	private String applicableJobImages;
-
 	private int cacheTTL = 7;
 	
 	public boolean isEnabled() {
@@ -63,50 +52,18 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, group="Job Applicability",
-			description="Optionally specify space-separated projects applicable for this executor. "
-					+ "Use * or ? for wildcard match")
-	@Patterns(suggester = "suggestProjects")
-	@NameOfEmptyValue("All")
-	public String getApplicableProjects() {
-		return applicableProjects;
+	@Editable(order=10000, name="Job Match Condition", description="Jobs applicable for this executor must match "
+			+ "condition specified here")
+	@JobMatch
+	@NotEmpty
+	public String getJobMatch() {
+		return jobMatch;
 	}
 
-	public void setApplicableProjects(String applicableProjects) {
-		this.applicableProjects = applicableProjects;
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestProjects(String matchWith) {
-		return SuggestionUtils.suggestProjects(matchWith);
+	public void setJobMatch(String jobMatch) {
+		this.jobMatch = jobMatch;
 	}
 
-	@Editable(order=10100, group="Job Applicability",
-			description="Optionally specify space-separated branches applicable for this executor. "
-					+ "Use * or ? for wildcard match")
-	@Patterns
-	@NameOfEmptyValue("All")
-	public String getApplicableBranches() {
-		return applicableBranches;
-	}
-
-	public void setApplicableBranches(String applicableBranches) {
-		this.applicableBranches = applicableBranches;
-	}
-
-	@Editable(order=10200, group="Job Applicability",
-			description="Optionally specify space-separated jobs applicable for this executor. "
-					+ "Use * or ? for wildcard match")
-	@Patterns
-	@NameOfEmptyValue("All")
-	public String getApplicableJobNames() {
-		return applicableJobNames;
-	}
-
-	public void setApplicableJobNames(String applicableJobNames) {
-		this.applicableJobNames = applicableJobNames;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobNames(String matchWith) {
 		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
@@ -114,19 +71,6 @@ public abstract class JobExecutor implements Serializable {
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}
 
-	@Editable(order=10300, group="Job Applicability",
-			description="Optionally specify space-separated job images applicable for this executor. "
-					+ "Use * or ? for wildcard match")
-	@Patterns
-	@NameOfEmptyValue("All")
-	public String getApplicableJobImages() {
-		return applicableJobImages;
-	}
-
-	public void setApplicableJobImages(String applicableJobImages) {
-		this.applicableJobImages = applicableJobImages;
-	}
-	
 	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. "
 			+ "OneDev may create multiple job caches even for same cache key to avoid cache conflicts when "
 			+ "running jobs concurrently. This setting tells OneDev to remove caches inactive for specified "
@@ -141,35 +85,36 @@ public abstract class JobExecutor implements Serializable {
 	
 	public abstract void execute(String jobToken, JobContext context);
 
-	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String jobImage) {
-		Matcher matcher = new PathMatcher();
-
-		return isEnabled() 
-				&& (getApplicableProjects() == null || PatternSet.fromString(getApplicableProjects()).matches(matcher, project.getName()))
-				&& (getApplicableJobNames() == null || PatternSet.fromString(getApplicableJobNames()).matches(matcher, jobName))
-				&& (getApplicableJobImages() == null || PatternSet.fromString(getApplicableJobImages()).matches(matcher, jobImage))
-				&& (getApplicableBranches() == null || project.isCommitOnBranches(commitId, getApplicableBranches()));
+	public final boolean isApplicable(Build build) {
+		return isEnabled() && io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).matches(build);
 	}
 	
 	public Usage onDeleteProject(String projectName, int executorIndex) {
 		Usage usage = new Usage();
-		if (getApplicableProjects() != null) {
-			PatternSet patternSet = PatternSet.fromString(getApplicableProjects());
-			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
-				usage.add("applicable projects");
-		} 
-		return usage.prefix("job executor #" + executorIndex);
+		if (io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).isUsingProject(projectName))
+			usage.add("job executor #" + executorIndex + ": job match" );
+		return usage;
 	}
 	
 	public void onRenameProject(String oldName, String newName) {
-		PatternSet patternSet = PatternSet.fromString(getApplicableProjects());
-		if (patternSet.getIncludes().remove(oldName))
-			patternSet.getIncludes().add(newName);
-		if (patternSet.getExcludes().remove(oldName))
-			patternSet.getExcludes().add(newName);
-		setApplicableProjects(patternSet.toString());
-		if (getApplicableProjects().length() == 0)
-			setApplicableProjects(null);
+		io.onedev.server.util.jobmatch.JobMatch parsedJobMatch = 
+				io.onedev.server.util.jobmatch.JobMatch.parse(this.jobMatch);
+		parsedJobMatch.onRenameProject(oldName, newName);
+		jobMatch = parsedJobMatch.toString();
 	}
 
+	public Usage onDeleteUser(String userName, int executorIndex) {
+		Usage usage = new Usage();
+		if (io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).isUsingUser(userName))
+			usage.add("job executor #" + executorIndex + ": job match" );
+		return usage;
+	}
+	
+	public void onRenameUser(String oldName, String newName) {
+		io.onedev.server.util.jobmatch.JobMatch parsedJobMatch = 
+				io.onedev.server.util.jobmatch.JobMatch.parse(this.jobMatch);
+		parsedJobMatch.onRenameUser(oldName, newName);
+		jobMatch = parsedJobMatch.toString();
+	}
+	
 }

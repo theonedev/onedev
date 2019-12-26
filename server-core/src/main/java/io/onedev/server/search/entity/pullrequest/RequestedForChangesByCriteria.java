@@ -48,9 +48,8 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.RequestedForChangesBy) 
-				+ " " + PullRequestQuery.quote(value);
+	public String asString() {
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.RequestedForChangesBy) + " " + quote(value);
 	}
 
 }

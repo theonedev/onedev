@@ -2,7 +2,6 @@ package io.onedev.server.issue.transitiontrigger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,10 +12,12 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.RoleChoice;
 
@@ -30,6 +31,11 @@ public class PressButtonTrigger extends TransitionTrigger {
 	private List<String> authorizedRoles = new ArrayList<>();
 	
 	private List<String> promptFields = new ArrayList<>();
+	
+	public PressButtonTrigger() {
+		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
+				.getRuleName(IssueQueryLexer.All));
+	}
 	
 	@Editable(order=100)
 	@NotEmpty
@@ -74,6 +80,7 @@ public class PressButtonTrigger extends TransitionTrigger {
 
 	@Override
 	public void onRenameField(String oldName, String newName) {
+		super.onRenameField(oldName, newName);
 		int index = getPromptFields().indexOf(oldName);
 		if (index != -1) {
 			if (getPromptFields().contains(newName))				
@@ -85,6 +92,8 @@ public class PressButtonTrigger extends TransitionTrigger {
 
 	@Override
 	public boolean onDeleteField(String fieldName) {
+		if (super.onDeleteField(fieldName))
+			return true;
 		for (Iterator<String> it = getPromptFields().iterator(); it.hasNext();) {
 			if (it.next().equals(fieldName))
 				it.remove();
@@ -101,15 +110,15 @@ public class PressButtonTrigger extends TransitionTrigger {
 
 	@Override
 	public Usage onDeleteRole(String roleName) {
-		Usage usage = new Usage();
+		Usage usage = super.onDeleteRole(roleName);
 		if (getAuthorizedRoles().contains(roleName))
-			usage.add("press button trigger: authorized roles");
+			usage.add("authorized roles");
 		return usage;
 	}
 
 	@Override
 	public Collection<String> getUndefinedFields() {
-		Collection<String> undefinedFields = new HashSet<>();
+		Collection<String> undefinedFields = super.getUndefinedFields();
 		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		for (String field: getPromptFields()) {
 			if (setting.getFieldSpec(field) == null)
@@ -133,6 +142,26 @@ public class PressButtonTrigger extends TransitionTrigger {
 			return true;
 		}
 	}
+
+	@Editable(order=1000, name="Applicable Issues", description="Specify criteria of issues applicable for this transition")
+	@IssueQuery(withOrder = false, withCurrentUserCriteria = true, withCurrentBuildCriteria = false, 
+			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
+	@NotEmpty
+	@Override
+	public String getIssueQuery() {
+		return super.getIssueQuery();
+	}
+
+	public void setIssueQuery(String issueQuery) {
+		super.setIssueQuery(issueQuery);
+	}
 	
+	@Override
+	public String getDescription() {
+		if (authorizedRoles.isEmpty())
+			return "Button '" + buttonLabel + "' is pressed by any user";
+		else
+			return "Button '" + buttonLabel + "' is pressed by any user of roles " + authorizedRoles;
+	}
 	
 }

@@ -26,6 +26,8 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -103,6 +105,7 @@ public class RunJobAction extends PostBuildAction {
 					public void run() {
 						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
 						Build.push(build);
+						ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 						try {
 							new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(getJobParams())) {
 								
@@ -118,6 +121,7 @@ public class RunJobAction extends PostBuildAction {
 									build.getProject().getName(), build.getCommitHash(), jobName);
 							logger.error(message, e);
 						} finally {
+							ScriptIdentity.pop();
 							Build.pop();
 						}
 					}

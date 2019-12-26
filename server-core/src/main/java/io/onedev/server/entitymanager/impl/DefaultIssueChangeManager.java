@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -23,14 +22,17 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.issue.IssueChangeEvent;
-import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.issue.TransitionSpec;
+import io.onedev.server.issue.transitiontrigger.BranchUpdateTrigger;
 import io.onedev.server.issue.transitiontrigger.BuildSuccessfulTrigger;
-import io.onedev.server.issue.transitiontrigger.CommitTrigger;
 import io.onedev.server.issue.transitiontrigger.DiscardPullRequest;
 import io.onedev.server.issue.transitiontrigger.MergePullRequest;
 import io.onedev.server.issue.transitiontrigger.OpenPullRequest;
@@ -63,7 +65,10 @@ import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectAwareCommit;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -77,6 +82,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	private final TransactionManager transactionManager;
 	
+	private final ProjectManager projectManager;
+	
+	private final PullRequestManager pullRequestManager;
+	
 	private final BuildManager buildManager;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -84,11 +93,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Inject
 	public DefaultIssueChangeManager(Dao dao, TransactionManager transactionManager, 
 			IssueManager issueManager,  IssueFieldManager issueFieldManager,
-			BuildManager buildManager, ListenerRegistry listenerRegistry) {
+			ProjectManager projectManager, BuildManager buildManager,
+			PullRequestManager pullRequestManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
 		this.transactionManager = transactionManager;
+		this.projectManager = projectManager;
+		this.pullRequestManager = pullRequestManager;
 		this.buildManager = buildManager;
 		this.listenerRegistry = listenerRegistry;
 	}
@@ -233,10 +245,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 								BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
 								String branches = trigger.getBranches();
 								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-								if ((trigger.getJobNames() == null || PatternSet.fromString(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
+								if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 										&& build.getStatus() == Build.Status.SUCCESSFUL
 										&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true);
+									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false);
 									List<IssueCriteria> criterias = new ArrayList<>();
 									for (String fromState: transition.getFromStates()) 
 										criterias.add(new StateCriteria(fromState));
@@ -261,52 +273,86 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	}
 	
 	private void on(PullRequest request, Class<? extends PullRequestTrigger> triggerClass) {
-		for (TransitionSpec transition: request.getTargetProject().getIssueSetting().getTransitionSpecs(true)) {
-			if (transition.getTrigger().getClass() == triggerClass) {
-				PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
-				if (trigger.getBranch().equals(request.getTargetBranch())) {
-					for (Issue issue: request.getFixedIssues()) {
-						if (transition.getFromStates().contains(issue.getState())) {
-							issue.removeFields(transition.getRemoveFields());
-							changeState(issue, transition.getToState(), new HashMap<>(), null);
+		Long requestId = request.getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				transactionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						Matcher matcher = new PathMatcher();
+						PullRequest request = pullRequestManager.load(requestId);
+						Project project = request.getTargetProject();
+						for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
+							if (transition.getTrigger().getClass() == triggerClass) {
+								PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
+								if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
+									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, true, false);
+									List<IssueCriteria> criterias = new ArrayList<>();
+									for (String fromState: transition.getFromStates()) 
+										criterias.add(new StateCriteria(fromState));
+									criterias.add(query.getCriteria());
+									query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+									PullRequest.push(request);
+									try {
+										for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
+											issue.removeFields(transition.getRemoveFields());
+											changeState(issue, transition.getToState(), new HashMap<>(), null);
+										}
+									} finally {
+										PullRequest.pop();
+									}
+								}
+							}
 						}
 					}
-				}
+				});
 			}
-		}
+		});
 	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestChangeEvent event) {
 		if (event.getChange().getData() instanceof PullRequestMergeData) {
-			for (Issue issue: event.getRequest().getFixedIssues()) {
-				IssueChange change = new IssueChange();
-				change.setDate(event.getDate());
-				change.setUser(event.getUser());
-				change.setIssue(issue);
-				change.setData(new IssuePullRequestMergedData(event.getRequest()));
-				save(change);
+			for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
+				Issue issue = issueManager.find(event.getProject(), issueNumber);
+				if (issue != null) {
+					IssueChange change = new IssueChange();
+					change.setDate(event.getDate());
+					change.setUser(event.getUser());
+					change.setIssue(issue);
+					change.setData(new IssuePullRequestMergedData(event.getRequest()));
+					save(change);
+				}
 			}
 			on(event.getRequest(), MergePullRequest.class);
 		} else if (event.getChange().getData() instanceof PullRequestDiscardData) {
-			for (Issue issue: event.getRequest().getFixedIssues()) {
-				IssueChange change = new IssueChange();
-				change.setDate(event.getDate());
-				change.setUser(event.getUser());
-				change.setIssue(issue);
-				change.setData(new IssuePullRequestDiscardedData(event.getRequest()));
-				save(change);
+			for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
+				Issue issue = issueManager.find(event.getProject(), issueNumber);
+				if (issue != null) {
+					IssueChange change = new IssueChange();
+					change.setDate(event.getDate());
+					change.setUser(event.getUser());
+					change.setIssue(issue);
+					change.setData(new IssuePullRequestDiscardedData(event.getRequest()));
+					save(change);
+				}
 			}
 			on(event.getRequest(), DiscardPullRequest.class);
 		} else if (event.getChange().getData() instanceof PullRequestReopenData) {
-			for (Issue issue: event.getRequest().getFixedIssues()) {
-				IssueChange change = new IssueChange();
-				change.setDate(event.getDate());
-				change.setUser(event.getUser());
-				change.setIssue(issue);
-				change.setData(new IssuePullRequestReopenedData(event.getRequest()));
-				save(change);
+			for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
+				Issue issue = issueManager.find(event.getProject(), issueNumber);
+				if (issue != null) {
+					IssueChange change = new IssueChange();
+					change.setDate(event.getDate());
+					change.setUser(event.getUser());
+					change.setIssue(issue);
+					change.setData(new IssuePullRequestReopenedData(event.getRequest()));
+					save(change);
+				}
 			}
 			on(event.getRequest(), OpenPullRequest.class);
 		}
@@ -315,48 +361,76 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Listen
 	public void on(PullRequestOpened event) {
-		for (Issue issue: event.getRequest().getFixedIssues()) {
-			IssueChange change = new IssueChange();
-			change.setDate(event.getDate());
-			change.setUser(event.getUser());
-			change.setIssue(issue);
-			change.setData(new IssuePullRequestOpenedData(event.getRequest()));
-			save(change);
+		for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
+			Issue issue = issueManager.find(event.getProject(), issueNumber);
+			if (issue != null) {
+				IssueChange change = new IssueChange();
+				change.setDate(event.getDate());
+				change.setUser(event.getUser());
+				change.setIssue(issue);
+				change.setData(new IssuePullRequestOpenedData(event.getRequest()));
+				save(change);
+			}
 		}
 		on(event.getRequest(), OpenPullRequest.class);
 	}
 	
 	@Transactional
 	@Listen
-	public void on(IssueCommitted event) {
-		Issue issue = event.getIssue();
-		
-		IssueChange change = new IssueChange();
-		change.setIssue(issue);
-		change.setDate(new Date());
-		change.setData(new IssueCommittedData(event.getFixCommits().stream().map(it->it.name()).collect(Collectors.toList())));
-		save(change);
-		
-		for (TransitionSpec transition: issue.getProject().getIssueSetting().getTransitionSpecs(true)) {
-			if (transition.getTrigger() instanceof CommitTrigger && transition.getFromStates().contains(issue.getState())) {
-				CommitTrigger commitTrigger = (CommitTrigger) transition.getTrigger();
-				boolean applicable;
-				if (commitTrigger.getBranches() == null) {
-					applicable = true;
-				} else {
-					for (ObjectId commitId: event.getFixCommits()) {
-						if (issue.getProject().isCommitOnBranches(commitId, commitTrigger.getBranches())) {
-							applicable = true;
-							break;
-						}
-					}
-					applicable = false;
-				}
-				if (applicable) {
-					issue.removeFields(transition.getRemoveFields());
-					changeState(issue, transition.getToState(), new HashMap<>(), null);
+	public void on(RefUpdated event) {
+		if (!event.getNewCommitId().equals(ObjectId.zeroId()) 
+				&& GitUtils.ref2branch(event.getRefName()) != null) {
+			for (Long issueNumber: event.getCommit().getFixedIssueNumbers()) {
+				Issue issue = issueManager.find(event.getProject(), issueNumber);
+				if (issue != null) {
+					IssueChange change = new IssueChange();
+					change.setIssue(issue);
+					change.setDate(new Date());
+					change.setData(new IssueCommittedData(event.getCommit().getCommitId().name()));
+					save(change);
 				}
 			}
+
+			Long projectId = event.getCommit().getProject().getId();
+			ObjectId commitId = event.getCommit().getCommitId();
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					transactionManager.runAsync(new Runnable() {
+
+						@Override
+						public void run() {
+							Project project = projectManager.load(projectId);
+							ProjectAwareCommit commit = new ProjectAwareCommit(project, commitId);
+							for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
+								if (transition.getTrigger() instanceof BranchUpdateTrigger) {
+									BranchUpdateTrigger trigger = (BranchUpdateTrigger) transition.getTrigger();
+									String branches = trigger.getBranches();
+									if (branches == null || project.isCommitOnBranches(commitId, branches)) {
+										IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), 
+												true, false, false, false, true);
+										List<IssueCriteria> criterias = new ArrayList<>();
+										for (String fromState: transition.getFromStates()) 
+											criterias.add(new StateCriteria(fromState));
+										criterias.add(query.getCriteria());
+										query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+										ProjectAwareCommit.push(commit);
+										try {
+											for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
+												issue.removeFields(transition.getRemoveFields());
+												changeState(issue, transition.getToState(), new HashMap<>(), null);
+											}
+										} finally {
+											ProjectAwareCommit.pop();
+										}
+									}
+								}
+							}
+						}
+					});
+				}
+			});
 		}
 	}
 

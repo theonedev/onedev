@@ -34,11 +34,11 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 		for (Role role: OneDev.getInstance(RoleManager.class).query())
 			roleNames.put(role.getName(), role.getName());
 		
-		String selected = getModelObject();
-		if (!roleNames.containsKey(selected))
-			selected = null;
+		String selection = getModelObject();
+		if (!roleNames.containsKey(selection))
+			selection = null;
 		
-    	input = new StringSingleChoice("input", Model.of(selected), Model.ofMap(roleNames)) {
+    	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(roleNames)) {
 
 			@Override
 			protected void onInitialize() {

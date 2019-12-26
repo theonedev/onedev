@@ -33,6 +33,7 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
@@ -78,7 +79,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			if (!fieldName.equals(IssueQueryConstants.FIELD_STATE)) {
 				Input field = getIssue().getFieldInputs().get(fieldName);
 				if (field != null && !field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
+					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR) {
 
 						@Override
 						protected Issue getIssue() {

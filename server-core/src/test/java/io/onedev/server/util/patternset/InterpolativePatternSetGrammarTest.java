@@ -28,25 +28,25 @@ public class InterpolativePatternSetGrammarTest {
 		
 		expected = new PatternSet(Sets.newHashSet("\"hello\""), Sets.newHashSet("\"hello world\"")); 
 		interpolated = Interpolative.fromString("\\\"hello\\\" -@\"\\\"hello world\\\"\"@").interpolateWith(interpolator);
-		actual = PatternSet.fromString(interpolated);
+		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("hello world"), Sets.newHashSet()); 
 		interpolated = Interpolative.fromString("@\"@hello world\"").interpolateWith(interpolator);
-		actual = PatternSet.fromString(interpolated);
+		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("@robin", "-@alive"), Sets.newHashSet("\"@")); 
 		interpolated = Interpolative.fromString("\\@robin \"-\\@alive\" -\\\"\\@").interpolateWith(interpolator);
-		actual = PatternSet.fromString(interpolated);
+		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("@robin", "hello world", "world"), Sets.newHashSet("hello")); 
 		interpolated = Interpolative.fromString("\\@robin @\"hello world\"@ -@hello world@").interpolateWith(interpolator);
-		actual = PatternSet.fromString(interpolated);
+		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 	}

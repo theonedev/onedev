@@ -47,9 +47,8 @@ public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) 
-				+ " " + PullRequestQuery.quote(value);
+	public String asString() {
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) + " " + quote(value);
 	}
 
 }

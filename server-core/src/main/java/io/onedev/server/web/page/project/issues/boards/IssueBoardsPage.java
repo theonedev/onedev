@@ -113,7 +113,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String additionalQueryString) {
 		IssueQuery additionalQuery;
 		try {
-			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true, true, false);
+			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true, true, false, false, false);
 		} catch (Exception e) {
 			String prefix;
 			if (backlog)
@@ -127,7 +127,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 		IssueQuery baseQuery;
 		try {
-			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false);
+			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
 		} catch (Exception e) {
 			String prefix;
 			if (backlog)
@@ -597,7 +597,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			else
 				model = Model.of(query);
 			TextField<String> input = new TextField<String>("input", model);
-			input.add(new IssueQueryBehavior(projectModel, true, false));
+			input.add(new IssueQueryBehavior(projectModel, true, true, false, false, false));
 			if (backlog)
 				input.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
 			else

@@ -20,7 +20,7 @@ public class JobPermission implements Permission {
 	
 	private PatternSet getJobNamesPatternSet() {
 		if (jobNamesPatternSet == null)
-			jobNamesPatternSet = PatternSet.fromString(jobNames);
+			jobNamesPatternSet = PatternSet.parse(jobNames);
 		return jobNamesPatternSet;
 	}
 	@Override

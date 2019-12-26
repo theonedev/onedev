@@ -1,7 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
@@ -17,19 +16,19 @@ public class IssueCommittedData implements IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final List<String> commitHashes;
+	private final String commitHash;
 	
-	public IssueCommittedData(List<String> commitHashes) {
-		this.commitHashes = commitHashes;
+	public IssueCommittedData(String commitHash) {
+		this.commitHash = commitHash;
 	}
 	
-	public List<String> getCommitHashes() {
-		return commitHashes;
+	public String getCommitHash() {
+		return commitHash;
 	}
 
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new IssueCommittedPanel(componentId, commitHashes) {
+		return new IssueCommittedPanel(componentId, commitHash) {
 			
 			private static final long serialVersionUID = 1L;
 
@@ -42,7 +41,7 @@ public class IssueCommittedData implements IssueChangeData {
 	
 	@Override
 	public String getDescription() {
-		return "New commits fixing this issue added";
+		return "New commit fixing this issue added";
 	}
 
 	@Override

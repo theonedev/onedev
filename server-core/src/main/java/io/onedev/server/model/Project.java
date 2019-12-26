@@ -395,7 +395,7 @@ public class Project extends AbstractEntity {
 		this.forks = forks;
 	}
 	
-	public List<RefInfo> getBranches() {
+	public List<RefInfo> getBranchRefInfos() {
 		List<RefInfo> refInfos = getRefInfos(Constants.R_HEADS);
 		for (Iterator<RefInfo> it = refInfos.iterator(); it.hasNext();) {
 			RefInfo refInfo = it.next();
@@ -409,7 +409,7 @@ public class Project extends AbstractEntity {
 		return refInfos;
     }
 	
-	public List<RefInfo> getTags() {
+	public List<RefInfo> getTagRefInfos() {
 		return getRefInfos(Constants.R_TAGS);
     }
 	
@@ -674,7 +674,7 @@ public class Project extends AbstractEntity {
 	public List<String> getJobNames() {
 		if (jobNames == null) {
 			Set<String> jobNameSet = new HashSet<>();
-			for (RefInfo refInfo: getBranches()) {
+			for (RefInfo refInfo: getBranchRefInfos()) {
 				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), 
 						BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 				if (blob != null && blob.getText() != null) {
@@ -1142,7 +1142,7 @@ public class Project extends AbstractEntity {
 		for (TagProtection protection: getTagProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user)
-					&& PatternSet.fromString(protection.getTags()).matches(new PathMatcher(), tagName)) {
+					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				noCreation = noCreation || protection.isNoCreation();
 				noDeletion = noDeletion || protection.isNoDeletion();
 				noUpdate = noUpdate || protection.isNoUpdate();
@@ -1163,11 +1163,11 @@ public class Project extends AbstractEntity {
 		boolean noForcedPush = false;
 		Set<String> jobNames = new HashSet<>();
 		List<FileProtection> fileProtections = new ArrayList<>();
-		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(null);
+		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
 		for (BranchProtection protection: getBranchProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user) 
-					&& PatternSet.fromString(protection.getBranches()).matches(new PathMatcher(), branchName)) {
+					&& PatternSet.parse(protection.getBranches()).matches(new PathMatcher(), branchName)) {
 				noCreation = noCreation || protection.isNoCreation();
 				noDeletion = noDeletion || protection.isNoDeletion();
 				noForcedPush = noForcedPush || protection.isNoForcedPush();
@@ -1319,15 +1319,15 @@ public class Project extends AbstractEntity {
 			Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
 			descendants.add(commitId);
 		
-			PatternSet branchPatterns = PatternSet.fromString(branches);
-			for (RefInfo ref: getBranches()) {
+			PatternSet branchPatterns = PatternSet.parse(branches);
+			for (RefInfo ref: getBranchRefInfos()) {
 				String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
 				if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
 					return true;
 			}
 			return false;
 		} else {
-			return PatternSet.fromString(branches).matches(matcher, "master");
+			return PatternSet.parse(branches).matches(matcher, "master");
 		}
 	}
 

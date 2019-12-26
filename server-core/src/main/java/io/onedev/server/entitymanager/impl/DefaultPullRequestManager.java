@@ -688,7 +688,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				request.getTargetBranch(), request.getSubmitter());
 		checkReviews(branchProtection.getParsedReviewRequirement(), request.getLatestUpdate());
 
-		ReviewRequirement checkedRequirement = ReviewRequirement.fromString(null);
+		ReviewRequirement checkedRequirement = ReviewRequirement.parse(null, true);
 		for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
 			if (branchProtection.getFileProtections().stream().allMatch(
 					it->checkedRequirement.covers(it.getParsedReviewRequirement()))) {

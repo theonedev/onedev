@@ -67,21 +67,12 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			
 		};
 		
-		input = new StringMultiChoice("input", new LoadableDetachableModel<Collection<String>>() {
-
-			@Override
-			protected Collection<String> load() {
-				List<String> selections;
-				if (getModelObject() != null) {
-					selections = MultiChoiceEditor.this.getModelObject();
-					selections.retainAll(choicesModel.getObject().keySet());
-				} else {
-					selections = new ArrayList<>();
-				}
-				return selections;
-			}
-			
-		}, choicesModel) {
+		List<String> selections = getModelObject();
+		if (selections != null) 
+			selections.retainAll(choicesModel.getObject().keySet());
+		else
+			selections = new ArrayList<>();
+		input = new StringMultiChoice("input", Model.of(selections), choicesModel) {
 
 			@Override
 			protected void onInitialize() {

@@ -36,6 +36,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
@@ -83,7 +84,22 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 		
-		WebMarkupContainer general = new WebMarkupContainer("general");
+		WebMarkupContainer general = new WebMarkupContainer("general") {
+
+			@Override
+			protected void onBeforeRender() {
+				User submitter = User.from(getBuild().getSubmitter(), getBuild().getSubmitterName());
+				addOrReplace(new UserIdentPanel("submitter", submitter, Mode.NAME));
+				User canceller = User.from(getBuild().getCanceller(), getBuild().getCancellerName());
+				UserIdentPanel cancellerIdentPanel = new UserIdentPanel("canceller", canceller, Mode.NAME);				
+				cancellerIdentPanel.setVisible(getBuild().getStatus() == Build.Status.CANCELLED 
+						&& (getBuild().getCanceller() != null || getBuild().getCancellerName() != null));
+				addOrReplace(cancellerIdentPanel);
+				super.onBeforeRender();
+			}
+			
+		};
+		
 		if (!getBuild().isFinished()) {
 			general.add(new AjaxSelfUpdatingTimerBehavior(Duration.ONE_SECOND) {
 
@@ -128,18 +144,6 @@ public abstract class BuildSidePanel extends Panel {
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		
-		general.add(new UserIdentPanel("submitter", User.from(getBuild().getSubmitter(), getBuild().getSubmitterName()), Mode.NAME));
-
-		general.add(new UserIdentPanel("canceller", User.from(getBuild().getCanceller(), getBuild().getCancellerName()), Mode.NAME) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getBuild().getCanceller() != null || getBuild().getCancellerName() != null);
-			}
-			
-		});
-		
 		general.add(new Label("submitDate", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -148,12 +152,29 @@ public abstract class BuildSidePanel extends Panel {
 			}
 			
 		}));
+		general.add(new Label("retryDate", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return DateUtils.formatAge(getBuild().getRetryDate());
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getBuild().getRetryDate() != null);
+			}
+			
+		});
 		
-		general.add(new Label("waitingInQueue", new LoadableDetachableModel<String>() {
+		general.add(new Label("waitingResources", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
 				long duration;
+				
 				if (getBuild().getRunningDate() != null)
 					duration = getBuild().getRunningDate().getTime() - getBuild().getPendingDate().getTime();
 				else
@@ -230,7 +251,7 @@ public abstract class BuildSidePanel extends Panel {
 		WebMarkupContainer dependencesContainer = new WebMarkupContainer("dependences");
 		add(dependencesContainer);
 		
-		String query = "depends on " + BuildQuery.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
+		String query = "depends on " + Criteria.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
 		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0, getBuild().getDependents().size()));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
@@ -238,7 +259,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		dependencesContainer.add(dependentsLink);
 		
-		query = "dependencies of " + BuildQuery.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
+		query = "dependencies of " + Criteria.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
 		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0, getBuild().getDependencies().size()));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());

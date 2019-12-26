@@ -1,6 +1,5 @@
 package io.onedev.server.search.entity;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,8 +12,9 @@ import javax.persistence.criteria.Root;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.util.RangeBuilder;
+import io.onedev.server.util.criteria.Criteria;
 
-public abstract class EntityCriteria<T extends AbstractEntity> implements Serializable {
+public abstract class EntityCriteria<T extends AbstractEntity> extends Criteria<T> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -22,8 +22,6 @@ public abstract class EntityCriteria<T extends AbstractEntity> implements Serial
 	
 	public abstract Predicate getPredicate(Root<T> root, CriteriaBuilder builder);
 
-	public abstract boolean matches(T entity);
-	
 	protected Predicate inManyValues(CriteriaBuilder builder, Path<Long> attribute, Collection<Long> inValues, 
 			Collection<Long> allValues) {
 		List<Long> listOfInValues = new ArrayList<>(inValues);
@@ -56,8 +54,5 @@ public abstract class EntityCriteria<T extends AbstractEntity> implements Serial
 		
 		return builder.or(predicates.toArray(new Predicate[0]));
 	}
-	
-	@Override
-	public abstract String toString();
 	
 }

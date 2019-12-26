@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.ProjectQueryConstants;
@@ -45,10 +44,10 @@ public class SourceProjectCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_SOURCE_PROJECT) + " " 
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_SOURCE_PROJECT) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
-				+ PullRequestQuery.quote(projectName);
+				+ quote(projectName);
 	}
 
 }

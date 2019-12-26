@@ -2,6 +2,8 @@ package io.onedev.server.search.entity;
 
 import java.io.Serializable;
 
+import io.onedev.server.util.criteria.Criteria;
+
 public class EntitySort implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -31,9 +33,9 @@ public class EntitySort implements Serializable {
 	@Override
 	public String toString() {
 		if (direction == Direction.ASCENDING)
-			return EntityQuery.quote(field) + " asc";
+			return Criteria.quote(field) + " asc";
 		else
-			return EntityQuery.quote(field) + " desc";
+			return Criteria.quote(field) + " desc";
 	}
 	
 }

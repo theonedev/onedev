@@ -34,7 +34,7 @@ public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.CreatedByMe);
 	}
 

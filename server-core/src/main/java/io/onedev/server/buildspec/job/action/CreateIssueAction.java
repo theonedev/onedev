@@ -124,8 +124,8 @@ public class CreateIssueAction extends PostBuildAction {
 							}
 							OneDev.getInstance(IssueManager.class).open(issue);
 						} finally {
-							Build.pop();
 							ScriptIdentity.pop();
+							Build.pop();
 						}
 					}
 				});

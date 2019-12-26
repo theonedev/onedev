@@ -1,14 +1,20 @@
 package io.onedev.server.buildspec.job.retrycondition;
 
-import java.util.function.Predicate;
-
 import io.onedev.server.model.Build;
+import io.onedev.server.util.criteria.Criteria;
 
-public class NeverCriteria implements Predicate<Build> {
+public class NeverCriteria extends Criteria<Build> {
+
+	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean test(Build build) {
+	public boolean matches(Build build) {
 		return false;
+	}
+
+	@Override
+	public String asString() {
+		return RetryCondition.getRuleName(RetryConditionLexer.Never);
 	}
 
 }

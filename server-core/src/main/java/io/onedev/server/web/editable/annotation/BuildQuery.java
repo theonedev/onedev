@@ -18,7 +18,7 @@ public @interface BuildQuery {
 	
 	boolean withUnfinishedCriteria();
 	
-	boolean noAutoFocus() default true;
+	boolean withOrder() default true;
 	
     String message() default "";
 

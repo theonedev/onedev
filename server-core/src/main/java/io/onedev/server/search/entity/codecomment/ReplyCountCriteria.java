@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.CodeCommentQueryConstants;
 
@@ -45,8 +44,10 @@ public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_REPLY_COUNT) + " " + CodeCommentQuery.getRuleName(operator) + " " + CodeCommentQuery.quote(String.valueOf(value));
+	public String asString() {
+		return quote(CodeCommentQueryConstants.FIELD_REPLY_COUNT) + " " 
+				+ CodeCommentQuery.getRuleName(operator) + " " 
+				+ quote(String.valueOf(value));
 	}
 
 }

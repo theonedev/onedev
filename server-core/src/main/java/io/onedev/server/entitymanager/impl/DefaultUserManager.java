@@ -24,6 +24,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -75,6 +76,9 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     			project.getIssueSetting().onRenameUser(oldName, user.getName());
     		}
     		
+        	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
+        		jobExecutor.onRenameUser(oldName, user.getName());
+    		
     		issueFieldManager.onRenameUser(oldName, user.getName());
     		settingManager.getIssueSetting().onRenameUser(oldName, user.getName());
     	}
@@ -109,6 +113,12 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 			usage.add(project.getIssueSetting().onDeleteUser(user.getName()));
 			usage.prefix("project '" + project.getName() + "': setting");
 		}
+		
+    	int index = 0;
+    	for (JobExecutor jobExecutor: settingManager.getJobExecutors()) {
+    		usage.add(jobExecutor.onDeleteUser(user.getName(), index).prefix("administration"));
+    		index++;
+    	}
 
 		usage.add(settingManager.getIssueSetting().onDeleteUser(user.getName()).prefix("administration"));
 		

@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.issue.FixedInCriteria;
+import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
@@ -38,7 +38,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 
 			@Override
 			protected IssueQuery getBaseQuery() {
-				return new IssueQuery(new FixedInCriteria(getBuild()), new ArrayList<>());
+				return new IssueQuery(new FixedInBuildCriteria(getBuild()), new ArrayList<>());
 			}
 			
 			@Override

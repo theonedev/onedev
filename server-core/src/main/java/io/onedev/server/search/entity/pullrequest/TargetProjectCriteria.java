@@ -7,7 +7,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.ProjectQueryConstants;
@@ -39,10 +38,10 @@ public class TargetProjectCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_TARGET_PROJECT) + " " 
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_TARGET_PROJECT) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
-				+ PullRequestQuery.quote(projectName);
+				+ quote(projectName);
 	}
 
 }

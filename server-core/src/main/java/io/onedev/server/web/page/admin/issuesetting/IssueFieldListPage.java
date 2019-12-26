@@ -31,6 +31,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -296,6 +297,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 									getSetting().getDefaultPromptFieldsUponIssueOpen().remove(field.getName());
 									getSetting().getListFields().remove(field.getName());
 									getSetting().onDeleteField(field.getName());
+									OneDev.getInstance(RoleManager.class).onDeleteIssueField(field.getName());
 									getSetting().setReconciled(false);
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 									target.add(fieldsTable);

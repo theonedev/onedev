@@ -32,10 +32,10 @@ public class TitleCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(IssueQueryConstants.FIELD_TITLE) + " " 
+	public String asString() {
+		return quote(IssueQueryConstants.FIELD_TITLE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
-				+ IssueQuery.quote(value);
+				+ quote(value);
 	}
 
 }

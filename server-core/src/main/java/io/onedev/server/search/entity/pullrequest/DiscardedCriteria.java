@@ -28,7 +28,7 @@ public class DiscardedCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
+	public String asString() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.Discarded);
 	}
 

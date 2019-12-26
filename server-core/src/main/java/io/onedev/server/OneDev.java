@@ -237,10 +237,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 				}
 			}
 			
-			if (serverConfig.getHttpPort() != 0)
-				serverUrl = "http://" + ipRef.get() + ":" + serverConfig.getHttpPort();
-			else 
+			if (serverConfig.getHttpsPort() != 0)
 				serverUrl = "https://" + ipRef.get() + ":" + serverConfig.getHttpsPort();
+			else 
+				serverUrl = "http://" + ipRef.get() + ":" + serverConfig.getHttpPort();
 		}
 		
 		return serverUrl;
@@ -248,14 +248,14 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private String buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
 		String serverUrl = null;
-		if (httpPort != null) {
-			serverUrl = "http://" + host;
-			if (!httpPort.equals("80"))
-				serverUrl += ":" + httpPort;
-		} else if (httpsPort != null) {
+		if (httpsPort != null) {
 			serverUrl = "https://" + host;
 			if (!httpsPort.equals("443"))
 				serverUrl += ":" + httpsPort;
+		} else if (httpPort != null) {
+			serverUrl = "http://" + host;
+			if (!httpPort.equals("80"))
+				serverUrl += ":" + httpPort;
 		} else {
 			logger.warn("This OneDev deployment looks odd to me: "
 					+ "both http and https port are not specified");

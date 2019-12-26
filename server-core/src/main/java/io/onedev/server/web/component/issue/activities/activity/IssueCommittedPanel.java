@@ -1,18 +1,14 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.git.BlobIdent;
@@ -29,79 +25,68 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 @SuppressWarnings("serial")
-public abstract class IssueCommittedPanel extends GenericPanel<List<RevCommit>> {
+public abstract class IssueCommittedPanel extends GenericPanel<RevCommit> {
 
-	private final List<String> commitHashes;
+	private final String commitHash;
 	
-	public IssueCommittedPanel(String id, List<String> commitHashes) {
+	public IssueCommittedPanel(String id, String commitHash) {
 		super(id);
-		this.commitHashes = commitHashes;
+		this.commitHash = commitHash;
+		
+		setModel(new LoadableDetachableModel<RevCommit>() {
+
+			@Override
+			protected RevCommit load() {
+				return getIssue().getProject().getRevCommit(commitHash, true);
+			}
+			
+		});
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ListView<RevCommit>("commits", new LoadableDetachableModel<List<RevCommit>>() {
+		RevCommit commit = getModelObject();
+		
+		add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
+
+		add(new CommitMessagePanel("message", getModel()) {
 
 			@Override
-			protected List<RevCommit> load() {
-				List<RevCommit> commits = new ArrayList<>();
-				for (String commitHash: commitHashes) {
-					RevCommit commit = getIssue().getProject().getRevCommit(commitHash, false); 
-					if (commit != null)
-						commits.add(commit);
-				}
-				return commits;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(final ListItem<RevCommit> item) {
-				RevCommit commit = item.getModelObject();
-				
-				item.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
-
-				item.add(new CommitMessagePanel("message", item.getModel()) {
-
-					@Override
-					protected Project getProject() {
-						return getIssue().getProject(); 
-					}
-					
-				});
-
-				item.add(new CommitStatusPanel("buildStatus", commit.copy()) {
-					
-					@Override
-					protected String getCssClasses() {
-						return "btn btn-default btn-xs";
-					}
-
-					@Override
-					protected Project getProject() {
-						return getIssue().getProject();
-					}
-					
-				});
-				
-				Project project = getIssue().getProject();
-				CommitDetailPage.State commitState = new CommitDetailPage.State();
-				commitState.revision = commit.name();
-				PageParameters params = CommitDetailPage.paramsOf(project, commitState);
-				Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
-				item.add(hashLink);
-				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
-				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
-
-				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
-				ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
-				params = ProjectBlobPage.paramsOf(project, browseState);
-				item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
+			protected Project getProject() {
+				return getIssue().getProject(); 
 			}
 			
 		});
+
+		add(new CommitStatusPanel("buildStatus", ObjectId.fromString(commitHash)) {
+			
+			@Override
+			protected String getCssClasses() {
+				return "btn btn-default btn-xs";
+			}
+
+			@Override
+			protected Project getProject() {
+				return getIssue().getProject();
+			}
+			
+		});
+		
+		Project project = getIssue().getProject();
+		CommitDetailPage.State commitState = new CommitDetailPage.State();
+		commitState.revision = commit.name();
+		PageParameters params = CommitDetailPage.paramsOf(project, commitState);
+		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
+		add(hashLink);
+		hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
+		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+
+		BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
+		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
+		params = ProjectBlobPage.paramsOf(project, browseState);
+		add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 	}
 
 	protected abstract Issue getIssue();

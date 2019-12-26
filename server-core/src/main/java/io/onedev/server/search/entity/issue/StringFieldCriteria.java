@@ -48,8 +48,10 @@ public class StringFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
+	public String asString() {
+		return quote(getFieldName()) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
+				+ quote(value);
 	}
 
 	@Override

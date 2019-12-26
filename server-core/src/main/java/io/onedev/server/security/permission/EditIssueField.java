@@ -1,22 +1,22 @@
 package io.onedev.server.security.permission;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
 
 import org.apache.shiro.authz.Permission;
 
 public class EditIssueField implements Permission {
 
-	private final String fieldName;
+	private final Collection<String> fields;
 	
-	public EditIssueField(@Nullable String fieldName) {
-		this.fieldName = fieldName;
+	public EditIssueField(Collection<String> fields) {
+		this.fields = fields;
 	}
 	
 	@Override
 	public boolean implies(Permission p) {
 		if (p instanceof EditIssueField) {
 			EditIssueField editIssueField = (EditIssueField) p;
-			return fieldName == null || fieldName.equals(editIssueField.fieldName);
+			return fields.containsAll(editIssueField.fields);
 		} else {
 			return new AccessProject().implies(p);
 		}

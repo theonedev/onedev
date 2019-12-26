@@ -7,7 +7,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -39,8 +38,10 @@ public class StatusCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_STATUS) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value);
+	public String asString() {
+		return quote(PullRequestQueryConstants.FIELD_STATUS) + " " 
+				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
+				+ quote(value);
 	}
 
 }

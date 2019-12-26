@@ -52,7 +52,7 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	@Nullable
 	public static IssueCriteria of(List<IssueCriteria> criterias) {
 		if (criterias.size() > 1)
-			return new AndCriteria(criterias);
+			return new AndIssueCriteria(criterias);
 		else if (criterias.size() == 1)
 			return criterias.iterator().next();
 		else

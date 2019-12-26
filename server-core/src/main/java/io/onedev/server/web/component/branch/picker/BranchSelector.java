@@ -56,7 +56,7 @@ public abstract class BranchSelector extends Panel {
 		this.projectModel = projectModel;
 		this.branch = branch;		
 		
-		for (RefInfo ref: projectModel.getObject().getBranches())
+		for (RefInfo ref: projectModel.getObject().getBranchRefInfos())
 			branches.add(GitUtils.ref2branch(ref.getRef().getName()));
 		
 		filteredBranches.addAll(branches);

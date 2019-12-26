@@ -25,6 +25,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.BooleanField;
 import io.onedev.server.issue.fieldspec.BuildChoiceField;
 import io.onedev.server.issue.fieldspec.ChoiceField;
+import io.onedev.server.issue.fieldspec.CommitField;
 import io.onedev.server.issue.fieldspec.DateField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.fieldspec.GroupChoiceField;
@@ -85,7 +86,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 
 	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString, 
-			boolean validate, boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria) {
+			boolean validate, boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
+			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -95,7 +97,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 				}
 				
 			});
@@ -110,7 +112,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 				if (e instanceof OneException)
 					throw e;
 				else
-					throw new OneException("Malformed query syntax", e);
+					throw new OneException("Malformed query", e);
 			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			IssueCriteria issueCriteria;
@@ -133,6 +135,14 @@ public class IssueQuery extends EntityQuery<Issue> {
 							if (!withCurrentBuildCriteria)
 								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentBuildCriteria();
+						case IssueQueryLexer.FixedInCurrentPullRequest:
+							if (!withCurrentPullRequestCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+							return new FixedInCurrentPullRequestCriteria();
+						case IssueQueryLexer.FixedInCurrentCommit:
+							if (!withCurrentCommitCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+							return new FixedInCurrentCommitCriteria();
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -142,14 +152,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 					public IssueCriteria visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
-						if (validate)
-							checkField(fieldName, operator);
+						if (validate) {
+							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
+									withCurrentPullRequestCriteria, withCurrentCommitCriteria);
+						}
 						if (fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) 
 							return new MilestoneIsEmptyCriteria();
-						else if (operator == IssueQueryLexer.IsMe && !withCurrentUserCriteria)
-							throw new OneException("Operator '" + getRuleName(operator) + "' is not supported here");
-						else if ((operator == IssueQueryLexer.IsCurrent || operator == IssueQueryLexer.IsPrevious) && !withCurrentBuildCriteria)
-							throw new OneException("Operator '" + getRuleName(operator) + "' is not supported here");
 						else 
 							return new FieldOperatorCriteria(fieldName, operator);
 					}
@@ -159,7 +167,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 						if (ctx.SubmittedBy() != null) 
 							return new SubmittedByCriteria(value);
 						else if (ctx.FixedInBuild() != null) 
-							return new FixedInCriteria(project, value);
+							return new FixedInBuildCriteria(project, value);
+						else if (ctx.FixedInPullRequest() != null) 
+							return new FixedInPullRequestCriteria(project, value);
+						else if (ctx.FixedInCommit() != null) 
+							return new FixedInCommitCriteria(project, value);
 						else 
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 					}
@@ -179,7 +191,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					
 					@Override
 					public IssueCriteria visitParensCriteria(ParensCriteriaContext ctx) {
-						return visit(ctx.criteria());
+						return (IssueCriteria) visit(ctx.criteria()).withParens(true);
 					}
 
 					@Override
@@ -187,8 +199,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						if (validate)
-							checkField(fieldName, operator);
+						if (validate) {
+							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
+									withCurrentPullRequestCriteria, withCurrentCommitCriteria);
+						}
 						
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
@@ -240,6 +254,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 									return new BuildFieldCriteria(fieldName, project, value);
 								} else if (field instanceof PullRequestChoiceField) {
 									return new PullRequestFieldCriteria(fieldName, project, value);
+								} else if (field instanceof CommitField) {
+									return new CommitFieldCriteria(fieldName, project, value);
 								} else if (field instanceof BooleanField) {
 									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
 								} else if (field instanceof NumberField) {
@@ -285,7 +301,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						List<IssueCriteria> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new OrCriteria(childCriterias);
+						return new OrIssueCriteria(childCriterias);
 					}
 
 					@Override
@@ -293,12 +309,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 						List<IssueCriteria> childCriterias = new ArrayList<>();
 						for (CriteriaContext childCtx: ctx.criteria())
 							childCriterias.add(visit(childCtx));
-						return new AndCriteria(childCriterias);
+						return new AndIssueCriteria(childCriterias);
 					}
 
 					@Override
 					public IssueCriteria visitNotCriteria(NotCriteriaContext ctx) {
-						return new NotCriteria(visit(ctx.criteria()));
+						return new NotIssueCriteria(visit(ctx.criteria()));
 					}
 					
 				}.visit(criteriaContext);
@@ -343,7 +359,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return new OneException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
-	public static void checkField(String fieldName, int operator) {
+	public static void checkField(String fieldName, int operator, 
+			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
+			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
 		FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec == null && !IssueQueryConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
@@ -355,12 +373,17 @@ public class IssueQuery extends EntityQuery<Issue> {
 			}
 			break;
 		case IssueQueryLexer.IsMe:
-			if (!(fieldSpec instanceof UserChoiceField))
+			if (!(fieldSpec instanceof UserChoiceField && withCurrentUserCriteria))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsCurrent:
+			if (!(fieldSpec instanceof BuildChoiceField && withCurrentBuildCriteria 
+					|| fieldSpec instanceof PullRequestChoiceField && withCurrentPullRequestCriteria)
+					|| fieldSpec instanceof CommitField && withCurrentCommitCriteria)
+				throw newOperatorException(fieldName, operator);
+			break;
 		case IssueQueryLexer.IsPrevious:
-			if (!(fieldSpec instanceof BuildChoiceField))
+			if (!(fieldSpec instanceof BuildChoiceField && withCurrentBuildCriteria)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsBefore:
@@ -392,6 +415,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !(fieldSpec instanceof BuildChoiceField)
 					&& !(fieldSpec instanceof BooleanField)
 					&& !(fieldSpec instanceof NumberField) 
+					&& !(fieldSpec instanceof CommitField) 
 					&& !(fieldSpec instanceof ChoiceField) 
 					&& !(fieldSpec instanceof UserChoiceField)
 					&& !(fieldSpec instanceof GroupChoiceField)

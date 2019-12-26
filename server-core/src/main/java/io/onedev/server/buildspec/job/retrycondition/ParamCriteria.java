@@ -1,11 +1,13 @@
 package io.onedev.server.buildspec.job.retrycondition;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.util.criteria.Criteria;
 
-public class ParamCriteria implements Predicate<Build> {
+public class ParamCriteria extends Criteria<Build> {
+
+	private static final long serialVersionUID = 1L;
 
 	private String name;
 	
@@ -17,12 +19,16 @@ public class ParamCriteria implements Predicate<Build> {
 	}
 
 	@Override
-	public boolean test(Build build) {
+	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
-		if (paramValues == null || paramValues.isEmpty())
-			return value == null;
-		else 
-			return paramValues.contains(value);
+		return paramValues != null && paramValues.contains(value);
 	}
 
+	@Override
+	public String asString() {
+		return quote(name) + " " 
+				+ RetryCondition.getRuleName(RetryConditionLexer.Is) + " "
+				+ quote(value);
+	}
+	
 }

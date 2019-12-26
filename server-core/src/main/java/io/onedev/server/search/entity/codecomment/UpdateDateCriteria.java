@@ -46,10 +46,10 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_UPDATE_DATE) + " " 
+	public String asString() {
+		return quote(CodeCommentQueryConstants.FIELD_UPDATE_DATE) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
-				+ CodeCommentQuery.quote(rawValue);
+				+ quote(rawValue);
 	}
 
 }
