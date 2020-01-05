@@ -14,6 +14,10 @@ Language aware symbol search. Symbol navigation in source code and diff. Outline
 
 ### Code Discussions and Comprehensions
 
-Code discussions on arbitrary block of source code or diff. Discussions stay with the code to help code comprehension even if file is changed or renamed. This also works for code discussions made in pull requests. 
+Instant code discussions on arbitrary block of source code or diff without creating pull requests. Discussions stay with the code to help code comprehension even if file is changed or renamed. This also works for code discussions from pull requests. 
 
 ![Code Comments](introduction/code-comments.gif)
+
+### Commit Query and Subscription
+
+Commit query by file, author, committer, date, or message. Save the query for quick access. Subscribe the query to get notified of interesting changes.
