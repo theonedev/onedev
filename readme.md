@@ -6,8 +6,6 @@ With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. S
 
 Being an open source product does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
 
-### Git Management
-
-* Language aware symbol search and navigation. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
+* Language aware symbol search. Symbol navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 
   ![Symbol Search](introduction/symbol-search.gif)
