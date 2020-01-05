@@ -10,4 +10,4 @@ Being an open source product does not mean that features of OneDev are compromis
 
 * Language aware symbol search and navigation. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 
-  ![Symbol Search](introduction/symbol-search.png)
+  ![Symbol Search](introduction/symbol-search.gif)
