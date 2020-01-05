@@ -2,7 +2,12 @@
 
 With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. Simple yet Powerful.
 
-| **[A Five Minutes Tutorial](https://code.onedev.io/projects/onedev-manual/blob/master/pages/5min-tutorial.md)** | **[Download](https://code.onedev.io/projects/onedev-server/builds)** | **[Documentation](https://code.onedev.io/projects/onedev-manual/blob)** |
+<div style="font-size: 20px;">
+| <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/5min-tutorial.md">A Five Minutes Tutorial</a> 
+| <a href="https://code.onedev.io/projects/onedev-server/builds">Download</a> 
+| <a href="https://code.onedev.io/projects/onedev-manual/blob">Documentation</a> |
+</div>
+<p>
 
 Being an open source product does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
 
