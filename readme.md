@@ -21,3 +21,5 @@ Instant code discussions on arbitrary block of source code or diff without creat
 ### Commit Query and Subscription
 
 Commit query by file, author, committer, date, or message. Save the query for quick access. Subscribe the query to get notified of interesting changes.
+
+![Commit Query](introduction/commit-query.gif)
