@@ -29,6 +29,10 @@ No YAML files to write. No complex grammars to remember. Create build spec for y
 
 ![Cispec](introduction/cispec.gif)
 
+### Flexible Build Workflow and Pipeline
+
+Use parameters to control job behaviors. Create matrix builds by combining values of different parameters. Connect jobs to create pipelines via dependencies. Run massive job pods concurrently to speed up processing. Manual approval of certain jobs with role based control.
+
 ### Code Discussions and Comprehensions
 
 Instant code discussions on arbitrary block of source code or diff without creating pull requests. Discussions stay with the code to help code comprehension even if file is changed or renamed. This also works for code discussions from pull requests. 
