@@ -32,7 +32,8 @@ No YAML files to write. No complex grammars to remember. Create build spec for y
 
 ### Flexible Build Workflow and Pipeline
 
-Use parameters to control job behaviors. Create matrix builds by combining values of different parameters. Connect jobs to create pipelines via dependencies. Run massive job pods concurrently to speed up processing. Manual approval of certain jobs with role based control.
+Conditional build parameters. Create matrix builds by combining values of different parameters. Connect jobs to create pipelines via dependencies. Run massive job pods concurrently to speed up processing. Manual approval of certain jobs with role based control.
+
 
 
 ### Code Discussions and Comprehensions
