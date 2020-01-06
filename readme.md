@@ -9,7 +9,7 @@ With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. S
 </div>
 <p>
 
-Being an open source product does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
+Being open source does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
 
 ### Symbol Search and Navigation
 
