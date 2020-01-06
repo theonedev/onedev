@@ -97,7 +97,8 @@ body.ProjectBlobPage.additionalWidth3 {
 #project-blob>.revision-indexing {
 	padding: 8px 8px 9px 8px;
 	background: #fcf8e3;
-	border-bottom: 1px solid #DDD;
+	border-top: 1px solid #F2E084;
+	border-bottom: 1px solid #F7EBAF;
 	color: #8a6d3b;
 	font-size: 13px;
 }

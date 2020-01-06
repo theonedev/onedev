@@ -45,6 +45,8 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
@@ -53,6 +55,7 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -156,15 +159,18 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			for (PullRequestChange change: request.getChanges()) {
 				if (change.getData() instanceof PullRequestReferencedFromIssueData) {
 					PullRequestReferencedFromIssueData referencedFromIssueData = (PullRequestReferencedFromIssueData) change.getData();
-					if (OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId()) != null)
+					Issue issue = OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId());
+					if (issue != null && SecurityUtils.canAccess(issue.getProject()))
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else if (change.getData() instanceof PullRequestReferencedFromPullRequestData) {
 					PullRequestReferencedFromPullRequestData referencedFromPullRequestData = (PullRequestReferencedFromPullRequestData) change.getData();
-					if (OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId()) != null)
+					PullRequest otherRequest = OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId());
+					if (otherRequest != null && SecurityUtils.canReadCode(otherRequest.getTargetProject()))
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else if (change.getData() instanceof PullRequestReferencedFromCodeCommentData) {
 					PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = (PullRequestReferencedFromCodeCommentData) change.getData();
-					if (OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId()) != null)
+					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
+					if (comment != null && SecurityUtils.canReadCode(comment.getProject()))
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else {
 					otherActivities.add(new PullRequestChangeActivity(change));

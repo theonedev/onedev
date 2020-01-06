@@ -6,6 +6,8 @@ import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentPullRequest;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInPullRequest;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentCommit;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
@@ -157,9 +159,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if (fieldElements.isEmpty()) {
 								if (operator == SubmittedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
-								else if (operator == FixedInCurrentBuild)
+								else if (operator == FixedInBuild)
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-								else if (operator == FixedInCurrentPullRequest) 
+								else if (operator == FixedInPullRequest) 
 									return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								else
 									return SuggestionUtils.suggestCommits(project, matchWith);

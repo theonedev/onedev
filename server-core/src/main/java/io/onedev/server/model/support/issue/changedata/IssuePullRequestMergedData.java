@@ -12,7 +12,7 @@ public class IssuePullRequestMergedData extends IssuePullRequestData {
 	
 	@Override
 	public String getDescription() {
-		return "merged pull request of this issue";
+		return "merged pull request fixing this issue";
 	}
 	
 }

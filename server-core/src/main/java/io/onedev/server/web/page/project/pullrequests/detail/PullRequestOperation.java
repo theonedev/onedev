@@ -2,6 +2,8 @@ package io.onedev.server.web.page.project.pullrequests.detail;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Session;
+
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
@@ -25,7 +27,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			OneDev.getInstance(PullRequestManager.class).discard(request, comment);
+			OneDev.getInstance(PullRequestManager.class).discard(request, comment);			
 		}
 
 	},
@@ -53,6 +55,7 @@ public enum PullRequestOperation {
 			result.setCommit(request.getHeadCommitHash());
 			review.setResult(result);
 			OneDev.getInstance(PullRequestReviewManager.class).review(review);
+			Session.get().success("Approved");
 		}
 
 	},
@@ -80,6 +83,7 @@ public enum PullRequestOperation {
 			result.setCommit(request.getHeadCommitHash());
 			review.setResult(result);
 			OneDev.getInstance(PullRequestReviewManager.class).review(review);
+			Session.get().success("Requested for changes");
 		}
 
 	},
@@ -109,6 +113,7 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			OneDev.getInstance(PullRequestManager.class).deleteSourceBranch(request, comment);
+			Session.get().success("Deleted source branch");
 		}
 
 		@Override
@@ -133,6 +138,7 @@ public enum PullRequestOperation {
 		@Override
 		public void operate(PullRequest request, String comment) {
 			OneDev.getInstance(PullRequestManager.class).restoreSourceBranch(request, comment);
+			Session.get().success("Restored source branch");
 		}
 
 		@Override

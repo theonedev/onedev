@@ -45,8 +45,8 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 				List<InputSuggestion> suggestions = suggest(unmatched);
 				return suggestions
 						.stream()
-						.filter(it->!matches.contains(it.getContent()))
-						.map(it->{
+						.filter(it -> !matches.contains(it.getContent()) || it.getContent().endsWith("/"))
+						.map(it -> {
 							if (it.getContent().contains(" ") || it.getContent().startsWith("-")) {
 								InputSuggestion suggestion = it.escape("\"");
 								suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
@@ -70,7 +70,7 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						List<InputSuggestion> suggestions = PatternSetAssistBehavior.this.suggest(matchWith)
 								.stream()
-								.filter(it -> !matches.contains(it.getContent()))
+								.filter(it -> !matches.contains(it.getContent()) || it.getContent().endsWith("/"))
 								.collect(Collectors.toList());
 						if (!suggestions.isEmpty() || matches.contains(matchWith) || matchWith.length() == 0) 
 							return suggestions;

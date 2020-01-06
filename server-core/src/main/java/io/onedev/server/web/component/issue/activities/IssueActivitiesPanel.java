@@ -36,10 +36,12 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssuePullRequestData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
@@ -119,15 +121,18 @@ public abstract class IssueActivitiesPanel extends Panel {
 			for (IssueChange change: getIssue().getChanges()) {
 				if (change.getData() instanceof IssueReferencedFromIssueData) {
 					IssueReferencedFromIssueData referencedFromIssueData = (IssueReferencedFromIssueData) change.getData();
-					if (OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId()) != null)
+					Issue issue = OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId());
+					if (issue != null && SecurityUtils.canAccess(issue.getProject()))
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueReferencedFromPullRequestData) {
 					IssueReferencedFromPullRequestData referencedFromPullRequestData = (IssueReferencedFromPullRequestData) change.getData();
-					if (OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId()) != null)
+					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId());
+					if (request != null && SecurityUtils.canReadCode(request.getTargetProject()))
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueReferencedFromCodeCommentData) {
 					IssueReferencedFromCodeCommentData referencedFromCodeCommentData = (IssueReferencedFromCodeCommentData) change.getData();
-					if (OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId()) != null)
+					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
+					if (comment != null && SecurityUtils.canReadCode(comment.getProject()))
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueCommittedData && SecurityUtils.canReadCode(getIssue().getProject())) {
 					IssueCommittedData issueCommittedData = (IssueCommittedData) change.getData();

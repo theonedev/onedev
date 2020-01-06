@@ -55,7 +55,7 @@ public abstract class CommitStatusPanel extends Panel {
 		protected List<Job> load() {
 			try {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
-				if (buildSpec != null)
+				if (buildSpec != null) 
 					return buildSpec.getJobs();
 			} catch (Exception e) {
 				logger.error("Error retrieving build spec (project: {}, commit: {})", 

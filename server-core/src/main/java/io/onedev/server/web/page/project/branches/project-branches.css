@@ -46,6 +46,7 @@
 }
 #project-branches>.list>table .bar {
 	height: 6px;
+	display: inline-block;
 }
 #project-branches>.list>table .ahead .bar {
 	background: #ccc;

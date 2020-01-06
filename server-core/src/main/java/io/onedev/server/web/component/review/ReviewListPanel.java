@@ -122,7 +122,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 					if (review.getResult().isApproved())
 						result.add(AttributeAppender.append("class", "approved fa fa-check"));
 					else 
-						result.add(AttributeAppender.append("class", "request-for-changes fa fa-warning"));
+						result.add(AttributeAppender.append("class", "request-for-changes fa fa-hand-stop-o"));
 				} else {
 					result.add(AttributeAppender.append("class", "awaiting fa fa-clock-o"));
 				}

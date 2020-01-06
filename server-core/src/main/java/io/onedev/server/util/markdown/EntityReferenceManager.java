@@ -107,26 +107,29 @@ public class EntityReferenceManager {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
 			for (Issue referencedIssue: new IssueParser().parseReferences(request.getTargetProject(), document)) {
-				boolean found = false;
-				for (IssueChange change: referencedIssue.getChanges()) {
-					if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData) {
-						io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData referencedFromPullRequestData = 
-								(io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData) change.getData();
-						if (referencedFromPullRequestData.getRequestId().equals(request.getId())) {
-							found = true;
-							break;
+				if (!referencedIssue.getProject().equals(request.getTargetProject()) 
+						|| !request.getFixedIssueNumbers().contains(referencedIssue.getNumber())) {
+					boolean found = false;
+					for (IssueChange change: referencedIssue.getChanges()) {
+						if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData) {
+							io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData referencedFromPullRequestData = 
+									(io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData) change.getData();
+							if (referencedFromPullRequestData.getRequestId().equals(request.getId())) {
+								found = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!found) {
-					io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData referencedFromPullRequestData = 
-							new io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData(request);
-					IssueChange change = new IssueChange();
-					change.setData(referencedFromPullRequestData);
-					change.setDate(new Date());
-					change.setIssue(referencedIssue);
-					referencedIssue.getChanges().add(change);
-					issueChangeManager.save(change);
+					if (!found) {
+						io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData referencedFromPullRequestData = 
+								new io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData(request);
+						IssueChange change = new IssueChange();
+						change.setData(referencedFromPullRequestData);
+						change.setDate(new Date());
+						change.setIssue(referencedIssue);
+						referencedIssue.getChanges().add(change);
+						issueChangeManager.save(change);
+					}
 				}
 			}
 			for (PullRequest referencedRequest: new PullRequestParser().parseReferences(request.getTargetProject(), document)) {

@@ -71,6 +71,7 @@
 }
 #request-detail>.main>.activities .activity>td>.body>.referenced-from .label {
 	line-height: inherit;
+	margin-left: 8px;
 }
 #request-detail>.main>.activities .activity>td.no-body>.head {
 	margin-top: 10px;

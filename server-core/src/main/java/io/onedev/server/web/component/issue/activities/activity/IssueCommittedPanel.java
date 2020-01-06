@@ -87,7 +87,7 @@ public abstract class IssueCommittedPanel extends GenericPanel<RevCommit> {
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
 		params = ProjectBlobPage.paramsOf(project, browseState);
 		add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
-	}
+	}	
 
 	protected abstract Issue getIssue();
 	

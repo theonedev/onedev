@@ -46,9 +46,9 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 			String transformed = transformer.apply(issue.getTitle());
 			String title;
 			if (issue.getProject().equals(project)) { 
-				title = String.format("<a href='%s'>#%d</a> - %s", url, issue.getNumber(), transformed);
+				title = String.format("<a href='%s'>#%d</a> %s", url, issue.getNumber(), transformed);
 			} else { 
-				title = String.format("<a href='%s'>%s#%d</a> - %s", 
+				title = String.format("<a href='%s'>%s#%d</a> %s", 
 						url, issue.getProject().getName(), issue.getNumber(), transformed);
 			}
 			add(new Label("title", title).setEscapeModelStrings(false));
@@ -57,9 +57,9 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 			String transformed = transformer.apply(issue.getTitle());
 			String title;
 			if (issue.getProject().equals(project)) 
-				title = "#" + issue.getNumber() + " - " + transformed;
+				title = "#" + issue.getNumber() + " " + transformed;
 			else 
-				title = issue.getProject().getName() + "#" + issue.getNumber() + " - " + transformed;
+				title = issue.getProject().getName() + "#" + issue.getNumber() + " " + transformed;
 			add(new Label("title", title).setEscapeModelStrings(false));
 		}
 	}

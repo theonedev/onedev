@@ -46,9 +46,9 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 			String transformed = transformer.apply(request.getTitle());
 			String title;
 			if (request.getTargetProject().equals(project)) { 
-				title = String.format("<a href='%s'>#%d</a> - %s", url, request.getNumber(), transformed);
+				title = String.format("<a href='%s'>#%d</a> %s", url, request.getNumber(), transformed);
 			} else { 
-				title = String.format("<a href='%s'>%s#%d</a> - %s", 
+				title = String.format("<a href='%s'>%s#%d</a> %s", 
 						url, request.getTargetProject().getName(), request.getNumber(), transformed);
 			}
 			add(new Label("title", title).setEscapeModelStrings(false));
@@ -57,9 +57,9 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 			String transformed = transformer.apply(request.getTitle());
 			String title;
 			if (request.getTargetProject().equals(project)) 
-				title = "#" + request.getNumber() + " - " + transformed;
+				title = "#" + request.getNumber() + " " + transformed;
 			else 
-				title = request.getTargetProject().getName() + "#" + request.getNumber() + " - " + transformed;
+				title = request.getTargetProject().getName() + "#" + request.getNumber() + " " + transformed;
 			add(new Label("title", title).setEscapeModelStrings(false));
 		}
 	}

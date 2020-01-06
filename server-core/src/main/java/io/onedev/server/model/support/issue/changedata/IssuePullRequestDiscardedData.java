@@ -12,7 +12,7 @@ public class IssuePullRequestDiscardedData extends IssuePullRequestData {
 	
 	@Override
 	public String getDescription() {
-		return "discarded pull request of this issue";
+		return "discarded pull request fixing this issue";
 	}
 	
 }

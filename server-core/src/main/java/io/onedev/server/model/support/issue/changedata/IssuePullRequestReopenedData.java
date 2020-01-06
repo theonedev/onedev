@@ -12,7 +12,7 @@ public class IssuePullRequestReopenedData extends IssuePullRequestData {
 	
 	@Override
 	public String getDescription() {
-		return "reopened pull request of this issue";
+		return "reopened pull request fixing this issue";
 	}
 	
 }

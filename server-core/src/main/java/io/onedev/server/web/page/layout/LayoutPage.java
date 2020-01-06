@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.layout;
 
+import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.Session;
@@ -211,8 +212,9 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MyWebHooksPage.class));
 		if (getPage() instanceof MyWebHooksPage)
 			item.add(AttributeAppender.append("class", "active"));
-		
-		if (SecurityUtils.getSubject().isRunAs()) {
+
+		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
+		if (prevPrincipals != null && !prevPrincipals.getPrimaryPrincipal().equals(0L)) {
 			Link<Void> signOutLink = new Link<Void>("signOut") {
 
 				@Override

@@ -39,8 +39,10 @@
 .issue-activities .activity>.content>.body {
 	margin-top: 8px;
 }
-.issue-activities .activity>.content>.body>.referenced-from .label {
+.issue-activities .activity>.content>.body>.referenced-from .label,
+.issue-activities .activity>.content>.body>.pull-request .label {
 	line-height: inherit;
+	margin-left: 8px;
 }
 
 .issue-activities .activity>.content>.body>.actions {
