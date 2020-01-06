@@ -8,9 +8,9 @@ With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. S
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/usage-scenarios.md">Usage Scenarios</a>
 | <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
 </div>
-<p style="margin-bottom: 24px;">
+<p style="margin-bottom: 20px;">
 
-Being open source does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
+<p style="font-size: 16px;">Being open source does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
 
 ### Symbol Search and Navigation
 
