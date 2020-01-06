@@ -10,7 +10,7 @@ With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. S
 </div>
 <p style="margin-bottom: 20px;">
 
-<p style="font-size: 16px;">Being open source does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
+Being open source does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
 
 ### Symbol Search and Navigation
 
@@ -33,6 +33,7 @@ No YAML files to write. No complex grammars to remember. Create build spec for y
 ### Flexible Build Workflow and Pipeline
 
 Use parameters to control job behaviors. Create matrix builds by combining values of different parameters. Connect jobs to create pipelines via dependencies. Run massive job pods concurrently to speed up processing. Manual approval of certain jobs with role based control.
+
 
 ### Code Discussions and Comprehensions
 
