@@ -1,4 +1,4 @@
-# An All-In-One DevOps Platform 
+# Super Easy All-In-One DevOps Platform 
 
 With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. Simple yet Powerful.
 
