@@ -4,8 +4,9 @@ With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. S
 
 <div style="font-size: 20px;">
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/5min-tutorial.md">A Five Minutes Tutorial</a> 
-| <a href="https://code.onedev.io/projects/onedev-server/builds">Download</a> 
-| <a href="https://code.onedev.io/projects/onedev-manual/blob">Documentation</a> |
+| <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/installation-guide.md">Installation Guide</a> 
+| <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/usage-scenarios.md">Usage Scenarios</a>
+| <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
 </div>
 <p>
 
