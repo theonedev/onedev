@@ -19,7 +19,7 @@ Language aware symbol search. Symbol navigation in source code and diff. Outline
 
 ### Docker First Kubernetes Native Build Farm
 
-Damn easy to set up a build farm to run massive CI builds as pods in Kubernetes. No any agents or runners required. Transparent support for Linux and Windows containers. 
+Damn easy to set up a build farm to run massive CI builds as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
 
 ![Job Executor](introduction/job-executor.png)
 
