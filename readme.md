@@ -17,6 +17,12 @@ Language aware symbol search. Symbol navigation in source code and diff. Outline
 
 ![Symbol Search](introduction/symbol-search.gif)
 
+### Docker First Kubernetes Native Build Farm
+
+Damn easy to set up a build farm to run massive CI builds as pods in Kubernetes. No any agents or runners required. Transparent support for Linux and Windows containers. 
+
+![Job Executor](introduction/job-executor.png)
+
 ### Code Discussions and Comprehensions
 
 Instant code discussions on arbitrary block of source code or diff without creating pull requests. Discussions stay with the code to help code comprehension even if file is changed or renamed. This also works for code discussions from pull requests. 
