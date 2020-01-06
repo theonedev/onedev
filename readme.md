@@ -36,6 +36,12 @@ Enforce pull request review under certain conditions with branch protections. Sp
 
 ![Branch Protection](introduction/branch-protection.gif)
 
+### Pull Request Query and Watch
+
+Find pull requests by title, status, comment and user, or those requiring review, requiring changes, including particular commits or issues, etc. Save query for quick access. Watch query to stay tuned with interesting pull requests.
+
+
+
 ### Docker First Kubernetes Native Build Farm
 
 Damn easy to set up a build farm to run massive CI builds as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
