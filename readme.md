@@ -10,7 +10,7 @@ With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. S
 </div>
 <p style="margin-bottom: 20px;">
 
-Being open source does not mean that features of OneDev are compromised compared to other commercial products. Instead it has many benefits:
+Feature highlights compared to other products in the market:
 
 ### Symbol Search and Navigation
 
@@ -24,23 +24,11 @@ Instant code discussions on arbitrary block of source code or diff without creat
 
 ![Code Comments](introduction/code-comments.gif)
 
-### Commit Query and Subscription
-
-Commit query by file, author, committer, date, or message. Save the query for quick access. Subscribe the query to be notified of interesting changes.
-
-![Commit Query](introduction/commit-query.gif)
-
 ### Flexible Pull Request Review Policies
 
 Enforce pull request review under certain conditions with branch protections. Specify required reviewers and builds for desired file patterns. 
 
 ![Branch Protection](introduction/branch-protection.gif)
-
-### Pull Request Query and Watch
-
-Find pull requests by title, status, comment and user, or those requiring review, requiring changes, including particular commits or issues, etc. Save query for quick access. Watch query to stay tuned with interesting pull requests.
-
-
 
 ### Docker First Kubernetes Native Build Farm
 
@@ -59,3 +47,9 @@ No YAML files to write. No complex grammars to remember. Create build spec for y
 Conditional build parameters. Create matrix builds by combining values of different parameters. Connect jobs to create pipelines via dependencies. Run massive job pods concurrently to speed up processing. Manual approval of certain jobs with role based control.
 
 ![Build Workflow](introduction/build-workflow.gif)
+
+### Powerful Query Language
+
+A powerful query language is available to execute sophisticated queries against projects, commits, builds, issues, pull requests or code comments, with auto suggestions and completions everywhere. Query can be saved for quick access later, and can be subscribed to get notified of interesting events.
+
+![Commit Query](introduction/commit-query.gif)
