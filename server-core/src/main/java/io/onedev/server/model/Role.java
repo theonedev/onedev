@@ -136,8 +136,7 @@ public class Role extends AbstractEntity implements Permission {
 		this.manageCodeComments = manageCodeComments;
 	}
 
-	@Editable(order=300, description="Specify source code permission. <b class='red'>NOTE: </b> Permission to "
-			+ "read/write code implies the permission to access artifacts of all jobs")
+	@Editable(order=300)
 	@ShowCondition("isCodePrivilegeVisible")
 	@NotNull
 	public CodePrivilege getCodePrivilege() {
