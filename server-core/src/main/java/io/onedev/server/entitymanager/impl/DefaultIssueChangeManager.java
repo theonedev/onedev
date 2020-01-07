@@ -144,6 +144,34 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		}
 	}
 	
+	private void checkBuild(TransitionSpec transition, Build build) {
+		if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
+			Project project = build.getProject();
+			BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
+			String branches = trigger.getBranches();
+			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+			if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
+					&& build.getStatus() == Build.Status.SUCCESSFUL
+					&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
+				IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false);
+				List<IssueCriteria> criterias = new ArrayList<>();
+				for (String fromState: transition.getFromStates()) 
+					criterias.add(new StateCriteria(fromState));
+				criterias.add(query.getCriteria());
+				query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+				Build.push(build);
+				try {
+					for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
+						issue.removeFields(transition.getRemoveFields());
+						changeState(issue, transition.getToState(), new HashMap<>(), null);
+					}
+				} finally {
+					Build.pop();
+				}
+			}
+		}               
+	}
+
 	@Transactional
 	@Override
 	public void changeMilestone(Issue issue, @Nullable Milestone milestone) {
@@ -238,35 +266,12 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 					@Override
 					public void run() {
+						SecurityUtils.bindAsSystem();
 						Build build = buildManager.load(buildId);
-						Project project = build.getProject();
-						for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
-							if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
-								BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
-								String branches = trigger.getBranches();
-								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-								if ((trigger.getJobNames() == null || PatternSet.parse(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
-										&& build.getStatus() == Build.Status.SUCCESSFUL
-										&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false);
-									List<IssueCriteria> criterias = new ArrayList<>();
-									for (String fromState: transition.getFromStates()) 
-										criterias.add(new StateCriteria(fromState));
-									criterias.add(query.getCriteria());
-									query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
-									Build.push(build);
-									try {
-										for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
-											issue.removeFields(transition.getRemoveFields());
-											changeState(issue, transition.getToState(), new HashMap<>(), null);
-										}
-									} finally {
-										Build.pop();
-									}
-								}
-							}
-						}
+						for (TransitionSpec transition: build.getProject().getIssueSetting().getTransitionSpecs(true)) 
+							checkBuild(transition, build);
 					}
+					
 				});
 			}
 		});
@@ -282,6 +287,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 					@Override
 					public void run() {
+						SecurityUtils.bindAsSystem();
 						Matcher matcher = new PathMatcher();
 						PullRequest request = pullRequestManager.load(requestId);
 						Project project = request.getTargetProject();
@@ -401,6 +407,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 						@Override
 						public void run() {
+							SecurityUtils.bindAsSystem();
 							Project project = projectManager.load(projectId);
 							ProjectAwareCommit commit = new ProjectAwareCommit(project, commitId);
 							for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
@@ -427,6 +434,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 									}
 								}
 							}
+                            for (Build build: buildManager.query(project, commitId)) {
+                            	for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) 
+                            		checkBuild(transition, build);
+                            }
 						}
 					});
 				}
