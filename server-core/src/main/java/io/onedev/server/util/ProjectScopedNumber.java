@@ -1,5 +1,8 @@
 package io.onedev.server.util;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -45,4 +48,26 @@ public class ProjectScopedNumber {
 		return number;
 	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof ProjectScopedNumber))
+			return false;
+		if (this == other)
+			return true;
+		ProjectScopedNumber otherProjectScopedNumber = (ProjectScopedNumber) other;
+		return new EqualsBuilder()
+				.append(project, otherProjectScopedNumber.project)
+				.append(number, otherProjectScopedNumber.number)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37).append(project).append(number).toHashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return getProject().getName() + "#" + getNumber();
+	}
 }

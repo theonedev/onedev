@@ -141,8 +141,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Sessional
 	@Override
 	public Issue find(String issueFQN) {
-		ProjectScopedNumber number = ProjectScopedNumber.from(issueFQN);
-		return find(number.getProject(), number.getNumber());
+		return find(ProjectScopedNumber.from(issueFQN));
+	}
+	
+	@Sessional
+	@Override
+	public Issue find(ProjectScopedNumber issueFQN) {
+		return find(issueFQN.getProject(), issueFQN.getNumber());
 	}
 	
 	@Transactional

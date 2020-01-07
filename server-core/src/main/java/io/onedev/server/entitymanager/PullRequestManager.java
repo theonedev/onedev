@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -14,11 +15,14 @@ import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectScopedNumber;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
     @Nullable 
     PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source);
+    
+    Map<ProjectAndBranch, PullRequest> findEffectives(ProjectAndBranch target, Collection<ProjectAndBranch> sources);
     
     @Nullable 
     PullRequest findOpen(ProjectAndBranch target, ProjectAndBranch source);
@@ -32,6 +36,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     @Nullable
     PullRequest find(String pullRequestFQN);
+    
+    @Nullable
+    PullRequest find(ProjectScopedNumber pullRequestFQN);
     
 	@Nullable
 	PullRequest findLatest(Project targetProject, User submitter);

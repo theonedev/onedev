@@ -582,6 +582,26 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
+	public Map<ProjectAndBranch, PullRequest> findEffectives(ProjectAndBranch target, Collection<ProjectAndBranch> sources) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		Collection<Criterion> criterions = new ArrayList<>();
+		for (ProjectAndBranch source: sources) {
+			Criterion merged = Restrictions.and(
+					Restrictions.eq("closeInfo.status", CloseInfo.Status.MERGED), 
+					Restrictions.eq("lastMergePreview.requestHead", source.getObjectName()));
+			criterions.add(Restrictions.and(ofTarget(target), ofSource(source), Restrictions.or(ofOpen(), merged)));
+		}
+		criteria.add(Restrictions.or(criterions.toArray(new Criterion[0])));
+		
+		Map<ProjectAndBranch, PullRequest> requests = new HashMap<>();
+		for(PullRequest request: query(criteria)) 
+			requests.put(new ProjectAndBranch(request.getSourceProject(), request.getSourceBranch()), request);
+		
+		return requests;
+	}
+	
+	@Sessional
+	@Override
 	public PullRequest findLatest(Project targetProject, User submitter) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
@@ -1053,14 +1073,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		criteria.add(Restrictions.eq("targetProject", targetProject));
 		criteria.add(Restrictions.eq("number", number));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 	
 	@Sessional
 	@Override
 	public PullRequest find(String pullRequestFQN) {
-		ProjectScopedNumber number = ProjectScopedNumber.from(pullRequestFQN);
-		return find(number.getProject(), number.getNumber());
+		return find(ProjectScopedNumber.from(pullRequestFQN));
+	}
+	
+	@Sessional
+	@Override
+	public PullRequest find(ProjectScopedNumber pullRequestFQN) {
+		return find(pullRequestFQN.getProject(), pullRequestFQN.getNumber());
 	}
 	
 	@Sessional

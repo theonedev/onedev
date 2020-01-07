@@ -31,6 +31,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
@@ -51,6 +53,7 @@ import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -73,6 +76,7 @@ import io.onedev.server.web.util.WicketUtils;
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
@@ -875,8 +879,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return getTargetProject();
 	}
 
-	public String getFQN() {
-		return getTargetProject() + "#" + getNumber();
+	public ProjectScopedNumber getFQN() {
+		return new ProjectScopedNumber(getTargetProject(), getNumber());
 	}
 	
 	public static void push(PullRequest request) {

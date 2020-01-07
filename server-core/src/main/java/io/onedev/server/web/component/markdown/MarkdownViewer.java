@@ -131,7 +131,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				String referenceId = params.getParameterValue(REFERENCE_ID).toString();
 				switch (referenceType) {
 				case "issue":
-					Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(referenceId));
+					Issue issue = OneDev.getInstance(IssueManager.class).find(referenceId);
 					if (issue != null) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
 						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s')", 
@@ -141,7 +141,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "pull request":
-					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(Long.valueOf(referenceId));
+					PullRequest request = OneDev.getInstance(PullRequestManager.class).find(referenceId);
 					if (request != null) {
 						String statusCss;
 						String status;
@@ -163,7 +163,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "build":
-					Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(referenceId));
+					Build build = OneDev.getInstance(BuildManager.class).find(referenceId);
 					if (build != null) {
 						String statusCss = "fa build-status build-status-" + build.getStatus().name().toLowerCase();
 						String statusTitle = build.getStatus().getDisplayName();
@@ -177,7 +177,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "user":
-					User user = OneDev.getInstance(UserManager.class).get(Long.valueOf(referenceId));
+					User user = OneDev.getInstance(UserManager.class).findByName(referenceId);
 					if (user != null) {
 						String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(user);
 						String script = String.format("onedev.server.markdown.renderUserTooltip('%s', '%s', '%s')", 

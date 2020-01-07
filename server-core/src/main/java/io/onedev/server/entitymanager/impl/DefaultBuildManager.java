@@ -171,10 +171,15 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Sessional
 	@Override
 	public Build find(String buildFQN) {
-		ProjectScopedNumber number = ProjectScopedNumber.from(buildFQN);
-		return find(number.getProject(), number.getNumber());
+		return find(ProjectScopedNumber.from(buildFQN));
 	}
 
+	@Sessional
+	@Override
+	public Build find(ProjectScopedNumber buildFQN) {
+		return find(buildFQN.getProject(), buildFQN.getNumber());
+	}
+	
 	@Transactional
 	@Override
 	public void save(Build build) {

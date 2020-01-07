@@ -15,10 +15,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.markdown.BuildParser;
-import io.onedev.server.util.markdown.IssueParser;
-import io.onedev.server.util.markdown.PullRequestParser;
+import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.markdown.ReferenceParser;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -39,59 +37,34 @@ public class ReferenceTransformer implements Function<String, String> {
 		String escaped = "<pre>" + HtmlEscape.escapeHtml5(t) + "</pre>";
 		Document doc = Jsoup.parseBodyFragment(escaped);
 		
-		new IssueParser() {
+		new ReferenceParser(Issue.class) {
 
 			@Override
-			protected String toHtml(Issue referenceable, String referenceText) {
+			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 						IssueActivitiesPage.paramsOf(referenceable, null)) + "'>" + referenceText + "</a>";
 			}
 
-			@Override
-			protected Issue findReferenceable(Project project, long number) {
-				if (SecurityUtils.canAccess(project))
-					return super.findReferenceable(project, number);
-				else
-					return null;
-			}
-			
 		}.parseReferences(project, doc);
 
-		new PullRequestParser() {
+		new ReferenceParser(PullRequest.class) {
 
 			@Override
-			protected String toHtml(PullRequest referenceable, String referenceText) {
+			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
 						PullRequestActivitiesPage.paramsOf(referenceable, null)) + "'>" + referenceText + "</a>";
 			}
 
-			@Override
-			protected PullRequest findReferenceable(Project project, long number) {
-				if (SecurityUtils.canReadCode(project))
-					return super.findReferenceable(project, number);
-				else
-					return null;
-			}
-			
 		}.parseReferences(project, doc);
 
-		new BuildParser() {
+		new ReferenceParser(Build.class) {
 
 			@Override
-			protected String toHtml(Build referenceable, String referenceText) {
+			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(BuildDashboardPage.class, 
 						BuildDashboardPage.paramsOf(referenceable, null)) + "'>" + referenceText + "</a>";
 			}
 
-			@Override
-			protected Build findReferenceable(Project project, long number) {
-				Build build= super.findReferenceable(project, number);
-				if (build != null && SecurityUtils.canAccess(build))
-					return build;
-				else
-					return null;
-			}
-			
 		}.parseReferences(project, doc);
 		
 		if (url != null) {

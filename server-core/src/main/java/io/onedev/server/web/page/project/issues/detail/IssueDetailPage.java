@@ -31,6 +31,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -256,13 +257,17 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	}
 
 	public static PageParameters paramsOf(Issue issue, @Nullable QueryPosition position) {
-		PageParameters params = ProjectPage.paramsOf(issue.getProject());
-		params.add(PARAM_ISSUE, issue.getNumber());
+		return paramsOf(issue.getFQN(), position);
+	}
+
+	public static PageParameters paramsOf(ProjectScopedNumber issueFQN, @Nullable QueryPosition position) {
+		PageParameters params = ProjectPage.paramsOf(issueFQN.getProject());
+		params.add(PARAM_ISSUE, issueFQN.getNumber());
 		if (position != null)
 			position.fill(params);
 		return params;
 	}
-
+	
 	@Override
 	public List<String> getInputNames() {
 		throw new UnsupportedOperationException();

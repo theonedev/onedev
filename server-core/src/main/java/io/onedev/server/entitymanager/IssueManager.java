@@ -13,6 +13,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -22,6 +23,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	
     @Nullable
     Issue find(Project project, long number);
+    
+    @Nullable
+    Issue find(ProjectScopedNumber issueFQN);
     
     @Nullable
     Issue find(String issueFQN);

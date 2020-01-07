@@ -4,8 +4,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Document;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 
 public class MentionProcessor extends MentionParser implements MarkdownProcessor {
 	
@@ -15,14 +13,12 @@ public class MentionProcessor extends MentionParser implements MarkdownProcessor
 	}
 
 	@Override
-	protected String toHtml(User user) {
+	protected String toHtml(String userName) {
 		if (RequestCycle.get() != null) {
-			return String.format("<a href='%s' class='reference mention' data-reference=%s>@%s</a>", 
-				RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user)),
-				user.getId(),
-				user.getName());
+			return String.format("<a class='reference mention' data-reference='%s'>@%s</a>", 
+					userName, userName);
 		} else {
-			return super.toHtml(user);
+			return super.toHtml(userName);
 		}
 	}
 	

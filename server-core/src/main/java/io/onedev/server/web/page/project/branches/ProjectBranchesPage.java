@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.branches;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -117,6 +118,27 @@ public class ProjectBranchesPage extends ProjectPage {
 				}
 			}
 			return refs;
+		}
+		
+	};
+	
+	private IModel<Map<ProjectAndBranch, PullRequest>> effectiveRequestsModel = 
+			new LoadableDetachableModel<Map<ProjectAndBranch, PullRequest>>() {
+
+		@Override
+		protected Map<ProjectAndBranch, PullRequest> load() {
+			ProjectAndBranch target = new ProjectAndBranch(getProject(), baseBranch);
+			
+			Collection<ProjectAndBranch> sources = new ArrayList<>();
+			for (long i=branchesView.getFirstItemOffset(); i<branchesModel.getObject().size(); i++) {
+				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
+					break;
+				RefInfo refInfo = branchesModel.getObject().get((int)i);
+				String branchName = GitUtils.ref2branch(refInfo.getRef().getName());
+				sources.add(new ProjectAndBranch(getProject(), branchName)); 
+			}
+			
+			return OneDev.getInstance(PullRequestManager.class).findEffectives(target, sources);
 		}
 		
 	};
@@ -612,10 +634,8 @@ public class ProjectBranchesPage extends ProjectPage {
 				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
 				item.add(actionsContainer.setOutputMarkupId(true));
 
-				PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-				PullRequest effectiveRequest = pullRequestManager.findEffective(
-						new ProjectAndBranch(getProject(), baseBranch), 
-						new ProjectAndBranch(getProject(), branch));
+				ProjectAndBranch source = new ProjectAndBranch(getProject(), branch);
+				PullRequest effectiveRequest = effectiveRequestsModel.getObject().get(source);
 				WebMarkupContainer requestLink;
 				if (effectiveRequest != null && ab.getAhead() != 0) {
 					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
@@ -775,6 +795,7 @@ public class ProjectBranchesPage extends ProjectPage {
 		branchesModel.detach();
 		aheadBehindsModel.detach();
 		aheadBehindWidthModel.detach();
+		effectiveRequestsModel.detach();
 		
 		super.onDetach();
 	}

@@ -101,6 +101,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
@@ -1233,8 +1234,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 
 	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position) {
-		PageParameters params = ProjectPage.paramsOf(request.getTargetProject());
-		params.add(PARAM_REQUEST, request.getNumber());
+		return paramsOf(request.getFQN(), position);
+	}
+	
+	public static PageParameters paramsOf(ProjectScopedNumber requestFQN, @Nullable QueryPosition position) {
+		PageParameters params = ProjectPage.paramsOf(requestFQN.getProject());
+		params.add(PARAM_REQUEST, requestFQN.getNumber());
 		if (position != null)
 			position.fill(params);
 		return params;

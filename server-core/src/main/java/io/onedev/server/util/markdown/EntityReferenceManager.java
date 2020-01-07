@@ -9,8 +9,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -31,6 +34,7 @@ import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.util.ProjectScopedNumber;
 
 @Singleton
 public class EntityReferenceManager {
@@ -52,8 +56,9 @@ public class EntityReferenceManager {
 	private void addReferenceChange(Issue issue, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
-			for (Issue referencedIssue: new IssueParser().parseReferences(issue.getProject(), document)) {
-				if (!referencedIssue.equals(issue)) {
+			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(issue.getProject(), document)) {
+				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
+				if (referencedIssue != null && !referencedIssue.equals(issue)) {
 					boolean found = false;
 					for (IssueChange change: referencedIssue.getChanges()) {
 						if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData) {
@@ -77,27 +82,30 @@ public class EntityReferenceManager {
 					}
 				}
 			}
-			for (PullRequest referencedRequest: new PullRequestParser().parseReferences(issue.getProject(), document)) {
-				boolean found = false;
-				for (PullRequestChange change: referencedRequest.getChanges()) {
-					if (change.getData() instanceof io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData) {
-						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData referencedFromIssueData = 
-								(io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData) change.getData();
-						if (referencedFromIssueData.getIssueId().equals(issue.getId())) {
-							found = true;
-							break;
+			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(issue.getProject(), document)) {
+				PullRequest referencedRequest  = OneDev.getInstance(PullRequestManager.class).find(referencedRequestFQN);
+				if (referencedRequest != null) {
+					boolean found = false;
+					for (PullRequestChange change: referencedRequest.getChanges()) {
+						if (change.getData() instanceof io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData) {
+							io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData referencedFromIssueData = 
+									(io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData) change.getData();
+							if (referencedFromIssueData.getIssueId().equals(issue.getId())) {
+								found = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!found) {
-					io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData referencedFromIssueData = 
-							new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData(issue);
-					PullRequestChange change = new PullRequestChange();
-					change.setData(referencedFromIssueData);
-					change.setDate(new Date());
-					change.setRequest(referencedRequest);
-					referencedRequest.getChanges().add(change);
-					pullRequestChangeManager.save(change);
+					if (!found) {
+						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData referencedFromIssueData = 
+								new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData(issue);
+						PullRequestChange change = new PullRequestChange();
+						change.setData(referencedFromIssueData);
+						change.setDate(new Date());
+						change.setRequest(referencedRequest);
+						referencedRequest.getChanges().add(change);
+						pullRequestChangeManager.save(change);
+					}
 				}
 			}
 		}
@@ -106,9 +114,11 @@ public class EntityReferenceManager {
 	private void addReferenceChange(PullRequest request, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
-			for (Issue referencedIssue: new IssueParser().parseReferences(request.getTargetProject(), document)) {
-				if (!referencedIssue.getProject().equals(request.getTargetProject()) 
-						|| !request.getFixedIssueNumbers().contains(referencedIssue.getNumber())) {
+			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(request.getTargetProject(), document)) {
+				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
+				if (referencedIssue != null 
+						&& (!referencedIssue.getProject().equals(request.getTargetProject()) 
+								|| !request.getFixedIssueNumbers().contains(referencedIssue.getNumber()))) {
 					boolean found = false;
 					for (IssueChange change: referencedIssue.getChanges()) {
 						if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData) {
@@ -132,8 +142,9 @@ public class EntityReferenceManager {
 					}
 				}
 			}
-			for (PullRequest referencedRequest: new PullRequestParser().parseReferences(request.getTargetProject(), document)) {
-				if (!referencedRequest.equals(request)) {
+			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(request.getTargetProject(), document)) {
+				PullRequest referencedRequest = OneDev.getInstance(PullRequestManager.class).find(referencedRequestFQN);
+				if (referencedRequest != null && !referencedRequest.equals(request)) {
 					boolean found = false;
 					for (PullRequestChange change: referencedRequest.getChanges()) {
 						if (change.getData() instanceof io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData) {
@@ -163,50 +174,56 @@ public class EntityReferenceManager {
 	private void addReferenceChange(CodeComment comment, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
-			for (Issue referencedIssue: new IssueParser().parseReferences(comment.getProject(), document)) {
-				boolean found = false;
-				for (IssueChange change: referencedIssue.getChanges()) {
-					if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData) {
-						io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData referencedFromCodeCommentData = 
-								(io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData) change.getData();
-						if (referencedFromCodeCommentData.getCommentId().equals(comment.getId())) {
-							found = true;
-							break;
+			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(comment.getProject(), document)) {
+				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
+				if (referencedIssue != null) {
+					boolean found = false;
+					for (IssueChange change: referencedIssue.getChanges()) {
+						if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData) {
+							io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData referencedFromCodeCommentData = 
+									(io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData) change.getData();
+							if (referencedFromCodeCommentData.getCommentId().equals(comment.getId())) {
+								found = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!found) {
-					io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData referencedFromCodeCommentData = 
-							new io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData(comment);
-					IssueChange change = new IssueChange();
-					change.setData(referencedFromCodeCommentData);
-					change.setDate(new Date());
-					change.setIssue(referencedIssue);
-					referencedIssue.getChanges().add(change);
-					issueChangeManager.save(change);
+					if (!found) {
+						io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData referencedFromCodeCommentData = 
+								new io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData(comment);
+						IssueChange change = new IssueChange();
+						change.setData(referencedFromCodeCommentData);
+						change.setDate(new Date());
+						change.setIssue(referencedIssue);
+						referencedIssue.getChanges().add(change);
+						issueChangeManager.save(change);
+					}
 				}
 			}
-			for (PullRequest referencedRequest: new PullRequestParser().parseReferences(comment.getProject(), document)) {
-				boolean found = false;
-				for (PullRequestChange change: referencedRequest.getChanges()) {
-					if (change.getData() instanceof io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData) {
-						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = 
-								(io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData) change.getData();
-						if (referencedFromCodeCommentData.getCommentId().equals(comment.getId())) {
-							found = true;
-							break;
+			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(comment.getProject(), document)) {
+				PullRequest referencedRequest = OneDev.getInstance(PullRequestManager.class).find(referencedRequestFQN);
+				if (referencedRequest != null) {
+					boolean found = false;
+					for (PullRequestChange change: referencedRequest.getChanges()) {
+						if (change.getData() instanceof io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData) {
+							io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = 
+									(io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData) change.getData();
+							if (referencedFromCodeCommentData.getCommentId().equals(comment.getId())) {
+								found = true;
+								break;
+							}
 						}
 					}
-				}
-				if (!found) {
-					io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = 
-							new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData(comment);
-					PullRequestChange change = new PullRequestChange();
-					change.setData(referencedFromCodeCommentData);
-					change.setDate(new Date());
-					change.setRequest(referencedRequest);
-					referencedRequest.getChanges().add(change);
-					pullRequestChangeManager.save(change);
+					if (!found) {
+						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = 
+								new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData(comment);
+						PullRequestChange change = new PullRequestChange();
+						change.setData(referencedFromCodeCommentData);
+						change.setDate(new Date());
+						change.setRequest(referencedRequest);
+						referencedRequest.getChanges().add(change);
+						pullRequestChangeManager.save(change);
+					}
 				}
 			}
 		}

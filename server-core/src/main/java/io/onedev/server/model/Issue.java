@@ -29,6 +29,8 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -45,6 +47,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.IssueFacade;
@@ -63,6 +66,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="commentCount"), @Index(columnList="o_milestone_id"), 
 				@Index(columnList="updateDate")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Editable
@@ -502,8 +506,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return getProject();
 	}
 
-	public String getFQN() {
-		return getProject() + "#" + getNumber();
+	public ProjectScopedNumber getFQN() {
+		return new ProjectScopedNumber(getProject(), getNumber());
 	}
 	
 }

@@ -132,7 +132,14 @@ public class IssueNotificationManager {
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
 				String rendered = markdownManager.render(markdown);
-				Collection<User> mentionUsers = new MentionParser().parseMentions(rendered);
+				
+				Collection<User> mentionUsers = new HashSet<>();
+				for (String userName: new MentionParser().parseMentions(rendered)) {
+					User mentionUser = userManager.findByName(userName);
+					if (mentionUser != null) 
+						mentionUsers.add(mentionUser);
+				}
+				
 				if (!mentionUsers.isEmpty()) {
 					for (User mentionedUser: mentionUsers)
 						watch(issue, mentionedUser, true);

@@ -63,6 +63,7 @@ import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.inputspec.SecretInput;
@@ -718,8 +719,8 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public String getFQN() {
-		return getProject().getName() + "#" + getNumber();
+	public ProjectScopedNumber getFQN() {
+		return new ProjectScopedNumber(getProject(), getNumber());
 	}
 	
 	public Collection<String> getOnBranches() {

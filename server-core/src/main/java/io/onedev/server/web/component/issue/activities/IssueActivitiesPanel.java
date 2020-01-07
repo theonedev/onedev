@@ -122,23 +122,23 @@ public abstract class IssueActivitiesPanel extends Panel {
 				if (change.getData() instanceof IssueReferencedFromIssueData) {
 					IssueReferencedFromIssueData referencedFromIssueData = (IssueReferencedFromIssueData) change.getData();
 					Issue issue = OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId());
-					if (issue != null && SecurityUtils.canAccess(issue.getProject()))
+					if (issue != null)
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueReferencedFromPullRequestData) {
 					IssueReferencedFromPullRequestData referencedFromPullRequestData = (IssueReferencedFromPullRequestData) change.getData();
 					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId());
-					if (request != null && SecurityUtils.canReadCode(request.getTargetProject()))
+					if (request != null)
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueReferencedFromCodeCommentData) {
 					IssueReferencedFromCodeCommentData referencedFromCodeCommentData = (IssueReferencedFromCodeCommentData) change.getData();
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
-					if (comment != null && SecurityUtils.canReadCode(comment.getProject()))
+					if (comment != null)
 						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssueCommittedData && SecurityUtils.canReadCode(getIssue().getProject())) {
+				} else if (change.getData() instanceof IssueCommittedData) {
 					IssueCommittedData issueCommittedData = (IssueCommittedData) change.getData();
 					if (getIssue().getProject().getRevCommit(issueCommittedData.getCommitHash(), false) != null)
 						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssuePullRequestData && SecurityUtils.canReadCode(getIssue().getProject())) {
+				} else if (change.getData() instanceof IssuePullRequestData) {
 					IssuePullRequestData issuePullRequestData = (IssuePullRequestData) change.getData();
 					if (issuePullRequestData.getPullRequest() != null)
 						otherActivities.add(new IssueChangeActivity(change));

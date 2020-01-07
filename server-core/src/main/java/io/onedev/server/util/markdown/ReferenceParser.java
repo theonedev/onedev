@@ -2,7 +2,6 @@ package io.onedev.server.util.markdown;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,12 +21,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.Referenceable;
-import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.util.validation.ProjectNameValidator;
 
-public abstract class ReferenceParser<T extends Referenceable> {
+public class ReferenceParser {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("code", "a");
 	
@@ -35,32 +33,24 @@ public abstract class ReferenceParser<T extends Referenceable> {
 	
 	private final String referenceType;
 	
-	public ReferenceParser() {
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ReferenceParser.class, getClass());
-		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
-			Class<?> referenceClass = typeArguments.get(0);
-			referenceType = referenceClass.getSimpleName();
-			String[] words = StringUtils.split(WordUtils.uncamel(referenceType).toLowerCase(), " ");
-			StringBuilder builder = new StringBuilder("(^|\\W+)(");
-			for (int i=0; i<words.length-1; i++) 
-				builder.append(words[i]).append("\\s*");
-			builder.append(words[words.length-1]).append("\\s+)(");
-			builder.append(ProjectNameValidator.PATTERN.pattern());
-			builder.append(")?#(\\d+)(?=$|\\W+)");
-			pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
-		} else {
-			throw new RuntimeException("Subclass of ReferenceParser must realize the type argument <T>");
-		}
+	public ReferenceParser(Class<? extends AbstractEntity> referenceClass) {
+		referenceType = referenceClass.getSimpleName();
+		String[] words = StringUtils.split(WordUtils.uncamel(referenceType).toLowerCase(), " ");
+		StringBuilder builder = new StringBuilder("(^|\\W+)(");
+		for (int i=0; i<words.length-1; i++) 
+			builder.append(words[i]).append("\\s*");
+		builder.append(words[words.length-1]).append("\\s+)(");
+		builder.append(ProjectNameValidator.PATTERN.pattern());
+		builder.append(")?#(\\d+)(?=$|\\W+)");
+		pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
 	}
 	
-	public Collection<T> parseReferences(Project project, String rendered) {
+	public Collection<ProjectScopedNumber> parseReferences(Project project, String rendered) {
 		return parseReferences(project, Jsoup.parseBodyFragment(rendered));		
 	}
 	
-	protected abstract T findReferenceable(Project project, long number);
-	
-	public Collection<T> parseReferences(@Nullable Project project, Document document) {
-		Collection<T> references = new HashSet<>();
+	public Collection<ProjectScopedNumber> parseReferences(@Nullable Project project, Document document) {
+		Collection<ProjectScopedNumber> references = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
@@ -95,13 +85,9 @@ public abstract class ReferenceParser<T extends Referenceable> {
 				
 				String referenceTag;
 				if (referenceProject != null) {
-					T referenceable = findReferenceable(referenceProject, referenceNumber);
-					if (referenceable != null) {
-						references.add(referenceable);
-						referenceTag = toHtml(referenceable, referenceText);
-					} else {
-						referenceTag = referenceText;
-					}
+					ProjectScopedNumber referenceable = new ProjectScopedNumber(referenceProject, referenceNumber);
+					references.add(referenceable);
+					referenceTag = toHtml(referenceable, referenceText);
 				} else {
 					referenceTag = referenceText; 
 				}
@@ -113,7 +99,7 @@ public abstract class ReferenceParser<T extends Referenceable> {
 		return references;
 	}
 
-	protected String toHtml(T referenceable, String referenceText) {
+	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 		return referenceText;
 	}
 	

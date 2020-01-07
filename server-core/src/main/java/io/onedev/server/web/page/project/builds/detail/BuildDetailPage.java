@@ -38,6 +38,7 @@ import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.JobIdentity;
@@ -421,8 +422,12 @@ public abstract class BuildDetailPage extends ProjectPage
 	}
 
 	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position) {
-		PageParameters params = ProjectPage.paramsOf(build.getProject());
-		params.add(PARAM_BUILD, build.getNumber());
+		return paramsOf(build.getFQN(), position);
+	}
+	
+	public static PageParameters paramsOf(ProjectScopedNumber buildFQN, @Nullable QueryPosition position) {
+		PageParameters params = ProjectPage.paramsOf(buildFQN.getProject());
+		params.add(PARAM_BUILD, buildFQN.getNumber());
 		if (position != null)
 			position.fill(params);
 		return params;

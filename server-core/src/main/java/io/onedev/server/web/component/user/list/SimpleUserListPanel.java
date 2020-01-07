@@ -2,15 +2,13 @@ package io.onedev.server.web.component.user.list;
 
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
-import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 
 @SuppressWarnings("serial")
 abstract class SimpleUserListPanel extends Panel {
@@ -25,11 +23,10 @@ abstract class SimpleUserListPanel extends Panel {
 
 		RepeatingView usersView = new RepeatingView("users");
 		for (User user:  getUsers()) {
-			Link<Void> link = new BookmarkablePageLink<Void>(usersView.newChildId(), 
-					UserProfilePage.class, UserProfilePage.paramsOf(user));
-			link.add(new UserAvatar("avatar", user));
-			link.add(new Label("name", user.getDisplayName()));
-			usersView.add(link);
+			WebMarkupContainer container = new WebMarkupContainer(usersView.newChildId());
+			container.add(new UserAvatar("avatar", user));
+			container.add(new Label("name", user.getDisplayName()));
+			usersView.add(container);
 		}
 		add(usersView);
 	}

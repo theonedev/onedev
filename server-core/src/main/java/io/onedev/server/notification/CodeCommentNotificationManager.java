@@ -1,13 +1,14 @@
 package io.onedev.server.notification;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.HashSet;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
@@ -26,11 +27,15 @@ public class CodeCommentNotificationManager {
 	
 	private final UrlManager urlManager;
 	
+	private final UserManager userManager;
+	
 	@Inject
-	public CodeCommentNotificationManager(MailManager mailManager, MarkdownManager markdownManager, UrlManager urlManager) {
+	public CodeCommentNotificationManager(MailManager mailManager, MarkdownManager markdownManager, 
+			UrlManager urlManager, UserManager userManager) {
 		this.mailManager = mailManager;
 		this.markdownManager = markdownManager;
 		this.urlManager = urlManager;
+		this.userManager = userManager;
 	}
 	
 	@Transactional
@@ -40,8 +45,15 @@ public class CodeCommentNotificationManager {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			String rendered = markdownManager.render(markdown);
-			Collection<User> mentionUsers = new MentionParser().parseMentions(rendered);
-			if (!mentionUsers.isEmpty()) {
+			
+			Collection<String> toList = new HashSet<>();
+			for (String userName: new MentionParser().parseMentions(rendered)) {
+				User user = userManager.findByName(userName);
+				if (user != null) 
+					toList.add(user.getEmail());
+			}
+			
+			if (!toList.isEmpty()) {
 				String url;
 				if (event instanceof CodeCommentCreated)
 					url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
@@ -54,8 +66,8 @@ public class CodeCommentNotificationManager {
 					String subject = String.format("You are mentioned in a code comment on file '%s'", 
 							event.getComment().getMarkPos().getPath());
 					String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-					mailManager.sendMailAsync(mentionUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
-							subject, body);
+					
+					mailManager.sendMailAsync(toList, subject, body);
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package io.onedev.server.util.validation;
 
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -11,6 +12,8 @@ import io.onedev.server.util.validation.annotation.GroupName;
 
 public class GroupNameValidator implements ConstraintValidator<GroupName, String> {
 
+	public static final Pattern PATTERN = Pattern.compile("\\w([\\w-\\.]*\\w)?");
+	
 	private boolean interpolative;
 	
 	private String message;
@@ -39,7 +42,16 @@ public class GroupNameValidator implements ConstraintValidator<GroupName, String
 			return true; // will be handled by interpolative validator
 		}
 		
-		if (value.equals("new")) {
+		if (!PATTERN.matcher(value).matches()) {
+			constraintContext.disableDefaultConstraintViolation();
+			String message = this.message;
+			if (message.length() == 0) {
+				message = "Should start and end with alphanumeric or underscore. "
+						+ "Only alphanumeric, underscore, dash, and dot are allowed in the middle.";
+			}
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
+		} else if (value.equals("new")) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)

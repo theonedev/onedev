@@ -13,9 +13,6 @@ import org.jsoup.select.NodeTraversor;
 import com.google.common.collect.ImmutableSet;
 
 import io.onedev.commons.utils.HtmlUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
 import io.onedev.server.util.TextNodeVisitor;
 
 public class MentionParser {
@@ -24,12 +21,12 @@ public class MentionParser {
 	
 	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)($|\\s+)");
 
-	public Collection<User> parseMentions(String rendered) {
+	public Collection<String> parseMentions(String rendered) {
 		return parseMentions(Jsoup.parseBodyFragment(rendered));		
 	}
 	
-	public Collection<User> parseMentions(Document document) {
-		Collection<User> mentions = new HashSet<>();
+	public Collection<String> parseMentions(Document document) {
+		Collection<String> mentions = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
@@ -45,20 +42,13 @@ public class MentionParser {
 		NodeTraversor tranversor = new NodeTraversor(visitor);
 		tranversor.traverse(document);
 		
-		UserManager userManager = OneDev.getInstance(UserManager.class);
-		
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = PATTERN.matcher(node.getWholeText());
 			while (matcher.find()) {
 				String userName = matcher.group(2);
 				String userTag;
-				User user = userManager.findByName(userName);
-				if (user != null) {
-					mentions.add(user);
-					userTag = toHtml(user);
-				} else {
-					userTag = "@" + userName;
-				}
+				mentions.add(userName);
+				userTag = toHtml(userName);
 				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + userTag + matcher.group(3));
 			}
 			HtmlUtils.appendTail(matcher, node);
@@ -67,8 +57,8 @@ public class MentionParser {
 		return mentions;
 	}
 
-	protected String toHtml(User user) {
-		return "@" + user.getName();
+	protected String toHtml(String userName) {
+		return "@" + userName;
 	}
 	
 }

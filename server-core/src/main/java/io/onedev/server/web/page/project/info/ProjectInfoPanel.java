@@ -18,6 +18,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.util.SecurityUtils;
@@ -27,8 +28,8 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
+import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -48,7 +49,25 @@ public abstract class ProjectInfoPanel extends Panel {
 		super.onInitialize();
 		
 		add(new Label("name", getProject().getName()));
-		add(new UserIdentPanel("owner", getProject().getOwner(), Mode.NAME));
+		
+		User owner = getProject().getOwner();
+		if (SecurityUtils.isAdministrator()) {
+			add(new ViewStateAwarePageLink<Void>("owner", UserProfilePage.class, UserProfilePage.paramsOf(owner))
+					.setBody(Model.of(owner.getDisplayName())));
+		} else if (owner.equals(SecurityUtils.getUser())) {
+			add(new ViewStateAwarePageLink<Void>("owner", MyProfilePage.class)
+					.setBody(Model.of(owner.getDisplayName())));
+		} else {
+			add(new Label("owner", owner.getDisplayName()) {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("span");
+				}
+				
+			});
+		}
 
 		add(new ModalLink("forkNow") {
 			

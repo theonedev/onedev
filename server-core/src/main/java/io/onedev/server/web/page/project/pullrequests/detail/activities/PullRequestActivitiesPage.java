@@ -55,7 +55,6 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -160,17 +159,17 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				if (change.getData() instanceof PullRequestReferencedFromIssueData) {
 					PullRequestReferencedFromIssueData referencedFromIssueData = (PullRequestReferencedFromIssueData) change.getData();
 					Issue issue = OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId());
-					if (issue != null && SecurityUtils.canAccess(issue.getProject()))
+					if (issue != null)
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else if (change.getData() instanceof PullRequestReferencedFromPullRequestData) {
 					PullRequestReferencedFromPullRequestData referencedFromPullRequestData = (PullRequestReferencedFromPullRequestData) change.getData();
 					PullRequest otherRequest = OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId());
-					if (otherRequest != null && SecurityUtils.canReadCode(otherRequest.getTargetProject()))
+					if (otherRequest != null)
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else if (change.getData() instanceof PullRequestReferencedFromCodeCommentData) {
 					PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = (PullRequestReferencedFromCodeCommentData) change.getData();
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
-					if (comment != null && SecurityUtils.canReadCode(comment.getProject()))
+					if (comment != null)
 						otherActivities.add(new PullRequestChangeActivity(change));
 				} else {
 					otherActivities.add(new PullRequestChangeActivity(change));

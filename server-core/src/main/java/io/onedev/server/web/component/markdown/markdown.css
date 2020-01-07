@@ -375,3 +375,6 @@ body.fullscreen {
 	background: url("/img/ajax-indicator-big.gif") center no-repeat;
 }
 
+.reference.mention {
+	text-decoration: none;
+}

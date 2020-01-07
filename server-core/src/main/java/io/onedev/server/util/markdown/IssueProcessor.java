@@ -7,29 +7,26 @@ import org.jsoup.nodes.Document;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 
-public class IssueProcessor extends IssueParser implements MarkdownProcessor {
+public class IssueProcessor extends ReferenceParser implements MarkdownProcessor {
 	
+	public IssueProcessor() {
+		super(Issue.class);
+	}
+
 	@Override
 	public void process(@Nullable Project project, Document document, Object context) {
 		parseReferences(project, document);
 	}
 
 	@Override
-	protected Issue findReferenceable(Project project, long number) {
-		if (SecurityUtils.canAccess(project))
-			return super.findReferenceable(project, number);
-		else
-			return null;
-	}
-
-	@Override
-	protected String toHtml(Issue issue, String text) {
+	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 		CharSequence url = RequestCycle.get().urlFor(
-				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null)); 
-		return String.format("<a href='%s' class='issue reference' data-reference=%d>%s</a>", url, issue.getId(), text);
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(referenceable, null)); 
+		return String.format("<a href='%s' class='issue reference' data-reference='%s'>%s</a>", 
+				url, referenceable.toString(), referenceText);
 	}
 	
 }
