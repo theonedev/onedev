@@ -52,4 +52,4 @@ Conditional build parameters. Create matrix builds by combining values of differ
 
 A powerful query language is available to execute sophisticated queries against projects, commits, builds, issues, pull requests or code comments, with auto suggestions and completions everywhere. Query can be saved for quick access later, and can be subscribed to get notified of interesting events.
 
-![Commit Query](introduction/commit-query.gif)
+![Powerful Query](introduction/powerful-query.gif)
