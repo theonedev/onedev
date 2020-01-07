@@ -14,6 +14,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -47,6 +48,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.query.IssueQueryConstants;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -72,16 +74,14 @@ public abstract class IssueOperationsPanel extends Panel {
 			replace(actionOptions);
 			target.add(actionOptions);
 		} else {
-			add(actionOptions);
+			addOrReplace(actionOptions);
 		}
 	}
 	
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
+	protected void onBeforeRender() {
 		WebMarkupContainer stateContainer = new WebMarkupContainer("state");
-		add(stateContainer);
+		addOrReplace(stateContainer);
 		stateContainer.add(new IssueStateLabel("state", new AbstractReadOnlyModel<Issue>() {
 
 			@Override
@@ -153,7 +153,7 @@ public abstract class IssueOperationsPanel extends Panel {
 										editor.newComponentContext(), fieldBean, trigger.getPromptFields());
 								IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
 								manager.changeState(getIssue(), transition.getToState(), fieldValues, comment);
-								onStateChanged(target);
+								target.add(IssueOperationsPanel.this);
 							}
 							
 						});
@@ -179,7 +179,7 @@ public abstract class IssueOperationsPanel extends Panel {
 			}
 		}
 		
-		add(transitionsView);
+		addOrReplace(transitionsView);
 
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null) {
@@ -216,7 +216,7 @@ public abstract class IssueOperationsPanel extends Panel {
 			query = null;
 		
 		Component createIssueButton = newCreateIssueButton("newIssue", query);
-		add(createIssueButton);
+		addOrReplace(createIssueButton);
 		
 		stateContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
@@ -231,11 +231,39 @@ public abstract class IssueOperationsPanel extends Panel {
 			
 		}));
 		
-		add(new SideInfoLink("moreInfo"));
+		addOrReplace(new SideInfoLink("moreInfo"));
 		
 		newEmptyActionOptions(null);
+		
+		super.onBeforeRender();
 	}
 	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				handler.add(IssueOperationsPanel.this);
+			}
+			
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+				handler.add(IssueOperationsPanel.this);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+			}
+			
+		});
+		
+		setOutputMarkupId(true);
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -243,8 +271,6 @@ public abstract class IssueOperationsPanel extends Panel {
 	}
 
 	protected abstract Issue getIssue();
-	
-	protected abstract void onStateChanged(AjaxRequestTarget target);
 	
 	protected abstract Component newCreateIssueButton(String componentId, String templateQuery);
 	

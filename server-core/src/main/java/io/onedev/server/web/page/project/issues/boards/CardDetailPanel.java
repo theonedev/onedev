@@ -78,8 +78,10 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	}
 	
 	@Override
-	protected void onBeforeRender() {
-		addOrReplace(new IssueTitlePanel("title") {
+	protected void onInitialize() {
+		super.onInitialize();
+
+		add(new IssueTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {
@@ -88,16 +90,11 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 		});
 		
-		addOrReplace(new IssueOperationsPanel("operations") {
+		add(new IssueOperationsPanel("operations") {
 
 			@Override
 			protected Issue getIssue() {
 				return CardDetailPanel.this.getIssue();
-			}
-
-			@Override
-			protected void onStateChanged(AjaxRequestTarget target) {
-				target.add(CardDetailPanel.this);
 			}
 
 			@Override
@@ -106,7 +103,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			}
 
 		});
-
+		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new AjaxActionTab(Model.of("Activities")) {
 
@@ -153,9 +150,9 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			});
 		}
 		
-		addOrReplace(new Tabbable("tabs", tabs).setOutputMarkupId(true));
+		add(new Tabbable("tabs", tabs).setOutputMarkupId(true));
 		
-		addOrReplace(new SideInfoPanel("moreInfo") {
+		add(new SideInfoPanel("moreInfo") {
 
 			@Override
 			protected Component newContent(String componentId) {
@@ -196,15 +193,23 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			}
 			
 		});
-		addOrReplace(activities = newActivitiesPanel());
+		add(activities = newActivitiesPanel());
 		
-		super.onBeforeRender();
-	}
+		add(new AjaxLink<Void>("close") {
 
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
 
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onClose(target);
+			}
+			
+		});
+		
 		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 			
 			@Override
@@ -247,21 +252,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			}
 			
 		});	
-		
-		add(new AjaxLink<Void>("close") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onClose(target);
-			}
-			
-		});
 		
 		setOutputMarkupId(true);
 	}

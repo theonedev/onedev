@@ -19,6 +19,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -35,6 +36,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
@@ -57,6 +60,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -81,10 +85,8 @@ public abstract class IssueSidePanel extends Panel {
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		add(new EntityNavPanel<Issue>("issueNav") {
+	protected void onBeforeRender() {
+		addOrReplace(new EntityNavPanel<Issue>("issueNav") {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
@@ -108,11 +110,11 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		add(newFieldsContainer());
-		add(newMilestoneContainer());
-		add(newVotesContainer());
+		addOrReplace(newFieldsContainer());
+		addOrReplace(newMilestoneContainer());
+		addOrReplace(newVotesContainer());
 		
-		add(new EntityWatchesPanel("watches") {
+		addOrReplace(new EntityWatchesPanel("watches") {
 
 			@Override
 			protected void onSaveWatch(EntityWatch watch) {
@@ -131,7 +133,33 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		add(newDeleteLink("delete"));
+		addOrReplace(newDeleteLink("delete"));		
+		
+		super.onBeforeRender();
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		
+		add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				handler.add(IssueSidePanel.this);
+			}
+			
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+				handler.add(IssueSidePanel.this);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Lists.newArrayList(Issue.getWebSocketObservable(getIssue().getId()));
+			}
+			
+		});
 		
 		setOutputMarkupId(true);
 	}
@@ -159,7 +187,6 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		};
-		
 		fragment.setOutputMarkupId(true);
 		
 		fragment.add(new ListView<Input>("fields", fieldsModel) {

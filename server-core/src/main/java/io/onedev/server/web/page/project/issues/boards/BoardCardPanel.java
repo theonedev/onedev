@@ -34,10 +34,12 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
+import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 abstract class BoardCardPanel extends GenericPanel<Issue> {
@@ -128,6 +130,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
 						modal.close();
+						OneDev.getInstance(WebSocketManager.class).notifyObserverChange((BasePage) BoardCardPanel.this.getPage());
 					}
 
 					@Override
@@ -161,6 +164,13 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onDeletedIssue(AjaxRequestTarget target) {
 						modal.close();
+						OneDev.getInstance(WebSocketManager.class).notifyObserverChange((BasePage) BoardCardPanel.this.getPage());
+					}
+
+					@Override
+					protected void onAfterRender() {
+						OneDev.getInstance(WebSocketManager.class).notifyObserverChange((BasePage) getPage());
+						super.onAfterRender();
 					}
 
 				};

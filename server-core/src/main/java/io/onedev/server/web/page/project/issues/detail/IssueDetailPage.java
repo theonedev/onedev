@@ -114,11 +114,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			}
 
 			@Override
-			protected void onStateChanged(AjaxRequestTarget target) {
-				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
-			}
-
-			@Override
 			protected Component newCreateIssueButton(String componentId, String templateQuery) {
 				return new BookmarkablePageLink<Void>(componentId, NewIssuePage.class, NewIssuePage.paramsOf(getProject(), templateQuery));
 			}

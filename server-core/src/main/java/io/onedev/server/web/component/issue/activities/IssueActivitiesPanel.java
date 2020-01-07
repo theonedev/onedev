@@ -188,8 +188,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 		return row;
 	}
 	
-	
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
