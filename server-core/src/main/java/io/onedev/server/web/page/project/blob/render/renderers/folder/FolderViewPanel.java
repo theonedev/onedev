@@ -48,6 +48,7 @@ import io.onedev.server.web.component.user.card.PersonCardPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.util.EditParamsAware;
 
 @SuppressWarnings("serial")
 public class FolderViewPanel extends Panel {
@@ -258,7 +259,8 @@ public class FolderViewPanel extends Panel {
 				ProjectBlobPage.State state = new ProjectBlobPage.State();
 				state.blobIdent = readmeModel.getObject();
 				state.mode = Mode.EDIT;
-				state.editFromFolder = true;
+				state.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
+				state.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
 				setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(context.getProject(), state));
 			}
 

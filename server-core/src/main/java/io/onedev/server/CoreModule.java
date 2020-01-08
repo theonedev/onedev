@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -80,6 +81,7 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.DefaultJobManager;
 import io.onedev.server.buildspec.job.JobManager;
@@ -445,7 +447,12 @@ public class CoreModule extends AbstractPluginModule {
 
 					@Override
 					public void execute(Runnable command) {
-						super.execute(SecurityUtils.inheritSubject(command));
+						try {
+							super.execute(SecurityUtils.inheritSubject(command));
+						} catch (RejectedExecutionException e) {
+							if (!isShutdown())
+								throw ExceptionUtils.unchecked(e);
+						}
 					}
 
 		        };

@@ -43,8 +43,8 @@ import io.onedev.commons.jsyntax.TextToken;
 import io.onedev.commons.jsyntax.TokenUtils;
 import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlameBlock;
@@ -81,6 +81,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
+import io.onedev.server.web.util.EditParamsAware;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel implements SourceAware {
@@ -230,6 +231,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 						ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
 						editState.requestId = request.getId();
 						editState.mode = Mode.EDIT;
+						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
+						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
 						PageParameters params = ProjectBlobPage.paramsOf(request.getSourceProject(), editState);
 						setResponsePage(ProjectBlobPage.class, params);
 					}
@@ -246,6 +249,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					public void onClick() {
 						ProjectBlobPage.State editState = new ProjectBlobPage.State(change.getBlobIdent());
 						editState.mode = Mode.EDIT;
+						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
+						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
 						PageParameters params = ProjectBlobPage.paramsOf(project, editState);
 						setResponsePage(ProjectBlobPage.class, params);
 					}

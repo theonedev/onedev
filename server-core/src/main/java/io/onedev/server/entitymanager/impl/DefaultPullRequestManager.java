@@ -401,7 +401,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		pullRequestChangeManager.save(change);
 	}
 
-	private void checkUpdate(PullRequest request) {
+	@Override
+	public void checkUpdate(PullRequest request) {
 		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			ObjectId mergeBase = GitUtils.getMergeBase(
 					request.getTargetProject().getRepository(), request.getTarget().getObjectId(), 

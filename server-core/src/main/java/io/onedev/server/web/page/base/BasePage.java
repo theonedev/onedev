@@ -307,5 +307,4 @@ public abstract class BasePage extends WebPage {
 	protected int getPageRefreshInterval() {
 		return 0;
 	}
-	
 }

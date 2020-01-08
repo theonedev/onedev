@@ -28,7 +28,7 @@ import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 @SuppressWarnings("serial")
 public abstract class EntityWatchesPanel extends Panel {
 
-	private static final int MAX_DISPLAY_AVATARS = 0;
+	private static final int MAX_DISPLAY_AVATARS = 20;
 	
 	public EntityWatchesPanel(String id) {
 		super(id);

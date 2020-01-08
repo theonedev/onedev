@@ -232,7 +232,7 @@ public abstract class BlobViewPanel extends Panel {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				context.onModeChange(target, Mode.VIEW, !context.isViewPlain(), false, null);
+				context.onModeChange(target, Mode.VIEW, !context.isViewPlain(), null);
 			}
 			
 		}));

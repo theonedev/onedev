@@ -19,10 +19,8 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
-import org.eclipse.jgit.lib.FileMode;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -75,17 +73,10 @@ public abstract class BlobEditPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				if (context.getMode() == Mode.EDIT && context.isEditFromFolder()) {
-					BlobIdent blobIdent = new BlobIdent(context.getBlobIdent());
-					if (blobIdent.path.contains("/"))
-						blobIdent.path = StringUtils.substringBeforeLast(blobIdent.path, "/");
-					else
-						blobIdent.path = null;
-					blobIdent.mode = FileMode.TREE.getBits();
-					context.onSelect(target, blobIdent, null);
-				} else {
+				if (context.getUrlBeforeEdit() != null) 
+					throw new RedirectToUrlException(context.getUrlBeforeEdit());
+				else 
 					context.onModeChange(target, Mode.VIEW, null);
-				}
 			}
 			
 		});

@@ -57,10 +57,11 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends ProjectPage implements CommentSupport {
+public class RevisionComparePage extends ProjectPage implements CommentSupport, EditParamsAware {
 
 	public enum TabPanel {
 		COMMITS, 
@@ -800,6 +801,16 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 				observables.add(CodeComment.getWebSocketObservable(state.commentId));
 		}
 		return observables;
+	}
+
+	@Override
+	public PageParameters getParamsBeforeEdit() {
+		return paramsOf(getProject(), state);
+	}
+
+	@Override
+	public PageParameters getParamsAfterEdit() {
+		return paramsOf(getProject(), state);
 	}
 
 }

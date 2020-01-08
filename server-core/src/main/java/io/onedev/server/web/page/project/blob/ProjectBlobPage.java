@@ -36,6 +36,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
@@ -111,11 +112,12 @@ import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPane
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, ScriptIdentityAware {
+public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, ScriptIdentityAware, EditParamsAware {
 
 	private static final String PARAM_REVISION = "revision";
 	
@@ -131,7 +133,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	
 	private static final String PARAM_VIEW_PLAIN = "view-plain";
 	
-	private static final String PARAM_EDIT_FROM_FOLDER = "edit-from-folder";
+	private static final String PARAM_URL_BEFORE_EDIT = "url-before-edit";
+	
+	private static final String PARAM_URL_AFTER_EDIT = "url-after-edit";
 	
 	private static final String PARAM_QUERY = "query";
 	
@@ -184,8 +188,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		String viewPlain = params.get(PARAM_VIEW_PLAIN).toString();
 		state.viewPlain = "true".equals(viewPlain);
 		
-		String editFromFolder = params.get(PARAM_EDIT_FROM_FOLDER).toString();
-		state.editFromFolder = "true".equals(editFromFolder);
+		state.urlBeforeEdit = params.get(PARAM_URL_BEFORE_EDIT).toString();
+		state.urlAfterEdit = params.get(PARAM_URL_AFTER_EDIT).toString();
 
 		if (state.blobIdent.revision != null)
 			resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
@@ -904,8 +908,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			params.add(PARAM_MODE, state.mode.name().toLowerCase());
 		if (state.mode == Mode.VIEW && state.viewPlain)
 			params.add(PARAM_VIEW_PLAIN, true);
-		if (state.mode == Mode.EDIT && state.editFromFolder)
-			params.add(PARAM_EDIT_FROM_FOLDER, true);
+		if (state.urlBeforeEdit != null)
+			params.add(PARAM_URL_BEFORE_EDIT, state.urlBeforeEdit);
+		if (state.urlAfterEdit != null)
+			params.add(PARAM_URL_AFTER_EDIT, state.urlAfterEdit);
 			
 		if (state.query != null)
 			params.add(PARAM_QUERY, state.query);
@@ -1011,8 +1017,23 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	@Override
-	public boolean isEditFromFolder() {
-		return state.editFromFolder;
+	public String getUrlBeforeEdit() {
+		return state.urlBeforeEdit;
+	}
+
+	@Override
+	public String getUrlAfterEdit() {
+		return state.urlAfterEdit;
+	}
+	
+	@Override
+	public PageParameters getParamsBeforeEdit() {
+		return paramsOf(getProject(), state);
+	}
+
+	@Override
+	public PageParameters getParamsAfterEdit() {
+		return paramsOf(getProject(), state);
 	}
 
 	@Override
@@ -1142,11 +1163,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		 */
 		public boolean viewPlain;
 		
-		/*
-		 * Whether or not current editing is triggered from folder view, for instance, clicking 
-		 * edit link of folder readme. Applicable only when mode is EDIT
-		 */
-		public boolean editFromFolder;
+		public String urlBeforeEdit;
+		
+		public String urlAfterEdit;
 		
 		public boolean renderSource;
 		
@@ -1166,14 +1185,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 	@Override
 	public void onModeChange(AjaxRequestTarget target, Mode mode, @Nullable String newPath) {
-		onModeChange(target, mode, false, false, newPath);
+		onModeChange(target, mode, false, newPath);
 	}
 	
 	@Override
-	public void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, 
-			boolean editFromFolder, @Nullable String newPath) {
+	public void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, @Nullable String newPath) {
 		state.viewPlain = viewPlain;
-		state.editFromFolder = editFromFolder;
 		state.initialNewPath = newPath;
 		
 		/*
@@ -1209,6 +1226,15 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		String refName = refUpdated.getRefName();
 		ObjectId oldCommitId = refUpdated.getOldCommitId();
 		ObjectId newCommitId = refUpdated.getNewCommitId();
+		
+		/*
+		 * Update pull request as this is a direct consequence of editing source branch. Also this 
+		 * is necessary to show the latest changes of the pull request after editing 
+		 */
+		PullRequest request = getPullRequest();
+		if (request != null)
+			OneDev.getInstance(PullRequestManager.class).checkUpdate(request);
+		
 		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
 			@Override
@@ -1228,7 +1254,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			
 		});
 		
-		if (target != null) {
+		if (state.urlAfterEdit != null) {
+			throw new RedirectToUrlException(state.urlAfterEdit);
+		} else if (target != null) {
 			BlobIdent newBlobIdent;
 			if (state.mode == Mode.DELETE) {
 				try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
@@ -1249,16 +1277,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			} else if (state.mode == Mode.ADD) {
 				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
 			} else if (state.mode == Mode.EDIT) {
-				if (state.editFromFolder) {
-					newBlobIdent = new BlobIdent(state.blobIdent);
-					if (newBlobIdent.path.contains("/"))
-						newBlobIdent.path = StringUtils.substringBeforeLast(newBlobIdent.path, "/");
-					else
-						newBlobIdent.path = null;
-					newBlobIdent.mode = FileMode.TREE.getBits();
-				} else {
-					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-				}
+				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
 			} else {
 				// We've uploaded some files
 				newBlobIdent = null;

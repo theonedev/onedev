@@ -47,12 +47,13 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class PullRequestChangesPage extends PullRequestDetailPage implements CommentSupport {
+public class PullRequestChangesPage extends PullRequestDetailPage implements CommentSupport, EditParamsAware {
 
 	public static final String PARAM_OLD_COMMIT = "old-commit";
 	
@@ -563,6 +564,22 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		return observables;
 	}
 
+	@Override
+	public PageParameters getParamsBeforeEdit() {
+		return paramsOf(getPullRequest(), getPosition(), state);
+	}
+
+	@Override
+	public PageParameters getParamsAfterEdit() {
+		PageParameters params = getParamsBeforeEdit();
+		params.remove(PARAM_NEW_COMMIT);
+		if (getOpenComment() != null)
+			params.set(PARAM_OLD_COMMIT, getOpenComment().getMarkPos().getCommit());
+		else
+			params.remove(PARAM_OLD_COMMIT);
+		return params;
+	}
+	
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;

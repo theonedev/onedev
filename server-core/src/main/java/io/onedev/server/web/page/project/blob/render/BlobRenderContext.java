@@ -66,7 +66,11 @@ public interface BlobRenderContext extends Serializable {
 	
 	boolean isViewPlain();
 	
-	boolean isEditFromFolder();
+	@Nullable
+	String getUrlBeforeEdit();
+	
+	@Nullable
+	String getUrlAfterEdit();
 	
 	boolean isOnBranch();
 	
@@ -78,8 +82,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onModeChange(AjaxRequestTarget target, Mode mode, @Nullable String newPath);
 	
-	void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, 
-			boolean editFromFolder, @Nullable String newPath);
+	void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, @Nullable String newPath);
 	
 	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position);
 	

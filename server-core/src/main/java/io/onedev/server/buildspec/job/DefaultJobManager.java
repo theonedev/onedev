@@ -109,8 +109,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobManager.class);
 	
-	private enum Status {STARTED, STOPPING, STOPPED};
-	
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 	
 	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
@@ -139,7 +137,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private volatile List<JobExecutor> jobExecutors;
 	
-	private volatile Status status;
+	private volatile Thread thread;
 	
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
@@ -319,7 +317,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		return null;
 	}
 
-	private void execute(Build build) {
+	private JobExecution execute(Build build) {
 		ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 		try {
 			String jobToken = UUID.randomUUID().toString();
@@ -526,18 +524,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					
 				}), job.getTimeout() * 1000L));
 				
-				JobExecution prevExecution = jobExecutions.put(build.getId(), executionRef.get());
-				
-				if (prevExecution != null)
-					prevExecution.cancel(null);
+				return executionRef.get();
 			} else {
-				markBuildError(build, "No applicable job executor");
+				throw new OneException("No applicable job executor");
 			}
-		} catch (Throwable e) {
-			if (e instanceof OneException)
-				markBuildError(build, e.getMessage());
-			else
-				markBuildError(build, Throwables.getStackTraceAsString(e));
 		} finally {
 			ScriptIdentity.pop();
 		}
@@ -705,50 +695,56 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Listen
 	public void on(SystemStarted event) {
-		status = Status.STARTED;
 		jobExecutors = settingManager.getJobExecutors();
-		new Thread(this).start();		
+		thread = new Thread(this);
+		thread.start();		
 	}
 	
 	@Listen
 	public void on(SystemStopping event) {
-		if (status == Status.STARTED) {
-			status = Status.STOPPING;
-			while (status == Status.STOPPING) {
-				synchronized (this) {
-					notify();
-				}
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-				}
+		if (thread != null) {
+			Thread copy = thread;
+			thread = null;
+			try {
+				copy.join();
+			} catch (InterruptedException e) {
 			}
 		}
 	}
 
 	@Override
 	public synchronized void run() {
-		while (true) {
+		while (!jobExecutions.isEmpty() || thread != null) {
 			try {
-				wait(CHECK_INTERVAL);
-			} catch (InterruptedException e) {
-			}
-			try {
-				boolean hasRunnings = transactionManager.call(new Callable<Boolean>() {
+				transactionManager.run(new Runnable() {
 	
 					@Override
-					public Boolean call() {
+					public void run() {
 						for (Build build: buildManager.queryUnfinished()) {
-							if (build.getStatus() == Build.Status.PENDING || build.getStatus() == Build.Status.RUNNING) {
+							if (build.getStatus() == Build.Status.RUNNING || build.getStatus() == Build.Status.PENDING) {
 								JobExecution execution = jobExecutions.get(build.getId());
 								if (execution != null) {
 									if (execution.isTimedout())
 										execution.cancel(null);
-								} else {
-									markBuildError(build, "Stopped for unknown reason");
+								} else if (thread != null) {
+									try {
+										jobExecutions.put(build.getId(), execute(build));
+									} catch (Throwable t) {
+										if (t instanceof OneException)
+											markBuildError(build, t.getMessage());
+										else
+											markBuildError(build, Throwables.getStackTraceAsString(t));
+									}
 								}
-							} else if (build.getStatus() == Build.Status.WAITING && build.getRetryDate() == null) {
-								if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() 
+							} else if (build.getStatus() == Build.Status.WAITING) {
+								if (build.getRetryDate() != null) {
+									JobExecution execution = jobExecutions.get(build.getId());
+									if (execution == null && thread != null) {
+										build.setStatus(Build.Status.PENDING);
+										build.setPendingDate(new Date());
+										listenerRegistry.post(new BuildPending(build));
+									}
+								} else if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() 
 										&& it.getDependency().isFinished() 
 										&& it.getDependency().getStatus() != Build.Status.SUCCESSFUL)) {
 									markBuildError(build, "Some dependencies are required to be successful but failed");
@@ -756,11 +752,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									build.setStatus(Build.Status.PENDING);
 									build.setPendingDate(new Date());
 									listenerRegistry.post(new BuildPending(build));
-									
-									if (status == Status.STARTED) 
-										execute(build);									
 								}
-							}
+							} 
 						}
 						for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext();) {
 							Map.Entry<Long, JobExecution> entry = it.next();
@@ -795,17 +788,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								}
 							}
 						}
-						return !jobExecutions.isEmpty();
 					}
 					
 				});
-				if (!hasRunnings && status == Status.STOPPING)
-					break;
+				Thread.sleep(CHECK_INTERVAL);
 			} catch (Throwable e) {
 				logger.error("Error checking unfinished builds", e);
 			} 
 		}	
-		status = Status.STOPPED;
 	}
 	
 	@Listen
