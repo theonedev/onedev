@@ -112,9 +112,6 @@
 #request-detail>.main>.activities .activity>td.content .plain.diff {
 	margin-bottom: 12px;
 }
-#request-detail>.main>.activities .activity>td.content .plain.diff>tbody>tr>td {
-	background: none !important;
-}
 
 @media(max-width: 991px) {
 	#request-detail>.main>.activities .activity>td.avatar .avatar {

@@ -133,11 +133,6 @@ public class PlainDiffPanel extends Panel {
 	
 	private String renderDiffs() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(""
-				+ "<colgroup>"
-				+ "<col width='60'></col>"
-				+ "<col></col>"
-				+ "</colgroup>");
 		for (int i=0; i<diffBlocks.size(); i++) {
 			DiffBlock<Tokenized> block = diffBlocks.get(i);
 			if (block.getOperation() == Operation.EQUAL) {
@@ -224,6 +219,7 @@ public class PlainDiffPanel extends Panel {
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
 		
+		builder.append("<td class='operation'>&nbsp;</td>");
 		builder.append("<td colspan='2' class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 		appendTokenized(builder, block.getUnits().get(lineIndex));
 		builder.append("</td>");
@@ -235,6 +231,7 @@ public class PlainDiffPanel extends Panel {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
+		builder.append("<td class='operation new'>+</td>");
 		builder.append("<td colspan='2' class='content new' data-new='").append(newLineNo).append("'>");
 		if (tokenDiffs != null) {
 			if (tokenDiffs.isEmpty()) {
@@ -259,6 +256,7 @@ public class PlainDiffPanel extends Panel {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
+		builder.append("<td class='operation old'>-</td>");
 		builder.append("<td colspan='2' class='content old' data-old='").append(oldLineNo).append("'>");
 		if (tokenDiffs != null) {
 			if (tokenDiffs.isEmpty()) {
@@ -285,6 +283,7 @@ public class PlainDiffPanel extends Panel {
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
+		builder.append("<td class='operation old new'>*</td>");
 		builder.append("<td colspan='2' class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 		if (tokenDiffs.isEmpty()) {
 			builder.append("&nbsp;");

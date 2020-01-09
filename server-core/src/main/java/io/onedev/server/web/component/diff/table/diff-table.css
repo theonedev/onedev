@@ -117,3 +117,7 @@ table.diff>tbody>tr:hover>td {
 table.plain.diff {
 	border: none;
 }
+table.plain.diff>tbody>tr>td.operation {
+	width: 12px;
+	padding: 0 4px 0 0;
+}

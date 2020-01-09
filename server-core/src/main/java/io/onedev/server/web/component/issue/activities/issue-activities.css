@@ -58,9 +58,6 @@
 .issue-activities .activity>.content>.body .plain.diff {
 	margin-bottom: 12px;
 }
-.issue-activities .activity>.content>.body .plain.diff>tbody>tr>td {
-	background: none !important;
-}
 .issue-activities .activity>.content>.body>.commit {
 	color: #888;
 }
