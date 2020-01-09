@@ -30,6 +30,12 @@ Conditional build parameters. Create matrix builds by combining values of differ
 
 ![Build Workflow](introduction/build-workflow.gif)
 
+### Custom Issue States and Fields
+
+Add custom issue states and fields. Appearance or value of issue field can be defined to be dependent on value of other fields. Define manual state transition rules with permission control, or auto transition rules when certain events happen. 
+
+![Custom Issue](introduction/custom-issue.gif)
+
 ### Symbol Search and Navigation
 
 Language aware symbol search. Symbol navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
