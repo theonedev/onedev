@@ -403,7 +403,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							while (true) {
 								JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
 										serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
-										job.getSubmoduleCredentials(), job.getCpuRequirement(), job.getMemoryRequirement(), 
+										submoduleCredentials, job.getCpuRequirement(), job.getMemoryRequirement(), 
 										commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
 										executor.getCacheTTL(), retried, job.getServices(), jobLogger) {
 

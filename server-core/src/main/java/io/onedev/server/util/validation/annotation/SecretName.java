@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.util.validation.DnsNameValidator;
+import io.onedev.server.util.validation.SecretNameValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=DnsNameValidator.class) 
-public @interface DnsName {
+@Constraint(validatedBy=SecretNameValidator.class) 
+public @interface SecretName {
 
 	boolean interpolative() default false;
 	

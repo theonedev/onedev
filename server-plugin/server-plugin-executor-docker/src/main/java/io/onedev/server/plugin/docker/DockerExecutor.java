@@ -85,6 +85,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	private String dockerExecutable;
 	
 	private transient CapacityRunner capacityRunner;
+	
+	private transient volatile String outerInstallPath;
 
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
 	public List<RegistryLogin> getRegistryLogins() {
@@ -546,30 +548,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									
 								}).checkReturnCode();
 								
-								// clear credential.helper list to remove possible Windows credential manager
 								git.clearArgs();
-								if (SystemUtils.IS_OS_WINDOWS)
-									git.addArgs("config", "--global", "credential.helper", "\"\"");
-								else
-									git.addArgs("config", "--global", "credential.helper", "");
-								git.execute(new LineConsumer() {
-	
-									@Override
-									public void consume(String line) {
-										jobContext.getLogger().log(line);
-									}
-									
-								}, new LineConsumer() {
-	
-									@Override
-									public void consume(String line) {
-										jobContext.getLogger().log(line);
-									}
-									
-								}).checkReturnCode();
-								
-								git.clearArgs();
-								git.addArgs("config", "--global", "--add", "credential.helper", "store");
+								git.addArgs("config", "--global", "--replace-all", "credential.helper", "store");
 								git.execute(new LineConsumer() {
 	
 									@Override
@@ -741,7 +721,9 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								}).checkReturnCode();
 								
 								git.clearArgs();
-								git.addArgs("submodule", "update", "--init", "--recursive", "--force", "--quiet", "--depth=1");
+								git.addArgs("submodule", "update", "--init", "--recursive", "--force", "--quiet");
+								if (jobContext.getCloneDepth() != null)
+									git.addArgs("--depth=" + jobContext.getCloneDepth());
 								git.execute(new LineConsumer() {
 	
 									@Override
@@ -770,7 +752,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-	
+
 						String containerBuildHome;
 						String containerWorkspace;
 						String containerEntryPoint;
@@ -807,14 +789,14 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						if (getRunOptions() != null)
 							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						
-						docker.addArgs("-v", hostBuildHome.getAbsolutePath() + ":" + containerBuildHome);
+						docker.addArgs("-v", getOuterPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
 						if (workspaceCache != null)
-							docker.addArgs("-v", workspaceCache.getAbsolutePath() + ":" + containerWorkspace);
+							docker.addArgs("-v", getOuterPath(workspaceCache.getAbsolutePath()) + ":" + containerWorkspace);
 						for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
 							if (!PathUtils.isCurrent(entry.getValue())) {
 								String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
 								String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
-								docker.addArgs("-v", hostCachePath + ":" + containerCachePath);
+								docker.addArgs("-v", getOuterPath(hostCachePath) + ":" + containerCachePath);
 							}
 						}
 						if (SystemUtils.IS_OS_LINUX)
@@ -980,6 +962,42 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		return isValid;
 	}
 	
+	private String getOuterPath(String hostPath) {
+		String hostInstallPath = Bootstrap.installDir.getAbsolutePath();
+		Preconditions.checkState(hostPath.startsWith(hostInstallPath + "/")
+				|| hostPath.startsWith(hostInstallPath + "\\"));
+		if (outerInstallPath == null) {
+			if (Bootstrap.isInDocker()) {
+				AtomicReference<String> installDirRef = new AtomicReference<>(null);
+				Commandline docker = newDocker();
+				String inspectFormat = String.format(
+						"{{range .Mounts}} {{if eq .Destination \"%s\"}} {{.Source}} {{end}} {{end}}", 
+						hostInstallPath);
+				docker.addArgs("inspect", "-f", inspectFormat, System.getenv("HOSTNAME"));						
+				docker.execute(new LineConsumer() {
+		
+					@Override
+					public void consume(String line) {
+						installDirRef.set(line.trim());
+					}
+					
+				}, new LineConsumer() {
+		
+					@Override
+					public void consume(String line) {
+						logger.error(line);
+					}
+					
+				}).checkReturnCode();
+				
+				outerInstallPath = Preconditions.checkNotNull(installDirRef.get());
+			} else {
+				outerInstallPath = hostInstallPath;
+			}
+		}
+		return outerInstallPath + hostPath.substring(hostInstallPath.length());
+	}
+	
 	@Override
 	public void test(TestData testData, JobLogger jobLogger) {
 		login(jobLogger);
@@ -1027,8 +1045,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				containerWorkspacePath = "/onedev-build/workspace";
 				containerCachePath = "/onedev-build/cache";
 			}
-			cmd.addArgs("-v", workspaceDir.getAbsolutePath() + ":" + containerWorkspacePath);
-			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + containerCachePath);
+			cmd.addArgs("-v", getOuterPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
+			cmd.addArgs("-v", getOuterPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
 			
 			cmd.addArgs("-w", containerWorkspacePath);
 			cmd.addArgs(testData.getDockerImage());
@@ -1083,7 +1101,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 	
 	public void cleanDirAsRoot(File dir) {
-		if (SystemUtils.IS_OS_WINDOWS) {
+		if (SystemUtils.IS_OS_WINDOWS || Bootstrap.isInDocker()) {
 			FileUtils.cleanDir(dir);
 		} else {
 			Commandline cmd = newDocker();

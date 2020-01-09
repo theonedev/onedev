@@ -8,18 +8,19 @@ import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.interpolative.Interpolative;
-import io.onedev.server.util.validation.annotation.DnsName;
+import io.onedev.server.util.validation.annotation.SecretName;
 
-public class DnsNameValidator implements ConstraintValidator<DnsName, String> {
+public class SecretNameValidator implements ConstraintValidator<SecretName, String> {
 
-	private static final Pattern PATTERN = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
+	public static final Pattern PATTERN = Pattern.compile("\\w([\\w-\\.]*\\w)?");
 	
 	private boolean interpolative;
 	
 	private String message;
 	
 	@Override
-	public void initialize(DnsName constaintAnnotation) {
+	public void initialize(SecretName constaintAnnotation) {
+		interpolative = constaintAnnotation.interpolative();
 		message = constaintAnnotation.message();
 	}
 
@@ -44,8 +45,8 @@ public class DnsNameValidator implements ConstraintValidator<DnsName, String> {
 		if (!PATTERN.matcher(value).matches()) {
 			String message = this.message;
 			if (message.length() == 0) {
-				message = "Should only contain alphanumberic characters or '-', and can only "
-						+ "start and end with alphanumeric characters";
+				message = "Should start and end with alphanumeric or underscore. "
+						+ "Only alphanumeric, underscore, dash, and dot are allowed in the middle.";
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;

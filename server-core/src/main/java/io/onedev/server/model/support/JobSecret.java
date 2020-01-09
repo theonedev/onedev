@@ -14,7 +14,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.validation.annotation.DnsName;
+import io.onedev.server.util.validation.annotation.SecretName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Password;
@@ -36,7 +36,7 @@ public class JobSecret implements Serializable {
 	@Editable(order=100)
 	@SuggestionProvider("suggestNames")
 	@NotEmpty
-	@DnsName
+	@SecretName
 	public String getName() {
 		return name;
 	}
