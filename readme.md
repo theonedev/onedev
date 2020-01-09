@@ -36,6 +36,12 @@ Add custom issue states and fields. Appearance or value of issue field can be de
 
 ![Custom Issue](introduction/custom-issue.gif)
 
+### Auto Refreshing Issue Boards
+
+Define issue boards to show issues in columns based on values of specified field. Perform all operations to issues without leaving the board. Board will be refreshed automatically to reflect most recent issue state.
+
+![Issue Boards](introduction/issue-boards.gif)
+
 ### Symbol Search and Navigation
 
 Language aware symbol search. Symbol navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
