@@ -242,7 +242,7 @@ public class ProjectTagsPage extends ProjectPage {
 						} else {
 							Project project = getProject();
 							TagProtection protection = project.getTagProtection(tagName, getLoginUser());
-							if (protection.isNoCreation()) {
+							if (protection.isPreventCreation()) {
 								form.error("Unable to create protected tag");
 								target.focusComponent(nameInput);
 								target.add(form);
@@ -393,7 +393,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 						Project project = getProject();
 						if (SecurityUtils.canWriteCode(project)) 
-							setEnabled(!project.getTagProtection(tagName, getLoginUser()).isNoDeletion());
+							setEnabled(!project.getTagProtection(tagName, getLoginUser()).isPreventDeletion());
 						else 
 							setVisible(false);
 					}

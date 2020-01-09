@@ -28,11 +28,11 @@ public class TagProtection implements Serializable {
 	
 	private String userMatch = new Anyone().toString();
 	
-	private boolean noUpdate = true;
+	private boolean preventUpdate = true;
 	
-	private boolean noDeletion = true;
+	private boolean preventDeletion = true;
 	
-	private boolean noCreation = true;
+	private boolean preventCreation = true;
 	
 	public boolean isEnabled() {
 		return enabled;
@@ -69,31 +69,31 @@ public class TagProtection implements Serializable {
 		this.userMatch = userMatch;
 	}
 
-	@Editable(order=200, description="Check this to not allow tag update")
-	public boolean isNoUpdate() {
-		return noUpdate;
+	@Editable(order=200, description="Check this to prevent tag update")
+	public boolean isPreventUpdate() {
+		return preventUpdate;
 	}
 
-	public void setNoUpdate(boolean noUpdate) {
-		this.noUpdate = noUpdate;
+	public void setPreventUpdate(boolean preventUpdate) {
+		this.preventUpdate = preventUpdate;
 	}
 
-	@Editable(order=300, description="Check this to not allow tag deletion")
-	public boolean isNoDeletion() {
-		return noDeletion;
+	@Editable(order=300, description="Check this to prevent tag deletion")
+	public boolean isPreventDeletion() {
+		return preventDeletion;
 	}
 
-	public void setNoDeletion(boolean noDeletion) {
-		this.noDeletion = noDeletion;
+	public void setPreventDeletion(boolean preventDeletion) {
+		this.preventDeletion = preventDeletion;
 	}
 
-	@Editable(order=400, description="Check this to not allow tag creation")
-	public boolean isNoCreation() {
-		return noCreation;
+	@Editable(order=400, description="Check this to prevent tag creation")
+	public boolean isPreventCreation() {
+		return preventCreation;
 	}
 
-	public void setNoCreation(boolean noCreation) {
-		this.noCreation = noCreation;
+	public void setPreventCreation(boolean preventCreation) {
+		this.preventCreation = preventCreation;
 	}
 
 	public void onRenameGroup(String oldName, String newName) {

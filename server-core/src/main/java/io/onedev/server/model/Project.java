@@ -1143,16 +1143,16 @@ public class Project extends AbstractEntity {
 			if (protection.isEnabled() 
 					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user)
 					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
-				noCreation = noCreation || protection.isNoCreation();
-				noDeletion = noDeletion || protection.isNoDeletion();
-				noUpdate = noUpdate || protection.isNoUpdate();
+				noCreation = noCreation || protection.isPreventCreation();
+				noDeletion = noDeletion || protection.isPreventDeletion();
+				noUpdate = noUpdate || protection.isPreventUpdate();
 			}
 		}
 		
 		TagProtection protection = new TagProtection();
-		protection.setNoCreation(noCreation);
-		protection.setNoDeletion(noDeletion);
-		protection.setNoUpdate(noUpdate);
+		protection.setPreventCreation(noCreation);
+		protection.setPreventDeletion(noDeletion);
+		protection.setPreventUpdate(noUpdate);
 		
 		return protection;
 	}
@@ -1168,9 +1168,9 @@ public class Project extends AbstractEntity {
 			if (protection.isEnabled() 
 					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user) 
 					&& PatternSet.parse(protection.getBranches()).matches(new PathMatcher(), branchName)) {
-				noCreation = noCreation || protection.isNoCreation();
-				noDeletion = noDeletion || protection.isNoDeletion();
-				noForcedPush = noForcedPush || protection.isNoForcedPush();
+				noCreation = noCreation || protection.isPreventCreation();
+				noDeletion = noDeletion || protection.isPreventDeletion();
+				noForcedPush = noForcedPush || protection.isPreventForcedPush();
 				jobNames.addAll(protection.getJobNames());
 				fileProtections.addAll(protection.getFileProtections());
 				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
@@ -1180,9 +1180,9 @@ public class Project extends AbstractEntity {
 		BranchProtection protection = new BranchProtection();
 		protection.setFileProtections(fileProtections);
 		protection.setJobNames(new ArrayList<>(jobNames));
-		protection.setNoCreation(noCreation);
-		protection.setNoDeletion(noDeletion);
-		protection.setNoForcedPush(noForcedPush);
+		protection.setPreventCreation(noCreation);
+		protection.setPreventDeletion(noDeletion);
+		protection.setPreventForcedPush(noForcedPush);
 		protection.setParsedReviewRequirement(reviewRequirement);
 		
 		return protection;

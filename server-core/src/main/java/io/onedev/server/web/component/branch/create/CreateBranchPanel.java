@@ -85,7 +85,7 @@ abstract class CreateBranchPanel extends Panel {
 					User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 					BranchProtection protection = project.getBranchProtection(branchName, user);
-					if (protection.isNoCreation()) {
+					if (protection.isPreventCreation()) {
 						form.error("Unable to create protected branch");
 						target.focusComponent(nameInput);
 						target.add(form);

@@ -437,7 +437,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						} else {
 							Project project = getProject();
 							BranchProtection protection = project.getBranchProtection(branchName, getLoginUser());
-							if (protection.isNoCreation()) {
+							if (protection.isPreventCreation()) {
 								form.error("Unable to create protected branch");
 								target.focusComponent(nameInput);
 								target.add(form);
@@ -735,7 +735,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							if (project.getDefaultBranch().equals(branch)) 
 								setEnabled(false);
 							else 
-								setEnabled(!project.getBranchProtection(branch, getLoginUser()).isNoDeletion());
+								setEnabled(!project.getBranchProtection(branch, getLoginUser()).isPreventDeletion());
 						} else {
 							setVisible(false);
 						}

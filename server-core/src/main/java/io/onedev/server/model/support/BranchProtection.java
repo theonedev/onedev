@@ -48,11 +48,11 @@ public class BranchProtection implements Serializable {
 	
 	private String userMatch = new Anyone().toString();
 	
-	private boolean noForcedPush = true;
+	private boolean preventForcedPush = true;
 	
-	private boolean noDeletion = true;
+	private boolean preventDeletion = true;
 	
-	private boolean noCreation = true;
+	private boolean preventCreation = true;
 	
 	private String reviewRequirement;
 	
@@ -97,31 +97,31 @@ public class BranchProtection implements Serializable {
 		this.userMatch = userMatch;
 	}
 
-	@Editable(order=200, description="Check this to not allow forced push")
-	public boolean isNoForcedPush() {
-		return noForcedPush;
+	@Editable(order=200, description="Check this to prevent forced push")
+	public boolean isPreventForcedPush() {
+		return preventForcedPush;
 	}
 
-	public void setNoForcedPush(boolean noForcedPush) {
-		this.noForcedPush = noForcedPush;
+	public void setPreventForcedPush(boolean preventForcedPush) {
+		this.preventForcedPush = preventForcedPush;
 	}
 
-	@Editable(order=300, description="Check this to not allow branch deletion")
-	public boolean isNoDeletion() {
-		return noDeletion;
+	@Editable(order=300, description="Check this to prevent branch deletion")
+	public boolean isPreventDeletion() {
+		return preventDeletion;
 	}
 
-	public void setNoDeletion(boolean noDeletion) {
-		this.noDeletion = noDeletion;
+	public void setPreventDeletion(boolean preventDeletion) {
+		this.preventDeletion = preventDeletion;
 	}
 
-	@Editable(order=350, description="Check this to not allow branch creation")
-	public boolean isNoCreation() {
-		return noCreation;
+	@Editable(order=350, description="Check this to prevent branch creation")
+	public boolean isPreventCreation() {
+		return preventCreation;
 	}
 
-	public void setNoCreation(boolean noCreation) {
-		this.noCreation = noCreation;
+	public void setPreventCreation(boolean preventCreation) {
+		this.preventCreation = preventCreation;
 	}
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "

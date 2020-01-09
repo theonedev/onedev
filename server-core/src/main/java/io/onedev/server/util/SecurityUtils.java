@@ -107,21 +107,21 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canDeleteBranch(Project project, String branchName) {
 		if (canWriteCode(project)) 
-			return !project.getBranchProtection(branchName, getUser()).isNoDeletion();
+			return !project.getBranchProtection(branchName, getUser()).isPreventDeletion();
 		else 
 			return false;
 	}
 	
 	public static boolean canCreateTag(Project project, String tagName) {
 		if (canWriteCode(project)) 
-			return !project.getTagProtection(tagName, getUser()).isNoCreation();
+			return !project.getTagProtection(tagName, getUser()).isPreventCreation();
 		else 
 			return false;
 	}
 	
 	public static boolean canCreateBranch(Project project, String branchName) {
 		if (canWriteCode(project)) 
-			return !project.getBranchProtection(branchName, getUser()).isNoCreation();
+			return !project.getBranchProtection(branchName, getUser()).isPreventCreation();
 		else 
 			return false;
 	}
