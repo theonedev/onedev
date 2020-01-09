@@ -63,3 +63,5 @@ A powerful query language is available to execute sophisticated queries against 
 ### Deep Integration of Code, Issue, Pull Request and Build
 
 Configure issue to transit to desired state upon particular commit, build or pull request events. See commit and pull request events in issue activities. Query fixed issues between two builds. Query builds or pull requests fixing specified issues.
+
+![Issue Query](introduction/issue-query.gif)
