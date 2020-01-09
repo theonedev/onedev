@@ -77,3 +77,9 @@ A powerful query language is available to execute sophisticated queries against 
 Configure issue to transit to desired state upon particular commit, build or pull request events. See commit and pull request events in issue activities. Query fixed issues between two builds. Query builds or pull requests fixing specified issues.
 
 ![Issue Query](introduction/issue-query.gif)
+
+### Fine Grained Permission Control
+
+Define permission schemes best suiting your development workflow. For instance, you may specify who can change particular source folder, who can assign issues, who can run release builds, or who can access build log, etc.
+
+![Role](introduction/role.png)
