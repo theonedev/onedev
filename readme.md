@@ -14,7 +14,7 @@ Feature highlights compared to other products in the market:
 
 ### Docker First Kubernetes Native Build Farm
 
-Damn easy to set up a build farm to run massive CI builds as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
+Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
 
 ![Job Executor](features/job-executor.png)
 
