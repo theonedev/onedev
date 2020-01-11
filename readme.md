@@ -26,19 +26,19 @@ No YAML files to write. No complex grammars to remember. Create build spec for y
 
 ### Flexible Build Workflow and Pipeline
 
-Conditional build parameters. Create matrix builds by combining values of different parameters. Connect jobs to create pipelines via dependencies. Run massive job pods concurrently to speed up processing. Manual approval of certain jobs with role based control.
+Conditional build parameters. Create matrix builds by combining different parameters. Connect jobs to create pipelines. Run jobs concurrently to speed up processing. Run jobs automatically upon certain events, or manually by authorized users
 
 ![Build Workflow](features/build-workflow.gif)
 
 ### Custom Issue States and Fields
 
-Add custom issue states and fields. Appearance or value of issue field can be defined to be dependent on value of other fields. Define manual state transition rules with permission control, or auto transition rules when certain events happen. 
+Add custom issue states and fields. Configure field dependencies. Transit issue state automatically upon certain events, or manually by authorized users 
 
 ![Custom Issue](features/custom-issue.gif)
 
-### Auto Refreshing Issue Boards
+### Auto-Refreshing Issue Boards
 
-Define issue boards to show issues in columns based on values of specified field. Perform all operations to issues without leaving the board. Board will be refreshed automatically to reflect most recent issue state.
+Define issue boards to show issues in columns based on values of specified field. Perform issue operations without leaving the board. Refresh board automatically to reflect most recent issue state.
 
 ![Issue Boards](features/issue-boards.gif)
 
@@ -50,31 +50,31 @@ Language aware symbol search. Symbol navigation in source code and diff. Outline
 
 ### Code Discussions and Comprehensions
 
-Instant code discussions on arbitrary block of source code or diff without creating pull requests. Discussions stay with the code to help code comprehension even if file is changed or renamed. 
+Instant and lightweight code discussions on code and diff blocks without creating pull requests. Discussions stay with the code to help code comprehension even if file is changed or renamed. 
 
 ![Code Comments](features/code-comments.gif)
 
 ### Flexible Pull Request Review Policies
 
-Enforce pull request review under certain conditions with branch protections. Specify required reviewers and builds for desired file patterns. 
+Enforce pull request review with branch protections. Specify required reviewers and builds for desired file patterns. 
 
 ![Branch Protection](features/branch-protection.gif)
 
-### Iterative Pull Request Review
+### Painless Pull Request Review
 
-Code discussions in pull requests are well organized so that user can easily know what has been changed since last review.
+Review pull request commits as a whole or one by one. Organize code discussions in threads to show changes since last review explicitly
 
 ![Increment Review](features/increment-review.gif)
 
 ### Powerful Query Language
 
-A powerful query language is available to execute sophisticated queries against projects, commits, builds, issues, pull requests or code comments, with auto suggestions and completions everywhere. Query can be saved for quick access later, and can be subscribed to get notified of interesting events.
+Perform sophisticated queries against projects, commits, builds, issues, pull requests or code comments with a powerful query language. Save query for quick access. Subscribe to saved query to get notified of interesting events.
 
 ![Powerful Query](features/powerful-query.gif)
 
 ### Deep Integration of Code, Issue, Pull Request and Build
 
-Configure issue to transit to desired state upon particular commit, build or pull request events. See commit and pull request events in issue activities. Query fixed issues between two builds. Query builds or pull requests fixing specified issues.
+Configure issues to transit to desired state upon commit, build or pull request events. See commit and pull request events in issue activities. Query fixed issues between builds. Find builds or pull requests fixing particular issues or commits
 
 ![Issue Query](features/issue-query.gif)
 
