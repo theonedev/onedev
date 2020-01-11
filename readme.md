@@ -1,6 +1,6 @@
 # Super Easy All-In-One DevOps Platform 
 
-With Issue Tracking, Git Management, Pull Request, Wiki, and Build Management. Simple yet Powerful.
+With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Powerful.
 
 <div style="font-size: 20px;">
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/5min-tutorial.md">A Five Minutes Tutorial</a> 
