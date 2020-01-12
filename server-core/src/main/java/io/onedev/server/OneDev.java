@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -189,58 +188,33 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		} 
 		
 		if (serverUrl == null) {
-			AtomicReference<String> ipRef = new AtomicReference<>(null);
+			String host;
 			if (Bootstrap.isInDocker()) {
-				Commandline cmd = new Commandline("ip");
-				cmd.addArgs("route");
-				cmd.execute(new LineConsumer() {
-
-					@Override
-					public void consume(String line) {
-						if (line.startsWith("default")) {
-							StringTokenizer tokenizer = new StringTokenizer(line);
-							tokenizer.nextToken();
-							tokenizer.nextToken();
-							ipRef.set(tokenizer.nextToken());
-						}
-					}
-					
-				}, new LineConsumer() {
-
-					@Override
-					public void consume(String line) {
-						logger.error(line);
-					}
-					
-				}).checkReturnCode();
-			}
-			
-			if (ipRef.get() == null) {
+				host = "localhost";
+			} else try {
+				if (SystemUtils.IS_OS_MAC_OSX) {
+					try (Socket socket = new Socket()) {
+						socket.connect(new InetSocketAddress("microsoft.com", 80));
+						host = StringUtils.stripStart(socket.getLocalAddress().toString(), "/");					
+					} 
+				} else {
+					try (DatagramSocket socket = new DatagramSocket()) {
+						socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+						host = socket.getLocalAddress().getHostAddress();
+					} 
+				}
+			} catch (Exception e) {
 				try {
-					if (SystemUtils.IS_OS_MAC_OSX) {
-						try (Socket socket = new Socket()) {
-							socket.connect(new InetSocketAddress("microsoft.com", 80));
-							ipRef.set(StringUtils.stripStart(socket.getLocalAddress().toString(), "/"));					
-						} 
-					} else {
-						try (DatagramSocket socket = new DatagramSocket()) {
-							socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
-							ipRef.set(socket.getLocalAddress().getHostAddress());
-						} 
-					}
-				} catch (Exception e) {
-					try {
-						ipRef.set(InetAddress.getLocalHost().getHostName());
-					} catch (UnknownHostException e2) {
-						throw new RuntimeException(e2);
-					}
+					host = InetAddress.getLocalHost().getHostName();
+				} catch (UnknownHostException e2) {
+					throw new RuntimeException(e2);
 				}
 			}
 			
 			if (serverConfig.getHttpsPort() != 0)
-				serverUrl = "https://" + ipRef.get() + ":" + serverConfig.getHttpsPort();
+				serverUrl = "https://" + host + ":" + serverConfig.getHttpsPort();
 			else 
-				serverUrl = "http://" + ipRef.get() + ":" + serverConfig.getHttpPort();
+				serverUrl = "http://" + host + ":" + serverConfig.getHttpPort();
 		}
 		
 		return serverUrl;
