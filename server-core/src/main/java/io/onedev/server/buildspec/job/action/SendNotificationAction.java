@@ -5,8 +5,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
 import io.onedev.server.notification.BuildNotificationManager;
-import io.onedev.server.util.script.identity.JobIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NotificationReceiver;
 
@@ -30,16 +28,9 @@ public class SendNotificationAction extends PostBuildAction {
 
 	@Override
 	public void execute(Build build) {
-		Build.push(build);
-		ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
-		try {
-			io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver parsedReceiver = 
-					io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver.parse(receivers, build);
-			OneDev.getInstance(BuildNotificationManager.class).notify(build, parsedReceiver.getEmails());
-		} finally {
-			ScriptIdentity.pop();
-			Build.pop();
-		}
+		io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver parsedReceiver = 
+				io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver.parse(receivers, build);
+		OneDev.getInstance(BuildNotificationManager.class).notify(build, parsedReceiver.getEmails());
 	}
 
 	@Override

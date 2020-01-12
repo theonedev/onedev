@@ -808,19 +808,42 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
-		try {
-			for (PostBuildAction action: build.getJob().getPostBuildActions()) {
-				if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
-					action.execute(build);
-			}
-		} catch (Throwable e) {
-			logger.error("Error processing post build actions", e);
-		}
-		
 		for (BuildParam param: build.getParams()) {
 			if (param.getType().equals(ParamSpec.SECRET)) 
 				param.setValue(null);
 		}
+
+		Long buildId = build.getId();
+
+		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
+						Build.push(build);
+						ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
+						try {
+							for (PostBuildAction action: build.getJob().getPostBuildActions()) {
+								if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
+									action.execute(build);
+							}
+						} catch (Throwable e) {
+							String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)", 
+									build.getProject().getName(), build.getCommitHash(), build.getJobName());
+							logger.error(message, e);
+						} finally {
+							ScriptIdentity.pop();
+							Build.pop();
+						}
+					}
+				});
+			}
+			
+		});
 	}
 	
 	@Override

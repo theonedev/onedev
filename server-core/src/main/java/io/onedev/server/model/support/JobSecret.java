@@ -74,7 +74,7 @@ public class JobSecret implements Serializable {
 		this.value = value;
 	}
 
-	@Editable(order=300, name="Authorize Branches", description=""
+	@Editable(order=300, description=""
 			+ "Optionally specify space-separated branches to authorize.\n"
 			+ "Only builds from authorized branches can access this secret.\n"
 			+ "Use * or ? for wildcard match. Leave empty to authorize all branches")

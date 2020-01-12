@@ -1157,6 +1157,29 @@ public class Project extends AbstractEntity {
 		return protection;
 	}
 	
+	public TagProtection getTagProtection(String tagName, Build build) {
+		boolean noCreation = false;
+		boolean noDeletion = false;
+		boolean noUpdate = false;
+		Project project = build.getProject();
+		for (TagProtection protection: getTagProtections()) {
+			if (protection.isEnabled() 
+					&& (protection.getBuildBranches() == null || project.isCommitOnBranches(build.getCommitId(), protection.getBuildBranches()))
+					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
+				noCreation = noCreation || protection.isPreventCreation();
+				noDeletion = noDeletion || protection.isPreventDeletion();
+				noUpdate = noUpdate || protection.isPreventUpdate();
+			}
+		}
+		
+		TagProtection protection = new TagProtection();
+		protection.setPreventCreation(noCreation);
+		protection.setPreventDeletion(noDeletion);
+		protection.setPreventUpdate(noUpdate);
+		
+		return protection;
+	}
+	
 	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
 		boolean noCreation = false;
 		boolean noDeletion = false;

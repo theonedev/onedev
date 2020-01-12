@@ -1,6 +1,7 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -13,6 +14,7 @@ import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -27,6 +29,8 @@ public class TagProtection implements Serializable {
 	private String tags;
 	
 	private String userMatch = new Anyone().toString();
+	
+	private String buildBranches;
 	
 	private boolean preventUpdate = true;
 	
@@ -58,7 +62,7 @@ public class TagProtection implements Serializable {
 		return SuggestionUtils.suggestTags(Project.get(), matchWith);
 	}
 	
-	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the tag matches criteria specified here")
+	@Editable(order=150, name="Applicable Users", description="Rule will apply if user operating the tag matches criteria specified here")
 	@io.onedev.server.web.editable.annotation.UserMatch
 	@NotEmpty(message="may not be empty")
 	public String getUserMatch() {
@@ -69,6 +73,29 @@ public class TagProtection implements Serializable {
 		this.userMatch = userMatch;
 	}
 
+	@Editable(order=180, description=""
+			+ "Rule will apply if build operating the tag is on specified branches. Multiple branches "
+			+ "should be separated with spaces. Use * or ? for wildcard match. Leave empty to match "
+			+ "all branches")
+	@Patterns(suggester = "suggestBranches")
+	@NameOfEmptyValue("All")
+	public String getBuildBranches() {
+		return buildBranches;
+	}
+
+	public void setBuildBranches(String buildBranches) {
+		this.buildBranches = buildBranches;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestBranches(String matchWith) {
+		Project project = Project.get();
+		if (project != null)
+			return SuggestionUtils.suggestBranches(project, matchWith);
+		else
+			return new ArrayList<>();
+	}
+	
 	@Editable(order=200, description="Check this to prevent tag update")
 	public boolean isPreventUpdate() {
 		return preventUpdate;

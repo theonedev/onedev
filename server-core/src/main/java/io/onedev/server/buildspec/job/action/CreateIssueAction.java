@@ -15,7 +15,6 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldsupply.FieldSupply;
@@ -23,11 +22,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.script.identity.JobIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.FieldNamesProvider;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -92,44 +88,29 @@ public class CreateIssueAction extends PostBuildAction {
 	
 	@Override
 	public void execute(Build build) {
-		Long buildId = build.getId();
-
-		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+		OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 
 			@Override
 			public void run() {
-				OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
-						Build.push(build);
-						ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
-						try {
-							Issue issue = new Issue();
-							issue.setUUID(UUID.randomUUID().toString());
-							issue.setProject(build.getProject());
-							issue.setTitle(build.interpolate(getIssueTitle()));
-							issue.setSubmitter(SecurityUtils.getUser());
-							issue.setSubmitDate(new Date());
-							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-							GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
-							issue.setState(issueSetting.getInitialStateSpec().getName());
-							
-							issue.setDescription(getIssueDescription());
-							for (FieldSupply supply: getIssueFields()) {
-								Object fieldValue = issueSetting.getFieldSpec(supply.getName())
-										.convertToObject(supply.getValueProvider().getValue());
-								issue.setFieldValue(supply.getName(), fieldValue);
-							}
-							OneDev.getInstance(IssueManager.class).open(issue);
-						} finally {
-							ScriptIdentity.pop();
-							Build.pop();
-						}
-					}
-				});
+				Issue issue = new Issue();
+				issue.setUUID(UUID.randomUUID().toString());
+				issue.setProject(build.getProject());
+				issue.setTitle(build.interpolate(getIssueTitle()));
+				issue.setSubmitter(SecurityUtils.getUser());
+				issue.setSubmitDate(new Date());
+				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+				GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
+				issue.setState(issueSetting.getInitialStateSpec().getName());
+				
+				issue.setDescription(getIssueDescription());
+				for (FieldSupply supply: getIssueFields()) {
+					Object fieldValue = issueSetting.getFieldSpec(supply.getName())
+							.convertToObject(supply.getValueProvider().getValue());
+					issue.setFieldValue(supply.getName(), fieldValue);
+				}
+				OneDev.getInstance(IssueManager.class).open(issue);
 			}
+			
 		});
 		
 	}
