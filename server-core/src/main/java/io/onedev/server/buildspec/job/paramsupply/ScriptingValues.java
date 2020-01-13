@@ -64,14 +64,22 @@ public class ScriptingValues implements ValuesProvider {
 		variables.put("build", Build.get());
 		variables.put("event", Event.get());
 		List<List<String>> values = new ArrayList<>();
-		for (Object each: (List<Object>) GroovyUtils.evalScriptByName(scriptName, variables)) {
-			List<String> strings = new ArrayList<>();
-			if (each instanceof Collection) { 
-				for (Object each2: (Collection<?>) each)
-					strings.add(each2.toString());
-			} else if (each != null) {
-				strings.add(each.toString());
+		Object result = GroovyUtils.evalScriptByName(scriptName, variables);
+		if (result instanceof List) {
+			for (Object each: (List<Object>) result) {
+				List<String> strings = new ArrayList<>();
+				if (each instanceof Collection) { 
+					for (Object each2: (Collection<?>) each)
+						strings.add(each2.toString());
+				} else if (each != null) {
+					strings.add(each.toString());
+				}
+				values.add(strings);
 			}
+		} else {
+			List<String> strings = new ArrayList<>();
+			if (result != null) 
+				strings.add(result.toString());
 			values.add(strings);
 		}
 		return values;
