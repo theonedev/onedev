@@ -4,11 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
@@ -36,21 +34,21 @@ public class BeanUtils {
 	 * If there are fields with the same name in super-class and sub-class, 
 	 * fields in the sub-class with be returned only.
 	 */
-	public static List<Field> getFields(Class<?> clazz) {
-		List<Field> fields = new ArrayList<Field>();
-		Set<String> existingNames = new HashSet<String>();
+	public static List<Field> findFields(Class<?> clazz) {
+		Map<String, Field> fields = new LinkedHashMap<>();
 		
 		Class<?> current = clazz;
 		while (current != null) {
 			for (Field field: current.getDeclaredFields()) {
-				if (!Modifier.isStatic(field.getModifiers()) && !existingNames.contains(field.getName())) {
-					fields.add(field);
-					existingNames.add(field.getName());
+				if (!field.isSynthetic() 
+						&& !Modifier.isStatic(field.getModifiers()) 
+						&& !fields.containsKey(field.getName())) {
+					fields.put(field.getName(), field);
 				}
 			}
 			current = current.getSuperclass();
 		}
-		return fields;
+		return new ArrayList<Field>(fields.values());
 	}
 	
 	/**
@@ -108,7 +106,7 @@ public class BeanUtils {
 	 * 			to sub classes coming first   
 	 */
 	public static List<Method> findGetters(Class<?> clazz) {
-		Map<String, Method> getters = new LinkedHashMap<String, Method>();
+		Map<String, Method> getters = new LinkedHashMap<>();
 		
 		Class<?> current = clazz;
 		while (current != null) {

@@ -95,7 +95,7 @@ public class CreateIssueAction extends PostBuildAction {
 				Issue issue = new Issue();
 				issue.setUUID(UUID.randomUUID().toString());
 				issue.setProject(build.getProject());
-				issue.setTitle(build.interpolate(getIssueTitle()));
+				issue.setTitle(getIssueTitle());
 				issue.setSubmitter(SecurityUtils.getUser());
 				issue.setSubmitDate(new Date());
 				SettingManager settingManager = OneDev.getInstance(SettingManager.class);

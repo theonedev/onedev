@@ -29,7 +29,7 @@ public class SendNotificationAction extends PostBuildAction {
 	@Override
 	public void execute(Build build) {
 		io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver parsedReceiver = 
-				io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver.parse(receivers, build);
+				io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver.parse(getReceivers(), build);
 		OneDev.getInstance(BuildNotificationManager.class).notify(build, parsedReceiver.getEmails());
 	}
 

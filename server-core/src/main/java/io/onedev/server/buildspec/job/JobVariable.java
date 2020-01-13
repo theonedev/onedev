@@ -39,6 +39,14 @@ public enum JobVariable {
 		}
 		
 	}, 
+	BUILD_VERSION {
+
+		@Override
+		public String getValue(Build build) {
+			return build.getVersion();
+		}
+		
+	}, 
 	ON_BRANCHES {
 		
 		@Override

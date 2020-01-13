@@ -326,7 +326,7 @@ public class DefaultPersistManager implements PersistManager {
 	 * @return
 	 */
 	private boolean hasForeignKeyDependency(Class<?> entityType1, Class<?> entityType2) {
-		for (Field field: BeanUtils.getFields(entityType1)) {
+		for (Field field: BeanUtils.findFields(entityType1)) {
 			if (field.getAnnotation(ManyToOne.class) != null) {
 				if (field.getType() == entityType2)
 					return true;

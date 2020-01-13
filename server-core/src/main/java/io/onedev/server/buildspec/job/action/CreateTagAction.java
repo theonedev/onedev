@@ -61,6 +61,7 @@ public class CreateTagAction extends PostBuildAction {
 	public void execute(Build build) {
 		PersonIdent tagIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 		Project project = build.getProject();
+		String tagName = getTagName();
 		Ref tagRef = project.getTagRef(tagName);
 		TagProtection protection = project.getTagProtection(tagName, build);
 		if (tagRef != null) {

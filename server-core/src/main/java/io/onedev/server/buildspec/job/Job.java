@@ -15,6 +15,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
 import org.apache.wicket.Component;
@@ -303,6 +304,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9410, group="Retry Upon Failure", description="Maximum of retries before giving up")
+	@Min(value=1, message="This value should not be less than 1")
 	public int getMaxRetries() {
 		return maxRetries;
 	}
@@ -314,6 +316,7 @@ public class Job implements Serializable, Validatable {
 	@Editable(order=9420, group="Retry Upon Failure", description="Delay for the first retry in seconds. "
 			+ "Delay of subsequent retries will be calculated using an exponential back-off "
 			+ "based on this delay")
+	@Min(value=1, message="This value should not be less than 1")
 	public int getRetryDelay() {
 		return retryDelay;
 	}

@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
@@ -28,10 +29,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.subject.Subject;
@@ -99,8 +97,6 @@ import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.validation.Interpolated;
-import io.onedev.server.web.editable.Path;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource {
@@ -319,24 +315,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	private JobExecution execute(Build build) {
 		ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
+		Build.push(build);
 		try {
 			String jobToken = UUID.randomUUID().toString();
 			Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
 			
-			Job job = SerializationUtils.clone(build.getJob());
-			build.interpolate(job);
-			
-			// make sure interpolated result passes validation
-			Interpolated.push(true);
-			try {
-				for (ConstraintViolation<?> violation: OneDev.getInstance(Validator.class).validate(job)) {
-					String errorMessage = String.format("Error validating job (property: %s, message: %s)", 
-								new Path(violation.getPropertyPath()).toString(), violation.getMessage());
-					throw new OneException(errorMessage);
-				}
-			} finally {
-				Interpolated.pop();
-			}
+			Job job = (Job) VariableInterpolator.installInterceptor(build.getJob());
 			
 			JobExecutor executor = getJobExecutor(build);
 			if (executor != null) {
@@ -359,71 +343,91 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							Set<String> includeFiles = new HashSet<>();
 							Set<String> excludeFiles = new HashSet<>();
 							List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
+							AtomicInteger maxRetries = new AtomicInteger(0);
+							AtomicInteger retryDelay = new AtomicInteger(0);
 							
 							sessionManager.run(new Runnable() {
 
 								@Override
 								public void run() {
 									Build build = buildManager.load(buildId);
-									jobLogger.log("Retrieving dependency artifacts...");
-									for (BuildDependence dependence: build.getDependencies()) {
-										if (dependence.getArtifacts() != null) {
-											build.retrieveArtifacts(dependence.getDependency(), 
-													dependence.getArtifacts(), serverWorkspace);
+									Build.push(build);
+									try {
+										jobLogger.log("Retrieving dependency artifacts...");
+										for (BuildDependence dependence: build.getDependencies()) {
+											if (dependence.getArtifacts() != null) {
+												build.retrieveArtifacts(dependence.getDependency(), 
+														dependence.getArtifacts(), serverWorkspace);
+											}
 										}
-									}
 
-									if (job.getArtifacts() != null) {
-										PatternSet patternSet = PatternSet.parse(job.getArtifacts());
-										includeFiles.addAll(patternSet.getIncludes());
-										excludeFiles.addAll(patternSet.getExcludes());
-									}
-									for (JobReport report: job.getReports()) {
-										PatternSet patternSet = PatternSet.parse(report.getFilePatterns());
-										includeFiles.addAll(patternSet.getIncludes());
-										excludeFiles.addAll(patternSet.getExcludes());
-									}
-									
-									if (job.isRetrieveSource()) {
-										for (SubmoduleCredential submoduleCredential: job.getSubmoduleCredentials()) {
-											SubmoduleCredential resolvedSubmoduleCredential = new SubmoduleCredential();
-											resolvedSubmoduleCredential.setUrl(submoduleCredential.getUrl());
-											resolvedSubmoduleCredential.setUserName(submoduleCredential.getUserName());
-											resolvedSubmoduleCredential.setPasswordSecret(
-													build.getSecretValue(submoduleCredential.getPasswordSecret()));
-											submoduleCredentials.add(resolvedSubmoduleCredential);
+										if (job.getArtifacts() != null) {
+											PatternSet patternSet = PatternSet.parse(job.getArtifacts());
+											includeFiles.addAll(patternSet.getIncludes());
+											excludeFiles.addAll(patternSet.getExcludes());
 										}
+										for (JobReport report: job.getReports()) {
+											PatternSet patternSet = PatternSet.parse(report.getFilePatterns());
+											includeFiles.addAll(patternSet.getIncludes());
+											excludeFiles.addAll(patternSet.getExcludes());
+										}
+										
+										if (job.isRetrieveSource()) {
+											for (SubmoduleCredential submoduleCredential: job.getSubmoduleCredentials()) {
+												SubmoduleCredential resolvedSubmoduleCredential = new SubmoduleCredential();
+												resolvedSubmoduleCredential.setUrl(submoduleCredential.getUrl());
+												resolvedSubmoduleCredential.setUserName(submoduleCredential.getUserName());
+												resolvedSubmoduleCredential.setPasswordSecret(
+														build.getSecretValue(submoduleCredential.getPasswordSecret()));
+												submoduleCredentials.add(resolvedSubmoduleCredential);
+											}
+										}
+										maxRetries.set(job.getMaxRetries());
+									} finally {
+										Build.pop();
 									}
-									
 								}
 								
 							});
 
-							int retried = 0;
+							AtomicInteger retried = new AtomicInteger(0);
 							while (true) {
-								JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
-										serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
-										submoduleCredentials, job.getCpuRequirement(), job.getMemoryRequirement(), 
-										commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
-										executor.getCacheTTL(), retried, job.getServices(), jobLogger) {
+								JobContext jobContext = sessionManager.call(new Callable<JobContext> () {
 
 									@Override
-									public void notifyJobRunning() {
-										transactionManager.run(new Runnable() {
+									public JobContext call() throws Exception {
+										Build build = buildManager.load(buildId);
+										Build.push(build);
+										try {
+											return new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
+													serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
+													submoduleCredentials, job.getCpuRequirement(), job.getMemoryRequirement(), 
+													commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
+													executor.getCacheTTL(), retried.get(), job.getServices(), jobLogger) {
+												
+												@Override
+												public void notifyJobRunning() {
+													transactionManager.run(new Runnable() {
 
-											@Override
-											public void run() {
-												Build build = buildManager.load(buildId);
-												build.setStatus(Build.Status.RUNNING);
-												build.setRunningDate(new Date());
-												buildManager.save(build);
-												listenerRegistry.post(new BuildRunning(build));
-											}
-											
-										});
+														@Override
+														public void run() {
+															Build build = buildManager.load(buildId);
+															build.setStatus(Build.Status.RUNNING);
+															build.setRunningDate(new Date());
+															buildManager.save(build);
+															listenerRegistry.post(new BuildRunning(build));
+														}
+														
+													});
+												}
+												
+											};
+										} finally {
+											Build.pop();
+										}
 									}
-
-								};
+									
+								});
 								
 								jobContexts.put(jobToken, jobContext);
 								
@@ -434,7 +438,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									if (ExceptionUtils.find(e, InterruptedException.class) != null) {
 										throw e;
 									} else {
-										if (retried++ < job.getMaxRetries() && transactionManager.call(new Callable<Boolean>() {
+										if (retried.getAndIncrement() < maxRetries.get() && transactionManager.call(new Callable<Boolean>() {
 
 											@Override
 											public Boolean call() {
@@ -467,7 +471,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												
 											});
 											try {						
-												Thread.sleep(job.getRetryDelay() * (long)(Math.pow(2, retried)) * 1000L);
+												Thread.sleep(retryDelay.get() * (long)(Math.pow(2, retried.get())) * 1000L);
 											} catch (InterruptedException e2) {
 												throw e2;
 											}
@@ -503,14 +507,19 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									@Override
 									public void run() {
 										Build build = buildManager.load(buildId);
-										if (job.getArtifacts() != null) {
-											jobLogger.log("Publishing job artifacts...");
-											build.publishArtifacts(serverWorkspace, job.getArtifacts());
+										Build.push(build);
+										try {
+											if (job.getArtifacts() != null) {
+												jobLogger.log("Publishing job artifacts...");
+												build.publishArtifacts(serverWorkspace, job.getArtifacts());
+											}
+											
+											jobLogger.log("Processing job reports...");
+											for (JobReport report: job.getReports())
+												report.process(build, serverWorkspace, jobLogger);
+										} finally {
+											Build.pop();
 										}
-										
-										jobLogger.log("Processing job reports...");
-										for (JobReport report: job.getReports())
-											report.process(build, serverWorkspace, jobLogger);
 									}
 									
 								});
@@ -529,6 +538,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				throw new OneException("No applicable job executor");
 			}
 		} finally {
+			Build.pop();
 			ScriptIdentity.pop();
 		}
 	}
@@ -584,7 +594,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									Long projectId = event.getProject().getId();
 									
 									// run asynchrously as session may get closed due to exception
-									OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+									transactionManager.runAfterCommit(new Runnable() {
 
 										@Override
 										public void run() {
@@ -824,11 +834,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					@Override
 					public void run() {
 						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
-						Build.push(build);
 						ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
+						Build.push(build);
 						try {
-							for (PostBuildAction action: build.getJob().getPostBuildActions()) {
-								if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
+							Job job = (Job) VariableInterpolator.installInterceptor(build.getJob());
+							for (PostBuildAction action: job.getPostBuildActions()) {
+								if (ActionCondition.parse(job, action.getCondition()).matches(build))
 									action.execute(build);
 							}
 						} catch (Throwable e) {
@@ -836,8 +847,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									build.getProject().getName(), build.getCommitHash(), build.getJobName());
 							logger.error(message, e);
 						} finally {
-							ScriptIdentity.pop();
 							Build.pop();
+							ScriptIdentity.pop();
 						}
 					}
 				});

@@ -3,8 +3,6 @@ package io.onedev.server.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,7 +57,6 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.support.JobSecret;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
@@ -71,7 +68,6 @@ import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -683,41 +679,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		else 
 			return null;
 	}	
-	
-	@SuppressWarnings("unchecked")
-	public void interpolate(Serializable bean) {
-		Build.push(this);
-		try {
-			for (Method getter: BeanUtils.findGetters(bean.getClass())) {
-				Method setter = BeanUtils.findSetter(getter);
-				if (setter != null && getter.getAnnotation(Editable.class) != null) {
-					Serializable value = (Serializable) getter.invoke(bean);
-					if (value != null) {
-						if (getter.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
-							if (value instanceof String) {
-								setter.invoke(bean, interpolate((String) getter.invoke(bean)));
-							} else if (value instanceof List) {
-								List<String> list = (List<String>) value;
-								for (int i=0; i<list.size(); i++)
-									list.set(i, interpolate(list.get(i)));
-							}
-						} else if (value instanceof Collection) {
-							for (Serializable element: (Collection<Serializable>) value) {
-								if (element.getClass().getAnnotation(Editable.class) != null)
-									interpolate(element);
-							}
-						} else if (value.getClass().getAnnotation(Editable.class) != null) {
-							interpolate(value);
-						}
-					}
-				}
-			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException(e);
-		} finally {
-			Build.pop();
-		}
-	}
 	
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getProject(), getNumber());
