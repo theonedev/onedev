@@ -146,24 +146,24 @@ public class SuggestionUtils {
 		for (JobVariable var: JobVariable.values()) 
 			variables.put(var.name().toLowerCase(), null);
 		for (ParamSpec paramSpec: job.getParamSpecs()) 
-			variables.put(VariableInterpolator.PARAMS_PREFIX + paramSpec.getName(), paramSpec.getDescription());
+			variables.put(VariableInterpolator.PREFIX_PARAMS + paramSpec.getName(), paramSpec.getDescription());
 		for (Property property: buildSpec.getProperties())
-			variables.put(VariableInterpolator.PROPERTIES_PREFIX + property.getName(), null);
+			variables.put(VariableInterpolator.PREFIX_PROPERTIES + property.getName(), null);
 		for (JobSecret secret: project.getBuildSetting().getHierarchySecrets(project)) {
-			String varName = VariableInterpolator.SECRETS_PREFIX + secret.getName();
+			String varName = VariableInterpolator.PREFIX_SECRETS + secret.getName();
 			if (commitId != null && secret.isAuthorized(project, commitId) 
 					|| commitId == null && secret.isAuthorized(project, "master")) {
 				variables.put(varName, null);
 			}
 		}
 		for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
-			String varName = VariableInterpolator.SCRIPTS_PREFIX + script.getName();
+			String varName = VariableInterpolator.PREFIX_SCRIPTS + script.getName();
 			if (!variables.containsKey(varName) && script.isAuthorized(ScriptIdentity.get()))
 				variables.put(varName, null);
 		}
 		
 		for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
-			String varName = VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX 
+			String varName = VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX 
 					+ contribution.getScript().getName();
 			if (!variables.containsKey(varName))
 				variables.put(varName, null);

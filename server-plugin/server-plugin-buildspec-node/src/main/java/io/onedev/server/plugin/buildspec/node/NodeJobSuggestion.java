@@ -58,7 +58,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setName("angular ci");
 			job.setImage("1dev/buildspec-node:10.16-alpine-chrome");
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo", 
 					"npm install",
 					"npm install \\@angular/cli");
@@ -111,7 +111,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo",
 					"npm install typescript", 
 					"npm install", 
@@ -160,7 +160,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo", 
 					"npm install");
 
@@ -203,7 +203,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo", 
 					"npm install");
 

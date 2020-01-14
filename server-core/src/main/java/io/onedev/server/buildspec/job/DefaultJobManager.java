@@ -345,6 +345,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
 							AtomicInteger maxRetries = new AtomicInteger(0);
 							AtomicInteger retryDelay = new AtomicInteger(0);
+							List<CacheSpec> caches = new ArrayList<>();
+							List<JobService> services = new ArrayList<>();
 							
 							sessionManager.run(new Runnable() {
 
@@ -371,7 +373,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											includeFiles.addAll(patternSet.getIncludes());
 											excludeFiles.addAll(patternSet.getExcludes());
 										}
-										
 										if (job.isRetrieveSource()) {
 											for (SubmoduleCredential submoduleCredential: job.getSubmoduleCredentials()) {
 												SubmoduleCredential resolvedSubmoduleCredential = new SubmoduleCredential();
@@ -382,6 +383,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												submoduleCredentials.add(resolvedSubmoduleCredential);
 											}
 										}
+										for (CacheSpec cache: job.getCaches())
+											caches.add(build.interpolateProperties(cache));
+										for (JobService service: job.getServices())
+											services.add(build.interpolateProperties(service));
 										maxRetries.set(job.getMaxRetries());
 									} finally {
 										Build.pop();
@@ -402,8 +407,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											return new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
 													serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
 													submoduleCredentials, job.getCpuRequirement(), job.getMemoryRequirement(), 
-													commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
-													executor.getCacheTTL(), retried.get(), job.getServices(), jobLogger) {
+													commitId, caches, new PatternSet(includeFiles, excludeFiles), 
+													executor.getCacheTTL(), retried.get(), services, jobLogger) {
 												
 												@Override
 												public void notifyJobRunning() {

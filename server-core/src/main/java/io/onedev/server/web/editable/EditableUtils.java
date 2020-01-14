@@ -113,5 +113,5 @@ public class EditableUtils {
 	public static <T extends AnnotatedElement> void sortAnnotatedElements(List<T> annotatedElements) {
 		annotatedElements.sort((element1, element2) -> getOrder(element1) - getOrder(element2));
 	}
-	
+
 }

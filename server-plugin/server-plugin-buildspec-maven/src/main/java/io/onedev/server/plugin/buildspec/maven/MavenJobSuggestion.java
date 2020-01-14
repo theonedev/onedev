@@ -43,7 +43,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("maven ci");
 
-			job.setImage("@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
+			job.setImage("@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
 			/*
 			 * Before running maven test, we extract version of the project and use LogInstruction to tell 
 			 * OneDev using extracted version for current build

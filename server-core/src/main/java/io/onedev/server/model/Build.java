@@ -3,6 +3,9 @@ package io.onedev.server.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +60,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.support.JobSecret;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
@@ -68,6 +72,7 @@ import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -99,7 +104,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String ARTIFACTS_DIR = "artifacts";
 	
-	private static final int MAX_STATUS_MESSAGE_LEN = 1024;
+	private static final int MAX_ERROR_MESSAGE_LEN = 16384;
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
@@ -158,7 +163,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private Date retryDate;
 	
-	@Column(length=MAX_STATUS_MESSAGE_LEN)
+	@Column(length=MAX_ERROR_MESSAGE_LEN)
 	private String errorMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
@@ -381,7 +386,7 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setErrorMessage(String errorMessage) {
 		if (errorMessage != null) {
-			errorMessage = StringUtils.abbreviate(errorMessage, MAX_STATUS_MESSAGE_LEN);
+			errorMessage = StringUtils.abbreviate(errorMessage, MAX_ERROR_MESSAGE_LEN);
 			for (String secretValue: getSecretValuesToMask())
 				errorMessage = StringUtils.replace(errorMessage, secretValue, SecretInput.MASK);
 		}
@@ -678,6 +683,72 @@ public class Build extends AbstractEntity implements Referenceable {
 			return StringUtils.unescape(Interpolative.parse(interpolativeString).interpolateWith(new VariableInterpolator(this)));
 		else 
 			return null;
+	}	
+	
+	@SuppressWarnings("unchecked")
+	public <T> T interpolateProperties(T object) {
+		Class<T> clazz = VariableInterpolator.getUninterceptedClass(object);
+		
+		T unintercepted;
+		try {
+			unintercepted = clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
+
+		for (Field field: BeanUtils.findFields(clazz)) {
+			field.setAccessible(true);
+			try {
+				field.set(unintercepted, field.get(object));
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		for (Method getter: BeanUtils.findGetters(clazz)) {
+			if (getter.getAnnotation(Editable.class) != null) {
+				Method setter = BeanUtils.findSetter(getter);
+				if (setter != null) {
+					try {
+						Object propertyValue = getter.invoke(unintercepted);
+						if (propertyValue != null) {
+							Class<?> propertyClass = VariableInterpolator.getUninterceptedClass(propertyValue);
+							if (getter.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
+								try {
+									if (propertyValue instanceof String) {
+										setter.invoke(unintercepted, interpolate((String) propertyValue));
+									} else if (propertyValue instanceof List) {
+										List<String> interpolatedList = new ArrayList<>();
+										for (String element: (List<String>) propertyValue) 
+											interpolatedList.add(interpolate(element));
+										setter.invoke(unintercepted, interpolatedList);
+									}
+								} catch (Exception e) {
+									String message = String.format("Error interpolating (class: %s, property: %s)", 
+											propertyClass, BeanUtils.getPropertyName(getter));
+									throw new RuntimeException(message, e);
+								}
+							} else if (propertyClass.getAnnotation(Editable.class) != null) {
+								setter.invoke(unintercepted, interpolateProperties(propertyValue));
+							} else if (propertyValue instanceof List) {
+								List<Object> uninterceptedList = new ArrayList<>();
+								for (Object element: (List<?>)propertyValue) { 
+									if (element != null && VariableInterpolator.getUninterceptedClass(element).getAnnotation(Editable.class) != null)
+										uninterceptedList.add(interpolateProperties(element));
+									else
+										uninterceptedList.add(element);
+								}
+								setter.invoke(unintercepted, uninterceptedList);
+							}
+						}
+					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
+		
+		return unintercepted;
 	}	
 	
 	public ProjectScopedNumber getFQN() {

@@ -25,13 +25,13 @@ import net.sf.cglib.proxy.MethodProxy;
 
 public class VariableInterpolator implements Function<String, String> {
 
-	public static final String PARAMS_PREFIX = "params:"; 
+	public static final String PREFIX_PARAMS = "params:"; 
 	
-	public static final String PROPERTIES_PREFIX = "properties:";
+	public static final String PREFIX_PROPERTIES = "properties:";
 	
-	public static final String SECRETS_PREFIX = "secrets:";
+	public static final String PREFIX_SECRETS = "secrets:";
 	
-	public static final String SCRIPTS_PREFIX = "scripts:";
+	public static final String PREFIX_SCRIPTS = "scripts:";
 	
 	private final Build build;
 	
@@ -45,8 +45,8 @@ public class VariableInterpolator implements Function<String, String> {
 			if (var.name().toLowerCase().equals(t))
 				return var.getValue(build);
 		}
-		if (t.startsWith(PARAMS_PREFIX)) {
-			String paramName = t.substring(PARAMS_PREFIX.length());
+		if (t.startsWith(PREFIX_PARAMS)) {
+			String paramName = t.substring(PREFIX_PARAMS.length());
 			for (Entry<String, Input> entry: build.getParamInputs().entrySet()) {
 				if (paramName.equals(entry.getKey())) {
 					if (build.isParamVisible(paramName)) {
@@ -64,18 +64,18 @@ public class VariableInterpolator implements Function<String, String> {
 				}					
 			}
 			throw new OneException("Undefined param: " + paramName);
-		} else if (t.startsWith(PROPERTIES_PREFIX)) {
-			String propertyName = t.substring(PROPERTIES_PREFIX.length());
+		} else if (t.startsWith(PREFIX_PROPERTIES)) {
+			String propertyName = t.substring(PREFIX_PROPERTIES.length());
 			String propertyValue = build.getSpec().getPropertyMap().get(propertyName);
 			if (propertyValue != null)
 				return propertyValue;
 			else
 				throw new OneException("Undefined property: " + propertyName);
-		} else if (t.startsWith(SECRETS_PREFIX)) {
-			String secretName = t.substring(SECRETS_PREFIX.length());
+		} else if (t.startsWith(PREFIX_SECRETS)) {
+			String secretName = t.substring(PREFIX_SECRETS.length());
 			return build.getSecretValue(secretName);
-		} else if (t.startsWith(SCRIPTS_PREFIX)) {
-			String scriptName = t.substring(SCRIPTS_PREFIX.length());
+		} else if (t.startsWith(PREFIX_SCRIPTS)) {
+			String scriptName = t.substring(PREFIX_SCRIPTS.length());
 			Map<String, Object> context = new HashMap<>();
 			context.put("build", build);
 			Object result = GroovyUtils.evalScriptByName(scriptName, context);
@@ -88,17 +88,19 @@ public class VariableInterpolator implements Function<String, String> {
 		}
 	}
 
-	public static Object installInterceptor(Object object) {
+	
+	public static <T> T installInterceptor(T object) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(object.getClass());
 		enhancer.setCallback(new InterpolatorInterceptor());
 
-		Object enhanced = enhancer.create();
+		@SuppressWarnings("unchecked")
+		T intercepted = (T) enhancer.create();
 
 		for (Field field: BeanUtils.findFields(object.getClass())) {
 			field.setAccessible(true);
 			try {
-				field.set(enhanced, field.get(object));
+				field.set(intercepted, field.get(object));
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
@@ -112,16 +114,16 @@ public class VariableInterpolator implements Function<String, String> {
 						Object propertyValue = getter.invoke(object);
 						if (propertyValue != null) {
 							if (propertyValue.getClass().getAnnotation(Editable.class) != null) {
-								setter.invoke(enhanced, installInterceptor(propertyValue));
+								setter.invoke(intercepted, installInterceptor(propertyValue));
 							} else if (propertyValue instanceof List) {
-								List<Object> enhancedList = new ArrayList<>();
+								List<Object> interceptedList = new ArrayList<>();
 								for (Object element: (List<?>)propertyValue) { 
-									if (element.getClass().getAnnotation(Editable.class) != null)
-										enhancedList.add(installInterceptor(element));
+									if (element != null && element.getClass().getAnnotation(Editable.class) != null)
+										interceptedList.add(installInterceptor(element));
 									else
-										enhancedList.add(element);
+										interceptedList.add(element);
 								}
-								setter.invoke(enhanced, enhancedList);
+								setter.invoke(intercepted, interceptedList);
 							}
 						}
 					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -131,7 +133,15 @@ public class VariableInterpolator implements Function<String, String> {
 			}
 		}
 		
-		return enhanced;
+		return intercepted;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> Class<T> getUninterceptedClass(T object) {
+		Class<T> clazz = (Class<T>) object.getClass();
+		while (Enhancer.isEnhanced(clazz))
+			clazz = (Class<T>) clazz.getSuperclass();
+		return clazz;
 	}
 	
 	private static class InterpolatorInterceptor implements MethodInterceptor, Serializable {
@@ -145,25 +155,19 @@ public class VariableInterpolator implements Function<String, String> {
 					&& method.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
 				Serializable propertyValue = (Serializable) methodProxy.invokeSuper(proxy, args);
 				Build build = Build.get();
-				try {
-					if (build == null) { 
-						throw new RuntimeException("No build context");
-					} else if (propertyValue instanceof String) {
-						return build.interpolate((String) propertyValue);
-					} else if (propertyValue instanceof List) {
-						List<String> interpolatedList = new ArrayList<>();
-						for (String element: (List<String>) propertyValue)  
-							interpolatedList.add(build.interpolate(element));
-						return interpolatedList;
-					}
-				} catch (Exception e) {
-					String message = String.format("Error doing interpolator intercepting (class: %s, method: %s)", 
-							method.getDeclaringClass().getName(), method.getName());
-					throw new RuntimeException(message, e);
+				if (build == null) { 
+					throw new RuntimeException("No build context");
+				} else if (propertyValue instanceof String) {
+					return build.interpolate((String) propertyValue);
+				} else if (propertyValue instanceof List) {
+					List<String> interpolatedList = new ArrayList<>();
+					for (String element: (List<String>) propertyValue)  
+						interpolatedList.add(build.interpolate(element));
+					return interpolatedList;
 				}
 			} 
 			return methodProxy.invokeSuper(proxy, args);
 		}		
 	}
-		
+			
 }

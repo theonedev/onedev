@@ -17,7 +17,6 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.server.OneException;
 import io.onedev.server.util.interpolative.InterpolativeParser.InterpolativeContext;
 import io.onedev.server.util.interpolative.InterpolativeParser.SegmentContext;
 import io.onedev.server.util.interpolative.Segment.Type;
@@ -41,7 +40,7 @@ public class Interpolative implements Serializable {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed interpolative");
+				throw new RuntimeException("Malformed interpolative: " + interpolativeString);
 			}
 			
 		});

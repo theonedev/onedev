@@ -40,7 +40,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 		if (gradleBlob != null || kotlinGradleBlob != null) {
 			Job job = new Job();
 			job.setName("gradle ci");
-			job.setImage("@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
+			job.setImage("@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
 			job.setCommands(Lists.newArrayList(
 					"set -e",
 					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"",
