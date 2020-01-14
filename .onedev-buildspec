@@ -44,7 +44,12 @@
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
             <timeout>3600</timeout>
-            <postBuildActions/>
+            <postBuildActions>
+                <io.onedev.server.buildspec.job.action.CreateTagAction>
+                    <condition>successful</condition>
+                    <tagName>v@build_version@</tagName>
+                </io.onedev.server.buildspec.job.action.CreateTagAction>
+            </postBuildActions>
             <retryCondition>never</retryCondition>
             <maxRetries>3</maxRetries>
             <retryDelay>30</retryDelay>
