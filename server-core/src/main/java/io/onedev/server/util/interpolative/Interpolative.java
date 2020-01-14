@@ -32,9 +32,27 @@ public class Interpolative implements Serializable {
 		this.segments = segments;
 	}
 	
-	public static Interpolative fromString(String interpolativeString) {
+	public static Interpolative parse(String interpolativeString) {
+		CharStream is = CharStreams.fromString(interpolativeString); 
+		InterpolativeLexer lexer = new InterpolativeLexer(is);
+		lexer.removeErrorListeners();
+		lexer.addErrorListener(new BaseErrorListener() {
+
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				throw new OneException("Malformed interpolative");
+			}
+			
+		});
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		InterpolativeParser parser = new InterpolativeParser(tokens);
+		parser.removeErrorListeners();
+		parser.setErrorHandler(new BailErrorStrategy());
+		InterpolativeContext interpolativeContext = parser.interpolative();
+		
 		List<Segment> segments = new ArrayList<>();
-		for (SegmentContext segment: parse(interpolativeString).segment()) {
+		for (SegmentContext segment: interpolativeContext.segment()) {
 			if (segment.Literal() != null) 
 				segments.add(new Segment(Type.LITERAL, segment.Literal().getText()));
 			else
@@ -61,24 +79,4 @@ public class Interpolative implements Serializable {
 		return builder.toString();
 	}
 	
-	public static InterpolativeContext parse(String interpolativeString) {
-		CharStream is = CharStreams.fromString(interpolativeString); 
-		InterpolativeLexer lexer = new InterpolativeLexer(is);
-		lexer.removeErrorListeners();
-		lexer.addErrorListener(new BaseErrorListener() {
-
-			@Override
-			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed interpolative");
-			}
-			
-		});
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		InterpolativeParser parser = new InterpolativeParser(tokens);
-		parser.removeErrorListeners();
-		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.interpolative();
-	}
-
 }

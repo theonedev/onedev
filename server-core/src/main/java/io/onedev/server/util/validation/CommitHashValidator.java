@@ -23,7 +23,7 @@ public class CommitHashValidator implements ConstraintValidator<CommitHash, Stri
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		if (value == null || interpolative && !Interpolated.get() && !Interpolative.fromString(value).getSegments(Segment.Type.VARIABLE).isEmpty())
+		if (value == null || interpolative && !Interpolated.get() && !Interpolative.parse(value).getSegments(Segment.Type.VARIABLE).isEmpty())
 			return true;
 		
 		if (!ObjectId.isId(value)) {

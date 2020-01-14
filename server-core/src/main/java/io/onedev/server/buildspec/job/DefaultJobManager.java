@@ -443,9 +443,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											@Override
 											public Boolean call() {
 												Build build = buildManager.load(buildId);
-												if (e instanceof OneException)
+												if (e instanceof OneException) 
 													build.setErrorMessage(e.getMessage());
-												else
+												else 
 													build.setErrorMessage(Throwables.getStackTraceAsString(e));
 												buildManager.save(build);
 												RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
@@ -544,20 +544,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	private void log(Throwable e, JobLogger logger) {
-		if (e.getMessage() != null)
+		if (e instanceof OneException)
 			logger.log(e.getMessage());
 		else
 			logger.log(e);
 	}
 	
 	private RuntimeException maskSecrets(Throwable e, Collection<String> jobSecretsToMask) {
-		String errorMessage = e.getMessage();
-		if (errorMessage != null) {
+		if (e instanceof OneException) {
+			String errorMessage = e.getMessage();
 			for (String secret: jobSecretsToMask)
 				errorMessage = StringUtils.replace(errorMessage, secret, SecretInput.MASK);
-			return new RuntimeException(errorMessage);
+			return new OneException(errorMessage);
 		} else {
-			return ExceptionUtils.unchecked(e);
+			String stackTrace = Throwables.getStackTraceAsString(e);
+			for (String secret: jobSecretsToMask)
+				stackTrace = StringUtils.replace(stackTrace, secret, SecretInput.MASK);
+			return new OneException(stackTrace);
 		}
 	}
 	
@@ -787,7 +790,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									}
 									build.setStatus(Build.Status.CANCELLED);
 								} catch (ExecutionException e) {
-									if (e.getCause() != null)
+									if (e.getCause() instanceof OneException)
 										build.setStatus(Build.Status.FAILED, e.getCause().getMessage());
 									else
 										build.setStatus(Build.Status.FAILED, e.getMessage());

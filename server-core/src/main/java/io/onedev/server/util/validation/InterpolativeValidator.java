@@ -33,7 +33,7 @@ public class InterpolativeValidator implements ConstraintValidator<Interpolative
 			
 			for (String each: values) {
 				try {
-					io.onedev.server.util.interpolative.Interpolative.fromString(each);					
+					io.onedev.server.util.interpolative.Interpolative.parse(each);					
 				} catch (Exception e) {
 					constraintContext.disableDefaultConstraintViolation();
 					String message = this.message;

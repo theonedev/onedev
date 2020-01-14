@@ -121,7 +121,7 @@ public class ProjectDependency implements Serializable {
 	private static List<InputSuggestion> suggestArtifacts(String matchWith) {
 		Project project = getInputProject();
 		String buildNumber = (String) EditContext.get().getInputValue("buildNumber");
-		if (project != null && io.onedev.server.util.interpolative.Interpolative.fromString(buildNumber).getSegments(Segment.Type.VARIABLE).isEmpty()) {
+		if (project != null && io.onedev.server.util.interpolative.Interpolative.parse(buildNumber).getSegments(Segment.Type.VARIABLE).isEmpty()) {
 			if (buildNumber.startsWith("#"))
 				buildNumber = buildNumber.substring(1);
 			Build build = OneDev.getInstance(BuildManager.class).find(project, Long.parseLong(buildNumber));

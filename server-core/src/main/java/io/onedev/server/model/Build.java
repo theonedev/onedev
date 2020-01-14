@@ -675,7 +675,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public String interpolate(@Nullable String interpolativeString) {
 		if (interpolativeString != null) 
-			return StringUtils.unescape(Interpolative.fromString(interpolativeString).interpolateWith(new VariableInterpolator(this)));
+			return StringUtils.unescape(Interpolative.parse(interpolativeString).interpolateWith(new VariableInterpolator(this)));
 		else 
 			return null;
 	}	

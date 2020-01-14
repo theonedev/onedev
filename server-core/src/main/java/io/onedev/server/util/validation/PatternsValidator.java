@@ -26,7 +26,7 @@ public class PatternsValidator implements ConstraintValidator<Patterns, String> 
 		if (value == null) 
 			return true;
 		if (interpolative && !Interpolated.get()) try {
-			value = Interpolative.fromString(value).interpolateWith(new Function<String, String>() {
+			value = Interpolative.parse(value).interpolateWith(new Function<String, String>() {
 
 				@Override
 				public String apply(String t) {

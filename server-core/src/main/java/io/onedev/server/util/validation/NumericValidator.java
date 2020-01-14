@@ -26,7 +26,7 @@ public class NumericValidator implements ConstraintValidator<Numeric, String> {
 			return true;
 		
 		if (interpolative && !Interpolated.get()) try {
-			value = StringUtils.unescape(Interpolative.fromString(value).interpolateWith(new Function<String, String>() {
+			value = StringUtils.unescape(Interpolative.parse(value).interpolateWith(new Function<String, String>() {
 
 				@Override
 				public String apply(String t) {

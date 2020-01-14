@@ -109,7 +109,7 @@ public class VariableInterpolator implements Function<String, String> {
 				Method setter = BeanUtils.findSetter(getter);
 				if (setter != null) {
 					try {
-						Object propertyValue = getter.invoke(enhanced);
+						Object propertyValue = getter.invoke(object);
 						if (propertyValue != null) {
 							if (propertyValue.getClass().getAnnotation(Editable.class) != null) {
 								setter.invoke(enhanced, installInterceptor(propertyValue));
@@ -145,15 +145,21 @@ public class VariableInterpolator implements Function<String, String> {
 					&& method.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
 				Serializable propertyValue = (Serializable) methodProxy.invokeSuper(proxy, args);
 				Build build = Build.get();
-				if (build == null) {
-					throw new OneException("No build context in interpolator interceptor");
-				} else if (propertyValue instanceof String) {
-					return build.interpolate((String) propertyValue);
-				} else if (propertyValue instanceof List) {
-					List<String> interpolatedList = new ArrayList<>();
-					for (String element: (List<String>) propertyValue)  
-						interpolatedList.add(build.interpolate(element));
-					return interpolatedList;
+				try {
+					if (build == null) { 
+						throw new RuntimeException("No build context");
+					} else if (propertyValue instanceof String) {
+						return build.interpolate((String) propertyValue);
+					} else if (propertyValue instanceof List) {
+						List<String> interpolatedList = new ArrayList<>();
+						for (String element: (List<String>) propertyValue)  
+							interpolatedList.add(build.interpolate(element));
+						return interpolatedList;
+					}
+				} catch (Exception e) {
+					String message = String.format("Error doing interpolator intercepting (class: %s, method: %s)", 
+							method.getDeclaringClass().getName(), method.getName());
+					throw new RuntimeException(message, e);
 				}
 			} 
 			return methodProxy.invokeSuper(proxy, args);
