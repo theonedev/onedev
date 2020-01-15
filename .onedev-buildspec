@@ -100,7 +100,11 @@
             <projectDependencies/>
             <services/>
             <reports/>
-            <triggers/>
+            <triggers>
+                <io.onedev.server.buildspec.job.trigger.TagCreateTrigger>
+                    <params/>
+                </io.onedev.server.buildspec.job.trigger.TagCreateTrigger>
+            </triggers>
             <caches/>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
