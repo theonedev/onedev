@@ -57,7 +57,7 @@
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Master (GitHub)</name>
             <paramSpecs/>
-            <image>alpine/git:1.0.7</image>
+            <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
             </commands>
@@ -85,9 +85,10 @@
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Tags (GitHub)</name>
             <paramSpecs/>
-            <image>alpine/git:1.0.7</image>
+            <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>set -e</string>
+                <string>rm -rf ~/.m2/repository/io/onedev #clean downloaded dependencies as sometimes we do not change project versions</string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
                 <string>tag=v$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>git tag -a $tag</string>
@@ -105,7 +106,12 @@
                     <params/>
                 </io.onedev.server.buildspec.job.trigger.TagCreateTrigger>
             </triggers>
-            <caches/>
+            <caches>
+                <io.onedev.server.buildspec.job.CacheSpec>
+                    <key>maven-cache</key>
+                    <path>/root/.m2/repository</path>
+                </io.onedev.server.buildspec.job.CacheSpec>
+            </caches>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
             <timeout>3600</timeout>
