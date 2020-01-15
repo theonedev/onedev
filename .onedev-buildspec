@@ -55,7 +55,7 @@
             <retryDelay>30</retryDelay>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
-            <name>Sync with GitHub</name>
+            <name>Sync Master (GitHub)</name>
             <paramSpecs/>
             <image>alpine/git:1.0.7</image>
             <commands>
@@ -73,6 +73,34 @@
                     <branches>master</branches>
                 </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
             </triggers>
+            <caches/>
+            <cpuRequirement>250m</cpuRequirement>
+            <memoryRequirement>128m</memoryRequirement>
+            <timeout>3600</timeout>
+            <postBuildActions/>
+            <retryCondition>never</retryCondition>
+            <maxRetries>3</maxRetries>
+            <retryDelay>30</retryDelay>
+        </io.onedev.server.buildspec.job.Job>
+        <io.onedev.server.buildspec.job.Job>
+            <name>Sync Tags (GitHub)</name>
+            <paramSpecs/>
+            <image>alpine/git:1.0.7</image>
+            <commands>
+                <string>set -e</string>
+                <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
+                <string>tag=v$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
+                <string>git tag -a $tag</string>
+                <string>url = "https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev"</string>
+                <string>git push -f $url $tag:$tag</string>
+            </commands>
+            <retrieveSource>true</retrieveSource>
+            <submoduleCredentials/>
+            <jobDependencies/>
+            <projectDependencies/>
+            <services/>
+            <reports/>
+            <triggers/>
             <caches/>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
