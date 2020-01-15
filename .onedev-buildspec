@@ -88,7 +88,7 @@
             <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>set -e</string>
-                <string>git fetch --tags</string>
+                <string>git fetch --tags https://robin:@secrets:onedev-password@\@code.onedev.io/projects/onedev-server</string>
                 <string>git push -f --tags https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev</string>
             </commands>
             <retrieveSource>true</retrieveSource>
