@@ -93,7 +93,7 @@
                 <string>tag=v$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>git config --global user.name "Robin Shen"</string>
                 <string>git config --global user.email "robin\@pmease.com"</string>
-                <string>git tag -a $tag</string>
+                <string>git tag -a $tag -m "Release"</string>
                 <string>url = "https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev"</string>
                 <string>git push -f $url $tag:$tag</string>
             </commands>
