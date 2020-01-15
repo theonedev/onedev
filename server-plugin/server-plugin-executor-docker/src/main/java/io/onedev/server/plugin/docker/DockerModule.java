@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
@@ -59,7 +60,10 @@ public class DockerModule extends AbstractPluginModule {
 					
 					return new DockerExecutor();
 				} catch (Exception e) {
-					return null;
+					if (ExceptionUtils.find(e, InterruptedException.class) != null)
+						throw ExceptionUtils.unchecked(e);
+					else
+						return null;
 				}
 			}
 			
