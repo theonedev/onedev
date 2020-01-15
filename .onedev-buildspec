@@ -55,9 +55,9 @@
             <retryDelay>30</retryDelay>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
-            <name>Sync with GitHub</name>
+            <name>Sync Master (GitHub)</name>
             <paramSpecs/>
-            <image>alpine/git:1.0.7</image>
+            <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
             </commands>
@@ -74,6 +74,40 @@
                 </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
             </triggers>
             <caches/>
+            <cpuRequirement>250m</cpuRequirement>
+            <memoryRequirement>128m</memoryRequirement>
+            <timeout>3600</timeout>
+            <postBuildActions/>
+            <retryCondition>never</retryCondition>
+            <maxRetries>3</maxRetries>
+            <retryDelay>30</retryDelay>
+        </io.onedev.server.buildspec.job.Job>
+        <io.onedev.server.buildspec.job.Job>
+            <name>Sync Tags (GitHub)</name>
+            <paramSpecs/>
+            <image>1dev/build-environment:1.0</image>
+            <commands>
+                <string>set -e</string>
+                <string>git fetch --tags https://robin:@secrets:onedev-password@\@code.onedev.io/projects/onedev-server</string>
+                <string>git push -f --tags https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev</string>
+            </commands>
+            <retrieveSource>true</retrieveSource>
+            <submoduleCredentials/>
+            <jobDependencies/>
+            <projectDependencies/>
+            <services/>
+            <reports/>
+            <triggers>
+                <io.onedev.server.buildspec.job.trigger.TagCreateTrigger>
+                    <params/>
+                </io.onedev.server.buildspec.job.trigger.TagCreateTrigger>
+            </triggers>
+            <caches>
+                <io.onedev.server.buildspec.job.CacheSpec>
+                    <key>maven-cache</key>
+                    <path>/root/.m2/repository</path>
+                </io.onedev.server.buildspec.job.CacheSpec>
+            </caches>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
             <timeout>3600</timeout>
