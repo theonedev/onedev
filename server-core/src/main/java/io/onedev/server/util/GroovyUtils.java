@@ -74,17 +74,20 @@ public class GroovyUtils {
         			}
         		}
         	}
+        	throw new OneException("No authorized groovy script found: " 
+        			+ GroovyScript.BUILTIN_PREFIX + scriptName);
+    	} else {
+        	for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
+        		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
+        			try {
+        				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
+        			} catch (Exception e) {
+        				throw new OneException("Error evaluating named groovy script: " + scriptName, e);
+        			}
+        		}
+        	}
+        	throw new OneException("No authorized groovy script found: " + scriptName);
     	}
-    	for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
-    		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
-    			try {
-    				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
-    			} catch (Exception e) {
-    				throw new OneException("Error evaluating named groovy script: " + scriptName, e);
-    			}
-    		}
-    	}
-    	throw new OneException("No authorized groovy script found: " + scriptName);
     }
     
     public static Object evalScript(String scriptContent, Map<String, Object> variables) {

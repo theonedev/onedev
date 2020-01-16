@@ -70,6 +70,8 @@ import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -781,9 +783,11 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static void push(Build build) {
 		stack.get().push(build);
+		ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 	}
 
 	public static void pop() {
+		ScriptIdentity.pop();
 		stack.get().pop();
 	}
 	

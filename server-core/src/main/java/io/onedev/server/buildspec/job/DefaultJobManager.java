@@ -314,7 +314,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private JobExecution execute(Build build) {
-		ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 		Build.push(build);
 		try {
 			String jobToken = UUID.randomUUID().toString();
@@ -544,7 +543,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 		} finally {
 			Build.pop();
-			ScriptIdentity.pop();
 		}
 	}
 	
@@ -842,7 +840,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					@Override
 					public void run() {
 						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
-						ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 						Build.push(build);
 						try {
 							Job job = (Job) VariableInterpolator.installInterceptor(build.getJob());
@@ -856,7 +853,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							logger.error(message, e);
 						} finally {
 							Build.pop();
-							ScriptIdentity.pop();
 						}
 					}
 				});
