@@ -56,6 +56,8 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			input.add(inputAssistBehavior);
 			input.add(AttributeAppender.append("spellcheck", "false"));
 			input.add(AttributeAppender.append("autocomplete", "off"));
+			if (!getDescriptor().isPropertyRequired())
+				input.add(AttributeAppender.append("class", "no-autofocus"));
 		}
 		
 		input.add(new OnTypingDoneBehavior() {
