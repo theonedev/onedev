@@ -33,7 +33,17 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 		if (!choices.containsKey(selection))
 			selection = null;
 		
-		input = new JobSingleChoice("input", Model.of(selection), Model.ofMap(choices));
+		input = new JobSingleChoice("input", Model.of(selection), Model.ofMap(choices)) {
+			
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				getSettings().configurePlaceholder(descriptor);
+			}
+			
+		};
+		input.setRequired(descriptor.isPropertyRequired());
+		
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

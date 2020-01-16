@@ -8,6 +8,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import io.onedev.server.util.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public abstract class Authenticator implements Serializable {
@@ -30,6 +31,7 @@ public abstract class Authenticator implements Serializable {
 	@Editable(order=20000, description="Optionally add newly authenticated user to specified group if group "
 			+ "information is not available in external authentication system")
 	@GroupChoice
+	@NameOfEmptyValue("No default group")
 	public String getDefaultGroup() {
 		return defaultGroup;
 	}

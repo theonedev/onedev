@@ -54,7 +54,7 @@ public class PullRequestChoiceEditor extends PropertyEditor<Long> {
     		@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor, this);
+				getSettings().configurePlaceholder(descriptor);
 			}
     		
     	};

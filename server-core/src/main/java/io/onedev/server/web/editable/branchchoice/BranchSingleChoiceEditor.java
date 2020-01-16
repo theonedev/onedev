@@ -46,7 +46,7 @@ public class BranchSingleChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor, this);
+				getSettings().configurePlaceholder(descriptor);
 			}
 			
     	};

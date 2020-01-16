@@ -15,12 +15,13 @@ package io.onedev.server.web.component.select2;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import org.apache.wicket.Component;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
 import io.onedev.server.web.component.select2.json.Json;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 
 /**
@@ -404,13 +405,19 @@ public final class Settings implements Serializable {
 		this.dropdownAutoWidth = dropdownAutoWidth;
 	}
 	
-	public void configurePlaceholder(PropertyDescriptor propertyDescriptor, Component component) {
+	public void configurePlaceholder(PropertyDescriptor propertyDescriptor) {
+		Method propertyGetter = propertyDescriptor.getPropertyGetter();
 		if (propertyDescriptor.isPropertyRequired()) {
-			Method getter = propertyDescriptor.getPropertyGetter();
-			if (getter.getAnnotation(OmitName.class) != null)
-				setPlaceholder("Select " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
-		} else if (propertyDescriptor.getNameOfEmptyValue() != null) {
-			setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
+			if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null)
+				setPlaceholder("Choose " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
+			else
+				setPlaceholder("Choose...");
+		} else if (propertyDescriptor.getPropertyGetter().getAnnotation(OmitName.class) != null) {
+			setPlaceholder(EditableUtils.getDisplayName(propertyDescriptor.getPropertyGetter()));
+		} else {
+			NameOfEmptyValue nameOfEmptyValue = propertyGetter.getAnnotation(NameOfEmptyValue.class);
+			if (nameOfEmptyValue != null)
+				setPlaceholder(nameOfEmptyValue.value());
 		}
 	}
 	

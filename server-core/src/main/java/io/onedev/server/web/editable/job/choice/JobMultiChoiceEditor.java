@@ -41,7 +41,17 @@ public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		}
 		
-		input = new JobMultiChoice("input", Model.of(selections), Model.ofMap(choices));
+		input = new JobMultiChoice("input", Model.of(selections), Model.ofMap(choices)) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				getSettings().configurePlaceholder(descriptor);
+			}
+			
+		};
+		input.setRequired(descriptor.isPropertyRequired());
+		
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

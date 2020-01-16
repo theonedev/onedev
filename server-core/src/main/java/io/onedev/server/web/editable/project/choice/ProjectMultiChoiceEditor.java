@@ -51,7 +51,7 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				getSettings().configurePlaceholder(descriptor, this);
+				getSettings().configurePlaceholder(descriptor);
 			}
 			
 		};

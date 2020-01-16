@@ -64,7 +64,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
         	@Override
         	protected void onInitialize() {
         		super.onInitialize();
-				getSettings().configurePlaceholder(descriptor, this);
+				getSettings().configurePlaceholder(descriptor);
         	}
         	
         };

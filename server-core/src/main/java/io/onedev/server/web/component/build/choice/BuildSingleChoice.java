@@ -18,7 +18,7 @@ public class BuildSingleChoice extends Select2Choice<Build> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Select build ...");
+			getSettings().setPlaceholder("Choose build ...");
 		getSettings().setFormatResult("onedev.server.buildChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.buildChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.buildChoiceFormatter.escapeMarkup");
