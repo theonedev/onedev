@@ -387,6 +387,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										for (JobService service: job.getServices())
 											services.add(build.interpolateProperties(service));
 										maxRetries.set(job.getMaxRetries());
+										retryDelay.set(job.getRetryDelay());
 									} finally {
 										Build.pop();
 									}
