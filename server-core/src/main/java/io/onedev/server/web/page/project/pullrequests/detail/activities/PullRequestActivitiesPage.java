@@ -301,7 +301,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 	}
 	
 	private void notifyWebSocketObserverChange() {
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
 	private Component newSinceChangesRow(String id, Date sinceDate) {

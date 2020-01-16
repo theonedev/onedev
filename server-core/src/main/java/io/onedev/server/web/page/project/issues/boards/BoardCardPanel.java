@@ -130,7 +130,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).notifyObserverChange((BasePage) BoardCardPanel.this.getPage());
+						OneDev.getInstance(WebSocketManager.class).observe((BasePage) BoardCardPanel.this.getPage());
 					}
 
 					@Override
@@ -164,12 +164,12 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onDeletedIssue(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).notifyObserverChange((BasePage) BoardCardPanel.this.getPage());
+						OneDev.getInstance(WebSocketManager.class).observe((BasePage) BoardCardPanel.this.getPage());
 					}
 
 					@Override
 					protected void onAfterRender() {
-						OneDev.getInstance(WebSocketManager.class).notifyObserverChange((BasePage) getPage());
+						OneDev.getInstance(WebSocketManager.class).observe((BasePage) getPage());
 						super.onAfterRender();
 					}
 

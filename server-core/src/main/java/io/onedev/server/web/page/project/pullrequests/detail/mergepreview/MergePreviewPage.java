@@ -148,7 +148,7 @@ public class MergePreviewPage extends PullRequestDetailPage {
 					if (event.getPayload() instanceof PageDataChanged) {
 						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
 						pageDataChanged.getHandler().add(this);
-						OneDev.getInstance(WebSocketManager.class).notifyObserverChange(MergePreviewPage.this);
+						OneDev.getInstance(WebSocketManager.class).observe(MergePreviewPage.this);
 					}
 				}
 				
@@ -235,7 +235,7 @@ public class MergePreviewPage extends PullRequestDetailPage {
 					if (event.getPayload() instanceof PageDataChanged) {
 						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
 						newContent(pageDataChanged.getHandler());
-						OneDev.getInstance(WebSocketManager.class).notifyObserverChange(MergePreviewPage.this);
+						OneDev.getInstance(WebSocketManager.class).observe(MergePreviewPage.this);
 					}
 				}
 				

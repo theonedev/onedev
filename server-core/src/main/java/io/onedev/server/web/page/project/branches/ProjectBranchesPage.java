@@ -19,8 +19,11 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -90,6 +93,7 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
@@ -446,6 +450,24 @@ public class ProjectBranchesPage extends ProjectPage {
 								modal.close();
 								target.add(branchesContainer);
 								newPagingNavigation(target);
+								
+								target.addListener(new AjaxRequestTarget.IListener() {
+
+									@Override
+									public void onBeforeRespond(Map<String, Component> map, AjaxRequestTarget target) {
+									}
+
+									@Override
+									public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
+										OneDev.getInstance(WebSocketManager.class).observe(ProjectBranchesPage.this);
+									}
+
+									@Override
+									public void updateAjaxAttributes(AbstractDefaultAjaxBehavior behavior,
+											AjaxRequestAttributes attributes) {
+									}
+									
+								});
 							}
 						}
 					}

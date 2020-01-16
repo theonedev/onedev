@@ -851,7 +851,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		resolvedRevision = null;
 		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
 		
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 		newRevisionPicker(target);
 		newCommitStatus(target);
 		target.add(revisionIndexing);
@@ -1057,7 +1057,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			newBuildSupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
-			OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+			OneDev.getInstance(WebSocketManager.class).observe(this);
 		} else if (state.position != null) {
 			if (get(BLOB_CONTENT_ID) instanceof Positionable) {
 				// This logic is added for performance reason, we do not want to 
@@ -1102,14 +1102,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state.commentId = null;
 			state.position = null;
 		}
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
 	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 		state.position = SourceRendererProvider.getPosition(range);
 		pushState(target);
 	}

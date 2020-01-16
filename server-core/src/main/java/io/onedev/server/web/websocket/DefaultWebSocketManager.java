@@ -62,7 +62,7 @@ public class DefaultWebSocketManager implements WebSocketManager, SchedulableTas
 	}
 	
 	@Override
-	public void notifyObserverChange(BasePage page) {
+	public void observe(BasePage page) {
 		String sessionId = page.getSession().getId();
 		if (sessionId != null) {
 			Map<IKey, Collection<String>> sessionPages = observables.get(sessionId);

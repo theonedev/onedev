@@ -652,7 +652,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		super.onPopState(target, data);
 		
 		state = (State) data;
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 		
 		newTabPanel(target);
 		target.add(tabbable);
@@ -752,7 +752,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 			state.mark = null;
 		}
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
 	@Override
@@ -771,7 +771,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
 	@Override

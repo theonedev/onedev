@@ -133,7 +133,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	}
 	
 	private void onRegionChange() {
-		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 	
 	@Override

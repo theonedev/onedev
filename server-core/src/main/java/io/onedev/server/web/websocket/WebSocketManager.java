@@ -14,7 +14,7 @@ public interface WebSocketManager {
 	
 	static final String KEEP_ALIVE = "KeepAlive";
 	
-	void notifyObserverChange(BasePage page);
+	void observe(BasePage page);
 	
 	void onDestroySession(String sessionId);
 	

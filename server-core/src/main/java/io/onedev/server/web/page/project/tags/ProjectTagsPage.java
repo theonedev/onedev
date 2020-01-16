@@ -3,11 +3,14 @@ package io.onedev.server.web.page.project.tags;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -65,6 +68,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class ProjectTagsPage extends ProjectPage {
@@ -251,6 +255,23 @@ public class ProjectTagsPage extends ProjectPage {
 								modal.close();
 								target.add(tagsContainer);
 								newPagingNavigation(target);
+								target.addListener(new AjaxRequestTarget.IListener() {
+
+									@Override
+									public void onBeforeRespond(Map<String, Component> map, AjaxRequestTarget target) {
+									}
+
+									@Override
+									public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
+										OneDev.getInstance(WebSocketManager.class).observe(ProjectTagsPage.this);
+									}
+
+									@Override
+									public void updateAjaxAttributes(AbstractDefaultAjaxBehavior behavior,
+											AjaxRequestAttributes attributes) {
+									}
+									
+								});
 							}
 						}
 					}
