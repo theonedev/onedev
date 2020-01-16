@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -34,6 +35,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -152,6 +154,25 @@ public abstract class CommitStatusPanel extends Panel {
 					jobsView.add(jobItem);
 				}
 				
+				fragment.add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+						handler.add(component);
+					}
+					
+					@Override
+					public void onConnectionOpened(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						return CommitStatusPanel.this.getWebSocketObservables();
+					}
+					
+				});
+				
 				return fragment;
 			}
 
@@ -182,11 +203,15 @@ public abstract class CommitStatusPanel extends Panel {
 			
 			@Override
 			protected Collection<String> getWebSocketObservables() {
-				return Lists.newArrayList("commit-status:" + getProject().getId() + ":" + commitId.name());
+				return CommitStatusPanel.this.getWebSocketObservables();
 			}
 			
 		});
 		add(statusLink);
+	}
+	
+	private Collection<String> getWebSocketObservables() {
+		return Lists.newArrayList("commit-status:" + getProject().getId() + ":" + commitId.name());
 	}
 
 	@Override
