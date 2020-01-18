@@ -1,0 +1,7 @@
+.image-view {
+	text-align: center;
+	padding: 20px;
+}
+.image-view img {
+	max-width: 100%;
+}

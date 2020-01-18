@@ -1,0 +1,20 @@
+.state-transition-list>.head>a {
+	margin-right: 8px;
+}
+.transition-spec-edit .property-prerequisite>.value .control-label, 
+.transition-spec-edit .property-trigger>.value .control-label {
+	font-weight: normal;
+}
+.floating.transition-spec .property-authorized .name {
+	border-right: none;
+	text-align: left;
+} 
+.floating.transition-spec .property-authorized .value {
+	white-space: nowrap;
+} 
+.floating.transition-spec .property-prerequisite .property-inputName td.name, 
+.floating.transition-spec .property-buttonLabel td.name, 
+.floating.transition-spec .property-promptFields td.name {
+	border-right: none;
+	text-align: left;
+}

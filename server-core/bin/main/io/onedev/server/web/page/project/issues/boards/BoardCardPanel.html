@@ -1,0 +1,18 @@
+<wicket:panel>
+	<div class="head clearfix">
+		<wicket:enclosure child="state">
+			<div class="state pull-left">
+				<span wicket:id="state"></span>
+			</div>
+		</wicket:enclosure>
+		<div wicket:id="fields" class="field pull-left"></div>
+		<a wicket:id="detail" class="detail pull-left" title="Click to show issue details"><i class="fa fa-window-maximize"></i></a>
+		<div class="pull-right avatars">
+			<a wicket:id="avatars" class="avatar"></a>
+		</div>
+	</div>
+	<div class="body">
+		<span wicket:id="number"></span>
+		<span wicket:id="title"></span>
+	</div>
+</wicket:panel>

@@ -1,0 +1,23 @@
+<wicket:panel>
+	<div wicket:id="comment" class="project-comment"></div>
+	<wicket:fragment wicket:id="viewFrag">
+		<div wicket:id="content"></div>
+		<div wicket:id="actions" class="actions">
+			<a wicket:id="edit">Edit</a>
+			<wicket:enclosure child="delete">
+			<span class="middot"></span>
+			<a wicket:id="delete">Delete</a>
+			</wicket:enclosure>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editFrag">
+		<form wicket:id="form" class="leave-confirm">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div wicket:id="input"></div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

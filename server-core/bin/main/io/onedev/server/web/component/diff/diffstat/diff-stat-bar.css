@@ -1,0 +1,16 @@
+.diff-stat-bar {
+	font-family: 'FontAwesome'; 
+	color: #ddd; 
+}
+.diff-stat-bar>i {
+	font-size: 10px;
+	font-style: normal; 
+	word-spacing: -2px;
+}
+.diff-stat-bar .additions {
+	color: #35c335;
+}
+.diff-stat-bar .deletions {
+	color: #c33535;
+}
+

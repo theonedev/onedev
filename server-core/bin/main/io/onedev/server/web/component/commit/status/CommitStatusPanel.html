@@ -1,0 +1,15 @@
+<wicket:panel>
+	<a wicket:id="status" class="commit-status"><span wicket:id="icon"></span> <i class="fa fa-angle-down"></i></a>
+    <wicket:fragment wicket:id="detailFrag">
+        <div class="commit-status-detail">
+            <div wicket:id="jobs" class="job">
+                <div class="head">
+                    <a wicket:id="name" class="name"><b wicket:id="label"></b></a>
+                    <a wicket:id="showInList" class="show-in-list" title="Show in build list"><i class="fa fa-list-ul"></i></a>
+                    <a wicket:id="run" class="run" title="Run this job"><i class="fa fa-play"></i></a>
+                </div>
+                <div wicket:id="detail" class="body"></div>
+            </div>
+        </div>
+    </wicket:fragment>
+</wicket:panel>

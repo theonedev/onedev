@@ -1,0 +1,86 @@
+<wicket:extend>
+	<div id="issue-boards">
+		<wicket:container wicket:id="content"></wicket:container>
+	</div>
+	<wicket:fragment wicket:id="hasBoardsFrag">
+		<div class="head">
+			<form wicket:id="query" class="clearable-wrapper">
+				<div class="input-group">
+					<span class="input-group-btn">
+						<a wicket:id="board" title="Board" class="board-selector btn btn-default">
+							<i class="fa fa-columns"></i>
+							<span wicket:id="label"></span>
+							<i class="fa fa-caret-down"></i>
+						</a>
+						<a wicket:id="backlog" class="backlog btn btn-default"><i class="fa fa-inbox"></i> Backlog</a>
+						<a wicket:id="milestone"></a>
+					</span>
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control no-autofocus">
+					<span class="input-group-btn">
+						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					</span>
+				</div>
+			</form>
+		</div>
+		<div wicket:id="feedback" class="feedback"></div>
+		<div class="body">
+			<div wicket:id="columns" class="column"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noBoardsFrag">
+		<div class="alert alert-info no-boards">No issue boards defined 
+			<a wicket:id="newBoard"><i class="fa fa-plus"></i> Add New</a>
+			<a wicket:id="useDefault"><i class="fa fa-undo"></i> Use Default</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="hasMilestoneFrag">
+		<a wicket:id="link" title="Milestone" class="milestone-selector btn">
+			<i class="fa fa-ext fa-milestone"></i>
+			<span wicket:id="label"></span>
+			<i class="fa fa-caret-down"></i>
+		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="boardMenuFrag">
+		<div class="board-menu">
+			<table class="boards table">
+				<tr wicket:id="boards" class="board">
+					<td class="name">
+						<span wicket:id="dragIndicator" class="drag-indicator"><i class="fa fa-reorder"></i></span>			
+						<a wicket:id="select" class="select"><span wicket:id="name"></span></a>
+					</td>
+					<td wicket:id="actions" class="actions">
+						<a wicket:id="edit" title="Edit"><i class="fa fa-pencil"></i></a>
+						<a wicket:id="delete" title="Delete"><i class="fa fa-trash"></i></a>
+					</td>
+				</tr>
+			</table>
+			<a wicket:id="newBoard" class="btn btn-default btn-sm btn-block new-board"><i class="fa fa-plus"></i> Add New Board</a>
+			<a wicket:id="useDefault" class="btn btn-default btn-sm btn-block use-global"><i class="fa fa-undo"></i> Use Default Boards</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="milestoneMenuFrag">
+		<div class="milestone-menu">
+			<table class="milestones">
+				<tr wicket:id="milestones" class="milestone">
+					<td class="name">
+						<a wicket:id="select"><span wicket:id="name"></span></a>
+					</td>
+					<td class="status">
+						<span wicket:id="status"></span>
+					</td>
+					<td class="due-date">
+						<span wicket:id="dueDate"></span>
+					</td>
+					<td wicket:id="actions" class="actions">
+						<a wicket:id="close" class="action" title="Close"><i class="fa fa-check"></i></a>
+						<a wicket:id="reopen" class="action" title="Reopen"><i class="fa fa-repeat"></i></a>
+						<a wicket:id="edit" class="action" title="Edit"><i class="fa fa-pencil"></i></a>
+						<a wicket:id="delete" class="action" title="Delete"><i class="fa fa-trash"></i></a>
+					</td>
+				</tr>
+			</table>
+			<a wicket:id="showClosed" class="show-closed btn btn-block btn-default btn-sm"><i class="fa fa-angle-double-down"></i> Show Closed</a>
+			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-default btn-sm"><i class="fa fa-plus"></i> Add New Milestone</a>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

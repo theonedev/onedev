@@ -1,0 +1,19 @@
+<wicket:extend>
+	<div class="invalid-pullrequest alert alert-danger">
+		<div class="head">
+			Unable to show pull request as some commits no longer exist in the underlying git repository
+		</div>
+		<div class="body">
+			This might happen for two reasons:
+			<ul>
+				<li> The project points to a wrong git repository. In this case, you will need to copy over the correct repository, 
+				or make sure that the correct global storage directory is specified.</li>
+				<li> Those commits are no longer needed and have been garbage collected. 
+				<wicket:enclosure child="delete">
+				In this case, you may also <a wicket:id="delete">delete the pull request</a>
+				</wicket:enclosure>
+				</li>
+			</ul>		
+		</div>
+	</div>
+</wicket:extend>

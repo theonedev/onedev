@@ -1,0 +1,14 @@
+.contributor-avatars {
+	position: relative;
+}
+.contributor-avatars .author .avatar {
+	height: 36px;
+	width: 36px;
+}
+.contributor-avatars .committer .avatar {
+	position: absolute;
+	height: 16px;
+	width: 16px;
+	left: 22px;
+	top: 13px;
+}

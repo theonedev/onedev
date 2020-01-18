@@ -1,0 +1,52 @@
+<wicket:panel>
+	<div class="saved-queries">
+		<div class="head">
+			<h4 class="title">Saved Queries</h4>
+			<div class="actions">
+				<a wicket:id="edit" class="edit-saved-queries" title="Edit saved queries"><i class="fa fa-pencil"></i></a>
+				<a wicket:id="close" class="close-saved-queries" title="Hide saved queries"><i class="fa fa-times"></i></a>
+			</div>
+		</div>
+		<hr>
+		<div class="body">
+			<wicket:enclosure child="userQueries">
+			<div wicket:id="userQueries">
+				<span class="btn-group">
+					<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a><a wicket:id="subscriptionStatus" class="subscription-status btn btn-default btn-sm"></a><a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
+				</span>
+			</div>
+			<hr/>
+			</wicket:enclosure>
+			<div wicket:id="queries">
+				<span class="btn-group">
+					<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a><a wicket:id="subscriptionStatus" class="subscription-status btn btn-default btn-sm"></a><a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
+				</span>
+			</div>
+			<div wicket:id="watchHint" class="help-block">
+				<b><i class="fa fa-lightbulb-o"></i> Tips:</b> You may watch/unwatch specified queries above. 
+				The first matching query will take effect
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="editSavedQueriesFrag">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 class="modal-title">Edit Saved Queries</h4>
+		</div>
+		<div class="modal-body">
+			<ul wicket:id="tab" class="nav nav-tabs"></ul>
+			<div wicket:id="tabPanel"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="editSavedQueriesContentFrag">
+		<form wicket:id="form" class="leave-confirm edit-saved-queries">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="editor"></div>
+			<div class="actions">
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
+				<a wicket:id="useDefault" class="btn btn-primary">Use Default</a>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

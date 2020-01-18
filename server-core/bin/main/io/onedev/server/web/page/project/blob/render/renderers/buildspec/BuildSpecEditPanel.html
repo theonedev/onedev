@@ -1,0 +1,42 @@
+<wicket:panel>
+    <div wicket:id="content" class="build-spec build-spec-edit"></div>
+    <wicket:fragment wicket:id="validFrag">
+        <div class="valid">
+        	<div class="head">
+        		<a class="jobs">Jobs</a>
+        		<a class="properties">Properties</a>
+        	</div>
+            <div class="body position-aware">
+                <div class="jobs">
+                    <div class="side">
+                        <!-- do not leave white space between navs and nav element as we are using .navs:not(:empty)
+                        in css -->
+                        <div class="navs"><div wicket:id="navs" class="nav">
+                            <a class="select">
+                                <span class="drag-indicator"><i class="fa fa-reorder"></i></span>
+                                <span class="name"></span>
+                            </a>
+                            <a title="Delete job" class="delete"><i class="fa fa-trash"></i></a>
+                        </div></div>
+                        <div class="add">
+	                        <a wicket:id="create" class="create btn btn-success">
+	                            <i class="fa fa-plus"></i> Add Job
+	                        </a>
+	                        <a wicket:id="suggestions" class="suggestions btn btn-success" title="Job suggestions"><i class="fa fa-magic"></i></a>
+                        </div>
+                    </div>
+                    <div class="contents">
+                        <div wicket:id="contents" class="content"></div>
+                    </div>
+                </div>
+	            <div wicket:id="properties" class="properties"></div>
+            </div>
+        </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="invalidFrag">
+        <div class="invalid">
+            <div class="title">Error rendering build spec</div>
+            <div wicket:id="errorMessage" class="error-message"></div>
+        </div>
+    </wicket:fragment>
+</wicket:panel>

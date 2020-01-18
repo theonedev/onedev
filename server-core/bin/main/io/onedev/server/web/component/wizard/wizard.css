@@ -1,0 +1,12 @@
+.wizard>.head {
+	margin-bottom: 20px;
+}
+.wizard>.head>.title {
+	font-size: 16px;
+}
+.wizard>.body {
+	margin-bottom: 20px;
+}
+.wizard>.foot>* {
+	margin-right: 8px;
+}

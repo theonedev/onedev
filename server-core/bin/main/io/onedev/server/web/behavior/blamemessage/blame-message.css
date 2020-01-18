@@ -1,0 +1,16 @@
+.blame-message {
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	position: absolute;
+	z-index: 10000;
+	font-size: 13px;
+	background-color: #FBFCC5; 
+	border: 1px solid black;
+	border-radius: 4px; 
+	color: black; 
+	padding: 8px;
+}
+.blame-message>.authoring {
+	margin-bottom: 12px;
+	font-weight: bold;	
+}

@@ -1,0 +1,21 @@
+@media(max-width: 767px) {
+	.build-list .expanded {
+		display: none;
+	}
+}
+.build-list>.head {
+	position: relative;
+}
+.build-list>.head>* {
+	margin-bottom: 20px;
+}
+.build-list>.head>.others:empty {
+	margin-bottom: 0;
+}
+.build-list>.head>.others>* {
+	margin-right: 16px;
+	color: #444;
+}
+.build-list>.head>.others>*:last-child {
+	margin-right: 0;
+}

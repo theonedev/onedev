@@ -1,0 +1,14 @@
+<wicket:panel>
+	<div class="commit clearfix">
+		<div wicket:id="author" class="author pull-left"></div> 
+		<div wicket:id="message" class="message pull-left"></div> 
+		<div class="btn-group pull-right browse">
+			<a wicket:id="browseCode" title="Browse code" class="btn btn-default btn-xs"><i class="fa fa-file-text-o"></i></a>
+        </div>
+        <div class="btn-group pull-right hash">
+            <a wicket:id="hashLink" class="hash btn btn-xs btn-default"><span wicket:id="hash"></span></a>
+            <a wicket:id="copyHash" class="btn btn-xs btn-default"><i class="fa fa-clipboard"></i></a>
+        </div>
+        <div wicket:id="buildStatus" class="build-status pull-right"></div>
+	</div>
+</wicket:panel>

@@ -1,0 +1,34 @@
+<wicket:extend>
+	<div wicket:id="content" class="merge-preview"></div>
+	<wicket:fragment wicket:id="availableFrag">
+		<div class="available">
+			<div class="commits clearfix">
+				<div class="commit pull-left">
+					<div class="title">Base</div>
+					<span class="btn-group">
+						<a wicket:id="targetHead" class="hash btn btn-sm btn-default"><span wicket:id="hash"></span></a> 
+						<a wicket:id="copyTargetHead" class="btn btn-sm btn-default"><i class="fa fa-clipboard"></i></a> 
+					</span> 
+					<div class="description">Head of target branch</div>
+				</div>
+				<div class="vs pull-left">VS</div> 
+				<div class="commit pull-left">
+					<div class="title">Compare</div>
+					<span class="btn-group">
+						<a wicket:id="mergedCommit" class="hash btn btn-sm btn-default"><span wicket:id="hash"></span></a>
+						<a wicket:id="copyMergedCommit" class="btn btn-sm btn-default"><i class="fa fa-clipboard"></i></a>
+					</span>
+					<span wicket:id="buildStatus" class="build-status"></span>						
+					<div class="description">Merged commit</div>
+				</div>
+			</div>
+			<div wicket:id="outDated" class="out-dated alert alert-warning">
+				<a wicket:id="link"><i class="fa fa-warning"></i> Merge preview is outdated, click to refresh</a> 
+			</div>
+			<div wicket:id="revisionDiff" class="body"></div>		
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="notAvailableFrag">
+		<div class="not-available"><i class="fa fa-info-circle"></i> Merge preview is not available yet</div>
+	</wicket:fragment>
+</wicket:extend>

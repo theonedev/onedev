@@ -1,0 +1,23 @@
+<wicket:extend>
+	<div class="page-title">Job Executors</div>
+	<div class="help-block">
+       For a given build job, the first matching job executor will be used
+	</div>
+	<div wicket:id="jobExecutorSetting" class="panel-list">
+		<ul class="list-unstyled job-executors">
+			<li wicket:id="executors" class="job-executor"><div wicket:id="executor"></div></li>
+		</ul>
+		<div wicket:id="newExecutor"></div>
+	</div>
+	<wicket:fragment wicket:id="editNewFrag">
+		<div class="executor panel panel-default">
+			<div class="panel-heading"><div class="panel-title">Edit Executor</div></div>
+			<div class="panel-body">
+				<div wicket:id="editor"></div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addNewLinkFrag">
+		<a wicket:id="link" class="add-new"><i class="fa fa-plus-circle fa-lg"></i> Add Executor</a>
+	</wicket:fragment>
+</wicket:extend>

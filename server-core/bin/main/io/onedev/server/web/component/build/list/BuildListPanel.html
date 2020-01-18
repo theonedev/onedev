@@ -1,0 +1,57 @@
+<wicket:panel>
+	<div class="build-list">
+		<div class="head">
+			<form wicket:id="query" class="clearable-wrapper">
+				<div class="input-group no-autofocus">
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order builds here">
+					<span class="input-group-btn">
+						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					</span>
+				</div>
+			</form>
+			<div wicket:id="others" class="others">
+				<a wicket:id="showSavedQueries" class="show-saved-queries"><i class="fa fa-eye"></i> Show Saved Queries</a>
+				<a wicket:id="saveQuery" class="save-query"><i class="fa fa-save"></i> Save Query</a>
+				<a wicket:id="listParams" class="list-params"><i class="fa fa-list-ul"></i> Display Params</a>
+			</div>
+		</div>
+		<div wicket:id="body" class="body">
+			<div wicket:id="feedback"></div>
+			<table wicket:id="builds" class="table"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="linkFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+    </wicket:fragment>	
+	<wicket:fragment wicket:id="statusFrag">
+		<span wicket:id="icon"></span> 
+		<a wicket:id="link">
+			<span wicket:id="name"></span>
+			<span wicket:id="date"></span> 
+		</a> 
+	</wicket:fragment>	
+	<wicket:fragment wicket:id="commitFrag">
+		<a wicket:id="hashLink" class="hash"><span wicket:id="hash"></span></a>
+		<a wicket:id="copyHash"><i class="fa fa-clipboard"></i></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="listParamsFrag">
+		<div class="build-list-params">
+			<form wicket:id="form">
+				<div class="modal-header">
+					<button wicket:id="close" type="button" class="close">&times;</button>
+					<h4 id="modal-title" class="modal-title">
+						Params to Display
+					</h4>
+				</div>
+				<div class="modal-body">
+					<input wicket:id="params" type="hidden" class="form-control">
+				</div>
+				<div class="modal-footer clearfix">
+					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
+					<a wicket:id="useDefault" class="btn btn-primary">Use Default</a>
+					<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</wicket:fragment>	
+</wicket:panel>

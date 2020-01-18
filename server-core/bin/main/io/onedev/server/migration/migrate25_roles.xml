@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<list>
+  <io.onedev.server.model.Role revision="0.0">
+    <id>1</id>
+    <name>Manager</name>
+    <manageProject>true</manageProject>
+    <managePullRequests>false</managePullRequests>
+    <manageCodeComments>false</manageCodeComments>
+    <codePrivilege>NONE</codePrivilege>
+    <manageIssues>false</manageIssues>
+    <scheduleIssues>false</scheduleIssues>
+    <editableIssueFields/>
+    <jobPrivileges/>
+  </io.onedev.server.model.Role>
+  <io.onedev.server.model.Role revision="0.0">
+    <id>2</id>
+    <name>Developer</name>
+    <manageProject>false</manageProject>
+    <managePullRequests>false</managePullRequests>
+    <manageCodeComments>false</manageCodeComments>
+    <codePrivilege>WRITE</codePrivilege>
+    <manageIssues>false</manageIssues>
+    <scheduleIssues>true</scheduleIssues>
+    <editableIssueFields>
+      <string>Type</string>
+      <string>Priority</string>
+      <string>Assignee</string>
+      <string>Resolution</string>
+      <string>Duplicate With</string>
+    </editableIssueFields>
+    <jobPrivileges>
+      <io.onedev.server.model.support.role.JobPrivilege>
+        <jobNames>*</jobNames>
+        <manageJob>false</manageJob>
+        <runJob>true</runJob>
+        <accessLog>false</accessLog>
+      </io.onedev.server.model.support.role.JobPrivilege>
+    </jobPrivileges>
+  </io.onedev.server.model.Role>
+  <io.onedev.server.model.Role revision="0.0">
+    <id>3</id>
+    <name>Tester</name>
+    <manageProject>false</manageProject>
+    <managePullRequests>false</managePullRequests>
+    <manageCodeComments>false</manageCodeComments>
+    <codePrivilege>READ</codePrivilege>
+    <manageIssues>false</manageIssues>
+    <scheduleIssues>true</scheduleIssues>
+    <editableIssueFields>
+      <string>Type</string>
+      <string>Priority</string>
+      <string>Assignee</string>
+      <string>Resolution</string>
+      <string>Duplicate With</string>
+    </editableIssueFields>
+    <jobPrivileges>
+      <io.onedev.server.model.support.role.JobPrivilege>
+        <jobNames>*</jobNames>
+        <manageJob>false</manageJob>
+        <runJob>false</runJob>
+        <accessLog>true</accessLog>
+      </io.onedev.server.model.support.role.JobPrivilege>
+    </jobPrivileges>
+  </io.onedev.server.model.Role>
+  <io.onedev.server.model.Role revision="0.0">
+    <id>4</id>
+    <name>Reporter</name>
+    <manageProject>false</manageProject>
+    <managePullRequests>false</managePullRequests>
+    <manageCodeComments>false</manageCodeComments>
+    <codePrivilege>NONE</codePrivilege>
+    <manageIssues>false</manageIssues>
+    <scheduleIssues>false</scheduleIssues>
+    <editableIssueFields>
+      <string>Type</string>
+      <string>Priority</string>
+    </editableIssueFields>
+    <jobPrivileges>
+      <io.onedev.server.model.support.role.JobPrivilege>
+        <jobNames>*</jobNames>
+        <manageJob>false</manageJob>
+        <runJob>false</runJob>
+        <accessLog>false</accessLog>
+      </io.onedev.server.model.support.role.JobPrivilege>
+    </jobPrivileges>
+  </io.onedev.server.model.Role>
+</list>

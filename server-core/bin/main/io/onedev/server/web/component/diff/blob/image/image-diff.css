@@ -1,0 +1,14 @@
+.image-diff {
+	border: 1px solid #D8D8D8;
+}
+.image-diff td {
+	padding: 16px;
+	width: 50%;
+}
+.image-diff td.old {
+	border-right: 1px solid #D8D8D8;
+}
+.image-diff img {
+	max-width: 100%;
+	max-height: 100%;
+}

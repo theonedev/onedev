@@ -1,0 +1,22 @@
+.subtree-dropdown-trigger {
+	background: url(arrow-right.png) no-repeat center top 3px;
+	width: 16px; 
+	height: 20px; 
+	display: block;
+}
+.subtree-dropdown-trigger:hover, .subtree-dropdown-trigger.dropdown-open {
+	background-image: url(arrow-down.png);
+}	
+.subtree-dropdown {
+	padding: 8px 24px 8px 4px; 
+	max-width: 800px; 
+}
+.subtree-dropdown .tree-theme-human span.tree-content a {
+	color: #1f3b7b; 
+	font-size: 13px;
+}
+.blob-navigator .add {
+	font-size: 18px;
+	line-height: 20px;
+	vertical-align: middle;
+}

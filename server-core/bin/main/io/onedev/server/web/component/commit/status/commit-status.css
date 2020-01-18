@@ -1,0 +1,32 @@
+.commit-status {
+    display: inline-block;
+}
+.commit-status-detail {
+    padding: 12px;
+}
+.commit-status-detail>.job {
+	margin-bottom: 8px;
+}
+.commit-status-detail>.job>.head {
+    padding: 4px 0;
+    white-space: nowrap;
+}
+.commit-status-detail>.job>.head .show-in-list {
+    color: #666;
+    margin-left: 8px;
+}
+.commit-status-detail>.job>.head .run {
+    color: #666;
+    margin-left: 4px;
+}
+
+.commit-status-detail>.job>.body {
+    border-top: 1px solid #D8D8D8;
+    padding-top: 8px;
+}
+.commit-status-detail>.job>.body .simple-build-list {
+	padding: 0;
+}
+.commit-status-detail>.job>.body .no-builds {
+	padding: 0;
+}

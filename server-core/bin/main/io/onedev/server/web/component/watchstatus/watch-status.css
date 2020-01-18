@@ -1,0 +1,54 @@
+.watch-status:BEFORE {
+	font-family: "FontAwesome";
+}
+.watch-status:AFTER {
+	font-family: "FontAwesome";
+	margin-left: 4px;
+}
+.watch-status.default:BEFORE {
+	content: "\f10c";
+}
+.watch-status.default:AFTER {
+	content: "Watch if involved";
+}
+.watch-status.watch:BEFORE {
+	content: "\f06e";
+}
+.watch-status.watch:AFTER {
+	content: "Watch";
+}
+.watch-status.do-not-watch:BEFORE {
+	content: "\f070";
+}
+.watch-status.do-not-watch:AFTER {
+	content: "Do not watch";
+}
+
+.floating .watch-status {
+	padding: 16px 0;
+}
+.floating .watch-status a {
+	display: block;
+	color: #333;
+	padding: 8px 8px 8px 28px;
+	text-decoration: none;
+	position: relative;
+}
+.floating .watch-status a.active:before {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 8px;
+}
+.floating .watch-status a .title {
+	font-weight: bold;
+}
+.floating .watch-status a .description {
+	font-size: 13px;
+	color: #666;
+	margin-top: 4px;
+}
+
+.floating .watch-status a:hover {
+	background: #F5F5F5;
+}

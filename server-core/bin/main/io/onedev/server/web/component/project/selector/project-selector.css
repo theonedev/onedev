@@ -1,0 +1,19 @@
+.project-selector {
+	padding: 20px;
+}
+.project-selector .btn {
+	margin-bottom: 12px;
+}
+.project-selector ul, .project-selector .alert {
+	margin: 12px 0 0 0;
+}
+.project-selector ul a {
+	padding: 5px 20px !important;
+}
+.project-selector ul a.current>span:before {
+	font-family: "FontAwesome"; 
+	content: "\f00c"; 
+	margin-right: 4px;	
+	position: absolute;
+	left: 24px;
+}

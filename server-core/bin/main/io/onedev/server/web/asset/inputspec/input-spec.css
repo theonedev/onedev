@@ -1,0 +1,23 @@
+.floating.input-spec .property-uuid, .input-spec-edit .property-uuid {
+	display: none;
+}
+.floating.input-spec>.content>.body>div>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
+	min-width: 150px;
+} 
+.floating.input-spec .bean-viewer+.bean-viewer table>tbody>tr:first-child>td {
+    padding-top: 16px;
+}
+
+.floating.input-spec .property-showCondition .property-inputName td.name, 
+.floating.input-spec .property-choicesProvider .property-inputName td.name,
+.floating.input-spec .property-defaultValueProvider .property-inputName td.name {
+	border-right: none;
+	text-align: left;
+}
+
+.input-spec .property-showCondition .property-inputName td.name, 
+.input-spec-edit .property-showCondition .property-inputName label.name, 
+.input-spec-edit .property-choiceProvider>.value label.name,
+.input-spec-edit .property-choiceProvider>.value .bean.list thead th {
+	font-weight: normal;
+}

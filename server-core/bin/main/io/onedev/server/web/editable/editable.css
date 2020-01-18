@@ -1,0 +1,147 @@
+.editable>.bean-properties>table {
+	width: 100%;
+}
+.editable>.group {
+	margin-bottom: 12px;
+}
+.editable>.group:last-child {
+    margin-bottom: 0;
+}
+.editable>.group>a {
+    display: block;
+    text-decoration: none;
+    color: #444;
+    background: #F5F5F5;
+    padding: 4px 8px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.editable>.group>a:AFTER {
+	font-family: "FontAwesome";    
+    margin-left: 12px; 
+}
+.editable>.group>a:AFTER {
+    content: "\f103";
+}
+.editable>.group.expanded>a:AFTER {
+    content: "\f102";
+}
+.editable>.group>div, .editable>.group>table {
+    display: none;
+}
+.editable>.group.expanded>div {
+    display: block;
+}
+.editable>.group.expanded>table {
+    display: table;
+}
+.editable>.bean-properties>table>tbody>tr>td {
+	vertical-align: top;
+	padding: 0 8px 16px 0;
+}
+.editable>.bean-properties>table>tbody>tr:last-child>td {
+    padding-bottom: 0;
+}
+.editable td.value>div:last-child>div:last-child>table>tbody>tr:last-child>td.value, 
+.editable td.value>div:last-child>div:last-child>div:last-child>div:last-child>table>tbody>tr:last-child>td.value {
+	padding-bottom: 0;
+	margin-bottom: 0;
+}
+.editable td.value>div>.checkbox, .editable td.value>div>.checkbox>label {
+	margin: 0;
+}
+ 
+.editable>.bean-properties>table>tbody>tr>td.name {
+	font-weight: bold;
+	border-right: 1px solid #E0E0E0;
+	text-align: right; 
+	white-space: nowrap; 
+    width: 20%;
+    font-size: 12px;
+    line-height: 20px;
+}
+.editable>.bean-properties>table>tbody>tr>td.value {
+	padding-left: 8px;
+}
+.editable table {
+    margin-bottom: 0;
+}
+
+.property-editor>.bean-list>table>*>tr>.actions {
+    font-size: 18px;
+}
+.property-editor>.list>table>tfoot>tr>td.norecords-td>div,
+.property-editor>.bean-list>table>tfoot>tr>td.no-elements>div {
+    border-top: 2px solid #DDD;
+    margin-top: -7px;
+    padding: 8px 0 0 8px;
+}
+.property-editor>.polymorphic-list>table>tbody>tr>td {
+    border-top: 2px solid #BBB;
+    padding-top: 20px;
+}
+.property-editor>.polymorphic-list>table>tbody>tr>td>.head {
+	margin-bottom: 20px;
+}
+.property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions {
+    font-size: 18px;
+    margin-left: 20px;
+}
+.property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions a {
+    color: #666;
+}
+
+.property-viewer>.polymorphic-list>tbody>tr>td {
+    border-top: 2px solid #BBB;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+.property-viewer>.polymorphic-list>tbody>tr>td>.type-selector {
+    margin-bottom: 12px;
+}
+.property-viewer>.bean-list>tfoot>tr>td.no-elements>div {
+    border-top: 2px solid #DDD;
+    margin-top: -7px;
+    padding-top: 7px;
+}
+
+.editable>.polymorphic>.type-selector {
+	margin-bottom: 15px;
+}
+
+.bean-editor>input.enable {
+	margin-bottom: 12px;
+}
+
+.bean-editor .password-confirm {
+	margin-top: 12px;
+}
+
+.property-editor>.bean-editor {
+	border-top: 1px dotted #BBB;
+	margin-top: 4px;
+	padding-top: 12px;
+	margin-bottom: 12px;
+}
+.bean-viewer .bean-properties>table>tbody>tr.name-omitted>td {
+	padding-left: 0;
+}
+.bean-viewer .type-selector {
+	font-style: italic;
+} 
+
+.editable ul.feedbackPanel {
+    margin: 10px 0;
+}
+.bean-editor .bean-list>table>tbody>tr>td {
+    border-top: none;
+} 
+.bean-editor .select2-container {
+	width: 100%;
+}
+
+.form-group>.editable>.list>.head {
+	margin-top: 8px;
+}
+

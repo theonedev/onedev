@@ -1,0 +1,22 @@
+<wicket:panel>
+	<li wicket:id="tabs" class="expanded">
+		<wicket:container wicket:id="tab"></wicket:container>
+	</li>
+	<li class="collapsed active">
+		<wicket:container wicket:id="collapsed"></wicket:container>
+	</li>
+	<li wicket:id="options" class="options"></li>
+	<wicket:fragment wicket:id="multiTabCollapsedFrag">
+		<a wicket:id="link" class="multiple"><span wicket:id="label"></span> <i class="fa fa-chevron-down"></i></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="singleTabCollapsedFrag">
+		<a class="single"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="tabsFrag">
+		<ul class="list-unstyled">
+			<li wicket:id="tabs">
+				<wicket:container wicket:id="tab"></wicket:container>
+			</li>
+		</ul>
+	</wicket:fragment>
+</wicket:panel>

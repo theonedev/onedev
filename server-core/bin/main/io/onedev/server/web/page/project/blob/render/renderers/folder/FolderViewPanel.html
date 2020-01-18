@@ -1,0 +1,29 @@
+<wicket:panel>
+	<div class="folder-view autofit">
+		<table class="files">
+			<tr wicket:id="parent" class="parent">
+				<td colspan="3">
+					<a wicket:id="link"><i class="fa fa-level-up"></i> <span>..</span></a>
+				</td>
+			</tr>
+			<tr wicket:id="children" class="child">
+				<td class="path">
+					<a wicket:id="pathLink"><i wicket:id="icon"></i> <span wicket:id="label"></span></a>
+				</td>
+				<td wicket:id="lastCommit" class="last-commit author expanded"></td>
+				<td class="last-commit message"></td>
+				<td class="last-commit when expanded"></td>
+			</tr>
+		</table>
+		<div wicket:id="readme" class="readme">
+			<div class="head">
+				<span wicket:id="title" class="title"></span>
+				<span class="actions">
+					<a wicket:id="edit"><i class="fa fa-pencil"></i></a>
+				</span>
+			</div>
+			<div wicket:id="body" class="body"></div>
+		</div>
+	</div>
+	<div wicket:id="userCard" class="user-card-content"></div>
+</wicket:panel>

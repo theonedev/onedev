@@ -1,0 +1,70 @@
+.issue-list>.head {
+	position: relative;
+}
+.issue-list>.head>* {
+	margin-bottom: 20px;
+}
+.issue-list>.head>form {
+	margin-right: 130px;
+}
+.issue-list>.head>.open-new {
+	width: 120px;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.issue-list>.head>.others:empty {
+	margin-bottom: 0;
+}
+.issue-list>.head>.others>* {
+	margin-right: 16px;
+	color: #444;
+}
+.issue-list>.head>.others>*:last-child {
+	margin-right: 0;
+}
+.issue-list>.body td .number>a {
+	margin-right: 12px;
+}
+.issue-list>.body td .title>a {
+	margin-right: 4px;
+}
+.issue-list>.body td .number>a, .issue-list>.body td .title>a {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.issue-list>.body td .issue-state {
+	font-size: 12px;
+}
+.issue-list>.body td .primary {
+	margin-bottom: 8px;
+}
+.issue-list>.body td .secondary>.pull-left>div {
+	margin-right: 20px;
+}
+.issue-list>.body td .submission, .issue-list>.body td .comments, .issue-list>.body td .votes {
+	color: #888;
+	font-size: 13px;
+}
+.issue-list>.body td .votes {
+	margin-right: 8px;	
+}
+
+.issue-list>.body .new-indicator {
+	width: 4px;
+	padding: 0;
+}
+.issue-list>.body tr.issue.new td.new-indicator {
+	background: #4667EE;
+}
+.issue-batch-edit form .modal-body>div {
+	margin-bottom: 20px;
+}
+.issue-batch-edit .alert {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+.issue-batch-edit .select-fields>.checkboxes>* {
+	margin-right: 10px;
+}

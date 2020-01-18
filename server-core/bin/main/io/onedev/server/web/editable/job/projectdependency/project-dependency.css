@@ -1,0 +1,5 @@
+.floating.project-dependency td.name {
+    width: 160px !important;
+    word-break: break-all !important;
+    white-space: normal !important;
+}

@@ -1,0 +1,39 @@
+.build-artifacts>table th, .build-artifacts>table td {
+	padding: 8px;
+}
+.build-artifacts>table>thead>tr>th {
+    border-bottom: 2px solid #DDD;
+    border-top: none;
+}
+.build-artifacts>table>tbody>tr>td {
+    border-top: 1px solid #DDD;
+}
+.build-artifacts>table>thead+tfoot>tr>td.norecords-td>div {
+    border-top: 2px solid #DDD;
+    margin-top: -10px;
+    padding-top: 10px;
+    padding-left: 10px;
+}
+.build-artifacts>table th.tree {
+    padding-left: 18px;
+}
+.build-artifacts>table td.tree {
+    padding-left: 0px;
+}
+
+.build-artifacts>table td span.tree-content>a {
+	color: #1f3b7b;
+}
+
+.build-artifacts>table td span.tree-content>a:before {
+    margin-right: 4px;
+    width: 1.28571429em;
+    text-align: center;
+	font-family: "FontAwesome";
+}
+.build-artifacts>table td span.tree-content>a.folder:before {
+    content: "\f114";
+}
+.build-artifacts>table td span.tree-content>a.file:before {
+    content: "\f0f6";
+}

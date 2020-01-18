@@ -1,0 +1,64 @@
+.pull-request-list>.head {
+	position: relative;
+}
+.pull-request-list>.head>* {
+	margin-bottom: 20px;
+}
+.pull-request-list>.head>form.can-create-pull-requests {
+	margin-right: 170px;
+}
+.pull-request-list>.head>.open-new {
+	position: absolute;
+	width: 160px;
+	right: 0;
+	top: 0;
+}
+.pull-request-list>.head>.others:empty {
+	margin-bottom: 0;
+}
+.pull-request-list>.head>.others>* {
+	margin-right: 16px;
+	color: #444;
+}
+.pull-request-list>.head>.others>*:last-child {
+	margin-right: 0;
+}
+
+.pull-request-list>.body td .number>a {
+	margin-right: 12px;
+}
+.pull-request-list>.body td .title>a {
+	margin-right: 4px;
+}
+.pull-request-list>.body td .number>a, .pull-request-list>.body td .title>a {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.pull-request-list>.body td .request-status {
+	font-size: 12px;
+}
+.pull-request-list>.body td .primary {
+	margin-bottom: 8px;
+}
+.pull-request-list>.body td .secondary>.pull-left>div {
+	margin-right: 20px;
+}
+.pull-request-list>.body td .branches .fa {
+	color: #666;
+	margin: 0 4px;
+}
+.pull-request-list>.body td .submission, 
+.pull-request-list>.body td .comments {
+	color: #888;
+	font-size: 13px;
+}
+
+.pull-request-list>.body .new-indicator {
+	width: 4px;
+	padding: 0;
+}
+.pull-request-list>.body tr.request.new td.new-indicator {
+	background: #4667EE;
+}
+

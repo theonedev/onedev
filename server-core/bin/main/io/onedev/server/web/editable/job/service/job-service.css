@@ -1,0 +1,3 @@
+.def-detail.job-service .editable>.bean-properties>table>tbody>tr>td.name {
+    min-width: 150px;
+}

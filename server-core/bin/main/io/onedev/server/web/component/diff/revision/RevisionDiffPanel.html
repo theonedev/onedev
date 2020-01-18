@@ -1,0 +1,80 @@
+<wicket:panel>
+	<div class="revision-diff">
+		<div wicket:id="revisionsIndexing" class="revisions-indexing">
+			<img wicket:id="icon">
+			<span>Revisions indexing in progress... (symbol navigation in revisions will be accurate after indexed)</span>
+		</div>
+		<table class="head">
+			<tr>
+				<td class="view-mode">
+					<span class="btn-group">
+						<a wicket:id="unified" class="btn btn-default">Unified</a>
+						<a wicket:id="split" class="btn btn-default">Split</a>
+					</span>
+				</td>
+				<td class="whitespace-option">
+					<span wicket:id="whitespaceOption" class="btn btn-default" title="White space options">White space <i class="caret"></i></span>
+				</td>
+				<td class="path-filter">				
+					<form wicket:id="pathFilter" class="clearable-wrapper">
+						<div class="input-group">
+                            <input wicket:id="input" class="form-control no-autofocus" spellcheck="false" autocomplete="off" placeholder="Filter by path">
+							<span class="input-group-btn">
+								<button wicket:id="submit" title="Filter" class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+							</span>
+						</div>
+					</form>
+				</td>
+            </tr>
+            <tr wicket:id="invalidPathFilter" class="invalid-path-filter"><td colspan="3"><div class="alert alert-danger">Malformed path filter</div></td></tr>
+		</table>
+		<div wicket:id="body" class="body">
+			<div class="title">
+				Total <a wicket:id="totalFiles" class="total-files"></a>
+			</div>
+			<div wicket:id="tooManyFiles" class="alert alert-warning">Sorry we are unable to display all files as there are too many</div>
+			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
+				<li wicket:id="diffStats" class="diff-stat clearfix">
+					<i wicket:id="icon" class="icon fa-fw pull-left"></i>
+					<a wicket:id="file" class="file pull-left"><span wicket:id="name"></span></a>
+					<span wicket:id="hasComments" class="fa fa-comments" title="There are comments on this file"></span>
+					<wicket:enclosure child="bar">
+					<span wicket:id="bar" class="bar pull-right"></span>
+					<span wicket:id="deletions" class="deletions pull-right"></span>
+					<span wicket:id="additions" class="additions pull-right"></span>
+					</wicket:enclosure>
+				</li>
+			</ul>
+			<div class="detail">
+				<div wicket:id="comment" class="comment">
+					<div class="ui-resizable-handle ui-resizable-e"></div>
+					<div class="content">
+						<div wicket:id="head" class="head clearfix">
+							<a wicket:id="context" class="pull-left context close" title="Compare with another revision"><i class="fa fa-ext fa-file-diff"></i></a>
+							<a wicket:id="locate" class="pull-left locate close"><i class="fa fa-hand-o-right"></i></a>
+							<a wicket:id="close" class="pull-left close" title="Hide comment"><i class="fa fa-times"></i></a>
+						</div>
+						<div wicket:id="body" class="body"></div>
+					</div>
+				</div>
+				<ul class="diffs list-unstyled">
+					<li wicket:id="diffs" class="diff">
+						<div wicket:id="diff"></div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="newCommentFrag">
+		<form wicket:id="form" class="new-comment leave-confirm">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div class="form-group">
+				<div wicket:id="content"></div>
+			</div>
+			<div class="actions">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

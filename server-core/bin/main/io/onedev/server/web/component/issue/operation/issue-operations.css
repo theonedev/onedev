@@ -1,0 +1,33 @@
+.issue-operations>div {
+	margin-bottom: 20px;
+}
+.issue-operations>.state-and-actions {
+	margin-bottom: 12px;
+	padding-right: 30px;
+	position: relative;
+}
+.issue-operations>.state-and-actions>.state {
+	margin-right: 16px;
+	padding-right: 16px;
+}
+.issue-operations>.state-and-actions>.state.with-separator {
+	border-right: 1px solid #E0E0E0;
+}
+.issue-operations>.state-and-actions>.state>.issue-state {
+	font-size: 16px;
+	padding: 7px 24px;
+	display: block;
+}
+.issue-operations>.state-and-actions>* {
+	margin-right: 10px;
+	margin-bottom: 8px;
+}
+.issue-operations>.state-and-actions>.more-info {
+	position: absolute;
+	right: 0;
+	top: -3px;
+	font-size: 24px;
+	margin: 0;
+	color: #666;
+	transform: rotate(-90deg);
+}

@@ -1,0 +1,64 @@
+<wicket:extend>
+	<div id="commit-detail">
+		<div class="info">
+			<div class="message">
+				<div class="subject clearfix">
+					<div wicket:id="title" class="pull-left"></div>
+					<div class="btn-group pull-right">
+						<a wicket:id="browseCode" title="browse code" class="btn btn-default btn-sm"><i class="fa fa-file-text-o"></i></a>
+						<a wicket:id="createBranch" title="Branch from this commit" class="btn btn-default btn-sm"><i class="fa fa-code-fork"></i></a>
+						<a wicket:id="createTag" title="Tag this commit" class="btn btn-default btn-sm"><i class="fa fa-tag"></i></a>
+					</div>
+				</div>
+				<pre wicket:id="detail" class="detail"></pre>
+			</div>
+			<div wicket:id="refs" class="refs"></div>
+			<div class="contribution-and-parents clearfix">
+				<div class="contribution pull-left">
+					<span wicket:id="contributorAvatars" class="avatars"></span>
+					<span wicket:id="contribution" class="name"></span>
+				</div>
+				<div class="commit pull-left">
+					<span wicket:id="hash" class="hash"></span>
+					<a wicket:id="copyHash" class="copy"><i class="fa fa-clipboard"></i></a>
+				</div>
+				<div wicket:id="parents" class="parents pull-left"></div>
+			</div>
+        </div>
+        <wicket:enclosure child="jobs">
+        <div class="jobs clearfix">
+            <div wicket:id="jobs" class="job pull-left">
+				<span class="btn-group">
+					<a wicket:id="detail" class="btn btn-default">
+						<span wicket:id="status" class="status"></span>
+						<b wicket:id="name" class="name"></b>
+						<i class="fa fa-angle-down"></i>
+					</a>					
+	                <a wicket:id="run" class="run btn btn-default" title="Run this job"><i class="fa fa-play"></i></a>
+				</span>
+            </div>
+        </div>
+        </wicket:enclosure>
+		<div wicket:id="revisionDiff"></div>
+	</div>
+	<wicket:fragment wicket:id="refsFrag">
+		<span wicket:id="refs">
+			<a wicket:id="link"><span wicket:id="label"></span></a>
+		</span>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="multiParentsFrag">
+		<div class="multiple">
+			<span wicket:id="count"></span>  
+			<div wicket:id="parents" class="parent btn-group">
+				<a wicket:id="link" title="Show commit of this parent" class="commit btn btn-default btn-xs"><span wicket:id="label"></span></a>
+				<a wicket:id="diff" title="Compare with this parent" class="diff btn btn-default btn-xs"><i class="fa fa-ext fa-file-diff"></i></a>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="singleParentFrag">
+		<div class="single">
+			<span>1 parent</span>  
+			<a wicket:id="parent" class="parent hash"><span wicket:id="label"></span></a>
+		</div>
+    </wicket:fragment>
+</wicket:extend>

@@ -1,0 +1,25 @@
+.user-card {
+    position: relative;
+    font-size: 16px;
+    padding: 12px;
+    line-height: 22px;
+}
+.user-card>.info {
+    padding: 8px 12px 12px 80px;
+}
+.user-card.bigger>.info {
+	padding-left: 104px;
+}
+.user-card img {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+}
+.user-card.bigger img {
+    width: 90px;
+    height: 90px;
+}
+.user-card i {
+    color: #888;
+    font-size: 14px;
+}
