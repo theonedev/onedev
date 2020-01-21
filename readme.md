@@ -2,7 +2,7 @@
 
 With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Powerful.
 
-<div style="font-size: 20px;">
+<div style="font-size: 18px;">
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/5min-tutorial.md">A Five Minutes Tutorial</a> 
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/installation-guide.md">Installation Guide</a> 
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/master/pages/usage-scenarios.md">Usage Scenarios</a>
@@ -10,8 +10,6 @@ With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Po
 | <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
 </div>
 <p style="margin-bottom: 20px;">
-
-Feature highlights compared to other products in the market:
 
 ### Docker First Kubernetes Native Build Farm
 
