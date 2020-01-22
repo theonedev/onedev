@@ -3,6 +3,38 @@
 <io.onedev.server.buildspec.BuildSpec revision="1">
     <jobs>
         <io.onedev.server.buildspec.job.Job>
+            <name>CI</name>
+            <paramSpecs/>
+            <image>1dev/build-environment:1.0</image>
+            <commands>
+                <string>set -e</string>
+                <string>rm -rf ~/.m2/repository/io/onedev #clean downloaded dependencies as sometimes we do not change project versions</string>
+                <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
+                <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
+                <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
+                <string>mvn test</string>
+            </commands>
+            <retrieveSource>true</retrieveSource>
+            <submoduleCredentials/>
+            <jobDependencies/>
+            <projectDependencies/>
+            <services/>
+            <reports/>
+            <triggers>
+                <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
+                    <params/>
+                </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
+            </triggers>
+            <caches/>
+            <cpuRequirement>250m</cpuRequirement>
+            <memoryRequirement>128m</memoryRequirement>
+            <timeout>3600</timeout>
+            <postBuildActions/>
+            <retryCondition>never</retryCondition>
+            <maxRetries>3</maxRetries>
+            <retryDelay>30</retryDelay>
+        </io.onedev.server.buildspec.job.Job>
+        <io.onedev.server.buildspec.job.Job>
             <name>Release</name>
             <paramSpecs/>
             <image>1dev/build-environment:1.0</image>
