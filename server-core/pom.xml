@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>3.0.4</version>
+		<version>3.0.5</version>
 	</parent>
 	<build>
 		<plugins>
@@ -325,7 +325,7 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>k8s-helper</artifactId>
-			<version>1.0.7</version>
+			<version>1.0.8</version>
 		</dependency>
 	</dependencies>
 	<properties>
