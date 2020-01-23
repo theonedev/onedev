@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.build.side;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,8 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -22,7 +22,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.util.time.Duration;
+
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -37,6 +38,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
@@ -100,18 +102,6 @@ public abstract class BuildSidePanel extends Panel {
 			
 		};
 		
-		if (!getBuild().isFinished()) {
-			general.add(new AjaxSelfUpdatingTimerBehavior(Duration.ONE_SECOND) {
-
-				@Override
-				protected void onPostProcessTarget(AjaxRequestTarget target) {
-					super.onPostProcessTarget(target);
-					if (getBuild().isFinished())
-						stop(target);
-				}
-				
-			});
-		}
 		general.setOutputMarkupId(true);
 		add(general);
 		
@@ -169,19 +159,11 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 		
-		general.add(new Label("waitingResources", new LoadableDetachableModel<String>() {
+		general.add(new Label("queueingTakes", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				long duration;
-				
-				if (getBuild().getRunningDate() != null)
-					duration = getBuild().getRunningDate().getTime() - getBuild().getPendingDate().getTime();
-				else
-					duration = System.currentTimeMillis() - getBuild().getPendingDate().getTime(); 
-				if (duration < 0)
-					duration = 0;
-				return DateUtils.formatDuration(duration);
+				return DateUtils.formatDuration(getBuild().getRunningDate().getTime() - getBuild().getPendingDate().getTime());
 			}
 			
 		}) {
@@ -189,8 +171,7 @@ public abstract class BuildSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getPendingDate() != null 
-						&& (!getBuild().isFinished() || getBuild().getRunningDate() != null));
+				setVisible(getBuild().getPendingDate() != null && getBuild().getRunningDate() != null);
 			}
 			
 		});
@@ -199,14 +180,7 @@ public abstract class BuildSidePanel extends Panel {
 
 			@Override
 			protected String load() {
-				long duration;
-				if (getBuild().getFinishDate() != null)
-					duration = getBuild().getFinishDate().getTime() - getBuild().getRunningDate().getTime();
-				else
-					duration = System.currentTimeMillis() - getBuild().getRunningDate().getTime(); 
-				if (duration < 0)
-					duration = 0;
-				return DateUtils.formatDuration(duration);
+				return DateUtils.formatDuration(getBuild().getFinishDate().getTime() - getBuild().getRunningDate().getTime());
 			}
 			
 		}) {
@@ -214,7 +188,26 @@ public abstract class BuildSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getRunningDate() != null);
+				setVisible(getBuild().getRunningDate() != null && getBuild().getFinishDate() != null);
+			}
+			
+		});
+		
+		general.add(new WebSocketObserver() {
+				
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				handler.add(component);
+			}
+			
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+				handler.add(component);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
 			}
 			
 		});
