@@ -1141,7 +1141,7 @@ public class Project extends AbstractEntity {
 		boolean noUpdate = false;
 		for (TagProtection protection: getTagProtections()) {
 			if (protection.isEnabled() 
-					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user)
+					&& UserMatch.parse(protection.getUserMatch()).matches(this, user)
 					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				noCreation = noCreation || protection.isPreventCreation();
 				noDeletion = noDeletion || protection.isPreventDeletion();
@@ -1189,7 +1189,7 @@ public class Project extends AbstractEntity {
 		ReviewRequirement reviewRequirement = ReviewRequirement.parse(null, true);
 		for (BranchProtection protection: getBranchProtections()) {
 			if (protection.isEnabled() 
-					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user) 
+					&& UserMatch.parse(protection.getUserMatch()).matches(this, user) 
 					&& PatternSet.parse(protection.getBranches()).matches(new PathMatcher(), branchName)) {
 				noCreation = noCreation || protection.isPreventCreation();
 				noDeletion = noDeletion || protection.isPreventDeletion();

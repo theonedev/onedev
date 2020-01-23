@@ -15,7 +15,7 @@ import io.onedev.server.util.validation.PatternsValidator;
 @Constraint(validatedBy=PatternsValidator.class) 
 public @interface Patterns {
 
-	String message() default "Malformed patterns";
+	String message() default "";
 	
 	boolean interpolative() default false;
 	

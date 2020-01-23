@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -76,8 +77,11 @@ public class ProjectListPanel extends Panel {
 			try {
 				return ProjectQuery.parse(query);
 			} catch (Exception e) {
-				logger.error("Error parsing project query: " + query, e);
-				error(e.getMessage());
+				logger.debug("Error parsing project query: " + query, e);
+				if (e.getMessage() != null)
+					error(HtmlUtils.formatAsHtml(e.getMessage()));
+				else
+					error("Malformed project query");
 			}
 			return null;
 		}

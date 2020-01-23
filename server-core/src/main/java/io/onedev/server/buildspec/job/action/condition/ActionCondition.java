@@ -61,7 +61,7 @@ public class ActionCondition extends Criteria<Build> {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed action condition", e);
+				throw new RuntimeException("Malformed action condition", e);
 			}
 			
 		});
@@ -69,15 +69,7 @@ public class ActionCondition extends Criteria<Build> {
 		ActionConditionParser parser = new ActionConditionParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		ConditionContext conditionContext;
-		try {
-			conditionContext = parser.condition();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed action condition", e);
-		}
+		ConditionContext conditionContext = parser.condition();
 
 		Criteria<Build> criteria;
 		

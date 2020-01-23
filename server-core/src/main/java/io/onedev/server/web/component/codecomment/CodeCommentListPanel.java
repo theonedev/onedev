@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -76,8 +77,11 @@ public abstract class CodeCommentListPanel extends Panel {
 			try {
 				return CodeCommentQuery.parse(getProject(), query);
 			} catch (Exception e) {
-				logger.error("Error parsing code comment query: " + query, e);
-				error(e.getMessage());
+				logger.debug("Error parsing code comment query: " + query, e);
+				if (e.getMessage() != null)
+					error(HtmlUtils.escape(e.getMessage()));
+				else
+					error("Malformed code comment query");
 			}
 			return null;
 		}

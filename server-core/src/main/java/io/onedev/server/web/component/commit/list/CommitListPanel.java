@@ -106,7 +106,10 @@ public abstract class CommitListPanel extends Panel {
 				return CommitQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.debug("Error parsing commit query: " + query, e);
-				error(e.getMessage());
+				if (e.getMessage() != null)
+					error(HtmlUtils.formatAsHtml(e.getMessage()));
+				else
+					error("Malformed commit query");
 			}
 			return null;
 		}

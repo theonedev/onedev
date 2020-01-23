@@ -155,7 +155,10 @@ public class BuildSpec implements Serializable, Validatable {
 				try {
 					RetryCondition.parse(job, job.getRetryCondition());
 				} catch (Exception e) {
-					context.buildConstraintViolationWithTemplate(e.getMessage())
+					String message = e.getMessage();
+					if (message == null)
+						message = "Malformed retry condition";
+					context.buildConstraintViolationWithTemplate(message)
 							.addPropertyNode("jobs").addPropertyNode("retryCondition")
 								.inIterable().atIndex(i)
 							.addConstraintViolation();

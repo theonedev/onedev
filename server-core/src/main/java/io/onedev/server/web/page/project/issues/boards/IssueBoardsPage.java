@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -115,13 +116,19 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		try {
 			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true, true, false, false, false);
 		} catch (Exception e) {
-			String prefix;
-			if (backlog)
-				prefix = "Error parsing backlog query: ";
-			else
-				prefix = "Error parsing issue query: ";
-			logger.error(prefix + additionalQueryString, e);
-			error(prefix + e.getMessage());
+			if (backlog) {
+				logger.debug("Error parsing backlog query: " + additionalQueryString, e);
+				if (e.getMessage() != null)
+					error("Error parsing backlog query: " + HtmlUtils.formatAsHtml(e.getMessage()));
+				else 
+					error("Malformed backlog query");
+			} else {
+				logger.debug("Error parsing issue query: " + additionalQueryString, e);
+				if (e.getMessage() != null)
+					error("Error parsing issue query: " + HtmlUtils.formatAsHtml(e.getMessage()));
+				else 
+					error("Malformed issue query");
+			}
 			return null;
 		}			
 
@@ -129,14 +136,19 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		try {
 			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
 		} catch (Exception e) {
-			String prefix;
-			if (backlog)
-				prefix = "Error parsing backlog base query: ";
-			else
-				prefix = "Error parsing base query: ";
-				
-			logger.error(prefix + baseQueryString, e);
-			error(prefix + e.getMessage());
+			if (backlog) {
+				logger.debug("Error parsing backlog base query: " + baseQueryString, e);
+				if (e.getMessage() != null)
+					error("Error parsing backlog base query: " + HtmlUtils.formatAsHtml(e.getMessage()));
+				else 
+					error("Malformed backlog base query");
+			} else {
+				logger.debug("Error parsing base query: " + baseQueryString, e);
+				if (e.getMessage() != null)
+					error("Error parsing base query: " + HtmlUtils.formatAsHtml(e.getMessage()));
+				else 
+					error("Malformed issue query");
+			}
 			return null;
 		}
 		return IssueQuery.merge(baseQuery, additionalQuery);

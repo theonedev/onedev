@@ -20,7 +20,6 @@ import org.apache.tools.ant.DirectoryScanner;
 
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneException;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
 import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;
@@ -89,7 +88,7 @@ public class PatternSet implements Serializable {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed pattern set");
+					throw new RuntimeException("Malformed pattern set");
 				}
 				
 			});
@@ -98,15 +97,7 @@ public class PatternSet implements Serializable {
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
 			
-			PatternsContext patternsContext;
-			try {
-				patternsContext = parser.patterns();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					throw e;
-				else
-					throw new RuntimeException("Malformed pattern set", e);
-			}
+			PatternsContext patternsContext = parser.patterns();
 			
 			for (PatternContext pattern: patternsContext.pattern()) {
 				String value;

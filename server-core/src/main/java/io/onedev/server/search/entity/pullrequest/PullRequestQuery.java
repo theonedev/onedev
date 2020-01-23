@@ -64,7 +64,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed pull request query", e);
+					throw new RuntimeException("Malformed pull request query", e);
 				}
 				
 			});
@@ -72,15 +72,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			PullRequestQueryParser parser = new PullRequestQueryParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
-			QueryContext queryContext;
-			try {
-				queryContext = parser.query();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					throw e;
-				else
-					throw new RuntimeException("Malformed pull request query", e);
-			}
+			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<PullRequest> requestCriteria;
 			if (criteriaContext != null) {

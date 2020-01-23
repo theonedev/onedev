@@ -73,7 +73,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed code comment query", e);
+					throw new RuntimeException("Malformed code comment query", e);
 				}
 				
 			});
@@ -81,15 +81,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 			CodeCommentQueryParser parser = new CodeCommentQueryParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
-			QueryContext queryContext;
-			try {
-				queryContext = parser.query();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					throw e;
-				else
-					throw new RuntimeException("Malformed code comment query", e);
-			}
+			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<CodeComment> commentCriteria;
 			if (criteriaContext != null) {

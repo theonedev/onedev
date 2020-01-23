@@ -15,9 +15,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneException;
-import io.onedev.server.buildspec.job.log.instruction.LogInstructionLexer;
-import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser;
 import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.model.Build;
 
@@ -43,7 +40,7 @@ public abstract class LogInstruction {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed log instruction");
+				throw new RuntimeException("Malformed log instruction");
 			}
 			
 		});
@@ -51,14 +48,7 @@ public abstract class LogInstruction {
 		LogInstructionParser parser = new LogInstructionParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		try {
-			return parser.instruction();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed log instruction", e);
-		}
+		return parser.instruction();
 	}
 	
 }

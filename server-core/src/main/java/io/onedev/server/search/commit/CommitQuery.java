@@ -27,7 +27,6 @@ import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
-import io.onedev.server.search.commit.CommitQueryParser.QueryContext;
 
 public class CommitQuery implements Serializable {
 	
@@ -50,7 +49,7 @@ public class CommitQuery implements Serializable {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed commit query", e);
+					throw new RuntimeException("Malformed commit query", e);
 				}
 				
 			});
@@ -67,16 +66,7 @@ public class CommitQuery implements Serializable {
 			List<String> messageValues = new ArrayList<>();
 			List<Revision> revisions = new ArrayList<>();
 			
-			QueryContext queryContext;
-			try {
-				queryContext = parser.query();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					throw e;
-				else
-					throw new RuntimeException("Malformed commit query", e);
-			}
-			for (CriteriaContext criteria: queryContext.criteria()) {
+			for (CriteriaContext criteria: parser.query().criteria()) {
 				if (criteria.authorCriteria() != null) {
 					if (criteria.authorCriteria().AuthoredByMe() != null)
 						authorValues.add(null);

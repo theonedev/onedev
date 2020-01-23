@@ -21,8 +21,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.usermatch.UserMatchLexer;
-import io.onedev.server.util.usermatch.UserMatchParser;
 import io.onedev.server.util.usermatch.UserMatchParser.CriteriaContext;
 import io.onedev.server.util.usermatch.UserMatchParser.ExceptCriteriaContext;
 import io.onedev.server.util.usermatch.UserMatchParser.UserMatchContext;
@@ -78,12 +76,29 @@ public class UserMatch implements Serializable {
 		}
 	}
 	
-	public static UserMatch fromString(@Nullable String userMatchString) {
+	public static UserMatch parse(@Nullable String userMatchString) {
 		List<UserMatchCriteria> criterias = new ArrayList<>();
 		List<UserMatchCriteria> exceptCriterias = new ArrayList<>();
 		
 		if (userMatchString != null) {
-			UserMatchContext userMatchContext = parse(userMatchString);
+			CharStream is = CharStreams.fromString(userMatchString); 
+			UserMatchLexer lexer = new UserMatchLexer(is);
+			lexer.removeErrorListeners();
+			lexer.addErrorListener(new BaseErrorListener() {
+
+				@Override
+				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+						int charPositionInLine, String msg, RecognitionException e) {
+					throw new RuntimeException("Malformed user match");
+				}
+				
+			});
+			CommonTokenStream tokens = new CommonTokenStream(lexer);
+			UserMatchParser parser = new UserMatchParser(tokens);
+			parser.removeErrorListeners();
+			parser.setErrorHandler(new BailErrorStrategy());
+			
+			UserMatchContext userMatchContext = parser.userMatch();
 			
 			for (CriteriaContext criteriaContext: userMatchContext.criteria())
 				criterias.add(getUserMatchCriteria(criteriaContext));
@@ -100,34 +115,6 @@ public class UserMatch implements Serializable {
 		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
 	}
 	
-	public static UserMatchContext parse(String userMatchString) {
-		CharStream is = CharStreams.fromString(userMatchString); 
-		UserMatchLexer lexer = new UserMatchLexer(is);
-		lexer.removeErrorListeners();
-		lexer.addErrorListener(new BaseErrorListener() {
-
-			@Override
-			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed user match");
-			}
-			
-		});
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		UserMatchParser parser = new UserMatchParser(tokens);
-		parser.removeErrorListeners();
-		parser.setErrorHandler(new BailErrorStrategy());
-		
-		try {
-			return parser.userMatch();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed user match", e);
-		}
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -158,7 +145,7 @@ public class UserMatch implements Serializable {
 	}
 	
 	public static String onRenameGroup(String userMatchString, String oldName, String newName) {
-		UserMatch userMatch = fromString(userMatchString);
+		UserMatch userMatch = parse(userMatchString);
 		onRenameGroup(userMatch.getCriterias(), oldName, newName);
 		onRenameGroup(userMatch.getExceptCriterias(), oldName, newName);
 		return userMatch.toString();
@@ -175,7 +162,7 @@ public class UserMatch implements Serializable {
 	}
 	
 	public static String onRenameUser(String userMatchString, String oldName, String newName) {
-		UserMatch userMatch = fromString(userMatchString);
+		UserMatch userMatch = parse(userMatchString);
 		onRenameUser(userMatch.getCriterias(), oldName, newName);
 		onRenameUser(userMatch.getExceptCriterias(), oldName, newName);
 		return userMatch.toString();
@@ -193,7 +180,7 @@ public class UserMatch implements Serializable {
 	}
 	
 	public static boolean isUsingUser(String userMatchString, String userName) {
-		UserMatch userMatch = fromString(userMatchString);
+		UserMatch userMatch = parse(userMatchString);
 		return isUsingUser(userMatch.getCriterias(), userName) 
 				|| isUsingUser(userMatch.getExceptCriterias(), userName);
 	}
@@ -210,7 +197,7 @@ public class UserMatch implements Serializable {
 	}
 	
 	public static boolean isUsingGroup(String userMatchString, String groupName) {
-		UserMatch userMatch = fromString(userMatchString);
+		UserMatch userMatch = parse(userMatchString);
 		return isUsingGroup(userMatch.getCriterias(), groupName) 
 				|| isUsingGroup(userMatch.getExceptCriterias(), groupName);
 	}

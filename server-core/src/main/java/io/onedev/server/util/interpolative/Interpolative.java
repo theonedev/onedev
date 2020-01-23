@@ -17,7 +17,6 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.server.util.interpolative.InterpolativeParser.InterpolativeContext;
 import io.onedev.server.util.interpolative.InterpolativeParser.SegmentContext;
 import io.onedev.server.util.interpolative.Segment.Type;
 
@@ -49,18 +48,8 @@ public class Interpolative implements Serializable {
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
 		
-		InterpolativeContext interpolativeContext;
-		try {
-			interpolativeContext = parser.interpolative();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed interpolative", e);
-		}
-		
 		List<Segment> segments = new ArrayList<>();
-		for (SegmentContext segment: interpolativeContext.segment()) {
+		for (SegmentContext segment: parser.interpolative().segment()) {
 			if (segment.Literal() != null) 
 				segments.add(new Segment(Type.LITERAL, segment.Literal().getText()));
 			else

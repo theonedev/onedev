@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -103,7 +104,10 @@ public abstract class IssueListPanel extends Panel {
 				return IssueQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.debug("Error parsing issue query: " + query, e);
-				error(e.getMessage());
+				if (e.getMessage() != null)
+					error(HtmlUtils.formatAsHtml(e.getMessage()));
+				else
+					error("Malformed issue query");
 			}
 			return null;
 		}

@@ -22,7 +22,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiverParser.CriteriaContext;
-import io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiverParser.ReceiverContext;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
@@ -48,7 +47,7 @@ public class NotificationReceiver {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed notification receiver");
+				throw new RuntimeException("Malformed notification receiver");
 			}
 			
 		});
@@ -57,17 +56,7 @@ public class NotificationReceiver {
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
 		
-		ReceiverContext receiverContext;
-		try {
-			receiverContext = parser.receiver();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed notification receiver", e);
-		}
-		
-		for (CriteriaContext criteria: receiverContext.criteria()) {
+		for (CriteriaContext criteria: parser.receiver().criteria()) {
 			if (criteria.userCriteria() != null) {
 				String userName = getValue(criteria.userCriteria().Value());
 				User user = OneDev.getInstance(UserManager.class).findByName(userName);

@@ -53,7 +53,7 @@ public class JobMatch extends Criteria<Build> {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed job match", e);
+				throw new RuntimeException("Malformed job match", e);
 			}
 			
 		});
@@ -61,15 +61,7 @@ public class JobMatch extends Criteria<Build> {
 		JobMatchParser parser = new JobMatchParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		JobMatchContext jobMatchContext;
-		try {
-			jobMatchContext = parser.jobMatch();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed job match", e);
-		}
+		JobMatchContext jobMatchContext = parser.jobMatch();
 
 		Criteria<Build> criteria;
 		

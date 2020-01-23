@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -90,8 +91,11 @@ public abstract class PullRequestListPanel extends Panel {
 			try {
 				return PullRequestQuery.parse(getProject(), query);
 			} catch (Exception e) {
-				logger.error("Error parsing pull request query: " + query, e);
-				error(e.getMessage());
+				logger.debug("Error parsing pull request query: " + query, e);
+				if (e.getMessage() != null)
+					error(HtmlUtils.formatAsHtml(e.getMessage()));
+				else
+					error("Malformed pull request query");
 			}
 			return null;
 		}

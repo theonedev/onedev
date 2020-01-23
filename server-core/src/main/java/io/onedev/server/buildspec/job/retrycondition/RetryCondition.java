@@ -58,7 +58,7 @@ public class RetryCondition extends Criteria<Build> {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed retry condition", e);
+				throw new RuntimeException("Malformed retry condition", e);
 			}
 			
 		});
@@ -66,15 +66,7 @@ public class RetryCondition extends Criteria<Build> {
 		RetryConditionParser parser = new RetryConditionParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		ConditionContext conditionContext;
-		try {
-			conditionContext = parser.condition();
-		} catch (Exception e) {
-			if (e.getMessage() != null)
-				throw e;
-			else
-				throw new RuntimeException("Malformed retry condition", e);
-		}
+		ConditionContext conditionContext = parser.condition();
 
 		Criteria<Build> criteria;
 		

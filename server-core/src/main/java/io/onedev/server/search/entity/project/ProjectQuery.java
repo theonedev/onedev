@@ -71,7 +71,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed project query", e);
+					throw new RuntimeException("Malformed project query", e);
 				}
 				
 			});
@@ -79,15 +79,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 			ProjectQueryParser parser = new ProjectQueryParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
-			QueryContext queryContext;
-			try {
-				queryContext = parser.query();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					throw e;
-				else
-					throw new RuntimeException("Malformed project query", e);
-			}
+			QueryContext queryContext = parser.query();
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<Project> projectCriteria;
 			if (criteriaContext != null) {

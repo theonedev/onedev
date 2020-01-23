@@ -52,7 +52,7 @@ public class ReviewRequirement {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed review requirement");
+					throw new RuntimeException("Malformed review requirement");
 				}
 				
 			});
@@ -61,15 +61,7 @@ public class ReviewRequirement {
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
 			
-			RequirementContext requirementContext;
-			try {
-				requirementContext = parser.requirement();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					throw e;
-				else
-					throw new RuntimeException("Malformed review requirement", e);
-			}
+			RequirementContext requirementContext = parser.requirement();
 			
 			for (CriteriaContext criteria: requirementContext.criteria()) {
 				if (criteria.userCriteria() != null) {
