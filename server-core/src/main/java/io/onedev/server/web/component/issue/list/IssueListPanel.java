@@ -102,7 +102,7 @@ public abstract class IssueListPanel extends Panel {
 				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true, true, false, false, false);
 				return IssueQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
-				logger.error("Error parsing issue query: " + query, e);
+				logger.debug("Error parsing issue query: " + query, e);
 				error(e.getMessage());
 			}
 			return null;

@@ -57,9 +57,17 @@ public class NotificationReceiver {
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
 		
-		ReceiverContext receiver = parser.receiver();
+		ReceiverContext receiverContext;
+		try {
+			receiverContext = parser.receiver();
+		} catch (Exception e) {
+			if (e.getMessage() != null)
+				throw e;
+			else
+				throw new RuntimeException("Malformed notification receiver", e);
+		}
 		
-		for (CriteriaContext criteria: receiver.criteria()) {
+		for (CriteriaContext criteria: receiverContext.criteria()) {
 			if (criteria.userCriteria() != null) {
 				String userName = getValue(criteria.userCriteria().Value());
 				User user = OneDev.getInstance(UserManager.class).findByName(userName);

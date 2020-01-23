@@ -61,7 +61,7 @@ public class ActionCondition extends Criteria<Build> {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed condition", e);
+				throw new OneException("Malformed action condition", e);
 			}
 			
 		});
@@ -73,10 +73,10 @@ public class ActionCondition extends Criteria<Build> {
 		try {
 			conditionContext = parser.condition();
 		} catch (Exception e) {
-			if (e instanceof OneException)
+			if (e.getMessage() != null)
 				throw e;
 			else
-				throw new OneException("Malformed condition", e);
+				throw new RuntimeException("Malformed action condition", e);
 		}
 
 		Criteria<Build> criteria;

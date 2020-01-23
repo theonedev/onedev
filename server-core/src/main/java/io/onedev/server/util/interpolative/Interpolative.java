@@ -48,7 +48,16 @@ public class Interpolative implements Serializable {
 		InterpolativeParser parser = new InterpolativeParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		InterpolativeContext interpolativeContext = parser.interpolative();
+		
+		InterpolativeContext interpolativeContext;
+		try {
+			interpolativeContext = parser.interpolative();
+		} catch (Exception e) {
+			if (e.getMessage() != null)
+				throw e;
+			else
+				throw new RuntimeException("Malformed interpolative", e);
+		}
 		
 		List<Segment> segments = new ArrayList<>();
 		for (SegmentContext segment: interpolativeContext.segment()) {

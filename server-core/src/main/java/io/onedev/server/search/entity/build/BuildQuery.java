@@ -80,7 +80,7 @@ public class BuildQuery extends EntityQuery<Build> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed query", e);
+					throw new OneException("Malformed build query", e);
 				}
 				
 			});
@@ -92,10 +92,10 @@ public class BuildQuery extends EntityQuery<Build> {
 			try {
 				queryContext = parser.query();
 			} catch (Exception e) {
-				if (e instanceof OneException)
+				if (e.getMessage() != null)
 					throw e;
 				else
-					throw new OneException("Malformed query", e);
+					throw new RuntimeException("Malformed build query", e);
 			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			EntityCriteria<Build> buildCriteria;

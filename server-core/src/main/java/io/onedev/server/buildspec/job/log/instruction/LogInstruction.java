@@ -51,7 +51,14 @@ public abstract class LogInstruction {
 		LogInstructionParser parser = new LogInstructionParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.instruction();
+		try {
+			return parser.instruction();
+		} catch (Exception e) {
+			if (e.getMessage() != null)
+				throw e;
+			else
+				throw new RuntimeException("Malformed log instruction", e);
+		}
 	}
 	
 }

@@ -60,9 +60,18 @@ public class ReviewRequirement {
 			ReviewRequirementParser parser = new ReviewRequirementParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
-			RequirementContext requirement = parser.requirement();
 			
-			for (CriteriaContext criteria: requirement.criteria()) {
+			RequirementContext requirementContext;
+			try {
+				requirementContext = parser.requirement();
+			} catch (Exception e) {
+				if (e.getMessage() != null)
+					throw e;
+				else
+					throw new RuntimeException("Malformed review requirement", e);
+			}
+			
+			for (CriteriaContext criteria: requirementContext.criteria()) {
 				if (criteria.userCriteria() != null) {
 					String userName = getValue(criteria.userCriteria().Value());
 					User user = OneDev.getInstance(UserManager.class).findByName(userName);

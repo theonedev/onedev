@@ -89,7 +89,7 @@ public class PatternSet implements Serializable {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed patterns");
+					throw new OneException("Malformed pattern set");
 				}
 				
 			});
@@ -97,9 +97,18 @@ public class PatternSet implements Serializable {
 			PatternSetParser parser = new PatternSetParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
-			PatternsContext patterns = parser.patterns();
 			
-			for (PatternContext pattern: patterns.pattern()) {
+			PatternsContext patternsContext;
+			try {
+				patternsContext = parser.patterns();
+			} catch (Exception e) {
+				if (e.getMessage() != null)
+					throw e;
+				else
+					throw new RuntimeException("Malformed pattern set", e);
+			}
+			
+			for (PatternContext pattern: patternsContext.pattern()) {
 				String value;
 				if (pattern.Quoted() != null) 
 					value = FenceAware.unfence(pattern.Quoted().getText());

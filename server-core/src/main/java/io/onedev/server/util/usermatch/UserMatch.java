@@ -117,7 +117,15 @@ public class UserMatch implements Serializable {
 		UserMatchParser parser = new UserMatchParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.userMatch();
+		
+		try {
+			return parser.userMatch();
+		} catch (Exception e) {
+			if (e.getMessage() != null)
+				throw e;
+			else
+				throw new RuntimeException("Malformed user match", e);
+		}
 	}
 
 	@Override

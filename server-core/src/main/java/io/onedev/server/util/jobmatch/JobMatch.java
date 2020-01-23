@@ -65,10 +65,10 @@ public class JobMatch extends Criteria<Build> {
 		try {
 			jobMatchContext = parser.jobMatch();
 		} catch (Exception e) {
-			if (e instanceof OneException)
+			if (e.getMessage() != null)
 				throw e;
 			else
-				throw new OneException("Malformed job match", e);
+				throw new RuntimeException("Malformed job match", e);
 		}
 
 		Criteria<Build> criteria;

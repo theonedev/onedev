@@ -97,7 +97,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 				@Override
 				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 						int charPositionInLine, String msg, RecognitionException e) {
-					throw new OneException("Malformed query", e);
+					throw new OneException("Malformed issue query", e);
 				}
 				
 			});
@@ -105,14 +105,15 @@ public class IssueQuery extends EntityQuery<Issue> {
 			IssueQueryParser parser = new IssueQueryParser(tokens);
 			parser.removeErrorListeners();
 			parser.setErrorHandler(new BailErrorStrategy());
+			
 			QueryContext queryContext;
 			try {
 				queryContext = parser.query();
 			} catch (Exception e) {
-				if (e instanceof OneException)
+				if (e.getMessage() != null)
 					throw e;
 				else
-					throw new OneException("Malformed query", e);
+					throw new RuntimeException("Malformed issue query", e);
 			}
 			CriteriaContext criteriaContext = queryContext.criteria();
 			IssueCriteria issueCriteria;

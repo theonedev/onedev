@@ -201,10 +201,8 @@ public class DefaultPersistManager implements PersistManager {
 
 	@Override
 	public void stop() {
-		if (sessionFactory != null) {
+		if (sessionFactory != null)
 			sessionFactory.close();
-			sessionFactory = null;
-		}
 	}
 
 	protected Connection getConnection() {

@@ -58,7 +58,7 @@ public class RetryCondition extends Criteria<Build> {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new OneException("Malformed condition", e);
+				throw new OneException("Malformed retry condition", e);
 			}
 			
 		});
@@ -70,10 +70,10 @@ public class RetryCondition extends Criteria<Build> {
 		try {
 			conditionContext = parser.condition();
 		} catch (Exception e) {
-			if (e instanceof OneException)
+			if (e.getMessage() != null)
 				throw e;
 			else
-				throw new OneException("Malformed condition", e);
+				throw new RuntimeException("Malformed retry condition", e);
 		}
 
 		Criteria<Build> criteria;
