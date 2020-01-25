@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.Plugin;
 import io.onedev.server.OneDev;
@@ -50,6 +49,7 @@ import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
 import io.onedev.server.web.page.my.buildsetting.MySecretsPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.webhook.MyWebHooksPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.security.LoginPage;
@@ -202,6 +202,11 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MyPasswordPage.class));
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
+
+		signedInContainer.add(item = new WebMarkupContainer("mySshKeys"));
+		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
+		if (getPage() instanceof MySshKeysPage)
+		    item.add(AttributeAppender.append("class", "active"));
 
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MySecretsPage.class));
