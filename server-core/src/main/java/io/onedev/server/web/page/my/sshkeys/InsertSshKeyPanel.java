@@ -8,8 +8,10 @@ import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
+import io.onedev.server.OneDev;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
@@ -49,10 +51,21 @@ public class InsertSshKeyPanel extends Panel {
         
         form.add(new AjaxSubmitLink("add") {
             @Override
-            protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-                super.onSubmit(target, form);
+            protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
+                super.onSubmit(target, myform);
                                 
-                user.getSshKeys();
+                SshKey sshKey = form.getModelObject();
+                
+                Dao dao = OneDev.getInstance(Dao.class);
+                
+                sshKey.setDigest("digesto");
+                sshKey.setOwner(user);
+                
+                dao.persist(sshKey);
+                
+                System.out.println("Number of keys: " + dao.count(SshKey.class));
+                
+                modal.close();
             }
         });
         
