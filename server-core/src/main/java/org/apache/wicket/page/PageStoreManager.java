@@ -17,22 +17,28 @@
 package org.apache.wicket.page;
 
 import java.io.Serializable;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.apache.wicket.pageStore.IPageStore;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  */
 public class PageStoreManager extends AbstractPageManager
 {
+	private static final Logger logger = LoggerFactory.getLogger(PageStoreManager.class);
+	
 	/**
 	 * A cache that holds all registered page managers. <br/>
 	 * applicationName -> page manager
@@ -273,7 +279,27 @@ public class PageStoreManager extends AbstractPageManager
 				SessionEntry entry = null;
 				if (RequestCycle.get() != null) {
 					HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
-					entry = getSessionEntry(!response.isCommitted());
+					if (response.isCommitted()) {
+						entry = getSessionEntry(false);
+						if (entry == null) {
+							HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
+							logger.debug("Unable to store touched page as response is committed and session is not available");
+							String url = request.getRequestURL().toString();
+							if (request.getQueryString() != null)
+								url += "?" + request.getQueryString();
+							logger.debug("url: " + url); 
+							logger.debug("method: " + request.getMethod());
+							Enumeration<String> headerNames = request.getHeaderNames();
+							while (headerNames.hasMoreElements()) {
+								String headerName = headerNames.nextElement();
+								Enumeration<String> headerValues = request.getHeaders(headerName);
+								while (headerValues.hasMoreElements()) 
+									logger.debug(headerName + ": " + headerValues.nextElement());
+							}
+						}
+					} else {
+						entry = getSessionEntry(true);
+					}
 				}
 				if (entry != null) {
 					entry.setSessionCache(touchedPages);
