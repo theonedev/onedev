@@ -13,18 +13,18 @@
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string>mvn package</string>
                 <string>mkdir publish</string>
-                <string>cp server-product/target/*.zip publish/</string>
-                <string>cp -r server-product/docker publish/</string>
-                <string>cp -r server-product/k8s publish/</string>
-                <string>mkdir publish/lib</string>
-                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* publish/lib</string>
+                <string>cp server-product/target/*.zip .</string>
+                <string>cp -r server-product/docker .</string>
+                <string>cp -r server-product/k8s .</string>
+                <string>mkdir lib</string>
+                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* lib</string>
             </commands>
             <retrieveSource>true</retrieveSource>
             <submoduleCredentials/>
             <jobDependencies/>
             <projectDependencies/>
             <services/>
-            <artifacts>publish/**</artifacts>
+            <artifacts>*.zip docker/** k8s/** lib/**</artifacts>
             <reports/>
             <triggers>
                 <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
@@ -46,7 +46,7 @@
             <retryDelay>30</retryDelay>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
-            <name>Build</name>
+            <name>QA</name>
             <paramSpecs>
                 <io.onedev.server.buildspec.job.paramspec.ChoiceParam>
                     <name>Type</name>
@@ -71,34 +71,36 @@
             <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>set -e</string>
-                <string>rm -rf ~/.m2/repository/io/onedev #clean downloaded dependencies as sometimes we do not change project versions</string>
+                <string>docker login -u robinshen -p @secrets:dockerhub-password@</string>
+                <string></string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
                 <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string></string>
-                <string>if [ "@params:Type@" = "QA" ]; then</string>
-                <string>  imageTag="qa-${buildVersion}"</string>
-                <string>else</string>
-                <string>  imageTag="${buildVersion}"</string>
-                <string>fi</string>
+                <string>unzip onedev-${buildVersion}.zip -d docker</string>
+                <string>mv docker/onedev-${buildVersion} docker/app</string>
+                <string>cp lib/* docker/app/site/lib</string>
                 <string></string>
-                <string>cd server-product/build</string>
-                <string>sh build.sh $imageTag @secrets:dockerhub-password@</string>
+                <string>docker build -t 1dev/server:qa-${buildVersion} docker</string>
+                <string>docker push 1dev/server:qa-${buildVersion}</string>
                 <string></string>
-                <string>cd ../..</string>
-                <string></string>
-                <string>mv server-product/target/k8s ./k8s-resources</string>
+                <string>mv k8s k8s-resources</string>
                 <string>zip -r k8s-resources.zip k8s-resources</string>
                 <string></string>
-                <string>mv server-product/target/*.zip .</string>
-                <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
-                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v $(pwd)/onedev:/opt/onedev -p 6610:6610 1dev/server:${imageTag}</string>
+                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v $(pwd)/onedev:/opt/onedev -p 6610:6610 1dev/server:qa-${buildVersion}</string>
                 <string>EOF</string>
             </commands>
-            <retrieveSource>true</retrieveSource>
+            <retrieveSource>false</retrieveSource>
             <submoduleCredentials/>
-            <jobDependencies/>
+            <jobDependencies>
+                <io.onedev.server.buildspec.job.JobDependency>
+                    <jobName>CI</jobName>
+                    <requireSuccessful>true</requireSuccessful>
+                    <jobParams/>
+                    <artifacts>**</artifacts>
+                </io.onedev.server.buildspec.job.JobDependency>
+            </jobDependencies>
             <projectDependencies/>
             <services/>
             <artifacts>*.zip *.sh</artifacts>
