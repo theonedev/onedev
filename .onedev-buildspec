@@ -24,6 +24,7 @@
             <jobDependencies/>
             <projectDependencies/>
             <services/>
+            <artifacts>publish/**</artifacts>
             <reports/>
             <triggers>
                 <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
