@@ -85,6 +85,7 @@
                 <string>docker push 1dev/server:qa-${buildVersion}</string>
                 <string></string>
                 <string>mv k8s k8s-resources</string>
+                <string>find k8s-resources -name "*.yaml" | xargs sed -i -e "s/\${buildVersion}/${buildVersion}/g"</string>
                 <string>zip -r k8s-resources.zip k8s-resources</string>
                 <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
