@@ -47,27 +47,7 @@
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
             <name>QA</name>
-            <paramSpecs>
-                <io.onedev.server.buildspec.job.paramspec.ChoiceParam>
-                    <name>Type</name>
-                    <allowMultiple>false</allowMultiple>
-                    <allowEmpty>false</allowEmpty>
-                    <choiceProvider class="io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices">
-                        <choices>
-                            <io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
-                                <uuid>a3db4872-aaaa-48ea-aea9-6b993d5f1ac7</uuid>
-                                <value>QA</value>
-                                <color>#0d87e9</color>
-                            </io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
-                            <io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
-                                <uuid>928e0583-ed5a-4a0d-856d-8f08895cccad</uuid>
-                                <value>Release</value>
-                                <color>#0d87e9</color>
-                            </io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
-                        </choices>
-                    </choiceProvider>
-                </io.onedev.server.buildspec.job.paramspec.ChoiceParam>
-            </paramSpecs>
+            <paramSpecs/>
             <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>set -e</string>
