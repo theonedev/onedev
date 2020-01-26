@@ -13,8 +13,8 @@
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string>mvn package</string>
                 <string>cp server-product/target/*.zip .</string>
-                <string>mkdir lib</string>
-                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* lib</string>
+                <string>mkdir -p site/lib</string>
+                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* site/lib</string>
             </commands>
             <retrieveSource>true</retrieveSource>
             <cloneDepth>1</cloneDepth>
@@ -22,7 +22,7 @@
             <jobDependencies/>
             <projectDependencies/>
             <services/>
-            <artifacts>*.zip lib/**</artifacts>
+            <artifacts>*.zip site/**</artifacts>
             <reports/>
             <triggers>
                 <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
@@ -58,13 +58,13 @@
                 <string>cp -r server-product/docker docker</string>
                 <string>unzip onedev-${buildVersion}.zip -d docker</string>
                 <string>mv docker/onedev-${buildVersion} docker/app</string>
-                <string>cp lib/* docker/app/site/lib</string>
+                <string>cp site/lib/* docker/app/site/lib</string>
                 <string></string>
                 <string>docker build -t 1dev/server:qa-${buildVersion} docker</string>
                 <string>docker push 1dev/server:qa-${buildVersion}</string>
                 <string></string>
                 <string>cp -r server-product/k8s k8s-resources</string>
-                <string>find k8s-resources -name "*.yaml" | xargs sed -i -e "s/\\${buildVersion}/${buildVersion}/g"</string>
+                <string>find k8s-resources -name "*.yaml" | xargs sed -i -e "s/\\${buildVersion}/qa-${buildVersion}/g"</string>
                 <string>zip -r k8s-resources.zip k8s-resources</string>
                 <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
@@ -93,6 +93,57 @@
                     <path>/root/.m2/repository</path>
                 </io.onedev.server.buildspec.job.CacheSpec>
             </caches>
+            <cpuRequirement>250m</cpuRequirement>
+            <memoryRequirement>128m</memoryRequirement>
+            <timeout>3600</timeout>
+            <postBuildActions/>
+            <retryCondition>never</retryCondition>
+            <maxRetries>3</maxRetries>
+            <retryDelay>30</retryDelay>
+        </io.onedev.server.buildspec.job.Job>
+        <io.onedev.server.buildspec.job.Job>
+            <name>Release</name>
+            <paramSpecs/>
+            <image>1dev/build-environment:1.0</image>
+            <commands>
+                <string>set -e</string>
+                <string>docker login -u robinshen -p @secrets:dockerhub-password@</string>
+                <string></string>
+                <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
+                <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
+                <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
+                <string></string>
+                <string>docker pull 1dev/server:qa-${buildVersion}</string>
+                <string>docker tag 1dev/server:qa-${buildVersion} 1dev/server:${buildVersion}</string>
+                <string>docker tag 1dev/server:qa-${buildVersion} 1dev/server:latest</string>
+                <string>docker push 1dev/server:${buildVersion}</string>
+                <string>docker push 1dev/server:latest</string>
+                <string></string>
+                <string>cp -r server-product/k8s k8s-resources</string>
+                <string>find k8s-resources -name "*.yaml" | xargs sed -i -e "s/\\${buildVersion}/${buildVersion}/g"</string>
+                <string>zip -r k8s-resources.zip k8s-resources</string>
+                <string></string>
+                <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
+                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v $(pwd)/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
+                <string>EOF</string>
+            </commands>
+            <retrieveSource>true</retrieveSource>
+            <cloneDepth>1</cloneDepth>
+            <submoduleCredentials/>
+            <jobDependencies>
+                <io.onedev.server.buildspec.job.JobDependency>
+                    <jobName>QA</jobName>
+                    <requireSuccessful>true</requireSuccessful>
+                    <jobParams/>
+                    <artifacts>*.zip</artifacts>
+                </io.onedev.server.buildspec.job.JobDependency>
+            </jobDependencies>
+            <projectDependencies/>
+            <services/>
+            <artifacts>*.zip *.sh</artifacts>
+            <reports/>
+            <triggers/>
+            <caches/>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
             <timeout>3600</timeout>
