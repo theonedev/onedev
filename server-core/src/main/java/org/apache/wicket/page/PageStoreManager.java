@@ -276,8 +276,8 @@ public class PageStoreManager extends AbstractPageManager
 		{
 			if (!touchedPages.isEmpty())
 			{
-				SessionEntry entry = null;
-				if (RequestCycle.get() != null) {
+				SessionEntry entry;
+				if (RequestCycle.get() != null && RequestCycle.get().getResponse() instanceof HttpServletResponse) {
 					HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
 					if (response.isCommitted()) {
 						entry = getSessionEntry(false);
@@ -287,19 +287,21 @@ public class PageStoreManager extends AbstractPageManager
 							String url = request.getRequestURL().toString();
 							if (request.getQueryString() != null)
 								url += "?" + request.getQueryString();
-							logger.debug("url: " + url); 
-							logger.debug("method: " + request.getMethod());
+							logger.debug("    url: " + url); 
+							logger.debug("    method: " + request.getMethod());
 							Enumeration<String> headerNames = request.getHeaderNames();
 							while (headerNames.hasMoreElements()) {
 								String headerName = headerNames.nextElement();
 								Enumeration<String> headerValues = request.getHeaders(headerName);
 								while (headerValues.hasMoreElements()) 
-									logger.debug(headerName + ": " + headerValues.nextElement());
+									logger.debug("    " + headerName + ": " + headerValues.nextElement());
 							}
 						}
 					} else {
 						entry = getSessionEntry(true);
 					}
+				} else {
+					entry = getSessionEntry(true);
 				}
 				if (entry != null) {
 					entry.setSessionCache(touchedPages);
