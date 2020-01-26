@@ -8,11 +8,16 @@
             <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>set -e</string>
-                <string>rm -rf ~/.m2/repository/io/onedev #clean downloaded dependencies as sometimes we do not change project versions</string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
                 <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
-                <string>mvn test</string>
+                <string>mvn package</string>
+                <string>mkdir publish</string>
+                <string>cp server-product/target/*.zip publish/</string>
+                <string>cp -r server-product/docker publish/</string>
+                <string>cp -r server-product/k8s publish/</string>
+                <string>mkdir publish/lib</string>
+                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* publish/lib</string>
             </commands>
             <retrieveSource>true</retrieveSource>
             <submoduleCredentials/>
@@ -40,8 +45,28 @@
             <retryDelay>30</retryDelay>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
-            <name>Release</name>
-            <paramSpecs/>
+            <name>Build</name>
+            <paramSpecs>
+                <io.onedev.server.buildspec.job.paramspec.ChoiceParam>
+                    <name>Type</name>
+                    <allowMultiple>false</allowMultiple>
+                    <allowEmpty>false</allowEmpty>
+                    <choiceProvider class="io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices">
+                        <choices>
+                            <io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
+                                <uuid>a3db4872-aaaa-48ea-aea9-6b993d5f1ac7</uuid>
+                                <value>QA</value>
+                                <color>#0d87e9</color>
+                            </io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
+                            <io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
+                                <uuid>928e0583-ed5a-4a0d-856d-8f08895cccad</uuid>
+                                <value>Release</value>
+                                <color>#0d87e9</color>
+                            </io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice>
+                        </choices>
+                    </choiceProvider>
+                </io.onedev.server.buildspec.job.paramspec.ChoiceParam>
+            </paramSpecs>
             <image>1dev/build-environment:1.0</image>
             <commands>
                 <string>set -e</string>
@@ -50,8 +75,14 @@
                 <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string></string>
+                <string>if [ "@params:Type@" = "QA" ]; then</string>
+                <string>  imageTag="qa-${buildVersion}"</string>
+                <string>else</string>
+                <string>  imageTag="${buildVersion}"</string>
+                <string>fi</string>
+                <string></string>
                 <string>cd server-product/build</string>
-                <string>sh build.sh @secrets:dockerhub-password@</string>
+                <string>sh build.sh $imageTag @secrets:dockerhub-password@</string>
                 <string></string>
                 <string>cd ../..</string>
                 <string></string>
@@ -61,7 +92,7 @@
                 <string>mv server-product/target/*.zip .</string>
                 <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
-                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v /opt/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
+                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v $(pwd)/onedev:/opt/onedev -p 6610:6610 1dev/server:${imageTag}</string>
                 <string>EOF</string>
             </commands>
             <retrieveSource>true</retrieveSource>
