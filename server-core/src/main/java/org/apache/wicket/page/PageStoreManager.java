@@ -21,10 +21,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.apache.wicket.pageStore.IPageStore;
+import org.apache.wicket.request.cycle.RequestCycle;
 
 /**
  * 
@@ -268,23 +270,29 @@ public class PageStoreManager extends AbstractPageManager
 		{
 			if (!touchedPages.isEmpty())
 			{
-				SessionEntry entry = getSessionEntry(true);
-				entry.setSessionCache(touchedPages);
-				for (IManageablePage page : touchedPages)
-				{
-					// WICKET-5103 use the same sessionId as used in
-					// SessionEntry#getPage()
-					pageStore.storePage(entry.sessionId, page);
+				SessionEntry entry = null;
+				if (RequestCycle.get() != null) {
+					HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
+					entry = getSessionEntry(!response.isCommitted());
 				}
+				if (entry != null) {
+					entry.setSessionCache(touchedPages);
+					for (IManageablePage page : touchedPages)
+					{
+						// WICKET-5103 use the same sessionId as used in
+						// SessionEntry#getPage()
+						pageStore.storePage(entry.sessionId, page);
+					}
 
-				STORING_TOUCHED_PAGES.set(true);
-				try
-				{
-					setSessionAttribute(getAttributeName(), entry);
-				}
-				finally
-				{
-					STORING_TOUCHED_PAGES.remove();
+					STORING_TOUCHED_PAGES.set(true);
+					try
+					{
+						setSessionAttribute(getAttributeName(), entry);
+					}
+					finally
+					{
+						STORING_TOUCHED_PAGES.remove();
+					}
 				}
 			}
 		}
