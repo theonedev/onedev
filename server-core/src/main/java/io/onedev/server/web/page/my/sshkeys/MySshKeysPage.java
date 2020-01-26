@@ -21,7 +21,7 @@ public class MySshKeysPage extends MyPage {
             
             @Override
             protected Component newContent(String id, ModalPanel modal) {
-                return new InsertSshKeyPanel(id, modal);
+                return new InsertSshKeyPanel(id, modal, getLoginUser());
             }
         });
 	}

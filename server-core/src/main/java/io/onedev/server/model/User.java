@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,7 +14,6 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -25,10 +23,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
-
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
@@ -113,6 +109,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="owner")
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<Project> projects = new ArrayList<>();
+    
+    @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+    private Collection<SshKey> sshKeys = new ArrayList<>();
     
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -524,5 +523,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		else 
 			return SecurityUtils.getUser();
 	}
+
+    public Collection<SshKey> getSshKeys() {
+        return sshKeys;
+    }
+
+    public void setSshKeys(Collection<SshKey> sshKeys) {
+        this.sshKeys = sshKeys;
+    }
 	
 }

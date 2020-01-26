@@ -22,7 +22,7 @@ public class SshKey extends AbstractEntity {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
-    private User user;
+    private User owner;
 
     public String getName() {
         return name;
@@ -48,13 +48,11 @@ public class SshKey extends AbstractEntity {
         this.digest = digest;
     }
 
-    public User getUser() {
-        return user;
+    public User getOwner() {
+        return owner;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
-    
-    
 }
