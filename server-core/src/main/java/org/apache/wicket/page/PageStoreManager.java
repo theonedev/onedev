@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
@@ -276,34 +275,8 @@ public class PageStoreManager extends AbstractPageManager
 		{
 			if (!touchedPages.isEmpty())
 			{
-				SessionEntry entry;
-				if (RequestCycle.get() != null && RequestCycle.get().getResponse() instanceof HttpServletResponse) {
-					HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
-					if (response.isCommitted()) {
-						entry = getSessionEntry(false);
-						if (entry == null) {
-							HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
-							logger.debug("Unable to store touched page as response is committed and session is not available");
-							String url = request.getRequestURL().toString();
-							if (request.getQueryString() != null)
-								url += "?" + request.getQueryString();
-							logger.debug("    url: " + url); 
-							logger.debug("    method: " + request.getMethod());
-							Enumeration<String> headerNames = request.getHeaderNames();
-							while (headerNames.hasMoreElements()) {
-								String headerName = headerNames.nextElement();
-								Enumeration<String> headerValues = request.getHeaders(headerName);
-								while (headerValues.hasMoreElements()) 
-									logger.debug("    " + headerName + ": " + headerValues.nextElement());
-							}
-						}
-					} else {
-						entry = getSessionEntry(true);
-					}
-				} else {
-					entry = getSessionEntry(true);
-				}
-				if (entry != null) {
+				try {
+					SessionEntry entry = getSessionEntry(true);
 					entry.setSessionCache(touchedPages);
 					for (IManageablePage page : touchedPages)
 					{
@@ -320,6 +293,23 @@ public class PageStoreManager extends AbstractPageManager
 					finally
 					{
 						STORING_TOUCHED_PAGES.remove();
+					}
+				} catch (IllegalStateException e) {
+					if (e.getMessage().contains("Response is committed")) {
+						HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
+						logger.debug("Unable to store touched page as response is committed and session is not available");
+						String url = request.getRequestURL().toString();
+						if (request.getQueryString() != null)
+							url += "?" + request.getQueryString();
+						logger.debug("    url: " + url); 
+						logger.debug("    method: " + request.getMethod());
+						Enumeration<String> headerNames = request.getHeaderNames();
+						while (headerNames.hasMoreElements()) {
+							String headerName = headerNames.nextElement();
+							Enumeration<String> headerValues = request.getHeaders(headerName);
+							while (headerValues.hasMoreElements()) 
+								logger.debug("    " + headerName + ": " + headerValues.nextElement());
+						}
 					}
 				}
 			}
