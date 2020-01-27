@@ -80,12 +80,7 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 			Subject subject = (Subject) request.getHttpServletRequest()
 					.getAttribute(WebSocketFilter.SHIRO_SUBJECT);
 	        ThreadContext.bind(subject);
-			sessionManager.openSession();
-			try {
-		        runnable.run();
-			} finally {
-				sessionManager.closeSession();
-			}
+	        sessionManager.run(runnable);
 		}
 	}
 	

@@ -17,17 +17,14 @@
 package org.apache.wicket.page;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.apache.wicket.pageStore.IPageStore;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -295,22 +292,10 @@ public class PageStoreManager extends AbstractPageManager
 						STORING_TOUCHED_PAGES.remove();
 					}
 				} catch (IllegalStateException e) {
-					if (e.getMessage().contains("Response is committed")) {
-						HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
-						logger.debug("Unable to store touched page as response is committed and session is not available");
-						String url = request.getRequestURL().toString();
-						if (request.getQueryString() != null)
-							url += "?" + request.getQueryString();
-						logger.debug("    url: " + url); 
-						logger.debug("    method: " + request.getMethod());
-						Enumeration<String> headerNames = request.getHeaderNames();
-						while (headerNames.hasMoreElements()) {
-							String headerName = headerNames.nextElement();
-							Enumeration<String> headerValues = request.getHeaders(headerName);
-							while (headerValues.hasMoreElements()) 
-								logger.debug("    " + headerName + ": " + headerValues.nextElement());
-						}
-					}
+					if (e.getMessage().contains("Response is committed")) 
+						logger.debug("Error storing touched pages", e);
+					else 
+						throw e;
 				}
 			}
 		}
