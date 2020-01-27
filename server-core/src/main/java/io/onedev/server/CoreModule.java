@@ -40,6 +40,7 @@ import org.apache.shiro.web.filter.mgt.FilterChainManager;
 import org.apache.shiro.web.filter.mgt.FilterChainResolver;
 import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.apache.shiro.web.servlet.ShiroFilter;
+import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.wicket.Application;
 import org.apache.wicket.core.request.mapper.StalePageException;
 import org.apache.wicket.protocol.http.PageExpiredException;
@@ -88,6 +89,7 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
+import io.onedev.server.crypto.DefaultTestKeyPair;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -159,6 +161,7 @@ import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitPostReceiveCallback;
 import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.git.server.SimpleGitServer;
 import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.DefaultCodeCommentRelationInfoManager;
@@ -387,7 +390,10 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CommitQuerySettingManager.class).to(DefaultCommitQuerySettingManager.class);
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
 		bind(WebHookManager.class);
-
+		
+		bind(KeyPairProvider.class).to(DefaultTestKeyPair.class);
+		bind(SimpleGitServer.class);
+		
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    

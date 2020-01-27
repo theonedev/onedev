@@ -1,5 +1,6 @@
 package io.onedev.server;
 
+import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.DatagramSocket;
@@ -32,6 +33,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.server.SimpleGitServer;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
@@ -68,12 +70,14 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	private final ExecutorService executorService;
 	
 	private volatile InitStage initStage;
+
+    private SimpleGitServer simpleGitServer;
 	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
 			SettingManager configManager, ExecutorService executorService, 
-			ListenerRegistry listenerRegistry) {
+			ListenerRegistry listenerRegistry, SimpleGitServer simpleGitServer) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -83,6 +87,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.serverConfig = serverConfig;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
+        this.simpleGitServer = simpleGitServer;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -107,7 +112,14 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			
 			initStage.waitForFinish();
 		}
-
+		
+		try {
+            simpleGitServer.start();
+            logger.info("Git server started at port " + simpleGitServer.getPort());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
 		sessionManager.openSession();
 		try {
 			listenerRegistry.post(new SystemStarting());
@@ -286,6 +298,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		taskScheduler.stop();
 		jettyRunner.stop();
 		executorService.shutdown();
+		
+		try {
+            simpleGitServer.stop();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 	}
 		
 	public Object writeReplace() throws ObjectStreamException {
