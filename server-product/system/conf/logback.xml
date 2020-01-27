@@ -40,6 +40,7 @@
 	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"/>
 	<logger name="com.zaxxer.hikari.util.DriverDataSource" level="ERROR"/>
 	<logger name="org.apache.shiro.mgt" level="ERROR"/>
+	<logger name="org.apache.wicket.request.resource.ResourceReferenceRegistry" level="ERROR"/>
 	<logger name="io.onedev" level="INFO"/>	
 	
 	<root level="WARN">
