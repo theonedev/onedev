@@ -169,10 +169,12 @@ public abstract class IssueActivitiesPanel extends Panel {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		if (activity.getUser() != null)
+		if (activity.getUser() != null) {
 			row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
-		else
+			row.add(AttributeAppender.append("class", "with-avatar"));
+		} else {
 			row.add(new WebMarkupContainer("avatar").setVisible(false));
+		}
 
 		row.add(activity.render("content", new DeleteCallback() {
 

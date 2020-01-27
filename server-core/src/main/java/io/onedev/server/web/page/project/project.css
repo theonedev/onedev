@@ -59,7 +59,7 @@
 }
 
 .project-nav-context-dropdown .info {
-	margin: -20px;
+	margin: -20px -20px 0 -20px;
 }
 .project-nav-context-dropdown .setting ul {
 	display: none;
@@ -75,7 +75,6 @@
 }
 .project-nav-context-dropdown .setting li:hover a {
 	background: #EEE !important;
-	color: black !important;
 }
 .project-nav-context-dropdown .setting li.active a {
 	font-weight: bold !important;

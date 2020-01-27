@@ -1,3 +1,8 @@
+@media(max-width: 991px) {
+	.pull-request-list>.body .pull-right {
+		display: none;
+	}
+}
 .pull-request-list>.head {
 	position: relative;
 }

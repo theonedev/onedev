@@ -94,7 +94,7 @@
 } 
 #request-detail>.main>.summary>.operations>.buttons>a, 
 #request-detail>.main>.summary>.operations>.confirm>form>input {
-	margin-right: 12px;
+	margin-right: 8px;
 } 
 #request-detail>.main>.summary>.operations>.confirm>form .markdown-editor {
 	margin-bottom: 16px;

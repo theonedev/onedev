@@ -593,7 +593,7 @@ public abstract class CommitListPanel extends Panel {
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
-			item.add(new CommitStatusPanel("buildStatus", commit.copy()) {
+			CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {
 
 				@Override
 				protected String getCssClasses() {
@@ -605,9 +605,21 @@ public abstract class CommitListPanel extends Panel {
 					return CommitListPanel.this.getProject();
 				}
 				
-			});
+			};
+			item.add(commitStatus);
 
-			item.add(AttributeAppender.append("class", "commit clearfix"));
+			item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					commitStatus.configure();
+					if (commitStatus.isVisible())
+						return "commit with-status";
+					else
+						return "commit";
+				}
+				
+			}));
 		} else {
 			item = new Fragment(itemId, "dateFrag", this);
 			DateTime dateTime = new DateTime(current.get(index+1).getCommitterIdent().getWhen());
