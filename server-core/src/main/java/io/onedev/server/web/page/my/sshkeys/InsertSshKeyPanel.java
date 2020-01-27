@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.my.sshkeys;
 
+import java.util.Collection;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
@@ -15,7 +16,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
-public class InsertSshKeyPanel extends Panel {
+public abstract class InsertSshKeyPanel extends Panel {
 
     private ModalPanel modal;
     private User user;
@@ -30,7 +31,7 @@ public class InsertSshKeyPanel extends Panel {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        
+        Collection<SshKey> sshKeys = user.getSshKeys();
         add(new AjaxLink<Void>("close") {
 
             @Override
@@ -63,9 +64,9 @@ public class InsertSshKeyPanel extends Panel {
                 
                 dao.persist(sshKey);
                 
-                System.out.println("Number of keys: " + dao.count(SshKey.class));
-                
                 modal.close();
+                
+                onSave(target);
             }
         });
         
@@ -76,4 +77,6 @@ public class InsertSshKeyPanel extends Panel {
         
         add(form);
     }
+    
+    protected abstract void onSave(AjaxRequestTarget target);
 }
