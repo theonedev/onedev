@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +20,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.wicket.request.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,8 +141,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		initStage = null;
 	}
 
-	public String guessServerUrl() {
-		String serverUrl = null;
+	public Url guessServerUrl() {
+	    Url serverUrl = null;
 		
 		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
 		if (serviceHost != null) { // we are running inside Kubernetes  
@@ -224,29 +227,31 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			}
 			
 			if (serverConfig.getHttpsPort() != 0)
-				serverUrl = "https://" + host + ":" + serverConfig.getHttpsPort();
-			else 
-				serverUrl = "http://" + host + ":" + serverConfig.getHttpPort();
+                serverUrl = new Url(Arrays.asList("https", host, Integer.toString(serverConfig.getHttpsPort())), Charset.forName("UTF8"));
+            else 
+				serverUrl = new Url(Arrays.asList("http", host, Integer.toString(serverConfig.getHttpPort())), Charset.forName("UTF8"));
+			
 		}
 		
 		return serverUrl;
 	}
 	
-	private String buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
-		String serverUrl = null;
+	private Url buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
+        Url serverUrl = null;
 		if (httpsPort != null) {
-			serverUrl = "https://" + host;
-			if (!httpsPort.equals("443"))
-				serverUrl += ":" + httpsPort;
+            serverUrl =  new Url(Arrays.asList("https", host), Charset.forName("UTF8"));
+    		if (!httpsPort.equals("443"))
+    			serverUrl.setPort(Integer.parseInt(httpsPort));
 		} else if (httpPort != null) {
-			serverUrl = "http://" + host;
+			serverUrl =  new Url(Arrays.asList("http", host), Charset.forName("UTF8"));
 			if (!httpPort.equals("80"))
-				serverUrl += ":" + httpPort;
+			    serverUrl.setPort(Integer.parseInt(httpPort));
 		} else {
 			logger.warn("This OneDev deployment looks odd to me: "
 					+ "both http and https port are not specified");
 		}
 		return serverUrl;
+  
 	}
 	
 	/**

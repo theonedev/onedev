@@ -138,7 +138,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		
 		if (setting == null || setting.getValue() == null) {
 			systemSetting = new SystemSetting();
-			systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
+			systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl().toString());
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
 			systemSetting = (SystemSetting) setting.getValue();
 		}
