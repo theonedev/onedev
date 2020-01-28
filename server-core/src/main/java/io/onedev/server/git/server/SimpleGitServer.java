@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.sshd.common.NamedFactory;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.session.Session;
@@ -92,9 +94,11 @@ public class SimpleGitServer {
         server.setHostBasedAuthenticator(AcceptAllHostBasedAuthenticator.INSTANCE);
        
         server.setPublickeyAuthenticator((userName, publicKey, session) -> {
+            System.out.println(KeyUtils.getFingerPrint(new BaseDigest("MD5", 512), publicKey));
             return true;
         });
     }
+    
     
     private List<NamedFactory<UserAuth>> getAuthFactories() {
         List<NamedFactory<UserAuth>> authentications = new ArrayList<>();
