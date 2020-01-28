@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.my.sshkeys;
 
 import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -12,8 +13,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
@@ -73,8 +74,8 @@ public class MySshKeysPage extends MyPage {
 		                item.add(new AjaxLink<Void>("delete") {
 		                    @Override
 		                    public void onClick(AjaxRequestTarget target) {
-		                       user.getSshKeys().remove(sshKey);
-		                       OneDev.getInstance(UserManager.class).save(user);
+		                       Dao dao = OneDev.getInstance(Dao.class);
+		                       dao.remove(sshKey);
 		                       target.add(keyList);
 		                    }
 		                });
