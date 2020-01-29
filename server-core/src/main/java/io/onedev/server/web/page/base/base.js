@@ -420,9 +420,6 @@ onedev.server = {
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			Wicket.WebSocket.send("ConnectionOpened");
 		});
-		Wicket.Event.subscribe("/websocket/error", function(jqEvent) {
-			$(".websocket-client-error").show();			
-		});
 	},
 
 	/*
