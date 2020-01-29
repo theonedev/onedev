@@ -1,3 +1,9 @@
+@media(max-width: 991px) {
+	.issue-list>.body .pull-right {
+		display: none;
+	}
+}
+
 .issue-list>.head {
 	position: relative;
 }
@@ -37,11 +43,12 @@
 .issue-list>.body td .issue-state {
 	font-size: 12px;
 }
-.issue-list>.body td .primary {
-	margin-bottom: 8px;
-}
 .issue-list>.body td .secondary>.pull-left>div {
 	margin-right: 20px;
+	margin-top: 8px;
+}
+.issue-list>.body td .secondary>.pull-right {
+	margin-top: 8px;
 }
 .issue-list>.body td .submission, .issue-list>.body td .comments, .issue-list>.body td .votes {
 	color: #888;

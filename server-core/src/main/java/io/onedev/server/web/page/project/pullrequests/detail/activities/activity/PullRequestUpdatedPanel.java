@@ -81,7 +81,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 				});
 
-				item.add(new CommitStatusPanel("buildStatus", commit.copy()) {
+				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {
 					
 					@Override
 					protected String getCssClasses() {
@@ -93,7 +93,8 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 						return getUpdate().getRequest().getTarget().getProject();
 					}
 					
-				});
+				};
+				item.add(commitStatus);
 				
 				Project project = getUpdate().getRequest().getTarget().getProject();
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
@@ -110,15 +111,18 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				params = ProjectBlobPage.paramsOf(project, browseState);
 				item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 				
-				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {
-					if (getUpdate().getRequest().getMergedCommits().contains(commit)) {
-						item.add(AttributeAppender.append("class", " merged"));
-						item.add(AttributeAppender.append("title", "This commit has been merged"));
-					} else if (!getUpdate().getRequest().getPendingCommits().contains(commit)) {
-						item.add(AttributeAppender.append("class", " rebased"));
-						item.add(AttributeAppender.append("title", "This commit has been rebased"));
+				item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						commitStatus.configure();
+						if (commitStatus.isVisible())
+							return "commit with-status";
+						else
+							return "commit";
 					}
-				}
+					
+				}));
 				
 			}
 			

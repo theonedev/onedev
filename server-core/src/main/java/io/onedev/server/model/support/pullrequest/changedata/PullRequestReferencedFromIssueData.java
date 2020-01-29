@@ -28,7 +28,7 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 	
 	@Override
 	public String getDescription() {
-		return "referenced from issue";
+		return "Referenced from issue";
 	}
 
 	@Override

@@ -27,10 +27,10 @@
         </div>
 	</div>
 	<wicket:fragment wicket:id="commitFrag">
-		<div class="avatar pull-left">
+		<div class="avatar">
 			<span wicket:id="avatar"></span>
 		</div>
-		<div class="detail pull-left">
+		<div class="detail">
 			<div class="message-and-labels clearfix">
 				<div wicket:id="message" class="message pull-left"></div>
 				<div wicket:id="labels" class="pull-left">
@@ -39,17 +39,19 @@
 			</div>
 			<div wicket:id="contribution"></div>
 		</div>
-        <span class="btn-group browse pull-right">
-            <a wicket:id="browseCode" title="Browse code" class="btn btn-default"><i class="fa fa-file-text-o"></i></a>
-            <wicket:enclosure>
-            <a wicket:id="compare" class="compare btn btn-default" title="Compare with base revision"><i class="fa fa-ext fa-file-diff"></i></a>
-            </wicket:enclosure>
-        </span>
-        <span class="btn-group hash pull-right">
-            <a wicket:id="hashLink" class="btn btn-default hash"><span wicket:id="hash"></span></a>
-            <a wicket:id="copyHash" class="btn btn-default"><i class="fa fa-clipboard"></i></a>
-        </span>
-        <span wicket:id="buildStatus" class="build-status pull-right"></span>
+		<div class="actions">
+	        <span wicket:id="buildStatus" class="build-status"></span>
+	        <span class="btn-group hash">
+	            <a wicket:id="hashLink" class="btn btn-default hash"><span wicket:id="hash"></span></a>
+	            <a wicket:id="copyHash" class="btn btn-default"><i class="fa fa-clipboard"></i></a>
+	        </span>
+	        <span class="btn-group browse">
+	            <a wicket:id="browseCode" title="Browse code" class="btn btn-default"><i class="fa fa-file-text-o"></i></a>
+	            <wicket:enclosure>
+	            <a wicket:id="compare" class="compare btn btn-default" title="Compare with base revision"><i class="fa fa-ext fa-file-diff"></i></a>
+	            </wicket:enclosure>
+	        </span>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="dateFrag">
 		<i class="fa fa-calendar"></i> <span wicket:id="date"></span>

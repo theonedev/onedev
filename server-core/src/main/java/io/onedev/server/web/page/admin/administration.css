@@ -20,9 +20,10 @@
 	margin-bottom: 20px;
 }
 .server-log>.body>pre {
-	background: black;
-	border: 1px solid black;
-	color: white;
+	overflow: visible;
+	background: white;
+	border: none;
+	padding: 0;
 }
 
 .license-detail .properties td {

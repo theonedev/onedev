@@ -39,11 +39,6 @@
 .issue-activities .activity>.content>.body {
 	margin-top: 8px;
 }
-.issue-activities .activity>.content>.body>.referenced-from .label,
-.issue-activities .activity>.content>.body>.pull-request .label {
-	line-height: inherit;
-	margin-left: 8px;
-}
 
 .issue-activities .activity>.content>.body>.actions {
 	margin-top: 8px;
@@ -60,16 +55,22 @@
 }
 .issue-activities .activity>.content>.body>.commit {
 	color: #888;
+	position: relative;
 }
 .issue-activities .activity>.content>.body>.commit .author {
 	width: 28px;
+	position: absolute;
 }
 .issue-activities .activity>.content>.body>.commit .message {
-	margin-right: 8px;
+	padding: 0 128px 0 28px;
 }
-.issue-activities .activity>.content>.body>.commit .pull-right {
-	margin-left: 4px;
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+.issue-activities .activity>.content>.body>.commit.with-status .message {
+	padding-right: 175px;
+}
+.issue-activities .activity>.content>.body>.commit .actions {
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 .issue-activities .activity>.content>.head a {
 	color: #999;
@@ -88,15 +89,14 @@
 	border-radius: 4px;	
 }
 @media(max-width: 991px) {
-	.issue-activities>table>tbody>tr>td.avatar .avatar {
-		width: 24px;
-		height: 24px;
+	.issue-activities .activity>.content>.body>.commit .browse, 
+	.issue-activities .activity>.content>.body>.commit .hash {
+		display: none;
 	}
-	.issue-activities>table>tbody>tr>td.content {
-		padding-left: 6px;
-	}
-	.issue-activities .activity>.content>.body {
-		margin-top: 12px;
-		margin-left: -24px;
-	}
+	.issue-activities .activity>.content>.body>.commit .message {
+		padding-right: 0;
+	} 
+	.issue-activities .activity>.content>.body>.commit.with-status .message {
+		padding-right: 45px;
+	} 
 }

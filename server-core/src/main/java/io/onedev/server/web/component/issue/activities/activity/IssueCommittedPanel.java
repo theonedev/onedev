@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -49,9 +50,12 @@ public abstract class IssueCommittedPanel extends GenericPanel<RevCommit> {
 
 		RevCommit commit = getModelObject();
 		
-		add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
+		WebMarkupContainer container = new WebMarkupContainer("commit");
+		add(container);
+		
+		container.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
 
-		add(new CommitMessagePanel("message", getModel()) {
+		container.add(new CommitMessagePanel("message", getModel()) {
 
 			@Override
 			protected Project getProject() {
@@ -60,7 +64,7 @@ public abstract class IssueCommittedPanel extends GenericPanel<RevCommit> {
 			
 		});
 
-		add(new CommitStatusPanel("buildStatus", ObjectId.fromString(commitHash)) {
+		CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", ObjectId.fromString(commitHash)) {
 			
 			@Override
 			protected String getCssClasses() {
@@ -72,21 +76,36 @@ public abstract class IssueCommittedPanel extends GenericPanel<RevCommit> {
 				return getIssue().getProject();
 			}
 			
-		});
+		};
+		container.add(commitStatus);
 		
 		Project project = getIssue().getProject();
 		CommitDetailPage.State commitState = new CommitDetailPage.State();
 		commitState.revision = commit.name();
 		PageParameters params = CommitDetailPage.paramsOf(project, commitState);
 		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
-		add(hashLink);
+		container.add(hashLink);
 		hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
-		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+		container.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
 		BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
 		params = ProjectBlobPage.paramsOf(project, browseState);
-		add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
+		container.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
+		
+		container.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				commitStatus.configure();
+				if (commitStatus.isVisible())
+					return "commit with-status";
+				else
+					return "commit";
+			}
+			
+		}));
+		
 	}	
 
 	protected abstract Issue getIssue();
