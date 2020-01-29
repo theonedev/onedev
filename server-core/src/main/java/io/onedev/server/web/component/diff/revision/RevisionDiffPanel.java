@@ -323,9 +323,9 @@ public class RevisionDiffPanel extends Panel {
 	    		 * display smaller diffs from different files as many as
 	    		 * possible
 	    		 */
-	    		if (changedLines <= WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
+	    		if (changedLines <= WebConstants.MAX_SINGLE_DIFF_LINES) {
 		    		totalChangedLines += changedLines;
-		    		if (totalChangedLines <= WebConstants.MAX_DIFF_LINES)
+		    		if (totalChangedLines <= WebConstants.MAX_TOTAL_DIFF_LINES)
 		    			displayChanges.add(change);
 		    		else
 		    			break;

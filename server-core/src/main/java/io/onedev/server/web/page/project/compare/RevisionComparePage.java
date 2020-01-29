@@ -792,10 +792,12 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	public Collection<String> getWebSocketObservables() {
 		Collection<String> observables = super.getWebSocketObservables();
 		if (getProject().getDefaultBranch() != null) {
-			if (state.compareWithMergeBase) 
-				observables.add(CommitIndexed.getWebSocketObservable(mergeBase.name()));
-			else
+			if (state.compareWithMergeBase) {
+				if (mergeBase != null)
+					observables.add(CommitIndexed.getWebSocketObservable(mergeBase.name()));
+			} else {
 				observables.add(CommitIndexed.getWebSocketObservable(state.leftSide.getCommit().name()));
+			}
 			observables.add(CommitIndexed.getWebSocketObservable(state.rightSide.getCommit().name()));
 			if (state.commentId != null)
 				observables.add(CodeComment.getWebSocketObservable(state.commentId));

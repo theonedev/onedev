@@ -7,8 +7,8 @@ public class WebConstants {
 	/* diff constants */
 	public static final int DIFF_EXPAND_SIZE = 15;
 	public static final int MAX_DIFF_FILES = 200;
-	public static final int MAX_SINGLE_FILE_DIFF_LINES = 5000;
-	public static final int MAX_DIFF_LINES = 10000;
+	public static final int MAX_SINGLE_DIFF_LINES = 2000;
+	public static final int MAX_TOTAL_DIFF_LINES = 5000;
 	public static final int DIFF_CONTEXT_SIZE = 3;
 	
 	/* commit constants */

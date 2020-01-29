@@ -74,7 +74,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 		if (blob.getText() != null) {
 			if (blob.getText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 				add(newFragment("Unable to diff as the file is too large.", true));
-			} else if (change.getAdditions()+change.getDeletions() > WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
+			} else if (change.getAdditions()+change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
 				add(newFragment("Diff is too large to be displayed.", true));
 			} else if (change.getDiffBlocks().isEmpty()) {
 				if (change.getNewBlobIdent().path != null)
@@ -112,7 +112,7 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 			if (change.getOldText() != null && change.getNewText() != null) {
 				if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 					add(newFragment("Unable to diff as the file is too large.", true));
-				} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_FILE_DIFF_LINES) {
+				} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
 				} else if (change.getAdditions() + change.getDeletions() == 0 
 						&& (commentSupport == null || commentSupport.getComments().isEmpty())) {

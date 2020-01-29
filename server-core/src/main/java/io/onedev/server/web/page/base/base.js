@@ -258,7 +258,7 @@ onedev.server = {
 				if ($ajaxLoadingIndicator[0].timer)
 					clearTimeout($ajaxLoadingIndicator[0].timer);
 				$ajaxLoadingIndicator[0].timer = setTimeout(function() {
-					if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator:visible").length == 0)
+					if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator").filter(":visible").length == 0)
 						$ajaxLoadingIndicator.show();
 				}, 2000);		
 			}
@@ -296,16 +296,16 @@ onedev.server = {
 			 * via Wicket
 			 */
 			setTimeout(function() {
-				var focusibleSelector = "input[type=text]:visible, input[type=password]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
-				
-				var inErrorSelector = ".has-error:visible:first";
-                var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+				// do not use :visible selector directly for performance reason 
+				var focusibleSelector = "input[type=text], input[type=password], input:not([type]), textarea, .CodeMirror";
+				var inErrorSelector = ".has-error";
+                var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector).filter(":visible:first");
                 if ($inError.length == 0) {
-				    inErrorSelector = ".feedbackPanelERROR:visible:first";
-                    $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+				    inErrorSelector = ".feedbackPanelERROR";
+                    $inError = $containers.find(inErrorSelector).addBack(inErrorSelector).filter(":visible:first");
                 }
 				if ($inError.length != 0) {
-					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
+					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector).filter(":visible");
 					if ($focusable.hasClass("CodeMirror") && $focusable[0].CodeMirror.options.readOnly == false) {
 						$focusable[0].CodeMirror.focus();					
                     } else if ($focusable.length != 0 
@@ -316,7 +316,7 @@ onedev.server = {
 						$inError[0].scrollIntoView({behavior: "smooth", block: "center"});
 					}
 				} else {
-					$containers.find(focusibleSelector).addBack(focusibleSelector).each(function() {
+					$containers.find(focusibleSelector).addBack(focusibleSelector).filter(":visible").each(function() {
 						var $this = $(this);
 						if ($this.closest(".no-autofocus").length == 0) {
 							if ($this.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
@@ -431,10 +431,10 @@ onedev.server = {
 	viewState: {
 		getInnerMostAutoFit: function() {
 			var $innerMost;
-			var $autofits = $(".autofit:visible");
+			var $autofits = $(".autofit").filter(":visible");
 			while ($autofits.length != 0) {
 				$innerMost = $autofits.first();
-				$autofits = $innerMost.find(".autofit:visible");
+				$autofits = $innerMost.find(".autofit").filter(":visible");
 			}
 			return $innerMost;
 		},
@@ -675,7 +675,7 @@ onedev.server = {
 
 	setupModalOverlays: function() {
 		$(document).on('hidden.bs.modal', '.modal', function () {
-			$('.modal:visible').length && $(document.body).addClass('modal-open');
+			$('.modal').filter(":visible").length && $(document.body).addClass('modal-open');
 		});		
 	},
 	
