@@ -275,8 +275,8 @@ public abstract class IssueActivitiesPanel extends Panel {
 					comment.setIssue(getIssue());
 					OneDev.getInstance(IssueCommentManager.class).save(comment);
 					
-					input.setModelObject("");
-
+					input.clearMarkdown();
+					
 					@SuppressWarnings("deprecation")
 					Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
 					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new IssueCommentedActivity(comment)); 
