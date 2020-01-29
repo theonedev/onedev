@@ -365,7 +365,7 @@ public abstract class IssueListPanel extends Panel {
 
 				@Override
 				public IModel<?> getBody() {
-					return Model.of("<i class='fa fa-plus'></i> New Issue <i class='fa fa-caret-down'></i>");
+					return Model.of("<i class='fa fa-plus'></i> New <i class='fa fa-caret-down'></i>");
 				}
 				
 				@Override

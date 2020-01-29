@@ -192,7 +192,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 
 				@Override
 				public String getCssClass() {
-					return "actions";
+					return "";
 				}
 
 				@Override

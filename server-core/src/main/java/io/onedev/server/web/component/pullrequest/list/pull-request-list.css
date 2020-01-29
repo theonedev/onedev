@@ -10,11 +10,11 @@
 	margin-bottom: 20px;
 }
 .pull-request-list>.head>form.can-create-pull-requests {
-	margin-right: 170px;
+	margin-right: 100px;
 }
 .pull-request-list>.head>.open-new {
 	position: absolute;
-	width: 160px;
+	width: 80px;
 	right: 0;
 	top: 0;
 }

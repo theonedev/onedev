@@ -4,16 +4,9 @@
 #milestone-list>.head>.pull-left {
 	margin-right: 20px;
 }
-#milestone-list>.body tbody a {
-	margin-right: 8px;
-}
 #milestone-list>.body tbody .actions {
 	white-space: nowrap;
 }
-#milestone-list>.body tbody .actions a {
-	color: #666;
-}
-
 .issue-stats>.progress {
 	float: left;
 	width: 200px;
@@ -55,11 +48,13 @@
 	font-weight: normal;
 	font-size: 16px;
 }
-#milestone-detail>.title .actions a {
-	color: #666;
-}
 #milestone-detail .description {
 	background: #F5F5F5;
 	border-radius: 4px;
 	padding: 20px;
+}
+@media(max-width: 767px) {
+	#milestone-list>.body .actions {
+		display: none;
+	}
 }

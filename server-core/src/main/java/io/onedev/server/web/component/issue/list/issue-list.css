@@ -11,10 +11,10 @@
 	margin-bottom: 20px;
 }
 .issue-list>.head>form {
-	margin-right: 130px;
+	margin-right: 100px;
 }
 .issue-list>.head>.open-new {
-	width: 120px;
+	width: 80px;
 	position: absolute;
 	right: 0;
 	top: 0;
