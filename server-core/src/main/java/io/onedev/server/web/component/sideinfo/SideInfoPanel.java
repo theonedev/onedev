@@ -47,7 +47,8 @@ public abstract class SideInfoPanel extends Panel {
 					+ "  direction: 'right', "
 					+ "  duration: 200, "
 					+ "  complete: function() {"
-					+ "    $(this).data('ps').update();"
+					+ "    if (!onedev.server.util.isDevice()) "
+					+ "      $(this).data('ps').update();"
 					+ "  }"
 					+ "});", getMarkupId());
 			moreInfoSideOpened.getHandler().appendJavaScript(script);

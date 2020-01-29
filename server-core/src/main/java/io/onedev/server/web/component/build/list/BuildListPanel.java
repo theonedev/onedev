@@ -484,50 +484,6 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Date")) {
-
-			@Override
-			public String getCssClass() {
-				return "date expanded";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				Long buildId = build.getId();
-
-				Fragment fragment = new Fragment(componentId, "dateFrag", BuildListPanel.this);
-				fragment.add(new Label("name", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return rowModel.getObject().getStatus().getDisplayName();
-					}
-					
-				}) {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(newBuildObserver(buildId));
-						setOutputMarkupId(true);
-					}
-					
-				});
-				fragment.add(new Label("date", new LoadableDetachableModel<String>() {
-
-					@Override
-					protected String load() {
-						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
-					}
-					
-				}));
-				fragment.add(newBuildObserver(buildId));
-				fragment.setOutputMarkupId(true);
-				cellItem.add(fragment);
-			}
-		});		
-		
 		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_COMMIT)) {
 
 			@Override
@@ -575,6 +531,50 @@ public abstract class BuildListPanel extends Panel {
 				
 			});
 		}	
+		
+		columns.add(new AbstractColumn<Build, Void>(Model.of("Last Update")) {
+
+			@Override
+			public String getCssClass() {
+				return "date expanded";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
+				Build build = rowModel.getObject();
+				Long buildId = build.getId();
+
+				Fragment fragment = new Fragment(componentId, "dateFrag", BuildListPanel.this);
+				fragment.add(new Label("name", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return rowModel.getObject().getStatus().getDisplayName();
+					}
+					
+				}) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(newBuildObserver(buildId));
+						setOutputMarkupId(true);
+					}
+					
+				});
+				fragment.add(new Label("date", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
+					}
+					
+				}));
+				fragment.add(newBuildObserver(buildId));
+				fragment.setOutputMarkupId(true);
+				cellItem.add(fragment);
+			}
+		});		
 		
 		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
