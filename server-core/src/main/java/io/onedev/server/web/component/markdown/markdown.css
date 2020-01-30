@@ -207,6 +207,18 @@ body.fullscreen {
 	color: inherit;	
 }
 
+.insert-url .directory>div {
+	position: relative;
+	padding-right: 48px;
+}
+.insert-url .directory>div>a {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.insert-url .blob-picker {
+	padding: 0;
+}
 .insert-url .attachment {
 	margin-bottom: 20px;
 }

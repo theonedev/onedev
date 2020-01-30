@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.blob;
+package io.onedev.server.web.component.blob.picker;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,6 +27,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 
 @SuppressWarnings("serial")

@@ -17,4 +17,15 @@ public interface BlobIdentFilter extends Serializable {
 		
 	};
 	
+	public static final BlobIdentFilter TREE = new BlobIdentFilter() {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public boolean filter(BlobIdent blobIdent) {
+			return blobIdent.isTree();
+		}
+		
+	};
+	
 }

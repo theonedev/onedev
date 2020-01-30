@@ -66,11 +66,13 @@
 			<div class="form-group">
 				<div wicket:id="file"></div>
 			</div>
-			<div class="form-group">
+			<div class="form-group directory">
   				<label>Directory</label>
-				<input wicket:id="directory" class="form-control"></input>
-				<p class="help-block">Optionally specify the directory to put uploaded files. This value 
-				is considered to be relative to current repository directory</p>
+  				<div>
+					<input wicket:id="directory" class="form-control"></input> 
+					<a wicket:id="select" title="Select" class="btn btn-default"><i class="fa fa-folder-open-o"></i></a>
+  				</div>
+				<p class="help-block">Optionally specify relative directory to put uploaded files</p>
 			</div>			
 			<div class="form-group">
   				<label>Summary Commit Message</label>

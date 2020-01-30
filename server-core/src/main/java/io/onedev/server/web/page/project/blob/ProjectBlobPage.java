@@ -68,6 +68,7 @@ import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -104,7 +105,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
-import io.onedev.server.web.page.project.blob.render.BlobUploadException;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
 import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
@@ -1254,49 +1254,51 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			
 		});
 		
-		if (state.urlAfterEdit != null) {
-			throw new RedirectToUrlException(state.urlAfterEdit);
-		} else if (target != null) {
-			BlobIdent newBlobIdent;
-			if (state.mode == Mode.DELETE) {
-				try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-					RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
-					String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
-					while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
-						if (parentPath.contains("/")) {
-							parentPath = StringUtils.substringBeforeLast(parentPath, "/");
-						} else {
-							parentPath = null;
-							break;
+		if (target != null) {
+			if (state.urlAfterEdit != null) {
+				throw new RedirectToUrlException(state.urlAfterEdit);
+			} else {
+				BlobIdent newBlobIdent;
+				if (state.mode == Mode.DELETE) {
+					try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
+						RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
+						String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
+						while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
+							if (parentPath.contains("/")) {
+								parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+							} else {
+								parentPath = null;
+								break;
+							}
 						}
-					}
-					newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}	
-			} else if (state.mode == Mode.ADD) {
-				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-			} else if (state.mode == Mode.EDIT) {
-				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-			} else {
-				// We've uploaded some files
-				newBlobIdent = null;
+						newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}	
+				} else if (state.mode == Mode.ADD) {
+					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+				} else if (state.mode == Mode.EDIT) {
+					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+				} else {
+					// We've uploaded some files
+					newBlobIdent = null;
+				}
+				
+				if (newBlobIdent != null) {
+					state.blobIdent = newBlobIdent;
+					state.position = position;
+					state.commentId = null;
+					state.mode = Mode.VIEW;
+					onResolvedRevisionChange(target);
+					pushState(target);
+				} else {
+					state.mode = Mode.VIEW;
+					onResolvedRevisionChange(target);
+				}
+		
+				// fix the issue that sometimes indexing indicator of new commit does not disappear 
+				target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 			}
-			
-			if (newBlobIdent != null) {
-				state.blobIdent = newBlobIdent;
-				state.position = position;
-				state.commentId = null;
-				state.mode = Mode.VIEW;
-				onResolvedRevisionChange(target);
-				pushState(target);
-			} else {
-				state.mode = Mode.VIEW;
-				onResolvedRevisionChange(target);
-			}
-	
-			// fix the issue that sometimes indexing indicator of new commit does not disappear 
-			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 		}
 	}
 	
@@ -1380,18 +1382,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	public RefUpdated uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
-		String parentPath;
-		BlobIdent blobIdent = getBlobIdent();
-		if (blobIdent.path != null) {
-			if (blobIdent.isTree()) 
-				parentPath = blobIdent.path;
-			else if (blobIdent.path.contains("/")) 
-				parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-			else
-				parentPath = null;
-		} else {
-			parentPath = null;
-		}
+		String parentPath = getDirectory();
 		
 		if (directory != null) { 
 			if (parentPath != null)
@@ -1401,6 +1392,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		}
 		
 		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+		BlobIdent blobIdent = getBlobIdent();
 		
 		for (FileUpload upload: uploads) {
 			String blobPath = upload.getClientFileName();
@@ -1408,9 +1400,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				blobPath = parentPath + "/" + blobPath;
 			
 			if (getProject().isReviewRequiredForModification(user, blobIdent.revision, blobPath)) 
-				throw new BlobUploadException("Review required for this change. Please submit pull request instead");
+				throw new BlobEditException("Review required for this change. Please submit pull request instead");
 			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
-				throw new BlobUploadException("Build required for this change. Please submit pull request instead");
+				throw new BlobEditException("Build required for this change. Please submit pull request instead");
 			
 			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
 			newBlobs.put(blobPath, blobContent);
@@ -1431,7 +1423,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 						prevCommitId, user.asPerson(), commitMessage);
 				return new RefUpdated(getProject(), refName, prevCommitId, newCommitId);
 			} catch (ObjectAlreadyExistsException|NotTreeException e) {
-				throw new BlobUploadException(e.getMessage());
+				throw new BlobEditException(e.getMessage());
 			} catch (ObsoleteCommitException e) {
 				prevCommitId = e.getOldCommitId();
 			}
@@ -1446,7 +1438,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	public String appendRaw(String url) {
 		try {
-			URIBuilder builder = new URIBuilder(url);
+			URIBuilder builder;
+			builder = new URIBuilder(url);
 			for (NameValuePair pair: builder.getQueryParams()) {
 				if (pair.getName().equals(PARAM_RAW))
 					return url;

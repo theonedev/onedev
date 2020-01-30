@@ -31,6 +31,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
@@ -51,7 +52,7 @@ public class BlobEdits implements Serializable {
 			if (normalizedPath != null)
 				this.oldPaths.add(normalizedPath);
 			else
-				throw new IllegalArgumentException("Invalid old path: " + oldPath);
+				throw new BlobEditException("Invalid old path: " + oldPath);
 		}
 		this.newBlobs = new HashMap<>();
 		for (Map.Entry<String, BlobContent> entry: newBlobs.entrySet()) { 
@@ -59,7 +60,7 @@ public class BlobEdits implements Serializable {
 			if (normalizedPath != null)
 				this.newBlobs.put(normalizedPath, entry.getValue());
 			else
-				throw new IllegalArgumentException("Invalid new path: " + entry.getKey());
+				throw new BlobEditException("Invalid new path: " + entry.getKey());
 		}
 	}
 

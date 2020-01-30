@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.blob;
+package io.onedev.server.web.component.blob.picker;
 
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 
