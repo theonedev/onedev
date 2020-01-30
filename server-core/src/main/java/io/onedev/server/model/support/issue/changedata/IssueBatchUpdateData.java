@@ -101,7 +101,7 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 			public void setComment(String comment) {
 				IssueBatchUpdateData.this.comment = comment;
 			}
-			
+
 		};
 	}
 

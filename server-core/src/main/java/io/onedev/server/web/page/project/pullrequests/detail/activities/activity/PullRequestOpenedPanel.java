@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.basic.Label;
@@ -8,6 +10,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -53,6 +56,11 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 				return getPullRequest().getTargetProject();
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getPullRequest().getParticipants());
+			}
+			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
 				return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID());

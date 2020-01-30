@@ -39,6 +39,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -148,6 +149,11 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Project getProject() {
 						return getComment().getProject();
+					}
+
+					@Override
+					protected List<User> getMentionables() {
+						return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
 					}
 					
 				};
@@ -282,8 +288,7 @@ public abstract class CodeCommentPanel extends Panel {
 				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", CodeCommentPanel.this, 
 						Model.of(replyId));
 				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent()), 
-						true) {
+				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent()), true) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -293,6 +298,11 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Project getProject() {
 						return getComment().getProject();
+					}
+
+					@Override
+					protected List<User> getMentionables() {
+						return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
 					}
 
 				};
@@ -601,6 +611,11 @@ public abstract class CodeCommentPanel extends Panel {
 				return getComment().getProject();
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
+			}
+			
 		};
 		contentInput.setRequired(true);
 		contentInput.setLabel(Model.of("Comment"));

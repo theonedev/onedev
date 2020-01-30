@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -42,6 +43,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
@@ -193,6 +195,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Boolean valid;
 	
 	private transient Collection<Long> fixedIssueNumbers;
+	
+	private transient Collection<User> participants;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	private String checkError;
@@ -778,6 +782,24 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 				}
 			}
 		} 
+	}
+	
+	public Collection<User> getParticipants() {
+		if (participants == null) {
+			participants = new LinkedHashSet<>();
+			if (getSubmitter() != null)
+				participants.add(getSubmitter());
+			for (PullRequestComment comment: getComments()) {
+				if (comment.getUser() != null)
+					participants.add(comment.getUser());
+			}
+			for (PullRequestChange change: getChanges()) {
+				if (change.getUser() != null)
+					participants.add(change.getUser());
+			}
+			participants.remove(OneDev.getInstance(UserManager.class).getSystem());
+		}
+		return participants;
 	}
 	
 	public boolean isValid() {

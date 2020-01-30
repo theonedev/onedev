@@ -84,6 +84,7 @@ import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
@@ -1045,6 +1046,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return requestModel.getObject().getTargetProject();
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getPullRequest().getParticipants());
+			}
+			
 			@Override
 			protected List<AttributeModifier> getInputModifiers() {
 				return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a note"));

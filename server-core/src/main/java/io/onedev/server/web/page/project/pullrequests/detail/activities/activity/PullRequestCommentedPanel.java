@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -8,6 +10,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
@@ -71,6 +74,12 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 						PullRequestCommentedPanel.this.getComment().getRequest().getUUID());
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(
+						PullRequestCommentedPanel.this.getComment().getRequest().getParticipants());
+			}
+			
 			@Override
 			protected boolean canModifyOrDeleteComment() {
 				return SecurityUtils.canModifyOrDelete(PullRequestCommentedPanel.this.getComment());

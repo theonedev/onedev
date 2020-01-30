@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -7,6 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -54,6 +57,12 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 				return IssueCommentedPanel.this.getComment().getIssue().getProject();
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(
+						IssueCommentedPanel.this.getComment().getIssue().getParticipants());
+			}
+			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
 				return new ProjectAttachmentSupport(IssueCommentedPanel.this.getComment().getIssue().getProject(), 

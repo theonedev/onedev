@@ -1,5 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -238,6 +240,15 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 				save(user);
 			}
 		}
+	}
+
+	@Override
+	public List<User> queryAndSort(Collection<User> topUsers) {
+		List<User> users = query();
+		users.sort(Comparator.comparing(User::getDisplayName));
+		users.removeAll(topUsers);
+		users.addAll(0, topUsers);
+		return users;
 	}
 	
 }

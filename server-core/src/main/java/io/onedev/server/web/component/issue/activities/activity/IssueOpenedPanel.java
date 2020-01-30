@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -7,6 +9,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -45,6 +48,11 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 				OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), comment);
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getIssue().getParticipants());
+			}
+			
 			@Override
 			protected Project getProject() {
 				return getIssue().getProject();

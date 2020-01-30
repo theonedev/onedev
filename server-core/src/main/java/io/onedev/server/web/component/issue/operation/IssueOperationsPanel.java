@@ -34,6 +34,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.DateField;
@@ -41,6 +42,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
@@ -138,6 +140,11 @@ public abstract class IssueOperationsPanel extends Panel {
 							@Override
 							protected List<AttributeModifier> getInputModifiers() {
 								return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+							}
+							
+							@Override
+							protected List<User> getMentionables() {
+								return OneDev.getInstance(UserManager.class).queryAndSort(getIssue().getParticipants());
 							}
 							
 						});

@@ -13,9 +13,10 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.util.match.MatchScoreProvider;
-import io.onedev.server.util.match.MatchScoreUtils;
+import static io.onedev.server.util.match.MatchScoreUtils.*;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
+import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 
 public class ReviewerProvider extends AbstractUserChoiceProvider {
@@ -38,26 +39,20 @@ public class ReviewerProvider extends AbstractUserChoiceProvider {
 		}
 		
 		List<User> reviewers = new ArrayList<>(users);
-
 		reviewers.sort(Comparator.comparing(User::getDisplayName));
+		reviewers.removeAll(request.getParticipants());
+		reviewers.addAll(0, request.getParticipants());
 		
-		reviewers = MatchScoreUtils.filterAndSort(reviewers, new MatchScoreProvider<User>() {
+		new ResponseFiller<User>(response).fill(filterAndSort(reviewers, new MatchScoreProvider<User>() {
 
 			@Override
 			public double getMatchScore(User object) {
-				return object.getMatchScore(term);
+				return object.getMatchScore(term) 
+						* (reviewers.size() - reviewers.indexOf(object)) 
+						/ reviewers.size();
 			}
 			
-		});
-
-		int first = page * WebConstants.PAGE_SIZE;
-		int last = first + WebConstants.PAGE_SIZE;
-		if (last > reviewers.size()) {
-			response.addAll(reviewers.subList(first, reviewers.size()));
-		} else {
-			response.addAll(reviewers.subList(first, last));
-			response.setHasMore(last < reviewers.size());
-		}
+		}), page, WebConstants.PAGE_SIZE);
 	}
 
 	@Override

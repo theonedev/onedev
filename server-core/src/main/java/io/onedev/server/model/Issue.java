@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +40,9 @@ import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
@@ -51,6 +54,7 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -133,6 +137,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private transient List<RevCommit> commits;
 	
 	private transient Map<String, Input> fieldInputs;
+	
+	private transient Collection<User> participants;
 	
 	public String getState() {
 		return state;
@@ -445,6 +451,36 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public boolean isFieldVisible(String fieldName) {
 		return isFieldVisible(fieldName, Sets.newHashSet());
+	}
+	
+	public Collection<User> getParticipants() {
+		if (participants == null) {
+			participants = new LinkedHashSet<>();
+			if (getSubmitter() != null)
+				participants.add(getSubmitter());
+			UserManager userManager = OneDev.getInstance(UserManager.class);
+			for (IssueField field: getFields()) {
+				if (field.getType().equals(InputSpec.USER)) {
+					User user = userManager.findByName(field.getValue());
+					if (user != null)
+						participants.add(user);
+				} else if (field.getType().equals(InputSpec.GROUP)) {
+					Group group = OneDev.getInstance(GroupManager.class).find(field.getValue());
+					if (group != null)
+						participants.addAll(group.getMembers());
+				}
+			}
+			for (IssueComment comment: getComments()) {
+				if (comment.getUser() != null)
+					participants.add(comment.getUser());
+			}
+			for (IssueChange change: getChanges()) {
+				if (change.getUser() != null)
+					participants.add(change.getUser());
+			}
+			participants.remove(userManager.getSystem());
+		}
+		return participants;
 	}
 
 	private boolean isFieldVisible(String fieldName, Set<String> checkedFieldNames) {

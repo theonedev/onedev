@@ -45,6 +45,7 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -52,6 +53,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
@@ -403,6 +405,11 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				@Override
 				protected Project getProject() {
 					return PullRequestActivitiesPage.this.getProject();
+				}
+				
+				@Override
+				protected List<User> getMentionables() {
+					return OneDev.getInstance(UserManager.class).queryAndSort(getPullRequest().getParticipants());
 				}
 				
 				@Override

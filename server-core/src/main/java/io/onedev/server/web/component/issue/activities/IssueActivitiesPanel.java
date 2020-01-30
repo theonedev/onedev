@@ -36,12 +36,14 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssuePullRequestData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
@@ -249,6 +251,11 @@ public abstract class IssueActivitiesPanel extends Panel {
 				@Override
 				protected Project getProject() {
 					return getIssue().getProject();
+				}
+				
+				@Override
+				protected List<User> getMentionables() {
+					return OneDev.getInstance(UserManager.class).queryAndSort(getIssue().getParticipants());
 				}
 				
 				@Override

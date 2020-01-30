@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.project.comment;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,8 +22,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.StaleStateException;
 
+import com.google.common.collect.Sets;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -97,6 +104,11 @@ public abstract class ProjectCommentPanel extends Panel {
 					@Override
 					protected Project getProject() {
 						return ProjectCommentPanel.this.getProject();
+					}
+
+					@Override
+					protected List<User> getMentionables() {
+						return ProjectCommentPanel.this.getMentionables();
 					}
 					
 				};
@@ -210,4 +222,9 @@ public abstract class ProjectCommentPanel extends Panel {
 	
 	@Nullable
 	protected abstract DeleteCallback getDeleteCallback();
+	
+	protected List<User> getMentionables() {
+		return OneDev.getInstance(UserManager.class).queryAndSort(Sets.newHashSet());
+	}	
+	
 }

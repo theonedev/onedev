@@ -1,13 +1,17 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
@@ -68,6 +72,11 @@ public abstract class DiffAndCommentAwarePanel extends Panel {
 				}
 
 				@Override
+				protected List<User> getMentionables() {
+					return OneDev.getInstance(UserManager.class).queryAndSort(getChange().getRequest().getParticipants());
+				}
+				
+				@Override
 				protected String getRequiredLabel() {
 					return null;
 				}
@@ -81,7 +90,7 @@ public abstract class DiffAndCommentAwarePanel extends Panel {
 				protected DeleteCallback getDeleteCallback() {
 					return null;
 				}
-				
+
 			});			
 		} else {
 			add(new WebMarkupContainer(COMMENT_ID).setVisible(false));

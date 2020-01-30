@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -88,6 +89,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	private String uuid = UUID.randomUUID().toString();
 	
 	private transient Boolean contextChanged;
+	
+	private transient Collection<User> participants;
 	
 	public Project getProject() {
 		return project;
@@ -313,6 +316,19 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@Override
 	public Project getAttachmentProject() {
 		return getProject();
+	}
+	
+	public Collection<User> getParticipants() {
+		if (participants == null) {
+			participants = new LinkedHashSet<>();
+			if (getUser() != null)
+				participants.add(getUser());
+			for (CodeCommentReply reply: getReplies()) {
+				if (reply.getUser() != null)
+					participants.add(reply.getUser());
+			}
+		}
+		return participants;
 	}
 	
 }

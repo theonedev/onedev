@@ -82,7 +82,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		position = QueryPosition.from(params);
 	}
 	
-	protected Issue getIssue() {
+	public Issue getIssue() {
 		return issueModel.getObject();
 	}
 	
