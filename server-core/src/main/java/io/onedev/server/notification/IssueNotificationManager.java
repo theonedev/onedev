@@ -4,12 +4,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.IssueWatchManager;
@@ -166,19 +165,20 @@ public class IssueNotificationManager {
 		} 		
 
 		Map<String, Group> newGroups = event.getNewGroups();
-		Map<String, User> newUsers = event.getNewUsers();
+		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
 		for (Group group: newGroups.values()) {
 			for (User member: group.getMembers())
 				watch(issue, member, true);
 		}
 		String url = urlManager.urlFor(issue);
-		for (Map.Entry<String, User> entry: newUsers.entrySet()) {
+		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
 			String subject = String.format("You are now \"%s\" of issue #%d: %s", 
 					entry.getKey(), issue.getNumber(), issue.getTitle());
 			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-			mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
-			notifiedUsers.add(entry.getValue());
+			Set<String> emails = entry.getValue().stream().map(it->it.getEmail()).collect(Collectors.toSet());
+			mailManager.sendMailAsync(emails, subject, body.toString());
+			notifiedUsers.addAll(entry.getValue());
 		}
 				
 		Collection<User> usersToNotify = new HashSet<>();

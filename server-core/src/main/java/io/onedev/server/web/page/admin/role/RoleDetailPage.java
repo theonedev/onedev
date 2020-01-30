@@ -12,7 +12,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.RoleManager;
@@ -106,7 +105,7 @@ public class RoleDetailPage extends AdministrationPage {
 					OneDev.getInstance(RoleManager.class).delete(getRole());
 					setResponsePage(RoleListPage.class);
 				} catch (OneException e) {
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 				}
 			}
 			

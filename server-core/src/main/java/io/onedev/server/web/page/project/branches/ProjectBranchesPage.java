@@ -59,7 +59,6 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
@@ -722,7 +721,7 @@ public class ProjectBranchesPage extends ProjectPage {
 									newPagingNavigation(target);
 									modal.close();
 								} catch (OneException e) {
-									error(HtmlUtils.formatAsHtml(e.getMessage()));
+									error(e.getMessage());
 									target.add(fragment);
 								}
 							}

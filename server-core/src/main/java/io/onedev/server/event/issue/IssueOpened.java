@@ -1,7 +1,10 @@
 package io.onedev.server.event.issue;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
@@ -30,16 +33,18 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 	}
 
 	@Override
-	public Map<String, User> getNewUsers() {
-		Map<String, User> newUsers = new HashMap<>();
+	public Map<String, Collection<User>> getNewUsers() {
+		Map<String, Collection<User>> newUsers = new HashMap<>();
 		UserManager userManager = OneDev.getInstance(UserManager.class);
 		for (Input field: getIssue().getFieldInputs().values()) {
 			if (field.getType().equals(FieldSpec.USER)) {
-				if (!field.getValues().isEmpty()) {
-					User newUser = userManager.findByName(field.getValues().iterator().next());
-					if (newUser != null)
-						newUsers.put(field.getName(), newUser);
-				}
+				Set<User> usersOfField = field.getValues()
+						.stream()
+						.map(it->userManager.findByName(it))
+						.filter(it->it!=null)
+						.collect(Collectors.toSet());
+				if (!usersOfField.isEmpty())
+					newUsers.put(field.getName(), usersOfField);
 			} 
 		}
 		return newUsers;

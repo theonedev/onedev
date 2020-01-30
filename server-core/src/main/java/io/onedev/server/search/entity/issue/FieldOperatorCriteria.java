@@ -1,7 +1,9 @@
 package io.onedev.server.search.entity.issue;
 
 import java.nio.channels.IllegalSelectorException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,10 +32,13 @@ public class FieldOperatorCriteria extends FieldCriteria {
 	private static final long serialVersionUID = 1L;
 	
 	private final int operator;
+	
+	private final boolean allowMultiple;
 
-	public FieldOperatorCriteria(String name, int operator) {
+	public FieldOperatorCriteria(String name, int operator, boolean allowMultiple) {
 		super(name);
 		this.operator = operator;
+		this.allowMultiple = allowMultiple;
 	}
 
 	@Override
@@ -41,7 +46,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 		Path<?> valueAttribute = field.get(IssueField.ATTR_VALUE);
 		Path<?> projectAttribute = field.getParent().get(IssueQueryConstants.ATTR_PROJECT);		
 		if (operator == IssueQueryLexer.IsEmpty) {
-			return builder.isNull(valueAttribute);
+			return null;
 		} else if (operator == IssueQueryLexer.IsMe) {
 			if (User.get() != null)
 				return builder.equal(valueAttribute, User.get().getName());
@@ -157,12 +162,30 @@ public class FieldOperatorCriteria extends FieldCriteria {
 		return quote(getFieldName()) + " " + IssueQuery.getRuleName(operator);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
-		if (operator == IssueQueryLexer.IsEmpty)
+		if (operator == IssueQueryLexer.IsEmpty) {
 			issue.setFieldValue(getFieldName(), null);
-		else if (operator == IssueQueryLexer.IsMe)
-			issue.setFieldValue(getFieldName(), SecurityUtils.getUser().getName());
+		} else if (operator == IssueQueryLexer.IsMe) {
+			if (allowMultiple) {
+				List list;
+				if (!initedLists.contains(getFieldName())) {
+					list = new ArrayList();
+					issue.setFieldValue(getFieldName(), list);
+					initedLists.add(getFieldName());
+				} else {
+					list = (List) issue.getFieldValue(getFieldName());
+					if (list == null) {
+						list = new ArrayList();
+						issue.setFieldValue(getFieldName(), list);
+					}
+				}
+				list.add(SecurityUtils.getUser().getName());
+			} else {
+				issue.setFieldValue(getFieldName(), SecurityUtils.getUser().getName());
+			}
+		}
 	}
 
 }

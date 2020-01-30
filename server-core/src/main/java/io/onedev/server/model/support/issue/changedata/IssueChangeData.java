@@ -1,6 +1,7 @@
 package io.onedev.server.model.support.issue.changedata;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -21,7 +22,7 @@ public interface IssueChangeData extends Serializable {
 	@Nullable
 	CommentSupport getCommentSupport();
 	
-	Map<String, User> getNewUsers();
+	Map<String, Collection<User>> getNewUsers();
 	
 	Map<String, Group> getNewGroups();
 	

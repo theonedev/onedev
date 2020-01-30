@@ -43,32 +43,28 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		if (allowMultiple) {
+		if (allowMultiple)
 			return builder.equal(field.get(IssueField.ATTR_VALUE), value);
-		} else {
-			if (operator == IssueQueryLexer.Is) 
-				return builder.equal(field.get(IssueField.ATTR_VALUE), value);
-			else if (operator == IssueQueryLexer.IsGreaterThan) 
-				return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
-			else
-				return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
-		}
+		else if (operator == IssueQueryLexer.Is) 
+			return builder.equal(field.get(IssueField.ATTR_VALUE), value);
+		else if (operator == IssueQueryLexer.IsGreaterThan) 
+			return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
+		else
+			return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		if (allowMultiple) {
+		if (allowMultiple) 
 			return ((List<String>)fieldValue).contains(value);
-		} else {
-			if (operator == IssueQueryLexer.Is)
-				return Objects.equals(fieldValue, value);
-			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return issue.getFieldOrdinal(getFieldName(), fieldValue) > ordinal;
-			else
-				return issue.getFieldOrdinal(getFieldName(), fieldValue) < ordinal;
-		}
+		else if (operator == IssueQueryLexer.Is)
+			return Objects.equals(fieldValue, value);
+		else if (operator == IssueQueryLexer.IsGreaterThan)
+			return issue.getFieldOrdinal(getFieldName(), fieldValue) > ordinal;
+		else
+			return issue.getFieldOrdinal(getFieldName(), fieldValue) < ordinal;
 	}
 
 	@Override
@@ -83,9 +79,8 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		SpecifiedChoices specifiedChoices = SpecifiedChoices.of(issueSetting.getFieldSpec(getFieldName()));
-		if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(value)) {
+		if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(value)) 
 			undefinedFieldValues.add(new UndefinedFieldValue(getFieldName(), value));
-		}
 		return undefinedFieldValues;
 	}
 	

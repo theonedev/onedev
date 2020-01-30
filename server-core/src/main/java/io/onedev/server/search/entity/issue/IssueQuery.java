@@ -151,8 +151,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 						}
 						if (fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) 
 							return new MilestoneIsEmptyCriteria();
-						else 
-							return new FieldOperatorCriteria(fieldName, operator);
+						else {
+							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
+							return new FieldOperatorCriteria(fieldName, operator, fieldSpec.isAllowMultiple());
+						}
 					}
 					
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
@@ -211,20 +213,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 								return new TitleCriteria(value);
 							} else if (fieldName.equals(IssueQueryConstants.FIELD_DESCRIPTION)) {
 								return new DescriptionCriteria(value);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_COMMENT)) {
-								return new CommentCriteria(value);
 							} else {
-								FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-								if (fieldSpec instanceof TextField) {
-									return new StringFieldCriteria(fieldName, value, operator);
-								} else {
-									long ordinal;
-									if (validate)
-										ordinal = getValueOrdinal((ChoiceField) fieldSpec, value);
-									else
-										ordinal = 0;
-									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, true);
-								}
+								return new CommentCriteria(value);
 							}
 						case IssueQueryLexer.Is:
 							if (fieldName.equals(IssueQueryConstants.FIELD_PROJECT)) {
@@ -255,10 +245,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else if (field instanceof ChoiceField) { 
 									long ordinal = getValueOrdinal((ChoiceField) field, value);
-									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
+									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, field.isAllowMultiple());
 								} else if (field instanceof UserChoiceField 
 										|| field instanceof GroupChoiceField) {
-									return new ChoiceFieldCriteria(fieldName, value, -1, operator, false);
+									return new ChoiceFieldCriteria(fieldName, value, -1, operator, field.isAllowMultiple());
 								} else {
 									return new StringFieldCriteria(fieldName, value, operator);
 								}
@@ -391,8 +381,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			if (!fieldName.equals(IssueQueryConstants.FIELD_TITLE) 
 					&& !fieldName.equals(IssueQueryConstants.FIELD_DESCRIPTION)
 					&& !fieldName.equals(IssueQueryConstants.FIELD_COMMENT)
-					&& !(fieldSpec instanceof TextField) 
-					&& !(fieldSpec != null && fieldSpec.isAllowMultiple())) {
+					&& !(fieldSpec instanceof TextField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -422,7 +411,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !fieldName.equals(IssueQueryConstants.FIELD_COMMENT_COUNT)
 					&& !fieldName.equals(IssueQueryConstants.FIELD_NUMBER)
 					&& !(fieldSpec instanceof NumberField) 
-					&& !(fieldSpec instanceof ChoiceField))
+					&& !(fieldSpec instanceof ChoiceField && !fieldSpec.isAllowMultiple()))
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

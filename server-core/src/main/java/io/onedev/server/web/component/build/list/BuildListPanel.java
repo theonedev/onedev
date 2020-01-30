@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -105,7 +104,7 @@ public abstract class BuildListPanel extends Panel {
 			} catch (Exception e) {
 				logger.debug("Error parsing build query: " + query, e);
 				if (e.getMessage() != null)
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 				else
 					error("Malformed build query");
 			}

@@ -50,7 +50,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -107,7 +106,7 @@ public abstract class CommitListPanel extends Panel {
 			} catch (Exception e) {
 				logger.debug("Error parsing commit query: " + query, e);
 				if (e.getMessage() != null)
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 				else
 					error("Malformed commit query");
 			}
@@ -156,7 +155,7 @@ public abstract class CommitListPanel extends Panel {
 					commitHashes = command.call();
 				} catch (Exception e) {
 					if (e.getMessage() != null)
-						error(HtmlUtils.formatAsHtml(e.getMessage()));
+						error(e.getMessage());
 					else
 						error("Error calculating commits: check log for details");
 					commitHashes = new ArrayList<>();

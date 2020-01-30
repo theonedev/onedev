@@ -1,5 +1,6 @@
 package io.onedev.server.event.issue;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,7 @@ public abstract class IssueEvent extends ProjectEvent {
 	
 	public abstract boolean affectsBoards();
 	
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();
 	}
 	

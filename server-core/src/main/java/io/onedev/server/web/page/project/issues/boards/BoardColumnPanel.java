@@ -88,7 +88,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					criterias.add(new ChoiceFieldCriteria(identifyField, 
 							getColumn(), -1, IssueQueryLexer.Is, false));
 				} else {
-					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty));
+					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty, false));
 				}
 				return new IssueQuery(IssueCriteria.of(criterias), boardQuery.getSorts());
 			} else {

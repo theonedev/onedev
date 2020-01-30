@@ -104,13 +104,14 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		for (String fieldName: displayFields) {
 			Input field = getIssue().getFieldInputs().get(fieldName);
 			if (field != null && field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
-				User user = OneDev.getInstance(UserManager.class)
-						.findByName(field.getValues().iterator().next());
-				if (user != null) {
-					String tooltip = field.getName() + ": " + user.getDisplayName();
-					UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), user);
-					avatar.add(AttributeAppender.append("title", tooltip));
-					avatarsView.add(avatar);
+				for (String userName: field.getValues()) {
+					User user = OneDev.getInstance(UserManager.class).findByName(userName);
+					if (user != null) {
+						String tooltip = field.getName() + ": " + user.getDisplayName();
+						UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), user);
+						avatar.add(AttributeAppender.append("title", tooltip));
+						avatarsView.add(avatar);
+					}
 				}
 			}
 		}

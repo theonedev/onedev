@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.IssueQueryConstants;
 

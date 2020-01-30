@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class IssueDescriptionChangeData implements IssueChangeData {
 	}
 	
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();
 	}
 
