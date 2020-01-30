@@ -1,6 +1,14 @@
 package io.onedev.server.web.page.my.sshkeys;
 
-import java.util.Collection;
+import java.io.IOException;
+import java.io.StringReader;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.util.List;
+import org.apache.sshd.common.config.keys.AuthorizedKeyEntry;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.sshd.common.config.keys.PublicKeyEntryResolver;
+import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
@@ -31,7 +39,6 @@ public abstract class InsertSshKeyPanel extends Panel {
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        Collection<SshKey> sshKeys = user.getSshKeys();
         add(new AjaxLink<Void>("close") {
 
             @Override
@@ -59,8 +66,28 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 Dao dao = OneDev.getInstance(Dao.class);
                 
-                sshKey.setDigest("digesto");
                 sshKey.setOwner(user);
+                
+                try {
+                    StringReader stringReader = new StringReader(sshKey.getContent());
+                    List<AuthorizedKeyEntry> entries = AuthorizedKeyEntry.readAuthorizedKeys(stringReader, true);
+
+                    AuthorizedKeyEntry entry = entries.get(0);
+                    PublicKey pubEntry = entry.resolvePublicKey(PublicKeyEntryResolver.FAILING);
+                    
+                    String fingerPrint = KeyUtils.getFingerPrint(new BaseDigest("MD5", 512), pubEntry);
+                    System.out.println(fingerPrint);
+                    
+                    sshKey.setDigest(fingerPrint);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (GeneralSecurityException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                
                 
                 dao.persist(sshKey);
                 
