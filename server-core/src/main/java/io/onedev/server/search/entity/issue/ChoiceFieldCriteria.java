@@ -62,9 +62,9 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 		else if (operator == IssueQueryLexer.Is)
 			return Objects.equals(fieldValue, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return issue.getFieldOrdinal(getFieldName(), fieldValue) > ordinal;
+			return issue.getFieldOrdinal(getFieldName(), (String)fieldValue) > ordinal;
 		else
-			return issue.getFieldOrdinal(getFieldName(), fieldValue) < ordinal;
+			return issue.getFieldOrdinal(getFieldName(), (String)fieldValue) < ordinal;
 	}
 
 	@Override

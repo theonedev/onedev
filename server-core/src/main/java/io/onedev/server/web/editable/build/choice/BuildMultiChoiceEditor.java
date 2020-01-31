@@ -1,5 +1,10 @@
 package io.onedev.server.web.editable.build.choice;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,19 +23,19 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
-import io.onedev.server.web.component.build.choice.BuildSingleChoice;
+import io.onedev.server.web.component.build.choice.BuildMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.BuildChoice;
 import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
-public class BuildChoiceEditor extends PropertyEditor<Long> {
+public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 
-	private BuildSingleChoice input;
+	private BuildMultiChoice input;
 	
-	public BuildChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
-			IModel<Long> propertyModel) {
+	public BuildMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+			IModel<List<Long>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
@@ -51,23 +56,19 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 		}
 	}
 	
-	@Nullable
-	private Build getBuild() {
-		if (getProject() != null && getModelObject() != null)
-			return OneDev.getInstance(BuildManager.class).find(getProject(), getModelObject());
-		else
-			return null;
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Build build;
-		if (getProject() != null && getModelObject() != null)
-			build = OneDev.getInstance(BuildManager.class).find(getProject(), getModelObject());
-		else
-			build = null;
+		List<Build> selections = new ArrayList<>();
+		if (getModelObject() != null) {
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			for (Long buildId: getModelObject()) {
+				Build build = buildManager.get(buildId);
+				if (build != null)
+					selections.add(build);
+			}
+		} 
 		
 		BuildChoiceProvider choiceProvider = new BuildChoiceProvider(new AbstractReadOnlyModel<Project>() {
 
@@ -77,7 +78,7 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 			}
     		
     	});
-    	input = new BuildSingleChoice("input", Model.of(build), choiceProvider) {
+    	input = new BuildMultiChoice("input", Model.of(selections), choiceProvider) {
 
     		@Override
 			protected void onInitialize() {
@@ -104,12 +105,12 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 	}
 
 	@Override
-	protected Long convertInputToValue() throws ConversionException {
-		Build build = input.getConvertedInput();
-		if (build != null)
-			return build.getNumber();
+	protected List<Long> convertInputToValue() throws ConversionException {
+		Collection<Build> builds = input.getConvertedInput();
+		if (builds != null)
+			return builds.stream().map(it->it.getId()).collect(Collectors.toList());
 		else
-			return null;
+			return new ArrayList<>();
 	}
 
 }

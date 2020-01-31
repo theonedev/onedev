@@ -331,20 +331,26 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 				String fieldName = fieldSpec.getName();
 				List<IssueField> fields = fieldMap.get(fieldName);
 				if (fields != null) {
+					Collections.sort(fields, new Comparator<IssueField>() {
+
+						@Override
+						public int compare(IssueField o1, IssueField o2) {
+							long result = o1.getOrdinal() - o2.getOrdinal();
+							if (result > 0)
+								return 1;
+							else if (result < 0)
+								return -1;
+							else
+								return 0;
+						}
+						
+					});
 					String type = fields.iterator().next().getType();
 					List<String> values = new ArrayList<>();
 					for (IssueField field: fields) {
 						if (field.getValue() != null)
 							values.add(field.getValue());
 					}
-					Collections.sort(values, new Comparator<String>() {
-	
-						@Override
-						public int compare(String o1, String o2) {
-							return (int) (fieldSpec.getOrdinal(o1) - fieldSpec.getOrdinal(o2));
-						}
-						
-					});
 					if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
 						values = Lists.newArrayList(values.iterator().next());
 					fieldInputs.put(fieldName, new Input(fieldName, type, values));
@@ -377,7 +383,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
-	public long getFieldOrdinal(String fieldName, Object fieldValue) {
+	public long getFieldOrdinal(String fieldName, String fieldValue) {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 		if (fieldSpec != null) 
@@ -424,15 +430,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		
 		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
-			long ordinal = getFieldOrdinal(fieldName, fieldValue);
-
 			List<String> strings = fieldSpec.convertToStrings(fieldValue);
 			if (!strings.isEmpty()) {
 				for (String string: strings) {
 					IssueField field = new IssueField();
 					field.setIssue(this);
 					field.setName(fieldName);
-					field.setOrdinal(ordinal);
+					field.setOrdinal(getFieldOrdinal(fieldName, string));
 					field.setType(fieldSpec.getType());
 					field.setValue(string);
 					getFields().add(field);
@@ -441,7 +445,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 				IssueField field = new IssueField();
 				field.setIssue(this);
 				field.setName(fieldName);
-				field.setOrdinal(ordinal);
+				field.setOrdinal(getFieldOrdinal(fieldName, null));
 				field.setType(fieldSpec.getType());
 				getFields().add(field);
 			}

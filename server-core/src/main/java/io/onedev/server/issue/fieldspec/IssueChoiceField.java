@@ -33,9 +33,9 @@ public class IssueChoiceField extends FieldSpec {
 	}
 
 	@Override
-	public long getOrdinal(Object fieldValue) {
+	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null)
-			return (Long) fieldValue;
+			return Long.valueOf(fieldValue);
 		else
 			return super.getOrdinal(fieldValue);
 	}

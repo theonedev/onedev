@@ -16,26 +16,20 @@ public class BuildChoiceField extends FieldSpec {
 		return BuildChoiceInput.getPropertyDef(this, indexes);
 	}
 
-	@Editable
-	@Override
-	public boolean isAllowMultiple() {
-		return false;
-	}
-
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return BuildChoiceInput.convertToObject(strings);
+		return BuildChoiceInput.convertToObject(this, strings);
 	}
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return BuildChoiceInput.convertToStrings(value);
+		return BuildChoiceInput.convertToStrings(this, value);
 	}
 
 	@Override
-	public long getOrdinal(Object fieldValue) {
+	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null)
-			return (Long) fieldValue;
+			return Long.parseLong(fieldValue);
 		else
 			return super.getOrdinal(fieldValue);
 	}

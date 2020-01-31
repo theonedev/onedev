@@ -30,12 +30,16 @@ public class DateInput {
 	}
 
 	public static Object convertToObject(List<String> strings) {
-		if (strings.size() == 1)
-			return Constants.DATE_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
-		else if (strings.size() == 0)
-			return null;
-		else
-			throw new ValidationException("Not eligible for multi-value");
+		try {
+			if (strings.size() == 1)
+				return Constants.DATE_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
+			else if (strings.size() == 0)
+				return null;
+			else
+				throw new ValidationException("Not eligible for multi-value");
+		} catch (IllegalArgumentException e) {
+			throw new ValidationException(e.getMessage());
+		}
 	}
 
 	public static List<String> convertToStrings(Object value) {

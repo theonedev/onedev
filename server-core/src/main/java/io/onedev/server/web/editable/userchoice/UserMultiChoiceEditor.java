@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -94,13 +95,11 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> userNames = new ArrayList<>();
 		Collection<User> users = input.getConvertedInput();
-		if (users != null) {
-			for (User user: users)
-				userNames.add(user.getName());
-		} 
-		return userNames;
+		if (users != null) 
+			return users.stream().map(it->it.getName()).collect(Collectors.toList());
+		else
+			return new ArrayList<>();
 	}
 
 }

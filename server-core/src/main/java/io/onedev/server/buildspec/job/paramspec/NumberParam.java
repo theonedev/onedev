@@ -72,9 +72,9 @@ public class NumberParam extends ParamSpec {
 	}
 
 	@Override
-	public long getOrdinal(Object fieldValue) {
+	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null)
-			return (Integer)fieldValue;
+			return Integer.parseInt(fieldValue);
 		else
 			return super.getOrdinal(fieldValue);
 	}

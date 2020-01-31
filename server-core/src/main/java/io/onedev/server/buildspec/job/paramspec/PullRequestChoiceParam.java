@@ -33,9 +33,9 @@ public class PullRequestChoiceParam extends ParamSpec {
 	}
 
 	@Override
-	public long getOrdinal(Object fieldValue) {
+	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null)
-			return (Long) fieldValue;
+			return Long.parseLong(fieldValue);
 		else
 			return super.getOrdinal(fieldValue);
 	}
