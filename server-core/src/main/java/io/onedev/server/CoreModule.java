@@ -322,7 +322,7 @@ public class CoreModule extends AbstractPluginModule {
 		configurePersistence();
 		configureRestServices();
 		configureWeb();
-		configureCI();
+		configureBuild();
 		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
@@ -611,7 +611,7 @@ public class CoreModule extends AbstractPluginModule {
 		});
 	}
 	
-	private void configureCI() {
+	private void configureBuild() {
 		contribute(ScriptContribution.class, new ScriptContribution() {
 
 			@Override
