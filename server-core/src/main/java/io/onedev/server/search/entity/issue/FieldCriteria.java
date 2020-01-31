@@ -54,6 +54,9 @@ public abstract class FieldCriteria extends IssueCriteria {
 		}
 	}
 
+	/**
+	 * @return predicate of field value. <tt>null</tt> to indicate that this field is empty   
+	 */
 	@Nullable
 	protected abstract Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder);
 	
