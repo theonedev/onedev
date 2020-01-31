@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.my.sshkeys;
 
 import java.util.List;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -13,7 +12,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
@@ -50,8 +48,6 @@ public class MySshKeysPage extends MyPage {
             }
         });
 		
-	
-		
 		LoadableDetachableModel<List<SshKey>> detachableModel = new LoadableDetachableModel<List<SshKey>>() {
 		    final SimpleExpression eq = Restrictions.eq("owner", user);
 
@@ -71,6 +67,8 @@ public class MySshKeysPage extends MyPage {
 		                final SshKey sshKey = item.getModelObject();
 		                item.add(new Label("name", sshKey.getName()));
 		                item.add(new Label("owner", sshKey.getOwner().getName()));
+		                item.add(new Label("digest", sshKey.getDigest()));                          
+		                item.add(new Label("timestamp", sshKey.getTimestamp().toString()));                          
 		                item.add(new AjaxLink<Void>("delete") {
 		                    @Override
 		                    public void onClick(AjaxRequestTarget target) {

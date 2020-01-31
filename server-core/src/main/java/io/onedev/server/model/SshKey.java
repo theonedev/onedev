@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -19,6 +20,9 @@ public class SshKey extends AbstractEntity {
     
     @Column(nullable=false)
     private String digest;
+    
+    @Column(nullable=false)
+    private LocalDateTime timestamp;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
@@ -54,5 +58,13 @@ public class SshKey extends AbstractEntity {
 
     public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

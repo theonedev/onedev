@@ -1,9 +1,8 @@
 package io.onedev.server.web.page.my.sshkeys;
 
-import java.io.IOException;
 import java.io.StringReader;
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.apache.sshd.common.config.keys.AuthorizedKeyEntry;
 import org.apache.sshd.common.config.keys.KeyUtils;
@@ -76,18 +75,13 @@ public abstract class InsertSshKeyPanel extends Panel {
                     PublicKey pubEntry = entry.resolvePublicKey(PublicKeyEntryResolver.FAILING);
                     
                     String fingerPrint = KeyUtils.getFingerPrint(new BaseDigest("MD5", 512), pubEntry);
-                    System.out.println(fingerPrint);
                     
                     sshKey.setDigest(fingerPrint);
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
+                    sshKey.setTimestamp(LocalDateTime.now());
+                } catch (Exception e) {
                     e.printStackTrace();
-                } catch (GeneralSecurityException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                
-                
+                    return;
+                } 
                 
                 dao.persist(sshKey);
                 
