@@ -44,7 +44,7 @@
 	font-size: 12px;
 }
 .issue-list>.body td .secondary>.pull-left>div {
-	margin-right: 20px;
+	margin-right: 12px;
 	margin-top: 8px;
 }
 .issue-list>.body td .secondary>.pull-right {
@@ -53,6 +53,10 @@
 .issue-list>.body td .submission, .issue-list>.body td .comments, .issue-list>.body td .votes {
 	color: #888;
 	font-size: 13px;
+}
+
+.issue-list .field.undefined {
+	display: none;
 }
 .issue-list>.body td .votes {
 	margin-right: 8px;	

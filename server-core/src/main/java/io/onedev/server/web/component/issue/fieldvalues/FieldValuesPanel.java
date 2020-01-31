@@ -186,6 +186,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			label.setEscapeModelStrings(false);
 			label.add(AttributeAppender.append("title", getField().getName()));
 			add(label);
+			add(AttributeAppender.append("class", "undefined"));
 		} else {
 			add(new WebMarkupContainer("content").setVisible(false));
 		}
