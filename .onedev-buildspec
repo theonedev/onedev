@@ -144,7 +144,12 @@
             <artifacts>*.zip *.sh</artifacts>
             <reports/>
             <triggers/>
-            <caches/>
+            <caches>
+                <io.onedev.server.buildspec.job.CacheSpec>
+                    <key>maven-cache</key>
+                    <path>/root/.m2/repository</path>
+                </io.onedev.server.buildspec.job.CacheSpec>
+            </caches>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
             <timeout>3600</timeout>
