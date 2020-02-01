@@ -50,7 +50,7 @@ abstract class BacklogColumnPanel extends Panel {
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
 				criterias.add(new MilestoneIsEmptyCriteria());
-				return new IssueQuery(IssueCriteria.of(criterias), backlogQuery.getSorts());
+				return new IssueQuery(IssueCriteria.and(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
 			}

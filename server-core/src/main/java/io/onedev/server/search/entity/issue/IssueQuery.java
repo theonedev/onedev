@@ -506,7 +506,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-		return new IssueQuery(IssueCriteria.of(criterias), sorts);
+		return new IssueQuery(IssueCriteria.and(criterias), sorts);
 	}
 
 }

@@ -197,7 +197,7 @@ public class TransitionSpec implements Serializable {
 	
 	@Override
 	public String toString() {
-		return StringUtils.join(getFromStates()) + "-->" + getToState();		
+		return StringUtils.join(getFromStates()) + "->" + getToState();		
 	}
 
 	public boolean canTransitManually(Issue issue, @Nullable String toState) {

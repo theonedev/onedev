@@ -50,7 +50,7 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	}
 
 	@Nullable
-	public static IssueCriteria of(List<IssueCriteria> criterias) {
+	public static IssueCriteria and(List<IssueCriteria> criterias) {
 		if (criterias.size() > 1)
 			return new AndIssueCriteria(criterias);
 		else if (criterias.size() == 1)
@@ -59,6 +59,16 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 			return null;
 	}
 
+	@Nullable
+	public static IssueCriteria or(List<IssueCriteria> criterias) {
+		if (criterias.size() > 1)
+			return new OrIssueCriteria(criterias);
+		else if (criterias.size() == 1)
+			return criterias.iterator().next();
+		else
+			return null;
+	}
+	
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		return false;
 	}
