@@ -2,8 +2,6 @@ package io.onedev.server.issue;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Color;
@@ -15,11 +13,9 @@ public class StateSpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Category {OPEN, CLOSED};
-	
 	private String name;
 	
-	private Category category;
+	private boolean done;
 	
 	private String description;
 	
@@ -35,14 +31,13 @@ public class StateSpec implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=150, description="Select category of this state")
-	@NotNull
-	public Category getCategory() {
-		return category;
+	@Editable(order=150, description="Check to indicate that issue in this state is considered done")
+	public boolean isDone() {
+		return done;
 	}
 
-	public void setCategory(Category category) {
-		this.category = category;
+	public void setDone(boolean done) {
+		this.done = done;
 	}
 
 	@Editable(order=200)

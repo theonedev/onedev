@@ -25,9 +25,9 @@ public class MilestoneProgressBar extends GenericPanel<Milestone> {
 		super.onInitialize();
 		
 		int progress;
-		int totalIssues = getMilestone().getNumOfOpenIssues()+getMilestone().getNumOfClosedIssues();
+		int totalIssues = getMilestone().getNumOfIssuesTodo()+getMilestone().getNumOfIssuesDone();
 		if (totalIssues != 0)
-			progress = 100 * getMilestone().getNumOfClosedIssues() / totalIssues;
+			progress = 100 * getMilestone().getNumOfIssuesDone() / totalIssues;
 		else
 			progress = 0;
 		if (progress > 100)

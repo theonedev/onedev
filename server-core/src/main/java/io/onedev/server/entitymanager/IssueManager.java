@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -39,7 +38,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> query(Project project, String term, int count);
 
-	int count(Milestone milestone, @Nullable StateSpec.Category category);
+	int count(Milestone milestone, @Nullable Boolean done);
 	
 	Collection<String> getUndefinedStates();
 	

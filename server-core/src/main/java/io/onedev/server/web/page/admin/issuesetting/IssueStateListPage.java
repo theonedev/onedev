@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -41,6 +40,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public class IssueStateListPage extends IssueSettingPage {
@@ -113,7 +113,7 @@ public class IssueStateListPage extends IssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Category")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Done")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
@@ -122,7 +122,7 @@ public class IssueStateListPage extends IssueSettingPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.capitalize(state.getCategory().name().toLowerCase()));
+						return new Label(componentId, TextUtils.describe(state.isDone()));
 					}
 					
 				});

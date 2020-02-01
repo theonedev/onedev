@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -21,7 +20,7 @@ public abstract class MilestoneCloseLink extends ModalLink {
 
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
-		if (OneDev.getInstance(IssueManager.class).count(getMilestone(), StateSpec.Category.OPEN) != 0) {
+		if (OneDev.getInstance(IssueManager.class).count(getMilestone(), false) != 0) {
 			return new ConfirmCloseWithOpenIssuesPanel(id) {
 
 				@Override

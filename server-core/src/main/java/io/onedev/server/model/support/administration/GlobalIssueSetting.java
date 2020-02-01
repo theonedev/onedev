@@ -197,7 +197,6 @@ public class GlobalIssueSetting implements Serializable {
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
-		open.setCategory(StateSpec.Category.OPEN);
 		open.setColor("#f0ad4e");
 		
 		stateSpecs.add(open);
@@ -205,7 +204,7 @@ public class GlobalIssueSetting implements Serializable {
 		StateSpec closed = new StateSpec();
 		closed.setColor("#5cb85c");
 		closed.setName("Closed");
-		closed.setCategory(StateSpec.Category.CLOSED);
+		closed.setDone(true);
 		
 		stateSpecs.add(closed);
 		
@@ -537,10 +536,10 @@ public class GlobalIssueSetting implements Serializable {
 			throw new OneException("No any issue state is defined");
 	}
 	
-	public IssueCriteria getCategoryCriteria(StateSpec.Category category) {
+	public IssueCriteria getDoneCriteria(boolean done) {
 		List<IssueCriteria> criterias = new ArrayList<>();
 		for (StateSpec state: getStateSpecs()) {
-			if (category == state.getCategory())
+			if (state.isDone() == done)
 				criterias.add(new StateCriteria(state.getName()));
 		}
 		return new OrIssueCriteria(criterias);

@@ -43,7 +43,6 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.issue.StateSpec;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
@@ -275,9 +274,9 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	}
 
 	@Override
-	public int count(Milestone milestone, @Nullable StateSpec.Category category) {
-		if (category != null) {
-			IssueCriteria criteria = getIssueSetting().getCategoryCriteria(category);
+	public int count(Milestone milestone, @Nullable Boolean done) {
+		if (done != null) {
+			IssueCriteria criteria = getIssueSetting().getDoneCriteria(done);
 			if (criteria != null) {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				criterias.add(new MilestoneCriteria(milestone.getName()));

@@ -46,9 +46,9 @@ public class Milestone extends AbstractEntity {
 	@Column(nullable=false)
 	private Date dueDate;
 	
-	private int numOfOpenIssues;
+	private int numOfIssuesTodo;
 	
-	private int numOfClosedIssues;
+	private int numOfIssuesDone;
 	
 	private boolean closed;
 
@@ -101,20 +101,20 @@ public class Milestone extends AbstractEntity {
 		this.closed = closed;
 	}
 
-	public int getNumOfOpenIssues() {
-		return numOfOpenIssues;
+	public int getNumOfIssuesTodo() {
+		return numOfIssuesTodo;
 	}
 
-	public void setNumOfOpenIssues(int numOfOpenIssues) {
-		this.numOfOpenIssues = numOfOpenIssues;
+	public void setNumOfIssuesTodo(int numOfIssuesTodo) {
+		this.numOfIssuesTodo = numOfIssuesTodo;
 	}
 
-	public int getNumOfClosedIssues() {
-		return numOfClosedIssues;
+	public int getNumOfIssuesDone() {
+		return numOfIssuesDone;
 	}
 
-	public void setNumOfClosedIssues(int numOfClosedIssues) {
-		this.numOfClosedIssues = numOfClosedIssues;
+	public void setNumOfIssuesDone(int numOfIssuesDone) {
+		this.numOfIssuesDone = numOfIssuesDone;
 	}
 
 	public Collection<Issue> getIssues() {

@@ -35,12 +35,8 @@
 .board-menu>a, .milestone-menu>a {
 	margin-top: 10px !important;
 }
-.board-menu .actions, .milestone-menu .actions, .milestone-menu .status {
-	text-align: right;
-}
 .board-menu .actions a, .milestone-menu .actions a {
-	text-decoration: none;
-	color: #444;
+	color: #1f3b7b;
 }
 .milestone-selector.create .fa-caret-down {
 	display: none;

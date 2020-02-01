@@ -1399,4 +1399,32 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate34(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element stateElement: valueElement.element("stateSpecs").elements()) {
+								Element categoryElement = stateElement.element("category");
+								stateElement.addElement("done").setText(String.valueOf(categoryElement.getTextTrim().equals("CLOSED")));
+								categoryElement.detach();
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Milestones.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("numOfOpenIssues").setName("numOfIssuesTodo");
+					element.element("numOfClosedIssues").setName("numOfIssuesDone");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

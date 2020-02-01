@@ -20,35 +20,35 @@ public enum MilestoneSort {
 		}
 		
 	},
-	MOST_ISSUES {
+	MOST_ISSUES_TODO {
 
 		@Override
 		public Order getOrder() {
-			return Order.desc("numOfOpenIssues");
+			return Order.desc("numOfIssuesTodo");
 		}
 		
 	}, 
-	LEAST_ISSUES {
+	LEAST_ISSUES_TODO {
 
 		@Override
 		public Order getOrder() {
-			return Order.asc("numOfOpenIssues");
+			return Order.asc("numOfIssuesTodo");
 		}
 		
 	},
-	MOST_COMPLETED {
+	MOST_ISSUES_DONE {
 
 		@Override
 		public Order getOrder() {
-			return Order.desc("numOfClosedIssues");
+			return Order.desc("numOfIssuesDone");
 		}
 		
 	},
-	LEAST_COMPLETED {
+	LEAST_ISSUES_DONE {
 
 		@Override
 		public Order getOrder() {
-			return Order.asc("numOfClosedIssues");
+			return Order.asc("numOfIssuesDone");
 		}
 		
 	},

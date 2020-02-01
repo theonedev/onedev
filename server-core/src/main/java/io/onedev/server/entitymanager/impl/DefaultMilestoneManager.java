@@ -71,8 +71,8 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			query.setParameter("milestone", milestone);
 			query.setParameter("newMilestone", moveIssuesToMilestone);
 			query.executeUpdate();
-			moveIssuesToMilestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()+moveIssuesToMilestone.getNumOfClosedIssues());
-			moveIssuesToMilestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+moveIssuesToMilestone.getNumOfOpenIssues());
+			moveIssuesToMilestone.setNumOfIssuesDone(milestone.getNumOfIssuesDone()+moveIssuesToMilestone.getNumOfIssuesDone());
+			moveIssuesToMilestone.setNumOfIssuesTodo(milestone.getNumOfIssuesTodo()+moveIssuesToMilestone.getNumOfIssuesTodo());
 			save(moveIssuesToMilestone);
 		} else {
 			Query<?> query = getSession().createQuery("update Issue set milestone=null where milestone=:milestone");
@@ -97,7 +97,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	public void close(Milestone milestone, @Nullable Milestone moveOpenIssuesToMilestone) {
 		List<String> criterias = new ArrayList<>();
 		for (StateSpec state: getIssueSetting().getStateSpecs()) {
-			if (state.getCategory() == StateSpec.Category.OPEN)
+			if (!state.isDone())
 				criterias.add("state='" + state.getName() + "'");
 		}
 		if (!criterias.isEmpty()) {
@@ -107,14 +107,14 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 				query.setParameter("milestone", milestone);
 				query.setParameter("newMilestone", moveOpenIssuesToMilestone);
 				query.executeUpdate();
-				moveOpenIssuesToMilestone.setNumOfOpenIssues(moveOpenIssuesToMilestone.getNumOfOpenIssues()+milestone.getNumOfOpenIssues());
-				milestone.setNumOfOpenIssues(0);
+				moveOpenIssuesToMilestone.setNumOfIssuesTodo(moveOpenIssuesToMilestone.getNumOfIssuesTodo()+milestone.getNumOfIssuesTodo());
+				milestone.setNumOfIssuesTodo(0);
 				save(moveOpenIssuesToMilestone);
 			} else {
 				Query<?> query = getSession().createQuery("update Issue set milestone=null where milestone=:milestone and " + stateClause);
 				query.setParameter("milestone", milestone);
 				query.executeUpdate();
-				milestone.setNumOfOpenIssues(0);
+				milestone.setNumOfIssuesTodo(0);
 			}
 		}
 		milestone.setClosed(true);
@@ -129,10 +129,10 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		if (milestone != null) {
 			StateSpec state = getIssueSetting().getStateSpec(issue.getState());
 			Preconditions.checkNotNull(state);
-			if (state.getCategory() == StateSpec.Category.CLOSED)
-				milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()+1);
+			if (state.isDone())
+				milestone.setNumOfIssuesDone(milestone.getNumOfIssuesDone()+1);
 			else
-				milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+1);
+				milestone.setNumOfIssuesTodo(milestone.getNumOfIssuesTodo()+1);
 			save(milestone);
 		}
 	}
@@ -146,10 +146,10 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			if (milestone != null) {
 				StateSpec state = getIssueSetting().getStateSpec(issue.getState());
 				Preconditions.checkNotNull(state);
-				if (state.getCategory() == StateSpec.Category.CLOSED) 
-					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()-1);
+				if (state.isDone()) 
+					milestone.setNumOfIssuesDone(milestone.getNumOfIssuesDone()-1);
 				else
-					milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()-1);
+					milestone.setNumOfIssuesTodo(milestone.getNumOfIssuesTodo()-1);
 				save(milestone);
 			}
 		}
@@ -162,13 +162,13 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			Preconditions.checkNotNull(oldStateSpec);
 			StateSpec newStateSpec = getIssueSetting().getStateSpec(newState);
 			Preconditions.checkNotNull(oldStateSpec);
-			if (oldStateSpec.getCategory() != newStateSpec.getCategory()) {
-				if (oldStateSpec.getCategory() == StateSpec.Category.CLOSED) {
-					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()-1);
-					milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()+1);
+			if (oldStateSpec.isDone() != newStateSpec.isDone()) {
+				if (oldStateSpec.isDone()) {
+					milestone.setNumOfIssuesDone(milestone.getNumOfIssuesDone()-1);
+					milestone.setNumOfIssuesTodo(milestone.getNumOfIssuesTodo()+1);
 				} else {
-					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()+1);
-					milestone.setNumOfOpenIssues(milestone.getNumOfOpenIssues()-1);
+					milestone.setNumOfIssuesDone(milestone.getNumOfIssuesDone()+1);
+					milestone.setNumOfIssuesTodo(milestone.getNumOfIssuesTodo()-1);
 				}
 				save(milestone);
 			}
@@ -180,16 +180,16 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		Milestone newMilestone = project.getMilestone(newMilestoneName);
 		StateSpec stateSpec = getIssueSetting().getStateSpec(state);
 		Preconditions.checkNotNull(stateSpec);
-		if (stateSpec.getCategory() == StateSpec.Category.CLOSED) {
+		if (stateSpec.isDone()) {
 			if (oldMilestone != null)
-				oldMilestone.setNumOfClosedIssues(oldMilestone.getNumOfClosedIssues()-1);
+				oldMilestone.setNumOfIssuesDone(oldMilestone.getNumOfIssuesDone()-1);
 			if (newMilestone != null)
-				newMilestone.setNumOfClosedIssues(newMilestone.getNumOfClosedIssues()+1);
+				newMilestone.setNumOfIssuesDone(newMilestone.getNumOfIssuesDone()+1);
 		} else {
 			if (oldMilestone != null)
-				oldMilestone.setNumOfOpenIssues(oldMilestone.getNumOfOpenIssues()-1);
+				oldMilestone.setNumOfIssuesTodo(oldMilestone.getNumOfIssuesTodo()-1);
 			if (newMilestone != null)
-				newMilestone.setNumOfOpenIssues(newMilestone.getNumOfOpenIssues()+1);
+				newMilestone.setNumOfIssuesTodo(newMilestone.getNumOfIssuesTodo()+1);
 		}
 		if (oldMilestone != null)
 			save(oldMilestone);
