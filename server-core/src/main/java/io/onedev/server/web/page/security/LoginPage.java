@@ -5,6 +5,8 @@ import java.util.Arrays;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -113,8 +115,12 @@ public class LoginPage extends BasePage {
 						WebSession.get().login(userName, password, rememberMe);
 						continueToOriginalDestination();
 						setResponsePage(getApplication().getHomePage());
+					} catch (IncorrectCredentialsException e) {
+						error("Incorrect credentials");
+					} catch (UnknownAccountException e) {
+						error("Unknown user name");
 					} catch (AuthenticationException ae) {
-						error("Authentication not passed");
+						error(ae.getMessage());
 					}
 				}
 			}

@@ -22,6 +22,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.validation.constraints.NotNull;
 
+import org.apache.shiro.authc.AccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -129,9 +130,9 @@ public class LdapAuthenticator extends Authenticator {
 	}
 
 	@Editable(order=800, description=""
-			+ "Optionally specifies name of the attribute inside the user LDAP entry whose value will be taken as user "
-			+ "email. This field is normally set to <i>mail</i> according to RFC 2798. If left empty, email of the user "
-			+ "will not be retrieved")
+			+ "Specifies name of the attribute inside the user LDAP entry whose value will be taken as user "
+			+ "email. This field is normally set to <i>mail</i> according to RFC 2798")
+	@NotEmpty
 	public String getUserEmailAttribute() {
 		return userEmailAttribute;
 	}
@@ -171,8 +172,7 @@ public class LdapAuthenticator extends Authenticator {
         List<String> attributeNames = new ArrayList<String>();
         if (getUserFullNameAttribute() != null)
             attributeNames.add(getUserFullNameAttribute());
-        if (getUserEmailAttribute() != null)
-            attributeNames.add(getUserEmailAttribute());
+        attributeNames.add(getUserEmailAttribute());
         if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) {
         	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute)getGroupRetrieval();
             attributeNames.add(groupRetrieval.getUserGroupsAttribute());
@@ -246,14 +246,12 @@ public class LdapAuthenticator extends Authenticator {
                     if (attribute != null && attribute.get() != null)
                         fullName = (String) attribute.get();
                 }
-                if (getUserEmailAttribute() != null) {
-                    Attribute attribute = searchResultAttributes.get(getUserEmailAttribute());
-                    if (attribute != null && attribute.get() != null)
-                        email = (String) attribute.get();
-                }
+                Attribute attribute = searchResultAttributes.get(getUserEmailAttribute());
+                if (attribute != null && attribute.get() != null)
+                    email = (String) attribute.get();
                 if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) {
                 	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute) getGroupRetrieval();
-                    Attribute attribute = searchResultAttributes.get(
+                    attribute = searchResultAttributes.get(
                     		groupRetrieval.getUserGroupsAttribute());
                     if (attribute != null) {
                         for (NamingEnumeration<?> e = attribute.getAll(); e.hasMore();) {
@@ -333,7 +331,10 @@ public class LdapAuthenticator extends Authenticator {
                     		"'follow referrals' to true to avoid this exception.", pre);
                 }
             }
-            return new Authenticated(fullName, email, groupNames);
+            if (email == null)
+            	throw new AccountException("Email is required but not available in ldap directory");
+            else
+            	return new Authenticated(email, fullName, groupNames);
         } catch (NamingException e) {
         	throw new RuntimeException(e);
         } finally {

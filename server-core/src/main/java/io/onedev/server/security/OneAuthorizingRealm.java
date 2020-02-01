@@ -66,7 +66,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	
     private final UserManager userManager;
     
-    private final SettingManager configManager;
+    private final SettingManager settingManager;
     
     private final MembershipManager membershipManager;
     
@@ -83,7 +83,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
     
 	@Inject
-    public OneAuthorizingRealm(UserManager userManager, SettingManager configManager, 
+    public OneAuthorizingRealm(UserManager userManager, SettingManager settingManager, 
     		MembershipManager membershipManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
     		TransactionManager transactionManager) {
@@ -92,7 +92,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		setCredentialsMatcher(passwordMatcher);
 		
     	this.userManager = userManager;
-    	this.configManager = configManager;
+    	this.settingManager = settingManager;
     	this.membershipManager = membershipManager;
     	this.groupManager = groupManager;
     	this.projectManager = projectManager;
@@ -202,7 +202,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    		return user;
 
 		    	if (user == null || StringUtils.isBlank(user.getPassword())) {
-		        	Authenticator authenticator = configManager.getAuthenticator();
+		        	Authenticator authenticator = settingManager.getAuthenticator();
 		        	if (authenticator != null) {
 		        		Authenticated authenticated;
 		        		try {
@@ -217,8 +217,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		        			}
 		        		}
 		    			if (user != null) {
-		    				if (authenticated.getEmail() != null)
-		    					user.setEmail(authenticated.getEmail());
+		    				user.setEmail(authenticated.getEmail());
 		    				if (authenticated.getFullName() != null)
 		    					user.setFullName(authenticated.getFullName());
 
