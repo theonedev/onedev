@@ -1,8 +1,11 @@
 package io.onedev.server.web.page.my.sshkeys;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxCallListener;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -24,6 +27,8 @@ import io.onedev.server.web.page.my.MyPage;
 @SuppressWarnings("serial")
 public class MySshKeysPage extends MyPage {
 	
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    
 	public MySshKeysPage(PageParameters params) {
 		super(params);
 	}
@@ -68,13 +73,27 @@ public class MySshKeysPage extends MyPage {
 		                item.add(new Label("name", sshKey.getName()));
 		                item.add(new Label("owner", sshKey.getOwner().getName()));
 		                item.add(new Label("digest", sshKey.getDigest()));                          
-		                item.add(new Label("timestamp", sshKey.getTimestamp().toString()));                          
+		                item.add(new Label("timestamp", sshKey.getTimestamp().format(formatter)));                          
 		                item.add(new AjaxLink<Void>("delete") {
 		                    @Override
 		                    public void onClick(AjaxRequestTarget target) {
 		                       Dao dao = OneDev.getInstance(Dao.class);
 		                       dao.remove(sshKey);
 		                       target.add(keyList);
+		                    }
+		                    
+		                    @Override
+		                    protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+		                        super.updateAjaxAttributes(attributes);
+		                        AjaxCallListener myAjaxCallListener = new AjaxCallListener() {
+		                            
+		                            @Override
+		                            public CharSequence getPrecondition(Component component) {
+		                                return "return confirm(\"Are you sure you want to delete key \'" 
+		                                        + sshKey.getName() + "\'?\")";
+		                            }
+		                        };
+		                        attributes.getAjaxCallListeners().add(myAjaxCallListener);
 		                    }
 		                });
 		        }

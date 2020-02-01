@@ -36,7 +36,7 @@ import org.eclipse.jgit.transport.UploadPack;
 import io.onedev.server.entitymanager.ProjectManager;
 
 @Singleton
-public class SimpleGitServer {
+public class SimpleGitSshServer {
 
     private final Repository repository;
     
@@ -46,7 +46,7 @@ public class SimpleGitServer {
             .newFixedThreadPool("SimpleGitServer", 4);
 
     @Inject
-    public SimpleGitServer(ProjectManager projectManager , KeyPairProvider keyPairProvider) {
+    public SimpleGitSshServer(ProjectManager projectManager , KeyPairProvider keyPairProvider) {
         this.repository = null;
         this.server = SshServer.setUpDefaultServer();
 
@@ -117,7 +117,7 @@ public class SimpleGitServer {
 
             @Override
             protected Path computeRootDir(Session session) throws IOException {
-                return SimpleGitServer.this.repository.getDirectory()
+                return SimpleGitSshServer.this.repository.getDirectory()
                         .getParentFile().getAbsoluteFile().toPath();
             }
         });

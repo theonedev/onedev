@@ -14,16 +14,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -36,7 +33,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.git.server.SimpleGitServer;
+import io.onedev.server.git.server.SimpleGitSshServer;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
@@ -74,13 +71,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 
-    private SimpleGitServer simpleGitServer;
+    private SimpleGitSshServer simpleGitSshServer;
 	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
 			SettingManager configManager, ExecutorService executorService, 
-			ListenerRegistry listenerRegistry, SimpleGitServer simpleGitServer) {
+			ListenerRegistry listenerRegistry, SimpleGitSshServer simpleGitSshServer) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -90,7 +87,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.serverConfig = serverConfig;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
-        this.simpleGitServer = simpleGitServer;
+        this.simpleGitSshServer = simpleGitSshServer;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -116,9 +113,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			initStage.waitForFinish();
 		}
 		
+		//TODO: provide better config support for Git server
 		try {
-            simpleGitServer.start();
-            logger.info("Git server started at port " + simpleGitServer.getPort());
+            simpleGitSshServer.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,6 +135,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		
 		listenerRegistry.post(new SystemStarted());
 		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
+		logger.info("Git server started at port " + simpleGitSshServer.getPort());
 		initStage = null;
 	}
 
@@ -305,7 +303,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		executorService.shutdown();
 		
 		try {
-            simpleGitServer.stop();
+            simpleGitSshServer.stop();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

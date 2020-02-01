@@ -1,14 +1,11 @@
 package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
-
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
-
 import io.onedev.server.git.config.CurlConfig;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.git.config.SystemCurl;

@@ -161,7 +161,7 @@ import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitPostReceiveCallback;
 import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
-import io.onedev.server.git.server.SimpleGitServer;
+import io.onedev.server.git.server.SimpleGitSshServer;
 import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.DefaultCodeCommentRelationInfoManager;
@@ -392,7 +392,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebHookManager.class);
 		
 		bind(KeyPairProvider.class).to(DefaultTestKeyPair.class);
-		bind(SimpleGitServer.class);
+		bind(SimpleGitSshServer.class);
 		
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
