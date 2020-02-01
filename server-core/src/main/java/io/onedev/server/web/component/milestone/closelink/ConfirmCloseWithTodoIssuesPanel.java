@@ -17,9 +17,9 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneCloseOption;
 
 @SuppressWarnings("serial")
-abstract class ConfirmCloseWithOpenIssuesPanel extends Panel {
+abstract class ConfirmCloseWithTodoIssuesPanel extends Panel {
 
-	public ConfirmCloseWithOpenIssuesPanel(String id) {
+	public ConfirmCloseWithTodoIssuesPanel(String id) {
 		super(id);
 	}
 
@@ -58,7 +58,7 @@ abstract class ConfirmCloseWithOpenIssuesPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
-				if (option.isMoveOpenIssuesToAnotherMilestone()) {
+				if (option.isMoveTodoIssuesToAnotherMilestone()) {
 					Milestone newMilestone = milestoneManager.find(getMilestone().getProject(), option.getNewMilestone());
 					Preconditions.checkNotNull(newMilestone);
 					milestoneManager.close(getMilestone(), newMilestone);

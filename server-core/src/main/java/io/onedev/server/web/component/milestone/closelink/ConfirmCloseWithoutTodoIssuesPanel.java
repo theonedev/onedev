@@ -10,9 +10,9 @@ import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 
 @SuppressWarnings("serial")
-abstract class ConfirmCloseWithoutOpenIssuesPanel extends Panel {
+abstract class ConfirmCloseWithoutTodoIssuesPanel extends Panel {
 
-	public ConfirmCloseWithoutOpenIssuesPanel(String id) {
+	public ConfirmCloseWithoutTodoIssuesPanel(String id) {
 		super(id);
 	}
 
@@ -26,7 +26,7 @@ abstract class ConfirmCloseWithoutOpenIssuesPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				OneDev.getInstance(MilestoneManager.class).close(getMilestone(), null);
-				onClose(target);
+				onMilestoneClosed(target);
 			}
 			
 		});

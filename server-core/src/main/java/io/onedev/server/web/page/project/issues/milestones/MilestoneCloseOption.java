@@ -20,7 +20,7 @@ public class MilestoneCloseOption implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean moveOpenIssuesToAnotherMilestone = true;
+	private boolean moveTodoIssuesToAnotherMilestone = true;
 	
 	private String milestoneToClose;
 	
@@ -36,12 +36,12 @@ public class MilestoneCloseOption implements Serializable {
 	}
 
 	@Editable
-	public boolean isMoveOpenIssuesToAnotherMilestone() {
-		return moveOpenIssuesToAnotherMilestone;
+	public boolean isMoveTodoIssuesToAnotherMilestone() {
+		return moveTodoIssuesToAnotherMilestone;
 	}
 
-	public void setMoveOpenIssuesToAnotherMilestone(boolean moveOpenIssuesToAnotherMilestone) {
-		this.moveOpenIssuesToAnotherMilestone = moveOpenIssuesToAnotherMilestone;
+	public void setMoveTodoIssuesToAnotherMilestone(boolean moveTodoIssuesToAnotherMilestone) {
+		this.moveTodoIssuesToAnotherMilestone = moveTodoIssuesToAnotherMilestone;
 	}
 
 	@Editable(order=200, name="Another Open Milestone")
@@ -59,7 +59,7 @@ public class MilestoneCloseOption implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isNewMilestoneVisible() {
-		return (Boolean) EditContext.get().getInputValue("moveOpenIssuesToAnotherMilestone");
+		return (Boolean) EditContext.get().getInputValue("moveTodoIssuesToAnotherMilestone");
 	}
 	
 	@SuppressWarnings("unused")

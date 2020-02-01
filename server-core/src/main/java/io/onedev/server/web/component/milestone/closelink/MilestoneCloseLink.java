@@ -21,7 +21,7 @@ public abstract class MilestoneCloseLink extends ModalLink {
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
 		if (OneDev.getInstance(IssueManager.class).count(getMilestone(), false) != 0) {
-			return new ConfirmCloseWithOpenIssuesPanel(id) {
+			return new ConfirmCloseWithTodoIssuesPanel(id) {
 
 				@Override
 				protected Milestone getMilestone() {
@@ -41,7 +41,7 @@ public abstract class MilestoneCloseLink extends ModalLink {
 				
 			};
 		} else {
-			return new ConfirmCloseWithoutOpenIssuesPanel(id) {
+			return new ConfirmCloseWithoutTodoIssuesPanel(id) {
 
 				@Override
 				protected Milestone getMilestone() {
