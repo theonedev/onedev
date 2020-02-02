@@ -13,13 +13,11 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.SimpleExpression;
 import io.onedev.server.OneDev;
+import io.onedev.server.git.ssh.SshUtils;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.my.MyPage;
@@ -54,13 +52,10 @@ public class MySshKeysPage extends MyPage {
         });
 		
 		LoadableDetachableModel<List<SshKey>> detachableModel = new LoadableDetachableModel<List<SshKey>>() {
-		    final SimpleExpression eq = Restrictions.eq("owner", user);
-
             @Override
             protected List<SshKey> load() {
                 Dao dao = OneDev.getInstance(Dao.class);
-                EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
-                return dao.query(entityCriteria);
+                return SshUtils.loadUserKeys(user, dao);
             }
 		    
 		};

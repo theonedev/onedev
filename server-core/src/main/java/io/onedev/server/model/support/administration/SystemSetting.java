@@ -21,6 +21,8 @@ public class SystemSetting implements Serializable, Validatable {
 	private static final long serialVersionUID = 1;
 
 	private String serverUrl;
+
+	private String serverSshUrl;
 	
 	private GitConfig gitConfig = new SystemGit();
 	
@@ -77,5 +79,13 @@ public class SystemSetting implements Serializable, Validatable {
 			serverUrl = StringUtils.stripEnd(serverUrl, "/\\");
 		return true;
 	}
+
+    public String getServerSshUrl() {
+        return serverSshUrl;
+    }
+
+    public void setServerSshUrl(String serverSshUrl) {
+        this.serverSshUrl = serverSshUrl;
+    }
 
 }

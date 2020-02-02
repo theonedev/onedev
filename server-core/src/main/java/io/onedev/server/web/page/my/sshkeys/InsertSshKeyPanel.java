@@ -16,7 +16,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import io.onedev.server.OneDev;
-import io.onedev.server.git.server.SimpleGitSshServer;
+import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;

@@ -1,10 +1,9 @@
-package io.onedev.server.git.server;
+package io.onedev.server.git.ssh;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.PublicKey;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -17,9 +16,7 @@ import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.session.Session;
 import org.apache.sshd.common.util.threads.ThreadUtils;
-import org.apache.sshd.server.ServerAuthenticationManager;
 import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.auth.UserAuth;
 import org.apache.sshd.server.command.AbstractCommandSupport;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.shell.UnknownCommand;
@@ -28,14 +25,11 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.SimpleExpression;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
 public class SimpleGitSshServer {
@@ -92,10 +86,7 @@ public class SimpleGitSshServer {
         System.out.println("key digest: " + fingerPrint);
         
         User user = userManager.findByName(userName);
-        SimpleExpression eq = Restrictions.eq("owner", user);
-        EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
-        
-        List<SshKey> keys = dao.query(entityCriteria);
+        List<SshKey> keys = SshUtils.loadUserKeys(user, dao);
         
         for (SshKey sshKey : keys) {
             if (fingerPrint.equals(sshKey.getDigest())) {
@@ -106,18 +97,6 @@ public class SimpleGitSshServer {
         return false;
     }
 
-    private List<NamedFactory<UserAuth>> getAuthFactories() {
-        List<NamedFactory<UserAuth>> authentications = new ArrayList<>();
-       
-        authentications.add(
-                ServerAuthenticationManager.DEFAULT_USER_AUTH_PUBLIC_KEY_FACTORY);
-        authentications.add(
-                ServerAuthenticationManager.DEFAULT_USER_AUTH_KB_INTERACTIVE_FACTORY);
-//        authentications.add(
-//                ServerAuthenticationManager.DEFAULT_USER_AUTH_PASSWORD_FACTORY);
-        return authentications;
-    }
-    
     private List<NamedFactory<Command>> configureSubsystems() {
         server.setFileSystemFactory(new VirtualFileSystemFactory() {
 

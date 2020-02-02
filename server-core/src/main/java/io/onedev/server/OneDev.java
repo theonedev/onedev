@@ -33,7 +33,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.git.server.SimpleGitSshServer;
+import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
