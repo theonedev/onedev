@@ -1107,15 +1107,18 @@ public class Project extends AbstractEntity {
 
 	public List<Milestone> getSortedMilestones() {
 		if (sortedMilestones == null) {
-			sortedMilestones = new ArrayList<>(getMilestones());
-			Collections.sort(sortedMilestones, new Comparator<Milestone>() {
-
-				@Override
-				public int compare(Milestone o1, Milestone o2) {
-					return o1.getDueDate().compareTo(o2.getDueDate());
-				}
-				
-			});
+			sortedMilestones = new ArrayList<>();
+			List<Milestone> open = getMilestones().stream()
+					.filter(it->!it.isClosed())
+					.sorted(Comparator.comparing(Milestone::getDueDate))
+					.collect(Collectors.toList());
+			sortedMilestones.addAll(open);
+			List<Milestone> closed = getMilestones().stream()
+					.filter(it->it.isClosed())
+					.sorted(Comparator.comparing(Milestone::getDueDate))
+					.collect(Collectors.toList());
+			Collections.reverse(closed);
+			sortedMilestones.addAll(closed);
 		}
 		return sortedMilestones;
 	}

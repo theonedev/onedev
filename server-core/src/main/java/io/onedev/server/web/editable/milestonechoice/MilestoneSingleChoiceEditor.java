@@ -1,7 +1,6 @@
-package io.onedev.server.web.editable.userchoice;
+package io.onedev.server.web.editable.milestonechoice;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -12,22 +11,21 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
+import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.component.user.choice.UserSingleChoice;
+import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.UserChoice;
+import io.onedev.server.web.editable.annotation.MilestoneChoice;
 
 @SuppressWarnings("serial")
-public class UserSingleChoiceEditor extends PropertyEditor<String> {
+public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {
 
-	private UserSingleChoice input;
+	private MilestoneSingleChoice input;
 	
-	public UserSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+	public MilestoneSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
 			IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
@@ -37,34 +35,33 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		List<User> choices = new ArrayList<>();
+		List<Milestone> choices = new ArrayList<>();
 		
 		ComponentContext componentContext = new ComponentContext(this);
 		ComponentContext.push(componentContext);
 		try {
-			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
-			Preconditions.checkNotNull(userChoice);
-			if (userChoice.value().length() != 0) {
-				choices.addAll((List<User>)ReflectionUtils
-						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
+			MilestoneChoice milestoneChoice = descriptor.getPropertyGetter().getAnnotation(MilestoneChoice.class);
+			Preconditions.checkNotNull(milestoneChoice);
+			if (milestoneChoice.value().length() != 0) {
+				choices.addAll((List<Milestone>)ReflectionUtils
+						.invokeStaticMethod(descriptor.getBeanClass(), milestoneChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(UserManager.class).query());
-				choices.sort(Comparator.comparing(User::getName));
+				choices.addAll(Project.get().getSortedMilestones());
 			}
 		} finally {
 			ComponentContext.pop();
 		}
 		
-		User selection;
+		Milestone selection;
 		if (getModelObject() != null)
-			selection = OneDev.getInstance(UserManager.class).findByName(getModelObject());
+			selection = Project.get().getMilestone(getModelObject());
 		else
 			selection = null;
 		
 		if (selection != null && !choices.contains(selection))
 			selection = null;
 		
-    	input = new UserSingleChoice("input", Model.of(selection), Model.of(choices)) {
+    	input = new MilestoneSingleChoice("input", Model.of(selection), Model.of(choices)) {
 
 			@Override
 			protected void onInitialize() {
@@ -91,9 +88,9 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		User user = input.getConvertedInput();
-		if (user != null)
-			return user.getName();
+		Milestone milestone = input.getConvertedInput();
+		if (milestone != null)
+			return milestone.getName();
 		else
 			return null;
 	}

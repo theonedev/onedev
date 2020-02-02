@@ -37,6 +37,9 @@
 	margin-left: 8px;
 	color: #666;
 }
+.issue-side .milestone .status {
+	margin-left: 4px;
+}
 .issue-side .milestone>.body>.progress {
 	margin-top: 20px;
 }

@@ -18,10 +18,13 @@ public class ProjectSingleChoice extends Select2Choice<Project> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose a project ...");
+			getSettings().setPlaceholder("Choose a project...");
+		else
+			getSettings().setPlaceholder("Project not specified");
 		getSettings().setFormatResult("onedev.server.projectChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.projectChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.projectChoiceFormatter.escapeMarkup");
+		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

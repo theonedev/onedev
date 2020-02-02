@@ -56,7 +56,6 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 			}
     		
     	};
-        input.setConvertEmptyInputStringToNull(true);
         
         // add this to control allowClear flag of select2
     	input.setRequired(descriptor.isPropertyRequired());

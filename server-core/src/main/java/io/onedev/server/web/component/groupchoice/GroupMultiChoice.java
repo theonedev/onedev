@@ -20,10 +20,13 @@ public class GroupMultiChoice extends Select2MultiChoice<Group> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose groups ...");
+			getSettings().setPlaceholder("Choose groups...");
+		else
+			getSettings().setPlaceholder("Groups not specified");
 		getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");
+		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override

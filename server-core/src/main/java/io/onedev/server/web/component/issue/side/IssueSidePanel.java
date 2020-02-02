@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +34,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Lists;
 
@@ -64,8 +63,9 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
+import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
@@ -314,6 +314,14 @@ public abstract class IssueSidePanel extends Panel {
 				
 			}));
 			fragment.add(link);
+			fragment.add(new MilestoneStatusLabel("status", new AbstractReadOnlyModel<Milestone>() {
+
+				@Override
+				public Milestone getObject() {
+					return getIssue().getMilestone();
+				}
+				
+			}));
 		} else {
 			WebMarkupContainer link = new WebMarkupContainer("link") {
 
@@ -325,43 +333,30 @@ public abstract class IssueSidePanel extends Panel {
 				
 			};
 			link.add(new Label("label", "<i>No milestone</i>").setEscapeModelStrings(false));
+			fragment.add(new WebMarkupContainer("status").setVisible(false));
 			fragment.add(new WebMarkupContainer("progress").setVisible(false));
 			fragment.add(link);
 		}
 
 		fragment.add(new AjaxLink<Void>("edit") {
 
-			private String milestoneName = getIssue().getMilestoneName();
-			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueSidePanel.this);
 				Form<?> form = new Form<Void>("form");
 				
-				IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+				MilestoneSingleChoice choice = new MilestoneSingleChoice("milestone", 
+						Model.of(getIssue().getMilestone()), 
+						new LoadableDetachableModel<Collection<Milestone>>() {
 
 					@Override
-					protected Map<String, String> load() {
-						List<Milestone> milestones = getProject().getSortedMilestones();
-						Map<String, String> choices = new LinkedHashMap<>();
-						for (Milestone milestone: milestones)
-							choices.put(milestone.getName(), milestone.getName());
-						return choices;
+					protected Collection<Milestone> load() {
+						return getProject().getSortedMilestones();
 					}
 					
-				};
-				
-				StringSingleChoice choice = new StringSingleChoice("milestone", 
-						new PropertyModel<String>(this, "milestoneName"), choicesModel) {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						getSettings().setPlaceholder("No milestone");
-					}
-					
-				};
+				});
 				choice.setRequired(false);
+				
 				form.add(choice);
 
 				form.add(new AjaxButton("save") {
@@ -369,7 +364,7 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						Milestone milestone = getProject().getMilestone(milestoneName);
+						Milestone milestone = choice.getModelObject();
 						getIssueChangeManager().changeMilestone(getIssue(), milestone);
 						Component container = newMilestoneContainer();
 						IssueSidePanel.this.replace(container);

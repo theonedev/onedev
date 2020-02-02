@@ -87,7 +87,6 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 			}
     		
     	};
-        input.setConvertEmptyInputStringToNull(true);
         
         // add this to control allowClear flag of select2
     	input.setRequired(descriptor.isPropertyRequired());

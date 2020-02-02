@@ -35,7 +35,7 @@
 .board-menu>a, .milestone-menu>a {
 	margin-top: 10px !important;
 }
-.board-menu .actions a, .milestone-menu .actions a {
+.milestone-menu .actions a {
 	color: #1f3b7b;
 }
 .milestone-selector.create .fa-caret-down {

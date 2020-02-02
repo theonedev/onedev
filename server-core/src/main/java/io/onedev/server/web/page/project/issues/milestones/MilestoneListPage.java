@@ -221,7 +221,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 			@Override
 			public Iterator<? extends Milestone> iterator(long first, long count) {
 				EntityCriteria<Milestone> criteria = getCriteria(closed);
-				criteria.addOrder(sort.getOrder());
+				criteria.addOrder(sort.getOrder(closed));
 				return OneDev.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
 			}
 

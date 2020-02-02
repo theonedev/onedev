@@ -18,7 +18,7 @@ public class MilestoneStatusLabel extends Label {
 
 			@Override
 			protected String load() {
-				return milestoneModel.getObject().isClosed()? "Closed": "Open";
+				return milestoneModel.getObject().getStatusName();
 			}
 			
 		});

@@ -39,8 +39,10 @@
 	margin-right: 20px;
 	margin-bottom: 8px;
 }
-#milestone-detail>.title>.status {
+#milestone-detail>.title>.name {
 	margin-right: 10px;
+}
+#milestone-detail>.title>.status {
 	font-size: 16px;
 	margin-top: -2px;
 }

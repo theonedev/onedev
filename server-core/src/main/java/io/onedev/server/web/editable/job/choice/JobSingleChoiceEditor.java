@@ -43,8 +43,6 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 			
 		};
 		input.setRequired(descriptor.isPropertyRequired());
-		
-        input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
         add(input);

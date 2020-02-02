@@ -3,27 +3,29 @@ package io.onedev.server.util;
 import org.eclipse.jgit.util.StringUtils;
 import org.hibernate.criterion.Order;
 
+import io.onedev.server.model.Milestone;
+
 public enum MilestoneSort {
 	CLOSEST_DUE_DATE {
 
 		@Override
-		public Order getOrder() {
-			return Order.asc("dueDate");
+		public Order getOrder(boolean closed) {
+			return closed?Order.desc(Milestone.ATTR_DUE_DATE):Order.asc(Milestone.ATTR_DUE_DATE);
 		}
 		
 	},
 	FURTHEST_DUE_DATE {
 
 		@Override
-		public Order getOrder() {
-			return Order.desc("dueDate");
+		public Order getOrder(boolean closed) {
+			return closed?Order.asc(Milestone.ATTR_DUE_DATE):Order.desc(Milestone.ATTR_DUE_DATE);
 		}
 		
 	},
 	MOST_ISSUES_TODO {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.desc("numOfIssuesTodo");
 		}
 		
@@ -31,7 +33,7 @@ public enum MilestoneSort {
 	LEAST_ISSUES_TODO {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.asc("numOfIssuesTodo");
 		}
 		
@@ -39,7 +41,7 @@ public enum MilestoneSort {
 	MOST_ISSUES_DONE {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.desc("numOfIssuesDone");
 		}
 		
@@ -47,7 +49,7 @@ public enum MilestoneSort {
 	LEAST_ISSUES_DONE {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.asc("numOfIssuesDone");
 		}
 		
@@ -55,7 +57,7 @@ public enum MilestoneSort {
 	NAME {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.asc("name");
 		}
 		
@@ -63,13 +65,13 @@ public enum MilestoneSort {
 	NAME_REVERSELY {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.desc("name");
 		}
 		
 	};
 	
-	public abstract Order getOrder();
+	public abstract Order getOrder(boolean closed);
 
 	@Override
 	public String toString() {

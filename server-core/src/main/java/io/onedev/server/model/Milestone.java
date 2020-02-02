@@ -34,6 +34,8 @@ public class Milestone extends AbstractEntity {
 
 	public static final String ATTR_NAME = "name";
 	
+	public static final String ATTR_DUE_DATE = "dueDate";
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Project project;
@@ -99,6 +101,10 @@ public class Milestone extends AbstractEntity {
 
 	public void setClosed(boolean closed) {
 		this.closed = closed;
+	}
+	
+	public String getStatusName() {
+		return closed?"Closed":"Open";
 	}
 
 	public int getNumOfIssuesTodo() {

@@ -20,10 +20,13 @@ public class GroupSingleChoice extends Select2Choice<Group> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose group ...");
+			getSettings().setPlaceholder("Choose group...");
+		else
+			getSettings().setPlaceholder("Group not specified");
 		getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");
+		setConvertEmptyInputStringToNull(true);
 	}
 
 	@Override
