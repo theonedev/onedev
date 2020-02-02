@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.sshd.common.config.keys.AuthorizedKeyEntry;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.config.keys.PublicKeyEntryResolver;
-import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
@@ -17,6 +16,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import io.onedev.server.OneDev;
+import io.onedev.server.git.server.SimpleGitSshServer;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
@@ -74,7 +74,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                     AuthorizedKeyEntry entry = entries.get(0);
                     PublicKey pubEntry = entry.resolvePublicKey(PublicKeyEntryResolver.FAILING);
                     
-                    String fingerPrint = KeyUtils.getFingerPrint(new BaseDigest("MD5", 512), pubEntry);
+                    String fingerPrint = KeyUtils.getFingerPrint(SimpleGitSshServer.MD5_DIGESTER, pubEntry);
                     
                     sshKey.setDigest(fingerPrint);
                     sshKey.setTimestamp(LocalDateTime.now());

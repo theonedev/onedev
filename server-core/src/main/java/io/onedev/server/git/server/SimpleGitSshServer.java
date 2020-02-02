@@ -2,15 +2,14 @@ package io.onedev.server.git.server;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BaseDigest;
@@ -21,19 +20,22 @@ import org.apache.sshd.common.util.threads.ThreadUtils;
 import org.apache.sshd.server.ServerAuthenticationManager;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuth;
-import org.apache.sshd.server.auth.hostbased.AcceptAllHostBasedAuthenticator;
-import org.apache.sshd.server.auth.keyboard.DefaultKeyboardInteractiveAuthenticator;
 import org.apache.sshd.server.command.AbstractCommandSupport;
 import org.apache.sshd.server.command.Command;
-import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.shell.UnknownCommand;
 import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
-
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.SimpleExpression;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.impl.DefaultUserManager;
+import io.onedev.server.model.SshKey;
+import io.onedev.server.model.User;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
 public class SimpleGitSshServer {
@@ -45,22 +47,26 @@ public class SimpleGitSshServer {
     private final ExecutorService executorService = ThreadUtils
             .newFixedThreadPool("SimpleGitServer", 4);
 
+    private DefaultUserManager userManager;
+
+    private Dao dao;
+
+    public static final BaseDigest MD5_DIGESTER = new BaseDigest("MD5", 512);;
+
     @Inject
-    public SimpleGitSshServer(ProjectManager projectManager , KeyPairProvider keyPairProvider) {
+    public SimpleGitSshServer(ProjectManager projectManager,
+            DefaultUserManager userManager,
+            Dao dao,
+            KeyPairProvider keyPairProvider) {
+        this.userManager = userManager;
+        this.dao = dao;
         this.repository = null;
         this.server = SshServer.setUpDefaultServer();
 
         this.server.setKeyPairProvider(keyPairProvider);
+        this.server.setPort(40789);
         
         configureAuthentication();
-        
-        List<NamedFactory<Command>> subsystems = configureSubsystems();
-        
-        if (!subsystems.isEmpty()) {
-            this.server.setSubsystemFactories(subsystems);
-        }
-
-        disableShell();
 
         this.server.setCommandFactory(command -> {
             if (command.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK)) {
@@ -74,32 +80,32 @@ public class SimpleGitSshServer {
         
     }
     
-    private void disableShell() {
-        server.setShellFactory(null);
+    private void configureAuthentication() {
+        server.setPublickeyAuthenticator((userName, publicKey, session) -> {
+            return checkUserKeys(userName, publicKey);
+        });
     }
     
-    private void configureAuthentication() {
-        server.setUserAuthFactories(getAuthFactories());
-        server.setPasswordAuthenticator((user, pwd, session) -> {
-            return true;
-        });
-        server.setKeyboardInteractiveAuthenticator(new DefaultKeyboardInteractiveAuthenticator() {
-            @Override
-            public boolean authenticate(ServerSession session, String username, List<String> responses)
-                    throws Exception {
-                // TODO Auto-generated method stub
+    
+    private boolean checkUserKeys(String userName, PublicKey publicKey) {
+        String fingerPrint = KeyUtils.getFingerPrint(MD5_DIGESTER, publicKey);
+        System.out.println("key digest: " + fingerPrint);
+        
+        User user = userManager.findByName(userName);
+        SimpleExpression eq = Restrictions.eq("owner", user);
+        EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
+        
+        List<SshKey> keys = dao.query(entityCriteria);
+        
+        for (SshKey sshKey : keys) {
+            if (fingerPrint.equals(sshKey.getDigest())) {
                 return true;
             }
-        });
-        server.setHostBasedAuthenticator(AcceptAllHostBasedAuthenticator.INSTANCE);
-       
-        server.setPublickeyAuthenticator((userName, publicKey, session) -> {
-            System.out.println(KeyUtils.getFingerPrint(new BaseDigest("MD5", 512), publicKey));
-            return true;
-        });
+        }
+        
+        return false;
     }
-    
-    
+
     private List<NamedFactory<UserAuth>> getAuthFactories() {
         List<NamedFactory<UserAuth>> authentications = new ArrayList<>();
        
