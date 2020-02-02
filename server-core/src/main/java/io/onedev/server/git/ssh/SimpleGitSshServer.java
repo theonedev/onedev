@@ -45,7 +45,7 @@ public class SimpleGitSshServer {
 
     private Dao dao;
 
-    public static final BaseDigest MD5_DIGESTER = new BaseDigest("MD5", 512);;
+    public static final BaseDigest MD5_DIGESTER = new BaseDigest("MD5", 512);
 
     @Inject
     public SimpleGitSshServer(ProjectManager projectManager,
@@ -56,12 +56,11 @@ public class SimpleGitSshServer {
         this.dao = dao;
         this.repository = null;
         this.server = SshServer.setUpDefaultServer();
-
+        
         this.server.setKeyPairProvider(keyPairProvider);
         this.server.setPort(40789);
         
         configureAuthentication();
-
         this.server.setCommandFactory(command -> {
             if (command.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK)) {
                 return new GitUploadPackCommand(command, executorService);
@@ -83,8 +82,6 @@ public class SimpleGitSshServer {
     
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
         String fingerPrint = KeyUtils.getFingerPrint(MD5_DIGESTER, publicKey);
-        System.out.println("key digest: " + fingerPrint);
-        
         User user = userManager.findByName(userName);
         List<SshKey> keys = SshUtils.loadUserKeys(user, dao);
         

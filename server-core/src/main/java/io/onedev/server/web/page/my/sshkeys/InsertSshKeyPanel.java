@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import io.onedev.server.OneDev;
@@ -47,6 +48,9 @@ public abstract class InsertSshKeyPanel extends Panel {
         });
 
         Form<SshKey> form = new Form<>("form");
+        FeedbackPanel feedbackPanel = new FeedbackPanel("feedback");
+        
+        feedbackPanel.setOutputMarkupId(true);
         
         form.add(new AjaxLink<Void>("cancel") {
             
@@ -80,6 +84,8 @@ public abstract class InsertSshKeyPanel extends Panel {
                     sshKey.setTimestamp(LocalDateTime.now());
                 } catch (Exception e) {
                     e.printStackTrace();
+                    warn("The value inserted is not a valid key. Please check it and try again.");
+                    target.add(feedbackPanel);
                     return;
                 } 
                 
@@ -89,10 +95,17 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 onSave(target);
             }
+            
+            @Override
+            protected void onError(AjaxRequestTarget target, Form<?> form) {
+                super.onError(target, form);
+                target.add(feedbackPanel);
+            }
         });
         
-        form.add(new TextField<>("name"));
-        form.add(new TextArea<>("content"));
+        form.add(new TextField<>("name").setRequired(true));
+        form.add(new TextArea<>("content").setRequired(true));
+        form.add(feedbackPanel);
         
         form.setModel(new CompoundPropertyModel<SshKey>(new SshKey()));
         
