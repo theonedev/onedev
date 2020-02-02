@@ -168,7 +168,7 @@
             <paramSpecs/>
             <image>1dev/build-environment:1.0</image>
             <commands>
-                <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
+                <string>git push -f https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
             </commands>
             <retrieveSource>true</retrieveSource>
             <submoduleCredentials/>
