@@ -1,0 +1,1 @@
+Include issue #34 in build
