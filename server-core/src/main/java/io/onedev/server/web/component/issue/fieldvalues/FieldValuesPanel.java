@@ -191,7 +191,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			add(label);
 			add(AttributeAppender.append("class", "undefined"));
 		} else {
-			add(new WebMarkupContainer("content").setVisible(false));
+			add(new WebMarkupContainer("content"));
+			setVisible(false);
 		}
 	}
 

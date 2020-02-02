@@ -482,7 +482,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			String fieldName = (String) row[0];
 			String fieldValue = (String) row[1];
 			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getIssueSetting().getFieldSpec(fieldName));
-			if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(fieldValue)) {
+			if (specifiedChoices != null && fieldValue != null 
+					&& !specifiedChoices.getChoiceValues().contains(fieldValue)) {
 				undefinedFieldValues.add(new UndefinedFieldValue(fieldName, fieldValue));
 			}
 		}
