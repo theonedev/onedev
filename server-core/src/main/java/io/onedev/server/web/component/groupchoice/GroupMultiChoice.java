@@ -22,7 +22,7 @@ public class GroupMultiChoice extends Select2MultiChoice<Group> {
 		if (isRequired())
 			getSettings().setPlaceholder("Choose groups...");
 		else
-			getSettings().setPlaceholder("Groups not specified");
+			getSettings().setPlaceholder("Not specified");
 		getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");

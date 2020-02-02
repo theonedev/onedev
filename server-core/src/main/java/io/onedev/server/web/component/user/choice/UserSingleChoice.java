@@ -22,7 +22,7 @@ public class UserSingleChoice extends Select2Choice<User> {
 		if (isRequired())
 			getSettings().setPlaceholder("Choose a user...");
 		else
-			getSettings().setPlaceholder("User not specified");
+			getSettings().setPlaceholder("Not specified");
 		getSettings().setFormatResult("onedev.server.userChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.userChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.userChoiceFormatter.escapeMarkup");

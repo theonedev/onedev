@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -46,8 +47,12 @@ public class PullRequestChoiceProvider extends ChoiceProvider<PullRequest> {
 	@Override
 	public Collection<PullRequest> toChoices(Collection<String> ids) {
 		List<PullRequest> requests = Lists.newArrayList();
-		for (String id: ids)
-			requests.add(OneDev.getInstance(PullRequestManager.class).load(Long.valueOf(id)));
+		PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
+		for (String id: ids) {
+			PullRequest request = pullRequestManager.load(Long.valueOf(id)); 
+			Hibernate.initialize(request);
+			requests.add(request);
+		}
 		return requests;
 	}
 

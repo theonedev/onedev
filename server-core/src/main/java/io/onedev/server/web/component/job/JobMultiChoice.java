@@ -22,7 +22,7 @@ public class JobMultiChoice extends Select2MultiChoice<String> {
 		if (isRequired())
 			getSettings().setPlaceholder("Choose jobs...");
 		else
-			getSettings().setPlaceholder("Jobs not specified");
+			getSettings().setPlaceholder("Not specified");
 		getSettings().setFormatResult("onedev.server.choiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.choiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.choiceFormatter.escapeMarkup");

@@ -23,7 +23,7 @@ public class BranchMultiChoice extends Select2MultiChoice<String> {
 		if (isRequired())
 			getSettings().setPlaceholder("Choose branches...");
 		else
-			getSettings().setPlaceholder("Branches not specified");
+			getSettings().setPlaceholder("Not specified");
 		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");

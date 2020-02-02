@@ -3,6 +3,7 @@ package io.onedev.server.web.component.groupchoice;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -28,8 +29,9 @@ public abstract class AbstractGroupChoiceProvider extends ChoiceProvider<Group> 
 		List<Group> groups = Lists.newArrayList();
 		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 		for (String each : ids) {
-			Long id = Long.valueOf(each);
-			groups.add(groupManager.load(id));
+			Group group = groupManager.load(Long.valueOf(each));
+			Hibernate.initialize(group);
+			groups.add(group);
 		}
 
 		return groups;

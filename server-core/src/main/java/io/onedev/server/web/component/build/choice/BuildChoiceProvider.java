@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -48,8 +49,12 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 	@Override
 	public Collection<Build> toChoices(Collection<String> ids) {
 		List<Build> builds = Lists.newArrayList();
-		for (String id: ids)
-			builds.add(OneDev.getInstance(BuildManager.class).load(Long.valueOf(id)));
+		BuildManager buildManager = OneDev.getInstance(BuildManager.class); 
+		for (String id: ids) {
+			Build build = buildManager.load(Long.valueOf(id));
+			Hibernate.initialize(build);
+			builds.add(build);
+		}
 		return builds;
 	}
 

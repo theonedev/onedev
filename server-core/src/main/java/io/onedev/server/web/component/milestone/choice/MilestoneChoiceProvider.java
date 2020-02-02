@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -51,8 +52,9 @@ public class MilestoneChoiceProvider extends ChoiceProvider<Milestone> {
 		List<Milestone> milestones = Lists.newArrayList();
 		MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
 		for (String each : ids) {
-			Long id = Long.valueOf(each);
-			milestones.add(milestoneManager.load(id));
+			Milestone milestone = milestoneManager.load(Long.valueOf(each));
+			Hibernate.initialize(milestone);
+			milestones.add(milestone);
 		}
 
 		return milestones;

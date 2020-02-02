@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -46,8 +47,12 @@ public class IssueChoiceProvider extends ChoiceProvider<Issue> {
 	@Override
 	public Collection<Issue> toChoices(Collection<String> ids) {
 		List<Issue> issues = Lists.newArrayList();
-		for (String id: ids)
-			issues.add(OneDev.getInstance(IssueManager.class).load(Long.valueOf(id)));
+		IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+		for (String id: ids) {
+			Issue issue = issueManager.load(Long.valueOf(id)); 
+			Hibernate.initialize(issue);
+			issues.add(issue);
+		}
 		return issues;
 	}
 

@@ -20,7 +20,7 @@ public class ProjectSingleChoice extends Select2Choice<Project> {
 		if (isRequired())
 			getSettings().setPlaceholder("Choose a project...");
 		else
-			getSettings().setPlaceholder("Project not specified");
+			getSettings().setPlaceholder("Not specified");
 		getSettings().setFormatResult("onedev.server.projectChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.projectChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.projectChoiceFormatter.escapeMarkup");
