@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -47,6 +48,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -55,8 +57,6 @@ import io.onedev.server.web.component.issue.board.BoardEditPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.component.milestone.closelink.MilestoneCloseLink;
-import io.onedev.server.web.component.milestone.deletelink.MilestoneDeleteLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
@@ -200,7 +200,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			@Override
 			protected Milestone load() {
 				if (milestoneId != null)
-					return OneDev.getInstance(MilestoneManager.class).load(milestoneId);
+					return getMilestoneManager().load(milestoneId);
 				else
 					return null;
 			}
@@ -210,6 +210,10 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
 		query = params.get(PARAM_QUERY).toString();
 		backlogQuery = params.get(PARAM_BACKLOG_QUERY).toString();
+	}
+	
+	private MilestoneManager getMilestoneManager() {
+		return OneDev.getInstance(MilestoneManager.class);
 	}
 	
 	private List<Milestone> getMilestones() {
@@ -472,17 +476,14 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								};
 								item.add(actions);
 								
-								actions.add(new MilestoneCloseLink("close") {
+								actions.add(new AjaxLink<Void>("close") {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										super.onClick(target);
+										Milestone milestone = item.getModelObject();
+										milestone.setClosed(true);
+										getMilestoneManager().save(milestone);
 										dropdown.close();
-									}
-
-									@Override
-									protected Milestone getMilestone() {
-										return item.getModelObject();
 									}
 
 									@Override
@@ -491,22 +492,15 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										setVisible(!item.getModelObject().isClosed());
 									}
 									
-									@Override
-									protected void onMilestoneClosed(AjaxRequestTarget target) {
-										setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-												getProject(), getBoard(), null, backlog, query, backlogQuery));
-									}
-									
 								});
 								actions.add(new AjaxLink<Void>("reopen") {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										Milestone milestone = getMilestone();
+										Milestone milestone = item.getModelObject();
 										milestone.setClosed(false);
-										OneDev.getInstance(MilestoneManager.class).save(milestone);
-										setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-												getProject(), getBoard(), null, backlog, query, backlogQuery));
+										getMilestoneManager().save(milestone);
+										dropdown.close();
 									}
 
 									@Override
@@ -520,35 +514,32 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										super.onClick(target);
 										dropdown.close();
 									}
 
 								});
-								actions.add(new MilestoneDeleteLink("delete") {
+								actions.add(new AjaxLink<Void>("delete") {
 
 									@Override
-									public void onClick(AjaxRequestTarget target) {
-										super.onClick(target);
-										dropdown.close();
-									}
-
-									@Override
-									protected Milestone getMilestone() {
-										return item.getModelObject();
-									}
-
-									@Override
-									protected void onMilestoneDeleted(AjaxRequestTarget target) {
-										Milestone nextMilestone;
-										if (item.getModelObject().equals(IssueBoardsPage.this.getMilestone()))
-											nextMilestone = null;
-										else
-											nextMilestone = IssueBoardsPage.this.getMilestone();
-										setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-												getProject(), getBoard(), nextMilestone, backlog, query, backlogQuery));
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmListener(
+												"Do you really want to delete milestone '" + item.getModelObject().getName() + "'?"));
 									}
 									
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										dropdown.close();
+										Milestone milestone = item.getModelObject();
+										if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
+											getMilestoneManager().delete(milestone);
+											setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
+													getProject(), getBoard(), null, backlog, query, backlogQuery));
+										} else {
+											getMilestoneManager().delete(milestone);
+										}
+									}
+
 								});
 							}
 							

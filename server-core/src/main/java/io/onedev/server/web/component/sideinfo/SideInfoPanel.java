@@ -50,7 +50,8 @@ public abstract class SideInfoPanel extends Panel {
 					+ "    if (!onedev.server.util.isDevice()) "
 					+ "      $(this).data('ps').update();"
 					+ "  }"
-					+ "});", getMarkupId());
+					+ "});"
+					+ "$(window).resize();", getMarkupId());
 			moreInfoSideOpened.getHandler().appendJavaScript(script);
 		}
 	}

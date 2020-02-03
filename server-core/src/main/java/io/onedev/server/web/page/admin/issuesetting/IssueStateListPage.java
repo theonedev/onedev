@@ -40,7 +40,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public class IssueStateListPage extends IssueSettingPage {
@@ -111,23 +110,6 @@ public class IssueStateListPage extends IssueSettingPage {
 					
 				});
 			}
-		});		
-		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Done")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				StateSpec state = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, state) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, TextUtils.describe(state.isDone()));
-					}
-					
-				});
-			}
-			
 		});		
 		
 		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Color")) {

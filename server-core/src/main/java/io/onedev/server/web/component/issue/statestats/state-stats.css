@@ -1,0 +1,22 @@
+.state-stats {
+	white-space: nowrap;
+	min-width: 100px;
+}
+.state-stats>span {
+	display: inline-block;
+	border: 1px solid #BBB;
+	border-radius: 3px;
+}
+.state-stats>a {
+	display: inline-block;
+	text-decoration: none;
+}
+.state-stats>a:first-child {
+	border-radius: 3px 0 0 3px;
+}
+.state-stats>a:last-child {
+	border-radius: 0 3px 3px 0;
+}
+.state-stats>a:first-child:last-child {
+	border-radius: 3px;
+}

@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -8,6 +9,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -18,9 +20,12 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
+import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
@@ -99,7 +104,23 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 			
 		});
 		
-		add(new IssueStatsPanel("issueStats", milestoneModel));
+		add(new StateStatsBar("issueStats", new LoadableDetachableModel<Map<String, Integer>>() {
+
+			@Override
+			protected Map<String, Integer> load() {
+				return getMilestone().getStateStats();
+			}
+			
+		}) {
+
+			@Override
+			protected Link<Void> newStateLink(String componentId, String state) {
+				String query = new IssueQuery(new StateCriteria(state)).toString();
+				PageParameters params = MilestoneDetailPage.paramsOf(getMilestone(), query);
+				return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
+			}
+			
+		});
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
 			

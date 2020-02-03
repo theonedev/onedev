@@ -31,10 +31,7 @@ import io.onedev.server.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.OrIssueCriteria;
-import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
@@ -204,7 +201,6 @@ public class GlobalIssueSetting implements Serializable {
 		StateSpec closed = new StateSpec();
 		closed.setColor("#5cb85c");
 		closed.setName("Closed");
-		closed.setDone(true);
 		
 		stateSpecs.add(closed);
 		
@@ -536,15 +532,6 @@ public class GlobalIssueSetting implements Serializable {
 			throw new OneException("No any issue state is defined");
 	}
 	
-	public IssueCriteria getDoneCriteria(boolean done) {
-		List<IssueCriteria> criterias = new ArrayList<>();
-		for (StateSpec state: getStateSpecs()) {
-			if (state.isDone() == done)
-				criterias.add(new StateCriteria(state.getName()));
-		}
-		return new OrIssueCriteria(criterias);
-	}
-
 	public List<BoardSpec> getDefaultBoardSpecs() {
 		return defaultBoardSpecs;
 	}

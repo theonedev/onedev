@@ -1,8 +1,11 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -11,6 +14,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -28,17 +32,23 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.StateCriteria;
+import io.onedev.server.util.MilestoneAndState;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
@@ -58,7 +68,22 @@ public class MilestoneListPage extends ProjectIssuesPage {
 	
 	private final MilestoneSort sort;
 	
-	private Component milestonesTable;
+	private final IModel<Collection<MilestoneAndState>> milestoneAndStatesModel = 
+			new LoadableDetachableModel<Collection<MilestoneAndState>>() {
+
+		@Override
+		protected Collection<MilestoneAndState> load() {
+			List<Milestone> milestones = new ArrayList<>();
+			for (Component row: (WebMarkupContainer)milestonesTable.get("body").get("rows")) {
+				Milestone milestone = (Milestone) row.getDefaultModelObject();
+				milestones.add(milestone);
+			}
+			return OneDev.getInstance(IssueManager.class).queryMilestoneAndStates(getProject(), milestones);
+		}
+		
+	}; 
+	
+	private DataTable<Milestone, Void> milestonesTable;					
 	
 	private EntityCriteria<Milestone> getCriteria(boolean closed) {
 		EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
@@ -151,6 +176,11 @@ public class MilestoneListPage extends ProjectIssuesPage {
 		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Name")) {
 
 			@Override
+			public String getCssClass() {
+				return "name";
+			}
+			
+			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 					IModel<Milestone> rowModel) {
 				Milestone milestone = rowModel.getObject();
@@ -166,6 +196,11 @@ public class MilestoneListPage extends ProjectIssuesPage {
 		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Due Date")) {
 
 			@Override
+			public String getCssClass() {
+				return "due-date";
+			}
+			
+			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 					IModel<Milestone> rowModel) {
 				cellItem.add(new MilestoneDueLabel(componentId, rowModel));
@@ -173,26 +208,67 @@ public class MilestoneListPage extends ProjectIssuesPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Issues")) {
+		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Issue Stats")) {
 
 			@Override
 			public String getCssClass() {
-				return "issues";
+				return "issue-stats";
 			}
-
+			
 			@Override
-			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId, 
+			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 					IModel<Milestone> rowModel) {
-				cellItem.add(new IssueStatsPanel(componentId, rowModel));
+				Fragment fragment = new Fragment(componentId, "issueStatsFrag", MilestoneListPage.this) {
+
+					@Override
+					protected void onBeforeRender() {
+						/*
+						 * Create StateStatsBar here as it requires to access the milestoneAndStatsModel which can 
+						 * only be calculated correctly after the milestone table is initialized
+						 */
+						addOrReplace(new StateStatsBar("content", new LoadableDetachableModel<Map<String, Integer>>() {
+
+							@Override
+							protected Map<String, Integer> load() {
+								Map<String, Integer> stateStats = new HashMap<>();
+								for (MilestoneAndState milestoneAndState: milestoneAndStatesModel.getObject()) {
+									if (milestoneAndState.getMilestoneId().equals(rowModel.getObject().getId())) {
+										Integer count = stateStats.get(milestoneAndState.getIssueState());
+										if (count != null)
+											count ++;
+										else
+											count = 1;
+										stateStats.put(milestoneAndState.getIssueState(), count);
+									}
+								}
+								return stateStats;
+							}
+							
+						}) {
+
+							@Override
+							protected Link<Void> newStateLink(String componentId, String state) {
+								String query = new IssueQuery(new StateCriteria(state)).toString();
+								PageParameters params = MilestoneDetailPage.paramsOf(rowModel.getObject(), query);
+								return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
+							}
+							
+						});								
+						super.onBeforeRender();
+					}
+					
+				};
+				cellItem.add(fragment);
 			}
+			
 		});
 		
 		if (SecurityUtils.canManage(getProject())) {
-			columns.add(new AbstractColumn<Milestone, Void>(Model.of("")) {
+			columns.add(new AbstractColumn<Milestone, Void>(Model.of("Actions")) {
 
 				@Override
 				public String getCssClass() {
-					return "";
+					return "expanded actions";
 				}
 
 				@Override
@@ -263,6 +339,12 @@ public class MilestoneListPage extends ProjectIssuesPage {
 		add(milestonesTable = new DefaultDataTable<Milestone, Void>("milestones", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));		
 		milestonesTable.setOutputMarkupId(true);
+	}
+
+	@Override
+	protected void onDetach() {
+		milestoneAndStatesModel.detach();
+		super.onDetach();
 	}
 
 	@Override

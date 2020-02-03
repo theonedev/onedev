@@ -65,8 +65,12 @@ public class BuildQuery extends EntityQuery<Build> {
 		this.sorts = sorts;
 	}
 
+	public BuildQuery(@Nullable EntityCriteria<Build> criteria) {
+		this(criteria, new ArrayList<>());
+	}
+	
 	public BuildQuery() {
-		this(null, new ArrayList<>());
+		this(null);
 	}
 	
 	public static BuildQuery parse(@Nullable Project project, @Nullable String queryString, 

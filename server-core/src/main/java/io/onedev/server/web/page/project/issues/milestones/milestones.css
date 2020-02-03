@@ -4,22 +4,19 @@
 #milestone-list>.head>.pull-left {
 	margin-right: 20px;
 }
-#milestone-list>.body tbody .actions {
+#milestone-list table {
+	table-layout: fixed;
+}
+#milestone-list>.body tbody td.issue-stats {
+	padding-right: 20px;
+}
+
+#milestone-list>.body tbody td.actions {
 	white-space: nowrap;
 }
-.issue-stats>.progress {
-	float: left;
-	width: 200px;
-	margin-bottom: 0;
+#milestone-list>.body tbody td.issue-stats .state-stats {
 }
-.issue-stats>.text {
-	float: left;
-	margin-right: 16px;
-	margin-bottom: 4px;
-}
-.issue-stats>.text a:first-child {
-	margin-right: 8px;
-}
+
 .milestone-sort.active:before {
 	font-family: "FontAwesome";
 	content: "\f00c";
@@ -42,9 +39,8 @@
 #milestone-detail>.title>.name {
 	margin-right: 10px;
 }
-#milestone-detail>.title>.status {
-	font-size: 16px;
-	margin-top: -2px;
+#milestone-detail>.title .state-stats {
+	width: 300px;
 }
 #milestone-detail>.title .due, #milestone-detail>.title a {
 	font-weight: normal;
@@ -56,7 +52,7 @@
 	padding: 20px;
 }
 @media(max-width: 767px) {
-	#milestone-list>.body .actions {
+	#milestone-list>.body .expanded {
 		display: none;
 	}
 }

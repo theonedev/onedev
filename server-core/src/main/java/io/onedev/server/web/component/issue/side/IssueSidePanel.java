@@ -35,6 +35,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 
@@ -55,6 +56,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
@@ -63,9 +65,10 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
-import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
@@ -305,14 +308,23 @@ public abstract class IssueSidePanel extends Panel {
 			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
 					MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
 			link.add(new Label("label", getIssue().getMilestone().getName()));
-			fragment.add(new MilestoneProgressBar("progress", new AbstractReadOnlyModel<Milestone>() {
+			fragment.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
 
 				@Override
-				public Milestone getObject() {
-					return getIssue().getMilestone();
+				public Map<String, Integer> getObject() {
+					return getIssue().getMilestone().getStateStats();
 				}
 				
-			}));
+			}) {
+
+				@Override
+				protected Link<Void> newStateLink(String componentId, String state) {
+					String query = new IssueQuery(new StateCriteria(state)).toString();
+					PageParameters params = MilestoneDetailPage.paramsOf(getIssue().getMilestone(), query);
+					return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
+				}
+				
+			});
 			fragment.add(link);
 			fragment.add(new MilestoneStatusLabel("status", new AbstractReadOnlyModel<Milestone>() {
 

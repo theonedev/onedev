@@ -72,8 +72,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 		this.sorts = sorts;
 	}
 
+	public IssueQuery(@Nullable IssueCriteria criteria) {
+		this(criteria, new ArrayList<>());
+	}
+	
 	public IssueQuery() {
-		this(null, new ArrayList<>());
+		this(null);
 	}
 	
 	@Nullable

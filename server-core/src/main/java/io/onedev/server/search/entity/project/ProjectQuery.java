@@ -48,8 +48,12 @@ public class ProjectQuery extends EntityQuery<Project> {
 		this.sorts = sorts;
 	}
 
+	public ProjectQuery(@Nullable EntityCriteria<Project> criteria) {
+		this(criteria, new ArrayList<>());
+	}
+	
 	public ProjectQuery() {
-		this(null, new ArrayList<>());
+		this(null);
 	}
 	
 	@Nullable

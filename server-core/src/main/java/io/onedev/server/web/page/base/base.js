@@ -680,6 +680,10 @@ onedev.server = {
 	},
 	
 	onDomReady: function() {
+		$(window).resize(function() {
+			$(document).find(".resize-aware").trigger("resized");
+		});
+		
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();
 		onedev.server.focus.setupAutoFocus();

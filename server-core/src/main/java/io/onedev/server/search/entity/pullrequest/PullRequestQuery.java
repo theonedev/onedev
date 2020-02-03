@@ -50,8 +50,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		this.sorts = sorts;
 	}
 
+	public PullRequestQuery(@Nullable EntityCriteria<PullRequest> criteria) {
+		this(criteria, new ArrayList<>());
+	}
+	
 	public PullRequestQuery() {
-		this(null, new ArrayList<>());
+		this(null);
 	}
 	
 	public static PullRequestQuery parse(@Nullable Project project, @Nullable String queryString) {

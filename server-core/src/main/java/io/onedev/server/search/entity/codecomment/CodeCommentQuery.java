@@ -59,8 +59,12 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 		this.sorts = sorts;
 	}
 
+	public CodeCommentQuery(@Nullable EntityCriteria<CodeComment> criteria) {
+		this(criteria, new ArrayList<>());
+	}
+	
 	public CodeCommentQuery() {
-		this(null, new ArrayList<>());
+		this(null);
 	}
 	
 	public static CodeCommentQuery parse(Project project, @Nullable String queryString) {

@@ -15,8 +15,6 @@ public class StateSpec implements Serializable {
 
 	private String name;
 	
-	private boolean done;
-	
 	private String description;
 	
 	private String color = "#0d87e9";
@@ -29,15 +27,6 @@ public class StateSpec implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Editable(order=150, description="Check to indicate that issue in this state is considered done")
-	public boolean isDone() {
-		return done;
-	}
-
-	public void setDone(boolean done) {
-		this.done = done;
 	}
 
 	@Editable(order=200)
