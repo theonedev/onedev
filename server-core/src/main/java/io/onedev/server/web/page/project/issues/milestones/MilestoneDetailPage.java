@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -47,7 +49,11 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 	public MilestoneDetailPage(PageParameters params) {
 		super(params);
 		
-		Long milestoneId = params.get(PARAM_MILESTONE).toLong();
+		String idString = params.get(PARAM_MILESTONE).toString();
+		if (StringUtils.isBlank(idString))
+			throw new RestartResponseException(MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null));
+		
+		Long milestoneId = Long.valueOf(idString);
 		milestoneModel = new LoadableDetachableModel<Milestone>() {
 
 			@Override

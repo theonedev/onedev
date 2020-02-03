@@ -3,7 +3,9 @@ package io.onedev.server.web.page.admin.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -45,7 +47,11 @@ public abstract class UserPage extends AdministrationPage {
 	public UserPage(PageParameters params) {
 		super(params);
 		
-		Long userId = params.get(PARAM_USER).toLong();
+		String userIdString = params.get(PARAM_USER).toString();
+		if (StringUtils.isBlank(userIdString))
+			throw new RestartResponseException(UserListPage.class);
+		
+		Long userId = Long.valueOf(userIdString);
 		if (userId == User.SYSTEM_ID)
 			throw new OneException("System user is not accessible");
 		

@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -21,8 +23,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
-
-import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -89,7 +89,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		super(params);
 		
 		String projectName = params.get(PARAM_PROJECT).toString();
-		Preconditions.checkNotNull(projectName);
+		if (StringUtils.isBlank(projectName))
+			throw new RestartResponseException(ProjectListPage.class);
 		
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		

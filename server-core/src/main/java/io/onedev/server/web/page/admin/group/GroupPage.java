@@ -3,7 +3,9 @@ package io.onedev.server.web.page.admin.group;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -40,7 +42,11 @@ public abstract class GroupPage extends AdministrationPage {
 	public GroupPage(PageParameters params) {
 		super(params);
 		
-		Long groupId = params.get(PARAM_GROUP).toLong();
+		String groupIdString = params.get(PARAM_GROUP).toString();
+		if (StringUtils.isBlank(groupIdString))
+			throw new RestartResponseException(GroupListPage.class);
+		
+		Long groupId = Long.valueOf(groupIdString);
 		
 		groupModel = new LoadableDetachableModel<Group>() {
 

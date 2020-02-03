@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -114,8 +115,30 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	
 	public CommitDetailPage(PageParameters params) {
 		super(params);
+
+		List<String> revisionSegments = new ArrayList<>();
+		String segment = params.get(PARAM_REVISION).toString();
+		if (segment.length() != 0)
+			revisionSegments.add(segment);
+		for (int i=0; i<params.getIndexedCount(); i++) {
+			segment = params.get(i).toString();
+			if (segment.length() != 0)
+				revisionSegments.add(segment);
+		}
+
+		if (revisionSegments.isEmpty())
+			throw new RestartResponseException(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject()));
 		
-		state = new State(params);
+		State state = new State();
+		state.revision = Joiner.on("/").join(revisionSegments);
+		
+		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
+		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
+		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
+		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
+		
 		resolvedRevision = getProject().getRevCommit(state.revision, true).copy();
 		if (state.compareWith != null)
 			resolvedCompareWith = getProject().getRevCommit(state.compareWith, true).copy();
@@ -599,29 +622,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		@Nullable
 		public MarkPos mark;
-		
-		public State() {
-		}
-		
-		public State(PageParameters params) {
-			List<String> revisionSegments = new ArrayList<>();
-			String segment = params.get(PARAM_REVISION).toString();
-			if (segment.length() != 0)
-				revisionSegments.add(segment);
-			for (int i=0; i<params.getIndexedCount(); i++) {
-				segment = params.get(i).toString();
-				if (segment.length() != 0)
-					revisionSegments.add(segment);
-			}
-			
-			revision = Joiner.on("/").join(revisionSegments);
-			compareWith = params.get(PARAM_COMPARE_WITH).toString();
-			whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
-			pathFilter = params.get(PARAM_PATH_FILTER).toString();
-			blameFile = params.get(PARAM_BLAME_FILE).toString();
-			commentId = params.get(PARAM_COMMENT).toOptionalLong();
-			mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
-		}
 		
 	}
 

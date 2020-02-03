@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -83,6 +84,10 @@ public abstract class BuildDetailPage extends ProjectPage
 	public BuildDetailPage(PageParameters params) {
 		super(params);
 		
+		String buildNumberString = params.get(PARAM_BUILD).toString();
+		if (StringUtils.isBlank(buildNumberString))
+			throw new RestartResponseException(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), null, 0));
+			
 		buildModel = new LoadableDetachableModel<Build>() {
 
 			@Override

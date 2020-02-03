@@ -2,6 +2,8 @@ package io.onedev.server.web.page.admin.role;
 
 import java.io.Serializable;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -38,13 +40,15 @@ public class RoleDetailPage extends AdministrationPage {
 	public RoleDetailPage(PageParameters params) {
 		super(params);
 		
-		Long roleId = params.get(PARAM_ROLE).toLong();
+		String roleIdString = params.get(PARAM_ROLE).toString();
+		if (StringUtils.isBlank(roleIdString))
+			throw new RestartResponseException(RoleListPage.class);
 		
 		roleModel = new LoadableDetachableModel<Role>() {
 
 			@Override
 			protected Role load() {
-				return OneDev.getInstance(RoleManager.class).load(roleId);
+				return OneDev.getInstance(RoleManager.class).load(Long.valueOf(roleIdString));
 			}
 			
 		};

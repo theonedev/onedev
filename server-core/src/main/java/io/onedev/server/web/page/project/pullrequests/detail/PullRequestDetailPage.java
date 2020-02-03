@@ -164,11 +164,15 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	public PullRequestDetailPage(PageParameters params) {
 		super(params);
 		
+		String requestNumberString = params.get(PARAM_REQUEST).toString();
+		if (StringUtils.isBlank(requestNumberString))
+			throw new RestartResponseException(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), null, 0));
+		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
 			@Override
 			protected PullRequest load() {
-				Long requestNumber = params.get(PARAM_REQUEST).toLong();
+				Long requestNumber = Long.valueOf(requestNumberString);
 				PullRequest request = getPullRequestManager().find(getProject(), requestNumber);
 				if (request == null)
 					throw new EntityNotFoundException("Unable to find request #" + requestNumber + " in project " + getProject());

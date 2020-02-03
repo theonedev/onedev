@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -160,7 +161,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		boards = getProject().getIssueSetting().getBoardSpecs(true);
 		
 		String boardName = params.get(PARAM_BOARD).toString();
-		if (boardName != null) {
+		if (StringUtils.isNotBlank(boardName)) {
 			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
 				throw new OneException("Can not find issue board: " + boardName);
