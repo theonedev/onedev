@@ -6,13 +6,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.apache.wicket.util.convert.IConverter;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.SshKey;
@@ -44,21 +42,11 @@ public abstract class InsertSshKeyPanel extends Panel {
             }
         });
 
-        Form<SshKey> form = new Form<SshKey>("form") {
-            @Override
-            protected void onSubmit() {
-                super.onSubmit();
-                
-                SshKey sshKey = getModelObject();
-                Dao dao = OneDev.getInstance(Dao.class);
-                
-                sshKey.setOwner(user);
-                sshKey.setTimestamp(LocalDateTime.now());
-                
-                dao.persist(sshKey);
-            }
-        };
+        Form<SshKey> form = new Form<SshKey>("form") ;
         
+        CompoundPropertyModel<SshKey> model = new CompoundPropertyModel<SshKey>(new SshKey());
+        form.setModel(model);
+
         FeedbackPanel feedbackPanel = new FeedbackPanel("feedback");
         feedbackPanel.setOutputMarkupId(true);
         
@@ -74,6 +62,14 @@ public abstract class InsertSshKeyPanel extends Panel {
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
                 super.onSubmit(target, myform);
+                SshKey sshKey = form.getModelObject();
+                Dao dao = OneDev.getInstance(Dao.class);
+                
+                sshKey.setOwner(user);
+                sshKey.setTimestamp(LocalDateTime.now());
+                
+                dao.persist(sshKey);
+                
                 modal.close();
                 onSave(target);
             }
@@ -88,18 +84,8 @@ public abstract class InsertSshKeyPanel extends Panel {
         TextArea<String> textArea = new TextArea<String>("content");
 
         form.add(new TextField<>("name").setRequired(true));
-        form.add(textArea.setRequired(true));
-        form.add(new HiddenField<String>("digest"){
-            @SuppressWarnings("unchecked")
-            @Override
-            public <C> IConverter<C> getConverter(Class<C> type) {
-                return (IConverter<C>) new SshConverter(textArea);
-            }
-        });
-        
+        form.add(textArea.add(new SshValidator(model)).setRequired(true));
         form.add(feedbackPanel);
-        
-        form.setModel(new CompoundPropertyModel<SshKey>(new SshKey()));
         
         add(form);
     }
