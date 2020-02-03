@@ -1,34 +1,25 @@
 package io.onedev.server.git.ssh;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
-import org.apache.sshd.common.session.Session;
 import org.apache.sshd.common.util.threads.ThreadUtils;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.command.AbstractCommandSupport;
-import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.shell.UnknownCommand;
-import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
-
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
@@ -36,25 +27,26 @@ import io.onedev.server.persistence.dao.Dao;
 @Singleton
 public class SimpleGitSshServer {
 
-    private final Repository repository;
-    
     private final SshServer server;
 
     private final ExecutorService executorService = ThreadUtils
             .newFixedThreadPool("SimpleGitServer", 4);
 
-    private DefaultUserManager userManager;
+    private final DefaultUserManager userManager;
 
-    private Dao dao;
+    private final Dao dao;
+
+    private final ProjectManager projectManager;
 
     @Inject
-    public SimpleGitSshServer(ProjectManager projectManager,
-            DefaultUserManager userManager,
+    public SimpleGitSshServer(
             Dao dao,
+            ProjectManager projectManager,
+            DefaultUserManager userManager,
             KeyPairProvider keyPairProvider) {
+        this.projectManager = projectManager;
         this.userManager = userManager;
         this.dao = dao;
-        this.repository = null;
         this.server = SshServer.setUpDefaultServer();
         
         this.server.setKeyPairProvider(keyPairProvider);
@@ -92,19 +84,6 @@ public class SimpleGitSshServer {
         
         return false;
     }
-
-    private List<NamedFactory<Command>> configureSubsystems() {
-        server.setFileSystemFactory(new VirtualFileSystemFactory() {
-
-            @Override
-            protected Path computeRootDir(Session session) throws IOException {
-                return SimpleGitSshServer.this.repository.getDirectory()
-                        .getParentFile().getAbsoluteFile().toPath();
-            }
-        });
-        return Collections
-                .singletonList((new SftpSubsystemFactory.Builder()).build());
-    }
     
     public int start() throws IOException {
         server.start();
@@ -125,7 +104,14 @@ public class SimpleGitSshServer {
 
         @Override
         public void run() {
-            UploadPack uploadPack = new UploadPack(repository);
+            String gitCommand = getCommand();
+            int lastSegment = gitCommand.lastIndexOf('/');
+            int postifPos = gitCommand.lastIndexOf(".git");
+            
+            String projectName = gitCommand.substring(lastSegment +1, postifPos);
+            Project project = projectManager.find(projectName);
+            
+            UploadPack uploadPack = new UploadPack(project.getRepository());
             String gitProtocol = getEnvironment().getEnv().get("GIT_PROTOCOL");
             if (gitProtocol != null) {
                 uploadPack
@@ -154,8 +140,15 @@ public class SimpleGitSshServer {
 
         @Override
         public void run() {
+            String gitCommand = getCommand();
+            int lastSegment = gitCommand.lastIndexOf('/');
+            int postifPos = gitCommand.lastIndexOf(".git");
+            
+            String projectName = gitCommand.substring(lastSegment +1, postifPos);
+            Project project = projectManager.find(projectName);
+            
             try {
-                new ReceivePack(repository).receive(getInputStream(),
+                new ReceivePack(project.getRepository()).receive(getInputStream(),
                         getOutputStream(), getErrorStream());
                 onExit(0);
             } catch (IOException e) {
