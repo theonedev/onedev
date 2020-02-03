@@ -18,11 +18,11 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
-public class IssueChoiceEditor extends PropertyEditor<Long> {
+public class IssueSingleChoiceEditor extends PropertyEditor<Long> {
 
 	private IssueSingleChoice input;
 	
-	public IssueChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+	public IssueSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
 			IModel<Long> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}

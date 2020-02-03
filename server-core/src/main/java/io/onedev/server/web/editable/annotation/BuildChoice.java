@@ -10,6 +10,5 @@ import java.lang.annotation.Target;
 public @interface BuildChoice {
 
 	// optionally specify a method to return project for build query
-	String project() default "";
 	
 }

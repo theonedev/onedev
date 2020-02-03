@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -14,20 +12,15 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.BuildChoice;
-import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
@@ -39,21 +32,8 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@Nullable
 	private Project getProject() {
-		ComponentContext.push(new ComponentContext(this));
-		try {
-			BuildChoice choice = Preconditions.checkNotNull(descriptor
-					.getPropertyGetter().getAnnotation(BuildChoice.class));
-			if (choice.project().length() != 0) {
-				return (Project) ReflectionUtils.invokeStaticMethod(
-						descriptor.getBeanClass(), choice.project());
-			} else {
-				return findParent(ProjectAware.class).getProject();
-			}
-		} finally {
-			ComponentContext.pop();
-		}
+		return ((ProjectPage)getPage()).getProject();		
 	}
 	
 	@Override
@@ -63,8 +43,8 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 		List<Build> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			for (Long buildId: getModelObject()) {
-				Build build = buildManager.get(buildId);
+			for (Long buildNumber: getModelObject()) {
+				Build build = buildManager.find(getProject(), buildNumber);
 				if (build != null)
 					selections.add(build);
 			}
@@ -107,7 +87,7 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	protected List<Long> convertInputToValue() throws ConversionException {
 		Collection<Build> builds = input.getConvertedInput();
 		if (builds != null)
-			return builds.stream().map(it->it.getId()).collect(Collectors.toList());
+			return builds.stream().map(it->it.getNumber()).collect(Collectors.toList());
 		else
 			return new ArrayList<>();
 	}
