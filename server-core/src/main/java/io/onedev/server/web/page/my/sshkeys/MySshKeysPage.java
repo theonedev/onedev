@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
-import io.onedev.server.git.ssh.SshUtils;
+import io.onedev.server.git.ssh.SshKeyUtils;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
@@ -55,7 +55,7 @@ public class MySshKeysPage extends MyPage {
             @Override
             protected List<SshKey> load() {
                 Dao dao = OneDev.getInstance(Dao.class);
-                return SshUtils.loadUserKeys(user, dao);
+                return SshKeyUtils.loadUserKeys(user, dao);
             }
 		    
 		};

@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +13,11 @@ import javax.persistence.Table;
 @Table
 public class SshKey extends AbstractEntity {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     @Column(nullable=false)
     private String name;
 

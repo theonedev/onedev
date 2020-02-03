@@ -7,11 +7,12 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.sshd.common.file.virtualfs.VirtualFileSystemFactory;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.session.Session;
@@ -25,6 +26,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
+
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.model.SshKey;
@@ -44,8 +46,6 @@ public class SimpleGitSshServer {
     private DefaultUserManager userManager;
 
     private Dao dao;
-
-    public static final BaseDigest MD5_DIGESTER = new BaseDigest("MD5", 512);
 
     @Inject
     public SimpleGitSshServer(ProjectManager projectManager,
@@ -79,11 +79,10 @@ public class SimpleGitSshServer {
         });
     }
     
-    
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
-        String fingerPrint = KeyUtils.getFingerPrint(MD5_DIGESTER, publicKey);
+        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);
         User user = userManager.findByName(userName);
-        List<SshKey> keys = SshUtils.loadUserKeys(user, dao);
+        List<SshKey> keys = SshKeyUtils.loadUserKeys(user, dao);
         
         for (SshKey sshKey : keys) {
             if (fingerPrint.equals(sshKey.getDigest())) {
