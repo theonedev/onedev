@@ -1,5 +1,7 @@
 package io.onedev.server.search.entity.issue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.Nullable;
@@ -22,10 +24,13 @@ public class BuildFieldCriteria extends FieldCriteria {
 	
 	private final String value;
 	
-	public BuildFieldCriteria(String name, @Nullable Project project, String value) {
+	private final boolean allowMultiple;
+	
+	public BuildFieldCriteria(String name, @Nullable Project project, String value, boolean allowMultiple) {
 		super(name);
 		build = EntityQuery.getBuild(project, value);
 		this.value = value;
+		this.allowMultiple = allowMultiple;
 	}
 
 	@Override
@@ -41,6 +46,20 @@ public class BuildFieldCriteria extends FieldCriteria {
 		return issue.getProject().equals(build.getProject()) && Objects.equals(fieldValue, build.getNumber());
 	}
 
+	@SuppressWarnings({"unchecked" })
+	@Override
+	public void fill(Issue issue) {
+		if (allowMultiple) {
+			List<Long> valueFromIssue = (List<Long>) issue.getFieldValue(getFieldName());
+			if (valueFromIssue == null)
+				valueFromIssue = new ArrayList<>();
+			valueFromIssue.add(build.getNumber());
+			issue.setFieldValue(getFieldName(), valueFromIssue);
+		} else {
+			issue.setFieldValue(getFieldName(), build.getNumber());
+		}
+	}
+	
 	@Override
 	public String asString() {
 		return quote(getFieldName()) + " " 

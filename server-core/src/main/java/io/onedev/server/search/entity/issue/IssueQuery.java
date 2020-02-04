@@ -238,7 +238,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 								if (field instanceof IssueChoiceField) {
 									return new IssueFieldCriteria(fieldName, project, value);
 								} else if (field instanceof BuildChoiceField) {
-									return new BuildFieldCriteria(fieldName, project, value);
+									return new BuildFieldCriteria(fieldName, project, value, field.isAllowMultiple());
 								} else if (field instanceof PullRequestChoiceField) {
 									return new PullRequestFieldCriteria(fieldName, project, value);
 								} else if (field instanceof CommitField) {

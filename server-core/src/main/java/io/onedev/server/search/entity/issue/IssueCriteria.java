@@ -3,7 +3,6 @@ package io.onedev.server.search.entity.issue;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -16,11 +15,7 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public final void fill(Issue issue) {
-		fill(issue, new HashSet<>());
-	}
-	
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 	}
 	
 	public Collection<String> getUndefinedStates() {

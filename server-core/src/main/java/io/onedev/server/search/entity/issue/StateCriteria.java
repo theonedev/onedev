@@ -3,7 +3,6 @@ package io.onedev.server.search.entity.issue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
@@ -13,7 +12,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class StateCriteria extends IssueCriteria {
@@ -38,7 +36,7 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		issue.setState(value);
 	}
 

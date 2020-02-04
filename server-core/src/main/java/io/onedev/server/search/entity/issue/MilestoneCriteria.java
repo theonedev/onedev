@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Set;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
@@ -46,7 +44,7 @@ public class MilestoneCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		issue.setMilestone(issue.getProject().getMilestone(milestoneName));
 	}
 

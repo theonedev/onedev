@@ -1,7 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
@@ -40,7 +39,7 @@ public class BooleanFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		issue.setFieldValue(getFieldName(), value);
 	}
 

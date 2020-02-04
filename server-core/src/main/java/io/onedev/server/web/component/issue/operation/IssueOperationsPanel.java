@@ -36,10 +36,8 @@ import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.TransitionSpec;
-import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.DateField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
-import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -202,16 +200,10 @@ public abstract class IssueOperationsPanel extends Panel {
 					criterias.add(Criteria.quote(entry.getKey()) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty));
 				} else { 
 					FieldSpec field = issueSetting.getFieldSpec(entry.getKey());
-					if (field instanceof ChoiceField && ((ChoiceField)field).isAllowMultiple()) {
+					if (field.isAllowMultiple()) {
 						for (String string: strings) {
 							criterias.add(Criteria.quote(entry.getKey()) + " " 
-									+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
-									+ Criteria.quote(string));
-						}
-					} else if (field instanceof UserChoiceField && ((UserChoiceField)field).isAllowMultiple()) {
-						for (String string: strings) {
-							criterias.add(Criteria.quote(entry.getKey()) + " " 
-									+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
+									+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 									+ Criteria.quote(string));
 						}
 					} else if (!(field instanceof DateField)) { 

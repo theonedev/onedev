@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -162,26 +161,18 @@ public class FieldOperatorCriteria extends FieldCriteria {
 		return quote(getFieldName()) + " " + IssueQuery.getRuleName(operator);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"unchecked" })
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		if (operator == IssueQueryLexer.IsEmpty) {
 			issue.setFieldValue(getFieldName(), null);
 		} else if (operator == IssueQueryLexer.IsMe) {
 			if (allowMultiple) {
-				List list;
-				if (!initedLists.contains(getFieldName())) {
-					list = new ArrayList();
-					issue.setFieldValue(getFieldName(), list);
-					initedLists.add(getFieldName());
-				} else {
-					list = (List) issue.getFieldValue(getFieldName());
-					if (list == null) {
-						list = new ArrayList();
-						issue.setFieldValue(getFieldName(), list);
-					}
-				}
-				list.add(SecurityUtils.getUser().getName());
+				List<String> valueFromIssue = (List<String>) issue.getFieldValue(getFieldName());
+				if (valueFromIssue == null)
+					valueFromIssue = new ArrayList<>();
+				valueFromIssue.add(SecurityUtils.getUser().getName());
+				issue.setFieldValue(getFieldName(), valueFromIssue);
 			} else {
 				issue.setFieldValue(getFieldName(), SecurityUtils.getUser().getName());
 			}

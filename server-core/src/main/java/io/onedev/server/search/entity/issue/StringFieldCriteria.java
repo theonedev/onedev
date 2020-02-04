@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Set;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
@@ -55,7 +53,7 @@ public class StringFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
 			issue.setFieldValue(getFieldName(), value);
 	}

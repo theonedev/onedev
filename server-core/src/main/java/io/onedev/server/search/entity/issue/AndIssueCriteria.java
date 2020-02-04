@@ -105,9 +105,9 @@ public class AndIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		for (IssueCriteria criteria: criterias)
-			criteria.fill(issue, initedLists);
+			criteria.fill(issue);
 	}
 	
 }
