@@ -1,4 +1,4 @@
-package io.onedev.server.model.support;
+package io.onedev.server.model.support.build;
 
 import java.io.Serializable;
 

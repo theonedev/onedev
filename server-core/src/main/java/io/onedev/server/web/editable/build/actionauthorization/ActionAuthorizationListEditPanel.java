@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.job.trigger;
+package io.onedev.server.web.editable.build.actionauthorization;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,9 +24,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.trigger.JobTrigger;
+import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -36,25 +34,17 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 
 @SuppressWarnings("serial")
-class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
+class ActionAuthorizationListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<JobTrigger> triggers;
+	private final List<ActionAuthorization> authorizations;
 	
-	public JobTriggerListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public ActionAuthorizationListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		triggers = new ArrayList<>();
+		authorizations = new ArrayList<>();
 		for (Serializable each: model.getObject()) {
-			triggers.add((JobTrigger) each);
+			authorizations.add((ActionAuthorization) each);
 		}
-	}
-	
-	private Job getJob() {
-		JobAware jobAware = findParent(JobAware.class);
-		if (jobAware != null)
-			return jobAware.getJob();
-		else
-			return null;
 	}
 	
 	@Override
@@ -64,7 +54,7 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new JobTriggerEditPanel(id, triggers, -1) {
+				return new ActionAuthorizationEditPanel(id, authorizations, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -76,12 +66,7 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 						markFormDirty(target);
 						modal.close();
 						onPropertyUpdating(target);
-						target.add(JobTriggerListEditPanel.this);
-					}
-
-					@Override
-					public Job getJob() {
-						return JobTriggerListEditPanel.this.getJob();
+						target.add(ActionAuthorizationListEditPanel.this);
 					}
 
 				};
@@ -89,12 +74,12 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});
 		
-		List<IColumn<JobTrigger, Void>> columns = new ArrayList<>();
+		List<IColumn<ActionAuthorization, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<ActionAuthorization, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+			public void populateItem(Item<ICellPopulator<ActionAuthorization>> cellItem, String componentId, IModel<ActionAuthorization> rowModel) {
 				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
 			}
 			
@@ -105,33 +90,37 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<ActionAuthorization, Void>(Model.of("Action")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getDescription()));
+			public void populateItem(Item<ICellPopulator<ActionAuthorization>> cellItem, String componentId, IModel<ActionAuthorization> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getActionDescription()));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("#Params")) {
+		columns.add(new AbstractColumn<ActionAuthorization, Void>(Model.of("Authorized Branches")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getParams().size()));
+			public void populateItem(Item<ICellPopulator<ActionAuthorization>> cellItem, String componentId, IModel<ActionAuthorization> rowModel) {
+				String authorizedBranches = rowModel.getObject().getAuthorizedBranches();
+				if (authorizedBranches != null)
+					cellItem.add(new Label(componentId, authorizedBranches));
+				else
+					cellItem.add(new Label(componentId, "<i>All</i>").setEscapeModelStrings(false));
 			}
 			
 		});		
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<ActionAuthorization, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", JobTriggerListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<ActionAuthorization>> cellItem, String componentId, IModel<ActionAuthorization> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ActionAuthorizationListEditPanel.this);
 				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new JobTriggerEditPanel(id, triggers, cellItem.findParent(Item.class).getIndex()) {
+						return new ActionAuthorizationEditPanel(id, authorizations, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -143,12 +132,7 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 								markFormDirty(target);
 								modal.close();
 								onPropertyUpdating(target);
-								target.add(JobTriggerListEditPanel.this);
-							}
-
-							@Override
-							public Job getJob() {
-								return JobTriggerListEditPanel.this.getJob();
+								target.add(ActionAuthorizationListEditPanel.this);
 							}
 
 						};
@@ -160,9 +144,9 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						markFormDirty(target);
-						triggers.remove(rowModel.getObject());
+						authorizations.remove(rowModel.getObject());
 						onPropertyUpdating(target);
-						target.add(JobTriggerListEditPanel.this);
+						target.add(ActionAuthorizationListEditPanel.this);
 					}
 					
 				});
@@ -176,17 +160,17 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		IDataProvider<JobTrigger> dataProvider = new ListDataProvider<JobTrigger>() {
+		IDataProvider<ActionAuthorization> dataProvider = new ListDataProvider<ActionAuthorization>() {
 
 			@Override
-			protected List<JobTrigger> getData() {
-				return triggers;			
+			protected List<ActionAuthorization> getData() {
+				return authorizations;			
 			}
 
 		};
 		
-		DataTable<JobTrigger, Void> dataTable;
-		add(dataTable = new DataTable<JobTrigger, Void>("triggers", columns, dataProvider, Integer.MAX_VALUE));
+		DataTable<ActionAuthorization, Void> dataTable;
+		add(dataTable = new DataTable<ActionAuthorization, Void>("authorizations", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		
@@ -198,13 +182,13 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(triggers, fromIndex+i, fromIndex+i+1);
+						Collections.swap(authorizations, fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(triggers, fromIndex-i, fromIndex-i-1);
+						Collections.swap(authorizations, fromIndex-i, fromIndex-i-1);
 				}
 				onPropertyUpdating(target);
-				target.add(JobTriggerListEditPanel.this);
+				target.add(ActionAuthorizationListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
@@ -223,7 +207,7 @@ class JobTriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (JobTrigger each: triggers)
+		for (ActionAuthorization each: authorizations)
 			value.add(each);
 		return value;
 	}

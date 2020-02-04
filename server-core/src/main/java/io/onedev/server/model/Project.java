@@ -97,9 +97,9 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
-import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
+import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
@@ -1145,29 +1145,6 @@ public class Project extends AbstractEntity {
 		for (TagProtection protection: getTagProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.parse(protection.getUserMatch()).matches(this, user)
-					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
-				noCreation = noCreation || protection.isPreventCreation();
-				noDeletion = noDeletion || protection.isPreventDeletion();
-				noUpdate = noUpdate || protection.isPreventUpdate();
-			}
-		}
-		
-		TagProtection protection = new TagProtection();
-		protection.setPreventCreation(noCreation);
-		protection.setPreventDeletion(noDeletion);
-		protection.setPreventUpdate(noUpdate);
-		
-		return protection;
-	}
-	
-	public TagProtection getTagProtection(String tagName, Build build) {
-		boolean noCreation = false;
-		boolean noDeletion = false;
-		boolean noUpdate = false;
-		Project project = build.getProject();
-		for (TagProtection protection: getTagProtections()) {
-			if (protection.isEnabled() 
-					&& (protection.getBuildBranches() == null || project.isCommitOnBranches(build.getCommitId(), protection.getBuildBranches()))
 					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				noCreation = noCreation || protection.isPreventCreation();
 				noDeletion = noDeletion || protection.isPreventDeletion();

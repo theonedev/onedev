@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.model.support.BuildPreservation;
+import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

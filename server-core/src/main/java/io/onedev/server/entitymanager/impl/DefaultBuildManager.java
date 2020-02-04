@@ -62,7 +62,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.BuildPreservation;
+import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;

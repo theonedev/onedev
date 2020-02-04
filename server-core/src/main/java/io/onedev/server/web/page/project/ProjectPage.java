@@ -61,7 +61,7 @@ import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizat
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.build.ProjectBuildSettingPage;
-import io.onedev.server.web.page.project.setting.build.ProjectSecretsPage;
+import io.onedev.server.web.page.project.setting.build.ProjectJobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.ProjectIssueSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
@@ -313,7 +313,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", 
 				StateTransitionsPage.class, ProjectIssueSettingPage.class));
 		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-cubes", 
-				ProjectSecretsPage.class, ProjectBuildSettingPage.class));
+				ProjectJobSecretsPage.class, ProjectBuildSettingPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", ProjectWebHooksPage.class));
 		return tabs;
 	}

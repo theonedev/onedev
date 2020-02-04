@@ -57,7 +57,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.model.support.JobSecret;
+import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BeanUtils;

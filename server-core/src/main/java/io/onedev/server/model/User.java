@@ -29,11 +29,11 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
 
-import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.UserBuildSetting;
 import io.onedev.server.model.support.WebHook;
+import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.model.support.build.UserBuildSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.SecurityUtils;

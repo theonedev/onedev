@@ -1,7 +1,8 @@
-package io.onedev.server.model.support;
+package io.onedev.server.model.support.build;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.web.editable.annotation.BuildQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 

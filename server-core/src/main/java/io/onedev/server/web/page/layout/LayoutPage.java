@@ -47,7 +47,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
-import io.onedev.server.web.page.my.buildsetting.MySecretsPage;
+import io.onedev.server.web.page.my.buildsetting.MyJobSecretsPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.webhook.MyWebHooksPage;
@@ -204,7 +204,7 @@ public abstract class LayoutPage extends BasePage {
 			item.add(AttributeAppender.append("class", "active"));
 
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MySecretsPage.class));
+		item.add(new ViewStateAwarePageLink<Void>("link", MyJobSecretsPage.class));
 		if (getPage() instanceof MyBuildSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 

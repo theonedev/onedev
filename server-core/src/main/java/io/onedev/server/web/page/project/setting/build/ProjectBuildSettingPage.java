@@ -29,8 +29,16 @@ public abstract class ProjectBuildSettingPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new PageTab(Model.of("Secrets"), ProjectSecretsPage.class) {
+		tabs.add(new PageTab(Model.of("Job Secrets"), ProjectJobSecretsPage.class) {
 
+			@Override
+			public Component render(String componentId) {
+				return new TabLink(componentId, this);
+			}
+			
+		});
+		tabs.add(new PageTab(Model.of("Action Authorizations"), ProjectActionAuthorizationsPage.class) {
+			
 			@Override
 			public Component render(String componentId) {
 				return new TabLink(componentId, this);

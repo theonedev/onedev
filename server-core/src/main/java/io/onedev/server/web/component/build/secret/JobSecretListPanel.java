@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.job.secret;
+package io.onedev.server.web.component.build.secret;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.server.model.support.JobSecret;
+import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 

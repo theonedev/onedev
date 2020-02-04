@@ -7,19 +7,19 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.JobSecret;
+import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.util.inputspec.SecretInput;
-import io.onedev.server.web.component.job.secret.JobSecretListPanel;
-import io.onedev.server.web.component.job.secret.JobSecretsBean;
+import io.onedev.server.web.component.build.secret.JobSecretListPanel;
+import io.onedev.server.web.component.build.secret.JobSecretsBean;
 import io.onedev.server.web.component.link.SettingInOwnerLink;
 import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.page.admin.user.buildsetting.UserSecretsPage;
-import io.onedev.server.web.page.my.buildsetting.MySecretsPage;
+import io.onedev.server.web.page.admin.user.buildsetting.UserJobSecretsPage;
+import io.onedev.server.web.page.my.buildsetting.MyJobSecretsPage;
 
 @SuppressWarnings("serial")
-public class ProjectSecretsPage extends ProjectBuildSettingPage {
+public class ProjectJobSecretsPage extends ProjectBuildSettingPage {
 
-	public ProjectSecretsPage(PageParameters params) {
+	public ProjectJobSecretsPage(PageParameters params) {
 		super(params);
 	}
 
@@ -27,19 +27,19 @@ public class ProjectSecretsPage extends ProjectBuildSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		String note = String.format("Define secrets to be used in build jobs. Secret value less "
+		String note = String.format("Define job secrets to be used in build spec. Secret value less "
 				+ "than %d characters will not be masked in build log", SecretInput.MASK.length());
 		add(new Label("note", note).setEscapeModelStrings(false));
 		
 		JobSecretsBean bean = new JobSecretsBean();
-		bean.setSecrets(getProject().getBuildSetting().getSecrets());
-		add(new JobSecretListPanel("projectSpecificSecrets", bean) {
+		bean.setSecrets(getProject().getBuildSetting().getJobSecrets());
+		add(new JobSecretListPanel("projectSpecificJobSecrets", bean) {
 			
 			@Override
 			protected void onSaved(List<JobSecret> secrets) {
-				getProject().getBuildSetting().setSecrets(secrets);
+				getProject().getBuildSetting().setJobSecrets(secrets);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
-				setResponsePage(ProjectSecretsPage.class, ProjectSecretsPage.paramsOf(getProject()));
+				setResponsePage(ProjectJobSecretsPage.class, ProjectJobSecretsPage.paramsOf(getProject()));
 			}
 			
 		});
@@ -47,9 +47,9 @@ public class ProjectSecretsPage extends ProjectBuildSettingPage {
 		List<JobSecret> inheritedSecrets = getProject().getBuildSetting().getInheritedSecrets(getProject());
 		bean = new JobSecretsBean();
 		bean.setSecrets(inheritedSecrets);
-		add(PropertyContext.view("inheritedSecrets", bean, "secrets"));
+		add(PropertyContext.view("inheritedJobSecrets", bean, "secrets"));
 		
-		add(new SettingInOwnerLink("owner", projectModel, UserSecretsPage.class, MySecretsPage.class));
+		add(new SettingInOwnerLink("owner", projectModel, UserJobSecretsPage.class, MyJobSecretsPage.class));
 	}
 
 }

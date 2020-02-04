@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.build.perservation;
+package io.onedev.server.web.component.build.authorization;
 
 import java.io.Serializable;
 import java.util.List;
@@ -7,16 +7,16 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.server.model.support.build.BuildPreservation;
+import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public abstract class BuildPreservationListPanel extends Panel {
+public abstract class ActionAuthorizationListPanel extends Panel {
 
-	private final BuildPreservationsBean bean;
+	private final ActionAuthorizationsBean bean;
 	
-	public BuildPreservationListPanel(String id, BuildPreservationsBean bean) {
+	public ActionAuthorizationListPanel(String id, ActionAuthorizationsBean bean) {
 		super(id);
 		this.bean = bean;
 	}
@@ -25,15 +25,15 @@ public abstract class BuildPreservationListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		PropertyEditor<Serializable> editor = PropertyContext.edit("editor", bean, "buildPreservations");
+		PropertyEditor<Serializable> editor = PropertyContext.edit("editor", bean, "actionAuthorizations");
 		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSession().success("Build preserve rules saved");
-				onSaved(bean.getBuildPreservations());
+				getSession().success("Action authorization rules saved");
+				onSaved(bean.getActionAuthorizations());
 			}
 			
 		};
@@ -42,5 +42,5 @@ public abstract class BuildPreservationListPanel extends Panel {
 		add(form);
 	}
 
-	protected abstract void onSaved(List<BuildPreservation> buildPreservations);
+	protected abstract void onSaved(List<ActionAuthorization> actionAuthorizations);
 }

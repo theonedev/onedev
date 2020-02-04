@@ -1429,7 +1429,44 @@ public class DataMigrator {
 	
 	private void migrate35(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Settings.xml")) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element buildSettingElement = element.element("buildSetting");
+					for (Element queryElement: buildSettingElement.element("namedQueries").elements())
+						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+					Element secretsElement = buildSettingElement.element("secrets");
+					secretsElement.setName("jobSecrets");
+					for (Element secretElement: secretsElement.elements())
+						secretElement.setName("io.onedev.server.model.support.build.JobSecret");
+					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
+						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
+					buildSettingElement.addElement("actionAuthorizations");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element queryElement: element.element("userBuildQueries").elements())
+						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+					Element buildSettingElement = element.element("buildSetting");
+					Element secretsElement = buildSettingElement.element("secrets");
+					secretsElement.setName("jobSecrets");
+					for (Element secretElement: secretsElement.elements())
+						secretElement.setName("io.onedev.server.model.support.build.JobSecret");
+					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
+						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
+					buildSettingElement.addElement("actionAuthorizations");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element queryElement: element.element("userQueries").elements()) 
+						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("ISSUE")) {
@@ -1438,6 +1475,12 @@ public class DataMigrator {
 							for (Element stateElement: valueElement.element("stateSpecs").elements()) {
 								stateElement.element("done").detach();
 							}
+						}
+					} else if (element.elementTextTrim("key").equals("BUILD")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element queryElement: valueElement.element("namedQueries").elements()) 
+								queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
 						}
 					}
 				}
