@@ -6,10 +6,8 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.util.threads.ThreadUtils;
@@ -18,13 +16,13 @@ import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
-
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.ServerConfig;
 
 @Singleton
 public class SimpleGitSshServer {
@@ -40,19 +38,23 @@ public class SimpleGitSshServer {
 
     private final ProjectManager projectManager;
 
+    private final ServerConfig serverConfig;
+
     @Inject
     public SimpleGitSshServer(
             Dao dao,
             ProjectManager projectManager,
             DefaultUserManager userManager,
-            KeyPairProvider keyPairProvider) {
+            KeyPairProvider keyPairProvider,
+            ServerConfig serverConfig) {
+        this.dao = dao;
         this.projectManager = projectManager;
         this.userManager = userManager;
-        this.dao = dao;
+        this.serverConfig = serverConfig;
         this.server = SshServer.setUpDefaultServer();
         
         this.server.setKeyPairProvider(keyPairProvider);
-        this.server.setPort(40789);
+        this.server.setPort(serverConfig.getSshPort());
         
         configureAuthentication();
         this.server.setCommandFactory(command -> {
@@ -153,9 +155,5 @@ public class SimpleGitSshServer {
             }
         }
 
-    }
-
-    public int getPort() {
-        return server.getPort();
     }
 }

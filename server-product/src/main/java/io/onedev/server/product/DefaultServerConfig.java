@@ -3,14 +3,11 @@ package io.onedev.server.product;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.internal.guava.Preconditions;
-
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneException;
@@ -22,6 +19,8 @@ public class DefaultServerConfig implements ServerConfig {
 	private static final String PROP_HTTPPORT = "http_port";
 	
 	private static final String PROP_HTTPSPORT = "https_port";
+
+	private static final String PROP_SSHPORT = "ssh_port";
 	
 	private static final String PROP_KEYSTORE = "keystore";
 	
@@ -38,12 +37,15 @@ public class DefaultServerConfig implements ServerConfig {
 	private int sessionTimeout;
 	
 	private int httpsPort;
+
+	private int sshPort;
 	
 	private File trustCertsDir;
 	
 	private File keystoreFile;
 	
 	private String keystorePassword;
+
 	
 	@Inject
 	public DefaultServerConfig(ServerProperties props) {
@@ -61,6 +63,13 @@ public class DefaultServerConfig implements ServerConfig {
 		
 		if (httpPort == 0 && httpsPort == 0)
 			throw new RuntimeException("Either " + PROP_HTTPPORT + " or " + PROP_HTTPSPORT + " or both should be enabled");
+		
+		String sshPortStr = System.getenv(PROP_SSHPORT);
+        if (StringUtils.isBlank(sshPortStr))
+            sshPortStr = props.getProperty(PROP_SSHPORT);
+        if (StringUtils.isNotBlank(sshPortStr))
+            sshPort = Integer.parseInt(sshPortStr.trim());
+        
 		
 		String keystore = System.getenv(PROP_KEYSTORE); 
 		if (StringUtils.isBlank(keystore))
@@ -146,5 +155,10 @@ public class DefaultServerConfig implements ServerConfig {
 	public File getTrustCertsDir() {
 		return trustCertsDir;
 	}
+
+	@Override
+    public int getSshPort() {
+        return sshPort;
+    }
 	
 }

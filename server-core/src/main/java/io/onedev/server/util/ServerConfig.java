@@ -1,7 +1,6 @@
 package io.onedev.server.util;
 
 import java.io.File;
-
 import javax.annotation.Nullable;
 
 public interface ServerConfig {
@@ -37,5 +36,13 @@ public interface ServerConfig {
 	 * 			web session timeout in seconds
 	 */
 	int getSessionTimeout();
+
+	/**
+     * Get ssh port configured for the server.
+     * <p> 
+     * @return
+     *          ssh port of the server, or <i>0</i> if ssh port is not defined
+     */
+    int getSshPort();
 	
 }

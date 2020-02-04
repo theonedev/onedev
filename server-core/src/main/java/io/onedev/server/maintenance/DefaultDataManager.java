@@ -31,7 +31,6 @@ import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
@@ -49,6 +48,7 @@ import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.init.Skippable;
 import io.onedev.server.util.schedule.SchedulableTask;
@@ -76,12 +76,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private final RoleManager roleManager;
 	
 	private String backupTaskId;
+
+    private ServerConfig serverConfig;
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, UserManager userManager, 
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
-			PasswordService passwordService, RoleManager roleManager) {
+			PasswordService passwordService, RoleManager roleManager,
+			ServerConfig serverConfig) {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.validator = validator;
@@ -91,6 +94,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.mailManager = mailManager;
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
+        this.serverConfig = serverConfig;
 	}
 	
 	@SuppressWarnings("serial")
@@ -135,8 +139,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 		SystemSetting systemSetting = null;
 		
 		if (setting == null || setting.getValue() == null) {
-			systemSetting = new SystemSetting();
-			systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl().toString());
+		    Url serverUrl = OneDev.getInstance().guessServerUrl();
+		    
+		    systemSetting = new SystemSetting();
+			systemSetting.setServerUrl(serverUrl.toString());
+			systemSetting.setServerSshUrl(serverUrl.getHost()+ ":" + serverConfig.getSshPort());
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
 			systemSetting = (SystemSetting) setting.getValue();
 		}

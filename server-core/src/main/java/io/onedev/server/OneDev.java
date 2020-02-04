@@ -35,6 +35,7 @@ import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.maintenance.DataManager;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -134,8 +135,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		SecurityUtils.bindAsSystem();
 		
 		listenerRegistry.post(new SystemStarted());
-		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
-		logger.info("Git server started at port " + simpleGitSshServer.getPort());
+		SystemSetting systemSetting = configManager.getSystemSetting();
+        logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
+		logger.info("Git server started at " + systemSetting.getServerSshUrl());
 		initStage = null;
 	}
 
