@@ -6,17 +6,19 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.util.threads.ThreadUtils;
 import org.apache.sshd.server.SshServer;
-import org.apache.sshd.server.command.AbstractCommandSupport;
 import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
+
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.model.Project;
@@ -95,7 +97,7 @@ public class SimpleGitSshServer {
         server.stop(true);
     }
     
-    private class GitUploadPackCommand extends AbstractCommandSupport {
+    private class GitUploadPackCommand extends AbstractProjectAwareGitCommand {
 
         protected GitUploadPackCommand(String command,
                 ExecutorService executorService) {
@@ -104,11 +106,7 @@ public class SimpleGitSshServer {
 
         @Override
         public void run() {
-            String gitCommand = getCommand();
-            int lastSegment = gitCommand.lastIndexOf('/');
-            int postifPos = gitCommand.lastIndexOf(".git");
-            
-            String projectName = gitCommand.substring(lastSegment +1, postifPos);
+            String projectName = getGitProjectName();
             Project project = projectManager.find(projectName);
             
             UploadPack uploadPack = new UploadPack(project.getRepository());
@@ -131,7 +129,7 @@ public class SimpleGitSshServer {
 
     }
 
-    private class GitReceivePackCommand extends AbstractCommandSupport {
+    private class GitReceivePackCommand extends AbstractProjectAwareGitCommand {
 
         protected GitReceivePackCommand(String command,
                 ExecutorService executorService) {
@@ -140,11 +138,7 @@ public class SimpleGitSshServer {
 
         @Override
         public void run() {
-            String gitCommand = getCommand();
-            int lastSegment = gitCommand.lastIndexOf('/');
-            int postifPos = gitCommand.lastIndexOf(".git");
-            
-            String projectName = gitCommand.substring(lastSegment +1, postifPos);
+            String projectName = getGitProjectName();
             Project project = projectManager.find(projectName);
             
             try {
