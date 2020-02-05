@@ -35,6 +35,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramspec.SecretParam;
+import io.onedev.server.buildspec.job.paramsupply.Ignore;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.paramsupply.ScriptingValues;
 import io.onedev.server.buildspec.job.paramsupply.SpecifiedValues;
@@ -138,9 +139,11 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				if (isSecret) {
 					choices.add(SpecifiedValues.SECRET_DISPLAY_NAME);
 					choices.add(ScriptingValues.SECRET_DISPLAY_NAME);
+					choices.add(Ignore.DISPLAY_NAME);
 				} else {
 					choices.add(SpecifiedValues.DISPLAY_NAME);
 					choices.add(ScriptingValues.DISPLAY_NAME);
+					choices.add(Ignore.DISPLAY_NAME);
 				}
 				DropDownChoice<String> valuesProviderChoice = new DropDownChoice<String>("valuesProvider", new IModel<String>() {
 					
@@ -153,8 +156,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 						Class<?> valuesProviderClass = (Class<?>) container.getDefaultModelObject();
 						if (valuesProviderClass == SpecifiedValues.class)
 							return isSecret?SpecifiedValues.SECRET_DISPLAY_NAME:SpecifiedValues.DISPLAY_NAME;
-						else
+						else if (valuesProviderClass == ScriptingValues.class)
 							return isSecret?ScriptingValues.SECRET_DISPLAY_NAME:ScriptingValues.DISPLAY_NAME;
+						else
+							return Ignore.DISPLAY_NAME;
 					}
 
 					@Override
@@ -162,8 +167,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 						ValuesProvider valuesProvider;
 						if (object.equals(SpecifiedValues.DISPLAY_NAME) || object.equals(SpecifiedValues.SECRET_DISPLAY_NAME))  
 							valuesProvider = newSpecifiedValuesProvider(property);
-						else
+						else if (object.equals(ScriptingValues.DISPLAY_NAME) || object.equals(ScriptingValues.SECRET_DISPLAY_NAME))
 							valuesProvider = new ScriptingValues();
+						else
+							valuesProvider = new Ignore();
 						container.replace(newValuesEditor("values", property, valuesProvider));
 						container.setDefaultModelObject(valuesProvider.getClass());
 					}
@@ -331,8 +338,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 			fragment.setOutputMarkupId(true);
 			return fragment;
-		} else {
+		} else if (valuesProvider instanceof ScriptingValues) {
 			return PropertyContext.edit(componentId, valuesProvider, "scriptName").setOutputMarkupId(true);
+		} else {
+			return new WebMarkupContainer(componentId);
 		}
 	}
 
@@ -352,13 +361,15 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				ScriptingValues scriptingValues = new ScriptingValues();
 				scriptingValues.setScriptName((String) ((PropertyEditor<Serializable>) valuesEditor).getConvertedInput()); 
 				param.setValuesProvider(scriptingValues);
-			} else {
+			} else if (valuesProviderClass == SpecifiedValues.class) {
 				SpecifiedValues specifiedValues = new SpecifiedValues();
 				for (Component valueContainer: (WebMarkupContainer)valuesEditor.get("values")) {
 					Object propertyValue = ((PropertyEditor<Serializable>) valueContainer.get("value")).getConvertedInput();
 					specifiedValues.getValues().add(paramSpec.convertToStrings(propertyValue));
 				}
 				param.setValuesProvider(specifiedValues);
+			} else {
+				param.setValuesProvider(new Ignore());
 			}
 			value.add(param);
 		}

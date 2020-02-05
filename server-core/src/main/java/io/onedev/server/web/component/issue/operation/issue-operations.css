@@ -15,7 +15,7 @@
 }
 .issue-operations>.state-and-actions>.state>.issue-state {
 	font-size: 16px;
-	padding: 7px 24px;
+	padding: 7px 12px;
 	display: block;
 }
 .issue-operations>.state-and-actions>* {

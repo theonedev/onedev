@@ -32,7 +32,7 @@ public class BooleanInput {
 
 	public static Object convertToObject(List<String> strings) {
 		if (strings.size() == 0) {
-			throw new ValidationException("Invalid boolean value");
+			return false;
 		} else if (strings.size() == 1) {
 			String string = strings.iterator().next();
 			if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase(TextUtils.describe(true)))

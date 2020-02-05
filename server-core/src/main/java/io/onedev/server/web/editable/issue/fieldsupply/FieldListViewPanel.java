@@ -49,12 +49,14 @@ class FieldListViewPanel extends Panel {
 					container.add(new Label("value", value.iterator().next()));
 				else 
 					container.add(new Label("value", value.toString()));
-			} else {
+			} else if (field.getValueProvider() instanceof ScriptingValue) {
 				if (field.isSecret())
 					container.add(new Label("valueProvider", ScriptingValue.SECRET_DISPLAY_NAME));
 				else
 					container.add(new Label("valueProvider", ScriptingValue.DISPLAY_NAME));
 				container.add(PropertyContext.view("value", field.getValueProvider(), "scriptName"));
+			} else {
+				container.add(new WebMarkupContainer("value"));
 			}
 			fieldsView.add(container);
 		}

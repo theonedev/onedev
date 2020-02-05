@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=500, name="Commit to branch")
+@Editable(order=500, name="Code is committed")
 public class BranchUpdateTrigger extends TransitionTrigger {
 
 	private static final long serialVersionUID = 1L;

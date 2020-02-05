@@ -12,6 +12,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
+import io.onedev.server.buildspec.job.paramsupply.Ignore;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.paramsupply.ScriptingValues;
 import io.onedev.server.buildspec.job.paramsupply.SpecifiedValues;
@@ -58,12 +59,15 @@ class ParamListViewPanel extends Panel {
 				}
 				fragment.add(valuesView);
 				paramItem.add(fragment);
-			} else {
+			} else if (param.getValuesProvider() instanceof ScriptingValues) {
 				if (param.isSecret())
 					paramItem.add(new Label("valuesProvider", ScriptingValues.SECRET_DISPLAY_NAME));
 				else
 					paramItem.add(new Label("valuesProvider", ScriptingValues.DISPLAY_NAME));
 				paramItem.add(PropertyContext.view("values", param.getValuesProvider(), "scriptName"));
+			} else {
+				paramItem.add(new Label("valuesProvider", Ignore.DISPLAY_NAME));
+				paramItem.add(new WebMarkupContainer("values"));
 			}
 			paramsView.add(paramItem);
 		}

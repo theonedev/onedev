@@ -432,9 +432,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public PersonIdent asPerson() {
 		if (isSystem())
-			return new PersonIdent(getName(), "");
+			return new PersonIdent(getDisplayName(), "");
 		else
-			return new PersonIdent(getName(), getEmail());
+			return new PersonIdent(getDisplayName(), getEmail());
 	}
 	
 	public String getDisplayName() {

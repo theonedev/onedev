@@ -159,11 +159,16 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private void validate(Project project, ObjectId commitId) {
-    	for (ConstraintViolation<?> violation: validator.validate(project.getBuildSpec(commitId))) {
-    		String message = String.format("Error validating build spec (project: %s, commit: %s, property: %s, message: %s)", 
-    				project.getName(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
-    		throw new OneException(message);
-    	}
+		Project.push(project);
+		try {
+	    	for (ConstraintViolation<?> violation: validator.validate(project.getBuildSpec(commitId))) {
+	    		String message = String.format("Error validating build spec (project: %s, commit: %s, property: %s, message: %s)", 
+	    				project.getName(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
+	    		throw new OneException(message);
+	    	}
+		} finally {
+			Project.pop();
+		}
 	}
 	
 	@Transactional

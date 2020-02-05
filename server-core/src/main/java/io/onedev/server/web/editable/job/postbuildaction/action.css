@@ -9,11 +9,14 @@
 	color: inherit;
 	font-family: inherit;
 	background: none;
-	border-bottom: 1px solid #E5E5E5;
-	padding-left: 0;
-	padding-bottom: 8px;
+	border-bottom: 1px solid #D8D8D8;
+	padding: 4px 8px;
 	border-radius: 0;
 	font-size: 16px;
+	background: #F5F5F5;
+}
+.post-build-action-edit .group-issue-detail>div {
+	padding: 0 8px;
 }
 .post-build-action-edit .group-issue-detail>.toggle:after {
 	display: none;

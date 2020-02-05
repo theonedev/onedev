@@ -15,9 +15,6 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
@@ -37,8 +34,6 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class BuildSpec implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final Logger logger = LoggerFactory.getLogger(BuildSpec.class);
 	
 	public static final String BLOB_PATH = ".onedev-buildspec";
 	
@@ -173,8 +168,6 @@ public class BuildSpec implements Serializable, Validatable {
 				try {
 					action.validateWithContext(this, job);
 				} catch (Exception e) {
-					if (e.getMessage() == null)
-						logger.error("Error validating post build action", e);
 					context.buildConstraintViolationWithTemplate("Item #" + j + ": " + e.getMessage())
 							.addPropertyNode(PROP_JOBS).addPropertyNode(Job.PROP_POST_BUILD_ACTIONS)
 								.inIterable().atIndex(i)
