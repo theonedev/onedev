@@ -135,6 +135,18 @@ public class BoardSpec implements Serializable {
 	public void setDisplayFields(List<String> displayFields) {
 		this.displayFields = displayFields;
 	}
+	
+	public void populateEditColumns() {
+		getEditColumns().clear();
+		for (String column: getColumns()) 
+			getEditColumns().add(column!=null?column:BoardSpec.NULL_COLUMN);
+	}
+	
+	public void populateColumns() {
+		getColumns().clear();
+		for (String column: getEditColumns()) 
+			getColumns().add(column.equals(BoardSpec.NULL_COLUMN)?null:column);
+	}
 
 	@SuppressWarnings("unused")
 	private static List<String> getIdentifyFieldChoices() {

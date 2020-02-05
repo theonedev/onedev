@@ -50,9 +50,7 @@ abstract class NewBoardPanel extends Panel {
 							"This name has already been used by another issue board in the project");
 				} 
 				if (editor.isValid()){
-					board.getColumns().clear();
-					for (String column: board.getEditColumns()) 
-						board.getColumns().add(column.equals(BoardSpec.NULL_COLUMN)?null:column);
+					board.populateColumns();
 					
 					boards.add(board);
 					getProject().getIssueSetting().setBoardSpecs(boards);

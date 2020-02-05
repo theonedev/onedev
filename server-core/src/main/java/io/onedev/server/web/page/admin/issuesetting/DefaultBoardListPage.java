@@ -226,6 +226,9 @@ public class DefaultBoardListPage extends IssueSettingPage {
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewBoardFrag", DefaultBoardListPage.this);
+
+							board.populateEditColumns();
+							
 							fragment.add(BeanContext.view("viewer", getBoard(), Sets.newHashSet("name"), true));
 							fragment.add(new ModalLink("edit") {
 

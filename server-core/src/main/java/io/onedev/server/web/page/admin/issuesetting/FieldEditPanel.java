@@ -103,14 +103,14 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 					boolean displayInList;
 					if (fieldIndex != -1) {
 						FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
-						getSetting().getFieldSpecs().set(fieldIndex, field);
-						getSetting().getDefaultPromptFieldsUponIssueOpen().remove(oldField.getName());
-						displayInList = getSetting().getListFields().remove(oldField.getName());
 						if (!field.getName().equals(oldField.getName())) {
 							getSetting().onRenameField(oldField.getName(), field.getName());
 							OneDev.getInstance(RoleManager.class).onRenameIssueField(oldField.getName(), field.getName());
 							getSetting().setReconciled(false);
 						}
+						getSetting().getFieldSpecs().set(fieldIndex, field);
+						getSetting().getDefaultPromptFieldsUponIssueOpen().remove(oldField.getName());
+						displayInList = getSetting().getListFields().remove(oldField.getName());
 						if (oldField instanceof ChoiceField && field instanceof ChoiceField) {
 							ChoiceField oldChoiceInput = (ChoiceField) oldField;
 							ChoiceField choiceInput = (ChoiceField) field;

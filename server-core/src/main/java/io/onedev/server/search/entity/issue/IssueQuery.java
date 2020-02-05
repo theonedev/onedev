@@ -152,9 +152,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
 									withCurrentPullRequestCriteria, withCurrentCommitCriteria);
 						}
-						if (fieldName.equals(Issue.FIELD_MILESTONE)) 
+						if (fieldName.equals(Issue.FIELD_MILESTONE)) {
 							return new MilestoneIsEmptyCriteria();
-						else {
+						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 							return new FieldOperatorCriteria(fieldName, operator, fieldSpec.isAllowMultiple());
 						}

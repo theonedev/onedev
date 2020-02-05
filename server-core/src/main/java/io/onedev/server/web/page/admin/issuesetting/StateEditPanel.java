@@ -87,11 +87,11 @@ abstract class StateEditPanel extends Panel {
 				if (editor.isValid()) {
 					if (stateIndex != -1) {
 						StateSpec oldState = getSetting().getStateSpecs().get(stateIndex);
-						getSetting().getStateSpecs().set(stateIndex, state);
 						if (!state.getName().equals(oldState.getName())) { 
 							getSetting().onRenameState(oldState.getName(), state.getName());
 							getSetting().setReconciled(false);
 						}
+						getSetting().getStateSpecs().set(stateIndex, state);
 					} else {
 						getSetting().getStateSpecs().add(state);
 					}
