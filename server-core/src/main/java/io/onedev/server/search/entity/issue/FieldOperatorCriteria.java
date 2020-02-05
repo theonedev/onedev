@@ -24,7 +24,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.ProjectAwareCommit;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
@@ -42,8 +41,8 @@ public class FieldOperatorCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<?> valueAttribute = field.get(IssueField.ATTR_VALUE);
-		Path<?> projectAttribute = field.getParent().get(IssueQueryConstants.ATTR_PROJECT);		
+		Path<?> valueAttribute = field.get(IssueField.PROP_VALUE);
+		Path<?> projectAttribute = field.getParent().get(Issue.PROP_PROJECT);		
 		if (operator == IssueQueryLexer.IsEmpty) {
 			return null;
 		} else if (operator == IssueQueryLexer.IsMe) {

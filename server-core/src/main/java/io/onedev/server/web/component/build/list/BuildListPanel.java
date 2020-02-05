@@ -63,7 +63,6 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -453,7 +452,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_JOB)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.FIELD_JOB)) {
 
 			@Override
 			public String getCssClass() {
@@ -483,7 +482,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_COMMIT)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.FIELD_COMMIT)) {
 
 			@Override
 			public String getCssClass() {

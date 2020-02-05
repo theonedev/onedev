@@ -13,6 +13,7 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -49,9 +50,11 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
+import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -330,7 +333,23 @@ public abstract class BuildDetailPage extends ProjectPage
 					
 				});
 				
-				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
+				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
+
+					@Override
+					public Component render(String componentId) {
+						return new PageTabLink(componentId, this) {
+
+							@Override
+							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+								return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
+										FixedIssuesPage.paramsOf(getBuild(), getPosition(), 
+										getBuild().getJob().getDefaultFixedIssuesFilter()));
+							}
+							
+						};
+					}
+					
+				});
 				
 				if (SecurityUtils.canReadCode(getProject()))
 					tabs.add(new BuildTab("Changes", BuildChangesPage.class));

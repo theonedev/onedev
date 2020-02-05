@@ -42,13 +42,13 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		if (allowMultiple)
-			return builder.equal(field.get(IssueField.ATTR_VALUE), value);
+			return builder.equal(field.get(IssueField.PROP_VALUE), value);
 		else if (operator == IssueQueryLexer.Is) 
-			return builder.equal(field.get(IssueField.ATTR_VALUE), value);
+			return builder.equal(field.get(IssueField.PROP_VALUE), value);
 		else if (operator == IssueQueryLexer.IsGreaterThan) 
-			return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
+			return builder.greaterThan(field.get(IssueField.PROP_ORDINAL), ordinal);
 		else
-			return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
+			return builder.lessThan(field.get(IssueField.PROP_ORDINAL), ordinal);
 	}
 
 	@SuppressWarnings("unchecked")

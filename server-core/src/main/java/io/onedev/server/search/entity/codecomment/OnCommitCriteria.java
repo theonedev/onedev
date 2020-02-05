@@ -9,9 +9,8 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-
+import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
@@ -28,8 +27,8 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_PROJECT);
-		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_COMMIT);
+		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_PROJECT);
+		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_MARK_POS + "." + MarkPos.PROP_COMMIT);
 		return builder.and(
 				builder.equal(projectAttribute, project),
 				builder.equal(commitAttribute, commitId.name()));

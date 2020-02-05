@@ -33,7 +33,6 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaConte
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class ProjectQuery extends EntityQuery<Project> {
 
@@ -156,7 +155,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 			List<EntitySort> projectSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!ProjectQueryConstants.ORDER_FIELDS.containsKey(fieldName)) 
+				if (!Project.ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort projectSort = new EntitySort();
@@ -179,20 +178,20 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	public static void checkField(String fieldName, int operator) {
-		if (!ProjectQueryConstants.QUERY_FIELDS.contains(fieldName))
+		if (!Project.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case ProjectQueryLexer.Contains:
-			if (!fieldName.equals(ProjectQueryConstants.FIELD_DESCRIPTION))
+			if (!fieldName.equals(Project.FIELD_DESCRIPTION))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.Is:
-			if (!fieldName.equals(ProjectQueryConstants.FIELD_NAME)) 
+			if (!fieldName.equals(Project.FIELD_NAME)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.IsBefore:
 		case ProjectQueryLexer.IsAfter:
-			if (!fieldName.equals(ProjectQueryConstants.FIELD_UPDATE_DATE)) 
+			if (!fieldName.equals(Project.FIELD_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

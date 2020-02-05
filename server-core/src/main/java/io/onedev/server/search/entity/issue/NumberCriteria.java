@@ -11,7 +11,6 @@ import io.onedev.server.model.Project;
 
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class NumberCriteria extends IssueCriteria {
 
@@ -31,7 +30,7 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(IssueQueryConstants.ATTR_NUMBER);
+		Path<Long> attribute = root.get(Issue.PROP_NUMBER);
 		Predicate numberPredicate;
 		
 		if (operator == IssueQueryLexer.Is)
@@ -42,7 +41,7 @@ public class NumberCriteria extends IssueCriteria {
 			numberPredicate = builder.lessThan(attribute, number.getNumber());
 		
 		return builder.and(
-				builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), number.getProject()),
+				builder.equal(root.get(Issue.PROP_PROJECT), number.getProject()),
 				numberPredicate);
 	}
 
@@ -62,7 +61,7 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public String asString() {
-		return quote(IssueQueryConstants.FIELD_NUMBER) + " " 
+		return quote(Issue.FIELD_NUMBER) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

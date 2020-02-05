@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class MergeStrategyCriteria extends EntityCriteria<PullRequest> {
 
@@ -22,7 +21,7 @@ public class MergeStrategyCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<?> attribute = root.get(PullRequestQueryConstants.ATTR_MERGE_STRATEGY);
+		Path<?> attribute = root.get(PullRequest.PROP_MERGE_STRATEGY);
 		return builder.equal(attribute, value);
 	}
 
@@ -33,7 +32,7 @@ public class MergeStrategyCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_MERGE_STRATEGY) + " " 
+		return quote(PullRequest.FIELD_MERGE_STRATEGY) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
 				+ quote(value.toString());
 	}

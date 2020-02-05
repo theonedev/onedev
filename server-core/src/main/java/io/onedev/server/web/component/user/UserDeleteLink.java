@@ -13,8 +13,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.query.ProjectQueryConstants;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 import io.onedev.server.web.component.modal.message.MessageModal;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -33,7 +33,7 @@ public abstract class UserDeleteLink extends AjaxLink<Void> {
 
 				@Override
 				protected Component newMessageContent(String componentId) {
-					String query = Criteria.quote(ProjectQueryConstants.FIELD_OWNER) + " " 
+					String query = Criteria.quote(Project.FIELD_OWNER) + " " 
 							+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
 							+ Criteria.quote(getUser().getName());
 					PageParameters params = ProjectListPage.paramsOf(query, 0, 0); 

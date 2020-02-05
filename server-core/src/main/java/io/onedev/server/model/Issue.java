@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.Issue.*;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,6 +51,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
@@ -63,13 +66,13 @@ import io.onedev.server.web.editable.annotation.Editable;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_project_id"), @Index(columnList="state"), 
-				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
-				@Index(columnList="number"), @Index(columnList="submitDate"), 
-				@Index(columnList="o_submitter_id"), @Index(columnList="voteCount"), 
-				@Index(columnList="commentCount"), @Index(columnList="o_milestone_id"), 
-				@Index(columnList="updateDate")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
+				@Index(columnList="o_project_id"), @Index(columnList=PROP_STATE), 
+				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
+				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
+				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
+				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_milestone_id"), 
+				@Index(columnList=PROP_UPDATE_DATE)}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_NUMBER})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -78,6 +81,78 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String FIELD_NUMBER = "Number";
+	
+	public static final String PROP_NUMBER = "number";
+	
+	public static final String FIELD_PROJECT = "Project";
+	
+	public static final String PROP_PROJECT = "project";
+	
+	public static final String FIELD_STATE = "State";
+	
+	public static final String PROP_STATE = "state";
+	
+	public static final String FIELD_TITLE = "Title";
+	
+	public static final String PROP_TITLE = "title";
+	
+	public static final String FIELD_DESCRIPTION = "Description";
+	
+	public static final String PROP_DESCRIPTION = "description";
+	
+	public static final String FIELD_COMMENT = "Comment";
+	
+	public static final String PROP_COMMENTS = "comments";
+	
+	public static final String FIELD_SUBMITTER = "Submitter";
+	
+	public static final String PROP_SUBMITTER = "submitter";
+	
+	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	
+	public static final String PROP_SUBMIT_DATE = "submitDate";
+	
+	public static final String FIELD_VOTE_COUNT = "Vote Count";
+	
+	public static final String PROP_VOTE_COUNT = "voteCount";
+	
+	public static final String FIELD_COMMENT_COUNT = "Comment Count";
+	
+	public static final String PROP_COMMENT_COUNT = "commentCount";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_UPDATE_DATE = "updateDate";
+	
+	public static final String FIELD_MILESTONE = "Milestone";
+	
+	public static final String PROP_MILESTONE = "milestone";
+	
+	public static final String PROP_FIELDS = "fields";
+		
+	public static final String PROP_ID = "id";
+	
+	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
+	
+	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, 
+			FIELD_DESCRIPTION, FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
+			FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+	
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, 
+			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
+			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_VOTE_COUNT, PROP_VOTE_COUNT,
+			FIELD_COMMENT_COUNT, PROP_COMMENT_COUNT,
+			FIELD_NUMBER, PROP_NUMBER,
+			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			FIELD_PROJECT, PROP_PROJECT,
+			FIELD_UPDATE_DATE, PROP_UPDATE_DATE);	
+	
 	@Column(nullable=false)
 	private String state;
 	

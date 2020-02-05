@@ -19,7 +19,7 @@ public class PullRequestComment extends AbstractEntity {
 
 	public static final int DIFF_CONTEXT_SIZE = 3;
 	
-	public static final String ATTR_CONTENT = "content";
+	public static final String PROP_CONTENT = "content";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

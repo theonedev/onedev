@@ -7,7 +7,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 
@@ -24,7 +23,7 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(PullRequestQueryConstants.ATTR_COMMENT_COUNT);
+		Path<Long> attribute = root.get(PullRequest.PROP_COMMENT_COUNT);
 		if (operator == PullRequestQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
@@ -45,7 +44,7 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_COMMENT_COUNT) + " " 
+		return quote(PullRequest.FIELD_COMMENT_COUNT) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}

@@ -11,9 +11,8 @@ import io.onedev.server.model.Build;
 
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
-public class QueueingDateCriteria extends EntityCriteria<Build> {
+public class PendingDateCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,7 +22,7 @@ public class QueueingDateCriteria extends EntityCriteria<Build> {
 	
 	private final String value;
 	
-	public QueueingDateCriteria(String value, int operator) {
+	public PendingDateCriteria(String value, int operator) {
 		date = EntityQuery.getDateValue(value);
 		this.operator = operator;
 		this.value = value;
@@ -31,7 +30,7 @@ public class QueueingDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(BuildQueryConstants.ATTR_QUEUEING_DATE);
+		Path<Date> attribute = root.get(Build.PROP_PENDING_DATE);
 		if (operator == BuildQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -48,7 +47,7 @@ public class QueueingDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_QUEUEING_DATE) + " " 
+		return quote(Build.FIELD_PENDING_DATE) + " " 
 				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

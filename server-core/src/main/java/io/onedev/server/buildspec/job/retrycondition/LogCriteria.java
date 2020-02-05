@@ -6,7 +6,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class LogCriteria extends Criteria<Build> {
 
@@ -26,7 +25,7 @@ public class LogCriteria extends Criteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_LOG) + " " 
+		return quote(Build.FIELD_LOG) + " " 
 				+ RetryCondition.getRuleName(RetryConditionLexer.Contains) + " "
 				+ quote(value);
 	}

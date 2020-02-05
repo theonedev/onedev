@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class ContentCriteria extends EntityCriteria<CodeComment> {
 
@@ -22,7 +21,7 @@ public class ContentCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Expression<String> attribute = root.get(CodeCommentQueryConstants.ATTR_CONTENT);
+		Expression<String> attribute = root.get(CodeComment.PROP_CONTENT);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
 
@@ -34,7 +33,7 @@ public class ContentCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String asString() {
-		return quote(CodeCommentQueryConstants.FIELD_CONTENT) + " " 
+		return quote(CodeComment.FIELD_CONTENT) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

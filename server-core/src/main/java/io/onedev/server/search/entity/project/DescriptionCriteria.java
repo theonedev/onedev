@@ -9,7 +9,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class DescriptionCriteria extends EntityCriteria<Project> {
 
@@ -23,7 +22,7 @@ public class DescriptionCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
-		Expression<String> attribute = root.get(ProjectQueryConstants.ATTR_DESCRIPTION);
+		Expression<String> attribute = root.get(Project.PROP_DESCRIPTION);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
 
@@ -35,7 +34,7 @@ public class DescriptionCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public String asString() {
-		return Criteria.quote(ProjectQueryConstants.FIELD_DESCRIPTION) + " " 
+		return Criteria.quote(Project.FIELD_DESCRIPTION) + " " 
 				+ ProjectQuery.getRuleName(ProjectQueryLexer.Contains) + " " 
 				+ Criteria.quote(value);
 	}

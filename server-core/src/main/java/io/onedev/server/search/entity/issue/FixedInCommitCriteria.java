@@ -9,7 +9,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAwareCommit;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FixedInCommitCriteria extends IssueCriteria {
 
@@ -33,8 +32,8 @@ public class FixedInCommitCriteria extends IssueCriteria {
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		if (!commit.getFixedIssueNumbers().isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), commit.getProject()),
-					root.get(IssueQueryConstants.ATTR_NUMBER).in(commit.getFixedIssueNumbers()));
+					builder.equal(root.get(Issue.PROP_PROJECT), commit.getProject()),
+					root.get(Issue.PROP_NUMBER).in(commit.getFixedIssueNumbers()));
 		} else {
 			return builder.disjunction();
 		}

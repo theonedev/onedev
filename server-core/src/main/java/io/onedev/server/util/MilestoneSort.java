@@ -10,7 +10,7 @@ public enum MilestoneSort {
 
 		@Override
 		public Order getOrder(boolean closed) {
-			return closed?Order.desc(Milestone.ATTR_DUE_DATE):Order.asc(Milestone.ATTR_DUE_DATE);
+			return closed?Order.desc(Milestone.PROP_DUE_DATE):Order.asc(Milestone.PROP_DUE_DATE);
 		}
 		
 	},
@@ -18,7 +18,7 @@ public enum MilestoneSort {
 
 		@Override
 		public Order getOrder(boolean closed) {
-			return closed?Order.asc(Milestone.ATTR_DUE_DATE):Order.desc(Milestone.ATTR_DUE_DATE);
+			return closed?Order.asc(Milestone.PROP_DUE_DATE):Order.desc(Milestone.PROP_DUE_DATE);
 		}
 		
 	},

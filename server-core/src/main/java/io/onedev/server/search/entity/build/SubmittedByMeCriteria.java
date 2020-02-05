@@ -9,7 +9,6 @@ import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class SubmittedByMeCriteria extends EntityCriteria<Build> {
 
@@ -18,7 +17,7 @@ public class SubmittedByMeCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		if (User.get() != null) {
-			Path<User> attribute = root.get(BuildQueryConstants.ATTR_SUBMITTER);
+			Path<User> attribute = root.get(Build.PROP_SUBMITTER);
 			return builder.equal(attribute, User.get());
 		} else {
 			throw new OneException("Please login to perform this query");

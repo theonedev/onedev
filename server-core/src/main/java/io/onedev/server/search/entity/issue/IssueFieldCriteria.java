@@ -11,7 +11,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class IssueFieldCriteria extends FieldCriteria {
 
@@ -30,8 +29,8 @@ public class IssueFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		return builder.and(
-				builder.equal(field.getParent().get(IssueQueryConstants.ATTR_PROJECT), issue.getProject()),
-				builder.equal(field.get(IssueField.ATTR_ORDINAL), issue.getNumber()));
+				builder.equal(field.getParent().get(Issue.PROP_PROJECT), issue.getProject()),
+				builder.equal(field.get(IssueField.PROP_ORDINAL), issue.getNumber()));
 	}
 
 	@Override

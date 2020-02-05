@@ -9,9 +9,9 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class DiscardedByCriteria extends EntityCriteria<PullRequest> {
 
@@ -28,7 +28,7 @@ public class DiscardedByCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<User> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_USER);
+		Path<User> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_USER);
 		return builder.equal(attribute, user);
 	}
 

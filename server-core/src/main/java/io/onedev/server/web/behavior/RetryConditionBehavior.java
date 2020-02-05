@@ -23,7 +23,7 @@ import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionLexer;
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser;
-import io.onedev.server.util.query.BuildQueryConstants;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -45,8 +45,8 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = Lists.newArrayList(
-									BuildQueryConstants.FIELD_LOG, 
-									BuildQueryConstants.FIELD_ERROR_MESSAGE);
+									Build.FIELD_LOG, 
+									Build.FIELD_ERROR_MESSAGE);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
 							Job job = jobAware.getJob();
 							fields.addAll(job.getParamSpecMap().keySet());

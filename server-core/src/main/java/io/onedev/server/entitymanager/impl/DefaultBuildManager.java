@@ -81,7 +81,6 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 
@@ -269,14 +268,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
 				for (String value: entry.getValue()) {
-					Join<?, ?> join = root.join(BuildQueryConstants.ATTR_PARAMS, JoinType.INNER);
-					predicates.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
-					predicates.add(builder.equal(join.get(BuildParam.ATTR_VALUE), value));
+					Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
+					predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
+					predicates.add(builder.equal(join.get(BuildParam.PROP_VALUE), value));
 				}
 			} else {
-				Join<?, ?> join = root.join(BuildQueryConstants.ATTR_PARAMS, JoinType.INNER);
-				predicates.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
-				predicates.add(builder.isNull(join.get(BuildParam.ATTR_VALUE)));
+				Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
+				predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
+				predicates.add(builder.isNull(join.get(BuildParam.PROP_VALUE)));
 			}
 		}
 		
@@ -302,12 +301,12 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq(BuildQueryConstants.ATTR_PROJECT, project));
+		criteria.add(Restrictions.eq(Build.PROP_PROJECT, project));
 
 		if (!SecurityUtils.canManage(project)) {
 			List<Criterion> jobCriterions = new ArrayList<>();
 			for (String jobName: getAccessibleJobNames(project).get(project)) 
-				jobCriterions.add(Restrictions.eq(BuildQueryConstants.ATTR_JOB, jobName));
+				jobCriterions.add(Restrictions.eq(Build.PROP_JOB, jobName));
 			if (!jobCriterions.isEmpty())
 				criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
 			else
@@ -339,14 +338,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<String> criteriaQuery = builder.createQuery(String.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
-		criteriaQuery.select(root.get(BuildQueryConstants.ATTR_VERSION)).distinct(true);
+		criteriaQuery.select(root.get(Build.PROP_VERSION)).distinct(true);
 		
 		Collection<Predicate> predicates = getPredicates(project, root, builder);
 		predicates.add(builder.like(
-				builder.lower(root.get(BuildQueryConstants.ATTR_VERSION)), 
+				builder.lower(root.get(Build.PROP_VERSION)), 
 				"%" + matchWith.toLowerCase() + "%"));
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-		criteriaQuery.orderBy(builder.asc(root.get(BuildQueryConstants.ATTR_VERSION)));
+		criteriaQuery.orderBy(builder.asc(root.get(Build.PROP_VERSION)));
 
 		Query<String> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(0);
@@ -374,24 +373,24 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		Collection<Predicate> predicates = new ArrayList<>();
 
 		if (project != null) {
-			predicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), project));
+			predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
 			if (!SecurityUtils.canManage(project)) {
 				List<Predicate> jobPredicates = new ArrayList<>();
 				for (String jobName: getAccessibleJobNames(project).get(project)) 
-					jobPredicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_JOB), jobName));
+					jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
 				predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 			}
 		} else if (!SecurityUtils.isAdministrator()) {
 			List<Predicate> projectPredicates = new ArrayList<>();
 			for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames(null).entrySet()) {
 				if (SecurityUtils.canManage(project)) {
-					projectPredicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), entry.getKey()));
+					projectPredicates.add(builder.equal(root.get(Build.PROP_PROJECT), entry.getKey()));
 				} else {
 					List<Predicate> jobPredicates = new ArrayList<>();
 					for (String jobName: entry.getValue()) 
-						jobPredicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_JOB), jobName));
+						jobPredicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
 					projectPredicates.add(builder.and(
-							builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), entry.getKey()), 
+							builder.equal(root.get(Build.PROP_PROJECT), entry.getKey()), 
 							builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()]))));
 				}
 			}
@@ -440,13 +439,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: buildQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(BuildQuery.getPath(root, BuildQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.asc(BuildQuery.getPath(root, Build.ORDER_FIELDS.get(sort.getField()))));
 			else
-				orders.add(builder.desc(BuildQuery.getPath(root, BuildQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(BuildQuery.getPath(root, Build.ORDER_FIELDS.get(sort.getField()))));
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(BuildQueryConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(Build.PROP_ID)));
 		criteriaQuery.orderBy(orders);
 	}
 	
@@ -457,7 +456,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
-		criteriaQuery.select(root.get(BuildQueryConstants.ATTR_ID));
+		criteriaQuery.select(root.get(Build.PROP_ID));
 
 		criteriaQuery.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
 
@@ -542,7 +541,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> query = builder.createQuery(Long.class);
 		Root<Build> root = query.from(Build.class);
-		query.select(builder.max(root.get(BuildQueryConstants.ATTR_ID)));
+		query.select(builder.max(root.get(Build.PROP_ID)));
 		Long maxId = getSession().createQuery(query).getSingleResult();
 		return maxId!=null?maxId:0;
 	}

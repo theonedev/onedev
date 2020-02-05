@@ -42,6 +42,8 @@ public class BuildSpec implements Serializable, Validatable {
 	
 	public static final String BLOB_PATH = ".onedev-buildspec";
 	
+	public static final String PROP_JOBS = "jobs";
+	
 	private List<Job> jobs = new ArrayList<>();
 	
 	private List<Property> properties = new ArrayList<>();
@@ -95,7 +97,7 @@ public class BuildSpec implements Serializable, Validatable {
 		for (Job job: jobs) {
 			if (!jobNames.add(job.getName())) {
 				context.buildConstraintViolationWithTemplate("Duplicate names found: " + job.getName())
-						.addPropertyNode("jobs").addConstraintViolation();
+						.addPropertyNode(PROP_JOBS).addConstraintViolation();
 				valid = false;
 			}
 		}
@@ -113,14 +115,14 @@ public class BuildSpec implements Serializable, Validatable {
 						String message = "Item #" + j + ": Error validating parameters of dependency job '" 
 								+ dependencyJob.getName() + "': " + e.getMessage();
 						context.buildConstraintViolationWithTemplate(message)
-								.addPropertyNode("jobs").addPropertyNode("dependencies")
+								.addPropertyNode(PROP_JOBS).addPropertyNode(Job.PROP_JOB_DEPENDENCIES)
 									.inIterable().atIndex(i)
 								.addConstraintViolation();
 						valid = false;
 					}
 				} else {
 					context.buildConstraintViolationWithTemplate("Dependency job not found: " + dependency.getJobName())
-							.addPropertyNode("jobs").addPropertyNode("dependencies")
+							.addPropertyNode("jobs").addPropertyNode(Job.PROP_JOB_DEPENDENCIES)
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;
@@ -128,7 +130,7 @@ public class BuildSpec implements Serializable, Validatable {
 				List<String> dependencyChain = Lists.newArrayList(job.getName());
 				if (hasCircularDependencies(dependencyChain, dependency.getJobName())) {
 					context.buildConstraintViolationWithTemplate("Circular dependencies found: " + dependencyChain)
-							.addPropertyNode("jobs").addPropertyNode("dependencies")
+							.addPropertyNode(PROP_JOBS).addPropertyNode(Job.PROP_JOB_DEPENDENCIES)
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;
@@ -143,7 +145,7 @@ public class BuildSpec implements Serializable, Validatable {
 				} catch (Exception e) {
 					String message = "Item #" + j + ": Error validating job parameters: " + e.getMessage();
 					context.buildConstraintViolationWithTemplate(message)
-							.addPropertyNode("jobs").addPropertyNode("triggers")
+							.addPropertyNode(PROP_JOBS).addPropertyNode(Job.PROP_TRIGGERS)
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;
@@ -159,7 +161,7 @@ public class BuildSpec implements Serializable, Validatable {
 					if (message == null)
 						message = "Malformed retry condition";
 					context.buildConstraintViolationWithTemplate(message)
-							.addPropertyNode("jobs").addPropertyNode("retryCondition")
+							.addPropertyNode(PROP_JOBS).addPropertyNode(Job.PROP_RETRY_CONDITION)
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;
@@ -174,7 +176,7 @@ public class BuildSpec implements Serializable, Validatable {
 					if (e.getMessage() == null)
 						logger.error("Error validating post build action", e);
 					context.buildConstraintViolationWithTemplate("Item #" + j + ": " + e.getMessage())
-							.addPropertyNode("jobs").addPropertyNode("postBuildActions")
+							.addPropertyNode(PROP_JOBS).addPropertyNode(Job.PROP_POST_BUILD_ACTIONS)
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;

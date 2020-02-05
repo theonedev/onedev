@@ -19,7 +19,6 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {
 
@@ -37,19 +36,19 @@ public abstract class FieldCriteria extends IssueCriteria {
 
 	@Override
 	public final Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
+		Join<?, ?> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
 		Predicate valuePredicate = getValuePredicate(join, builder);
 		if (valuePredicate != null) {
 			join.on(builder.and(
-					builder.equal(join.get(IssueField.ATTR_NAME), getFieldName()), 
+					builder.equal(join.get(IssueField.PROP_NAME), getFieldName()), 
 					getValuePredicate(join, builder)));
 			return join.isNotNull();
 		} else {
 			join.on(builder.and(
-					builder.equal(join.get(IssueField.ATTR_NAME), getFieldName()), 
-					builder.or(builder.isNull(join.get(IssueField.ATTR_VALUE)))));
-			Join<?, ?> join2 = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
-			join2.on(builder.equal(join2.get(IssueField.ATTR_NAME), getFieldName()));
+					builder.equal(join.get(IssueField.PROP_NAME), getFieldName()), 
+					builder.or(builder.isNull(join.get(IssueField.PROP_VALUE)))));
+			Join<?, ?> join2 = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
+			join2.on(builder.equal(join2.get(IssueField.PROP_NAME), getFieldName()));
 			return builder.or(join.isNotNull(), join2.isNull());
 		}
 	}
@@ -64,7 +63,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		if (!IssueQueryConstants.QUERY_FIELDS.contains(fieldName) 
+		if (!Issue.QUERY_FIELDS.contains(fieldName) 
 				&& issueSetting.getFieldSpec(fieldName) == null) {
 			undefinedFields.add(fieldName);
 		}

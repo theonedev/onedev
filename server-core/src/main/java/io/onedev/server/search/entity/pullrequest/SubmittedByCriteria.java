@@ -11,7 +11,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 
@@ -28,7 +27,7 @@ public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<User> attribute = root.get(PullRequestQueryConstants.ATTR_SUBMITTER);
+		Path<User> attribute = root.get(PullRequest.PROP_SUBMITTER);
 		return builder.equal(attribute, user);
 	}
 

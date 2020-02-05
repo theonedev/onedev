@@ -26,7 +26,7 @@ import io.onedev.server.web.editable.annotation.Multiline;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "name"})}
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", Milestone.PROP_NAME})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
@@ -34,11 +34,11 @@ public class Milestone extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ATTR_ID = "id";
+	public static final String PROP_ID = "id";
 	
-	public static final String ATTR_NAME = "name";
+	public static final String PROP_NAME = "name";
 	
-	public static final String ATTR_DUE_DATE = "dueDate";
+	public static final String PROP_DUE_DATE = "dueDate";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

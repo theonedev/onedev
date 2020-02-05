@@ -1,6 +1,6 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.util.query.IssueQueryConstants.FIELD_NUMBER;
+import static io.onedev.server.model.Issue.FIELD_NUMBER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.query.PullRequestQueryConstants;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -62,14 +62,14 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(PullRequestQueryConstants.QUERY_FIELDS);
+							List<String> candidates = new ArrayList<>(PullRequest.QUERY_FIELDS);
 							if (getProject() != null)
-								candidates.remove(PullRequestQueryConstants.FIELD_TARGET_PROJECT);
+								candidates.remove(PullRequest.FIELD_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(PullRequestQueryConstants.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(PullRequest.ORDER_FIELDS.keySet());
 							if (getProject() != null)
-								candidates.remove(PullRequestQueryConstants.FIELD_TARGET_PROJECT);
+								candidates.remove(PullRequest.FIELD_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
@@ -88,34 +88,34 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = PullRequestQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									PullRequestQuery.checkField(fieldName, operator);
-									if (fieldName.equals(PullRequestQueryConstants.FIELD_SUBMIT_DATE) 
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_UPDATE_DATE)
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_CLOSE_DATE)) {
+									if (fieldName.equals(PullRequest.FIELD_SUBMIT_DATE) 
+											|| fieldName.equals(PullRequest.FIELD_UPDATE_DATE)
+											|| fieldName.equals(PullRequest.FIELD_CLOSE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(PullRequestQueryConstants.FIELD_TARGET_PROJECT)
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_SOURCE_PROJECT)) {
+									} else if (fieldName.equals(PullRequest.FIELD_TARGET_PROJECT)
+											|| fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjects(matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(PullRequestQueryConstants.FIELD_TARGET_BRANCH) 
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_SOURCE_BRANCH)) {
+									} else if (fieldName.equals(PullRequest.FIELD_TARGET_BRANCH) 
+											|| fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH)) {
 										if (project != null && !matchWith.contains("*"))
 											return SuggestionUtils.suggestBranches(project, matchWith);
 										else
 											return null;
 									} else if (fieldName.equals(FIELD_NUMBER)) {
 										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(PullRequestQueryConstants.FIELD_MERGE_STRATEGY)) {
+									} else if (fieldName.equals(PullRequest.FIELD_MERGE_STRATEGY)) {
 										List<String> candidates = new ArrayList<>();
 										for (MergeStrategy strategy: MergeStrategy.values())
 											candidates.add(strategy.toString());
 										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldName.equals(PullRequestQueryConstants.FIELD_TITLE) 
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_DESCRIPTION) 
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_COMMENT_COUNT)
-											|| fieldName.equals(PullRequestQueryConstants.FIELD_COMMENT)) {
+									} else if (fieldName.equals(PullRequest.FIELD_TITLE) 
+											|| fieldName.equals(PullRequest.FIELD_DESCRIPTION) 
+											|| fieldName.equals(PullRequest.FIELD_COMMENT_COUNT)
+											|| fieldName.equals(PullRequest.FIELD_COMMENT)) {
 										return null;
 									}
 								} catch (OneException ex) {
@@ -162,13 +162,13 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(PullRequestQueryConstants.FIELD_TARGET_PROJECT)
-							|| fieldName.equals(PullRequestQueryConstants.FIELD_TARGET_BRANCH) 
-							|| fieldName.equals(PullRequestQueryConstants.FIELD_SOURCE_PROJECT) 
-							|| fieldName.equals(PullRequestQueryConstants.FIELD_SOURCE_BRANCH) 
-							|| fieldName.equals(PullRequestQueryConstants.FIELD_TITLE) 
-							|| fieldName.equals(PullRequestQueryConstants.FIELD_DESCRIPTION)
-							|| fieldName.equals(PullRequestQueryConstants.FIELD_COMMENT)) {
+					if (fieldName.equals(PullRequest.FIELD_TARGET_PROJECT)
+							|| fieldName.equals(PullRequest.FIELD_TARGET_BRANCH) 
+							|| fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT) 
+							|| fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH) 
+							|| fieldName.equals(PullRequest.FIELD_TITLE) 
+							|| fieldName.equals(PullRequest.FIELD_DESCRIPTION)
+							|| fieldName.equals(PullRequest.FIELD_COMMENT)) {
 						hints.add("Use * for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

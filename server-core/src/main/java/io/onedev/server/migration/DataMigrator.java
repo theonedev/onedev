@@ -1433,8 +1433,11 @@ public class DataMigrator {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
-					for (Element queryElement: buildSettingElement.element("namedQueries").elements())
-						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+					Element namedQueriesElement = buildSettingElement.element("namedQueries");
+					if (namedQueriesElement != null) {
+						for (Element queryElement: namedQueriesElement.elements())
+							queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+					}
 					Element secretsElement = buildSettingElement.element("secrets");
 					secretsElement.setName("jobSecrets");
 					for (Element secretElement: secretsElement.elements())

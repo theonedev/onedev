@@ -11,7 +11,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class HasPendingReviewsCriteria extends EntityCriteria<PullRequest> {
 
@@ -19,10 +18,10 @@ public class HasPendingReviewsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
-		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
-		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
-		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
+		Join<?, ?> join = root.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
+		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
+		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.PROP_EXCLUDE_DATE);
+		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT_APPROVED);
 		join.on(builder.and(
 				builder.isNotNull(userPath), 
 				builder.isNull(excludeDatePath), 

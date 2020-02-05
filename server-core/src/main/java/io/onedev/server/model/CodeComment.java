@@ -29,6 +29,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
@@ -39,18 +40,60 @@ import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.SecurityUtils;
+import static io.onedev.server.model.CodeComment.*;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
 @Entity
 @Table(indexes={
 		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
-		@Index(columnList="commit"), @Index(columnList="path"), 
-		@Index(columnList="createDate"), @Index(columnList="updateDate")})
+		@Index(columnList=MarkPos.PROP_COMMIT), @Index(columnList=MarkPos.PROP_PATH), 
+		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=PROP_UPDATE_DATE)})
 public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_PROJECT = "project";
+	
+	public static final String FIELD_CONTENT = "Content";
+	
+	public static final String PROP_CONTENT = "content";
+	
+	public static final String FIELD_REPLY = "Reply";
+	
+	public static final String FIELD_PATH = "Path";
+	
+	public static final String PROP_MARK_POS = "markPos";
+	
+	public static final String FIELD_REPLY_COUNT = "Reply Count";
+	
+	public static final String PROP_REPLY_COUNT = "replyCount";
+	
+	public static final String FIELD_CREATE_DATE = "Create Date";
+	
+	public static final String PROP_CREATE_DATE = "createDate";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_UPDATE_DATE = "updateDate";
+	
+	public static final String PROP_USER = "user";
+	
+	public static final String PROP_RELATIONS = "relations";
+	
+	public static final String PROP_REPLIES = "replies";
+
+	public static final String PROP_ID = "id";
+	
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			FIELD_CONTENT, FIELD_REPLY, FIELD_PATH, FIELD_CREATE_DATE, FIELD_UPDATE_DATE, FIELD_REPLY_COUNT);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_CREATE_DATE, PROP_CREATE_DATE,
+			FIELD_UPDATE_DATE, PROP_UPDATE_DATE,
+			FIELD_REPLY_COUNT, PROP_REPLY_COUNT);
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

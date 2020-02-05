@@ -6,7 +6,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class VersionIsEmptyCriteria extends EntityCriteria<Build> {
 
@@ -14,7 +13,7 @@ public class VersionIsEmptyCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		return builder.isNull(root.get(BuildQueryConstants.ATTR_VERSION));
+		return builder.isNull(root.get(Build.PROP_VERSION));
 	}
 
 	@Override
@@ -24,7 +23,7 @@ public class VersionIsEmptyCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_VERSION) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
+		return quote(Build.FIELD_VERSION) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
 	}
 
 }

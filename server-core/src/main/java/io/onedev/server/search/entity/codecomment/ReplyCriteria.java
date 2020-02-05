@@ -11,7 +11,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
@@ -25,8 +24,8 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(CodeCommentQueryConstants.ATTR_REPLIES, JoinType.LEFT);
-		Path<String> attribute = join.get(CodeCommentReply.ATTR_CONTENT);
+		Join<?, ?> join = root.join(CodeComment.PROP_REPLIES, JoinType.LEFT);
+		Path<String> attribute = join.get(CodeCommentReply.PROP_CONTENT);
 		join.on(builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%"));
 		return join.isNotNull();
 	}
@@ -43,7 +42,7 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String asString() {
-		return quote(CodeCommentQueryConstants.FIELD_REPLY) + " " 
+		return quote(CodeComment.FIELD_REPLY) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

@@ -7,8 +7,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 
-import io.onedev.server.util.query.IssueQueryConstants;
-
 public class CommentCountCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
@@ -24,7 +22,7 @@ public class CommentCountCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		Path<Integer> attribute = root.get(IssueQueryConstants.ATTR_COMMENT_COUNT);
+		Path<Integer> attribute = root.get(Issue.PROP_COMMENT_COUNT);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
@@ -45,7 +43,7 @@ public class CommentCountCriteria extends IssueCriteria {
 
 	@Override
 	public String asString() {
-		return quote(IssueQueryConstants.FIELD_COMMENT_COUNT) + " " 
+		return quote(Issue.FIELD_COMMENT_COUNT) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}

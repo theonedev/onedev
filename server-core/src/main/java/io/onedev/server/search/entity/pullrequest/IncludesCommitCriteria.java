@@ -16,7 +16,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAwareCommit;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 
@@ -40,8 +39,8 @@ public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 		Collection<Long> pullRequestIds = getPullRequestIds();
 		if (!pullRequestIds.isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT), project),
-					root.get(PullRequestQueryConstants.ATTR_ID).in(pullRequestIds));
+					builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), project),
+					root.get(PullRequest.PROP_ID).in(pullRequestIds));
 		} else {
 			return builder.disjunction();
 		}

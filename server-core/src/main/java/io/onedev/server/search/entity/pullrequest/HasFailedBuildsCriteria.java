@@ -11,7 +11,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class HasFailedBuildsCriteria extends EntityCriteria<PullRequest> {
 
@@ -20,8 +19,8 @@ public class HasFailedBuildsCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root
-				.join(PullRequestQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
-				.join(PullRequestBuild.ATTR_BUILD, JoinType.INNER);
+				.join(PullRequest.PROP_PULL_REQUEST_BUILDS, JoinType.LEFT)
+				.join(PullRequestBuild.PROP_BUILD, JoinType.INNER);
 		Path<?> status = join.get(Build.STATUS);
 		
 		join.on(builder.or(

@@ -10,7 +10,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class CommentCriteria extends EntityCriteria<PullRequest> {
 
@@ -24,8 +23,8 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(PullRequestQueryConstants.ATTR_COMMENTS, JoinType.LEFT);
-		Path<String> attribute = join.get(PullRequestComment.ATTR_CONTENT);
+		Join<?, ?> join = root.join(PullRequest.PROP_COMMENTS, JoinType.LEFT);
+		Path<String> attribute = join.get(PullRequestComment.PROP_CONTENT);
 		join.on(builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%"));
 		return join.isNotNull();
 	}
@@ -41,7 +40,7 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_COMMENT) + " " 
+		return quote(PullRequest.FIELD_COMMENT) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

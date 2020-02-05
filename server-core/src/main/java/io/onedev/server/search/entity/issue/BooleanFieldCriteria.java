@@ -23,7 +23,7 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
+		return builder.equal(field.get(IssueField.PROP_VALUE), String.valueOf(value));
 	}
 
 	@Override

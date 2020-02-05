@@ -20,7 +20,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class FixedIssueCriteria extends EntityCriteria<Build> {
 
@@ -46,7 +45,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(BuildQueryConstants.ATTR_ID);
+		Path<Long> attribute = root.get(Build.PROP_ID);
 		Project project = issue.getProject();
 		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());
 		Collection<String> descendents = new HashSet<>();
@@ -55,7 +54,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendents);
 		return builder.and(
-				builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), issue.getProject()),
+				builder.equal(root.get(Build.PROP_PROJECT), issue.getProject()),
 				inManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));
 	}
 

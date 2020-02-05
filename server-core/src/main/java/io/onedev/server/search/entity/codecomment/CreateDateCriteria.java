@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 
@@ -29,7 +28,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(CodeCommentQueryConstants.ATTR_CREATE_DATE);
+		Path<Date> attribute = root.get(CodeComment.PROP_CREATE_DATE);
 		if (operator == CodeCommentQueryLexer.IsBefore)
 			return builder.lessThan(attribute, value);
 		else
@@ -46,7 +45,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String asString() {
-		return quote(CodeCommentQueryConstants.FIELD_CREATE_DATE) + " " 
+		return quote(CodeComment.FIELD_CREATE_DATE) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
 				+ quote(rawValue);
 	}

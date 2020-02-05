@@ -11,7 +11,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 
@@ -28,7 +27,7 @@ public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Path<User> attribute = root.get(CodeCommentQueryConstants.ATTR_USER);
+		Path<User> attribute = root.get(CodeComment.PROP_USER);
 		return builder.equal(attribute, this.user);
 	}
 

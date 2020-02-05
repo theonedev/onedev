@@ -48,7 +48,6 @@ import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -189,7 +188,7 @@ public abstract class IssueOperationsPanel extends Panel {
 
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null) {
-			criterias.add(Criteria.quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
+			criterias.add(Criteria.quote(Issue.FIELD_MILESTONE) + " " 
 					+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 					+ Criteria.quote(getIssue().getMilestoneName()));
 		}

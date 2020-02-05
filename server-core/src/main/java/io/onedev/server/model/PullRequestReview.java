@@ -25,13 +25,13 @@ public class PullRequestReview extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String ATTR_USER = "user";
+	public static final String PROP_USER = "user";
 	
-	public static final String PATH_RESULT = "result";
+	public static final String PROP_RESULT = "result";
 	
-	public static final String ATTR_RESULT_APPROVED = "result.approved";
+	public static final String PROP_RESULT_APPROVED = "result.approved";
 	
-	public static final String ATTR_EXCLUDE_DATE = "excludeDate";
+	public static final String PROP_EXCLUDE_DATE = "excludeDate";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

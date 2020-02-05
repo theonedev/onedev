@@ -13,7 +13,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 
@@ -30,11 +29,11 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(BuildQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
+		Join<?, ?> join = root.join(Build.PROP_PULL_REQUEST_BUILDS, JoinType.LEFT);
 		join.on(builder.and(
-				builder.equal(join.get(PullRequestBuild.ATTR_REQUEST), request), 
-				builder.equal(join.get(PullRequestBuild.ATTR_REQUIRED), true)));
-		return builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), request.getTargetProject());
+				builder.equal(join.get(PullRequestBuild.PROP_REQUEST), request), 
+				builder.equal(join.get(PullRequestBuild.PROP_REQUIRED), true)));
+		return builder.equal(root.get(Build.PROP_PROJECT), request.getTargetProject());
 	}
 
 	@Override

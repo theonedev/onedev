@@ -1,18 +1,18 @@
-package io.onedev.server.web.editable.commitquery;
+package io.onedev.server.web.editable;
 
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.CommitQueryBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.CommitQuery;
+import io.onedev.server.web.editable.string.StringPropertyEditor;
+import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class CommitQueryEditSupport implements EditSupport {
@@ -46,7 +46,21 @@ public class CommitQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new CommitQueryEditor(componentId, descriptor, model);
+		        	return new StringPropertyEditor(componentId, descriptor, model) {
+
+						@Override
+						protected InputAssistBehavior getInputAssistBehavior() {
+			                return new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
+
+			        			@Override
+			        			public Project getObject() {
+			        				return ((ProjectPage) getPage()).getProject();
+			        			}
+			            		
+			            	});
+						}
+		                
+		        	};
 				}
     			
     		};

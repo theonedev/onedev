@@ -34,12 +34,12 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.model.Issue;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -252,10 +252,10 @@ public class GlobalIssueSetting implements Serializable {
 		defaultPromptFieldsUponIssueOpen.add("Build");
 		
 		BoardSpec board = new BoardSpec();
-		board.setName(IssueQueryConstants.FIELD_STATE);
-		board.setIdentifyField(IssueQueryConstants.FIELD_STATE);
+		board.setName(Issue.FIELD_STATE);
+		board.setIdentifyField(Issue.FIELD_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed"));
-		board.setDisplayFields(Lists.newArrayList(IssueQueryConstants.FIELD_STATE, "Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+		board.setDisplayFields(Lists.newArrayList(Issue.FIELD_STATE, "Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 		defaultBoardSpecs.add(board);
 		
 		listFields.add("Type");

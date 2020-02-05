@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class MilestoneCriteria extends IssueCriteria {
 
@@ -23,7 +22,7 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		Path<String> attribute = root.join(IssueQueryConstants.ATTR_MILESTONE, JoinType.LEFT).get(Milestone.ATTR_NAME);
+		Path<String> attribute = root.join(Issue.PROP_MILESTONE, JoinType.LEFT).get(Milestone.PROP_NAME);
 		String normalized = milestoneName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -38,7 +37,7 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public String asString() {
-		return quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
+		return quote(Issue.FIELD_MILESTONE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 				+ quote(milestoneName);
 	}

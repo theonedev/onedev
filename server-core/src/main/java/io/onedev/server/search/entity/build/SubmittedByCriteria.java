@@ -11,7 +11,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class SubmittedByCriteria extends EntityCriteria<Build> {
 
@@ -28,7 +27,7 @@ public class SubmittedByCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<User> attribute = root.get(BuildQueryConstants.ATTR_SUBMITTER);
+		Path<User> attribute = root.get(Build.PROP_SUBMITTER);
 		return builder.equal(attribute, this.user);
 	}
 

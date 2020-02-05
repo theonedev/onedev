@@ -54,7 +54,6 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaConte
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
@@ -153,7 +152,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
 									withCurrentPullRequestCriteria, withCurrentCommitCriteria);
 						}
-						if (fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) 
+						if (fieldName.equals(Issue.FIELD_MILESTONE)) 
 							return new MilestoneIsEmptyCriteria();
 						else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -206,32 +205,32 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
 						case IssueQueryLexer.IsAfter:
-							if (fieldName.equals(IssueQueryConstants.FIELD_SUBMIT_DATE)) 
+							if (fieldName.equals(Issue.FIELD_SUBMIT_DATE)) 
 								return new SubmitDateCriteria(value, operator);
-							else if (fieldName.equals(IssueQueryConstants.FIELD_UPDATE_DATE))
+							else if (fieldName.equals(Issue.FIELD_UPDATE_DATE))
 								return new UpdateDateCriteria(value, operator);
 							else 
 								return new DateFieldCriteria(fieldName, value, operator);
 						case IssueQueryLexer.Contains:
-							if (fieldName.equals(IssueQueryConstants.FIELD_TITLE)) {
+							if (fieldName.equals(Issue.FIELD_TITLE)) {
 								return new TitleCriteria(value);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_DESCRIPTION)) {
+							} else if (fieldName.equals(Issue.FIELD_DESCRIPTION)) {
 								return new DescriptionCriteria(value);
 							} else {
 								return new CommentCriteria(value);
 							}
 						case IssueQueryLexer.Is:
-							if (fieldName.equals(IssueQueryConstants.FIELD_PROJECT)) {
+							if (fieldName.equals(Issue.FIELD_PROJECT)) {
 								return new ProjectCriteria(value);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) {
+							} else if (fieldName.equals(Issue.FIELD_MILESTONE)) {
 								return new MilestoneCriteria(value);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_STATE)) {
+							} else if (fieldName.equals(Issue.FIELD_STATE)) {
 								return new StateCriteria(value);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_VOTE_COUNT)) {
+							} else if (fieldName.equals(Issue.FIELD_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_COMMENT_COUNT)) {
+							} else if (fieldName.equals(Issue.FIELD_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_NUMBER)) {
+							} else if (fieldName.equals(Issue.FIELD_NUMBER)) {
 								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -259,11 +258,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 							}
 						case IssueQueryLexer.IsLessThan:
 						case IssueQueryLexer.IsGreaterThan:
-							if (fieldName.equals(IssueQueryConstants.FIELD_VOTE_COUNT)) {
+							if (fieldName.equals(Issue.FIELD_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_COMMENT_COUNT)) {
+							} else if (fieldName.equals(Issue.FIELD_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(IssueQueryConstants.FIELD_NUMBER)) {
+							} else if (fieldName.equals(Issue.FIELD_NUMBER)) {
 								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -312,7 +311,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			List<EntitySort> issueSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (validate && !IssueQueryConstants.ORDER_FIELDS.containsKey(fieldName)) {
+				if (validate && !Issue.ORDER_FIELDS.containsKey(fieldName)) {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (!(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
 							&& !(fieldSpec instanceof NumberField)) {
@@ -350,12 +349,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria, 
 			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
 		FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-		if (fieldSpec == null && !IssueQueryConstants.QUERY_FIELDS.contains(fieldName))
+		if (fieldSpec == null && !Issue.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
-			if (IssueQueryConstants.QUERY_FIELDS.contains(fieldName) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) { 
+			if (Issue.QUERY_FIELDS.contains(fieldName) 
+					&& !fieldName.equals(Issue.FIELD_MILESTONE)) { 
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -375,27 +374,27 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
-			if (!fieldName.equals(IssueQueryConstants.FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_UPDATE_DATE) 
+			if (!fieldName.equals(Issue.FIELD_SUBMIT_DATE) 
+					&& !fieldName.equals(Issue.FIELD_UPDATE_DATE) 
 					&& !(fieldSpec instanceof DateField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case IssueQueryLexer.Contains:
-			if (!fieldName.equals(IssueQueryConstants.FIELD_TITLE) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_DESCRIPTION)
-					&& !fieldName.equals(IssueQueryConstants.FIELD_COMMENT)
+			if (!fieldName.equals(Issue.FIELD_TITLE) 
+					&& !fieldName.equals(Issue.FIELD_DESCRIPTION)
+					&& !fieldName.equals(Issue.FIELD_COMMENT)
 					&& !(fieldSpec instanceof TextField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case IssueQueryLexer.Is:
-			if (!fieldName.equals(IssueQueryConstants.FIELD_PROJECT) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_STATE) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_VOTE_COUNT) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_COMMENT_COUNT) 
-					&& !fieldName.equals(IssueQueryConstants.FIELD_NUMBER)
-					&& !fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)
+			if (!fieldName.equals(Issue.FIELD_PROJECT) 
+					&& !fieldName.equals(Issue.FIELD_STATE) 
+					&& !fieldName.equals(Issue.FIELD_VOTE_COUNT) 
+					&& !fieldName.equals(Issue.FIELD_COMMENT_COUNT) 
+					&& !fieldName.equals(Issue.FIELD_NUMBER)
+					&& !fieldName.equals(Issue.FIELD_MILESTONE)
 					&& !(fieldSpec instanceof IssueChoiceField)
 					&& !(fieldSpec instanceof PullRequestChoiceField)
 					&& !(fieldSpec instanceof BuildChoiceField)
@@ -411,9 +410,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsLessThan:
 		case IssueQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(IssueQueryConstants.FIELD_VOTE_COUNT)
-					&& !fieldName.equals(IssueQueryConstants.FIELD_COMMENT_COUNT)
-					&& !fieldName.equals(IssueQueryConstants.FIELD_NUMBER)
+			if (!fieldName.equals(Issue.FIELD_VOTE_COUNT)
+					&& !fieldName.equals(Issue.FIELD_COMMENT_COUNT)
+					&& !fieldName.equals(Issue.FIELD_NUMBER)
 					&& !(fieldSpec instanceof NumberField) 
 					&& !(fieldSpec instanceof ChoiceField && !fieldSpec.isAllowMultiple()))
 				throw newOperatorException(fieldName, operator);
@@ -455,7 +454,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		if (criteria != null)
 			undefinedFields.addAll(criteria.getUndefinedFields());
 		for (EntitySort sort: sorts) {
-			if (!IssueQueryConstants.QUERY_FIELDS.contains(sort.getField()) 
+			if (!Issue.QUERY_FIELDS.contains(sort.getField()) 
 					&& getGlobalIssueSetting().getFieldSpec(sort.getField()) == null) {
 				undefinedFields.add(sort.getField());
 			}

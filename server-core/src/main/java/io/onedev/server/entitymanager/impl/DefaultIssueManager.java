@@ -70,7 +70,6 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
@@ -188,11 +187,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {
-			predicates.add(builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), project));
+			predicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
 			if (!projects.isEmpty())
-				predicates.add(root.get(IssueQueryConstants.ATTR_PROJECT).in(projects));
+				predicates.add(root.get(Issue.PROP_PROJECT).in(projects));
 			else
 				predicates.add(builder.disjunction());
 		}
@@ -211,23 +210,23 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: issueQuery.getSorts()) {
-			if (IssueQueryConstants.ORDER_FIELDS.containsKey(sort.getField())) {
+			if (Issue.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(root, IssueQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.asc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(root, IssueQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.desc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueField> join = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueField.ATTR_NAME), sort.getField()));
+				Join<Issue, IssueField> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
+				join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueField.ATTR_ORDINAL)));
+					orders.add(builder.asc(join.get(IssueField.PROP_ORDINAL)));
 				else
-					orders.add(builder.desc(join.get(IssueField.ATTR_ORDINAL)));
+					orders.add(builder.desc(join.get(IssueField.PROP_ORDINAL)));
 			}
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(IssueQueryConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(Issue.PROP_ID)));
 		query.orderBy(orders);
 		
 		return query;
@@ -346,7 +345,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		List<Issue> issues = new ArrayList<>();
 
 		EntityCriteria<Issue> criteria = newCriteria();
-		criteria.add(Restrictions.eq(IssueQueryConstants.ATTR_PROJECT, project));
+		criteria.add(Restrictions.eq(Issue.PROP_PROJECT, project));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);
@@ -628,15 +627,15 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		CriteriaQuery<MilestoneAndState> criteriaQuery = builder.createQuery(MilestoneAndState.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 		criteriaQuery.multiselect(
-				root.get(IssueQueryConstants.ATTR_MILESTONE).get(Milestone.ATTR_ID), 
-				root.get(IssueQueryConstants.ATTR_STATE));
+				root.get(Issue.PROP_MILESTONE).get(Milestone.PROP_ID), 
+				root.get(Issue.PROP_STATE));
 		
 		List<Predicate> milestonePredicates = new ArrayList<>();
 		for (Milestone milestone: milestones) 
-			milestonePredicates.add(builder.equal(root.get(IssueQueryConstants.ATTR_MILESTONE), milestone));
+			milestonePredicates.add(builder.equal(root.get(Issue.PROP_MILESTONE), milestone));
 		
 		criteriaQuery.where(builder.and(
-				builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), project),
+				builder.equal(root.get(Issue.PROP_PROJECT), project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();

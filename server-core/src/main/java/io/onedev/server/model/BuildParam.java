@@ -14,6 +14,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import static io.onedev.server.model.BuildParam.*;
 
 import io.onedev.server.util.jackson.DefaultView;
 
@@ -23,16 +24,16 @@ import io.onedev.server.util.jackson.DefaultView;
  */
 @Entity
 @Table(
-		indexes={@Index(columnList="o_build_id"), @Index(columnList="name"), @Index(columnList="value")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", "name", "value"})})
+		indexes={@Index(columnList="o_build_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE)}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", PROP_NAME, PROP_VALUE})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ATTR_NAME = "name";
+	public static final String PROP_NAME = "name";
 	
-	public static final String ATTR_VALUE = "value";
+	public static final String PROP_VALUE = "value";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

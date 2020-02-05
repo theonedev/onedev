@@ -275,7 +275,7 @@ public class PullRequestNotificationManager implements PersistListener {
 			PullRequestReview review = (PullRequestReview) entity;
 			if (review.getExcludeDate() == null && review.getResult() == null) {
 				for (int i=0; i<propertyNames.length; i++) {
-					if (propertyNames[i].equals(PullRequestReview.PATH_RESULT) && previousState[i] != null) {
+					if (propertyNames[i].equals(PullRequestReview.PROP_RESULT) && previousState[i] != null) {
 						inviteToReview(review);
 						break;
 					}

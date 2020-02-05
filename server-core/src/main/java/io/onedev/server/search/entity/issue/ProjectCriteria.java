@@ -7,9 +7,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.IssueQueryConstants;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class ProjectCriteria extends IssueCriteria {
 
@@ -24,8 +23,8 @@ public class ProjectCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<String> attribute = root
-				.join(IssueQueryConstants.ATTR_PROJECT, JoinType.INNER)
-				.get(ProjectQueryConstants.ATTR_NAME);
+				.join(Issue.PROP_PROJECT, JoinType.INNER)
+				.get(Project.PROP_NAME);
 		String normalized = projectName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -38,7 +37,7 @@ public class ProjectCriteria extends IssueCriteria {
 
 	@Override
 	public String asString() {
-		return quote(IssueQueryConstants.FIELD_PROJECT) + " " 
+		return quote(Issue.FIELD_PROJECT) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 				+ quote(projectName);
 	}

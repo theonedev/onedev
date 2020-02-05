@@ -12,7 +12,6 @@ import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class DependenciesOfCriteria extends EntityCriteria<Build> {
 
@@ -29,8 +28,8 @@ public class DependenciesOfCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(BuildQueryConstants.ATTR_DEPENDENTS, JoinType.LEFT);
-		join.on(builder.equal(join.get(BuildDependence.ATTR_DEPENDENT), build));
+		Join<?, ?> join = root.join(Build.PROP_DEPENDENTS, JoinType.LEFT);
+		join.on(builder.equal(join.get(BuildDependence.PROP_DEPENDENT), build));
 		return join.isNotNull();
 	}
 

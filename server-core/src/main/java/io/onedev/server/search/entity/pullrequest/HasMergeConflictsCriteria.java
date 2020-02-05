@@ -9,7 +9,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class HasMergeConflictsCriteria extends EntityCriteria<PullRequest> {
 
@@ -17,8 +16,8 @@ public class HasMergeConflictsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<?> requestHead = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_LAST_MERGE_PREVIEW_REQUEST_HEAD);
-		Path<?> merged = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_LAST_MERGE_PREVIEW_MERGED);
+		Path<?> requestHead = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_REQUEST_HEAD);
+		Path<?> merged = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED);
 		return builder.and(
 				builder.isNotNull(requestHead), 
 				builder.isNull(merged));

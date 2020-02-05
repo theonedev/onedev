@@ -27,7 +27,7 @@ public class NumericFieldCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<Integer> attribute = field.get(IssueField.ATTR_ORDINAL);
+		Path<Integer> attribute = field.get(IssueField.PROP_ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)

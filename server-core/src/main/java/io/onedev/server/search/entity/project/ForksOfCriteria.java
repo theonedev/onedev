@@ -10,7 +10,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class ForksOfCriteria extends EntityCriteria<Project> {
 
@@ -25,8 +24,8 @@ public class ForksOfCriteria extends EntityCriteria<Project> {
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
 		Path<String> attribute = root
-				.join(ProjectQueryConstants.ATTR_FORKED_FROM, JoinType.INNER)
-				.get(ProjectQueryConstants.ATTR_NAME);
+				.join(Project.PROP_FORKED_FROM, JoinType.INNER)
+				.get(Project.PROP_NAME);
 		String normalized = projectName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}

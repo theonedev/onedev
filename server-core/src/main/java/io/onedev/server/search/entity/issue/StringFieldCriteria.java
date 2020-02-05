@@ -29,7 +29,7 @@ public class StringFieldCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<String> attribute = field.get(IssueField.ATTR_VALUE);
+		Path<String> attribute = field.get(IssueField.PROP_VALUE);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(builder.lower(attribute), value.toLowerCase());
 		else 

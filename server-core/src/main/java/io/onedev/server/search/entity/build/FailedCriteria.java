@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class FailedCriteria extends EntityCriteria<Build> {
 
@@ -16,7 +15,7 @@ public class FailedCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<?> attribute = root.get(BuildQueryConstants.ATTR_STATUS);
+		Path<?> attribute = root.get(Build.PROP_STATUS);
 		return builder.equal(attribute, Build.Status.FAILED);
 	}
 

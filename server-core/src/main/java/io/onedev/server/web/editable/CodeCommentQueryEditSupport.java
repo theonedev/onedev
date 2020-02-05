@@ -1,29 +1,28 @@
-package io.onedev.server.web.editable.issue.query;
+package io.onedev.server.web.editable;
 
 import java.lang.reflect.Method;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.editable.annotation.CodeCommentQuery;
+import io.onedev.server.web.editable.string.StringPropertyEditor;
+import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
-public class IssueQueryEditSupport implements EditSupport {
+public class CodeCommentQueryEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-		IssueQuery issueQuery = propertyGetter.getAnnotation(IssueQuery.class);
-        if (issueQuery != null) {
+        if (propertyGetter.getAnnotation(CodeCommentQuery.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
-	    		throw new RuntimeException("Annotation 'IssueQuery' should be applied to property "
+	    		throw new RuntimeException("Annotation 'CodeCommentQuery' should be applied to property "
 	    				+ "with type 'String'");
         	}
     		return new PropertyContext<String>(descriptor) {
@@ -47,7 +46,21 @@ public class IssueQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new IssueQueryEditor(componentId, descriptor, model);
+		        	return new StringPropertyEditor(componentId, descriptor, model) {
+
+						@Override
+						protected InputAssistBehavior getInputAssistBehavior() {
+							return new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
+
+								@Override
+								public Project getObject() {
+									return ((ProjectPage) getPage()).getProject();
+								}
+					    		
+					    	});
+						}
+		        		
+		        	};
 				}
     			
     		};
