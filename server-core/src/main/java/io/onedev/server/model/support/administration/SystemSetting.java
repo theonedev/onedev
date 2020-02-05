@@ -80,6 +80,8 @@ public class SystemSetting implements Serializable, Validatable {
 		return true;
 	}
 
+	@Editable(name="Ssh URL", order=90, description="ssh url")
+    @NotEmpty
     public String getServerSshUrl() {
         return serverSshUrl;
     }

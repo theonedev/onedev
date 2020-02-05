@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 import javax.validation.Validator;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.request.Url;
+import org.apache.wicket.request.Url.StringMode;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
@@ -142,7 +143,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		    Url serverUrl = OneDev.getInstance().guessServerUrl();
 		    
 		    systemSetting = new SystemSetting();
-			systemSetting.setServerUrl(serverUrl.toString());
+			systemSetting.setServerUrl(serverUrl.toString(StringMode.FULL));
 			systemSetting.setServerSshUrl(serverUrl.getHost()+ ":" + serverConfig.getSshPort());
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
 			systemSetting = (SystemSetting) setting.getValue();

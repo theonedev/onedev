@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +18,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
+import org.apache.wicket.request.Url.StringMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
@@ -108,7 +108,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		
 		List<ManualConfig> manualConfigs = dataManager.init();
 		if (!manualConfigs.isEmpty()) {
-			logger.warn("Please set up the server at " + guessServerUrl());
+			logger.warn("Please set up the server at " 
+			            + guessServerUrl().toString(StringMode.FULL));
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitForFinish();
@@ -227,9 +228,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			}
 			
 			if (serverConfig.getHttpsPort() != 0)
-                serverUrl = new Url(Arrays.asList("https", host, Integer.toString(serverConfig.getHttpsPort())), Charset.forName("UTF8"));
+                serverUrl = buildServerUrl(host, null, Integer.toString(serverConfig.getHttpsPort()));
             else 
-				serverUrl = new Url(Arrays.asList("http", host, Integer.toString(serverConfig.getHttpPort())), Charset.forName("UTF8"));
+                serverUrl = buildServerUrl(host, Integer.toString(serverConfig.getHttpPort()), null);
 			
 		}
 		
@@ -237,21 +238,21 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}
 	
 	private Url buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
-        Url serverUrl = null;
-		if (httpsPort != null) {
-            serverUrl =  new Url(Arrays.asList("https", host), Charset.forName("UTF8"));
-    		if (!httpsPort.equals("443"))
-    			serverUrl.setPort(Integer.parseInt(httpsPort));
-		} else if (httpPort != null) {
-			serverUrl =  new Url(Arrays.asList("http", host), Charset.forName("UTF8"));
-			if (!httpPort.equals("80"))
-			    serverUrl.setPort(Integer.parseInt(httpPort));
-		} else {
-			logger.warn("This OneDev deployment looks odd to me: "
-					+ "both http and https port are not specified");
-		}
+        Url serverUrl = new Url(Charset.forName("UTF8"));
+        boolean haveHttpPort = httpPort != null;
+        boolean haveHttpsPort = httpsPort != null;
+
+        serverUrl.setHost(host);
+        serverUrl.setProtocol(haveHttpsPort ? "https" : "http");
+        
+        if (haveHttpsPort || haveHttpPort ) {
+            serverUrl.setPort(haveHttpsPort ? Integer.parseInt(httpsPort) : Integer.parseInt(httpPort));
+        } else {            
+            logger.warn("This OneDev deployment looks odd to me: "
+                    + "both http and https port are not specified");
+        }
+       
 		return serverUrl;
-  
 	}
 	
 	/**
