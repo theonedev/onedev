@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,8 +18,6 @@ import org.eclipse.jgit.transport.UploadPack;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.SshKey;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.ServerConfig;
 
@@ -76,17 +73,8 @@ public class SimpleGitSshServer {
     }
     
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
-        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);
-        User user = userManager.findByName(userName);
-        List<SshKey> keys = SshKeyUtils.loadUserKeys(user, dao);
-        
-        for (SshKey sshKey : keys) {
-            if (fingerPrint.equals(sshKey.getDigest())) {
-                return true;
-            }
-        }
-        
-        return false;
+        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);        
+        return SshKeyUtils.loadKeyByDigest(fingerPrint, dao) != null;
     }
     
     public int start() throws IOException {
@@ -110,6 +98,10 @@ public class SimpleGitSshServer {
         public void run() {
             String projectName = getGitProjectName();
             Project project = projectManager.find(projectName);
+            
+            if (project == null) {
+                onExit(-1, "Porject not found!");
+            }
             
             UploadPack uploadPack = new UploadPack(project.getRepository());
             String gitProtocol = getEnvironment().getEnv().get("GIT_PROTOCOL");
@@ -142,6 +134,10 @@ public class SimpleGitSshServer {
         public void run() {
             String projectName = getGitProjectName();
             Project project = projectManager.find(projectName);
+            
+            if (project == null) {
+                onExit(-1, "Porject not found!");
+            }
             
             try {
                 new ReceivePack(project.getRepository()).receive(getInputStream(),

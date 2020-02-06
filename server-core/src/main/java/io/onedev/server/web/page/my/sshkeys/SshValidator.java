@@ -31,7 +31,7 @@ public class SshValidator implements IValidator<String> {
     @Override
     public void validate(IValidatable<String> validatable) {
         try {
-            PublicKey pubEntry = SshKeyUtils.loadPublicKey(validatable.getValue());
+            PublicKey pubEntry = SshKeyUtils.decodePublicKey(validatable.getValue());
             String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
             
             boolean alreadyInUse = SshKeyUtils.isKeyAlreadyInUse(fingerPrint, dao);

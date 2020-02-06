@@ -5,13 +5,11 @@ import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.List;
-
 import org.apache.sshd.common.config.keys.AuthorizedKeyEntry;
 import org.apache.sshd.common.config.keys.PublicKeyEntryResolver;
 import org.apache.sshd.common.digest.BaseDigest;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
-
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
@@ -27,8 +25,15 @@ public class SshKeyUtils {
         List<SshKey> keys = dao.query(entityCriteria);
         return keys;
     }
+    
+    public static SshKey loadKeyByDigest(String digest, Dao dao) {
+        SimpleExpression eq = Restrictions.eq("digest", digest);
+        EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
+        
+        return dao.find(entityCriteria);
+    }
 
-    public static PublicKey loadPublicKey(String publicKey) throws IOException, GeneralSecurityException {
+    public static PublicKey decodePublicKey(String publicKey) throws IOException, GeneralSecurityException {
         StringReader stringReader = new StringReader(publicKey);
         List<AuthorizedKeyEntry> entries = AuthorizedKeyEntry.readAuthorizedKeys(stringReader, true);
 
