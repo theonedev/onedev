@@ -1429,7 +1429,75 @@ public class DataMigrator {
 	
 	private void migrate35(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Projects.xml")) {
+			if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("updateDate").detach();
+					Element createDateElement = element.element("createDate");
+					Element lastUpdateElement = element.addElement("lastUpdate");
+					Element userElement = element.element("user");
+					Element lastUpdateUserElement = lastUpdateElement.addElement("user");
+					if (userElement != null)
+						lastUpdateUserElement.setText(userElement.getTextTrim());
+					else
+						lastUpdateUserElement.setText("1");
+					lastUpdateElement.addElement("activity").setText("created");
+					Element dateElement = lastUpdateElement.addElement("date");
+					dateElement.addAttribute("class", createDateElement.attributeValue("class"));
+					dateElement.setText(createDateElement.getTextTrim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("updateDate").detach();
+					Element submitDateElement = element.element("submitDate");
+					Element lastUpdateElement = element.addElement("lastUpdate");
+					Element submitterElement = element.element("submitter");
+					Element lastUpdateUserElement = lastUpdateElement.addElement("user");
+					if (submitterElement != null)
+						lastUpdateUserElement.setText(submitterElement.getTextTrim());
+					else
+						lastUpdateUserElement.setText("1");
+					lastUpdateElement.addElement("activity").setText("opened");
+					Element dateElement = lastUpdateElement.addElement("date");
+					dateElement.addAttribute("class", submitDateElement.attributeValue("class"));
+					dateElement.setText(submitDateElement.getTextTrim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("updateDate").detach();
+					Element submitDateElement = element.element("submitDate");
+					Element lastUpdateElement = element.addElement("lastUpdate");
+					Element submitterElement = element.element("submitter");
+					Element lastUpdateUserElement = lastUpdateElement.addElement("user");
+					if (submitterElement != null)
+						lastUpdateUserElement.setText(submitterElement.getTextTrim());
+					else
+						lastUpdateUserElement.setText("1");
+					lastUpdateElement.addElement("activity").setText("opened");
+					Element dateElement = lastUpdateElement.addElement("date");
+					dateElement.addAttribute("class", submitDateElement.attributeValue("class"));
+					dateElement.setText(submitDateElement.getTextTrim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.element("data").attributeValue("class").contains("PullRequestDescriptionChangeData"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.element("data").attributeValue("class").contains("IssueDescriptionChangeData"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					Element buildSettingElement = element.element("buildSetting");
@@ -1445,6 +1513,12 @@ public class DataMigrator {
 					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
 						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
 					buildSettingElement.addElement("actionAuthorizations");
+					
+					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+						Element buildBranchesElement = tagProtectionElement.element("buildBranches");
+						if (buildBranchesElement != null)
+							buildBranchesElement.detach();
+					}
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.Input;
@@ -115,8 +116,11 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	}
 
 	@Override
-	public String getDescription() {
-		return "changed state";
+	public String getActivity(Issue withIssue) {
+		String activity = "changed state to '" + newState + "'";
+		if (withIssue != null)
+			activity += " for issue " + withIssue.describe();
+		return activity;
 	}
 	
 }

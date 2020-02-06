@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
-
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityCriteria;
 
 public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
@@ -29,7 +29,7 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Path<Date> attribute = CodeCommentQuery.getPath(root, CodeComment.PROP_UPDATE_DATE);
+		Path<Date> attribute = CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
 		if (operator == CodeCommentQueryLexer.IsBefore)
 			return builder.lessThan(attribute, value);
 		else
@@ -39,9 +39,9 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 	@Override
 	public boolean matches(CodeComment comment) {
 		if (operator == CodeCommentQueryLexer.IsBefore)
-			return comment.getUpdateDate().before(value);
+			return comment.getLastUpdate().getDate().before(value);
 		else
-			return comment.getUpdateDate().after(value);
+			return comment.getLastUpdate().getDate().after(value);
 	}
 
 	@Override

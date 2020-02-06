@@ -10,6 +10,8 @@ public class ReviewResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_APPROVED = "approved";
+	
 	private String commit;
 	
 	private Boolean approved = false;

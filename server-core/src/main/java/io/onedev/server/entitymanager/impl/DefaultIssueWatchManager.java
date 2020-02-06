@@ -29,5 +29,14 @@ public class DefaultIssueWatchManager extends AbstractEntityManager<IssueWatch>
 		criteria.add(Restrictions.eq("user", user));
 		return find(criteria);
 	}
+
+	@Override
+	public void watch(Issue issue, User user, boolean watching) {
+		IssueWatch watch = (IssueWatch) issue.getWatch(user, true);
+		if (watch.isNew()) {
+			watch.setWatching(watching);
+			save(watch);
+		}
+	}
 	
 }

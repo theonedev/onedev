@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
@@ -33,8 +34,11 @@ public class IssueTitleChangeData implements IssueChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "changed title";
+	public String getActivity(Issue withIssue) {
+		String activity = "changed title";
+		if (withIssue != null)
+			activity += " of issue " + withIssue.describe();
+		return activity;
 	}
 
 	@Override

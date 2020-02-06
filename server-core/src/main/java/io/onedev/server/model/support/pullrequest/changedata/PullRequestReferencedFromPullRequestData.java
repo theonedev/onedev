@@ -27,8 +27,11 @@ public class PullRequestReferencedFromPullRequestData implements PullRequestChan
 	}
 	
 	@Override
-	public String getDescription() {
-		return "referenced from other pull request";
+	public String getActivity(PullRequest withRequest) {
+		if (withRequest != null)
+			return "Another pull request referenced pull request " + withRequest.describe();
+		else
+			return "Referenced from other pull request";
 	}
 
 	@Override

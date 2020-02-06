@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityQuery;
 
 public class UpdateDateCriteria extends IssueCriteria {
@@ -29,7 +29,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		Path<Date> attribute = IssueQuery.getPath(root, Issue.PROP_UPDATE_DATE);
+		Path<Date> attribute = IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
 		if (operator == IssueQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -39,9 +39,9 @@ public class UpdateDateCriteria extends IssueCriteria {
 	@Override
 	public boolean matches(Issue issue) {
 		if (operator == IssueQueryLexer.IsBefore)
-			return issue.getUpdateDate().before(date);
+			return issue.getLastUpdate().getDate().before(date);
 		else
-			return issue.getUpdateDate().after(date);
+			return issue.getLastUpdate().getDate().after(date);
 	}
 
 	@Override

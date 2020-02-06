@@ -50,6 +50,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -74,7 +75,7 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_UUID), 
 				@Index(columnList=PROP_NO_SPACE_TITLE), @Index(columnList=PROP_NUMBER), 
 				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
-				@Index(columnList=PROP_UPDATE_DATE), @Index(columnList="o_sourceProject_id"), 
+				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_HEAD_COMMIT_HASH), 
 				@Index(columnList=MergePreview.COLUMN_REQUEST_HEAD), @Index(columnList=CloseInfo.COLUMN_DATE), 
 				@Index(columnList=CloseInfo.COLUMN_STATUS), @Index(columnList=CloseInfo.COLUMN_USER), 
@@ -137,7 +138,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String PROP_UPDATE_DATE = "updateDate";
+	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
 	public static final String FIELD_CLOSE_DATE = "Close Date";
 	
@@ -179,7 +180,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			FIELD_UPDATE_DATE, PROP_UPDATE_DATE,
+			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
 			FIELD_CLOSE_DATE, PROP_CLOSE_DATE,
 			FIELD_NUMBER, PROP_NUMBER,
 			FIELD_STATUS, PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS,
@@ -232,9 +233,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Column(nullable=false)
 	private String headCommitHash;
 	
-	@Column(nullable=false)
-	private Date updateDate = new Date();
-	
 	@Column(nullable=true)
 	private Date lastCodeCommentActivityDate;
 
@@ -258,6 +256,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private long number;
 	
 	private int commentCount;
+	
+	@Embedded
+	private LastUpdate lastUpdate;
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -736,6 +737,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.commentCount = commentCount;
 	}
 
+	public LastUpdate getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(LastUpdate lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
 	public List<RevCommit> getCommits() {
 		List<RevCommit> commits = new ArrayList<>();
 		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
@@ -761,14 +770,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		}
 	}
 	
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
-	}
-
 	@Nullable
 	public String getCheckError() {
 		return checkError;
@@ -1025,6 +1026,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			}
 			return null;
 		}
+	}
+	
+	public String describe() {
+		return "#" + getNumber() + " - " + getTitle();
 	}
 	
 }

@@ -38,6 +38,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
@@ -50,7 +51,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 @Table(indexes={
 		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
 		@Index(columnList=MarkPos.PROP_COMMIT), @Index(columnList=MarkPos.PROP_PATH), 
-		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=PROP_UPDATE_DATE)})
+		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=LastUpdate.COLUMN_DATE)})
 public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
@@ -77,7 +78,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String PROP_UPDATE_DATE = "updateDate";
+	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
 	public static final String PROP_USER = "user";
 	
@@ -92,7 +93,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_CREATE_DATE, PROP_CREATE_DATE,
-			FIELD_UPDATE_DATE, PROP_UPDATE_DATE,
+			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
 			FIELD_REPLY_COUNT, PROP_REPLY_COUNT);
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -111,8 +112,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@Column(nullable=false)
 	private Date createDate = new Date();
 
-	@Column(nullable=false)
-	private Date updateDate = new Date();
+	@Embedded
+	private LastUpdate lastUpdate;
 	
 	private int replyCount;
 
@@ -225,14 +226,14 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 		this.compareContext = compareContext;
 	}
 
-	public Date getUpdateDate() {
-		return updateDate;
+	public LastUpdate getLastUpdate() {
+		return lastUpdate;
 	}
 
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
+	public void setLastUpdate(LastUpdate lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
-	
+
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {

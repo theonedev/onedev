@@ -46,7 +46,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 			request.setCommentCount(request.getCommentCount() + relation.getComment().getReplyCount() + 1);
 		super.save(relation);
 		CodeComment comment = relation.getComment();
-		if (comment.getCreateDate().after(request.getUpdateDate())) {
+		if (comment.getCreateDate().after(request.getLastUpdate().getDate())) {
 			PullRequestCodeCommentCreated event = new PullRequestCodeCommentCreated(request, comment, derived); 
 			listenerRegistry.post(event);
 		}

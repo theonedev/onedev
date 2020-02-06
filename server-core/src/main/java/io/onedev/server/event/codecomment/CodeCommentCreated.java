@@ -15,4 +15,12 @@ public class CodeCommentCreated extends CodeCommentEvent implements MarkdownAwar
 		return getComment().getContent();
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "commented";
+		if (withEntity)
+			activity += " on file " + getComment().getMarkPos().getPath();
+		return activity;
+	}
+
 }

@@ -12,4 +12,6 @@ public interface IssueWatchManager extends EntityManager<IssueWatch> {
 	@Nullable
 	IssueWatch find(Issue issue, User user);
 
+	void watch(Issue issue, User user, boolean watching);
+
 }

@@ -21,4 +21,12 @@ public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {
 		return reply.getContent();
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "replied code comment on file '" + getComment().getMarkPos().getPath() + "'"; 
+		if (withEntity)
+			activity += " in pull request " + getRequest().describe();
+		return activity;
+	}
+
 }

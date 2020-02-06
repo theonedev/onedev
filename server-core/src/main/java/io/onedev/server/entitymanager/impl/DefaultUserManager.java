@@ -150,6 +150,12 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
+    	query = getSession().createQuery("update PullRequest set lastUpdate.user=null, "
+    			+ "lastUpdate.userName=:userName where lastUpdate.user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("userName", user.getDisplayName());
+    	query.executeUpdate();
+    	
     	query = getSession().createQuery("update PullRequestChange set user=null, userName=:userName where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
@@ -165,6 +171,12 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
+    	query = getSession().createQuery("update CodeComment set lastUpdate.user=null, lastUpdate.userName=:userName "
+    			+ "where lastUpdate.user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("userName", user.getDisplayName());
+    	query.executeUpdate();
+    	
     	query = getSession().createQuery("update CodeCommentReply set user=null, userName=:userName where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
@@ -174,6 +186,12 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     			+ "where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("submitterName", user.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update Issue set lastUpdate.user=null, lastUpdate.userName=:userName "
+    			+ "where lastUpdate.user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update IssueComment set user=null, userName=:userName where user=:user");

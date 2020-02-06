@@ -53,7 +53,7 @@
 	color: #666;
 	margin: 0 4px;
 }
-.pull-request-list>.body td .submission, 
+.pull-request-list>.body td .last-update, 
 .pull-request-list>.body td .comments {
 	color: #888;
 	font-size: 13px;

@@ -56,6 +56,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.permission.AccessProject;
@@ -620,9 +621,15 @@ public abstract class IssueListPanel extends Panel {
 				}	
 				fragment.add(fieldsView);
 				
-				User submitter = User.from(issue.getSubmitter(), issue.getSubmitterName());
-				fragment.add(new UserIdentPanel("submitter", submitter, Mode.NAME));
-				fragment.add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate())));
+				LastUpdate lastUpdate = issue.getLastUpdate();
+				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
+					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
+					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
+				} else {
+					fragment.add(new WebMarkupContainer("user").setVisible(false));
+				}
+				fragment.add(new Label("activity", lastUpdate.getActivity()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate())));
 				
 				cellItem.add(fragment);
 			}
@@ -636,7 +643,7 @@ public abstract class IssueListPanel extends Panel {
 				Item<Issue> item = super.newRowItem(id, index, model);
 				Issue issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getUpdateDate())?"issue":"issue new"));
+						issue.isVisitedAfter(issue.getLastUpdate().getDate())?"issue":"issue new"));
 				return item;
 			}
 			

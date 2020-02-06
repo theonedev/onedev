@@ -1,6 +1,12 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.Issue.*;
+import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
+import static io.onedev.server.model.Issue.PROP_NO_SPACE_TITLE;
+import static io.onedev.server.model.Issue.PROP_NUMBER;
+import static io.onedev.server.model.Issue.PROP_STATE;
+import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.Issue.PROP_TITLE;
+import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -49,6 +56,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
@@ -71,7 +79,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
 				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_milestone_id"), 
-				@Index(columnList=PROP_UPDATE_DATE)}, 
+				@Index(columnList=LastUpdate.COLUMN_DATE)}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_NUMBER})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -123,7 +131,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String PROP_UPDATE_DATE = "updateDate";
+	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
 	public static final String FIELD_MILESTONE = "Milestone";
 	
@@ -151,7 +159,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			FIELD_NUMBER, PROP_NUMBER,
 			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
 			FIELD_PROJECT, PROP_PROJECT,
-			FIELD_UPDATE_DATE, PROP_UPDATE_DATE);	
+			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
 	
 	@Column(nullable=false)
 	private String state;
@@ -186,13 +194,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	private long number;
 	
+	@Embedded
+	private LastUpdate lastUpdate;
+	
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonView(DefaultView.class)
 	private String noSpaceTitle;
-	
-	@Column(nullable=false)
-	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
@@ -263,6 +271,14 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setNumber(long number) {
 		this.number = number;
+	}
+
+	public LastUpdate getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(LastUpdate lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 
 	public User getSubmitter() {
@@ -367,14 +383,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.fields = fields;
 	}
 	
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
-	}
-
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
@@ -623,6 +631,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getProject(), getNumber());
+	}
+	
+	public String describe() {
+		return "#" + getNumber() + " - " + getTitle();
 	}
 	
 }

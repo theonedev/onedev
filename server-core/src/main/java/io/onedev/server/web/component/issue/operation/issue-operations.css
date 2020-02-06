@@ -18,6 +18,9 @@
 	padding: 7px 12px;
 	display: block;
 }
+.issue-operations>.state-and-actions>.btn.active {
+	background-color: #204C72;
+}
 .issue-operations>.state-and-actions>* {
 	margin-right: 10px;
 	margin-bottom: 8px;

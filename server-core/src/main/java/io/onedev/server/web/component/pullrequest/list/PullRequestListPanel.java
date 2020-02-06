@@ -52,6 +52,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
@@ -332,9 +333,15 @@ public abstract class PullRequestListPanel extends Panel {
 					}.setEscapeModelStrings(false));
 				}
 				
-				User submitter = User.from(request.getSubmitter(), request.getSubmitterName());
-				fragment.add(new UserIdentPanel("submitter", submitter, Mode.NAME));
-				fragment.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
+				LastUpdate lastUpdate = request.getLastUpdate();
+				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
+					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
+					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
+				} else {
+					fragment.add(new WebMarkupContainer("user").setVisible(false));
+				}
+				fragment.add(new Label("activity", lastUpdate.getActivity()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate())));
 				
 				cellItem.add(fragment);
 			}
@@ -394,7 +401,7 @@ public abstract class PullRequestListPanel extends Panel {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
 				PullRequest issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getUpdateDate())?"request":"request new"));
+						issue.isVisitedAfter(issue.getLastUpdate().getDate())?"request":"request new"));
 				return item;
 			}
 			

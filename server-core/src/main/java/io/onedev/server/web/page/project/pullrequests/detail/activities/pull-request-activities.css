@@ -35,9 +35,12 @@
 	position: relative;
 	padding: 6px 0;
 }
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit:hover {
+	background: #F7ECB9;
+}
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.author {
 	position: absolute;
-	left: 0;
+	left: 4px;
 	top: 6px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.message {
@@ -49,7 +52,7 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.actions {
 	position: absolute;
 	top: 6px;
-	right: 0;
+	right: 4px;
 }
 
 #request-detail>.main>.activities .activity>td>.content {

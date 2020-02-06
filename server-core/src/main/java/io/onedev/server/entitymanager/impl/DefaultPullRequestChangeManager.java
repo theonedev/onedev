@@ -2,11 +2,8 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.Date;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import com.google.common.base.Objects;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
@@ -14,7 +11,6 @@ import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -69,20 +65,4 @@ public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullR
 		}
 	}
 
-	@Transactional
-	@Override
-	public void changeDescription(PullRequest request, @Nullable String description) {
-		String prevDescription = request.getDescription();
-		if (!Objects.equal(prevDescription, description)) {
-			request.setDescription(description);
-			
-			PullRequestChange change = new PullRequestChange();
-			change.setDate(new Date());
-			change.setRequest(request);
-			change.setData(new PullRequestDescriptionChangeData(prevDescription, description));
-			change.setUser(SecurityUtils.getUser());
-			save(change);
-		}
-	}
-	
 }

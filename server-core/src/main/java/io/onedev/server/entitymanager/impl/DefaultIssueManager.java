@@ -40,6 +40,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
@@ -52,6 +53,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.issue.changedata.IssueChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -154,11 +159,15 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		Query<?> query = getSession().createQuery("select max(number) from Issue where project=:project");
 		query.setParameter("project", issue.getProject());
 		issue.setNumber(getNextNumber(issue.getProject(), query));
+		
+		IssueOpened event = new IssueOpened(issue);
+		issue.setLastUpdate(event.getLastUpdate());
+		
 		save(issue);
 
 		issueFieldManager.saveFields(issue);
 		
-		listenerRegistry.post(new IssueOpened(issue));
+		listenerRegistry.post(event);
 	}
 	
 	@Transactional
@@ -255,7 +264,18 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		event.getIssue().setUpdateDate(event.getDate());
+		boolean minorChange = false;
+		if (event instanceof IssueChangeEvent) {
+			IssueChangeData changeData = ((IssueChangeEvent)event).getChange().getData();
+			if (changeData instanceof IssueReferencedFromCodeCommentData
+					|| changeData instanceof IssueReferencedFromIssueData
+					|| changeData instanceof IssueReferencedFromPullRequestData) {
+				minorChange = true;
+			}
+		}
+		
+		if (!(event instanceof IssueOpened || minorChange))
+			event.getIssue().setLastUpdate(event.getLastUpdate());
 	}
 	
 	@Sessional

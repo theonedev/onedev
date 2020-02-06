@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.diff.DiffSupport;
@@ -25,8 +26,11 @@ public class PullRequestTitleChangeData implements PullRequestChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "changed title";
+	public String getActivity(PullRequest withRequest) {
+		String activity = "changed title";
+		if (withRequest != null)
+			activity += " of pull request " + withRequest.describe();
+		return activity;
 	}
 
 	@Override

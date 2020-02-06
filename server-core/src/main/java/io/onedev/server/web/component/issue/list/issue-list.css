@@ -50,7 +50,7 @@
 .issue-list>.body td .secondary>.pull-right {
 	margin-top: 8px;
 }
-.issue-list>.body td .submission, .issue-list>.body td .comments, .issue-list>.body td .votes {
+.issue-list>.body td .last-update, .issue-list>.body td .comments, .issue-list>.body td .votes {
 	color: #888;
 	font-size: 13px;
 }

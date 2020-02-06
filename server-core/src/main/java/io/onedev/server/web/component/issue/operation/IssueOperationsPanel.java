@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
@@ -95,6 +96,8 @@ public abstract class IssueOperationsPanel extends Panel {
 
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
+		
+		AtomicReference<Component> activeTransitionLinkRef = new AtomicReference<>(null);  
 		for (TransitionSpec transition: transitions) {
 			if (transition.canTransitManually(getIssue(), null)) {
 				PressButtonTrigger trigger = (PressButtonTrigger) transition.getTrigger();
@@ -103,7 +106,22 @@ public abstract class IssueOperationsPanel extends Panel {
 					private String comment;
 					
 					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						Component thisLink = this;
+						add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								return activeTransitionLinkRef.get() == thisLink?"active":""; 
+							}
+							
+						}));
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
+						activeTransitionLinkRef.set(this);
 						Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueOperationsPanel.this);
 						Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getIssue().getProject());
 						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
@@ -162,12 +180,14 @@ public abstract class IssueOperationsPanel extends Panel {
 							}
 							
 						});
-						
 						form.add(new AjaxLink<Void>("cancel") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								newEmptyActionOptions(target);
+								activeTransitionLinkRef.set(null);
+								for (Component each: transitionsView)
+									target.add(each);
 							}
 							
 						});
@@ -176,8 +196,11 @@ public abstract class IssueOperationsPanel extends Panel {
 						fragment.setOutputMarkupId(true);
 						IssueOperationsPanel.this.replace(fragment);
 						target.add(fragment);
+						
+						for (Component each: transitionsView)
+							target.add(each);
 					}
-					
+
 				};
 				link.add(new Label("label", trigger.getButtonLabel()));
 				transitionsView.add(link);

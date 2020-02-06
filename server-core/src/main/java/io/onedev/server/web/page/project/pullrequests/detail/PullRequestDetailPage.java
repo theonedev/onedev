@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
+import static io.onedev.server.model.Build.FIELD_JOB;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -8,7 +9,6 @@ import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.model.Build.FIELD_JOB;
 import static io.onedev.server.util.criteria.Criteria.quote;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DELETE_SOURCE_BRANCH;
@@ -160,6 +160,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	private Long reviewUpdateId;
 	
 	private MergeStrategy mergeStrategy;
+	
+	private PullRequestOperation activeOperation;
 	
 	public PullRequestDetailPage(PageParameters params) {
 		super(params);
@@ -893,6 +895,17 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return mergeStatusContainer;
 	}
 	
+	private AttributeAppender newOperationAppender(PullRequestOperation operation) {
+		return AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return operation == activeOperation?"active":""; 
+			}
+			
+		});
+	}
+	
 	private WebMarkupContainer newOperationsContainer() {
 		WebMarkupContainer operationsContainer = new WebMarkupContainer("operations") {
 
@@ -923,6 +936,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = APPROVE;
 				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				operationsContainer.replace(newOperationConfirm(confirmId, APPROVE, operationsContainer));
 				target.add(operationsContainer);
@@ -932,15 +946,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(APPROVE.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(APPROVE.canOperate(getPullRequest()));
 			}
 			
-		});
+		}.add(newOperationAppender(APPROVE)));
 		
 		operationsContainer.add(new AjaxLink<Void>("requestForChanges") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = REQUEST_FOR_CHANGES;
 				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				operationsContainer.replace(newOperationConfirm(confirmId, REQUEST_FOR_CHANGES, operationsContainer));
 				target.add(operationsContainer);
@@ -950,15 +965,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(REQUEST_FOR_CHANGES.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(REQUEST_FOR_CHANGES.canOperate(getPullRequest()));
 			}
 			
-		});
+		}.add(newOperationAppender(REQUEST_FOR_CHANGES)));
 		
 		operationsContainer.add(new AjaxLink<Void>("discard") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = DISCARD;
 				operationsContainer.replace(newOperationConfirm(confirmId, DISCARD, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
@@ -967,14 +983,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(DISCARD.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(DISCARD.canOperate(getPullRequest()));
 			}
 
-		});
+		}.add(newOperationAppender(DISCARD)));
+		
 		operationsContainer.add(new AjaxLink<Void>("reopen") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = REOPEN;
 				operationsContainer.replace(newOperationConfirm(confirmId, REOPEN, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
@@ -983,14 +1001,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(REOPEN.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(REOPEN.canOperate(getPullRequest()));
 			}
 
-		});
+		}.add(newOperationAppender(REOPEN)));
+		
 		operationsContainer.add(new AjaxLink<Void>("deleteSourceBranch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = DELETE_SOURCE_BRANCH;
 				operationsContainer.replace(newOperationConfirm(confirmId, DELETE_SOURCE_BRANCH, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
@@ -999,14 +1019,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(DELETE_SOURCE_BRANCH.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(DELETE_SOURCE_BRANCH.canOperate(getPullRequest()));
 			}
 
-		});
+		}.add(newOperationAppender(DELETE_SOURCE_BRANCH)));
+		
 		operationsContainer.add(new AjaxLink<Void>("restoreSourceBranch") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = RESTORE_SOURCE_BRANCH;
 				operationsContainer.replace(newOperationConfirm(confirmId, RESTORE_SOURCE_BRANCH, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
@@ -1015,10 +1037,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(RESTORE_SOURCE_BRANCH.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(RESTORE_SOURCE_BRANCH.canOperate(getPullRequest()));
 			}
 
-		});
+		}.add(newOperationAppender(RESTORE_SOURCE_BRANCH)));
 		
 		operationsContainer.add(new WebMarkupContainer(confirmId).setVisible(false));
 		
@@ -1115,24 +1137,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				}
 			}
 
-		}.add(AttributeModifier.replace("value", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "Confirm " + getOperationName(operation);
-			}
-			
-		})).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (operation == DISCARD)
-					return "btn-danger";
-				else 
-					return "btn-primary";
-			}
-			
-		})));
+		});
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
@@ -1143,6 +1148,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				activeOperation = null;
 				fragment.replaceWith(new WebMarkupContainer(id).setVisible(false));
 				target.add(operationsContainer);
 				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");

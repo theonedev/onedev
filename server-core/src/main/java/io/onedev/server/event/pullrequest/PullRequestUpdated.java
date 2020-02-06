@@ -15,4 +15,12 @@ public class PullRequestUpdated extends PullRequestEvent {
 		return update;
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "Commits added";
+		if (withEntity)
+			activity += " in pull request " + getRequest().describe();
+		return activity;
+	}
+
 }

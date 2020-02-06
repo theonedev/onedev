@@ -208,7 +208,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			PullRequestActivity lastActivity = (PullRequestActivity) prevActivityRow.getDefaultModelObject();
 			List<PullRequestActivity> newActivities = new ArrayList<>();
 			for (PullRequestActivity activity: getActivities()) {
-				if (activity.getDate().getTime() > lastActivity.getDate().getTime())
+				if (activity.getDate().after(lastActivity.getDate()))
 					newActivities.add(activity);
 			}
 

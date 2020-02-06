@@ -24,4 +24,9 @@ public class PullRequestChangeEvent extends PullRequestEvent implements Markdown
 			return null;
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		return change.getData().getActivity(withEntity?change.getRequest():null);
+	}
+
 }

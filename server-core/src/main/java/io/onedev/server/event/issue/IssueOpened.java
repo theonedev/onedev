@@ -66,4 +66,12 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 		return newGroups;
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "opened";
+		if (withEntity)
+			activity += " issue " + getIssue().describe();
+		return activity;
+	}
+
 }

@@ -67,7 +67,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 				.add(Restrictions.eq("commit", commit));
 		return find(criteria);
 	}	
-
+	
 	@Transactional
 	@Override
 	public boolean excludeReviewer(PullRequestReview review) {

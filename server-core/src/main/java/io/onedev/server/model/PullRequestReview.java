@@ -29,8 +29,6 @@ public class PullRequestReview extends AbstractEntity {
 	
 	public static final String PROP_RESULT = "result";
 	
-	public static final String PROP_RESULT_APPROVED = "result.approved";
-	
 	public static final String PROP_EXCLUDE_DATE = "excludeDate";
 	
 	@ManyToOne(fetch=FetchType.LAZY)

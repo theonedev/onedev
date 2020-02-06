@@ -35,6 +35,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
 
@@ -205,6 +206,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				}
 	
 				PullRequestUpdate update = new PullRequestUpdate();
+				update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
 				request.addUpdate(update);
 				update.setRequest(request);
 				update.setHeadCommitHash(request.getHeadCommitHash());

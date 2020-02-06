@@ -7,6 +7,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.validation.annotation.UserName;
 
@@ -51,7 +52,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (value.equals("new")) {
+		} else if (value.equals("new") || value.equals(OneDev.NAME)) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)

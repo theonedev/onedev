@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.util.CommentSupport;
@@ -26,8 +27,11 @@ public class PullRequestMergeStrategyChangeData implements PullRequestChangeData
 	}
 	
 	@Override
-	public String getDescription() {
-		return "changed merge strategy";
+	public String getActivity(PullRequest withRequest) {
+		String activity = "changed merge strategy";
+		if (withRequest != null)
+			activity += " of pull request" + withRequest.describe();
+		return activity;
 	}
 
 	@Override

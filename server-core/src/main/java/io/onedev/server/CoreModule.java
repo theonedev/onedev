@@ -391,8 +391,6 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    
-	    contribute(PersistListener.class, PullRequestNotificationManager.class);
-	    
 		bind(Realm.class).to(OneAuthorizingRealm.class);
 		bind(RememberMeManager.class).to(OneRememberMeManager.class);
 		bind(WebSecurityManager.class).to(OneWebSecurityManager.class);

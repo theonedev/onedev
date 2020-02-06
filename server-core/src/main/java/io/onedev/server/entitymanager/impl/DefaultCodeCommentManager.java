@@ -86,8 +86,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Override
 	public void create(CodeComment comment, PullRequest request) {
 		Preconditions.checkArgument(comment.isNew());
-		save(comment);
+		
 		CodeCommentCreated event = new CodeCommentCreated(comment, request);
+		comment.setLastUpdate(event.getLastUpdate());
+		save(comment);
+		
 		listenerRegistry.post(event);
 	}
 
@@ -104,7 +107,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		event.getComment().setUpdateDate(event.getDate());
+		if (!(event instanceof CodeCommentCreated))
+			event.getComment().setLastUpdate(event.getLastUpdate());
 	}
 	
 	@Sessional

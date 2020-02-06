@@ -1,10 +1,9 @@
 package io.onedev.server.notification;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.UrlManager;
@@ -46,28 +45,24 @@ public class CodeCommentNotificationManager {
 			String markdown = markdownAware.getMarkdown();
 			String rendered = markdownManager.render(markdown);
 			
-			Collection<String> toList = new HashSet<>();
 			for (String userName: new MentionParser().parseMentions(rendered)) {
 				User user = userManager.findByName(userName);
-				if (user != null) 
-					toList.add(user.getEmail());
-			}
-			
-			if (!toList.isEmpty()) {
-				String url;
-				if (event instanceof CodeCommentCreated)
-					url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
-				else if (event instanceof CodeCommentReplied)
-					url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), null);
-				else 
-					url = null;
-				
-				if (url != null) {
-					String subject = String.format("You are mentioned in a code comment on file '%s'", 
-							event.getComment().getMarkPos().getPath());
-					String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				if (user != null) { 
+					String url;
+					if (event instanceof CodeCommentCreated)
+						url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
+					else if (event instanceof CodeCommentReplied)
+						url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), null);
+					else 
+						url = null;
 					
-					mailManager.sendMailAsync(toList, subject, body);
+					if (url != null) {
+						String subject = String.format("You are mentioned in a code comment on file '%s'", 
+								event.getComment().getMarkPos().getPath());
+						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						
+						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, body);
+					}
 				}
 			}
 		}

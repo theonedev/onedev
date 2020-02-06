@@ -41,8 +41,11 @@ public class IssueCommittedData implements IssueChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "New commit fixing this issue added";
+	public String getActivity(Issue withIssue) {
+		if (withIssue != null)
+			return "Commit added fixing issue " + withIssue.describe();
+		else
+			return "Commit added fixing this issue";
 	}
 
 	@Override

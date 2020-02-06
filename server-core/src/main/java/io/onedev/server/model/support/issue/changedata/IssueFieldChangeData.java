@@ -17,6 +17,7 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
@@ -88,8 +89,11 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public String getDescription() {
-		return "changed fields";
+	public String getActivity(Issue withIssue) {
+		String activity = "changed fields";
+		if (withIssue != null)
+			activity += " of issue " + withIssue.describe();
+		return activity;
 	}
 
 	public List<String> getLines(Map<String, Input> fields) {

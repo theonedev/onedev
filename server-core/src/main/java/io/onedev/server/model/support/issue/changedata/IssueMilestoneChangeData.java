@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
@@ -62,8 +63,11 @@ public class IssueMilestoneChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public String getDescription() {
-		return "changed milestone";
+	public String getActivity(Issue withIssue) {
+		String activity = "changed milestone";
+		if (withIssue != null)
+			activity += " of issue " + withIssue.describe();
+		return activity;
 	}
 
 	@Override
