@@ -141,7 +141,10 @@ public class LdapAuthenticator extends Authenticator {
 		this.userEmailAttribute = userEmailAttribute;
 	}
 
-	@Editable(order=900)
+	@Editable(order=900, description="Specify the strategy to retrieve group membership information. "
+			+ "To give appropriate permissions to a LDAP group, a OneDev group with same name "
+			+ "should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage "
+			+ "group memberships at OneDev side")
 	@NotNull(message="may not be empty")
 	public GroupRetrieval getGroupRetrieval() {
 		return groupRetrieval;

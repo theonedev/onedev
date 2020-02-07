@@ -239,7 +239,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    							}
 		    							retrievedGroupNames.add(groupName);
 		    						} else {
-		    							logger.debug("Group '{}' from external authenticator is not defined", groupName);
+		    							logger.warn("Group '{}' from external authenticator is not defined", groupName);
 		    						}
 		    					}
 		        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
