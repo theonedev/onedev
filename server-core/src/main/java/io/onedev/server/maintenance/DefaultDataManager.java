@@ -144,7 +144,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 		    
 		    systemSetting = new SystemSetting();
 			systemSetting.setServerUrl(serverUrl.toString(StringMode.FULL));
-			systemSetting.setServerSshUrl(serverUrl.getHost()+ ":" + serverConfig.getSshPort());
+			
+			String sshUrl = serverUrl.getHost();
+			int sshPort = serverConfig.getSshPort();
+			
+			if (sshPort != 22) {
+			    sshUrl +=  ":" + sshPort;
+            }
+			
+			systemSetting.setServerSshUrl(sshUrl);
+			
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
 			systemSetting = (SystemSetting) setting.getValue();
 		}

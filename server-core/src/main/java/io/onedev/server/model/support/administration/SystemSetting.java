@@ -80,7 +80,7 @@ public class SystemSetting implements Serializable, Validatable {
 		return true;
 	}
 
-	@Editable(name="Ssh URL", order=90, description="ssh url")
+	@Editable(name="Ssh URL", order=90, description="Specify the URL to use with Git to access repositories via SSH")
     @NotEmpty
     public String getServerSshUrl() {
         return serverSshUrl;
