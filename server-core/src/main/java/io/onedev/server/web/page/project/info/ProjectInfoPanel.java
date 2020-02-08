@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
@@ -127,10 +126,16 @@ public abstract class ProjectInfoPanel extends Panel {
 		}
 		
 		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
+		
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getProject()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel)
 				.setVisible(SecurityUtils.canReadCode(getProject())));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
+
+		Model<String> cloneSshUrlModel = Model.of(urlManager.sshUrlFor(getProject()));
+		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
+		        .setVisible(SecurityUtils.canReadCode(getProject())));
+		add(new WebMarkupContainer("copySshUrl").add(new CopyClipboardBehavior(cloneSshUrlModel)));
 	}
 	
 	private Project getProject() {
