@@ -1,3 +1,11 @@
+body.IssueDetailPage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#issue-detail>.main {
+	overflow: scroll;
+	position: relative;
+	padding: 20px;
+}
 #issue-detail>.main>div {
 	margin-bottom: 20px;
 }
@@ -12,7 +20,7 @@
 
 @media(min-width: 1150px) {
 	#issue-detail>.main {
-		padding-right: 360px;
+		margin-right: 360px;
 	}
 	#issue-detail .side-info {
 		box-shadow: none;
@@ -21,7 +29,7 @@
 		display: block !important;
 	}
 	#issue-detail .issue-operations a.more-info, #issue-detail .side-info>a.close {
-		display: none;
+		display: none !important;
 	}
 	#issue-detail .issue-side .nav {
 		padding-right: 0;

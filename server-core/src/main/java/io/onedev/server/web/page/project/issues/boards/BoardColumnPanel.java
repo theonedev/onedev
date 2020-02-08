@@ -17,7 +17,7 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -187,9 +187,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
 						CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
-						String script = String.format("onedev.server.issueBoards.onColumnDomReady('%s', %s);", 
+						String script = String.format("onedev.server.issueBoards.onColumnLoad('%s', %s);", 
 								getMarkupId(), getQuery()!=null?callback:"undefined");
-						response.render(OnDomReadyHeaderItem.forScript(script));
+						// Use OnLoad instead of OnDomReady as otherwise perfect scrollbar is not shown unless resized 
+						response.render(OnLoadHeaderItem.forScript(script));
 					}
 
 					@Override

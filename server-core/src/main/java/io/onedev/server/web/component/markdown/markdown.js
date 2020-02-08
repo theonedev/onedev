@@ -857,11 +857,14 @@ onedev.server.markdown = {
         
 	},
 	initRendered: function($rendered) {
-		// delay highlight to fix the issue that code in markdown can not be 
-		// displayed appropriately in a reopened modal dialog 
-		setTimeout(function() {
-			onedev.server.highlight($rendered);
-		}, 0);
+		if (!onedev.server.util.isDevice()) {
+			$rendered.find("pre.highlight").each(function() {
+				var ps = new PerfectScrollbar(this);
+				$(this).addClass("resize-aware").on("resized", function() {
+					ps.update();
+				});
+			});
+		}
 
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
 		$rendered.find("a.header-anchor").each(function() {

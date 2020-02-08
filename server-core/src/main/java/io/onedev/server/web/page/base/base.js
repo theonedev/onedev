@@ -728,6 +728,13 @@ onedev.server = {
 			onedev.server.viewState.getFromViewAndSetToHistory();	
 		});
 		*/
+		
+		if (location.hash && !onedev.server.viewState.getFromHistory()) {
+			// Scroll anchors into view (for instance the markdown headline)
+			var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
+			if (element)
+				element.scrollIntoView();
+		}
 	}
 	
 };

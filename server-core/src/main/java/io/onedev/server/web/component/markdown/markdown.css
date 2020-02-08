@@ -264,15 +264,17 @@ body.fullscreen {
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
 	font-weight: bold;
 }
+.markdown-rendered pre.highlight {
+	padding: 8px;
+	border: 1px dashed #BBB;
+	background: #F9F9F9;
+	position: relative;
+}
 .markdown-rendered blockquote {
 	font-size: 15px; 
 	border-left: 4px solid #ddd; 
 	color: #777; 
 	padding: 0 16px;
-}
-.markdown-rendered code {
-	color: #333;
-	background: rgba(0, 0, 0, 0.04);
 }
 .markdown-rendered img {
 	max-width: 100%;

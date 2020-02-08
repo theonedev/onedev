@@ -27,7 +27,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -872,8 +871,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		String script = String.format("onedev.server.projectBlob.onDomReady(%s);", callback);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
-		
-		response.render(OnLoadHeaderItem.forScript("onedev.server.projectBlob.onWindowLoad();"));
 	}
 
 	public static ProjectBlobPage.State getState(CodeComment comment) {

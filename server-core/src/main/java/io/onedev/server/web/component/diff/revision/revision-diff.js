@@ -29,18 +29,17 @@ onedev.server.revisionDiff = {
 				}
 			});
 		}
-		
+
 		onedev.server.revisionDiff.reposition();
+	},
+	onWindowLoad: function() {
 		if (window.location.hash) {
 			var $anchor = $(window.location.hash);
 			if ($anchor.length != 0) {
-				setTimeout(function() {
-					var detailOffset = $(".revision-diff>.body>.detail").offset().top;
-					if ($(window).scrollTop() <= detailOffset) {
-						$(window).scrollTop(detailOffset);
-					} 
-					$anchor.closest(".code-comment").parent().jumpIntoView($anchor);
-				}, 100);
+				var detailOffset = $(".revision-diff>.body>.detail").offset().top;
+				if ($(window).scrollTop() <= detailOffset)
+					$(window).scrollTop(detailOffset);
+				$anchor[0].scrollIntoView();
 			}
 		} 
 	},

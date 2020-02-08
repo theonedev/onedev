@@ -6,29 +6,25 @@ onedev.server.issueBoards = {
 		if ($body.length != 0) {
 			// Do not use perfect scroll on Device as it may cause scroll issue
 			if (onedev.server.util.isDevice()) {
-				$(window).resize(function() {
+				$body.addClass("resize-aware").on("resized", function() {
 					$body.outerHeight($(window).height()-$body.offset().top);
 				});
 			} else {
 				var ps = new PerfectScrollbar($body[0]);
-				$(window).resize(function() {
+				$body.addClass("resize-aware").on("resized", function() {
 					$body.outerHeight($(window).height()-$body.offset().top);
 					ps.update();
 				});
 			}
 		}
 	}, 
-	onColumnDomReady: function(containerId, callback) {
+	onColumnLoad: function(containerId, callback) {
 		var $body = $("#" + containerId);
 		
 		// Do not use perfect scroll on Device as it may cause scroll issue
 		if (!onedev.server.util.isDevice()) {
 			var ps = new PerfectScrollbar($body[0]);
-			
-			// Scroll bar will not show in the flex box without this line
-			setTimeout(function() {ps.update();}, 100);
-			
-			$(window).resize(function() {
+			$body.addClass("resize-aware").on("resized", function() {
 				ps.update();
 			});
 		}

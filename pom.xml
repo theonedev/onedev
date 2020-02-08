@@ -570,7 +570,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.10</commons.version>
+		<commons.version>1.1.11</commons.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

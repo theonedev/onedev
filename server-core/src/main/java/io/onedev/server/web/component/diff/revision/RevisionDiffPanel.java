@@ -28,6 +28,7 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -483,6 +484,7 @@ public class RevisionDiffPanel extends Panel {
 				super.renderHead(response);
 				
 				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onDomReady();"));
+				response.render(OnLoadHeaderItem.forScript("onedev.server.revisionDiff.onWindowLoad();"));
 			}
 			
 		};

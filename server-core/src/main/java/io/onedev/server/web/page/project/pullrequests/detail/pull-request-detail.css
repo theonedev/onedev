@@ -7,6 +7,15 @@
     }
 }
 
+body.PullRequestDetailPage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#request-detail>.main {
+	overflow: scroll;
+	position: relative;
+	padding: 20px;
+}
+
 #request-detail>.main>div {
 	margin-bottom: 20px;
 }
@@ -191,7 +200,7 @@ ul>li>a.code-comments.new .fa-circle {
 
 @media(min-width: 1150px) {
 	#request-detail>.main {
-		padding-right: 360px;
+		margin-right: 360px;
 	}
 	#request-detail .side-info {
 		box-shadow: none;
