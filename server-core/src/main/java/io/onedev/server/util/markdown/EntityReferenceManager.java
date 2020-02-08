@@ -29,7 +29,9 @@ import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -262,6 +264,8 @@ public class EntityReferenceManager {
 	public void on(PullRequestChangeEvent event) {
 		if (event.getChange().getData() instanceof PullRequestTitleChangeData)
 			addReferenceChange(event.getRequest(), event.getRequest().getTitle());
+		if (event.getChange().getData() instanceof PullRequestDescriptionChangeData)
+			addReferenceChange(event.getRequest(), event.getRequest().getDescription());
 	}
 	
 	@Transactional
@@ -276,6 +280,8 @@ public class EntityReferenceManager {
 	public void on(IssueChangeEvent event) {
 		if (event.getChange().getData() instanceof IssueTitleChangeData)
 			addReferenceChange(event.getIssue(), event.getIssue().getTitle());
+		if (event.getChange().getData() instanceof IssueDescriptionChangeData)
+			addReferenceChange(event.getIssue(), event.getIssue().getDescription());
 	}
 	
 	@Transactional

@@ -26,7 +26,7 @@ public class BuildEventBroadcaster {
 		Project project = event.getProject();
 		Build build = event.getBuild();
 		
-		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(build.getId()), pageKey);
+		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(build.getId()), null);
 		
 		String observable = "commit-status:" + project.getId() + ":" + build.getCommitHash();
 		webSocketManager.notifyObservableChange(observable, pageKey);

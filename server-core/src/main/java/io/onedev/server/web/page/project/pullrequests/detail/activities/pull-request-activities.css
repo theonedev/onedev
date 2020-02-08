@@ -8,6 +8,9 @@
 #request-detail>.main>.activities .activity.new>.avatar {
 	border-left-color: #4667EE;
 }
+#request-detail>.main>.activities>table {
+	table-layout: fixed;
+}
 
 #request-detail>.main>.activities .activity>td {
 	border-bottom: 1px solid #EEE;
@@ -17,7 +20,7 @@
 	border-bottom: none;
 }
 #request-detail>.main>.activities .activity>td.avatar {
-	width: 1px;
+	width: 48px;
 	border-left: 4px solid white;
 	padding-left: 8px;
 }

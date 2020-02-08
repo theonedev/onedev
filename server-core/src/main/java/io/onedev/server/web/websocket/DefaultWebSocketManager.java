@@ -117,7 +117,7 @@ public class DefaultWebSocketManager implements WebSocketManager, SchedulableTas
 	
 	@Override
 	public void execute() {
-		for (IWebSocketConnection connection: new SimpleWebSocketConnectionRegistry().getConnections(application)) {
+		for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
 			if (connection.isOpen()) {
 				try {
 					connection.sendMessage(WebSocketManager.KEEP_ALIVE);

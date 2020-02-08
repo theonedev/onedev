@@ -5,6 +5,9 @@
 	padding-left: 12px;
 	display: inline-block;
 }
+.issue-activities>table {
+	table-layout: fixed;
+}
 .issue-activities tr.activity.new>.avatar {
 	border-left-color: #4667EE;
 }
@@ -17,7 +20,7 @@
 	border-bottom: none;
 }
 .issue-activities>table>tbody>tr>td.avatar {
-	width: 1px;
+	width: 48px;
 	border-left: 4px solid white;
 	padding-left: 8px;
 }

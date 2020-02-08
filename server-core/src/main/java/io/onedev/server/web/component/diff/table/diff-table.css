@@ -117,7 +117,13 @@ table.diff>tbody>tr:hover>td {
 table.plain.diff {
 	border: none;
 }
+table.plain.diff>tbody>tr>td.expander {
+	width: 20px;
+}
+table.plain.diff>tbody>tr>td.skipped {
+	border-left: none;
+}
 table.plain.diff>tbody>tr>td.operation {
-	width: 12px;
-	padding: 0 4px 0 0;
+	width: 20px;
+	padding: 0 4px 0 6px;
 }

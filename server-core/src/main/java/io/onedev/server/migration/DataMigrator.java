@@ -1483,20 +1483,6 @@ public class DataMigrator {
 					dateElement.setText(submitDateElement.getTextTrim());
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
-				VersionedDocument dom = VersionedDocument.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					if (element.element("data").attributeValue("class").contains("PullRequestDescriptionChangeData"))
-						element.detach();
-				}
-				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("IssueChanges.xml")) {
-				VersionedDocument dom = VersionedDocument.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					if (element.element("data").attributeValue("class").contains("IssueDescriptionChangeData"))
-						element.detach();
-				}
-				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {

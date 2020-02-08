@@ -129,7 +129,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		if (revisionSegments.isEmpty())
 			throw new RestartResponseException(ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject()));
 		
-		State state = new State();
+		state = new State();
 		state.revision = Joiner.on("/").join(revisionSegments);
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();

@@ -45,6 +45,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssuePullRequestDiscardedData;
@@ -127,6 +128,22 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		}
 	}
 
+	@Transactional
+	@Override
+	public void changeDescription(Issue issue, @Nullable String description) {
+		String prevDescription = issue.getDescription();
+		if (!Objects.equal(description, prevDescription)) {
+			issue.setDescription(description);
+			
+			IssueChange change = new IssueChange();
+			change.setIssue(issue);
+			change.setDate(new Date());
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new IssueDescriptionChangeData(prevDescription, issue.getDescription()));
+			save(change);
+		}
+	}
+	
 	private void checkBuild(TransitionSpec transition, Build build) {
 		if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 			Project project = build.getProject();
