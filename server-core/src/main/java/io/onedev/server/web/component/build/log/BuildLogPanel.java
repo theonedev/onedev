@@ -51,12 +51,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			}
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				appendRecentLogEntries(handler);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				appendRecentLogEntries(handler);
 			}
 			

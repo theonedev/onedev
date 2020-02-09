@@ -20,8 +20,6 @@ public abstract class WebSocketObserver extends Behavior {
 
 	public abstract Collection<String> getObservables();
 	
-	public abstract void onObservableChanged(IPartialPageRequestHandler handler, String observable);
-	
-	public abstract void onConnectionOpened(IPartialPageRequestHandler handler);
+	public abstract void onObservableChanged(IPartialPageRequestHandler handler);
 
 }

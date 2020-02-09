@@ -35,12 +35,8 @@ abstract class CardCountLabel extends Label {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
 			}
 			
 			@Override

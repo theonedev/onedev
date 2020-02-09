@@ -20,9 +20,9 @@ public class IssueEventBroadcaster {
 
 	@Listen
 	public void on(IssueEvent event) {
-		webSocketManager.notifyObservableChange(Issue.getWebSocketObservable(event.getIssue().getId()), null);
+		webSocketManager.notifyObservableChange(Issue.getWebSocketObservable(event.getIssue().getId()));
 		if (event.affectsBoards())
-			webSocketManager.notifyObservableChange(BoardSpec.getWebSocketObservable(event.getIssue().getProject().getId()), null);
+			webSocketManager.notifyObservableChange(BoardSpec.getWebSocketObservable(event.getIssue().getProject().getId()));
 	}
 
 }

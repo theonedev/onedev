@@ -19,7 +19,7 @@ public class CodeCommentEventBroadcaster {
 	
 	@Listen
 	public void on(CodeCommentEvent event) {
-		webSocketManager.notifyObservableChange(CodeComment.getWebSocketObservable(event.getComment().getId()), null);
+		webSocketManager.notifyObservableChange(CodeComment.getWebSocketObservable(event.getComment().getId()));
 	}
 		
 }

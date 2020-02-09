@@ -199,12 +199,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				updateActivities(handler);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				updateActivities(handler);
 			}
 			

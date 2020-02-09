@@ -124,13 +124,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		return new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(component);
-				handler.appendJavaScript("$(window).resize();");
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
 				handler.appendJavaScript("$(window).resize();");
 			}

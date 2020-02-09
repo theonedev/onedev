@@ -273,12 +273,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(IssueOperationsPanel.this);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(IssueOperationsPanel.this);
 			}
 			

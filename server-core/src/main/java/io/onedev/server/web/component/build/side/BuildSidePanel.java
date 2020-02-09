@@ -196,12 +196,7 @@ public abstract class BuildSidePanel extends Panel {
 		general.add(new WebSocketObserver() {
 				
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(component);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
 			}
 			

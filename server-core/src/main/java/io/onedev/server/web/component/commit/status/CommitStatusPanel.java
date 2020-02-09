@@ -157,12 +157,7 @@ public abstract class CommitStatusPanel extends Panel {
 				fragment.add(new WebSocketObserver() {
 					
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-						handler.add(component);
-					}
-					
-					@Override
-					public void onConnectionOpened(IPartialPageRequestHandler handler) {
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
 						handler.add(component);
 					}
 					

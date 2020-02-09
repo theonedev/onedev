@@ -23,13 +23,13 @@ public class BuildEventBroadcaster {
 		Project project = event.getProject();
 		Build build = event.getBuild();
 		
-		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(build.getId()), null);
+		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(build.getId()));
 		
 		String observable = "commit-status:" + project.getId() + ":" + build.getCommitHash();
-		webSocketManager.notifyObservableChange(observable, null);
+		webSocketManager.notifyObservableChange(observable);
 		
 		observable = "job-status:" + project.getId() + ":" + build.getCommitHash() + ":" + build.getJobName();
-		webSocketManager.notifyObservableChange(observable, null);
+		webSocketManager.notifyObservableChange(observable);
 	}
 
 }

@@ -122,12 +122,8 @@ abstract class CardListPanel extends Panel {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				behavior.refresh(handler);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
 			}
 			
 			@Override
