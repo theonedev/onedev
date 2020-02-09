@@ -70,6 +70,12 @@ public class SimpleGitSshServer {
         server.setPublickeyAuthenticator((userName, publicKey, session) -> {
             return checkUserKeys(userName, publicKey);
         });
+        
+        server.setShellFactory(new WelcomeGitShell());
+        server.setPasswordAuthenticator(null);
+        server.setKeyboardInteractiveAuthenticator(null);
+        server.setGSSAuthenticator(null);
+        server.setHostBasedAuthenticator(null);
     }
     
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
