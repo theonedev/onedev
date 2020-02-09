@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.pullrequests.create;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +54,6 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -800,17 +798,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();
-	}
-
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> regions = super.getWebSocketObservables();
-		PullRequest request = getPullRequest();
-		if (request != null) {
-			regions.add(CommitIndexed.getWebSocketObservable(request.getBaseCommit().name()));
-			regions.add(CommitIndexed.getWebSocketObservable(request.getHeadCommit().name()));
-		}
-		return regions;
 	}
 
 	@Override

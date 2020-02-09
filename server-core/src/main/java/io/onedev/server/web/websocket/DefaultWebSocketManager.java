@@ -82,7 +82,14 @@ public class DefaultWebSocketManager implements WebSocketManager {
 				sessionPages = new ConcurrentHashMap<>();
 				registeredObservables.put(sessionId, sessionPages);
 			}
-			sessionPages.put(new PageIdKey(page.getPageId()), page.findWebSocketObservables());
+			IKey pageKey = new PageIdKey(page.getPageId());
+			Collection<String> observables = page.findWebSocketObservables();
+			Collection<String> prevObservables = sessionPages.put(pageKey, observables);
+			if (prevObservables != null && !prevObservables.containsAll(observables)) {
+				IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, pageKey);
+				if (connection != null)
+					notifyPastObservables(connection);
+			}
 		}
 	}
 	
@@ -196,6 +203,10 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	 */
 	@Override
 	public void onConnect(IWebSocketConnection connection) {
+		notifyPastObservables(connection);
+	}
+
+	private void notifyPastObservables(IWebSocketConnection connection) {
 		Collection<String> registeredObservables = getRegisteredObservables(connection);
 		if (registeredObservables != null) {
 			Set<String> observables = new HashSet<>();

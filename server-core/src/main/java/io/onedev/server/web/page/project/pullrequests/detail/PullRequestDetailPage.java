@@ -44,7 +44,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -75,6 +74,7 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -106,6 +106,7 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -140,7 +141,6 @@ import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestDetailPage extends ProjectPage implements PullRequestAware {
@@ -311,41 +311,44 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary") {
 
 			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					for (Component child: this) {
-						if (child instanceof MarkupContainer) {
-							MarkupContainer container = (MarkupContainer) child;
-							Form<?> form = container.visitChildren(Form.class, new IVisitor<Form<?>, Form<?>>() {
-
-								@Override
-								public void component(Form<?> object, IVisit<Form<?>> visit) {
-									visit.stop(object);
-								}
-								
-							});
-							if (form == null) {
-								pageDataChanged.getHandler().add(child);
-							}
-						} else if (!(child instanceof Form)) {
-							pageDataChanged.getHandler().add(child);
-						}
-					}
-					WicketUtils.markLastVisibleChild(this);
-					pageDataChanged.getHandler().appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
-				}
-			}
-
-			@Override
 			protected void onBeforeRender() {
 				super.onBeforeRender();
 				WicketUtils.markLastVisibleChild(this);
 			}
 
 		};
+		summaryContainer.add(new WebSocketObserver() {
+
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+			}
+
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				for (Component child: summaryContainer) {
+					if (child instanceof MarkupContainer) {
+						MarkupContainer container = (MarkupContainer) child;
+						Form<?> form = container.visitChildren(Form.class, new IVisitor<Form<?>, Form<?>>() {
+
+							@Override
+							public void component(Form<?> object, IVisit<Form<?>> visit) {
+								visit.stop(object);
+							}
+							
+						});
+						if (form == null) {
+							handler.add(child);
+						}
+					} else if (!(child instanceof Form)) {
+						handler.add(child);
+					}
+				}
+				WicketUtils.markLastVisibleChild(summaryContainer);
+				handler.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
+			}
+			
+		});
 		summaryContainer.setOutputMarkupPlaceholderTag(true);
 		add(summaryContainer);
 
@@ -448,21 +451,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			@Override
 			protected Component newContent(String componentId) {
-				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this) {
-
-					@Override
-					public void onEvent(IEvent<?> event) {
-						super.onEvent(event);
-
-						if (event.getPayload() instanceof PageDataChanged) {
-							PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-							IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
-							partialPageRequestHandler.add(this);
-						}
-						
-					}
-
-				};
+				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this);
 				fragment.add(new EntityNavPanel<PullRequest>("requestNav") {
 
 					@Override
@@ -629,6 +618,20 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				});
 				
 				fragment.add(newManageContainer());
+				
+				fragment.add(new WebSocketObserver() {
+
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+					}
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+				});
 
 				fragment.setOutputMarkupId(true);
 				return fragment;
@@ -764,8 +767,20 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				
-				setOutputMarkupId(true);
+
+				add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+					}
+					
+				});
 				
 				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
@@ -781,16 +796,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 					
 				}));
-			}
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					pageDataChanged.getHandler().add(this);
-				}
+				setOutputMarkupId(true);
 			}
 			
 		});
@@ -1269,13 +1275,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 	
 	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> observables = super.getWebSocketObservables();
-		observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
-		return observables;
-	}
-
-	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
@@ -1298,17 +1297,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		public Component render(String componentId) {
 			if (getMainPageClass() == PullRequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", PullRequestDetailPage.this);
-				Link<Void> link = new ViewStateAwarePageLink<Void>("link", PullRequestCodeCommentsPage.class, paramsOf(getPullRequest(), position)) {
-
-					@Override
-					public void onEvent(IEvent<?> event) {
-						super.onEvent(event);
-						if (event.getPayload() instanceof PageDataChanged) {
-							((PageDataChanged)event.getPayload()).getHandler().add(this);
-						}
-					}
-					
-				};
+				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
+						PullRequestCodeCommentsPage.class, paramsOf(getPullRequest(), position));
 				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
@@ -1323,6 +1313,19 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 					
 				}));
+				link.add(new WebSocketObserver() {
+
+					@Override
+					public Collection<String> getObservables() {
+						return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+					}
+
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+				});
 				link.setOutputMarkupId(true);
 				fragment.add(link);
 				return fragment;

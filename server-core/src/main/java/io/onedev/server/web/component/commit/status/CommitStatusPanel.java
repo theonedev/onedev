@@ -26,7 +26,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
@@ -163,7 +163,7 @@ public abstract class CommitStatusPanel extends Panel {
 					
 					@Override
 					public Collection<String> getObservables() {
-						return CommitStatusPanel.this.getWebSocketObservables();
+						return getWebSocketObservables();
 					}
 					
 				});
@@ -206,7 +206,7 @@ public abstract class CommitStatusPanel extends Panel {
 	}
 	
 	private Collection<String> getWebSocketObservables() {
-		return Lists.newArrayList("commit-status:" + getProject().getId() + ":" + commitId.name());
+		return Sets.newHashSet("commit-status:" + getProject().getId() + ":" + commitId.name());
 	}
 
 	@Override

@@ -8,8 +8,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
@@ -89,6 +91,7 @@ import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
@@ -112,7 +115,6 @@ import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -254,6 +256,23 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				} else {
 					setVisible(false);
 				}
+			}
+			
+		});
+		revisionIndexing.add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(revisionIndexing);
+				resizeWindow(handler);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				Set<String> observables = new HashSet<>();
+				if (resolvedRevision != null) 
+					observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
+				return observables;
 			}
 			
 		});
@@ -1099,14 +1118,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state.commentId = null;
 			state.position = null;
 		}
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
 	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		state.position = SourceRendererProvider.getPosition(range);
 		pushState(target);
 	}
@@ -1124,21 +1141,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			return null;
 	}
 	
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> observables = super.getWebSocketObservables();
-		if (resolvedRevision != null) {
-			observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
-			observables.add("commit-status:" + getProject().getId() + ":" + resolvedRevision.name());
-		}
-		if (state.requestId != null)
-			observables.add(PullRequest.getWebSocketObservable(state.requestId));
-		if (state.commentId != null)
-			observables.add(CodeComment.getWebSocketObservable(state.commentId));
-		
-		return observables;
-	}
-
 	public static class State implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
@@ -1354,11 +1356,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		if (event.getPayload() instanceof RevisionResolved) {
 			RevisionResolved revisionResolveEvent = (RevisionResolved) event.getPayload();
 			resolvedRevision = revisionResolveEvent.getResolvedRevision();
-		} else if (event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			pageDataChanged.getHandler().add(revisionIndexing);
-			resizeWindow(pageDataChanged.getHandler());
-		}
+		} 
 	}
 
 	@Override

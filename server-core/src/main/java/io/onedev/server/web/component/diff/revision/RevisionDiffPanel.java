@@ -24,7 +24,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.IEvent;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -57,6 +57,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -76,6 +77,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.util.PathComparator;
 import io.onedev.server.util.ProjectAndRevision;
@@ -88,6 +90,7 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.blob.SourceAware;
@@ -101,7 +104,6 @@ import io.onedev.server.web.component.revisionpicker.RevisionSelector;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 /**
  * Make sure to add only one revision diff panel on a page
@@ -439,19 +441,23 @@ public class RevisionDiffPanel extends Panel {
 				add(new NoAntiCacheImage("icon", 
 						new PackageResourceReference(RevisionDiffPanel.class, "indexing.gif")));
 				
+				add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler) {
+						handler.add(component);
+						handler.appendJavaScript("$(window).resize();");
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						return getWebSocketObservables();
+					}
+				});
+				
 				setOutputMarkupPlaceholderTag(true);
 			}
 			
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					pageDataChanged.getHandler().add(this);
-					pageDataChanged.getHandler().appendJavaScript("$(window).resize();");
-				}
-			}
-
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -1092,18 +1098,21 @@ public class RevisionDiffPanel extends Panel {
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
-		WebMarkupContainer head = new WebMarkupContainer("head") {
-			
+		WebMarkupContainer head = new WebMarkupContainer("head");
+		head.add(new WebSocketObserver() {
+
 			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (commentContainer.isVisible() && event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					pageDataChanged.getHandler().add(this);
-				}
+			public Collection<String> getObservables() {
+				return getWebSocketObservables();
 			}
 
-		};
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				if (commentContainer.isVisible()) 
+					handler.add(component);
+			}
+			
+		});
 		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
@@ -1357,6 +1366,13 @@ public class RevisionDiffPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new RevisionDiffResourceReference()));
+	}
+	
+	private Set<String> getWebSocketObservables() {
+		Project project = projectModel.getObject();
+		return Sets.newHashSet(
+				CommitIndexed.getWebSocketObservable(project.getObjectId(oldRev, true).name()), 
+				CommitIndexed.getWebSocketObservable(project.getObjectId(newRev, true).name()));
 	}
 	
 	private static class ChangesAndCount {

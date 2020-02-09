@@ -1,19 +1,21 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
+import java.util.Collection;
 import java.util.Date;
 
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
@@ -26,7 +28,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 
 		@Override
 		protected String load() {
-			PullRequest request = requestModel.getObject();
+			PullRequest request = getPullRequest();
 			String commit = request.getBaseCommitHash();
 			for (PullRequestUpdate update: request.getSortedUpdates()) {
 				if (update.getDate().before(sinceDate))
@@ -45,7 +47,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 
 	@Override
 	public PageParameters getPageParameters() {
-		PullRequest request = requestModel.getObject();
+		PullRequest request = getPullRequest();
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 		state.oldCommit = oldCommitModel.getObject();
 		state.newCommit = request.getHeadCommitHash();
@@ -54,26 +56,34 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 	}
 
 	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
-			partialPageRequestHandler.add(this);
-		}
-	}
-
-	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		add(new WebSocketObserver() {
+
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+			}
+
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(component);
+			}
+			
+		});
+		
 		setOutputMarkupPlaceholderTag(true);
+	}
+	
+	private PullRequest getPullRequest() {
+		return requestModel.getObject();
 	}
 
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!oldCommitModel.getObject().equals(requestModel.getObject().getHeadCommitHash()));
+		setVisible(!oldCommitModel.getObject().equals(getPullRequest().getHeadCommitHash()));
 	}
 
 	@Override

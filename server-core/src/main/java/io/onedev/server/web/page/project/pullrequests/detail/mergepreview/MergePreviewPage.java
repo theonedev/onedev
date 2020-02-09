@@ -9,7 +9,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -22,13 +21,14 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.OneDev;
+import com.google.common.collect.Sets;
+
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
@@ -37,8 +37,6 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class MergePreviewPage extends PullRequestDetailPage implements EditParamsAware {
@@ -93,7 +91,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 		newContent(target);
 	}
 	
-	private void newContent(IPartialPageRequestHandler target) {
+	private void newContent(IPartialPageRequestHandler handler) {
 		Fragment fragment;
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
@@ -118,7 +116,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 
 				@Override
 				protected String getCssClasses() {
-					return "btn btn-default";
+					return "btn btn-default btn-sm";
 				}
 
 				@Override
@@ -132,6 +130,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 				@Override
 				protected void onInitialize() {
 					super.onInitialize();
+					
 					add(new AjaxLink<Void>("link") {
 
 						@Override
@@ -140,17 +139,20 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 						}
 						
 					});
-				}
-				
-				@Override
-				public void onEvent(IEvent<?> event) {
-					super.onEvent(event);
+					
+					add(new WebSocketObserver() {
 
-					if (event.getPayload() instanceof PageDataChanged) {
-						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-						pageDataChanged.getHandler().add(this);
-						OneDev.getInstance(WebSocketManager.class).observe(MergePreviewPage.this);
-					}
+						@Override
+						public Collection<String> getObservables() {
+							return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+						}
+
+						@Override
+						public void onObservableChanged(IPartialPageRequestHandler handler) {
+							handler.add(component);
+						}
+						
+					});
 				}
 				
 				@Override
@@ -227,26 +229,26 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			revisionDiff.setOutputMarkupId(true);
 			fragment.add(revisionDiff);
 		} else {
-			fragment = new Fragment("content", "notAvailableFrag", this) {
-
+			fragment = new Fragment("content", "notAvailableFrag", this);
+			fragment.add(new WebSocketObserver() {
+				
 				@Override
-				public void onEvent(IEvent<?> event) {
-					super.onEvent(event);
-
-					if (event.getPayload() instanceof PageDataChanged) {
-						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-						newContent(pageDataChanged.getHandler());
-						OneDev.getInstance(WebSocketManager.class).observe(MergePreviewPage.this);
-					}
+				public void onObservableChanged(IPartialPageRequestHandler handler) {
+					newContent(handler);
 				}
 				
-			};
+				@Override
+				public Collection<String> getObservables() {
+					return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				}
+				
+			});
 		}
 		fragment.setOutputMarkupId(true);
 		
-		if (target != null) {
+		if (handler != null) {
 			replace(fragment);
-			target.add(fragment);
+			handler.add(fragment);
 		} else {
 			add(fragment);
 		}
@@ -254,17 +256,6 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 	
 	public State getState() {
 		return state;
-	}
-	
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> regions = super.getWebSocketObservables();
-		MergePreview preview = getPullRequest().getMergePreview();
-		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
-			regions.add(CommitIndexed.getWebSocketObservable(preview.getTargetHead()));
-			regions.add(CommitIndexed.getWebSocketObservable(preview.getMerged()));
-		}		
-		return regions;
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {

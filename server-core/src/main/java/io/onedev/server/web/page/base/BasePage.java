@@ -20,7 +20,6 @@ import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -52,7 +51,6 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -187,20 +185,6 @@ public abstract class BasePage extends WebPage {
 				}
 				
 			});
-						
-			add(new WebSocketObserver() {
-
-				@Override
-				public Collection<String> getObservables() {
-					return getWebSocketObservables();
-				}
-
-				@Override
-				public void onObservableChanged(IPartialPageRequestHandler handler) {
-					send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler));
-				}
-
-			});			
 		} else {
 			add(new WebMarkupContainer("keepSessionAlive"));
 		}
@@ -243,7 +227,7 @@ public abstract class BasePage extends WebPage {
 
 			@Override
 			public void component(Component object, IVisit<Void> visit) {
-				observers.addAll(object.getBehaviors(io.onedev.server.web.behavior.WebSocketObserver.class));
+				observers.addAll(object.getBehaviors(WebSocketObserver.class));
 			}
 
 		});
@@ -257,10 +241,6 @@ public abstract class BasePage extends WebPage {
 		return observables;
 	}
 
-	public Collection<String> getWebSocketObservables() {
-		return new HashSet<>();
-	}
-	
 	private void checkReady() {
 		if (!OneDev.getInstance().isReady() && getClass() != ServerInitPage.class)
 			throw new RestartResponseAtInterceptPageException(ServerInitPage.class);

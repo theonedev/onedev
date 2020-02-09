@@ -55,6 +55,7 @@ import org.apache.wicket.util.time.Duration;
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.server.OneDev;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.ErrorPage;
 import io.onedev.server.web.page.layout.UICustomization;
@@ -117,7 +118,7 @@ public class OneWebApplication extends WebApplication {
 						&& !(component instanceof AbstractErrorPage) 
 						&& !(component instanceof BasePage)
 						&& !(component instanceof BrowserInfoPage)) {
-//					throw new RuntimeException("Page classes should extend from BasePage.");
+					throw new RuntimeException("Page classes should extend from BasePage.");
 				}
 			}
 		});
@@ -138,6 +139,11 @@ public class OneWebApplication extends WebApplication {
 
 			@Override
 			public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
+				if (!map.isEmpty()) {
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					if (target != null)
+						OneDev.getInstance(WebSocketManager.class).observe((BasePage) target.getPage());
+				}
 			}
 
 			@Override

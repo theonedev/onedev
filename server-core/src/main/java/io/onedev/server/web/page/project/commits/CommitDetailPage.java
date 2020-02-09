@@ -60,7 +60,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -590,7 +589,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
-		
 		state = (State) data;
 		newRevisionDiff(target);
 	}
@@ -689,14 +687,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		if (state.compareWith != null)
 			objectIdCache.put(state.compareWith, resolvedCompareWith);
 		return objectIdCache;
-	}
-
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> observables = super.getWebSocketObservables();
-		observables.add(CommitIndexed.getWebSocketObservable(resolvedRevision.name()));
-		observables.add(CommitIndexed.getWebSocketObservable(getCompareWith().name()));
-		return observables;
 	}
 
 	@Override
