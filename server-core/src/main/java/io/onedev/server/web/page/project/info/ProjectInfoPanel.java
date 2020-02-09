@@ -5,6 +5,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -152,6 +154,9 @@ public abstract class ProjectInfoPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ProjectInfoResourceReference()));
+		
+		response.render(JavaScriptHeaderItem.forReference(new ProjectInfoJsResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.projectInfo.onDomReady('sshHttpsSwitch');"));
 	}
 
 	protected abstract void onPromptForkOption(AjaxRequestTarget target);

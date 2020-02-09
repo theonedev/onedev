@@ -76,6 +76,7 @@ public class SimpleGitSshServer {
         server.setKeyboardInteractiveAuthenticator(null);
         server.setGSSAuthenticator(null);
         server.setHostBasedAuthenticator(null);
+        server.setUserAuthFactories(null);
     }
     
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
