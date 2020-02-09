@@ -11,7 +11,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -29,7 +28,6 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
@@ -188,8 +186,6 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 									+ "' is required and can not be removed");
 						}
 						reviewsModel.detach();
-						
-						send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					}
 					
 					@Override
@@ -213,12 +209,6 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
 			}
 		                                                                                                                              
-			@Override
-			protected void onSelect(AjaxRequestTarget target, User user) {
-				super.onSelect(target, user);
-				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
-			}
-			
 		});
 		
 		setOutputMarkupId(true);

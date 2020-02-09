@@ -44,7 +44,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -287,7 +286,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				
 				if (StringUtils.isNotBlank(title)) {
 					OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title);
-					send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					isEditingTitle = false;
 				}
 
@@ -701,7 +699,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				OneDev.getInstance(PullRequestChangeManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy);
-				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			
 		});

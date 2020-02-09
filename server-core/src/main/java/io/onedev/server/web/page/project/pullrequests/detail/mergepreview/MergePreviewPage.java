@@ -35,12 +35,13 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class MergePreviewPage extends PullRequestDetailPage {
+public class MergePreviewPage extends PullRequestDetailPage implements EditParamsAware {
 
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
@@ -278,6 +279,16 @@ public class MergePreviewPage extends PullRequestDetailPage {
 		response.render(CssHeaderItem.forReference(new MergePreviewResourceReference()));
 	}
 
+	@Override
+	public PageParameters getParamsBeforeEdit() {
+		return paramsOf(getPullRequest(), getPosition(), state);
+	}
+
+	@Override
+	public PageParameters getParamsAfterEdit() {
+		return paramsOf(getPullRequest(), getPosition(), state);
+	}
+	
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;

@@ -117,6 +117,8 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		add(avatarsView);
 
+		BasePage page = (BasePage) getPage();
+		
 		add(new ModalLink("detail") {
 
 			@Override
@@ -130,7 +132,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) BoardCardPanel.this.getPage());
+						OneDev.getInstance(WebSocketManager.class).observe(page);
 					}
 
 					@Override
@@ -164,12 +166,12 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onDeletedIssue(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) BoardCardPanel.this.getPage());
+						OneDev.getInstance(WebSocketManager.class).observe(page);
 					}
 
 					@Override
 					protected void onAfterRender() {
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) getPage());
+						OneDev.getInstance(WebSocketManager.class).observe(page);
 						super.onAfterRender();
 					}
 
