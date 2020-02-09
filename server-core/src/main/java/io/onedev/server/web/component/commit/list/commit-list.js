@@ -1,13 +1,13 @@
-onedev.server.commitGraph = {
-	render: function(containerId, commits) {
+onedev.server.commitList = {
+	renderGraph: function(containerId, commits) {
         var $commitList = $("#" + containerId + ">ul");
         
         if ($commitList.prev("svg").length == 0)
     		$commitList.before("<svg class='commit-graph'></svg>");
         var $graph = $commitList.prev("svg");
 
-		onedev.server.commitGraph.populateData($graph, commits);
-		onedev.server.commitGraph.drawGraph($graph);
+		onedev.server.commitList.populateGraphData($graph, commits);
+		onedev.server.commitList.drawGraph($graph);
 
 		var paper = Snap($graph[0]);
 		function getCommitDot(e) {
@@ -32,7 +32,7 @@ onedev.server.commitGraph = {
 	 * commits is an array of ordered commit object, and the commit object is itself a 
 	 * list of parent indexes
 	 */
-	populateData: function($graph, commits) {
+	populateGraphData: function($graph, commits) {
 		var columnsLimit = 12;
 		
 		var colorsLimit = 12;
@@ -432,7 +432,7 @@ $(function() {
 			return;
 		e.stopPropagation();
 		$(".commit-graph").each(function() {
-			onedev.server.commitGraph.drawGraph($(this));
+			onedev.server.commitList.drawGraph($(this));
 		});
 	});		
 });

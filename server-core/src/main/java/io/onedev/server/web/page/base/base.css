@@ -539,9 +539,6 @@ a.input-clear.input-group-clear {
     border: none;
     border-left: 6px solid;
 }
-.alert a {
-	font-weight: bold;
-}
 .alert-info {
 	border-color: #46A7D8;
 }

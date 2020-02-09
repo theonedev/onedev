@@ -857,15 +857,6 @@ onedev.server.markdown = {
         
 	},
 	initRendered: function($rendered) {
-		if (!onedev.server.util.isDevice()) {
-			$rendered.find("pre.highlight").each(function() {
-				var ps = new PerfectScrollbar(this);
-				$(this).addClass("resize-aware").on("resized", function() {
-					ps.update();
-				});
-			});
-		}
-
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
 		$rendered.find("a.header-anchor").each(function() {
 			var $headerAnchor = $(this);

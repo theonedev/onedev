@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -21,7 +22,6 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -48,6 +48,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
@@ -69,8 +71,6 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
-import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
@@ -176,13 +176,13 @@ public abstract class CommitListPanel extends Panel {
 					commits.last.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
 				}
 				
-				CommitGraphUtils.sort(commits.last, 0);
+				sort(commits.last, 0);
 				
 				commits.current = new ArrayList<>(commits.last);
 				for (int i=lastMaxCount; i<commitHashes.size(); i++)
 					commits.current.add(revWalk.parseCommit(ObjectId.fromString(commitHashes.get(i))));
 				
-				CommitGraphUtils.sort(commits.current, lastMaxCount);
+				sort(commits.current, lastMaxCount);
 
 				commits.last = separateByDate(commits.last);
 				commits.current = separateByDate(commits.current);
@@ -631,15 +631,81 @@ public abstract class CommitListPanel extends Panel {
 	}
 	
 	private String renderCommitGraph() {
-		String jsonOfCommits = CommitGraphUtils.asJSON(commitsModel.getObject().current);
-		return String.format("onedev.server.commitGraph.render('%s', %s);", body.getMarkupId(), jsonOfCommits);
+		String jsonOfCommits = asJSON(commitsModel.getObject().current);
+		return String.format("onedev.server.commitList.renderGraph('%s', %s);", body.getMarkupId(), jsonOfCommits);
 	}
 	
+	private void sort(List<RevCommit> commits, int from) {
+		final Map<String, Long> hash2index = new HashMap<>();
+		Map<String, RevCommit> hash2commit = new HashMap<>();
+		for (int i=0; i<commits.size(); i++) {
+			RevCommit commit = commits.get(i);
+			hash2index.put(commit.name(), 1L*i*commits.size());
+			hash2commit.put(commit.name(), commit);
+		}
+
+		Stack<RevCommit> stack = new Stack<>();
+		
+		for (int i=commits.size()-1; i>=from; i--)
+			stack.push(commits.get(i));
+
+		// commits are nearly ordered, so this should be fast
+		while (!stack.isEmpty()) {
+			RevCommit commit = stack.pop();
+			long commitIndex = hash2index.get(commit.name());
+			int count = 1;
+			for (RevCommit parent: commit.getParents()) {
+				String parentHash = parent.name();
+				Long parentIndex = hash2index.get(parentHash);
+				if (parentIndex != null && parentIndex.longValue()<commitIndex) {
+					stack.push(hash2commit.get(parentHash));
+					hash2index.put(parentHash, commitIndex+(count++));
+				}
+			}
+		}
+		
+		commits.sort((o1, o2) -> {
+			long value = hash2index.get(o1.name()) - hash2index.get(o2.name());
+			if (value < 0)
+				return -1;
+			else if (value > 0)
+				return 1;
+			else
+				return 0;
+		});
+	}
+	
+	private String asJSON(List<RevCommit> commits) {
+		Map<String, Integer> hash2index = new HashMap<>();
+		int commitIndex = 0;
+		for (int i=0; i<commits.size(); i++) { 
+			RevCommit commit = commits.get(i);
+			if (commit != null)
+				hash2index.put(commit.name(), commitIndex++);
+		}
+		List<List<Integer>> commitIndexes = new ArrayList<>();
+		for (RevCommit commit: commits) {
+			if (commit != null) {
+				List<Integer> parentIndexes = new ArrayList<>();
+				for (RevCommit parent: commit.getParents()) {
+					Integer parentIndex = hash2index.get(parent.name());
+					if (parentIndex != null)
+						parentIndexes.add(parentIndex);
+				}
+				commitIndexes.add(parentIndexes);
+			}
+		}
+		try {
+			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(commitIndexes);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+		
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CommitListResourceReference()));
-		response.render(JavaScriptHeaderItem.forReference(new CommitGraphResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new CommitListResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript(renderCommitGraph()));
 	}
 	

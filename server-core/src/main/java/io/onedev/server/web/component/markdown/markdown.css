@@ -269,6 +269,7 @@ body.fullscreen {
 	border: 1px dashed #BBB;
 	background: #F9F9F9;
 	position: relative;
+	word-break: normal;
 }
 .markdown-rendered blockquote {
 	font-size: 15px; 
