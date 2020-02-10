@@ -5,8 +5,10 @@ import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.common.util.threads.ThreadUtils;
@@ -15,8 +17,8 @@ import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
+
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.ServerConfig;
@@ -29,8 +31,6 @@ public class SimpleGitSshServer {
     private final ExecutorService executorService = ThreadUtils
             .newFixedThreadPool("SimpleGitServer", 4);
 
-    private final DefaultUserManager userManager;
-
     private final Dao dao;
 
     private final ProjectManager projectManager;
@@ -41,12 +41,10 @@ public class SimpleGitSshServer {
     public SimpleGitSshServer(
             Dao dao,
             ProjectManager projectManager,
-            DefaultUserManager userManager,
             KeyPairProvider keyPairProvider,
             ServerConfig serverConfig) {
         this.dao = dao;
         this.projectManager = projectManager;
-        this.userManager = userManager;
         this.serverConfig = serverConfig;
         this.server = SshServer.setUpDefaultServer();
         
@@ -79,6 +77,12 @@ public class SimpleGitSshServer {
         server.setUserAuthFactories(null);
     }
     
+    /**
+     * Just check that public key is present inside OneDev
+     * @param userName
+     * @param publicKey
+     * @return
+     */
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
         String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);        
         return SshKeyUtils.loadKeyByDigest(fingerPrint, dao) != null;

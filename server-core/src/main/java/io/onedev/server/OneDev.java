@@ -13,14 +13,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -115,7 +118,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			initStage.waitForFinish();
 		}
 		
-		//TODO: provide better config support for Git server
+		//TODO: provide better config support for Git server its certificates
 		try {
             simpleGitSshServer.start();
         } catch (IOException e) {
@@ -245,6 +248,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
         serverUrl.setHost(host);
         serverUrl.setProtocol(haveHttpsPort ? "https" : "http");
         
+        //Url class already strips out default ports (80, 443) in its toString method, so we don't need to check it. 
         if (haveHttpsPort || haveHttpPort ) {
             serverUrl.setPort(haveHttpsPort ? Integer.parseInt(httpsPort) : Integer.parseInt(httpPort));
         } else {            
