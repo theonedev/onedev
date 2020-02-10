@@ -11,7 +11,7 @@ body.PullRequestDetailPage #layout>.body {
 	padding: 50px 0 0 0;
 }
 #request-detail>.main {
-	overflow: scroll;
+	overflow: auto;
 	position: relative;
 	padding: 20px;
 }

@@ -680,6 +680,9 @@ onedev.server = {
 		$(window).resize(function() {
 			$(document).find(".resize-aware").trigger("resized");
 		});
+		$(window).scroll(function() {
+			$(document).find(".scroll-aware").trigger("scrolled");
+		});
 		
 		onedev.server.setupAjaxLoadingIndicator();
 		onedev.server.form.setupDirtyCheck();

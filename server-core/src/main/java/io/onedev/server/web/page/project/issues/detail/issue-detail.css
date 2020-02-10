@@ -2,7 +2,7 @@ body.IssueDetailPage #layout>.body {
 	padding: 50px 0 0 0;
 }
 #issue-detail>.main {
-	overflow: scroll;
+	overflow: auto;
 	position: relative;
 	padding: 20px;
 }

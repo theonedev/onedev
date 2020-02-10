@@ -1,5 +1,6 @@
 onedev.server.revisionDiff = {
 	onDomReady: function() {
+		$(".revision-diff").on("resized scrolled", onedev.server.revisionDiff.reposition);
 		var cookieName = "revisionDiff.showDiffStats";
 		var $body = $(".revision-diff>.body");
 		var $diffStats = $body.children(".diff-stats");
@@ -129,6 +130,3 @@ onedev.server.revisionDiff = {
 		}
 	}
 };
-$(function() {
-	$(window).on("scroll resize", onedev.server.revisionDiff.reposition);	
-});

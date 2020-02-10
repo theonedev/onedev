@@ -7,5 +7,8 @@ onedev.server.pullRequestDetail = {
 		}
 		adjustHeight();
 		$main.addClass("resize-aware").on("resized", adjustHeight);
+		$main.scroll(function() {
+			$main.find(".scroll-aware").addBack(".scroll-aware").trigger("scrolled");
+		});
 	}
 }
