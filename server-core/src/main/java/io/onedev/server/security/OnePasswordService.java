@@ -6,7 +6,7 @@ import org.apache.shiro.authc.credential.PasswordService;
 
 import com.pmease.security.shiro.bcrypt.BCryptPasswordService;
 
-import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.model.User;
 
 @Singleton
 public class OnePasswordService implements PasswordService {
@@ -20,7 +20,7 @@ public class OnePasswordService implements PasswordService {
 
 	@Override
 	public boolean passwordsMatch(Object submittedPlaintext, String encrypted) {
-		if (StringUtils.isNotBlank(encrypted))
+		if (!User.EXTERNAL_MANAGED.equals(encrypted))
 			return bcryptPasswordService.passwordsMatch(submittedPlaintext, encrypted);
 		else
 			return true;

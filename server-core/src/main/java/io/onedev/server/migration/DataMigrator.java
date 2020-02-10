@@ -1520,6 +1520,11 @@ public class DataMigrator {
 					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
 						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
 					buildSettingElement.addElement("actionAuthorizations");
+					Element passwordElement = element.element("password");
+					if (passwordElement == null)
+						element.addElement("password").setText("external_managed");
+					else if (StringUtils.isBlank(passwordElement.getText()))
+						passwordElement.setText("external_managed");
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {

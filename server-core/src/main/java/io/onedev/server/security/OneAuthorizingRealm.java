@@ -31,7 +31,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
@@ -201,7 +200,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    	if (user != null && user.isRoot())
 		    		return user;
 
-		    	if (user == null || StringUtils.isBlank(user.getPassword())) {
+		    	if (user == null || user.getPassword().equals(User.EXTERNAL_MANAGED)) {
 		        	Authenticator authenticator = settingManager.getAuthenticator();
 		        	if (authenticator != null) {
 		        		Authenticated authenticated;
@@ -254,7 +253,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    			} else {
 		    				user = new User();
 		    				user.setName(((UsernamePasswordToken) token).getUsername());
-		    				user.setPassword("");
+		    				user.setPassword(User.EXTERNAL_MANAGED);
 		    				if (authenticated.getEmail() != null)
 		    					user.setEmail(authenticated.getEmail());
 		    				if (authenticated.getFullName() != null)

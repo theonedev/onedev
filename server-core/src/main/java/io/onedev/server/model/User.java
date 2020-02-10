@@ -57,6 +57,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final Long ROOT_ID = 1L;
 	
+	public static final String EXTERNAL_MANAGED = "external_managed";
+	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
 		@Override
