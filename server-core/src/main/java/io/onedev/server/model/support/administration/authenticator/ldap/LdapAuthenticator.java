@@ -334,7 +334,7 @@ public class LdapAuthenticator extends Authenticator {
                     		"'follow referrals' to true to avoid this exception.", pre);
                 }
             }
-            if (email == null)
+            if (StringUtils.isBlank(email))
             	throw new AccountException("Email is required but not available in ldap directory");
             else
             	return new Authenticated(email, fullName, groupNames);
