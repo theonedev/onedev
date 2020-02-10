@@ -2,6 +2,8 @@
     background: black;
     color: white;
     position: relative;
+    white-space: pre-wrap;
+    word-break: normal;
 }
 .build-log>.log-entry>.date {
     padding-right: 8px;
