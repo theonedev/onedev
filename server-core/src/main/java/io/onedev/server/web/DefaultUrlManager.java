@@ -1,16 +1,12 @@
 package io.onedev.server.web;
 
 import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
 import org.eclipse.jgit.lib.ObjectId;
-
 import com.google.common.base.Splitter;
-
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Build;
@@ -46,7 +42,7 @@ public class DefaultUrlManager implements UrlManager {
 	@Override
 	public String sshUrlFor(Project project) {
 	    String serverSshUrl = configManager.getSystemSetting().getServerSshUrl();
-        return "ssh://git@"+ serverSshUrl + "/" + project.getName() + ".git";
+        return serverSshUrl + "/" + project.getName() + ".git";
 	}
 	
 	@Override

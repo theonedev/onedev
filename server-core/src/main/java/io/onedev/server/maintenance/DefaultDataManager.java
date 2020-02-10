@@ -152,7 +152,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			    sshUrl +=  ":" + sshPort;
             }
 			
-			systemSetting.setServerSshUrl(sshUrl);
+			systemSetting.setServerSshUrl("ssh://git@" + sshUrl);
 			
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
 			systemSetting = (SystemSetting) setting.getValue();
