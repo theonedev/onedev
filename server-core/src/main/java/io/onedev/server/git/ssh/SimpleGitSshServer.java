@@ -27,7 +27,8 @@ import io.onedev.server.util.ServerConfig;
 public class SimpleGitSshServer {
 
     private final SshServer server;
-
+    
+    //TODO make thread pool size configurable
     private final ExecutorService executorService = ThreadUtils
             .newFixedThreadPool("SimpleGitServer", 4);
 
@@ -60,8 +61,6 @@ public class SimpleGitSshServer {
             }
             return new UnknownCommand(command);
         });
-        
-        
     }
     
     private void configureAuthentication() {

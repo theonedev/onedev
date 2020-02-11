@@ -122,7 +122,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		try {
             simpleGitSshServer.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 		
 		sessionManager.openSession();
