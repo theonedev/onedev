@@ -110,7 +110,7 @@ public class SimpleGitSshServer {
             Project project = projectManager.find(projectName);
             
             if (project == null) {
-                onExit(-1, "Porject not found!");
+                onExit(-1, "Project not found!");
             }
             
             UploadPack uploadPack = new UploadPack(project.getRepository());
@@ -146,7 +146,7 @@ public class SimpleGitSshServer {
             Project project = projectManager.find(projectName);
             
             if (project == null) {
-                onExit(-1, "Porject not found!");
+                onExit(-1, "Project not found!");
             }
             
             try {
