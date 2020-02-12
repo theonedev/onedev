@@ -61,7 +61,8 @@
                 <string>curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"</string>
                 <string></string>
                 <string>cp -r server-product/docker docker</string>
-                <string>unzip server-product/target/onedev-${buildVersion}.zip -d docker</string>
+                <string>cp server-product/target/onedev-${buildVersion}.zip .</string>
+                <string>unzip onedev-${buildVersion}.zip -d docker</string>
                 <string>mv docker/onedev-${buildVersion} docker/app</string>
                 <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* docker/app/site/lib</string>
                 <string></string>
