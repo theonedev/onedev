@@ -56,7 +56,7 @@
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string></string>
                 <string># Skip test as we've already tested in CI build</string>
-                <string>mvn -Dmaven.test.skip=true deploy -Dmaven-deploy-password=@secrets:maven-deploy-password@</string>
+                <string>mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy</string>
                 <string></string>
                 <string>curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"</string>
                 <string></string>
