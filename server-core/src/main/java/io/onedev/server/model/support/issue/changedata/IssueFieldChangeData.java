@@ -1,10 +1,13 @@
 package io.onedev.server.model.support.issue.changedata;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 
@@ -14,6 +17,7 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
@@ -85,8 +89,11 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public String getDescription() {
-		return "changed fields";
+	public String getActivity(Issue withIssue) {
+		String activity = "changed fields";
+		if (withIssue != null)
+			activity += " of issue " + withIssue.describe();
+		return activity;
 	}
 
 	public List<String> getLines(Map<String, Input> fields) {
@@ -102,29 +109,38 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		UserManager userManager = OneDev.getInstance(UserManager.class);
-		Map<String, User> newUsers = new HashMap<>();
+		Map<String, Collection<User>> newUsers = new HashMap<>();
 		for (Input oldField: oldFields.values()) {
 			Input newField = newFields.get(oldField.getName());
-			if (newField != null && !describe(oldField).equals(describe(newField)) 
-					&& newField.getType().equals(FieldSpec.USER) && !newField.getValues().isEmpty()) { 
-				User user = userManager.findByName(newField.getValues().iterator().next());
-				if (user != null)
-					newUsers.put(newField.getName(), user);
+			if (newField != null 
+					&& !describe(oldField).equals(describe(newField)) 
+					&& newField.getType().equals(FieldSpec.USER)) { 
+				Set<User> newUsersOfField = newField.getValues()
+						.stream()
+						.filter(it->!oldField.getValues().contains(it))
+						.map(it->userManager.findByName(it))
+						.filter(it->it!=null)
+						.collect(Collectors.toSet());
+				if (!newUsersOfField.isEmpty())
+					newUsers.put(newField.getName(), newUsersOfField);
 			}
 		}
 		for (Input newField: newFields.values()) {
-			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(FieldSpec.USER) 
-					&& !newField.getValues().isEmpty()) { 
-				User user = userManager.findByName(newField.getValues().iterator().next());
-				if (user != null)
-					newUsers.put(newField.getName(), user);
+			if (!oldFields.containsKey(newField.getName()) 
+					&& newField.getType().equals(FieldSpec.USER)) { 
+				Set<User> usersOfField = newField.getValues()
+						.stream()
+						.map(it->userManager.findByName(it))
+						.filter(it->it!=null)
+						.collect(Collectors.toSet());
+				if (!usersOfField.isEmpty())
+					newUsers.put(newField.getName(), usersOfField);
 			}
 		}
 		return newUsers;
 	}
-
 	
 	@Override
 	public Map<String, Group> getNewGroups() {

@@ -67,7 +67,6 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			}
 			
 		};
-        input.setConvertEmptyInputStringToNull(true);
         
         input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));

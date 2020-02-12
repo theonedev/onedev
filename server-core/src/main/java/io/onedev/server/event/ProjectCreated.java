@@ -9,4 +9,12 @@ public class ProjectCreated extends ProjectEvent {
 		super(SecurityUtils.getUser(), project.getCreateDate(), project);
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "created";
+		if (withEntity)
+			activity += " project " + getProject().getName();
+		return activity;
+	}
+
 }

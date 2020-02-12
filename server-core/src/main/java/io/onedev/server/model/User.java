@@ -25,11 +25,12 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
-import io.onedev.server.model.support.NamedBuildQuery;
+
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.UserBuildSetting;
 import io.onedev.server.model.support.WebHook;
+import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.model.support.build.UserBuildSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
@@ -52,6 +53,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public static final Long SYSTEM_ID = -1L;
 	
 	public static final Long ROOT_ID = 1L;
+	
+	public static final String EXTERNAL_MANAGED = "external_managed";
 	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
@@ -431,9 +434,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public PersonIdent asPerson() {
 		if (isSystem())
-			return new PersonIdent(getName(), "");
+			return new PersonIdent(getDisplayName(), "");
 		else
-			return new PersonIdent(getName(), getEmail());
+			return new PersonIdent(getDisplayName(), getEmail());
 	}
 	
 	public String getDisplayName() {

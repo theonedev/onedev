@@ -66,6 +66,7 @@ import org.apache.wicket.util.string.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 /**
@@ -181,7 +182,8 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 			}
 		}
 
-		broadcastMessage(new ConnectedMessage(getApplication(), getSessionId(), key));
+		broadcastMessage(new ConnectedMessage(getApplication(), getSessionId(), key));		
+		OneDev.getInstance(WebSocketManager.class).onConnect(connection);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.Build.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -57,10 +59,11 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.model.support.JobSecret;
+import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
@@ -81,17 +84,112 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
-				@Index(columnList="submitterName"), @Index(columnList="cancellerName"), @Index(columnList="commitHash"), 
-				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="status"), 
-				@Index(columnList="submitDate"), @Index(columnList="pendingDate"), @Index(columnList="runningDate"), 
-				@Index(columnList="finishDate"), @Index(columnList="version"), 
-				@Index(columnList="o_project_id, commitHash")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
+				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
+				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS), 
+				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
+				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), 
+				@Index(columnList="o_project_id, " + PROP_COMMIT)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_NUMBER})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_ID = "id";
+
+	public static final String FIELD_NUMBER = "Number";
+	
+	public static final String PROP_NUMBER = "number";
+	
+	public static final String FIELD_VERSION = "Version";
+	
+	public static final String PROP_VERSION = "version";
+	
+	public static final String FIELD_PROJECT = "Project";
+	
+	public static final String PROP_PROJECT = "project";
+	
+	public static final String FIELD_PROJECT_OWNER = "Project Owner";
+	
+	public static final String FIELD_JOB = "Job";
+	
+	public static final String PROP_JOB = "jobName";
+	
+	public static final String FIELD_IMAGE = "Image";
+	
+	public static final String FIELD_STATUS = "Status";
+	
+	public static final String PROP_STATUS = "status";
+	
+	public static final String FIELD_SUBMITTER = "Submitter";
+	
+	public static final String PROP_SUBMITTER = "submitter";
+	
+	public static final String PROP_SUBMITTER_NAME = "submitterName";
+	
+	public static final String FIELD_CANCELLER = "Canceller";
+	
+	public static final String PROP_CANCELLER = "canceller";
+	
+	public static final String PROP_CANCELLER_NAME = "cancellerName";
+	
+	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	
+	public static final String PROP_SUBMIT_DATE = "submitDate";
+	
+	public static final String FIELD_PENDING_DATE = "Pending Date";
+	
+	public static final String PROP_PENDING_DATE = "pendingDate";
+	
+	public static final String FIELD_RUNNING_DATE = "Running Date";
+	
+	public static final String PROP_RUNNING_DATE = "runningDate";
+	
+	public static final String FIELD_FINISH_DATE = "Finish Date";
+	
+	public static final String PROP_FINISH_DATE = "finishDate";
+	
+	public static final String FIELD_COMMIT = "Commit";
+	
+	public static final String PROP_COMMIT = "commitHash";
+	
+	public static final String PROP_PARAMS = "params";
+	
+	public static final String FIELD_DEPENDENCIES = "Dependencies";
+	
+	public static final String PROP_DEPENDENCIES = "dependencies";
+	
+	public static final String FIELD_DEPENDENTS = "Dependents";
+	
+	public static final String PROP_DEPENDENTS = "dependents";
+	
+	public static final String PROP_PULL_REQUEST_BUILDS = "pullRequestBuilds";
+	
+	public static final String FIELD_ERROR_MESSAGE = "Error Message";
+	
+	public static final String FIELD_LOG = "Log";
+	
+	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
+			FIELD_SUBMIT_DATE, FIELD_PENDING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 
+			FIELD_COMMIT, FIELD_VERSION, FIELD_DEPENDENCIES, FIELD_DEPENDENTS, FIELD_ERROR_MESSAGE, 
+			FIELD_LOG, FIELD_PROJECT_OWNER, FIELD_IMAGE);
+	
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			FIELD_PROJECT, FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
+			FIELD_PENDING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_JOB, PROP_JOB,
+			FIELD_STATUS, PROP_STATUS,
+			FIELD_NUMBER, PROP_NUMBER,
+			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			FIELD_PENDING_DATE, PROP_PENDING_DATE,
+			FIELD_RUNNING_DATE, PROP_RUNNING_DATE,
+			FIELD_FINISH_DATE, PROP_FINISH_DATE,
+			FIELD_PROJECT, PROP_PROJECT,
+			FIELD_COMMIT, PROP_COMMIT);	
 	
 	private static ThreadLocal<Stack<Build>> stack =  new ThreadLocal<Stack<Build>>() {
 

@@ -19,7 +19,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.query.ProjectQueryConstants;
+import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -40,9 +40,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
-							return SuggestionUtils.suggest(ProjectQueryConstants.QUERY_FIELDS, matchWith);
+							return SuggestionUtils.suggest(Project.QUERY_FIELDS, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							return SuggestionUtils.suggest(new ArrayList<>(ProjectQueryConstants.ORDER_FIELDS.keySet()), matchWith);
+							return SuggestionUtils.suggest(new ArrayList<>(Project.ORDER_FIELDS.keySet()), matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -58,15 +58,15 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									ProjectQuery.checkField(fieldName, operator);
-									if (fieldName.equals(ProjectQueryConstants.FIELD_UPDATE_DATE)) {
+									if (fieldName.equals(Project.FIELD_UPDATE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(ProjectQueryConstants.FIELD_NAME)) {
+									} else if (fieldName.equals(Project.FIELD_NAME)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjects(matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(ProjectQueryConstants.FIELD_OWNER)) { 
+									} else if (fieldName.equals(Project.FIELD_OWNER)) { 
 										return SuggestionUtils.suggestUsers(matchWith);
 									} else {
 										return null;
@@ -115,8 +115,8 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(ProjectQueryConstants.FIELD_NAME) 
-							|| fieldName.equals(ProjectQueryConstants.FIELD_DESCRIPTION)) {
+					if (fieldName.equals(Project.FIELD_NAME) 
+							|| fieldName.equals(Project.FIELD_DESCRIPTION)) {
 						hints.add("Use * for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

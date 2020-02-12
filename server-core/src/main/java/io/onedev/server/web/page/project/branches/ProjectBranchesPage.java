@@ -59,7 +59,6 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
@@ -76,7 +75,6 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
@@ -698,7 +696,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						if (!pullRequestManager.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
 							String query = String.format("\"%s\" %s \"%s\" %s %s", 
-									PullRequestQueryConstants.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
+									PullRequest.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
 									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
 									new OpenCriteria().toString());
 							PageParameters params = ProjectPullRequestsPage.paramsOf(getProject(), query, 0);
@@ -722,7 +720,7 @@ public class ProjectBranchesPage extends ProjectPage {
 									newPagingNavigation(target);
 									modal.close();
 								} catch (OneException e) {
-									error(HtmlUtils.formatAsHtml(e.getMessage()));
+									error(e.getMessage());
 									target.add(fragment);
 								}
 							}

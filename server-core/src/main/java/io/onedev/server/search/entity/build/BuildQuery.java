@@ -1,16 +1,16 @@
 package io.onedev.server.search.entity.build;
 
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_COMMIT;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_FINISH_DATE;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_JOB;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_NUMBER;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_PROJECT;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_QUEUEING_DATE;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_RUNNING_DATE;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_VERSION;
-import static io.onedev.server.util.query.BuildQueryConstants.ORDER_FIELDS;
-import static io.onedev.server.util.query.BuildQueryConstants.QUERY_FIELDS;
+import static io.onedev.server.model.Build.FIELD_COMMIT;
+import static io.onedev.server.model.Build.FIELD_FINISH_DATE;
+import static io.onedev.server.model.Build.FIELD_JOB;
+import static io.onedev.server.model.Build.FIELD_NUMBER;
+import static io.onedev.server.model.Build.FIELD_PENDING_DATE;
+import static io.onedev.server.model.Build.FIELD_PROJECT;
+import static io.onedev.server.model.Build.FIELD_RUNNING_DATE;
+import static io.onedev.server.model.Build.FIELD_SUBMIT_DATE;
+import static io.onedev.server.model.Build.FIELD_VERSION;
+import static io.onedev.server.model.Build.ORDER_FIELDS;
+import static io.onedev.server.model.Build.QUERY_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,8 +65,12 @@ public class BuildQuery extends EntityQuery<Build> {
 		this.sorts = sorts;
 	}
 
+	public BuildQuery(@Nullable EntityCriteria<Build> criteria) {
+		this(criteria, new ArrayList<>());
+	}
+	
 	public BuildQuery() {
-		this(null, new ArrayList<>());
+		this(null);
 	}
 	
 	public static BuildQuery parse(@Nullable Project project, @Nullable String queryString, 
@@ -183,8 +187,8 @@ public class BuildQuery extends EntityQuery<Build> {
 						case BuildQueryLexer.IsAfter:
 							if (fieldName.equals(FIELD_SUBMIT_DATE))
 								return new SubmitDateCriteria(value, operator);
-							else if (fieldName.equals(FIELD_QUEUEING_DATE))
-								return new QueueingDateCriteria(value, operator);
+							else if (fieldName.equals(FIELD_PENDING_DATE))
+								return new PendingDateCriteria(value, operator);
 							else if (fieldName.equals(FIELD_RUNNING_DATE))
 								return new RunningDateCriteria(value, operator);
 							else if (fieldName.equals(FIELD_FINISH_DATE))
@@ -270,7 +274,7 @@ public class BuildQuery extends EntityQuery<Build> {
 		case BuildQueryLexer.IsBefore:
 		case BuildQueryLexer.IsAfter:
 			if (!fieldName.equals(FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(FIELD_QUEUEING_DATE)
+					&& !fieldName.equals(FIELD_PENDING_DATE)
 					&& !fieldName.equals(FIELD_RUNNING_DATE)
 					&& !fieldName.equals(FIELD_FINISH_DATE)) 
 				throw newOperatorException(fieldName, operator);

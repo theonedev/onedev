@@ -11,7 +11,6 @@ import io.onedev.server.model.Build;
 
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class FinishDateCriteria extends EntityCriteria<Build> {
 
@@ -31,7 +30,7 @@ public class FinishDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(BuildQueryConstants.ATTR_FINISH_DATE);
+		Path<Date> attribute = root.get(Build.PROP_FINISH_DATE);
 		if (operator == BuildQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -48,7 +47,7 @@ public class FinishDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_FINISH_DATE) + " " 
+		return quote(Build.FIELD_FINISH_DATE) + " " 
 				+ BuildQuery.getRuleName(operator) + " " + quote(value);
 	}
 

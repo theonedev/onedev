@@ -11,7 +11,9 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -48,9 +50,11 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
+import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -83,6 +87,10 @@ public abstract class BuildDetailPage extends ProjectPage
 	public BuildDetailPage(PageParameters params) {
 		super(params);
 		
+		String buildNumberString = params.get(PARAM_BUILD).toString();
+		if (StringUtils.isBlank(buildNumberString))
+			throw new RestartResponseException(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), null, 0));
+			
 		buildModel = new LoadableDetachableModel<Build>() {
 
 			@Override
@@ -116,13 +124,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		return new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(component);
-				handler.appendJavaScript("$(window).resize();");
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
 				handler.appendJavaScript("$(window).resize();");
 			}
@@ -325,7 +327,23 @@ public abstract class BuildDetailPage extends ProjectPage
 					
 				});
 				
-				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
+				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class) {
+
+					@Override
+					public Component render(String componentId) {
+						return new PageTabLink(componentId, this) {
+
+							@Override
+							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+								return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
+										FixedIssuesPage.paramsOf(getBuild(), getPosition(), 
+										getBuild().getJob().getDefaultFixedIssuesFilter()));
+							}
+							
+						};
+					}
+					
+				});
 				
 				if (SecurityUtils.canReadCode(getProject()))
 					tabs.add(new BuildTab("Changes", BuildChangesPage.class));

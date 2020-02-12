@@ -126,7 +126,7 @@ public class DefaultLogManager implements LogManager {
 							}
 						}
 						
-						webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId), null);
+						webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId));
 					}
 				} finally {
 					lock.unlock();

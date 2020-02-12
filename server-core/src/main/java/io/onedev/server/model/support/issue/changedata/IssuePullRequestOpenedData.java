@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 
 public class IssuePullRequestOpenedData extends IssuePullRequestData {
@@ -11,8 +12,11 @@ public class IssuePullRequestOpenedData extends IssuePullRequestData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "opened pull request fixing this issue";
+	public String getActivity(Issue withIssue) {
+		if (withIssue != null)
+			return "opened pull request fixing issue " + withIssue.describe();
+		else
+			return "opened pull request fixing this issue";
 	}
 	
 }

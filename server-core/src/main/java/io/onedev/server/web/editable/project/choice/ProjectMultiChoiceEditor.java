@@ -55,7 +55,6 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 			
 		};
-        input.setConvertEmptyInputStringToNull(true);
         input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

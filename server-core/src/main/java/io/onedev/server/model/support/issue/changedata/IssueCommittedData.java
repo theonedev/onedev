@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,8 +41,11 @@ public class IssueCommittedData implements IssueChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "New commit fixing this issue added";
+	public String getActivity(Issue withIssue) {
+		if (withIssue != null)
+			return "Commit added fixing issue " + withIssue.describe();
+		else
+			return "Commit added fixing this issue";
 	}
 
 	@Override
@@ -50,7 +54,7 @@ public class IssueCommittedData implements IssueChangeData {
 	}
 	
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();
 	}
 

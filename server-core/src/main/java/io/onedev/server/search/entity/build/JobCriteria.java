@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class JobCriteria extends EntityCriteria<Build> {
 
@@ -22,7 +21,7 @@ public class JobCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<String> attribute = root.get(BuildQueryConstants.ATTR_JOB);
+		Path<String> attribute = root.get(Build.PROP_JOB);
 		String normalized = jobName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -34,7 +33,7 @@ public class JobCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_JOB) + " " 
+		return quote(Build.FIELD_JOB) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ quote(jobName);
 	}

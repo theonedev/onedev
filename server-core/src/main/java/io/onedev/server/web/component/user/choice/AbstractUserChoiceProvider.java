@@ -3,6 +3,7 @@ package io.onedev.server.web.component.user.choice;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -31,8 +32,9 @@ public abstract class AbstractUserChoiceProvider extends ChoiceProvider<User> {
 		List<User> users = Lists.newArrayList();
 		UserManager userManager = OneDev.getInstance(UserManager.class);
 		for (String each : ids) {
-			Long id = Long.valueOf(each);
-			users.add(userManager.load(id));
+			User user = userManager.load(Long.valueOf(each)); 
+			Hibernate.initialize(user);
+			users.add(user);
 		}
 
 		return users;

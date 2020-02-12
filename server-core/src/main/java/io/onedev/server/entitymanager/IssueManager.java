@@ -6,13 +6,13 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.util.MilestoneAndState;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -39,8 +39,6 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	List<Issue> query(Project project, String term, int count);
 
-	int count(Milestone milestone, @Nullable StateSpec.Category category);
-	
 	Collection<String> getUndefinedStates();
 	
 	void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions);
@@ -59,4 +57,5 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Collection<Long> getIssueNumbers(Long projectId);
 	
+	Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones);
 }

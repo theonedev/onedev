@@ -17,7 +17,7 @@ import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -59,7 +59,6 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -82,15 +81,15 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				if (getMilestone() != null)
 					criterias.add(new MilestoneCriteria(getMilestone().getName()));
 				String identifyField = getBoard().getIdentifyField();
-				if (identifyField.equals(IssueQueryConstants.FIELD_STATE)) {
+				if (identifyField.equals(Issue.FIELD_STATE)) {
 					criterias.add(new StateCriteria(getColumn()));
 				} else if (getColumn() != null) {
 					criterias.add(new ChoiceFieldCriteria(identifyField, 
 							getColumn(), -1, IssueQueryLexer.Is, false));
 				} else {
-					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty));
+					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty, false));
 				}
-				return new IssueQuery(IssueCriteria.of(criterias), boardQuery.getSorts());
+				return new IssueQuery(IssueCriteria.and(criterias), boardQuery.getSorts());
 			} else {
 				return null;
 			}
@@ -156,7 +155,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								// move issue between board columns
 								ProjectIssueSetting workflow = getProject().getIssueSetting();
 								String identifyField = getBoard().getIdentifyField();
-								if (identifyField.equals(IssueQueryConstants.FIELD_STATE)) {
+								if (identifyField.equals(Issue.FIELD_STATE)) {
 									issue = SerializationUtils.clone(issue);
 									for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
 										if (transition.canTransitManually(issue, getColumn())) {
@@ -188,9 +187,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
 						CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
-						String script = String.format("onedev.server.issueBoards.onColumnDomReady('%s', %s);", 
+						String script = String.format("onedev.server.issueBoards.onColumnLoad('%s', %s);", 
 								getMarkupId(), getQuery()!=null?callback:"undefined");
-						response.render(OnDomReadyHeaderItem.forScript(script));
+						// Use OnLoad instead of OnDomReady as otherwise perfect scrollbar is not shown unless resized 
+						response.render(OnLoadHeaderItem.forScript(script));
 					}
 
 					@Override
@@ -222,7 +222,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		String identifyField = getBoard().getIdentifyField();
 		if (getColumn() != null) {
 			title = HtmlEscape.escapeHtml5(getColumn());
-			if (identifyField.equals(IssueQueryConstants.FIELD_STATE)) {
+			if (identifyField.equals(Issue.FIELD_STATE)) {
 				StateSpec stateSpec = getIssueSetting().getStateSpec(getColumn());
 				if (stateSpec != null)
 					color = stateSpec.getColor();
@@ -300,7 +300,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				super.onConfigure();
 				setVisible(getQuery() != null 
 						&& SecurityUtils.getUser() != null
-						&& (!getBoard().getIdentifyField().equals(IssueQueryConstants.FIELD_STATE) 
+						&& (!getBoard().getIdentifyField().equals(Issue.FIELD_STATE) 
 								|| getColumn().equals(getIssueSetting().getInitialStateSpec().getName())));
 			}
 			
@@ -340,7 +340,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					
 					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
-				} else if (fieldName.equals(IssueQueryConstants.FIELD_STATE)) {
+				} else if (fieldName.equals(Issue.FIELD_STATE)) {
 					ProjectIssueSetting workflow = getProject().getIssueSetting();
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
 					for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {

@@ -17,6 +17,18 @@ public class CloseInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String COLUMN_USER = "CLOSE_USER";
+	
+	public static final String COLUMN_USER_NAME = "CLOSE_USER_NAME";
+	
+	public static final String COLUMN_DATE = "CLOSE_DATE";
+	
+	public static final String COLUMN_STATUS = "CLOSE_STATUS";
+	
+	public static final String PROP_USER = "user";
+	
+	public static final String PROP_STATUS = "status";
+	
 	public enum Status {
 		MERGED, DISCARDED;
 	
@@ -28,16 +40,16 @@ public class CloseInfo implements Serializable {
 	};
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="CLOSE_USER")
+	@JoinColumn(name=COLUMN_USER)
 	private User user;
 	
-	@Column(name="CLOSE_USER_NAME")
+	@Column(name=COLUMN_USER_NAME)
 	private String userName;
 
-	@Column(name="CLOSE_DATE")
+	@Column(name=COLUMN_DATE)
 	private Date date;
 	
-	@Column(name="CLOSE_STATUS")
+	@Column(name=COLUMN_STATUS)
 	private Status status;
 
 	public User getUser() {

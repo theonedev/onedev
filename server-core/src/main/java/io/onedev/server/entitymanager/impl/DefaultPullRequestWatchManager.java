@@ -29,5 +29,14 @@ public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRe
 		criteria.add(Restrictions.eq("user", user));
 		return find(criteria);
 	}
+
+	@Override
+	public void watch(PullRequest request, User user, boolean watching) {
+		PullRequestWatch watch = (PullRequestWatch) request.getWatch(user, true);
+		if (watch.isNew()) {
+			watch.setWatching(watching);
+			save(watch);
+		}
+	}
 	
 }

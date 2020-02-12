@@ -70,12 +70,10 @@ public class ReferenceTransformer implements Function<String, String> {
 		if (url != null) {
 			StringBuilder builder = new StringBuilder();
 			for (Node node: Jsoup.parseBodyFragment(doc.body().html()).body().child(0).childNodes()) {
-				if (node instanceof TextNode) {
-					TextNode textNode = (TextNode) node;
-					builder.append("<a href='" + url + "'>" + textNode.getWholeText() + "</a>");
-				} else {
+				if (node instanceof TextNode) 
+					builder.append("<a href='" + url + "'>" + node.outerHtml() + "</a>");
+				else 
 					builder.append(node.outerHtml());
-				}
 			}
 			return builder.toString();
 		} else {

@@ -21,11 +21,12 @@ public class BranchMultiChoice extends Select2MultiChoice<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		if (isRequired())
-			getSettings().setPlaceholder("Choose branches ...");
+			getSettings().setPlaceholder("Choose branches...");
+		else
+			getSettings().setPlaceholder("Not specified");
 		getSettings().setFormatResult("onedev.server.branchChoiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.branchChoiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.branchChoiceFormatter.escapeMarkup");
-		
 		setConvertEmptyInputStringToNull(true);
 	}
 

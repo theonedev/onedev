@@ -63,7 +63,6 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 @Singleton
 public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> implements CodeCommentManager {
@@ -87,8 +86,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Override
 	public void create(CodeComment comment, PullRequest request) {
 		Preconditions.checkArgument(comment.isNew());
-		save(comment);
+		
 		CodeCommentCreated event = new CodeCommentCreated(comment, request);
+		comment.setLastUpdate(event.getLastUpdate());
+		save(comment);
+		
 		listenerRegistry.post(event);
 	}
 
@@ -105,7 +107,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		event.getComment().setUpdateDate(event.getDate());
+		if (!(event instanceof CodeCommentCreated))
+			event.getComment().setLastUpdate(event.getLastUpdate());
 	}
 	
 	@Sessional
@@ -243,10 +246,10 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			PullRequest request, Root<CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) {
-			Join<?, ?> relations = root.join(CodeCommentQueryConstants.ATTR_RELATIONS, JoinType.INNER);
-			relations.on(builder.equal(relations.get(CodeCommentRelation.ATTR_REQUEST), request));
+			Join<?, ?> relations = root.join(CodeComment.PROP_RELATIONS, JoinType.INNER);
+			relations.on(builder.equal(relations.get(CodeCommentRelation.PROP_REQUEST), request));
 		} else {
-			predicates.add(builder.equal(root.get(CodeCommentQueryConstants.ATTR_PROJECT), project));
+			predicates.add(builder.equal(root.get(CodeComment.PROP_PROJECT), project));
 		}
 		if (criteria != null) 
 			predicates.add(criteria.getPredicate(root, builder));
@@ -264,13 +267,13 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: commentQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.asc(CodeCommentQuery.getPath(root, CodeComment.ORDER_FIELDS.get(sort.getField()))));
 			else
-				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.ORDER_FIELDS.get(sort.getField()))));
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(CodeCommentQueryConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(CodeComment.PROP_ID)));
 		query.orderBy(orders);
 		
 		return query;

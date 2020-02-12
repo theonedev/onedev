@@ -11,7 +11,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class NumberCriteria extends EntityCriteria<PullRequest> {
 
@@ -31,7 +30,7 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<Long> attribute = root.get(PullRequestQueryConstants.ATTR_NUMBER);
+		Path<Long> attribute = root.get(PullRequest.PROP_NUMBER);
 		Predicate numberPredicate;
 		
 		if (operator == PullRequestQueryLexer.Is)
@@ -42,7 +41,7 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 			numberPredicate = builder.lessThan(attribute, number.getNumber());
 		
 		return builder.and(
-				builder.equal(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT), number.getProject()),
+				builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), number.getProject()),
 				numberPredicate);
 	}
 
@@ -62,7 +61,7 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_NUMBER) + " " 
+		return quote(PullRequest.FIELD_NUMBER) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

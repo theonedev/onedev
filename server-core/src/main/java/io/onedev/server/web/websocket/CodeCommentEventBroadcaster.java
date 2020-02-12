@@ -6,7 +6,6 @@ import javax.inject.Singleton;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class CodeCommentEventBroadcaster {
@@ -20,8 +19,7 @@ public class CodeCommentEventBroadcaster {
 	
 	@Listen
 	public void on(CodeCommentEvent event) {
-		PageKey sourcePageKey = WicketUtils.getPageKey();
-		webSocketManager.notifyObservableChange(CodeComment.getWebSocketObservable(event.getComment().getId()), sourcePageKey);
+		webSocketManager.notifyObservableChange(CodeComment.getWebSocketObservable(event.getComment().getId()));
 	}
 		
 }

@@ -7,11 +7,14 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -66,11 +69,15 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	public IssueDetailPage(PageParameters params) {
 		super(params);
 		
+		String issueNumberString = params.get(PARAM_ISSUE).toString();
+		if (StringUtils.isBlank(issueNumberString))
+			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), null, 0));
+		
 		issueModel = new LoadableDetachableModel<Issue>() {
 
 			@Override
 			protected Issue load() {
-				Long issueNumber = params.get(PARAM_ISSUE).toLong();
+				Long issueNumber = Long.valueOf(issueNumberString);
 				Issue issue = OneDev.getInstance(IssueManager.class).find(getProject(), issueNumber);
 				if (issue == null)
 					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
@@ -82,7 +89,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		position = QueryPosition.from(params);
 	}
 	
-	protected Issue getIssue() {
+	public Issue getIssue() {
 		return issueModel.getObject();
 	}
 	
@@ -247,7 +254,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssueDetailCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new IssueDetailResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueDetail.onDomReady();"));
 	}
 
 	@Override

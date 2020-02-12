@@ -2,7 +2,10 @@ package io.onedev.server.web.page.admin.user;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -27,7 +30,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.user.buildsetting.UserBuildSettingPage;
-import io.onedev.server.web.page.admin.user.buildsetting.UserSecretsPage;
+import io.onedev.server.web.page.admin.user.buildsetting.UserJobSecretsPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
@@ -44,7 +47,11 @@ public abstract class UserPage extends AdministrationPage {
 	public UserPage(PageParameters params) {
 		super(params);
 		
-		Long userId = params.get(PARAM_USER).toLong();
+		String userIdString = params.get(PARAM_USER).toString();
+		if (StringUtils.isBlank(userIdString))
+			throw new RestartResponseException(UserListPage.class);
+		
+		Long userId = Long.valueOf(userIdString);
 		if (userId == User.SYSTEM_ID)
 			throw new OneException("System user is not accessible");
 		
@@ -92,7 +99,7 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Sssh Keys", "fa fa-fw fa-lock", UserSshKeysPage.class));
 		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
-		tabs.add(new UserTab("Build Setting", "fa fa-fw fa-cubes", UserSecretsPage.class, UserBuildSettingPage.class));
+		tabs.add(new UserTab("Build Setting", "fa fa-fw fa-cubes", UserJobSecretsPage.class, UserBuildSettingPage.class));
 		tabs.add(new UserTab("Web Hooks", "fa fa-fw fa-volume-up", UserWebHooksPage.class, UserWebHooksPage.class));
 		
 		return tabs;

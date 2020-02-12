@@ -44,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -53,6 +52,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
@@ -93,7 +93,7 @@ public abstract class PullRequestListPanel extends Panel {
 			} catch (Exception e) {
 				logger.debug("Error parsing pull request query: " + query, e);
 				if (e.getMessage() != null)
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 				else
 					error("Malformed pull request query");
 			}
@@ -244,7 +244,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 				@Override
 				public IModel<?> getBody() {
-					return Model.of("<i class='fa fa-plus'></i> New Pull Request <i class='fa fa-caret-down'></i>");
+					return Model.of("<i class='fa fa-plus'></i> New <i class='fa fa-caret-down'></i>");
 				}
 				
 				@Override
@@ -333,9 +333,15 @@ public abstract class PullRequestListPanel extends Panel {
 					}.setEscapeModelStrings(false));
 				}
 				
-				User submitter = User.from(request.getSubmitter(), request.getSubmitterName());
-				fragment.add(new UserIdentPanel("submitter", submitter, Mode.NAME));
-				fragment.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
+				LastUpdate lastUpdate = request.getLastUpdate();
+				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
+					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
+					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
+				} else {
+					fragment.add(new WebMarkupContainer("user").setVisible(false));
+				}
+				fragment.add(new Label("activity", lastUpdate.getActivity()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate())));
 				
 				cellItem.add(fragment);
 			}
@@ -395,7 +401,7 @@ public abstract class PullRequestListPanel extends Panel {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
 				PullRequest issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getUpdateDate())?"request":"request new"));
+						issue.isVisitedAfter(issue.getLastUpdate().getDate())?"request":"request new"));
 				return item;
 			}
 			

@@ -7,6 +7,15 @@
     }
 }
 
+body.PullRequestDetailPage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#request-detail>.main {
+	overflow: auto;
+	position: relative;
+	padding: 20px;
+}
+
 #request-detail>.main>div {
 	margin-bottom: 20px;
 }
@@ -84,7 +93,9 @@
 #request-detail>.main>.summary .no-conflict>* {
 	margin-right: 4px;
 }
-
+#request-detail>.main>.summary>.operations>.confirm {
+	margin-top: 12px;
+}
 #request-detail>.main>.summary>.operations>.confirm>.hint {
 	margin-bottom: 12px;
 	font-size: 16px;
@@ -94,8 +105,15 @@
 } 
 #request-detail>.main>.summary>.operations>.buttons>a, 
 #request-detail>.main>.summary>.operations>.confirm>form>input {
-	margin-right: 12px;
+	margin-right: 8px;
 } 
+#request-detail>.main>.summary>.operations>.buttons>.btn-primary.active {
+	background-color: #204C72;
+} 
+#request-detail>.main>.summary>.operations>.buttons>.btn-danger.active {
+	background-color: #A62924;
+} 
+
 #request-detail>.main>.summary>.operations>.confirm>form .markdown-editor {
 	margin-bottom: 16px;
 } 
@@ -182,7 +200,7 @@ ul>li>a.code-comments.new .fa-circle {
 
 @media(min-width: 1150px) {
 	#request-detail>.main {
-		padding-right: 360px;
+		margin-right: 360px;
 	}
 	#request-detail .side-info {
 		box-shadow: none;

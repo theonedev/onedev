@@ -52,7 +52,6 @@ public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 		};
 		input.setRequired(descriptor.isPropertyRequired());
 		
-        input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
         add(input);

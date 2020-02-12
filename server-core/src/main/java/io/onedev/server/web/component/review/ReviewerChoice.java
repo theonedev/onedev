@@ -7,7 +7,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
@@ -50,9 +49,8 @@ public class ReviewerChoice extends SelectToAddChoice<User> {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, User userFacade) {
+	protected void onSelect(AjaxRequestTarget target, User user) {
 		PullRequest request = requestModel.getObject();
-		User user = OneDev.getInstance(UserManager.class).load(userFacade.getId());
 		PullRequestReview review = request.getReview(user);
 		if (review == null) {
 			review = new PullRequestReview();

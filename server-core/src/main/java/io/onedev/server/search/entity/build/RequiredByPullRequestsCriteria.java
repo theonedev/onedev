@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class RequiredByPullRequestsCriteria extends EntityCriteria<Build> {
 
@@ -17,8 +16,8 @@ public class RequiredByPullRequestsCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(BuildQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
-		join.on(builder.equal(join.get(PullRequestBuild.ATTR_REQUIRED), true)); 
+		Join<?, ?> join = root.join(Build.PROP_PULL_REQUEST_BUILDS, JoinType.LEFT);
+		join.on(builder.equal(join.get(PullRequestBuild.PROP_REQUIRED), true)); 
 		return join.isNotNull();
 	}
 

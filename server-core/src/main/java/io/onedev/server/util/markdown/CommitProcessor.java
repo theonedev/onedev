@@ -17,7 +17,6 @@ import com.google.common.collect.ImmutableSet;
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
@@ -36,33 +35,31 @@ public class CommitProcessor implements MarkdownProcessor {
 
 	@Override
 	public void process(@Nullable Project project, Document rendered, Object context) {
-		if (project != null && SecurityUtils.canReadCode(project)) {
-			TextNodeVisitor visitor = new TextNodeVisitor() {
-				
-				@Override
-				protected boolean isApplicable(TextNode node) {
-					return !HtmlUtils.hasAncestor(node, IGNORED_TAGS);
-				}
-			};
+		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
-			NodeTraversor tranversor = new NodeTraversor(visitor);
-			tranversor.traverse(rendered);
-			
-			for (TextNode node : visitor.getMatchedNodes()) {
-				Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());
-				while (matcher.find()) {
-					String commitHash = matcher.group(2);
-					String commitTag;
-					ObjectId commitId = ObjectId.fromString(commitHash);
-					if (project.getRevCommit(commitId, false) != null) {
-						commitTag = toHtml(project, commitId);
-					} else {
-						commitTag = commitId.name();
-					}
-					HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
-				}
-				HtmlUtils.appendTail(matcher, node);
+			@Override
+			protected boolean isApplicable(TextNode node) {
+				return !HtmlUtils.hasAncestor(node, IGNORED_TAGS);
 			}
+		};
+		
+		NodeTraversor tranversor = new NodeTraversor(visitor);
+		tranversor.traverse(rendered);
+		
+		for (TextNode node : visitor.getMatchedNodes()) {
+			Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());
+			while (matcher.find()) {
+				String commitHash = matcher.group(2);
+				String commitTag;
+				ObjectId commitId = ObjectId.fromString(commitHash);
+				if (project.getRevCommit(commitId, false) != null) {
+					commitTag = toHtml(project, commitId);
+				} else {
+					commitTag = commitId.name();
+				}
+				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
+			}
+			HtmlUtils.appendTail(matcher, node);
 		}
 	}
 	

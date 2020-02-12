@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.wicket.Component;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
@@ -23,8 +24,11 @@ public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "changed description";
+	public String getActivity(PullRequest withRequest) {
+		String activity = "changed description";
+		if (withRequest != null)
+			activity += " of pull request " + withRequest.describe();
+		return activity;
 	}
 
 	@Override

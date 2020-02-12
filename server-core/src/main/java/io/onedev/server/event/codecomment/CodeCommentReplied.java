@@ -22,4 +22,12 @@ public class CodeCommentReplied extends CodeCommentEvent implements MarkdownAwar
 		return reply.getContent();
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "replied comment";
+		if (withEntity)
+			activity += " on file " + getComment().getMarkPos().getPath();
+		return activity;
+	}
+
 }

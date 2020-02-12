@@ -28,7 +28,6 @@ import io.onedev.server.util.jobmatch.JobMatchParser.NotCriteriaContext;
 import io.onedev.server.util.jobmatch.JobMatchParser.OperatorValueCriteriaContext;
 import io.onedev.server.util.jobmatch.JobMatchParser.OrCriteriaContext;
 import io.onedev.server.util.jobmatch.JobMatchParser.ParensCriteriaContext;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class JobMatch extends Criteria<Build> {
 
@@ -83,11 +82,11 @@ public class JobMatch extends Criteria<Build> {
 					checkField(fieldName, operator);
 					
 					switch (fieldName) {
-					case BuildQueryConstants.FIELD_PROJECT:
+					case Build.FIELD_PROJECT:
 						return new ProjectCriteria(fieldValue);
-					case BuildQueryConstants.FIELD_PROJECT_OWNER:
+					case Build.FIELD_PROJECT_OWNER:
 						return new ProjectOwnerCriteria(fieldValue);
-					case BuildQueryConstants.FIELD_JOB:
+					case Build.FIELD_JOB:
 						return new NameCriteria(fieldValue);
 					default:
 						return new ImageCriteria(fieldValue);
@@ -127,10 +126,10 @@ public class JobMatch extends Criteria<Build> {
 	}
 	
 	public static void checkField(String fieldName, int operator) {
-		if (fieldName.equals(BuildQueryConstants.FIELD_PROJECT) 
-				|| fieldName.equals(BuildQueryConstants.FIELD_PROJECT_OWNER)
-				|| fieldName.equals(BuildQueryConstants.FIELD_JOB)
-				|| fieldName.equals(BuildQueryConstants.FIELD_IMAGE)) {
+		if (fieldName.equals(Build.FIELD_PROJECT) 
+				|| fieldName.equals(Build.FIELD_PROJECT_OWNER)
+				|| fieldName.equals(Build.FIELD_JOB)
+				|| fieldName.equals(Build.FIELD_IMAGE)) {
 			if (operator != JobMatchLexer.Is)
 				throw newOperatorException(fieldName, operator);
 		} else {

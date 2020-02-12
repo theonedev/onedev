@@ -12,7 +12,6 @@ import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectAwareCommit;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class CommitFieldCriteria extends FieldCriteria {
 
@@ -31,8 +30,8 @@ public class CommitFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		return builder.and(
-				builder.equal(field.getParent().get(IssueQueryConstants.ATTR_PROJECT), commit.getProject()),
-				builder.equal(field.get(IssueField.ATTR_VALUE), commit.getCommitId().name()));
+				builder.equal(field.getParent().get(Issue.PROP_PROJECT), commit.getProject()),
+				builder.equal(field.get(IssueField.PROP_VALUE), commit.getCommitId().name()));
 	}
 
 	@Override

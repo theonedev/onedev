@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
@@ -34,20 +35,20 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.TransitionSpec;
-import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.DateField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -95,6 +96,8 @@ public abstract class IssueOperationsPanel extends Panel {
 
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
+		
+		AtomicReference<Component> activeTransitionLinkRef = new AtomicReference<>(null);  
 		for (TransitionSpec transition: transitions) {
 			if (transition.canTransitManually(getIssue(), null)) {
 				PressButtonTrigger trigger = (PressButtonTrigger) transition.getTrigger();
@@ -103,7 +106,22 @@ public abstract class IssueOperationsPanel extends Panel {
 					private String comment;
 					
 					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						Component thisLink = this;
+						add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								return activeTransitionLinkRef.get() == thisLink?"active":""; 
+							}
+							
+						}));
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
+						activeTransitionLinkRef.set(this);
 						Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueOperationsPanel.this);
 						Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getIssue().getProject());
 						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
@@ -140,6 +158,11 @@ public abstract class IssueOperationsPanel extends Panel {
 								return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
 							}
 							
+							@Override
+							protected List<User> getMentionables() {
+								return OneDev.getInstance(UserManager.class).queryAndSort(getIssue().getParticipants());
+							}
+							
 						});
 
 						form.add(new AjaxButton("save") {
@@ -157,12 +180,14 @@ public abstract class IssueOperationsPanel extends Panel {
 							}
 							
 						});
-						
 						form.add(new AjaxLink<Void>("cancel") {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								newEmptyActionOptions(target);
+								activeTransitionLinkRef.set(null);
+								for (Component each: transitionsView)
+									target.add(each);
 							}
 							
 						});
@@ -171,8 +196,11 @@ public abstract class IssueOperationsPanel extends Panel {
 						fragment.setOutputMarkupId(true);
 						IssueOperationsPanel.this.replace(fragment);
 						target.add(fragment);
+						
+						for (Component each: transitionsView)
+							target.add(each);
 					}
-					
+
 				};
 				link.add(new Label("label", trigger.getButtonLabel()));
 				transitionsView.add(link);
@@ -183,7 +211,7 @@ public abstract class IssueOperationsPanel extends Panel {
 
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null) {
-			criterias.add(Criteria.quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
+			criterias.add(Criteria.quote(Issue.FIELD_MILESTONE) + " " 
 					+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 					+ Criteria.quote(getIssue().getMilestoneName()));
 		}
@@ -194,10 +222,10 @@ public abstract class IssueOperationsPanel extends Panel {
 					criterias.add(Criteria.quote(entry.getKey()) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty));
 				} else { 
 					FieldSpec field = issueSetting.getFieldSpec(entry.getKey());
-					if (field instanceof ChoiceField && ((ChoiceField)field).isAllowMultiple()) {
+					if (field.isAllowMultiple()) {
 						for (String string: strings) {
 							criterias.add(Criteria.quote(entry.getKey()) + " " 
-									+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
+									+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 									+ Criteria.quote(string));
 						}
 					} else if (!(field instanceof DateField)) { 
@@ -245,12 +273,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(IssueOperationsPanel.this);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(IssueOperationsPanel.this);
 			}
 			

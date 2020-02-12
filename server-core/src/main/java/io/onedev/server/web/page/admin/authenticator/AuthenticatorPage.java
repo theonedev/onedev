@@ -2,7 +2,6 @@ package io.onedev.server.web.page.admin.authenticator;
 
 import java.io.Serializable;
 
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -80,90 +79,88 @@ public class AuthenticatorPage extends AdministrationPage {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				new ModalPanel(target) {
+				if (editor.isValid()) {
+					new ModalPanel(target) {
 
-					@Override
-					protected Component newContent(String id) {
-						Fragment fragment = new Fragment(id, "testFrag", AuthenticatorPage.this);
-						BeanEditor tokenEditor = BeanContext.edit("editor", token);
-						tokenEditor.setOutputMarkupId(true);
-						Form<?> form = new Form<Void>("form") {
+						@Override
+						protected Component newContent(String id) {
+							Fragment fragment = new Fragment(id, "testFrag", AuthenticatorPage.this);
+							BeanEditor tokenEditor = BeanContext.edit("editor", token);
+							tokenEditor.setOutputMarkupId(true);
+							Form<?> form = new Form<Void>("form") {
 
-							@Override
-							protected void onError() {
-								super.onError();
-								RequestCycle.get().find(AjaxRequestTarget.class).add(tokenEditor);
-							}
+								@Override
+								protected void onError() {
+									super.onError();
+									RequestCycle.get().find(AjaxRequestTarget.class).add(tokenEditor);
+								}
 
-							@Override
-							protected void onSubmit() {
-								super.onSubmit();
-								AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);								
-								target.add(tokenEditor);
-								target.focusComponent(null);
-								close();
-								submitTask(target);
-							}
-							
-						};
-						form.add(new AjaxLink<Void>("close") {
+								@Override
+								protected void onSubmit() {
+									super.onSubmit();
+									AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);								
+									target.add(tokenEditor);
+									target.focusComponent(null);
+									close();
+									submitTask(target);
+								}
+								
+							};
+							form.add(new AjaxLink<Void>("close") {
 
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								close();
-							}
-							
-						});
-						form.add(tokenEditor);
-						form.add(new AjaxButton("ok") {});
-						form.add(new AjaxLink<Void>("cancel") {
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									close();
+								}
+								
+							});
+							form.add(tokenEditor);
+							form.add(new AjaxButton("ok") {});
+							form.add(new AjaxLink<Void>("cancel") {
 
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								close();
-							}
-							
-						});
-						fragment.add(form);
-						return fragment;
-					}
-					
-				};
-				target.add(form);
-				target.focusComponent(null);
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									close();
+								}
+								
+							});
+							fragment.add(form);
+							return fragment;
+						}
+						
+					};
+				} else {
+					target.add(form);
+				}
 			}
 
 			@Override
 			protected String runTask(JobLogger logger) {
-				try {
-					Authenticated authenticated = bean.getAuthenticator().authenticate(
-							new UsernamePasswordToken(token.getUserName(), token.getPassword()));
-					StringBuilder retrievedInfoBuilder = new StringBuilder();
-					if (authenticated.getFullName() != null) {
-						retrievedInfoBuilder.append("Full name: ")
-								.append(authenticated.getFullName())
-								.append("\n");
-					}
-					if (authenticated.getEmail() != null) {
-						retrievedInfoBuilder.append("Email: ")
-								.append(authenticated.getEmail())
-								.append("\n");
-					}
-					if (authenticated.getGroupNames() != null) {
-						retrievedInfoBuilder.append("Groups: ")
-								.append(Joiner.on(", ").join(authenticated.getGroupNames()))
-								.append("\n");
-					}
-					StringBuilder messageBuilder = 
-							new StringBuilder("Test successful: authentication passed");
-					if (retrievedInfoBuilder.length() != 0) {
-						messageBuilder.append(" with below information retrieved:\n")
-								.append(retrievedInfoBuilder);
-					} 
-					return messageBuilder.toString();
-				} catch (AuthenticationException e) {
-					return "Test successful: authentication not passed: " + e.getMessage();
+				Authenticated authenticated = bean.getAuthenticator().authenticate(
+						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
+				StringBuilder retrievedInfoBuilder = new StringBuilder();
+				if (authenticated.getFullName() != null) {
+					retrievedInfoBuilder.append("Full name: ")
+							.append(authenticated.getFullName())
+							.append("\n");
+				}
+				if (authenticated.getEmail() != null) {
+					retrievedInfoBuilder.append("Email: ")
+							.append(authenticated.getEmail())
+							.append("\n");
+				}
+				if (authenticated.getGroupNames() != null) {
+					retrievedInfoBuilder.append("Groups: ")
+							.append(Joiner.on(", ").join(authenticated.getGroupNames()))
+							.append("\n");
+				}
+				StringBuilder messageBuilder = 
+						new StringBuilder("Test successful: authentication passed");
+				if (retrievedInfoBuilder.length() != 0) {
+					messageBuilder.append(" with below information retrieved:\n")
+							.append(retrievedInfoBuilder);
 				} 
+				return messageBuilder.toString();
 			}
 
 		};

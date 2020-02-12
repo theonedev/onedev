@@ -40,7 +40,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -403,7 +402,7 @@ public class ProjectTagsPage extends ProjectPage {
 							OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
 							newPagingNavigation(target);
 						} catch (OneException e) {
-							tagsContainer.error(HtmlUtils.formatAsHtml(e.getMessage()));
+							tagsContainer.error(e.getMessage());
 						}
 						target.add(tagsContainer);
 					}

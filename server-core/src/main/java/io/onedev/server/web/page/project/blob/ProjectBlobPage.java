@@ -8,8 +8,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
@@ -27,7 +29,6 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
@@ -68,6 +69,7 @@ import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.exception.BlobEditException;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
@@ -89,6 +91,7 @@ import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
@@ -104,7 +107,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
-import io.onedev.server.web.page.project.blob.render.BlobUploadException;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
 import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
@@ -113,7 +115,6 @@ import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -255,6 +256,23 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				} else {
 					setVisible(false);
 				}
+			}
+			
+		});
+		revisionIndexing.add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(revisionIndexing);
+				resizeWindow(handler);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				Set<String> observables = new HashSet<>();
+				if (resolvedRevision != null) 
+					observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
+				return observables;
 			}
 			
 		});
@@ -872,8 +890,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		String script = String.format("onedev.server.projectBlob.onDomReady(%s);", callback);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
-		
-		response.render(OnLoadHeaderItem.forScript("onedev.server.projectBlob.onWindowLoad();"));
 	}
 
 	public static ProjectBlobPage.State getState(CodeComment comment) {
@@ -1102,14 +1118,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state.commentId = null;
 			state.position = null;
 		}
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
 	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 		state.position = SourceRendererProvider.getPosition(range);
 		pushState(target);
 	}
@@ -1127,21 +1141,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			return null;
 	}
 	
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> observables = super.getWebSocketObservables();
-		if (resolvedRevision != null) {
-			observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
-			observables.add("commit-status:" + getProject().getId() + ":" + resolvedRevision.name());
-		}
-		if (state.requestId != null)
-			observables.add(PullRequest.getWebSocketObservable(state.requestId));
-		if (state.commentId != null)
-			observables.add(CodeComment.getWebSocketObservable(state.commentId));
-		
-		return observables;
-	}
-
 	public static class State implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
@@ -1254,49 +1253,51 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			
 		});
 		
-		if (state.urlAfterEdit != null) {
-			throw new RedirectToUrlException(state.urlAfterEdit);
-		} else if (target != null) {
-			BlobIdent newBlobIdent;
-			if (state.mode == Mode.DELETE) {
-				try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-					RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
-					String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
-					while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
-						if (parentPath.contains("/")) {
-							parentPath = StringUtils.substringBeforeLast(parentPath, "/");
-						} else {
-							parentPath = null;
-							break;
+		if (target != null) {
+			if (state.urlAfterEdit != null) {
+				throw new RedirectToUrlException(state.urlAfterEdit);
+			} else {
+				BlobIdent newBlobIdent;
+				if (state.mode == Mode.DELETE) {
+					try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
+						RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
+						String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
+						while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
+							if (parentPath.contains("/")) {
+								parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+							} else {
+								parentPath = null;
+								break;
+							}
 						}
-					}
-					newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}	
-			} else if (state.mode == Mode.ADD) {
-				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-			} else if (state.mode == Mode.EDIT) {
-				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-			} else {
-				// We've uploaded some files
-				newBlobIdent = null;
+						newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}	
+				} else if (state.mode == Mode.ADD) {
+					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+				} else if (state.mode == Mode.EDIT) {
+					newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+				} else {
+					// We've uploaded some files
+					newBlobIdent = null;
+				}
+				
+				if (newBlobIdent != null) {
+					state.blobIdent = newBlobIdent;
+					state.position = position;
+					state.commentId = null;
+					state.mode = Mode.VIEW;
+					onResolvedRevisionChange(target);
+					pushState(target);
+				} else {
+					state.mode = Mode.VIEW;
+					onResolvedRevisionChange(target);
+				}
+		
+				// fix the issue that sometimes indexing indicator of new commit does not disappear 
+				target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 			}
-			
-			if (newBlobIdent != null) {
-				state.blobIdent = newBlobIdent;
-				state.position = position;
-				state.commentId = null;
-				state.mode = Mode.VIEW;
-				onResolvedRevisionChange(target);
-				pushState(target);
-			} else {
-				state.mode = Mode.VIEW;
-				onResolvedRevisionChange(target);
-			}
-	
-			// fix the issue that sometimes indexing indicator of new commit does not disappear 
-			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 		}
 	}
 	
@@ -1355,11 +1356,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		if (event.getPayload() instanceof RevisionResolved) {
 			RevisionResolved revisionResolveEvent = (RevisionResolved) event.getPayload();
 			resolvedRevision = revisionResolveEvent.getResolvedRevision();
-		} else if (event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			pageDataChanged.getHandler().add(revisionIndexing);
-			resizeWindow(pageDataChanged.getHandler());
-		}
+		} 
 	}
 
 	@Override
@@ -1380,18 +1377,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	public RefUpdated uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
-		String parentPath;
-		BlobIdent blobIdent = getBlobIdent();
-		if (blobIdent.path != null) {
-			if (blobIdent.isTree()) 
-				parentPath = blobIdent.path;
-			else if (blobIdent.path.contains("/")) 
-				parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-			else
-				parentPath = null;
-		} else {
-			parentPath = null;
-		}
+		String parentPath = getDirectory();
 		
 		if (directory != null) { 
 			if (parentPath != null)
@@ -1401,6 +1387,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		}
 		
 		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+		BlobIdent blobIdent = getBlobIdent();
 		
 		for (FileUpload upload: uploads) {
 			String blobPath = upload.getClientFileName();
@@ -1408,9 +1395,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				blobPath = parentPath + "/" + blobPath;
 			
 			if (getProject().isReviewRequiredForModification(user, blobIdent.revision, blobPath)) 
-				throw new BlobUploadException("Review required for this change. Please submit pull request instead");
+				throw new BlobEditException("Review required for this change. Please submit pull request instead");
 			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
-				throw new BlobUploadException("Build required for this change. Please submit pull request instead");
+				throw new BlobEditException("Build required for this change. Please submit pull request instead");
 			
 			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
 			newBlobs.put(blobPath, blobContent);
@@ -1431,7 +1418,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 						prevCommitId, user.asPerson(), commitMessage);
 				return new RefUpdated(getProject(), refName, prevCommitId, newCommitId);
 			} catch (ObjectAlreadyExistsException|NotTreeException e) {
-				throw new BlobUploadException(e.getMessage());
+				throw new BlobEditException(e.getMessage());
 			} catch (ObsoleteCommitException e) {
 				prevCommitId = e.getOldCommitId();
 			}
@@ -1446,7 +1433,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	public String appendRaw(String url) {
 		try {
-			URIBuilder builder = new URIBuilder(url);
+			URIBuilder builder;
+			builder = new URIBuilder(url);
 			for (NameValuePair pair: builder.getQueryParams()) {
 				if (pair.getName().equals(PARAM_RAW))
 					return url;

@@ -18,7 +18,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 
@@ -38,8 +37,8 @@ public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 		Collection<Long> pullRequestIds = getPullRequestIds(issue.getProject());
 		if (!pullRequestIds.isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT), issue.getProject()),
-					root.get(PullRequestQueryConstants.ATTR_ID).in(pullRequestIds));
+					builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), issue.getProject()),
+					root.get(PullRequest.PROP_ID).in(pullRequestIds));
 		} else {
 			return builder.disjunction();
 		}

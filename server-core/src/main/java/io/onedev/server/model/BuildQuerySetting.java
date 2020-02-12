@@ -13,8 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 

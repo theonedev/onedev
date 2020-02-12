@@ -45,6 +45,7 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.UrlRenderer;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.cycle.RequestCycleContext;
+import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
@@ -54,6 +55,7 @@ import org.apache.wicket.util.time.Duration;
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.server.OneDev;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.ErrorPage;
 import io.onedev.server.web.page.layout.UICustomization;
@@ -116,7 +118,7 @@ public class OneWebApplication extends WebApplication {
 						&& !(component instanceof AbstractErrorPage) 
 						&& !(component instanceof BasePage)
 						&& !(component instanceof BrowserInfoPage)) {
-//					throw new RuntimeException("Page classes should extend from BasePage.");
+					throw new RuntimeException("Page classes should extend from BasePage.");
 				}
 			}
 		});
@@ -137,6 +139,11 @@ public class OneWebApplication extends WebApplication {
 
 			@Override
 			public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
+				if (!map.isEmpty()) {
+					AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+					if (target != null)
+						OneDev.getInstance(WebSocketManager.class).observe((BasePage) target.getPage());
+				}
 			}
 
 			@Override
@@ -214,17 +221,20 @@ public class OneWebApplication extends WebApplication {
 
 					@Override
 					protected IRequestHandler mapExpectedExceptions(Exception e, Application application) {
-						boolean isAjax = ((WebRequest)RequestCycle.get().getRequest()).isAjax();
-						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException)) {
+						RequestCycle requestCycle = RequestCycle.get();
+						boolean isAjax = ((WebRequest)requestCycle.getRequest()).isAjax();
+						if (isAjax && (e instanceof ListenerInvocationNotAllowedException || e instanceof ComponentNotFoundException))
 							return EmptyAjaxRequestHandler.getInstance();
-						}
 						
-						Page errorPage = mapExceptions(e);
-						if (errorPage != null) {
-							return createPageRequestHandler(new PageProvider(errorPage));
-						} else {
-							return super.mapExpectedExceptions(e, application);
-						}
+						IRequestMapper mapper = Application.get().getRootRequestMapper();
+						if (mapper.mapRequest(requestCycle.getRequest()) instanceof ResourceReferenceRequestHandler)
+							return new ResourceErrorRequestHandler(e);
+						
+						HttpServletResponse response = (HttpServletResponse) requestCycle.getResponse().getContainerResponse();
+						if (!response.isCommitted())
+							return createPageRequestHandler(new PageProvider(new ErrorPage(e)));
+						
+						return super.mapExpectedExceptions(e, application);
 					}
 					
 				};
@@ -273,14 +283,6 @@ public class OneWebApplication extends WebApplication {
 
 	public Iterable<IRequestMapper> getRequestMappers() {
 		return getRootRequestMapperAsCompound();
-	}
-
-	protected Page mapExceptions(Exception e) {
-		HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
-		if (!response.isCommitted())
-			return new ErrorPage(e);
-		else
-			return null;
 	}
 
 }

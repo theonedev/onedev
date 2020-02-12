@@ -13,7 +13,11 @@
 	white-space: nowrap;
 } 
 .floating.transition-spec .property-prerequisite .property-inputName td.name, 
-.floating.transition-spec .property-buttonLabel td.name, 
+.floating.transition-spec .property-buttonLabel td.name,
+.floating.transition-spec .property-issueQuery td.name, 
+.floating.transition-spec .property-branches td.name, 
+.floating.transition-spec .property-jobNames td.name, 
+.floating.transition-spec .property-authorizedRoles td.name, 
 .floating.transition-spec .property-promptFields td.name {
 	border-right: none;
 	text-align: left;

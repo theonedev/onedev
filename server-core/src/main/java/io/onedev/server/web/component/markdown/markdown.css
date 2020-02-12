@@ -207,6 +207,18 @@ body.fullscreen {
 	color: inherit;	
 }
 
+.insert-url .directory>div {
+	position: relative;
+	padding-right: 48px;
+}
+.insert-url .directory>div>a {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.insert-url .blob-picker {
+	padding: 0;
+}
 .insert-url .attachment {
 	margin-bottom: 20px;
 }
@@ -252,15 +264,18 @@ body.fullscreen {
 .markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
 	font-weight: bold;
 }
+.markdown-rendered pre.highlight {
+	padding: 8px;
+	border: 1px dashed #BBB;
+	background: #F9F9F9;
+	position: relative;
+	word-break: normal;
+}
 .markdown-rendered blockquote {
 	font-size: 15px; 
 	border-left: 4px solid #ddd; 
 	color: #777; 
 	padding: 0 16px;
-}
-.markdown-rendered code {
-	color: #333;
-	background: rgba(0, 0, 0, 0.04);
 }
 .markdown-rendered img {
 	max-width: 100%;

@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.review;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -11,8 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -23,21 +23,22 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public class ReviewListPanel extends GenericPanel<PullRequest> {
@@ -78,16 +79,6 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 
 	private PullRequest getPullRequest() {
 		return getModelObject();
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (isVisibleInHierarchy() && event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			pageDataChanged.getHandler().add(this);
-		}
 	}
 	
 	@Override
@@ -188,8 +179,6 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 									+ "' is required and can not be removed");
 						}
 						reviewsModel.detach();
-						
-						send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					}
 					
 					@Override
@@ -213,10 +202,19 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
 			}
 		                                                                                                                              
+		});
+		
+		add(new WebSocketObserver() {
+			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, User user) {
-				super.onSelect(target, user);
-				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				if (isVisibleInHierarchy()) 
+					handler.add(component);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
 			}
 			
 		});

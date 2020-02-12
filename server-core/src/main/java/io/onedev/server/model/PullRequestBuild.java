@@ -16,11 +16,11 @@ public class PullRequestBuild extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String ATTR_BUILD = "build";
+	public static final String PROP_BUILD = "build";
 		
-	public static final String ATTR_REQUEST = "request";
+	public static final String PROP_REQUEST = "request";
 	
-	public static final String ATTR_REQUIRED = "required";
+	public static final String PROP_REQUIRED = "required";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

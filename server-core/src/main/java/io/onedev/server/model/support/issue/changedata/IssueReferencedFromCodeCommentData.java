@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Group;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
@@ -27,8 +29,11 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 	}
 
 	@Override
-	public String getDescription() {
-		return "Referenced from code comment";
+	public String getActivity(Issue withIssue) {
+		if (withIssue != null)
+			return "A code comment referenced issue " + withIssue.describe();
+		else
+			return "Referenced from code comment";
 	}
 
 	@Override
@@ -42,7 +47,7 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 	}
 
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();
 	}
 

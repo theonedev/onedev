@@ -313,7 +313,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(comment.getUpdateDate())));
+				cellItem.add(new Label(componentId, DateUtils.formatAge(comment.getLastUpdate().getDate())));
 			}
 
 			@Override
@@ -331,7 +331,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				Item<CodeComment> item = super.newRowItem(id, index, model);
 				CodeComment comment = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						comment.isVisitedAfter(comment.getUpdateDate())?"comment":"comment new"));
+						comment.isVisitedAfter(comment.getLastUpdate().getDate())?"comment":"comment new"));
 				return item;
 			}
 		});

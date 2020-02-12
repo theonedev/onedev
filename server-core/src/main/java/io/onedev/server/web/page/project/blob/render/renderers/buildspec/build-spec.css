@@ -1,6 +1,9 @@
 .build-spec {
     padding: 20px;
 }
+.build-spec>.valid {
+	min-width: 800px;
+}
 .build-spec.not-defined {
     font-style: italic;
     font-size: 16px;

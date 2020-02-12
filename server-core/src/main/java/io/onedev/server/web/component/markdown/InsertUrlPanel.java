@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.annotation.Nullable;
 
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.text.StringEscapeUtils;
@@ -40,6 +41,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.lang.Bytes;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Preconditions;
 
@@ -48,17 +50,20 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
+import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.component.blob.BlobPicker;
+import io.onedev.server.web.component.blob.folderpicker.BlobFolderPicker;
+import io.onedev.server.web.component.blob.picker.BlobPicker;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobUploadException;
 
 @SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {
@@ -69,7 +74,9 @@ abstract class InsertUrlPanel extends Panel {
 	
 	private static final MetaDataKey<String> UPLOAD_DIRECTORY = new MetaDataKey<String>(){};
 	
-	private static final MetaDataKey<HashSet<String>> BLOB_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
+	private static final MetaDataKey<HashSet<String>> FILE_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
+	
+	private static final MetaDataKey<HashSet<String>> FOLDER_PICKER_STATE = new MetaDataKey<HashSet<String>>(){};
 	
 	static final String TAB_INPUT_URL = "Input URL";
 	
@@ -147,6 +154,49 @@ abstract class InsertUrlPanel extends Panel {
 		return fragment;
 	}
 	
+	private ObjectId resolveCommitId(BlobRenderContext context) {
+		/*
+		 * We resolve revision to get latest commit id so that we can select to insert newly 
+		 * added/uploaded files while editing a markdown file
+		 */
+		String revision = context.getBlobIdent().revision;
+		if (revision == null)
+			revision = "master";
+		try {
+			return context.getProject().getRepository().resolve(revision);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private Set<BlobIdent> getPickerState(@Nullable ObjectId commitId, BlobIdent currentBlobIdent, 
+			@Nullable Set<String> expandedPaths) {
+		Set<BlobIdent> pickerState = new HashSet<>();
+		if (commitId != null) {
+			if (expandedPaths != null) {
+				for (String path: expandedPaths)
+					pickerState.add(new BlobIdent(commitId.name(), path, FileMode.TREE.getBits()));
+			} 
+			
+			String parentPath;
+			if (currentBlobIdent.isTree())
+				parentPath = currentBlobIdent.path;
+			else if (currentBlobIdent.path.contains("/"))
+				parentPath = StringUtils.substringBeforeLast(currentBlobIdent.path, "/");
+			else
+				parentPath = null;
+			
+			while (parentPath != null) {
+				pickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
+				if (parentPath.contains("/"))
+					parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+				else
+					parentPath = null;
+			}
+		}
+		return pickerState;
+	}
+	
 	private Component newPickExistingPanel() {
 		Fragment fragment;
 		BlobRenderContext context = markdownEditor.getBlobRenderContext();
@@ -170,47 +220,10 @@ abstract class InsertUrlPanel extends Panel {
 				
 			};
 			
-			/*
-			 * We resolve revision to get latest commit id so that we can select to insert newly 
-			 * added/uploaded files while editing a markdown file
-			 */
-			ObjectId commitId;
-			if (context.getBlobIdent().revision != null) {
-				try {
-					commitId = context.getProject().getRepository().resolve(context.getBlobIdent().revision);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			} else {
-				commitId = null;
-			}
+			ObjectId commitId = resolveCommitId(context);
 			
-			Set<BlobIdent> blobPickerState = new HashSet<>();
-			
-			if (commitId != null) {
-				Set<String> expandedPaths = WebSession.get().getMetaData(BLOB_PICKER_STATE);
-				if (expandedPaths != null) {
-					for (String path: expandedPaths)
-						blobPickerState.add(new BlobIdent(commitId.name(), path, FileMode.TREE.getBits()));
-				} 
-				
-				BlobIdent blobIdent = context.getBlobIdent();
-				String parentPath;
-				if (blobIdent.isTree())
-					parentPath = blobIdent.path;
-				else if (blobIdent.path.contains("/"))
-					parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-				else
-					parentPath = null;
-				
-				while (parentPath != null) {
-					blobPickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
-					if (parentPath.contains("/"))
-						parentPath = StringUtils.substringBeforeLast(parentPath, "/");
-					else
-						parentPath = null;
-				}
-			}
+			Set<BlobIdent> filePickerState = getPickerState(commitId, context.getBlobIdent(), 
+					WebSession.get().getMetaData(FILE_PICKER_STATE));
 			
 			fragment.add(new BlobPicker("files", commitId) {
 
@@ -238,14 +251,14 @@ abstract class InsertUrlPanel extends Panel {
 				@Override
 				protected void onStateChange() {
 					HashSet<String> expandedPaths = new HashSet<>();
-					for (BlobIdent blobIdent: blobPickerState)
+					for (BlobIdent blobIdent: filePickerState)
 						expandedPaths.add(blobIdent.path);
-					WebSession.get().setMetaData(BLOB_PICKER_STATE, expandedPaths);
+					WebSession.get().setMetaData(FILE_PICKER_STATE, expandedPaths);
 				}
 
 				@Override
 				protected Set<BlobIdent> getState() {
-					return blobPickerState;
+					return filePickerState;
 				}
 				
 			});
@@ -428,6 +441,50 @@ abstract class InsertUrlPanel extends Panel {
 				}
 				
 			})); 
+
+			BlobRenderContext context = Preconditions.checkNotNull(markdownEditor.getBlobRenderContext());
+			ObjectId commitId = resolveCommitId(context);
+			Set<BlobIdent> folderPickerState = getPickerState(commitId, context.getBlobIdent(), 
+					WebSession.get().getMetaData(FOLDER_PICKER_STATE));
+			
+			form.add(new DropdownLink("select") {
+
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new BlobFolderPicker(id, commitId) {
+
+						@Override
+						protected void onSelect(AjaxRequestTarget target, BlobIdent blobIdent) {
+							dropdown.close();
+							
+							String relativePath = PathUtils.relativize(context.getDirectory(), blobIdent.path);
+							String script = String.format("$('form.upload-blob .directory input').val('%s');", 
+									JavaScriptEscape.escapeJavaScript(relativePath));
+							target.appendJavaScript(script);
+						}
+
+						@Override
+						protected Project getProject() {
+							return markdownEditor.getBlobRenderContext().getProject();
+						}
+
+						@Override
+						protected void onStateChange() {
+							HashSet<String> expandedPaths = new HashSet<>();
+							for (BlobIdent blobIdent: folderPickerState)
+								expandedPaths.add(blobIdent.path);
+							WebSession.get().setMetaData(FOLDER_PICKER_STATE, expandedPaths);
+						}
+
+						@Override
+						protected Set<BlobIdent> getState() {
+							return folderPickerState;
+						}
+						
+					};
+				}
+				
+			});
 			
 			ReferenceInputBehavior behavior = new ReferenceInputBehavior(true) {
 				
@@ -471,14 +528,13 @@ abstract class InsertUrlPanel extends Panel {
 						
 						String fileName = uploads.iterator().next().getClientFileName();
 						String url;
-						if (directory != null) {
-							url = directory + "/" + fileName;
-						} else {
-							url = fileName;
-						}
+						if (directory != null) 
+							url = directory + "/" + UrlUtils.encodePath(fileName);
+						else 
+							url = UrlUtils.encodePath(fileName);
 						markdownEditor.insertUrl(target, isImage, url, UrlUtils.describe(fileName), null);
 						onClose(target);
-					} catch (BlobUploadException e) {
+					} catch (GitException e) {
 						form.error(e.getMessage());
 						target.add(feedback);
 					}

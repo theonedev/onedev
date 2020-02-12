@@ -12,9 +12,9 @@ public class Authenticated {
 	
 	private final Collection<String> groupNames;
 	
-	public Authenticated(@Nullable String fullName, @Nullable String email, Collection<String> groupNames) {
-		this.fullName = fullName;
+	public Authenticated(String email, @Nullable String fullName, Collection<String> groupNames) {
 		this.email = email;
+		this.fullName = fullName;
 		this.groupNames = groupNames;
 	}
 
@@ -23,7 +23,6 @@ public class Authenticated {
 		return fullName;
 	}
 
-	@Nullable
 	public String getEmail() {
 		return email;
 	}

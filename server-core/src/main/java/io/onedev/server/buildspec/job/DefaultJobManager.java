@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -130,6 +132,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final BuildParamManager buildParamManager;
 	
 	private final PasswordService passwordService;
+
+	private final Validator validator;
 	
 	private volatile List<JobExecutor> jobExecutors;
 	
@@ -139,7 +143,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
-			ProjectManager projectManager, PasswordService passwordService) {
+			ProjectManager projectManager, PasswordService passwordService, Validator validator) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -151,8 +155,22 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.buildParamManager = buildParamManager;
 		this.projectManager = projectManager;
 		this.passwordService = passwordService;
+		this.validator = validator;
 	}
 
+	private void validate(Project project, ObjectId commitId) {
+		Project.push(project);
+		try {
+	    	for (ConstraintViolation<?> violation: validator.validate(project.getBuildSpec(commitId))) {
+	    		String message = String.format("Error validating build spec (project: %s, commit: %s, property: %s, message: %s)", 
+	    				project.getName(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
+	    		throw new OneException(message);
+	    	}
+		} finally {
+			Project.pop();
+		}
+	}
+	
 	@Transactional
 	@Override
 	public Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap) {
@@ -169,6 +187,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		// Lock to guarantee uniqueness of build (by project, commit, job and parameters)
     	try {
         	lock.lockInterruptibly();
+        	
+        	validate(project, commitId);
+        	
 			return submit(project, commitId, jobName, paramMap, new LinkedHashSet<>()); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
@@ -651,6 +672,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Override
 	public void resubmit(Build build, Map<String, List<String>> paramMap) {
 		if (build.isFinished()) {
+        	validate(build.getProject(), build.getCommitId());
+			
 			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
 			build.setPendingDate(null);

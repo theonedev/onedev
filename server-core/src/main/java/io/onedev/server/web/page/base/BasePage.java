@@ -5,10 +5,12 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
@@ -18,7 +20,6 @@ import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -40,6 +41,8 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
+import com.google.common.base.Splitter;
+
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
@@ -48,7 +51,6 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -172,50 +174,18 @@ public abstract class BasePage extends WebPage {
 					super.onMessage(handler, message);
 					
 					if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
-						String observable = message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1);
+						List<String> observables = Splitter.on('\n').splitToList(
+								message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1));
 						for (WebSocketObserver observer: findWebSocketObservers()) {
-							if (observer.getObservables().contains(observable))
-								observer.onObservableChanged(handler, observable);
+							if (CollectionUtils.containsAny(observer.getObservables(), observables))
+								observer.onObservableChanged(handler);
 						}
-					} else if (message.getText().equals(WebSocketManager.CONNECTION_OPENED)) {
-						/* 
-						 * re-render interesting parts upon websocket connecting after a page is opened, 
-						 * this is necessary in case some web socket render request is sent between the 
-						 * gap of opening a page and a websocket connection is established. For instance
-						 * when someone creates a pull request, the server will re-render integration 
-						 * preview section of the page after preview is calculated and this may happen 
-						 * before the web socket connection is established. Requiring the page to 
-						 * re-render the integration preview section after connecting will make it 
-						 * displaying correctly    
-						 */
-						for (WebSocketObserver observer: findWebSocketObservers())
-							observer.onConnectionOpened(handler);
 					} 
 			 
 				}
 				
 			});
-						
-			add(new WebSocketObserver() {
-
-				@Override
-				public Collection<String> getObservables() {
-					return getWebSocketObservables();
-				}
-
-				@Override
-				public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-					send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler));
-				}
-
-				@Override
-				public void onConnectionOpened(IPartialPageRequestHandler handler) {
-					send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler, true));
-				}
-				
-			});			
 		} else {
-			
 			add(new WebMarkupContainer("keepSessionAlive"));
 		}
 
@@ -257,7 +227,7 @@ public abstract class BasePage extends WebPage {
 
 			@Override
 			public void component(Component object, IVisit<Void> visit) {
-				observers.addAll(object.getBehaviors(io.onedev.server.web.behavior.WebSocketObserver.class));
+				observers.addAll(object.getBehaviors(WebSocketObserver.class));
 			}
 
 		});
@@ -271,10 +241,6 @@ public abstract class BasePage extends WebPage {
 		return observables;
 	}
 
-	public Collection<String> getWebSocketObservables() {
-		return new HashSet<>();
-	}
-	
 	private void checkReady() {
 		if (!OneDev.getInstance().isReady() && getClass() != ServerInitPage.class)
 			throw new RestartResponseAtInterceptPageException(ServerInitPage.class);
@@ -301,8 +267,8 @@ public abstract class BasePage extends WebPage {
 	}
 	
 	protected final String getPageTitle() {
-		return "OneDev - One Platform for Software Development";
-	};
+		return "OneDev - Super Easy All-in-One DevOps Platform";
+	}
 
 	protected int getPageRefreshInterval() {
 		return 0;

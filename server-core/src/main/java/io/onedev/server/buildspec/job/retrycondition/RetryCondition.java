@@ -29,7 +29,6 @@ import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class RetryCondition extends Criteria<Build> {
 
@@ -96,9 +95,9 @@ public class RetryCondition extends Criteria<Build> {
 					checkField(job, fieldName, operator);
 					
 					switch (fieldName) {
-					case BuildQueryConstants.FIELD_LOG:
+					case Build.FIELD_LOG:
 						return new LogCriteria(fieldValue);
-					case BuildQueryConstants.FIELD_ERROR_MESSAGE:
+					case Build.FIELD_ERROR_MESSAGE:
 						return new ErrorMessageCriteria(fieldValue);
 					default:
 						return new ParamCriteria(fieldName, fieldValue);
@@ -133,7 +132,7 @@ public class RetryCondition extends Criteria<Build> {
 	}
 	
 	public static void checkField(Job job, String fieldName, int operator) {
-		if (fieldName.equals(BuildQueryConstants.FIELD_ERROR_MESSAGE) || fieldName.equals(BuildQueryConstants.FIELD_LOG)) {
+		if (fieldName.equals(Build.FIELD_ERROR_MESSAGE) || fieldName.equals(Build.FIELD_LOG)) {
 			if (operator != RetryConditionLexer.Contains)
 				throw newOperatorException(fieldName, operator);
 		} else if (job.getParamSpecMap().containsKey(fieldName)) {

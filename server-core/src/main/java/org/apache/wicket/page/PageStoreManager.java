@@ -25,12 +25,16 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.apache.wicket.pageStore.IPageStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  */
 public class PageStoreManager extends AbstractPageManager
 {
+	private static final Logger logger = LoggerFactory.getLogger(PageStoreManager.class);
+	
 	/**
 	 * A cache that holds all registered page managers. <br/>
 	 * applicationName -> page manager
@@ -268,23 +272,30 @@ public class PageStoreManager extends AbstractPageManager
 		{
 			if (!touchedPages.isEmpty())
 			{
-				SessionEntry entry = getSessionEntry(true);
-				entry.setSessionCache(touchedPages);
-				for (IManageablePage page : touchedPages)
-				{
-					// WICKET-5103 use the same sessionId as used in
-					// SessionEntry#getPage()
-					pageStore.storePage(entry.sessionId, page);
-				}
+				try {
+					SessionEntry entry = getSessionEntry(true);
+					entry.setSessionCache(touchedPages);
+					for (IManageablePage page : touchedPages)
+					{
+						// WICKET-5103 use the same sessionId as used in
+						// SessionEntry#getPage()
+						pageStore.storePage(entry.sessionId, page);
+					}
 
-				STORING_TOUCHED_PAGES.set(true);
-				try
-				{
-					setSessionAttribute(getAttributeName(), entry);
-				}
-				finally
-				{
-					STORING_TOUCHED_PAGES.remove();
+					STORING_TOUCHED_PAGES.set(true);
+					try
+					{
+						setSessionAttribute(getAttributeName(), entry);
+					}
+					finally
+					{
+						STORING_TOUCHED_PAGES.remove();
+					}
+				} catch (IllegalStateException e) {
+					if (e.getMessage().contains("Response is committed")) 
+						logger.debug("Error storing touched pages", e);
+					else 
+						throw e;
 				}
 			}
 		}

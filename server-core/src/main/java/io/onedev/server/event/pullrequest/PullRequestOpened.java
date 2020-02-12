@@ -14,4 +14,12 @@ public class PullRequestOpened extends PullRequestEvent implements MarkdownAware
 		return getRequest().getDescription();
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "opened";
+		if (withEntity)
+			activity += " pull request " + getRequest().describe();
+		return activity;
+	}
+
 }

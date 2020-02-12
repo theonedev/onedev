@@ -122,13 +122,5 @@ onedev.server.projectBlob = {
 		} else {
 			return 0;
 		}
-	},
-	onWindowLoad: function() {
-		if (location.hash && !onedev.server.viewState.getFromHistory()) {
-			// Scroll anchors into view (for instance the markdown headline)
-			var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
-			if (element)
-				element.scrollIntoView();
-		}
 	}
 }

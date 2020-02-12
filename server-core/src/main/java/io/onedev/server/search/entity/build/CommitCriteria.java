@@ -10,7 +10,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class CommitCriteria extends EntityCriteria<Build>  {
 
@@ -27,8 +26,8 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<?> projectAttribute = BuildQuery.getPath(root, BuildQueryConstants.ATTR_PROJECT);
-		Path<?> commitAttribute = BuildQuery.getPath(root, BuildQueryConstants.ATTR_COMMIT);
+		Path<?> projectAttribute = BuildQuery.getPath(root, Build.PROP_PROJECT);
+		Path<?> commitAttribute = BuildQuery.getPath(root, Build.PROP_COMMIT);
 		return builder.and(
 				builder.equal(projectAttribute, project), 
 				builder.equal(commitAttribute, commitId.name()));
@@ -41,7 +40,7 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_COMMIT) + " " 
+		return quote(Build.FIELD_COMMIT) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ quote(commitId.name());
 	}

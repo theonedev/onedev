@@ -8,9 +8,8 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.BuildQueryConstants;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class ProjectCriteria extends EntityCriteria<Build> {
 
@@ -25,8 +24,8 @@ public class ProjectCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<String> attribute = root
-				.join(BuildQueryConstants.ATTR_PROJECT, JoinType.INNER)
-				.get(ProjectQueryConstants.ATTR_NAME);
+				.join(Build.PROP_PROJECT, JoinType.INNER)
+				.get(Project.PROP_NAME);
 		String normalized = projectName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -39,7 +38,7 @@ public class ProjectCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_PROJECT) + " " 
+		return quote(Build.FIELD_PROJECT) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ quote(projectName);
 	}

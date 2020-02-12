@@ -1,0 +1,15 @@
+.title-and-status {
+	position: relative;
+}
+
+.title-and-status>.title {
+	padding-right: 48px; 
+}
+.title-and-status>.status {
+	position: absolute;
+	right: 0;
+	top: 0; 
+}
+.title-and-status .label {
+	line-height: inherit; 
+}

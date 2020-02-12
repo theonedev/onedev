@@ -25,16 +25,14 @@ import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.issue.fieldspec.BuildChoiceField;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
-import io.onedev.server.issue.fieldspec.IssueChoiceField;
 import io.onedev.server.issue.fieldspec.UserChoiceField;
+import io.onedev.server.issue.transitiontrigger.BranchUpdateTrigger;
 import io.onedev.server.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.OrIssueCriteria;
-import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
@@ -42,7 +40,6 @@ import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoic
 import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -74,22 +71,27 @@ public class GlobalIssueSetting implements Serializable {
 		List<Choice> choices = new ArrayList<>(); 
 		Choice newFeature = new Choice();
 		newFeature.setValue("New Feature");
+		newFeature.setColor("#93c47d");
 		choices.add(newFeature);
 		
 		Choice improvement = new Choice();
 		improvement.setValue("Improvement");
+		improvement.setColor("#93c47d");
 		choices.add(improvement);
 
 		Choice bug = new Choice();
 		bug.setValue("Bug");
+		bug.setColor("#ea9999");
 		choices.add(bug);
 
 		Choice task = new Choice();
 		task.setValue("Task");
+		task.setColor("#8e7cc3");
 		choices.add(task);
 
 		Choice buildFailure = new Choice();
 		buildFailure.setValue("Build Failure");
+		buildFailure.setColor("#cc0000");
 		choices.add(buildFailure);
 		
 		specifiedChoices.setChoices(choices);
@@ -114,7 +116,7 @@ public class GlobalIssueSetting implements Serializable {
 
 		Choice normal = new Choice();
 		normal.setValue("Normal");
-		normal.setColor("#0d87e9");
+		normal.setColor("#6fa8dc");
 		choices.add(normal);
 
 		Choice major = new Choice();
@@ -136,86 +138,91 @@ public class GlobalIssueSetting implements Serializable {
 		
 		fieldSpecs.add(priority);
 
-		UserChoiceField assignee = new UserChoiceField();
-		assignee.setAllowEmpty(true);
-		assignee.setNameOfEmptyValue("Not assigned");
-		assignee.setName("Assignee");
+		UserChoiceField assignees = new UserChoiceField();
+		assignees.setAllowMultiple(true);
+		assignees.setAllowEmpty(true);
+		assignees.setNameOfEmptyValue("Not assigned");
+		assignees.setName("Assignees");
 		
-		fieldSpecs.add(assignee);
+		fieldSpecs.add(assignees);
 		
-		BuildChoiceField build = new BuildChoiceField();
-		build.setName("Build");
-		build.setAllowEmpty(true);
-		build.setNameOfEmptyValue("No build specified");
+		BuildChoiceField failedBuild = new BuildChoiceField();
+		failedBuild.setName("Failed Build");
+		failedBuild.setAllowEmpty(true);
+		failedBuild.setNameOfEmptyValue("Not specified");
+		
+		fieldSpecs.add(failedBuild);
+		
 		ShowCondition showCondition = new ShowCondition();
 		showCondition.setInputName("Type");
 		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
 		valueIsOneOf.setValues(Lists.newArrayList("Build Failure"));
 		showCondition.setValueMatcher(valueIsOneOf);
-		build.setShowCondition(showCondition);
+		failedBuild.setShowCondition(showCondition);
 		
-		fieldSpecs.add(build);
-		
-		ChoiceField resolution = new ChoiceField();
-		resolution.setName("Resolution");
-		specifiedChoices = new SpecifiedChoices();
-
-		choices = new ArrayList<>(); 
-		
-		Choice fixed = new Choice();
-		fixed.setValue("Fixed");
-		choices.add(fixed);
-
-		Choice wontFix = new Choice();
-		wontFix.setValue("Invalid");
-		choices.add(wontFix);
-
-		Choice duplicated = new Choice();
-		duplicated.setValue("Duplicated");
-		choices.add(duplicated);
-		
-		specifiedChoices.setChoices(choices);
-		resolution.setChoiceProvider(specifiedChoices);
-		
-		specifiedDefaultValue = new SpecifiedDefaultValue();
-		specifiedDefaultValue.setValue("Fixed");
-		resolution.setDefaultValueProvider(specifiedDefaultValue);
-
-		fieldSpecs.add(resolution);
-
-		IssueChoiceField duplicateWith = new IssueChoiceField();
-		duplicateWith.setName("Duplicate With");
+		BuildChoiceField affectedBuilds = new BuildChoiceField();
+		affectedBuilds.setName("Affected Builds");
+		affectedBuilds.setAllowEmpty(true);
+		affectedBuilds.setNameOfEmptyValue("Not specified");
+		affectedBuilds.setAllowMultiple(true);
 		
 		showCondition = new ShowCondition();
-		showCondition.setInputName("Resolution");
+		showCondition.setInputName("Type");
 		valueIsOneOf = new ValueIsOneOf();
-		valueIsOneOf.setValues(Lists.newArrayList("Duplicated"));
+		valueIsOneOf.setValues(Lists.newArrayList("Bug"));
 		showCondition.setValueMatcher(valueIsOneOf);
-		duplicateWith.setShowCondition(showCondition);
+		affectedBuilds.setShowCondition(showCondition);
 		
-		fieldSpecs.add(duplicateWith);
+		fieldSpecs.add(affectedBuilds);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
-		open.setCategory(StateSpec.Category.OPEN);
 		open.setColor("#f0ad4e");
 		
 		stateSpecs.add(open);
 		
+		StateSpec committed = new StateSpec();
+		committed.setColor("#b4a7d6");
+		committed.setName("Committed");
+		
+		stateSpecs.add(committed);
+		
+		StateSpec invalid = new StateSpec();
+		invalid.setColor("#999999");
+		invalid.setName("Invalid");
+		
+		stateSpecs.add(invalid);
+		
 		StateSpec closed = new StateSpec();
 		closed.setColor("#5cb85c");
 		closed.setName("Closed");
-		closed.setCategory(StateSpec.Category.CLOSED);
 		
 		stateSpecs.add(closed);
 		
 		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setToState("Committed");
+		BranchUpdateTrigger branchUpdateTrigger = new BranchUpdateTrigger();
+		transition.setTrigger(branchUpdateTrigger);
+		
+		defaultTransitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Open", "Committed"));
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
 		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
-		pressButton.setPromptFields(Lists.newArrayList("Resolution", "Duplicate With"));
+		transition.setTrigger(pressButton);
+		
+		defaultTransitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Open", "Committed"));
+		transition.setToState("Invalid");
+		pressButton = new PressButtonTrigger();
+		pressButton.setButtonLabel("Invalid");
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
 		transition.setTrigger(pressButton);
 		
 		defaultTransitionSpecs.add(transition);
@@ -225,13 +232,13 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Closed");
 		BuildSuccessfulTrigger buildSuccessful = new BuildSuccessfulTrigger();
 		buildSuccessful.setBranches("master");
-		buildSuccessful.setIssueQuery("\"Type\" is \"Build Failure\" and (\"Build\" is current or \"Build\" is previous)");
+		buildSuccessful.setIssueQuery("\"Type\" is \"Build Failure\" and (\"Failed Build\" is current or \"Failed Build\" is previous)");
 		transition.setTrigger(buildSuccessful);
 		
 		defaultTransitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setFromStates(Lists.newArrayList("Open", "Committed"));
 		transition.setToState("Closed");
 		buildSuccessful = new BuildSuccessfulTrigger();
 		buildSuccessful.setBranches("master");
@@ -241,11 +248,10 @@ public class GlobalIssueSetting implements Serializable {
 		defaultTransitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed"));
+		transition.setFromStates(Lists.newArrayList("Committed", "Invalid", "Closed"));
 		transition.setToState("Open");
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
-		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
 		transition.setTrigger(pressButton);
 		
@@ -253,30 +259,33 @@ public class GlobalIssueSetting implements Serializable {
 		
 		defaultPromptFieldsUponIssueOpen.add("Type");
 		defaultPromptFieldsUponIssueOpen.add("Priority");
-		defaultPromptFieldsUponIssueOpen.add("Assignee");
-		defaultPromptFieldsUponIssueOpen.add("Build");
+		defaultPromptFieldsUponIssueOpen.add("Assignees");
+		defaultPromptFieldsUponIssueOpen.add("Failed Build");
+		defaultPromptFieldsUponIssueOpen.add("Affected Builds");
 		
 		BoardSpec board = new BoardSpec();
-		board.setName(IssueQueryConstants.FIELD_STATE);
-		board.setIdentifyField(IssueQueryConstants.FIELD_STATE);
-		board.setColumns(Lists.newArrayList("Open", "Closed"));
-		board.setDisplayFields(Lists.newArrayList(IssueQueryConstants.FIELD_STATE, "Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+		board.setName(Issue.FIELD_STATE);
+		board.setIdentifyField(Issue.FIELD_STATE);
+		board.setColumns(Lists.newArrayList("Open", "Committed", "Closed"));
+		board.setDisplayFields(Lists.newArrayList(Issue.FIELD_STATE, "Type", "Priority", "Assignees"));
 		defaultBoardSpecs.add(board);
 		
 		listFields.add("Type");
 		listFields.add("Priority");
-		listFields.add("Assignee");
+		listFields.add("Assignees");
 		
 		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignee\" is me and \"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignees\" is me and \"State\" is \"Open\""));
 		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
+		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignees\" is me"));
 		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
-		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignee\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Committed", "\"State\" is \"Committed\""));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
+		namedQueries.add(new NamedIssueQuery("Invalid", "\"State\" is \"Invalid\""));
 		namedQueries.add(new NamedIssueQuery("All", "all"));
 	}
 	
@@ -537,15 +546,6 @@ public class GlobalIssueSetting implements Serializable {
 			throw new OneException("No any issue state is defined");
 	}
 	
-	public IssueCriteria getCategoryCriteria(StateSpec.Category category) {
-		List<IssueCriteria> criterias = new ArrayList<>();
-		for (StateSpec state: getStateSpecs()) {
-			if (category == state.getCategory())
-				criterias.add(new StateCriteria(state.getName()));
-		}
-		return new OrIssueCriteria(criterias);
-	}
-
 	public List<BoardSpec> getDefaultBoardSpecs() {
 		return defaultBoardSpecs;
 	}

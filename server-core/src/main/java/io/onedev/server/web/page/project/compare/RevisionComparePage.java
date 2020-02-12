@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.compare;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -36,7 +35,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -752,7 +750,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 			state.mark = null;
 		}
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
 	@Override
@@ -771,7 +768,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
 	@Override
@@ -786,21 +782,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getProject(), markState)).toString();
-	}
-
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> observables = super.getWebSocketObservables();
-		if (getProject().getDefaultBranch() != null) {
-			if (state.compareWithMergeBase) 
-				observables.add(CommitIndexed.getWebSocketObservable(mergeBase.name()));
-			else
-				observables.add(CommitIndexed.getWebSocketObservable(state.leftSide.getCommit().name()));
-			observables.add(CommitIndexed.getWebSocketObservable(state.rightSide.getCommit().name()));
-			if (state.commentId != null)
-				observables.add(CodeComment.getWebSocketObservable(state.commentId));
-		}
-		return observables;
 	}
 
 	@Override

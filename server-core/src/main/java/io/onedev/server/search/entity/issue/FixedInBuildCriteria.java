@@ -12,7 +12,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FixedInBuildCriteria extends IssueCriteria {
 
@@ -37,8 +36,8 @@ public class FixedInBuildCriteria extends IssueCriteria {
 		Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
 		if (!fixedIssueNumbers.isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), build.getProject()),
-					root.get(IssueQueryConstants.ATTR_NUMBER).in(fixedIssueNumbers));
+					builder.equal(root.get(Issue.PROP_PROJECT), build.getProject()),
+					root.get(Issue.PROP_NUMBER).in(fixedIssueNumbers));
 		} else {
 			return builder.disjunction();
 		}

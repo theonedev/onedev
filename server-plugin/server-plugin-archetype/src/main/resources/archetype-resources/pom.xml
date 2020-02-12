@@ -114,7 +114,7 @@
 	        <plugin> 
 	            <groupId>io.onedev</groupId>  
 	            <artifactId>plugin-maven</artifactId>  
-	            <version>2.0.2</version>  
+	            <version>2.0.3</version>  
 	            <executions> 
 	                <execution> 
 	                    <id>populate-resources</id>  
@@ -143,8 +143,8 @@
 	</dependencies>
 	<repositories>
 		<repository>
-			<id>pmeaseRepo</id>
-			<url>http://artifact.pmease.com/artifactory/pmeaseRepo</url>
+			<id>onedev</id>
+			<url>https://artifact.onedev.io/artifactory/onedev</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
@@ -159,8 +159,8 @@
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>pmeaseRepo</id>
-			<url>http://artifact.pmease.com/artifactory/pmeaseRepo</url>
+			<id>onedev</id>
+			<url>https://artifact.onedev.io/artifactory/onedev</url>
 			<releases>
 				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>

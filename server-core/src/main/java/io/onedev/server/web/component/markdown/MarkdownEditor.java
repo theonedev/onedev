@@ -113,6 +113,11 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		super.onModelChanged();
 		input.setModelObject(getModelObject());
 	}
+	
+	public void clearMarkdown() {
+		setModelObject("");
+		input.setConvertedInput(null);
+	}
 
 	private String renderInput(String input) {
 		if (StringUtils.isNotBlank(input)) {

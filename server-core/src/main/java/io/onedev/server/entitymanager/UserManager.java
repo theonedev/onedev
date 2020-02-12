@@ -1,5 +1,8 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.PersonIdent;
@@ -69,5 +72,7 @@ public interface UserManager extends EntityManager<User> {
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
 	@Nullable User find(PersonIdent person);
+	
+	List<User> queryAndSort(Collection<User> topUsers);
 	
 }

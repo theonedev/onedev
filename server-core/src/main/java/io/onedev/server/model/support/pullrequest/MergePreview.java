@@ -17,16 +17,28 @@ import io.onedev.server.model.PullRequest;
 @Embeddable
 public class MergePreview implements Serializable {
 	
-	@Column(name="PREVIEW_TARGET_HEAD")
+	public static final String COLUMN_TARGET_HEAD = "PREVIEW_TARGET_HEAD";
+	
+	public static final String COLUMN_REQUEST_HEAD = "PREVIEW_REQUEST_HEAD";
+	
+	public static final String COLUMN_MERGE_STRATEGY = "PREVIEW_MERGE_STRATEGY";
+	
+	public static final String COLUMN_MERGED = "PREVIEW_MERGED";
+	
+	public static final String PROP_MERGED = "merged";
+	
+	public static final String PROP_REQUEST_HEAD = "requestHead";
+	
+	@Column(name=COLUMN_TARGET_HEAD)
 	private String targetHead;
 	
-	@Column(name="PREVIEW_REQUEST_HEAD")
+	@Column(name=COLUMN_REQUEST_HEAD)
 	private String requestHead;
 	
-	@Column(name="PREVIEW_MERGE_STRATEGY")
+	@Column(name=COLUMN_MERGE_STRATEGY)
 	private MergeStrategy mergeStrategy;
 	
-	@Column(name="PREVIEW_MERGED")
+	@Column(name=COLUMN_MERGED)
 	private String merged;
 	
 	@SuppressWarnings("unused")

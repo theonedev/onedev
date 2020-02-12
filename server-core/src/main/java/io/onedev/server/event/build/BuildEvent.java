@@ -32,4 +32,17 @@ public class BuildEvent extends ProjectEvent implements CommitAware {
 		return new ProjectAwareCommit(build.getProject(), ObjectId.fromString(build.getCommitHash()));
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = build.getStatus().getDisplayName();
+		if (withEntity) {
+			activity = " is " + activity;
+			if (build.getVersion() != null)
+				activity = "build #" + build.getNumber() + " (" + build.getVersion() + ")" + activity;
+			else
+				activity = "build #" + build.getNumber() + activity;
+		} 
+		return activity;
+	}
+
 }

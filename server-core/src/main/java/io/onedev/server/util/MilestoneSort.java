@@ -3,59 +3,61 @@ package io.onedev.server.util;
 import org.eclipse.jgit.util.StringUtils;
 import org.hibernate.criterion.Order;
 
+import io.onedev.server.model.Milestone;
+
 public enum MilestoneSort {
 	CLOSEST_DUE_DATE {
 
 		@Override
-		public Order getOrder() {
-			return Order.asc("dueDate");
+		public Order getOrder(boolean closed) {
+			return closed?Order.desc(Milestone.PROP_DUE_DATE):Order.asc(Milestone.PROP_DUE_DATE);
 		}
 		
 	},
 	FURTHEST_DUE_DATE {
 
 		@Override
-		public Order getOrder() {
-			return Order.desc("dueDate");
+		public Order getOrder(boolean closed) {
+			return closed?Order.asc(Milestone.PROP_DUE_DATE):Order.desc(Milestone.PROP_DUE_DATE);
 		}
 		
 	},
-	MOST_ISSUES {
+	MOST_ISSUES_TODO {
 
 		@Override
-		public Order getOrder() {
-			return Order.desc("numOfOpenIssues");
+		public Order getOrder(boolean closed) {
+			return Order.desc("numOfIssuesTodo");
 		}
 		
 	}, 
-	LEAST_ISSUES {
+	LEAST_ISSUES_TODO {
 
 		@Override
-		public Order getOrder() {
-			return Order.asc("numOfOpenIssues");
+		public Order getOrder(boolean closed) {
+			return Order.asc("numOfIssuesTodo");
 		}
 		
 	},
-	MOST_COMPLETED {
+	MOST_ISSUES_DONE {
 
 		@Override
-		public Order getOrder() {
-			return Order.desc("numOfClosedIssues");
+		public Order getOrder(boolean closed) {
+			return Order.desc("numOfIssuesDone");
 		}
 		
 	},
-	LEAST_COMPLETED {
+	LEAST_ISSUES_DONE {
 
 		@Override
-		public Order getOrder() {
-			return Order.asc("numOfClosedIssues");
+		public Order getOrder(boolean closed) {
+			return Order.asc("numOfIssuesDone");
 		}
 		
 	},
 	NAME {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.asc("name");
 		}
 		
@@ -63,13 +65,13 @@ public enum MilestoneSort {
 	NAME_REVERSELY {
 
 		@Override
-		public Order getOrder() {
+		public Order getOrder(boolean closed) {
 			return Order.desc("name");
 		}
 		
 	};
 	
-	public abstract Order getOrder();
+	public abstract Order getOrder(boolean closed);
 
 	@Override
 	public String toString() {

@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.model.support.NamedBuildQuery;
+import io.onedev.server.model.support.build.NamedBuildQuery;
 
 public class GlobalBuildSetting implements Serializable {
 	

@@ -6,6 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
+import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import io.onedev.server.web.asset.atwho.AtWhoResourceReference;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
@@ -14,6 +15,7 @@ import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
+import io.onedev.server.web.asset.perfectscrollbar.PerfectScrollbarResourceReference;
 import io.onedev.server.web.asset.textareacaretposition.TextareaCaretPositionResourceReference;
 import io.onedev.server.web.component.commit.status.CommitStatusCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
@@ -38,10 +40,12 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new PerfectScrollbarResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
 
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(MarkdownResourceReference.class, "markdown.css")));
+		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
 		return dependencies;
 	}
 	

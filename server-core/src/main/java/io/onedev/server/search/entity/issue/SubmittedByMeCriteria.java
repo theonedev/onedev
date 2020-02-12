@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.OneException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class SubmittedByMeCriteria extends IssueCriteria {
 
@@ -17,7 +16,7 @@ public class SubmittedByMeCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		if (User.get() != null) {
-			Path<User> attribute = root.get(IssueQueryConstants.ATTR_SUBMITTER);
+			Path<User> attribute = root.get(Issue.PROP_SUBMITTER);
 			return builder.equal(attribute, User.get());
 		} else {
 			throw new OneException("Please login to perform this query");

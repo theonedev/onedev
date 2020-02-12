@@ -9,7 +9,6 @@ import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class OwnedByMeCriteria extends EntityCriteria<Project> {
 
@@ -17,7 +16,7 @@ public class OwnedByMeCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
-		Expression<String> attribute = root.get(ProjectQueryConstants.ATTR_OWNER);
+		Expression<String> attribute = root.get(Project.PROP_OWNER);
 		if (User.get() != null)
 			return builder.equal(attribute, User.get());
 		else

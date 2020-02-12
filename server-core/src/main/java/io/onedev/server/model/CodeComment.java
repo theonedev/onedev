@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +29,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
@@ -36,20 +38,63 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.SecurityUtils;
+import static io.onedev.server.model.CodeComment.*;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
 @Entity
 @Table(indexes={
 		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
-		@Index(columnList="commit"), @Index(columnList="path"), 
-		@Index(columnList="createDate"), @Index(columnList="updateDate")})
+		@Index(columnList=MarkPos.PROP_COMMIT), @Index(columnList=MarkPos.PROP_PATH), 
+		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=LastUpdate.COLUMN_DATE)})
 public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_PROJECT = "project";
+	
+	public static final String FIELD_CONTENT = "Content";
+	
+	public static final String PROP_CONTENT = "content";
+	
+	public static final String FIELD_REPLY = "Reply";
+	
+	public static final String FIELD_PATH = "Path";
+	
+	public static final String PROP_MARK_POS = "markPos";
+	
+	public static final String FIELD_REPLY_COUNT = "Reply Count";
+	
+	public static final String PROP_REPLY_COUNT = "replyCount";
+	
+	public static final String FIELD_CREATE_DATE = "Create Date";
+	
+	public static final String PROP_CREATE_DATE = "createDate";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_LAST_UPDATE = "lastUpdate";
+	
+	public static final String PROP_USER = "user";
+	
+	public static final String PROP_RELATIONS = "relations";
+	
+	public static final String PROP_REPLIES = "replies";
+
+	public static final String PROP_ID = "id";
+	
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			FIELD_CONTENT, FIELD_REPLY, FIELD_PATH, FIELD_CREATE_DATE, FIELD_UPDATE_DATE, FIELD_REPLY_COUNT);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_CREATE_DATE, PROP_CREATE_DATE,
+			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
+			FIELD_REPLY_COUNT, PROP_REPLY_COUNT);
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -67,8 +112,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@Column(nullable=false)
 	private Date createDate = new Date();
 
-	@Column(nullable=false)
-	private Date updateDate = new Date();
+	@Embedded
+	private LastUpdate lastUpdate;
 	
 	private int replyCount;
 
@@ -88,6 +133,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	private String uuid = UUID.randomUUID().toString();
 	
 	private transient Boolean contextChanged;
+	
+	private transient Collection<User> participants;
 	
 	public Project getProject() {
 		return project;
@@ -179,14 +226,14 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 		this.compareContext = compareContext;
 	}
 
-	public Date getUpdateDate() {
-		return updateDate;
+	public LastUpdate getLastUpdate() {
+		return lastUpdate;
 	}
 
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
+	public void setLastUpdate(LastUpdate lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
-	
+
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
@@ -313,6 +360,19 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@Override
 	public Project getAttachmentProject() {
 		return getProject();
+	}
+	
+	public Collection<User> getParticipants() {
+		if (participants == null) {
+			participants = new LinkedHashSet<>();
+			if (getUser() != null)
+				participants.add(getUser());
+			for (CodeCommentReply reply: getReplies()) {
+				if (reply.getUser() != null)
+					participants.add(reply.getUser());
+			}
+		}
+		return participants;
 	}
 	
 }

@@ -1,13 +1,17 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
@@ -43,6 +47,11 @@ public abstract class DiffAndCommentAwarePanel extends Panel {
 				@Override
 				protected String getComment() {
 					return getChange().getData().getCommentSupport().getComment();
+				}
+
+				@Override
+				protected List<User> getMentionables() {
+					return OneDev.getInstance(UserManager.class).queryAndSort(getChange().getIssue().getParticipants());
 				}
 
 				@Override
@@ -90,4 +99,5 @@ public abstract class DiffAndCommentAwarePanel extends Panel {
 	protected abstract IssueChange getChange();
 	
 	protected abstract DiffSupport getDiffSupport();
+	
 }

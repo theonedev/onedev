@@ -1,13 +1,15 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.List;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -18,7 +20,6 @@ import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
@@ -45,7 +46,6 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
 				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
-				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 
 			@Override
@@ -53,6 +53,11 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 				return getPullRequest().getTargetProject();
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getPullRequest().getParticipants());
+			}
+			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
 				return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID());

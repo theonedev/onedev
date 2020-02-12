@@ -325,7 +325,7 @@ public class CoreModule extends AbstractPluginModule {
 		configurePersistence();
 		configureRestServices();
 		configureWeb();
-		configureCI();
+		configureBuild();
 		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
@@ -396,8 +396,6 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
-	    
-	    contribute(PersistListener.class, PullRequestNotificationManager.class);
 	    
 		bind(Realm.class).to(OneAuthorizingRealm.class);
 		bind(RememberMeManager.class).to(OneRememberMeManager.class);
@@ -617,7 +615,7 @@ public class CoreModule extends AbstractPluginModule {
 		});
 	}
 	
-	private void configureCI() {
+	private void configureBuild() {
 		contribute(ScriptContribution.class, new ScriptContribution() {
 
 			@Override

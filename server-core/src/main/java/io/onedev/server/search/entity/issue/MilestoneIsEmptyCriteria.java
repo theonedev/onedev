@@ -7,15 +7,13 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 
-import io.onedev.server.util.query.IssueQueryConstants;
-
 public class MilestoneIsEmptyCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		return builder.isNull(root.join(IssueQueryConstants.ATTR_MILESTONE, JoinType.LEFT));
+		return builder.isNull(root.join(Issue.PROP_MILESTONE, JoinType.LEFT));
 	}
 
 	@Override
@@ -25,7 +23,7 @@ public class MilestoneIsEmptyCriteria extends IssueCriteria {
 
 	@Override
 	public String asString() {
-		return quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
+		return quote(Issue.FIELD_MILESTONE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 

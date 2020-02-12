@@ -94,7 +94,7 @@ public class ChoiceParam extends ParamSpec {
 	}
 
 	@Override
-	public long getOrdinal(Object fieldValue) {
+	public long getOrdinal(String fieldValue) {
 		if (fieldValue != null) {
 			List<String> choices = new ArrayList<>(getChoiceProvider().getChoices(true).keySet());
 			return choices.indexOf(fieldValue);

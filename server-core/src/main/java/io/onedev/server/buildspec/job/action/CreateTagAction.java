@@ -14,7 +14,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -62,19 +61,19 @@ public class CreateTagAction extends PostBuildAction {
 		PersonIdent tagIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 		Project project = build.getProject();
 		String tagName = getTagName();
-		Ref tagRef = project.getTagRef(tagName);
-		TagProtection protection = project.getTagProtection(tagName, build);
-		if (tagRef != null) {
-			if (protection.isPreventUpdate()) {
-				throw new OneException("Updating tag '" + tagName + "' is not allowed in this build");
-			} else {
+
+		CreateTagAction instance = new CreateTagAction();
+		instance.setTagName(tagName);
+		if (project.getBuildSetting().isActionAuthorized(build, instance)) {
+			Ref tagRef = project.getTagRef(tagName);
+			if (tagRef != null) {
 				OneDev.getInstance(ProjectManager.class).deleteTag(project, tagName);
 				project.createTag(tagName, build.getCommitHash(), tagIdent, getTagMessage());
+			} else {
+				project.createTag(tagName, build.getCommitHash(), tagIdent, getTagMessage());
 			}
-		} else if (protection.isPreventCreation()) {
-			throw new OneException("Creating tag '" + tagName + "' is not allowed in this build");
 		} else {
-			project.createTag(tagName, build.getCommitHash(), tagIdent, getTagMessage());
+			throw new OneException("Creating tag '" + tagName + "' is not allowed in this build");
 		}
 	}
 

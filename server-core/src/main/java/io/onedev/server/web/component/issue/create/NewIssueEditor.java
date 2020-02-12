@@ -3,9 +3,7 @@ package io.onedev.server.web.component.issue.create;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -34,8 +32,8 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
 import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -49,7 +47,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	
 	private CommentInput descriptionInput;
 	
-	private StringSingleChoice milestoneChoice;
+	private MilestoneSingleChoice milestoneChoice;
 	
 	private BeanEditor fieldEditor;
 	
@@ -101,28 +99,18 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			
 		});
 
-		milestoneChoice = new StringSingleChoice("milestone", Model.of(issue.getMilestoneName()), new LoadableDetachableModel<Map<String, String>>() {
+		milestoneChoice = new MilestoneSingleChoice("milestone", Model.of(issue.getMilestone()), 
+				new LoadableDetachableModel<Collection<Milestone>>() {
 
 			@Override
-			protected Map<String, String> load() {
-				Map<String, String> choices = new LinkedHashMap<>();
-				List<Milestone> milestones = getProject().getSortedMilestones();
-				for (Milestone milestone: milestones)
-					choices.put(milestone.getName(), milestone.getName());
-				return choices;
+			protected Collection<Milestone> load() {
+				return getProject().getSortedMilestones();
 			}
 			
-		}) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				getSettings().setPlaceholder("No milestone");
-			}
-			
-		};
-		milestoneChoice.setRequired(false);
+		});
 		milestoneChoice.setVisible(SecurityUtils.canScheduleIssues(getProject()));
+		milestoneChoice.setRequired(false);
+		
 		add(milestoneChoice);
 		
 		Collection<String> properties = IssueUtils.getPropertyNames(getProject(), 
@@ -175,7 +163,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			Issue issue = newIssue();
 			issue.setTitle(titleInput.getConvertedInput());
 			issue.setDescription(descriptionInput.getConvertedInput());
-			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
+			issue.setMilestone(milestoneChoice.getConvertedInput());
 			
 			Collection<String> fieldNames = getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true); 
 			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.newComponentContext(), fieldEditor.getConvertedInput(), fieldNames));

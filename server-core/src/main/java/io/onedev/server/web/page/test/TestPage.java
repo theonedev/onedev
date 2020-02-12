@@ -25,6 +25,7 @@ public class TestPage extends BasePage {
 			}
 			
 		});
+		
 	}
 
 	@Override

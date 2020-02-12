@@ -1,9 +1,10 @@
 package io.onedev.server.search.entity.issue;
 
 import java.nio.channels.IllegalSelectorException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -23,25 +24,27 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.ProjectAwareCommit;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 	
 	private final int operator;
+	
+	private final boolean allowMultiple;
 
-	public FieldOperatorCriteria(String name, int operator) {
+	public FieldOperatorCriteria(String name, int operator, boolean allowMultiple) {
 		super(name);
 		this.operator = operator;
+		this.allowMultiple = allowMultiple;
 	}
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<?> valueAttribute = field.get(IssueField.ATTR_VALUE);
-		Path<?> projectAttribute = field.getParent().get(IssueQueryConstants.ATTR_PROJECT);		
+		Path<?> valueAttribute = field.get(IssueField.PROP_VALUE);
+		Path<?> projectAttribute = field.getParent().get(Issue.PROP_PROJECT);		
 		if (operator == IssueQueryLexer.IsEmpty) {
-			return builder.isNull(valueAttribute);
+			return null;
 		} else if (operator == IssueQueryLexer.IsMe) {
 			if (User.get() != null)
 				return builder.equal(valueAttribute, User.get().getName());
@@ -157,12 +160,22 @@ public class FieldOperatorCriteria extends FieldCriteria {
 		return quote(getFieldName()) + " " + IssueQuery.getRuleName(operator);
 	}
 
+	@SuppressWarnings({"unchecked" })
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
-		if (operator == IssueQueryLexer.IsEmpty)
+	public void fill(Issue issue) {
+		if (operator == IssueQueryLexer.IsEmpty) {
 			issue.setFieldValue(getFieldName(), null);
-		else if (operator == IssueQueryLexer.IsMe)
-			issue.setFieldValue(getFieldName(), SecurityUtils.getUser().getName());
+		} else if (operator == IssueQueryLexer.IsMe) {
+			if (allowMultiple) {
+				List<String> valueFromIssue = (List<String>) issue.getFieldValue(getFieldName());
+				if (valueFromIssue == null)
+					valueFromIssue = new ArrayList<>();
+				valueFromIssue.add(SecurityUtils.getUser().getName());
+				issue.setFieldValue(getFieldName(), valueFromIssue);
+			} else {
+				issue.setFieldValue(getFieldName(), SecurityUtils.getUser().getName());
+			}
+		}
 	}
 
 }

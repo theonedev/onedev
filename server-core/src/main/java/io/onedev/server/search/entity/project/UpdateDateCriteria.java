@@ -11,7 +11,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class UpdateDateCriteria extends EntityCriteria<Project> {
 
@@ -31,7 +30,7 @@ public class UpdateDateCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
-		Path<Date> attribute = ProjectQuery.getPath(root, ProjectQueryConstants.ATTR_UPDATE_DATE);
+		Path<Date> attribute = ProjectQuery.getPath(root, Project.PROP_UPDATE_DATE);
 		if (operator == ProjectQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -48,7 +47,7 @@ public class UpdateDateCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public String asString() {
-		return Criteria.quote(ProjectQueryConstants.FIELD_UPDATE_DATE) + " " 
+		return Criteria.quote(Project.FIELD_UPDATE_DATE) + " " 
 				+ ProjectQuery.getRuleName(operator) + " " 
 				+ Criteria.quote(value);
 	}

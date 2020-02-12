@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,8 +33,11 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "Referenced from other issue";
+	public String getActivity(Issue withIssue) {
+		if (withIssue != null)
+			return "Another issue referenced issue " + withIssue.describe();
+		else
+			return "Referenced from other issue";
 	}
 
 	@Override
@@ -42,7 +46,7 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	}
 	
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		return new HashMap<>();
 	}
 

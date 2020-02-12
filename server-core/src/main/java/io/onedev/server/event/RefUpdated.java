@@ -43,5 +43,13 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 			commit = new ProjectAwareCommit(getProject(), newCommitId);
 		return commit;
 	}
+
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "Git ref updated";
+		if (withEntity)
+			activity += " in project " + getProject().getName();
+		return activity;
+	}
 	
 }

@@ -17,10 +17,10 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneException;
+import io.onedev.server.model.Build;
 import io.onedev.server.util.jobmatch.JobMatch;
 import io.onedev.server.util.jobmatch.JobMatchLexer;
 import io.onedev.server.util.jobmatch.JobMatchParser;
-import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -42,10 +42,10 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = Lists.newArrayList(
-									BuildQueryConstants.FIELD_PROJECT, 
-									BuildQueryConstants.FIELD_PROJECT_OWNER, 
-									BuildQueryConstants.FIELD_JOB, 
-									BuildQueryConstants.FIELD_IMAGE);
+									Build.FIELD_PROJECT, 
+									Build.FIELD_PROJECT_OWNER, 
+									Build.FIELD_JOB, 
+									Build.FIELD_IMAGE);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -56,9 +56,9 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
-								if (fieldName.equals(BuildQueryConstants.FIELD_PROJECT))
+								if (fieldName.equals(Build.FIELD_PROJECT))
 									return SuggestionUtils.suggestProjects(matchWith);
-								else if (fieldName.equals(BuildQueryConstants.FIELD_PROJECT_OWNER))
+								else if (fieldName.equals(Build.FIELD_PROJECT_OWNER))
 									return SuggestionUtils.suggestUsers(matchWith);
 							}
 						} 

@@ -8,9 +8,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 
@@ -30,7 +30,7 @@ public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_UPDATE_DATE);
+		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
 		if (operator == PullRequestQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -40,14 +40,14 @@ public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		if (operator == PullRequestQueryLexer.IsBefore)
-			return request.getUpdateDate().before(date);
+			return request.getLastUpdate().getDate().before(date);
 		else
-			return request.getUpdateDate().after(date);
+			return request.getLastUpdate().getDate().after(date);
 	}
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_UPDATE_DATE) + " " 
+		return quote(PullRequest.FIELD_UPDATE_DATE) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

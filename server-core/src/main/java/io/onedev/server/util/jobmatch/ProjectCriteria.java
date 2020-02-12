@@ -1,8 +1,8 @@
 package io.onedev.server.util.jobmatch;
 
+import static io.onedev.server.model.Build.FIELD_PROJECT;
 import static io.onedev.server.util.jobmatch.JobMatch.getRuleName;
 import static io.onedev.server.util.jobmatch.JobMatchLexer.Is;
-import static io.onedev.server.util.query.BuildQueryConstants.FIELD_PROJECT;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;

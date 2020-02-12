@@ -7,7 +7,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 
@@ -24,7 +23,7 @@ public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Path<Integer> attribute = root.get(CodeCommentQueryConstants.ATTR_REPLY_COUNT);
+		Path<Integer> attribute = root.get(CodeComment.PROP_REPLY_COUNT);
 		if (operator == CodeCommentQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == CodeCommentQueryLexer.IsLessThan)
@@ -45,7 +44,7 @@ public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String asString() {
-		return quote(CodeCommentQueryConstants.FIELD_REPLY_COUNT) + " " 
+		return quote(CodeComment.FIELD_REPLY_COUNT) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}

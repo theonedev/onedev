@@ -43,7 +43,7 @@ public class PullRequestChoiceEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new PullRequestChoiceEditor(componentId, descriptor, model);
+						return new PullRequestSingleChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

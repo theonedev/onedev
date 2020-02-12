@@ -3,6 +3,7 @@ package io.onedev.server.model.support.administration.authenticator.ldap;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(name="Active Directory", order=100)
 public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
@@ -64,8 +65,11 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 	}
 
 	@Editable(order=1000, description=""
-			+ "Specify group search base if you want to search groups associated with the user. For example: "
-			+ "<i>cn=Users, dc=example, dc=com</i>")
+			+ "Optionally specify group search base if you want to retrieve group membership information "
+			+ "of the user. For example: <i>cn=Users, dc=example, dc=com</i>. To give appropriate "
+			+ "permissions to a Active Directory group, a OneDev group with same name should be defined. "
+			+ "Leave empty to manage group memberships at OneDev side")
+	@NameOfEmptyValue("Do not retrieve groups")
 	public String getGroupSearchBase() {
 		return groupSearchBase;
 	}

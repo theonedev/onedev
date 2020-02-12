@@ -31,7 +31,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
@@ -66,7 +65,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	
     private final UserManager userManager;
     
-    private final SettingManager configManager;
+    private final SettingManager settingManager;
     
     private final MembershipManager membershipManager;
     
@@ -83,7 +82,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
     
 	@Inject
-    public OneAuthorizingRealm(UserManager userManager, SettingManager configManager, 
+    public OneAuthorizingRealm(UserManager userManager, SettingManager settingManager, 
     		MembershipManager membershipManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
     		TransactionManager transactionManager) {
@@ -92,7 +91,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		setCredentialsMatcher(passwordMatcher);
 		
     	this.userManager = userManager;
-    	this.configManager = configManager;
+    	this.settingManager = settingManager;
     	this.membershipManager = membershipManager;
     	this.groupManager = groupManager;
     	this.projectManager = projectManager;
@@ -201,8 +200,8 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    	if (user != null && user.isRoot())
 		    		return user;
 
-		    	if (user == null || StringUtils.isBlank(user.getPassword())) {
-		        	Authenticator authenticator = configManager.getAuthenticator();
+		    	if (user == null || user.getPassword().equals(User.EXTERNAL_MANAGED)) {
+		        	Authenticator authenticator = settingManager.getAuthenticator();
 		        	if (authenticator != null) {
 		        		Authenticated authenticated;
 		        		try {
@@ -217,8 +216,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		        			}
 		        		}
 		    			if (user != null) {
-		    				if (authenticated.getEmail() != null)
-		    					user.setEmail(authenticated.getEmail());
+		    				user.setEmail(authenticated.getEmail());
 		    				if (authenticated.getFullName() != null)
 		    					user.setFullName(authenticated.getFullName());
 
@@ -240,7 +238,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    							}
 		    							retrievedGroupNames.add(groupName);
 		    						} else {
-		    							logger.debug("Group '{}' from external authenticator is not defined", groupName);
+		    							logger.warn("Group '{}' from external authenticator is not defined", groupName);
 		    						}
 		    					}
 		        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
@@ -255,7 +253,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    			} else {
 		    				user = new User();
 		    				user.setName(((UsernamePasswordToken) token).getUsername());
-		    				user.setPassword("");
+		    				user.setPassword(User.EXTERNAL_MANAGED);
 		    				if (authenticated.getEmail() != null)
 		    					user.setEmail(authenticated.getEmail());
 		    				if (authenticated.getFullName() != null)

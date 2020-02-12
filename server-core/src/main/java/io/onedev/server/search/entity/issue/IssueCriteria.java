@@ -3,7 +3,6 @@ package io.onedev.server.search.entity.issue;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -16,11 +15,7 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public final void fill(Issue issue) {
-		fill(issue, new HashSet<>());
-	}
-	
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 	}
 	
 	public Collection<String> getUndefinedStates() {
@@ -50,7 +45,7 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	}
 
 	@Nullable
-	public static IssueCriteria of(List<IssueCriteria> criterias) {
+	public static IssueCriteria and(List<IssueCriteria> criterias) {
 		if (criterias.size() > 1)
 			return new AndIssueCriteria(criterias);
 		else if (criterias.size() == 1)
@@ -59,6 +54,16 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 			return null;
 	}
 
+	@Nullable
+	public static IssueCriteria or(List<IssueCriteria> criterias) {
+		if (criterias.size() > 1)
+			return new OrIssueCriteria(criterias);
+		else if (criterias.size() == 1)
+			return criterias.iterator().next();
+		else
+			return null;
+	}
+	
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		return false;
 	}

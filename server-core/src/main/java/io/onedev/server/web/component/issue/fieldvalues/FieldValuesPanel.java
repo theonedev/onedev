@@ -95,11 +95,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					} else if (getField().getType().equals(FieldSpec.BUILD)) {
 						Build build = OneDev.getInstance(BuildManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));
-						if (build != null && SecurityUtils.canAccess(build)) {
+						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", 
 									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
-							link.add(new Label("label", "#" + build.getNumber()));
+							String buildInfo = "#" + build.getNumber();
+							if (build.getVersion() != null)
+								buildInfo += " (" + build.getVersion() + ")";
+							link.add(new Label("label", buildInfo));
 							linkFrag.add(link);
 							item.add(linkFrag);
 						} else {
@@ -186,8 +189,10 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			label.setEscapeModelStrings(false);
 			label.add(AttributeAppender.append("title", getField().getName()));
 			add(label);
+			add(AttributeAppender.append("class", "undefined"));
 		} else {
-			add(new WebMarkupContainer("content").setVisible(false));
+			add(new WebMarkupContainer("content"));
+			setVisible(false);
 		}
 	}
 

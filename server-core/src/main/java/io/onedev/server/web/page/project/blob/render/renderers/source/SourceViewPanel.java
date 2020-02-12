@@ -22,7 +22,6 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
@@ -107,7 +106,6 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 /**
  * Make sure to add only one source view panel per page
@@ -262,19 +260,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 		};
 		
-		WebMarkupContainer head = new WebMarkupContainer("head") {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (commentContainer.isVisible() && event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					pageDataChanged.getHandler().add(this);
-				}
-			}
-			
-		};
-		head.setOutputMarkupId(true);
+		WebMarkupContainer head = new WebMarkupContainer("head");
 		commentContainer.add(head);
 		
 		head.add(new DropdownLink("context") {

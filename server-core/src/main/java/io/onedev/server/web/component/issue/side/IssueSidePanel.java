@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +34,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 
@@ -56,6 +56,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
@@ -64,8 +65,10 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
-import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.web.component.issue.statestats.StateStatsBar;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
+import io.onedev.server.web.component.milestone.choice.MilestoneSingleChoice;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
@@ -145,12 +148,7 @@ public abstract class IssueSidePanel extends Panel {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(IssueSidePanel.this);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(IssueSidePanel.this);
 			}
 			
@@ -305,7 +303,25 @@ public abstract class IssueSidePanel extends Panel {
 			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
 					MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
 			link.add(new Label("label", getIssue().getMilestone().getName()));
-			fragment.add(new MilestoneProgressBar("progress", new AbstractReadOnlyModel<Milestone>() {
+			fragment.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
+
+				@Override
+				public Map<String, Integer> getObject() {
+					return getIssue().getMilestone().getStateStats();
+				}
+				
+			}) {
+
+				@Override
+				protected Link<Void> newStateLink(String componentId, String state) {
+					String query = new IssueQuery(new StateCriteria(state)).toString();
+					PageParameters params = MilestoneDetailPage.paramsOf(getIssue().getMilestone(), query);
+					return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
+				}
+				
+			});
+			fragment.add(link);
+			fragment.add(new MilestoneStatusLabel("status", new AbstractReadOnlyModel<Milestone>() {
 
 				@Override
 				public Milestone getObject() {
@@ -313,7 +329,6 @@ public abstract class IssueSidePanel extends Panel {
 				}
 				
 			}));
-			fragment.add(link);
 		} else {
 			WebMarkupContainer link = new WebMarkupContainer("link") {
 
@@ -325,43 +340,30 @@ public abstract class IssueSidePanel extends Panel {
 				
 			};
 			link.add(new Label("label", "<i>No milestone</i>").setEscapeModelStrings(false));
+			fragment.add(new WebMarkupContainer("status").setVisible(false));
 			fragment.add(new WebMarkupContainer("progress").setVisible(false));
 			fragment.add(link);
 		}
 
 		fragment.add(new AjaxLink<Void>("edit") {
 
-			private String milestoneName = getIssue().getMilestoneName();
-			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueSidePanel.this);
 				Form<?> form = new Form<Void>("form");
 				
-				IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+				MilestoneSingleChoice choice = new MilestoneSingleChoice("milestone", 
+						Model.of(getIssue().getMilestone()), 
+						new LoadableDetachableModel<Collection<Milestone>>() {
 
 					@Override
-					protected Map<String, String> load() {
-						List<Milestone> milestones = getProject().getSortedMilestones();
-						Map<String, String> choices = new LinkedHashMap<>();
-						for (Milestone milestone: milestones)
-							choices.put(milestone.getName(), milestone.getName());
-						return choices;
+					protected Collection<Milestone> load() {
+						return getProject().getSortedMilestones();
 					}
 					
-				};
-				
-				StringSingleChoice choice = new StringSingleChoice("milestone", 
-						new PropertyModel<String>(this, "milestoneName"), choicesModel) {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						getSettings().setPlaceholder("No milestone");
-					}
-					
-				};
+				});
 				choice.setRequired(false);
+				
 				form.add(choice);
 
 				form.add(new AjaxButton("save") {
@@ -369,7 +371,7 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						Milestone milestone = getProject().getMilestone(milestoneName);
+						Milestone milestone = choice.getModelObject();
 						getIssueChangeManager().changeMilestone(getIssue(), milestone);
 						Component container = newMilestoneContainer();
 						IssueSidePanel.this.replace(container);

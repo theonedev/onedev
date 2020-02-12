@@ -6,7 +6,6 @@ import javax.inject.Singleton;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.web.util.WicketUtils;
 
 @Singleton
 public class PullRequestEventBroadcaster {
@@ -20,8 +19,7 @@ public class PullRequestEventBroadcaster {
 
 	@Listen
 	public void on(PullRequestEvent event) {
-		PageKey sourcePageKey = WicketUtils.getPageKey();
-		webSocketManager.notifyObservableChange(PullRequest.getWebSocketObservable(event.getRequest().getId()), sourcePageKey);
+		webSocketManager.notifyObservableChange(PullRequest.getWebSocketObservable(event.getRequest().getId()));
 	}
 
 }

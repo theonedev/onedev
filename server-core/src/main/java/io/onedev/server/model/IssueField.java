@@ -9,22 +9,25 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import static io.onedev.server.model.IssueField.*;
 
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_issue_id"), @Index(columnList="name"), @Index(columnList="value"), 
-				@Index(columnList="type"), @Index(columnList="ordinal")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "name", "value"})})
+				@Index(columnList="o_issue_id"), @Index(columnList=PROP_NAME), @Index(columnList=PROP_VALUE), 
+				@Index(columnList=PROP_TYPE), @Index(columnList=PROP_ORDINAL)}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", PROP_NAME, PROP_VALUE})})
 public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ATTR_NAME = "name";
+	public static final String PROP_NAME = "name";
 	
-	public static final String ATTR_VALUE = "value";
+	public static final String PROP_VALUE = "value";
 	
-	public static final String ATTR_ORDINAL = "ordinal";
+	public static final String PROP_ORDINAL = "ordinal";
+	
+	public static final String PROP_TYPE = "type";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

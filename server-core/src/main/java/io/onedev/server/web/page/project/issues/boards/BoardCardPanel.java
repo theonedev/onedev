@@ -26,7 +26,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -71,14 +70,14 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(displayFields.contains(IssueQueryConstants.FIELD_STATE));
+				setVisible(displayFields.contains(Issue.FIELD_STATE));
 			}
 			
 		});
 		
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (String fieldName: displayFields) {
-			if (!fieldName.equals(IssueQueryConstants.FIELD_STATE)) {
+			if (!fieldName.equals(Issue.FIELD_STATE)) {
 				Input field = getIssue().getFieldInputs().get(fieldName);
 				if (field != null && !field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR) {
@@ -104,19 +103,22 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		for (String fieldName: displayFields) {
 			Input field = getIssue().getFieldInputs().get(fieldName);
 			if (field != null && field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
-				User user = OneDev.getInstance(UserManager.class)
-						.findByName(field.getValues().iterator().next());
-				if (user != null) {
-					String tooltip = field.getName() + ": " + user.getDisplayName();
-					UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), user);
-					avatar.add(AttributeAppender.append("title", tooltip));
-					avatarsView.add(avatar);
+				for (String userName: field.getValues()) {
+					User user = OneDev.getInstance(UserManager.class).findByName(userName);
+					if (user != null) {
+						String tooltip = field.getName() + ": " + user.getDisplayName();
+						UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), user);
+						avatar.add(AttributeAppender.append("title", tooltip));
+						avatarsView.add(avatar);
+					}
 				}
 			}
 		}
 		
 		add(avatarsView);
 
+		BasePage page = (BasePage) getPage();
+		
 		add(new ModalLink("detail") {
 
 			@Override
@@ -130,7 +132,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) BoardCardPanel.this.getPage());
+						OneDev.getInstance(WebSocketManager.class).observe(page);
 					}
 
 					@Override
@@ -164,12 +166,12 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					@Override
 					protected void onDeletedIssue(AjaxRequestTarget target) {
 						modal.close();
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) BoardCardPanel.this.getPage());
+						OneDev.getInstance(WebSocketManager.class).observe(page);
 					}
 
 					@Override
 					protected void onAfterRender() {
-						OneDev.getInstance(WebSocketManager.class).observe((BasePage) getPage());
+						OneDev.getInstance(WebSocketManager.class).observe(page);
 						super.onAfterRender();
 					}
 

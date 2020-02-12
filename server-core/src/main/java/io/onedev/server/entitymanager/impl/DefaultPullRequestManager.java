@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -56,6 +58,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
@@ -102,6 +105,9 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeDa
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
@@ -127,7 +133,6 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -167,12 +172,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final JobManager jobManager;
 	
+	private final ExecutorService executorService;
+	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
 			PullRequestReviewManager pullRequestReviewManager, UserManager userManager, 
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, SessionManager sessionManager,
-			PullRequestChangeManager pullRequestChangeManager,
+			PullRequestChangeManager pullRequestChangeManager, ExecutorService executorService,
 			PullRequestBuildManager pullRequestBuildManager, TransactionManager transactionManager, 
 			JobManager jobManager, ProjectManager projectManager) {
 		super(dao);
@@ -186,6 +193,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.listenerRegistry = listenerRegistry;
 		this.pullRequestChangeManager = pullRequestChangeManager;
 		this.pullRequestBuildManager = pullRequestBuildManager;
+		this.executorService = executorService;
 		this.jobManager = jobManager;
 		this.projectManager = projectManager;
 	}
@@ -357,6 +365,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		query.setParameter("project", request.getTargetProject());
 		request.setNumber(getNextNumber(request.getTargetProject(), query));
 
+		PullRequestOpened event = new PullRequestOpened(request);
+		request.setLastUpdate(event.getLastUpdate());
+		
 		dao.persist(request);
 		
 		RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), request.getBaseRef());
@@ -375,7 +386,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		checkAsync(Lists.newArrayList(request));
 		
-		listenerRegistry.post(new PullRequestOpened(request));
+		listenerRegistry.post(event);
 	}
 	
 	private void closeAsMerged(PullRequest request, boolean dueToMerged) {
@@ -442,6 +453,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					} else {
 						checkQuality(request);
 						
+						/*
+						 * If the check method runs concurrently, below statements may fail. It will 
+						 * not do any harm except that the transaction rolls back
+						 */
 						pullRequestReviewManager.saveReviews(request);
 						pullRequestBuildManager.savePullRequestBuilds(request);
 						
@@ -653,7 +668,25 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		event.getRequest().setUpdateDate(event.getDate());
+		boolean minorChange = false;
+		if (event instanceof PullRequestChangeEvent) {
+			PullRequestChangeData changeData = ((PullRequestChangeEvent)event).getChange().getData();
+			if (changeData instanceof PullRequestReviewerAddData 
+					|| changeData instanceof PullRequestReviewerRemoveData
+					|| changeData instanceof PullRequestSourceBranchDeleteData
+					|| changeData instanceof PullRequestSourceBranchRestoreData
+					|| changeData instanceof PullRequestReferencedFromCodeCommentData
+					|| changeData instanceof PullRequestReferencedFromIssueData
+					|| changeData instanceof PullRequestReferencedFromPullRequestData) {
+				minorChange = true;
+			}
+		}
+		if (!(event instanceof PullRequestOpened 
+				|| event instanceof PullRequestMergePreviewCalculated
+				|| event instanceof PullRequestBuildEvent
+				|| minorChange)) {
+			event.getRequest().setLastUpdate(event.getLastUpdate());
+		}
 	}
 	
 	@Transactional
@@ -687,12 +720,33 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 				@Override
 				public void run() {
-					dao.getSessionManager().runAsync(new Runnable() {
-	
+					executorService.execute(new Runnable() {
+
 						@Override
 						public void run() {
-					        for (Long requestId: requestIds)
-					        	check(load(requestId));
+					        for (Long requestId: requestIds) {
+					        	/* 
+					        	 * Lock here to minimize concurrent checks against the same pull request. We 
+					        	 * can not lock the check method directly as the lock should be put outside 
+					        	 * of transaction
+					        	 */
+					        	LockUtils.call("request-" + requestId + "-check", new Callable<Void>() {
+
+									@Override
+									public Void call() throws Exception {
+										sessionManager.run(new Runnable() {
+
+											@Override
+											public void run() {
+									        	check(load(requestId));
+											}
+											
+										});
+										return null;
+									}
+					        		
+					        	});
+					        }
 						}
 						
 					});
@@ -970,7 +1024,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
 			if (!projects.isEmpty())
-				predicates.add(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT).in(projects));
+				predicates.add(root.get(PullRequest.PROP_TARGET_PROJECT).in(projects));
 			else
 				predicates.add(builder.disjunction());
 		}
@@ -992,15 +1046,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (EntitySort sort: requestQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING) {
 				orders.add(builder.asc(PullRequestQuery.getPath(
-						root, PullRequestQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+						root, PullRequest.ORDER_FIELDS.get(sort.getField()))));
 			} else {
 				orders.add(builder.desc(PullRequestQuery.getPath(
-						root, PullRequestQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+						root, PullRequest.ORDER_FIELDS.get(sort.getField()))));
 			}
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(PullRequestQueryConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(PullRequest.PROP_ID)));
 		query.orderBy(orders);
 		
 		return query;
@@ -1096,7 +1150,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq(PullRequestQueryConstants.ATTR_TARGET_PROJECT, project));
+		criteria.add(Restrictions.eq(PullRequest.PROP_TARGET_PROJECT, project));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);

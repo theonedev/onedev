@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class StatusCriteria extends EntityCriteria<PullRequest> {
 
@@ -22,7 +21,7 @@ public class StatusCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<?> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_STATUS);
+		Path<?> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS);
 		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
 			return builder.isNull(attribute);
 		else
@@ -39,7 +38,7 @@ public class StatusCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_STATUS) + " " 
+		return quote(PullRequest.FIELD_STATUS) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
 				+ quote(value);
 	}

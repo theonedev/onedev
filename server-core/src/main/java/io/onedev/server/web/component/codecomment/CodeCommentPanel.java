@@ -1,10 +1,12 @@
 package io.onedev.server.web.component.codecomment;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -15,7 +17,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -35,10 +36,13 @@ import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Sets;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -51,6 +55,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -61,7 +66,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -148,6 +152,11 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Project getProject() {
 						return getComment().getProject();
+					}
+
+					@Override
+					protected List<User> getMentionables() {
+						return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
 					}
 					
 				};
@@ -282,8 +291,7 @@ public abstract class CodeCommentPanel extends Panel {
 				Fragment fragment = new Fragment(replyContainer.getId(), "replyEditFrag", CodeCommentPanel.this, 
 						Model.of(replyId));
 				Form<?> form = new Form<Void>("form");
-				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent()), 
-						true) {
+				CommentInput contentInput = new CommentInput("content", Model.of(getReply(replyId).getContent()), true) {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
@@ -293,6 +301,11 @@ public abstract class CodeCommentPanel extends Panel {
 					@Override
 					protected Project getProject() {
 						return getComment().getProject();
+					}
+
+					@Override
+					protected List<User> getMentionables() {
+						return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
 					}
 
 				};
@@ -400,6 +413,7 @@ public abstract class CodeCommentPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		Component outdatedLink;
 		if (getPullRequest() != null) {
 			QueryPosition position;
 			if (getPage() instanceof PullRequestDetailPage) 
@@ -407,18 +421,9 @@ public abstract class CodeCommentPanel extends Panel {
 			else
 				position = null;
 			PageParameters params = PullRequestChangesPage.paramsOf(getPullRequest(), position, getComment());
-			add(new BookmarkablePageLink<Void>("outdatedContext", PullRequestChangesPage.class, params) {
 
-				@Override
-				public void onEvent(IEvent<?> event) {
-					super.onEvent(event);
+			add(outdatedLink = new BookmarkablePageLink<Void>("outdatedContext", PullRequestChangesPage.class, params) {
 
-					if (event.getPayload() instanceof PageDataChanged) {
-						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-						pageDataChanged.getHandler().add(this);
-					}
-				}
-				
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
@@ -441,6 +446,7 @@ public abstract class CodeCommentPanel extends Panel {
 			}.setOutputMarkupPlaceholderTag(true));
 		} else {
 			add(new WebMarkupContainer("outdatedContext").setVisible(false));
+			outdatedLink = null;
 		}
 		
 		add(newCommentContainer());
@@ -460,6 +466,58 @@ public abstract class CodeCommentPanel extends Panel {
 		}
 		add(repliesView);
 		add(newAddReplyContainer());
+		
+		add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				Date lastReplyDate;
+				String prevReplyMarkupId;
+				if (repliesView.size() != 0) {
+					@SuppressWarnings("deprecation")
+					Component lastReplyContainer = repliesView.get(repliesView.size()-1);
+					
+					CodeCommentReply lastReply = getReply((Long) lastReplyContainer.getDefaultModelObject());
+					lastReplyDate = lastReply.getDate();
+					prevReplyMarkupId = lastReplyContainer.getMarkupId();
+				} else {
+					lastReplyDate = getComment().getCreateDate();
+					prevReplyMarkupId = get("comment").getMarkupId();
+				}
+				
+				List<CodeCommentReply> replies = new ArrayList<>();
+				for (CodeCommentReply reply: getComment().getReplies()) {
+					if (reply.getDate().getTime()>lastReplyDate.getTime()) {
+						replies.add(reply);
+					}
+				}
+				replies.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
+				
+				for (CodeCommentReply reply: replies) {
+					Component newReplyContainer = newReplyContainer(repliesView.newChildId(), reply); 
+					newReplyContainer.add(AttributeAppender.append("class", "new"));
+					repliesView.add(newReplyContainer);
+					
+					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
+							newReplyContainer.getMarkupId(), prevReplyMarkupId);
+					handler.prependJavaScript(script);
+					handler.add(newReplyContainer);
+					prevReplyMarkupId = newReplyContainer.getMarkupId();
+				}
+				
+				if (outdatedLink != null)
+					handler.add(outdatedLink);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				Set<String> observables = Sets.newHashSet(CodeComment.getWebSocketObservable(commentId));
+				if (getPullRequest() != null)
+					observables.add(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+				return observables;
+			}
+			
+		});
 		
 		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 			
@@ -502,56 +560,11 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onBeginRequest(RequestCycle cycle) {
 			}
-		});
+		});		
 		
 		setOutputMarkupId(true);
 	}
 
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-
-		if (event.getPayload() instanceof PageDataChanged) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			IPartialPageRequestHandler handler = pageDataChanged.getHandler();
-			
-			Date lastReplyDate;
-			String prevReplyMarkupId;
-			if (repliesView.size() != 0) {
-				@SuppressWarnings("deprecation")
-				Component lastReplyContainer = repliesView.get(repliesView.size()-1);
-				
-				CodeCommentReply lastReply = getReply((Long) lastReplyContainer.getDefaultModelObject());
-				lastReplyDate = lastReply.getDate();
-				prevReplyMarkupId = lastReplyContainer.getMarkupId();
-			} else {
-				lastReplyDate = getComment().getCreateDate();
-				prevReplyMarkupId = get("comment").getMarkupId();
-			}
-			
-			List<CodeCommentReply> replies = new ArrayList<>();
-			for (CodeCommentReply reply: getComment().getReplies()) {
-				if (reply.getDate().getTime()>lastReplyDate.getTime()) {
-					replies.add(reply);
-				}
-			}
-			replies.sort((o1, o2)->o1.getDate().compareTo(o2.getDate()));
-			
-			for (CodeCommentReply reply: replies) {
-				Component newReplyContainer = newReplyContainer(repliesView.newChildId(), reply); 
-				newReplyContainer.add(AttributeAppender.append("class", "new"));
-				repliesView.add(newReplyContainer);
-				
-				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
-						newReplyContainer.getMarkupId(), prevReplyMarkupId);
-				handler.prependJavaScript(script);
-				handler.add(newReplyContainer);
-				prevReplyMarkupId = newReplyContainer.getMarkupId();
-			}
-			
-		}
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -601,6 +614,11 @@ public abstract class CodeCommentPanel extends Panel {
 				return getComment().getProject();
 			}
 
+			@Override
+			protected List<User> getMentionables() {
+				return OneDev.getInstance(UserManager.class).queryAndSort(getComment().getParticipants());
+			}
+			
 		};
 		contentInput.setRequired(true);
 		contentInput.setLabel(Model.of("Comment"));

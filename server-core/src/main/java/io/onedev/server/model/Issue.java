@@ -1,5 +1,13 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
+import static io.onedev.server.model.Issue.PROP_NO_SPACE_TITLE;
+import static io.onedev.server.model.Issue.PROP_NUMBER;
+import static io.onedev.server.model.Issue.PROP_STATE;
+import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.Issue.PROP_TITLE;
+import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -39,18 +49,23 @@ import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -59,13 +74,13 @@ import io.onedev.server.web.editable.annotation.Editable;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_project_id"), @Index(columnList="state"), 
-				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
-				@Index(columnList="number"), @Index(columnList="submitDate"), 
-				@Index(columnList="o_submitter_id"), @Index(columnList="voteCount"), 
-				@Index(columnList="commentCount"), @Index(columnList="o_milestone_id"), 
-				@Index(columnList="updateDate")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
+				@Index(columnList="o_project_id"), @Index(columnList=PROP_STATE), 
+				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
+				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
+				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
+				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_milestone_id"), 
+				@Index(columnList=LastUpdate.COLUMN_DATE)}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_NUMBER})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -74,6 +89,78 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String FIELD_NUMBER = "Number";
+	
+	public static final String PROP_NUMBER = "number";
+	
+	public static final String FIELD_PROJECT = "Project";
+	
+	public static final String PROP_PROJECT = "project";
+	
+	public static final String FIELD_STATE = "State";
+	
+	public static final String PROP_STATE = "state";
+	
+	public static final String FIELD_TITLE = "Title";
+	
+	public static final String PROP_TITLE = "title";
+	
+	public static final String FIELD_DESCRIPTION = "Description";
+	
+	public static final String PROP_DESCRIPTION = "description";
+	
+	public static final String FIELD_COMMENT = "Comment";
+	
+	public static final String PROP_COMMENTS = "comments";
+	
+	public static final String FIELD_SUBMITTER = "Submitter";
+	
+	public static final String PROP_SUBMITTER = "submitter";
+	
+	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	
+	public static final String PROP_SUBMIT_DATE = "submitDate";
+	
+	public static final String FIELD_VOTE_COUNT = "Vote Count";
+	
+	public static final String PROP_VOTE_COUNT = "voteCount";
+	
+	public static final String FIELD_COMMENT_COUNT = "Comment Count";
+	
+	public static final String PROP_COMMENT_COUNT = "commentCount";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_LAST_UPDATE = "lastUpdate";
+	
+	public static final String FIELD_MILESTONE = "Milestone";
+	
+	public static final String PROP_MILESTONE = "milestone";
+	
+	public static final String PROP_FIELDS = "fields";
+		
+	public static final String PROP_ID = "id";
+	
+	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
+	
+	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, 
+			FIELD_DESCRIPTION, FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
+			FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+	
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, 
+			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
+			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_VOTE_COUNT, PROP_VOTE_COUNT,
+			FIELD_COMMENT_COUNT, PROP_COMMENT_COUNT,
+			FIELD_NUMBER, PROP_NUMBER,
+			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			FIELD_PROJECT, PROP_PROJECT,
+			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
+	
 	@Column(nullable=false)
 	private String state;
 	
@@ -107,13 +194,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	private long number;
 	
+	@Embedded
+	private LastUpdate lastUpdate;
+	
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonView(DefaultView.class)
 	private String noSpaceTitle;
-	
-	@Column(nullable=false)
-	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueField> fields = new ArrayList<>();
@@ -133,6 +220,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private transient List<RevCommit> commits;
 	
 	private transient Map<String, Input> fieldInputs;
+	
+	private transient Collection<User> participants;
 	
 	public String getState() {
 		return state;
@@ -182,6 +271,14 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setNumber(long number) {
 		this.number = number;
+	}
+
+	public LastUpdate getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(LastUpdate lastUpdate) {
+		this.lastUpdate = lastUpdate;
 	}
 
 	public User getSubmitter() {
@@ -286,14 +383,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.fields = fields;
 	}
 	
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
-	}
-
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
@@ -325,20 +414,26 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 				String fieldName = fieldSpec.getName();
 				List<IssueField> fields = fieldMap.get(fieldName);
 				if (fields != null) {
+					Collections.sort(fields, new Comparator<IssueField>() {
+
+						@Override
+						public int compare(IssueField o1, IssueField o2) {
+							long result = o1.getOrdinal() - o2.getOrdinal();
+							if (result > 0)
+								return 1;
+							else if (result < 0)
+								return -1;
+							else
+								return 0;
+						}
+						
+					});
 					String type = fields.iterator().next().getType();
 					List<String> values = new ArrayList<>();
 					for (IssueField field: fields) {
 						if (field.getValue() != null)
 							values.add(field.getValue());
 					}
-					Collections.sort(values, new Comparator<String>() {
-	
-						@Override
-						public int compare(String o1, String o2) {
-							return (int) (fieldSpec.getOrdinal(o1) - fieldSpec.getOrdinal(o2));
-						}
-						
-					});
 					if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
 						values = Lists.newArrayList(values.iterator().next());
 					fieldInputs.put(fieldName, new Input(fieldName, type, values));
@@ -371,7 +466,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
-	public long getFieldOrdinal(String fieldName, Object fieldValue) {
+	public long getFieldOrdinal(String fieldName, String fieldValue) {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 		if (fieldSpec != null) 
@@ -418,15 +513,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		
 		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
-			long ordinal = getFieldOrdinal(fieldName, fieldValue);
-
 			List<String> strings = fieldSpec.convertToStrings(fieldValue);
 			if (!strings.isEmpty()) {
 				for (String string: strings) {
 					IssueField field = new IssueField();
 					field.setIssue(this);
 					field.setName(fieldName);
-					field.setOrdinal(ordinal);
+					field.setOrdinal(getFieldOrdinal(fieldName, string));
 					field.setType(fieldSpec.getType());
 					field.setValue(string);
 					getFields().add(field);
@@ -435,7 +528,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 				IssueField field = new IssueField();
 				field.setIssue(this);
 				field.setName(fieldName);
-				field.setOrdinal(ordinal);
+				field.setOrdinal(getFieldOrdinal(fieldName, null));
 				field.setType(fieldSpec.getType());
 				getFields().add(field);
 			}
@@ -445,6 +538,36 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public boolean isFieldVisible(String fieldName) {
 		return isFieldVisible(fieldName, Sets.newHashSet());
+	}
+	
+	public Collection<User> getParticipants() {
+		if (participants == null) {
+			participants = new LinkedHashSet<>();
+			if (getSubmitter() != null)
+				participants.add(getSubmitter());
+			UserManager userManager = OneDev.getInstance(UserManager.class);
+			for (IssueField field: getFields()) {
+				if (field.getType().equals(InputSpec.USER)) {
+					User user = userManager.findByName(field.getValue());
+					if (user != null)
+						participants.add(user);
+				} else if (field.getType().equals(InputSpec.GROUP)) {
+					Group group = OneDev.getInstance(GroupManager.class).find(field.getValue());
+					if (group != null)
+						participants.addAll(group.getMembers());
+				}
+			}
+			for (IssueComment comment: getComments()) {
+				if (comment.getUser() != null)
+					participants.add(comment.getUser());
+			}
+			for (IssueChange change: getChanges()) {
+				if (change.getUser() != null)
+					participants.add(change.getUser());
+			}
+			participants.remove(userManager.getSystem());
+		}
+		return participants;
 	}
 
 	private boolean isFieldVisible(String fieldName, Set<String> checkedFieldNames) {
@@ -508,6 +631,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getProject(), getNumber());
+	}
+	
+	public String describe() {
+		return "#" + getNumber() + " - " + getTitle();
 	}
 	
 }

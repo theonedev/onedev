@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -111,23 +110,6 @@ public class IssueStateListPage extends IssueSettingPage {
 					
 				});
 			}
-		});		
-		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Category")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				StateSpec state = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, state) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.capitalize(state.getCategory().name().toLowerCase()));
-					}
-					
-				});
-			}
-			
 		});		
 		
 		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Color")) {

@@ -42,7 +42,7 @@ public class IssueChoiceEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<Long> renderForEdit(String componentId, IModel<Long> model) {
-						return new IssueChoiceEditor(componentId, descriptor, model);
+						return new IssueSingleChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};

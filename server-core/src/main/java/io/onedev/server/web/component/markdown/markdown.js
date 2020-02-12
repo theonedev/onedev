@@ -857,12 +857,6 @@ onedev.server.markdown = {
         
 	},
 	initRendered: function($rendered) {
-		// delay highlight to fix the issue that code in markdown can not be 
-		// displayed appropriately in a reopened modal dialog 
-		setTimeout(function() {
-			onedev.server.highlight($rendered);
-		}, 0);
-
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
 		$rendered.find("a.header-anchor").each(function() {
 			var $headerAnchor = $(this);

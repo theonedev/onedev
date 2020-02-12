@@ -26,7 +26,7 @@ import io.onedev.server.buildspec.job.action.condition.ActionConditionParser;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.query.BuildQueryConstants;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -48,8 +48,8 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = Lists.newArrayList(
-									BuildQueryConstants.FIELD_LOG, 
-									BuildQueryConstants.FIELD_ERROR_MESSAGE);
+									Build.FIELD_LOG, 
+									Build.FIELD_ERROR_MESSAGE);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
 							Job job = jobAware.getJob();
 							fields.addAll(job.getParamSpecMap().keySet());

@@ -1,3 +1,8 @@
+@media(max-width: 991px) {
+	#project-branches>.list>table .behind-ahead {
+		display: none;
+	}
+}
 #project-branches>.list>.head>.base {
 	width: 240px;
 }

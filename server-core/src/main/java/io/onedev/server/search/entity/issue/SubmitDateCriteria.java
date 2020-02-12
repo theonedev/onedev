@@ -8,9 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.IssueQueryConstants;
 
 public class SubmitDateCriteria extends IssueCriteria {
 
@@ -30,7 +28,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(IssueQueryConstants.ATTR_SUBMIT_DATE);
+		Path<Date> attribute = root.get(Issue.PROP_SUBMIT_DATE);
 		if (operator == IssueQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -47,7 +45,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public String asString() {
-		return quote(IssueQueryConstants.FIELD_SUBMIT_DATE) + " " 
+		return quote(Issue.FIELD_SUBMIT_DATE) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

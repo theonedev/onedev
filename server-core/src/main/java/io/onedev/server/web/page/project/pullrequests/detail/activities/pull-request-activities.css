@@ -8,6 +8,9 @@
 #request-detail>.main>.activities .activity.new>.avatar {
 	border-left-color: #4667EE;
 }
+#request-detail>.main>.activities>table {
+	table-layout: fixed;
+}
 
 #request-detail>.main>.activities .activity>td {
 	border-bottom: 1px solid #EEE;
@@ -17,7 +20,7 @@
 	border-bottom: none;
 }
 #request-detail>.main>.activities .activity>td.avatar {
-	width: 1px;
+	width: 48px;
 	border-left: 4px solid white;
 	padding-left: 8px;
 }
@@ -31,23 +34,28 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content .alert {
 	margin: 16px 0;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td {
-	color: #888;
-	padding: 4px 0;
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit {
+	position: relative;
+	padding: 6px 0;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content tr:hover td {
-	background: #F5F5F5;
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit:hover {
+	background: #F7ECB9;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.author {
-	width: 28px;
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.author {
+	position: absolute;
+	left: 4px;
+	top: 6px;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status {
-	width: 170px;
-	/* in order align embedded buttons */ 
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.message {
+	padding: 0 130px 0 30px;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span {
-	margin-left: 4px;
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.with-status>.message {
+	padding-right: 175px;
+}
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.actions {
+	position: absolute;
+	top: 6px;
+	right: 4px;
 }
 
 #request-detail>.main>.activities .activity>td>.content {
@@ -68,10 +76,6 @@
 }
 #request-detail>.main>.activities .activity>td>.body {
 	margin-top: 8px;
-}
-#request-detail>.main>.activities .activity>td>.body>.referenced-from .label {
-	line-height: inherit;
-	margin-left: 8px;
 }
 #request-detail>.main>.activities .activity>td.no-body>.head {
 	margin-top: 10px;
@@ -114,20 +118,14 @@
 }
 
 @media(max-width: 991px) {
-	#request-detail>.main>.activities .activity>td.avatar .avatar {
-		width: 24px;
-		height: 24px;
-	}
-	#request-detail>.main>.activities .activity>td.content {
-		padding-left: 6px;
-	}
-	#request-detail>.main>.activities .activity>td>.body {
-		margin-top: 12px;
-		margin-left: -24px;
-	}
-	#request-detail>.main>.activities .activity td.hash-and-status {
+	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit .hash,
+	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit .browse {
 		display: none;
 	}
+	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.message {
+		padding-right: 0;
+	}
+	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.with-status>.message {
+		padding-right: 45px;
+	}
 }
-
-

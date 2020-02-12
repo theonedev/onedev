@@ -15,4 +15,12 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent i
 		return getComment().getContent();
 	}
 
+	@Override
+	public String getActivity(boolean withEntity) {
+		String activity = "created code comment on file '" + getComment().getMarkPos().getPath() + "'"; 
+		if (withEntity)
+			activity += " in pull request " + getRequest().describe();
+		return activity;
+	}
+
 }

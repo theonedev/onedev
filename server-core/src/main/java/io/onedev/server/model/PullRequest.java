@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
@@ -39,23 +41,28 @@ import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
+import static io.onedev.server.model.PullRequest.*;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
@@ -65,21 +72,97 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="title"), @Index(columnList="uuid"), 
-				@Index(columnList="noSpaceTitle"), @Index(columnList="number"), 
-				@Index(columnList="o_targetProject_id"), @Index(columnList="submitDate"), 
-				@Index(columnList="updateDate"), @Index(columnList="o_sourceProject_id"), 
-				@Index(columnList="o_submitter_id"), @Index(columnList="headCommitHash"), 
-				@Index(columnList="PREVIEW_REQUEST_HEAD"), @Index(columnList="CLOSE_DATE"), 
-				@Index(columnList="CLOSE_STATUS"), @Index(columnList="CLOSE_USER"), 
-				@Index(columnList="CLOSE_USER_NAME")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
+				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_UUID), 
+				@Index(columnList=PROP_NO_SPACE_TITLE), @Index(columnList=PROP_NUMBER), 
+				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
+				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
+				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_HEAD_COMMIT_HASH), 
+				@Index(columnList=MergePreview.COLUMN_REQUEST_HEAD), @Index(columnList=CloseInfo.COLUMN_DATE), 
+				@Index(columnList=CloseInfo.COLUMN_STATUS), @Index(columnList=CloseInfo.COLUMN_USER), 
+				@Index(columnList=CloseInfo.COLUMN_USER_NAME)},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String FIELD_NUMBER = "Number";
+
+	public static final String PROP_NUMBER = "number";
+	
+	public static final String FIELD_STATUS = "Status";
+	
+	public static final String FIELD_TARGET_PROJECT = "Target Project";
+	
+	public static final String PROP_TARGET_PROJECT = "targetProject";
+	
+	public static final String FIELD_TARGET_BRANCH = "Target Branch";
+	
+	public static final String PROP_TARGET_BRANCH = "targetBranch";
+	
+	public static final String FIELD_SOURCE_PROJECT = "Source Project";
+	
+	public static final String PROP_SOURCE_PROJECT = "sourceProject";
+	
+	public static final String FIELD_SOURCE_BRANCH = "Source Branch";
+	
+	public static final String PROP_SOURCE_BRANCH = "sourceBranch";
+	
+	public static final String FIELD_TITLE = "Title";
+	
+	public static final String PROP_TITLE = "title";
+	
+	public static final String FIELD_DESCRIPTION = "Description";
+	
+	public static final String PROP_DESCRIPTION = "description";
+	
+	public static final String FIELD_COMMENT = "Comment";
+
+	public static final String PROP_COMMENTS = "comments";
+	
+	public static final String PROP_CODE_COMMENT_RELATIONS = "codeCommentRelations";
+	
+	public static final String FIELD_COMMENT_COUNT = "Comment Count";
+	
+	public static final String PROP_COMMENT_COUNT = "commentCount";
+
+	public static final String FIELD_SUBMITTER = "Submitter";
+	
+	public static final String PROP_SUBMITTER = "submitter";
+	
+	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	
+	public static final String PROP_SUBMIT_DATE = "submitDate";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_LAST_UPDATE = "lastUpdate";
+	
+	public static final String FIELD_CLOSE_DATE = "Close Date";
+	
+	public static final String PROP_CLOSE_DATE = "closeInfo.date";
+	
+	public static final String FIELD_MERGE_STRATEGY = "Merge Strategy";
+	
+	public static final String PROP_MERGE_STRATEGY = "mergeStrategy";
+	
+	public static final String PROP_CLOSE_INFO = "closeInfo";
+	
+	public static final String PROP_LAST_MERGE_PREVIEW = "lastMergePreview";
+	
+	public static final String PROP_ID = "id";
+	
+	public static final String PROP_REVIEWS = "reviews";
+	
+	public static final String PROP_PULL_REQUEST_BUILDS = "pullRequestBuilds";
+	
+	public static final String PROP_UUID = "uuid";
+	
+	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
+
+	public static final String PROP_HEAD_COMMIT_HASH = "headCommitHash";
 	
 	public static final String STATE_OPEN = "Open";
 
@@ -89,6 +172,24 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
+	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
+			FIELD_NUMBER, FIELD_TITLE, FIELD_TARGET_PROJECT, FIELD_TARGET_BRANCH, 
+			FIELD_SOURCE_PROJECT, FIELD_SOURCE_BRANCH, FIELD_DESCRIPTION, 
+			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
+			FIELD_CLOSE_DATE, FIELD_MERGE_STRATEGY, FIELD_COMMENT_COUNT);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
+			FIELD_CLOSE_DATE, PROP_CLOSE_DATE,
+			FIELD_NUMBER, PROP_NUMBER,
+			FIELD_STATUS, PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS,
+			FIELD_TARGET_PROJECT, PROP_TARGET_PROJECT,
+			FIELD_TARGET_BRANCH, PROP_TARGET_BRANCH,
+			FIELD_SOURCE_PROJECT, PROP_SOURCE_PROJECT,
+			FIELD_SOURCE_BRANCH, PROP_SOURCE_BRANCH,
+			FIELD_COMMENT_COUNT, PROP_COMMENT_COUNT);
+	
 	private static ThreadLocal<Stack<PullRequest>> stack =  new ThreadLocal<Stack<PullRequest>>() {
 
 		@Override
@@ -132,9 +233,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Column(nullable=false)
 	private String headCommitHash;
 	
-	@Column(nullable=false)
-	private Date updateDate = new Date();
-	
 	@Column(nullable=true)
 	private Date lastCodeCommentActivityDate;
 
@@ -158,6 +256,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private long number;
 	
 	private int commentCount;
+	
+	@Embedded
+	private LastUpdate lastUpdate;
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -193,6 +294,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Boolean valid;
 	
 	private transient Collection<Long> fixedIssueNumbers;
+	
+	private transient Collection<User> participants;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	private String checkError;
@@ -634,6 +737,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.commentCount = commentCount;
 	}
 
+	public LastUpdate getLastUpdate() {
+		return lastUpdate;
+	}
+
+	public void setLastUpdate(LastUpdate lastUpdate) {
+		this.lastUpdate = lastUpdate;
+	}
+
 	public List<RevCommit> getCommits() {
 		List<RevCommit> commits = new ArrayList<>();
 		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
@@ -659,14 +770,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		}
 	}
 	
-	public Date getUpdateDate() {
-		return updateDate;
-	}
-
-	public void setUpdateDate(Date updateDate) {
-		this.updateDate = updateDate;
-	}
-
 	@Nullable
 	public String getCheckError() {
 		return checkError;
@@ -778,6 +881,24 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 				}
 			}
 		} 
+	}
+	
+	public Collection<User> getParticipants() {
+		if (participants == null) {
+			participants = new LinkedHashSet<>();
+			if (getSubmitter() != null)
+				participants.add(getSubmitter());
+			for (PullRequestComment comment: getComments()) {
+				if (comment.getUser() != null)
+					participants.add(comment.getUser());
+			}
+			for (PullRequestChange change: getChanges()) {
+				if (change.getUser() != null)
+					participants.add(change.getUser());
+			}
+			participants.remove(OneDev.getInstance(UserManager.class).getSystem());
+		}
+		return participants;
 	}
 	
 	public boolean isValid() {
@@ -905,6 +1026,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			}
 			return null;
 		}
+	}
+	
+	public String describe() {
+		return "#" + getNumber() + " - " + getTitle();
 	}
 	
 }

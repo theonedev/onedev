@@ -8,11 +8,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.MilestoneChoice;
 
 @Editable
 public class BuiltInFieldsBean implements Serializable {
@@ -35,8 +34,7 @@ public class BuiltInFieldsBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@ChoiceProvider("getMilestoneChoices")
-	@NameOfEmptyValue("No milestone")
+	@MilestoneChoice
 	public String getMilestone() {
 		return milestone;
 	}
@@ -49,11 +47,6 @@ public class BuiltInFieldsBean implements Serializable {
 	private static List<String> getStateChoices() {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		return issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<String> getMilestoneChoices() {
-		return Project.get().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
 }

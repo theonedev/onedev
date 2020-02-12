@@ -31,6 +31,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.fieldspec.SecretField;
 import io.onedev.server.issue.fieldsupply.FieldSupply;
+import io.onedev.server.issue.fieldsupply.Ignore;
 import io.onedev.server.issue.fieldsupply.ScriptingValue;
 import io.onedev.server.issue.fieldsupply.SpecifiedValue;
 import io.onedev.server.issue.fieldsupply.ValueProvider;
@@ -39,10 +40,10 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.annotation.FieldNamesProvider;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -135,9 +136,11 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 					if (isSecret) {
 						choices.add(SpecifiedValue.SECRET_DISPLAY_NAME);
 						choices.add(ScriptingValue.SECRET_DISPLAY_NAME);
+						choices.add(Ignore.DISPLAY_NAME);
 					} else {
 						choices.add(SpecifiedValue.DISPLAY_NAME);
 						choices.add(ScriptingValue.DISPLAY_NAME);
+						choices.add(Ignore.DISPLAY_NAME);
 					}
 					DropDownChoice<String> valueProviderChoice = new DropDownChoice<String>("valueProvider", new IModel<String>() {
 						
@@ -150,8 +153,10 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 							Class<?> valueProviderClass = (Class<?>) container.getDefaultModelObject();
 							if (valueProviderClass == SpecifiedValue.class)
 								return isSecret?SpecifiedValue.SECRET_DISPLAY_NAME:SpecifiedValue.DISPLAY_NAME;
-							else
+							else if (valueProviderClass == ScriptingValue.class)
 								return isSecret?ScriptingValue.SECRET_DISPLAY_NAME:ScriptingValue.DISPLAY_NAME;
+							else
+								return Ignore.DISPLAY_NAME;
 						}
 
 						@Override
@@ -159,8 +164,10 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 							ValueProvider valueProvider;
 							if (object.equals(SpecifiedValue.DISPLAY_NAME) || object.equals(SpecifiedValue.SECRET_DISPLAY_NAME))  
 								valueProvider = newSpecifiedValueProvider(property);
-							else
+							else if (object.equals(ScriptingValue.DISPLAY_NAME) || object.equals(ScriptingValue.SECRET_DISPLAY_NAME))
 								valueProvider = new ScriptingValue();
+							else
+								valueProvider = new Ignore();
 							container.replace(newValueEditor("value", property, valueProvider));
 							container.setDefaultModelObject(valueProvider.getClass());
 						}
@@ -244,9 +251,11 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 				JobSecretEditBean bean = new JobSecretEditBean();
 				bean.setSecret((String) property.getPropertyValue(fieldBean));
 				return PropertyContext.edit("value", bean, "secret");
-			}		
-		} else {
+			}	
+		} else if (valueProvider instanceof ScriptingValue) {
 			return PropertyContext.edit("value", valueProvider, "scriptName");
+		} else {
+			return new WebMarkupContainer("value");
 		}
 	}
 
@@ -260,17 +269,21 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			field.setName((String) label.getDefaultModelObject());
 			FieldSpec fieldSpec = Preconditions.checkNotNull(getFieldSpecs().get(field.getName()));
 			field.setSecret(fieldSpec instanceof SecretField);
-			PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) container.get("value");
-			Class<?> valueProviderClass = (Class<?>) container.getDefaultModelObject();
-			if (valueProviderClass == SpecifiedValue.class) {
-				SpecifiedValue specifiedValue = new SpecifiedValue();
-				Object propertyValue = propertyEditor.getConvertedInput();
-				specifiedValue.setValue(fieldSpec.convertToStrings(propertyValue));
-				field.setValueProvider(specifiedValue);
+			if (container.get("value") instanceof PropertyEditor) {
+				PropertyEditor<Serializable> propertyEditor = (PropertyEditor<Serializable>) container.get("value");
+				Class<?> valueProviderClass = (Class<?>) container.getDefaultModelObject();
+				if (valueProviderClass == SpecifiedValue.class) {
+					SpecifiedValue specifiedValue = new SpecifiedValue();
+					Object propertyValue = propertyEditor.getConvertedInput();
+					specifiedValue.setValue(fieldSpec.convertToStrings(propertyValue));
+					field.setValueProvider(specifiedValue);
+				} else {
+					ScriptingValue scriptingValue = new ScriptingValue();
+					scriptingValue.setScriptName((String) propertyEditor.getConvertedInput()); 
+					field.setValueProvider(scriptingValue);
+				} 
 			} else {
-				ScriptingValue scriptingValue = new ScriptingValue();
-				scriptingValue.setScriptName((String) propertyEditor.getConvertedInput()); 
-				field.setValueProvider(scriptingValue);
+				field.setValueProvider(new Ignore());
 			}
 			value.add(field);
 		}

@@ -117,8 +117,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
 			Set<String> excludedProperties = Sets.newHashSet("administrator", "canCreateProjects"); 
-			manualConfigs.add(new ManualConfig("Create Administrator Account", null, 
-					administrator, excludedProperties) {
+			manualConfigs.add(new ManualConfig("Create Administrator Account", null, administrator, excludedProperties) {
 
 				@Override
 				public Skippable getSkippable() {

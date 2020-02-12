@@ -40,10 +40,10 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.issue.StateSpec;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
@@ -53,6 +53,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.issue.changedata.IssueChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -62,17 +66,15 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.issue.AndIssueCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.util.MilestoneAndState;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
@@ -157,11 +159,15 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		Query<?> query = getSession().createQuery("select max(number) from Issue where project=:project");
 		query.setParameter("project", issue.getProject());
 		issue.setNumber(getNextNumber(issue.getProject(), query));
+		
+		IssueOpened event = new IssueOpened(issue);
+		issue.setLastUpdate(event.getLastUpdate());
+		
 		save(issue);
 
 		issueFieldManager.saveFields(issue);
 		
-		listenerRegistry.post(new IssueOpened(issue));
+		listenerRegistry.post(event);
 	}
 	
 	@Transactional
@@ -190,11 +196,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {
-			predicates.add(builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), project));
+			predicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
 			if (!projects.isEmpty())
-				predicates.add(root.get(IssueQueryConstants.ATTR_PROJECT).in(projects));
+				predicates.add(root.get(Issue.PROP_PROJECT).in(projects));
 			else
 				predicates.add(builder.disjunction());
 		}
@@ -213,23 +219,23 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: issueQuery.getSorts()) {
-			if (IssueQueryConstants.ORDER_FIELDS.containsKey(sort.getField())) {
+			if (Issue.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(root, IssueQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.asc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(root, IssueQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.desc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueField> join = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueField.ATTR_NAME), sort.getField()));
+				Join<Issue, IssueField> join = root.join(Issue.PROP_FIELDS, JoinType.LEFT);
+				join.on(builder.equal(join.get(IssueField.PROP_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueField.ATTR_ORDINAL)));
+					orders.add(builder.asc(join.get(IssueField.PROP_ORDINAL)));
 				else
-					orders.add(builder.desc(join.get(IssueField.ATTR_ORDINAL)));
+					orders.add(builder.desc(join.get(IssueField.PROP_ORDINAL)));
 			}
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(IssueQueryConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(Issue.PROP_ID)));
 		query.orderBy(orders);
 		
 		return query;
@@ -258,7 +264,18 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		event.getIssue().setUpdateDate(event.getDate());
+		boolean minorChange = false;
+		if (event instanceof IssueChangeEvent) {
+			IssueChangeData changeData = ((IssueChangeEvent)event).getChange().getData();
+			if (changeData instanceof IssueReferencedFromCodeCommentData
+					|| changeData instanceof IssueReferencedFromIssueData
+					|| changeData instanceof IssueReferencedFromPullRequestData) {
+				minorChange = true;
+			}
+		}
+		
+		if (!(event instanceof IssueOpened || minorChange))
+			event.getIssue().setLastUpdate(event.getLastUpdate());
 	}
 	
 	@Sessional
@@ -272,24 +289,6 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
-	}
-
-	@Override
-	public int count(Milestone milestone, @Nullable StateSpec.Category category) {
-		if (category != null) {
-			IssueCriteria criteria = getIssueSetting().getCategoryCriteria(category);
-			if (criteria != null) {
-				List<IssueCriteria> criterias = new ArrayList<>();
-				criterias.add(new MilestoneCriteria(milestone.getName()));
-				criterias.add(criteria);
-				return count(milestone.getProject(), new AndIssueCriteria(criterias));
-			} else {
-				return 0;
-			}
-		} else {
-			IssueCriteria criteria = new MilestoneCriteria(milestone.getName());
-			return count(milestone.getProject(), criteria);
-		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -366,7 +365,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		List<Issue> issues = new ArrayList<>();
 
 		EntityCriteria<Issue> criteria = newCriteria();
-		criteria.add(Restrictions.eq(IssueQueryConstants.ATTR_PROJECT, project));
+		criteria.add(Restrictions.eq(Issue.PROP_PROJECT, project));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);
@@ -483,7 +482,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			String fieldName = (String) row[0];
 			String fieldValue = (String) row[1];
 			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getIssueSetting().getFieldSpec(fieldName));
-			if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(fieldValue)) {
+			if (specifiedChoices != null && fieldValue != null 
+					&& !specifiedChoices.getChoiceValues().contains(fieldValue)) {
 				undefinedFieldValues.add(new UndefinedFieldValue(fieldName, fieldValue));
 			}
 		}
@@ -638,6 +638,27 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		} finally {
 			issuesLock.readLock().unlock();
 		}
+	}
+
+	@Sessional
+	@Override
+	public Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<MilestoneAndState> criteriaQuery = builder.createQuery(MilestoneAndState.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		criteriaQuery.multiselect(
+				root.get(Issue.PROP_MILESTONE).get(Milestone.PROP_ID), 
+				root.get(Issue.PROP_STATE));
+		
+		List<Predicate> milestonePredicates = new ArrayList<>();
+		for (Milestone milestone: milestones) 
+			milestonePredicates.add(builder.equal(root.get(Issue.PROP_MILESTONE), milestone));
+		
+		criteriaQuery.where(builder.and(
+				builder.equal(root.get(Issue.PROP_PROJECT), project),
+				builder.or(milestonePredicates.toArray(new Predicate[0]))));
+		
+		return getSession().createQuery(criteriaQuery).getResultList();
 	}
 
 }

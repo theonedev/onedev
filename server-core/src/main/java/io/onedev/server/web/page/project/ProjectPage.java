@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -21,8 +23,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
-
-import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -61,7 +61,7 @@ import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizat
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.build.ProjectBuildSettingPage;
-import io.onedev.server.web.page.project.setting.build.ProjectSecretsPage;
+import io.onedev.server.web.page.project.setting.build.ProjectJobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.ProjectIssueSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
@@ -89,7 +89,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		super(params);
 		
 		String projectName = params.get(PARAM_PROJECT).toString();
-		Preconditions.checkNotNull(projectName);
+		if (StringUtils.isBlank(projectName))
+			throw new RestartResponseException(ProjectListPage.class);
 		
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		
@@ -312,7 +313,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", 
 				StateTransitionsPage.class, ProjectIssueSettingPage.class));
 		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-cubes", 
-				ProjectSecretsPage.class, ProjectBuildSettingPage.class));
+				ProjectJobSecretsPage.class, ProjectBuildSettingPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", ProjectWebHooksPage.class));
 		return tabs;
 	}

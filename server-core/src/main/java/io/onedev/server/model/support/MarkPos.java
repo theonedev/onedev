@@ -17,6 +17,10 @@ public class MarkPos implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_COMMIT = "commit";
+	
+	public static final String PROP_PATH = "path";
+	
 	@Column(nullable=false)
 	private String commit;
 

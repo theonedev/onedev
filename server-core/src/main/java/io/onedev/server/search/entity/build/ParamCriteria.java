@@ -11,7 +11,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class ParamCriteria extends EntityCriteria<Build> {
 
@@ -28,10 +27,10 @@ public class ParamCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(BuildQueryConstants.ATTR_PARAMS, JoinType.LEFT);
+		Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.LEFT);
 		join.on(builder.and(
-				builder.equal(join.get(BuildParam.ATTR_NAME), name)),
-				builder.equal(join.get(BuildParam.ATTR_VALUE), value));
+				builder.equal(join.get(BuildParam.PROP_NAME), name)),
+				builder.equal(join.get(BuildParam.PROP_VALUE), value));
 		return join.isNotNull();
 	}
 

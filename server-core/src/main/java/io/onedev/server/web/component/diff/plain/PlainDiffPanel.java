@@ -303,7 +303,7 @@ public class PlainDiffPanel extends Panel {
 		String script = String.format("javascript:$('#%s').data('callback')(%d);", getMarkupId(), blockIndex);
 		builder.append("<td class='expander noselect'><a title='Show more lines' href=\"")
 				.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
-		builder.append("<td class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
+		builder.append("<td class='skipped noselect' colspan='2'><i class='fa fa-ellipsis-h'></i> skipped ")
 				.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		builder.append("</tr>");
 	}

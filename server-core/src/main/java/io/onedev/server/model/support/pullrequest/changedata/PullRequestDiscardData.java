@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.diff.DiffSupport;
@@ -20,8 +21,11 @@ public class PullRequestDiscardData implements PullRequestChangeData {
 	}
 	
 	@Override
-	public String getDescription() {
-		return "discarded pull request";
+	public String getActivity(PullRequest withRequest) {
+		String activity = "discarded";
+		if (withRequest != null)
+			activity += " pull request " + withRequest.describe();
+		return activity;
 	}
 
 	@Override

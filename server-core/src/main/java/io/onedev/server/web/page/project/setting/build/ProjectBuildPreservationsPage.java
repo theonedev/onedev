@@ -6,7 +6,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.BuildPreservation;
+import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.web.component.build.perservation.BuildPreservationListPanel;
 import io.onedev.server.web.component.build.perservation.BuildPreservationsBean;
 import io.onedev.server.web.component.link.SettingInOwnerLink;

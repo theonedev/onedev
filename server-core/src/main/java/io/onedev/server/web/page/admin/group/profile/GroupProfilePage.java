@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
@@ -89,7 +88,7 @@ public class GroupProfilePage extends GroupPage {
 					OneDev.getInstance(GroupManager.class).delete(getGroup());
 					setResponsePage(GroupListPage.class);
 				} catch (OneException e) {
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 				}
 			}
 			

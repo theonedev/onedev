@@ -4,6 +4,7 @@ import java.util.Date;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastUpdate;
 
 public abstract class ProjectEvent extends Event {
 
@@ -18,4 +19,13 @@ public abstract class ProjectEvent extends Event {
 		return project;
 	}
 	
+	public abstract String getActivity(boolean withEntity);
+	
+	public LastUpdate getLastUpdate() {
+		LastUpdate lastUpdate = new LastUpdate();
+		lastUpdate.setUser(getUser());
+		lastUpdate.setActivity(getActivity(false));
+		lastUpdate.setDate(getDate());
+		return lastUpdate;
+	}
 }

@@ -1,6 +1,10 @@
 package io.onedev.server.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+
+import org.apache.wicket.util.encoding.UrlDecoder;
+import org.apache.wicket.util.encoding.UrlEncoder;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
@@ -33,4 +37,20 @@ public class UrlUtils {
 		return WordUtils.capitalize(url);
 	}
 
+	public static String encodePath(String url) {
+		return UrlEncoder.PATH_INSTANCE.encode(url, StandardCharsets.UTF_8);
+	}
+	
+	public static String decodePath(String url) {
+		return UrlDecoder.PATH_INSTANCE.decode(url, StandardCharsets.UTF_8.name());
+	}
+	
+	public static String encodeQuery(String query) {
+		return UrlEncoder.QUERY_INSTANCE.encode(query, StandardCharsets.UTF_8);
+	}
+	
+	public static String decodeQuery(String query) {
+		return UrlDecoder.QUERY_INSTANCE.decode(query, StandardCharsets.UTF_8.name());
+	}
+	
 }

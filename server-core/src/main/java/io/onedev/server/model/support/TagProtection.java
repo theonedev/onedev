@@ -14,7 +14,6 @@ import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -29,8 +28,6 @@ public class TagProtection implements Serializable {
 	private String tags;
 	
 	private String userMatch = new Anyone().toString();
-	
-	private String buildBranches;
 	
 	private boolean preventUpdate = true;
 	
@@ -73,20 +70,6 @@ public class TagProtection implements Serializable {
 		this.userMatch = userMatch;
 	}
 
-	@Editable(order=180, description=""
-			+ "Rule will apply if build operating the tag is on specified branches. Multiple branches "
-			+ "should be separated with spaces. Use * or ? for wildcard match. Leave empty to match "
-			+ "all branches")
-	@Patterns(suggester = "suggestBranches")
-	@NameOfEmptyValue("All")
-	public String getBuildBranches() {
-		return buildBranches;
-	}
-
-	public void setBuildBranches(String buildBranches) {
-		this.buildBranches = buildBranches;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestBranches(String matchWith) {
 		Project project = Project.get();

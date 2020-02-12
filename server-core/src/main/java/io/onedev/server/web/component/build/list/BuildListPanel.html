@@ -20,15 +20,20 @@
 			<table wicket:id="builds" class="table"></table>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="linkFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a>
-    </wicket:fragment>	
-	<wicket:fragment wicket:id="statusFrag">
-		<span wicket:id="icon"></span> 
+	<wicket:fragment wicket:id="buildFrag">
 		<a wicket:id="link">
-			<span wicket:id="name"></span>
-			<span wicket:id="date"></span> 
-		</a> 
+			<span wicket:id="icon"></span> 
+			<span wicket:id="label"></span>
+		</a>
+    </wicket:fragment>	
+	<wicket:fragment wicket:id="jobFrag">
+		<a wicket:id="link">
+			<span wicket:id="label"></span>
+		</a>
+    </wicket:fragment>	
+	<wicket:fragment wicket:id="dateFrag">
+		<span wicket:id="name"></span>
+		<span wicket:id="date"></span> 
 	</wicket:fragment>	
 	<wicket:fragment wicket:id="commitFrag">
 		<a wicket:id="hashLink" class="hash"><span wicket:id="hash"></span></a>

@@ -14,7 +14,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -32,6 +31,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.GitUtils;
@@ -39,9 +40,9 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -49,7 +50,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -145,16 +145,17 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(head = new WebMarkupContainer("changesHead") {
+		add(head = new WebMarkupContainer("changesHead"));
+		head.add(new WebSocketObserver() {
 
 			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+			}
 
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					pageDataChanged.getHandler().add(this);
-				}
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(component);
 			}
 			
 		});
@@ -552,16 +553,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		state.mark = mark;
 		pushState(target);
 		onRegionChange();
-	}
-
-	@Override
-	public Collection<String> getWebSocketObservables() {
-		Collection<String> observables = super.getWebSocketObservables();
-		observables.add(CommitIndexed.getWebSocketObservable(state.oldCommit));
-		observables.add(CommitIndexed.getWebSocketObservable((state.newCommit)));
-		if (state.commentId != null)
-			observables.add(CodeComment.getWebSocketObservable(state.commentId));
-		return observables;
 	}
 
 	@Override

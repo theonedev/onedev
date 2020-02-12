@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.diff.DiffSupport;
@@ -20,8 +21,11 @@ public class PullRequestSourceBranchRestoreData implements PullRequestChangeData
 	}
 	
 	@Override
-	public String getDescription() {
-		return "restored source branch";
+	public String getActivity(PullRequest withRequest) {
+		String activity = "restored source branch";
+		if (withRequest != null)
+			activity += " of pull request " + withRequest.describe();
+		return activity;
 	}
 
 	@Override

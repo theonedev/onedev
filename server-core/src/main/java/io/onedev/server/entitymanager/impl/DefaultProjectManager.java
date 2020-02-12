@@ -84,7 +84,6 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.query.ProjectQueryConstants;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -505,13 +504,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: projectQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(ProjectQuery.getPath(root, ProjectQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.asc(ProjectQuery.getPath(root, Project.ORDER_FIELDS.get(sort.getField()))));
 			else
-				orders.add(builder.desc(ProjectQuery.getPath(root, ProjectQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+				orders.add(builder.desc(ProjectQuery.getPath(root, Project.ORDER_FIELDS.get(sort.getField()))));
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.asc(root.get(ProjectQueryConstants.ATTR_NAME)));
+			orders.add(builder.asc(root.get(Project.PROP_NAME)));
 		query.orderBy(orders);
 		
 		return query;
@@ -524,7 +523,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 			Collection<Long> projectIds = getPermittedProjects(new AccessProject())
 					.stream().map(it->it.getId()).collect(Collectors.toSet());
 			if (!projectIds.isEmpty())
-				predicates.add(root.get(ProjectQueryConstants.ATTR_ID).in(projectIds));
+				predicates.add(root.get(Project.PROP_ID).in(projectIds));
 			else
 				predicates.add(builder.disjunction());
 		}

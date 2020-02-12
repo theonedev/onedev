@@ -1399,4 +1399,169 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate34(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element stateElement: valueElement.element("stateSpecs").elements()) {
+								Element categoryElement = stateElement.element("category");
+								stateElement.addElement("done").setText(String.valueOf(categoryElement.getTextTrim().equals("CLOSED")));
+								categoryElement.detach();
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Milestones.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("numOfOpenIssues").setName("numOfIssuesTodo");
+					element.element("numOfClosedIssues").setName("numOfIssuesDone");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate35(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("updateDate").detach();
+					Element createDateElement = element.element("createDate");
+					Element lastUpdateElement = element.addElement("lastUpdate");
+					Element userElement = element.element("user");
+					Element lastUpdateUserElement = lastUpdateElement.addElement("user");
+					if (userElement != null)
+						lastUpdateUserElement.setText(userElement.getTextTrim());
+					else
+						lastUpdateUserElement.setText("1");
+					lastUpdateElement.addElement("activity").setText("created");
+					Element dateElement = lastUpdateElement.addElement("date");
+					dateElement.addAttribute("class", createDateElement.attributeValue("class"));
+					dateElement.setText(createDateElement.getTextTrim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("updateDate").detach();
+					Element submitDateElement = element.element("submitDate");
+					Element lastUpdateElement = element.addElement("lastUpdate");
+					Element submitterElement = element.element("submitter");
+					Element lastUpdateUserElement = lastUpdateElement.addElement("user");
+					if (submitterElement != null)
+						lastUpdateUserElement.setText(submitterElement.getTextTrim());
+					else
+						lastUpdateUserElement.setText("1");
+					lastUpdateElement.addElement("activity").setText("opened");
+					Element dateElement = lastUpdateElement.addElement("date");
+					dateElement.addAttribute("class", submitDateElement.attributeValue("class"));
+					dateElement.setText(submitDateElement.getTextTrim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("updateDate").detach();
+					Element submitDateElement = element.element("submitDate");
+					Element lastUpdateElement = element.addElement("lastUpdate");
+					Element submitterElement = element.element("submitter");
+					Element lastUpdateUserElement = lastUpdateElement.addElement("user");
+					if (submitterElement != null)
+						lastUpdateUserElement.setText(submitterElement.getTextTrim());
+					else
+						lastUpdateUserElement.setText("1");
+					lastUpdateElement.addElement("activity").setText("opened");
+					Element dateElement = lastUpdateElement.addElement("date");
+					dateElement.addAttribute("class", submitDateElement.attributeValue("class"));
+					dateElement.setText(submitDateElement.getTextTrim());
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element buildSettingElement = element.element("buildSetting");
+					Element namedQueriesElement = buildSettingElement.element("namedQueries");
+					if (namedQueriesElement != null) {
+						for (Element queryElement: namedQueriesElement.elements())
+							queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+					}
+					Element secretsElement = buildSettingElement.element("secrets");
+					secretsElement.setName("jobSecrets");
+					for (Element secretElement: secretsElement.elements())
+						secretElement.setName("io.onedev.server.model.support.build.JobSecret");
+					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
+						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
+					buildSettingElement.addElement("actionAuthorizations");
+					
+					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+						Element buildBranchesElement = tagProtectionElement.element("buildBranches");
+						if (buildBranchesElement != null)
+							buildBranchesElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element queryElement: element.element("userBuildQueries").elements())
+						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+					Element buildSettingElement = element.element("buildSetting");
+					Element secretsElement = buildSettingElement.element("secrets");
+					secretsElement.setName("jobSecrets");
+					for (Element secretElement: secretsElement.elements())
+						secretElement.setName("io.onedev.server.model.support.build.JobSecret");
+					for (Element buildPreservationElement: buildSettingElement.element("buildPreservations").elements())
+						buildPreservationElement.setName("io.onedev.server.model.support.build.BuildPreservation");
+					buildSettingElement.addElement("actionAuthorizations");
+					Element passwordElement = element.element("password");
+					if (passwordElement == null)
+						element.addElement("password").setText("external_managed");
+					else if (StringUtils.isBlank(passwordElement.getText()))
+						passwordElement.setText("external_managed");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element queryElement: element.element("userQueries").elements()) 
+						queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element stateElement: valueElement.element("stateSpecs").elements()) {
+								stateElement.element("done").detach();
+							}
+						}
+					} else if (element.elementTextTrim("key").equals("BUILD")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element queryElement: valueElement.element("namedQueries").elements()) 
+								queryElement.setName("io.onedev.server.model.support.build.NamedBuildQuery");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Milestones.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("numOfIssuesTodo").detach();
+					element.element("numOfIssuesDone").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
+	
 }

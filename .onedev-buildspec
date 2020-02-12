@@ -5,16 +5,16 @@
         <io.onedev.server.buildspec.job.Job>
             <name>CI</name>
             <paramSpecs/>
-            <image>1dev/build-environment:1.0</image>
+            <image>1dev/build-environment:1.1</image>
             <commands>
                 <string>set -e</string>
-                <string>rm -rf ~/.m2/repository/io/onedev #clean downloaded dependencies as sometimes we do not change project versions</string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
                 <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string>mvn test</string>
             </commands>
             <retrieveSource>true</retrieveSource>
+            <cloneDepth>1</cloneDepth>
             <submoduleCredentials/>
             <jobDependencies/>
             <projectDependencies/>
@@ -23,9 +23,18 @@
             <triggers>
                 <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
                     <params/>
+                    <branches>master</branches>
                 </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
+                <io.onedev.server.buildspec.job.trigger.PullRequestTrigger>
+                    <params/>
+                </io.onedev.server.buildspec.job.trigger.PullRequestTrigger>
             </triggers>
-            <caches/>
+            <caches>
+                <io.onedev.server.buildspec.job.CacheSpec>
+                    <key>maven-cache</key>
+                    <path>/root/.m2/repository</path>
+                </io.onedev.server.buildspec.job.CacheSpec>
+            </caches>
             <cpuRequirement>250m</cpuRequirement>
             <memoryRequirement>128m</memoryRequirement>
             <timeout>3600</timeout>
@@ -37,31 +46,49 @@
         <io.onedev.server.buildspec.job.Job>
             <name>Release</name>
             <paramSpecs/>
-            <image>1dev/build-environment:1.0</image>
+            <image>1dev/build-environment:1.1</image>
             <commands>
                 <string>set -e</string>
-                <string>rm -rf ~/.m2/repository/io/onedev #clean downloaded dependencies as sometimes we do not change project versions</string>
+                <string>docker login -u robinshen -p @secrets:dockerhub-password@</string>
+                <string></string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
                 <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
                 <string></string>
-                <string>cd server-product/build</string>
-                <string>sh build.sh @secrets:dockerhub-password@</string>
+                <string># Skip test as we've already tested in CI build</string>
+                <string>mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@ deploy</string>
                 <string></string>
-                <string>cd ../..</string>
+                <string>curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"</string>
                 <string></string>
-                <string>mv server-product/target/k8s ./k8s-resources</string>
+                <string>cp -r server-product/docker docker</string>
+                <string>cp server-product/target/onedev-${buildVersion}.zip .</string>
+                <string>unzip onedev-${buildVersion}.zip -d docker</string>
+                <string>mv docker/onedev-${buildVersion} docker/app</string>
+                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* docker/app/site/lib</string>
+                <string></string>
+                <string>docker build -t 1dev/server:${buildVersion} docker</string>
+                <string>docker push 1dev/server:${buildVersion}</string>
+                <string>docker tag 1dev/server:${buildVersion} 1dev/server:latest</string>
+                <string>docker push 1dev/server:latest</string>
+                <string></string>
+                <string>cp -r server-product/k8s k8s-resources</string>
+                <string>find k8s-resources -name "*.yaml" | xargs sed -i -e "s/\\${buildVersion}/${buildVersion}/g"</string>
                 <string>zip -r k8s-resources.zip k8s-resources</string>
                 <string></string>
-                <string>mv server-product/target/*.zip .</string>
-                <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
-                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v /opt/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
+                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v \\$(pwd)/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
                 <string>EOF</string>
             </commands>
             <retrieveSource>true</retrieveSource>
+            <cloneDepth>1</cloneDepth>
             <submoduleCredentials/>
-            <jobDependencies/>
+            <jobDependencies>
+                <io.onedev.server.buildspec.job.JobDependency>
+                    <jobName>CI</jobName>
+                    <requireSuccessful>true</requireSuccessful>
+                    <jobParams/>
+                </io.onedev.server.buildspec.job.JobDependency>
+            </jobDependencies>
             <projectDependencies/>
             <services/>
             <artifacts>*.zip *.sh</artifacts>
@@ -85,13 +112,14 @@
             <retryCondition>never</retryCondition>
             <maxRetries>3</maxRetries>
             <retryDelay>30</retryDelay>
+            <defaultFixedIssuesFilter>not("State" is "Invalid") order by "Type" asc and "Priority" desc</defaultFixedIssuesFilter>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Master (GitHub)</name>
             <paramSpecs/>
-            <image>1dev/build-environment:1.0</image>
+            <image>alpine/git:1.0.7</image>
             <commands>
-                <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
+                <string>git push -f https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
             </commands>
             <retrieveSource>true</retrieveSource>
             <submoduleCredentials/>
@@ -117,7 +145,7 @@
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Tags (GitHub)</name>
             <paramSpecs/>
-            <image>1dev/build-environment:1.0</image>
+            <image>alpine/git:1.0.7</image>
             <commands>
                 <string>set -e</string>
                 <string>git fetch --tags https://robin:@secrets:onedev-password@\@code.onedev.io/projects/onedev-server</string>

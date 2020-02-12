@@ -284,7 +284,7 @@ public abstract class InputSpec implements Serializable {
 	@Nullable
 	public abstract Object convertToObject(List<String> strings);
 	
-	public long getOrdinal(Object fieldValue) {
+	public long getOrdinal(String fieldValue) {
 		return -1;
 	}
 	

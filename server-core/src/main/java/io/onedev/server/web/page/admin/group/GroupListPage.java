@@ -27,7 +27,6 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
@@ -163,7 +162,7 @@ public class GroupListPage extends AdministrationPage {
 							OneDev.getInstance(GroupManager.class).delete(rowModel.getObject());
 							setResponsePage(GroupListPage.class);
 						} catch (OneException e) {
-							getPage().error(HtmlUtils.formatAsHtml(e.getMessage()));
+							getPage().error(e.getMessage());
 						}
 					}
 

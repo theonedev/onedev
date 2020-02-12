@@ -10,7 +10,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class SubmitDateCriteria extends EntityCriteria<Build> {
 
@@ -30,7 +29,7 @@ public class SubmitDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Path<Date> attribute = root.get(BuildQueryConstants.ATTR_SUBMIT_DATE);
+		Path<Date> attribute = root.get(Build.PROP_SUBMIT_DATE);
 		if (operator == BuildQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -47,7 +46,7 @@ public class SubmitDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_SUBMIT_DATE) + " " 
+		return quote(Build.FIELD_SUBMIT_DATE) + " " 
 				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

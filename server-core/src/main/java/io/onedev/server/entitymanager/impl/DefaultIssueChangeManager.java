@@ -155,10 +155,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 					&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
 				IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true, false, false);
 				List<IssueCriteria> criterias = new ArrayList<>();
+				
+				List<IssueCriteria> fromStateCriterias = new ArrayList<>();
 				for (String fromState: transition.getFromStates()) 
-					criterias.add(new StateCriteria(fromState));
+					fromStateCriterias.add(new StateCriteria(fromState));
+				
+				criterias.add(IssueCriteria.or(fromStateCriterias));
 				criterias.add(query.getCriteria());
-				query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+				query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 				Build.push(build);
 				try {
 					for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
@@ -297,10 +301,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 								if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
 									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, false, true, false);
 									List<IssueCriteria> criterias = new ArrayList<>();
+									
+									List<IssueCriteria> fromStateCriterias = new ArrayList<>();
 									for (String fromState: transition.getFromStates()) 
-										criterias.add(new StateCriteria(fromState));
+										fromStateCriterias.add(new StateCriteria(fromState));
+									
+									criterias.add(IssueCriteria.or(fromStateCriterias));
 									criterias.add(query.getCriteria());
-									query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+									query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 									PullRequest.push(request);
 									try {
 										for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
@@ -418,10 +426,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 										IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), 
 												true, false, false, false, true);
 										List<IssueCriteria> criterias = new ArrayList<>();
+										
+										List<IssueCriteria> fromStateCriterias = new ArrayList<>();
 										for (String fromState: transition.getFromStates()) 
-											criterias.add(new StateCriteria(fromState));
+											fromStateCriterias.add(new StateCriteria(fromState));
+										
+										criterias.add(IssueCriteria.or(fromStateCriterias));
 										criterias.add(query.getCriteria());
-										query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+										query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 										ProjectAwareCommit.push(commit);
 										try {
 											for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {

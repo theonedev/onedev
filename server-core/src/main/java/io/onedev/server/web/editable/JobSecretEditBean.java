@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.JobSecret;
+import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;

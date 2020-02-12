@@ -31,9 +31,9 @@ public class DateFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		if (operator == IssueQueryLexer.IsBefore)
-			return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), date.getTime());
+			return builder.lessThan(field.get(IssueField.PROP_ORDINAL), date.getTime());
 		else
-			return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), date.getTime());
+			return builder.greaterThan(field.get(IssueField.PROP_ORDINAL), date.getTime());
 	}
 
 	@Override

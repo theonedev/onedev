@@ -1,8 +1,6 @@
 package io.onedev.server.util.markdown;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -60,7 +58,7 @@ public class UrlProcessor implements MarkdownProcessor {
 								Element element = (Element) node;
 								element.attr("href", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
 								try {
-									String path = UrlUtils.trimHashAndQuery(URLDecoder.decode(url, StandardCharsets.UTF_8.name()));
+									String path = UrlUtils.decodePath(UrlUtils.trimHashAndQuery(url));
 									String directory = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(directory, path);
 									referencedPath = GitUtils.normalizePath(referencedPath);
@@ -97,7 +95,7 @@ public class UrlProcessor implements MarkdownProcessor {
 								element.attr("src", blobRenderContext.appendRaw(resolveUrl(blobRenderContext.getDirectoryUrl(), url)));
 								try {
 									String basePath = blobRenderContext.getDirectory();
-									String referencedPath = PathUtils.resolve(basePath, UrlUtils.trimHashAndQuery(URLDecoder.decode(url, StandardCharsets.UTF_8.name())));
+									String referencedPath = PathUtils.resolve(basePath, UrlUtils.decodePath(UrlUtils.trimHashAndQuery(url)));
 									referencedPath = GitUtils.normalizePath(referencedPath);
 									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
 										element.after("<span class='missing'>!!missing!!</span>");

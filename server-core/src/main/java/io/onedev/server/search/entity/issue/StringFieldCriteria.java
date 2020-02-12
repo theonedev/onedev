@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Set;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
@@ -31,7 +29,7 @@ public class StringFieldCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<String> attribute = field.get(IssueField.ATTR_VALUE);
+		Path<String> attribute = field.get(IssueField.PROP_VALUE);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(builder.lower(attribute), value.toLowerCase());
 		else 
@@ -55,7 +53,7 @@ public class StringFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		if (operator == IssueQueryLexer.Is)
 			issue.setFieldValue(getFieldName(), value);
 	}

@@ -3,6 +3,8 @@ package io.onedev.server.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,7 +26,7 @@ import io.onedev.server.web.editable.annotation.Multiline;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "name"})}
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", Milestone.PROP_NAME})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
@@ -32,7 +34,11 @@ public class Milestone extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ATTR_NAME = "name";
+	public static final String PROP_ID = "id";
+	
+	public static final String PROP_NAME = "name";
+	
+	public static final String PROP_DUE_DATE = "dueDate";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -45,10 +51,6 @@ public class Milestone extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date dueDate;
-	
-	private int numOfOpenIssues;
-	
-	private int numOfClosedIssues;
 	
 	private boolean closed;
 
@@ -100,21 +102,9 @@ public class Milestone extends AbstractEntity {
 	public void setClosed(boolean closed) {
 		this.closed = closed;
 	}
-
-	public int getNumOfOpenIssues() {
-		return numOfOpenIssues;
-	}
-
-	public void setNumOfOpenIssues(int numOfOpenIssues) {
-		this.numOfOpenIssues = numOfOpenIssues;
-	}
-
-	public int getNumOfClosedIssues() {
-		return numOfClosedIssues;
-	}
-
-	public void setNumOfClosedIssues(int numOfClosedIssues) {
-		this.numOfClosedIssues = numOfClosedIssues;
+	
+	public String getStatusName() {
+		return closed?"Closed":"Open";
 	}
 
 	public Collection<Issue> getIssues() {
@@ -123,6 +113,19 @@ public class Milestone extends AbstractEntity {
 
 	public void setIssues(Collection<Issue> issues) {
 		this.issues = issues;
+	}
+	
+	public Map<String, Integer> getStateStats() {
+		Map<String, Integer> stateStats = new HashMap<>();
+		for (Issue issue: getIssues()) {
+			Integer count = stateStats.get(issue.getState());
+			if (count != null)
+				count++;
+			else
+				count = 1;
+			stateStats.put(issue.getState(), count);
+		}
+		return stateStats;
 	}
 	
 }

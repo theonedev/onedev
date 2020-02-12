@@ -8,7 +8,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
-import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class SourceBranchCriteria extends EntityCriteria<PullRequest> {
 
@@ -22,7 +21,7 @@ public class SourceBranchCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<String> attribute = root.get(PullRequestQueryConstants.ATTR_SOURCE_BRANCH);
+		Path<String> attribute = root.get(PullRequest.PROP_SOURCE_BRANCH);
 		String normalized = branch.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -34,7 +33,7 @@ public class SourceBranchCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String asString() {
-		return quote(PullRequestQueryConstants.FIELD_SOURCE_BRANCH) + " " 
+		return quote(PullRequest.FIELD_SOURCE_BRANCH) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
 				+ quote(branch);
 	}

@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -60,12 +59,10 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -106,7 +103,7 @@ public abstract class BuildListPanel extends Panel {
 			} catch (Exception e) {
 				logger.debug("Error parsing build query: " + query, e);
 				if (e.getMessage() != null)
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 				else
 					error("Malformed build query");
 			}
@@ -419,12 +416,20 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+				Fragment fragment = new Fragment(componentId, "buildFrag", BuildListPanel.this);
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
 						BuildDashboardPage.paramsOf(build, getQueryPosition(cellItem)));
+				link.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
+
+					@Override
+					protected Status load() {
+						return getBuildManager().load(buildId).getStatus();
+					}
+					
+				}));
 				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -439,70 +444,6 @@ public abstract class BuildListPanel extends Panel {
 						return builder.toString();
 					}
 					
-				}) {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(newBuildObserver(buildId));
-						setOutputMarkupId(true);
-					}
-					
-				});
-				fragment.add(link);
-				cellItem.add(fragment);
-			}
-		});
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_STATUS)) {
-
-			@Override
-			public String getCssClass() {
-				return "status";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				Long buildId = build.getId();
-
-				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
-				fragment.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
-
-					@Override
-					protected Status load() {
-						return getBuildManager().load(buildId).getStatus();
-					}
-					
-				}));
-				
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
-						BuildDashboardPage.paramsOf(build, getQueryPosition(cellItem)));
-				
-				link.add(new Label("name", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return rowModel.getObject().getStatus().getDisplayName();
-					}
-					
-				}) {
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(newBuildObserver(buildId));
-						setOutputMarkupId(true);
-					}
-					
-				});
-				link.add(new Label("date", new LoadableDetachableModel<String>() {
-
-					@Override
-					protected String load() {
-						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
-					}
-					
 				}));
 				fragment.add(link);
 				fragment.add(newBuildObserver(buildId));
@@ -511,7 +452,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_JOB)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.FIELD_JOB)) {
 
 			@Override
 			public String getCssClass() {
@@ -523,7 +464,7 @@ public abstract class BuildListPanel extends Panel {
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
 				if (SecurityUtils.canReadCode(build.getProject())) {
-					Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+					Fragment fragment = new Fragment(componentId, "jobFrag", BuildListPanel.this);
 					Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
 
 						@Override
@@ -541,7 +482,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_COMMIT)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.FIELD_COMMIT)) {
 
 			@Override
 			public String getCssClass() {
@@ -589,6 +530,50 @@ public abstract class BuildListPanel extends Panel {
 			});
 		}	
 		
+		columns.add(new AbstractColumn<Build, Void>(Model.of("Last Update")) {
+
+			@Override
+			public String getCssClass() {
+				return "date expanded";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
+				Build build = rowModel.getObject();
+				Long buildId = build.getId();
+
+				Fragment fragment = new Fragment(componentId, "dateFrag", BuildListPanel.this);
+				fragment.add(new Label("name", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return rowModel.getObject().getStatus().getDisplayName();
+					}
+					
+				}) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(newBuildObserver(buildId));
+						setOutputMarkupId(true);
+					}
+					
+				});
+				fragment.add(new Label("date", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						return DateUtils.formatAge(rowModel.getObject().getStatusDate());
+					}
+					
+				}));
+				fragment.add(newBuildObserver(buildId));
+				fragment.setOutputMarkupId(true);
+				cellItem.add(fragment);
+			}
+		});		
+		
 		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 	}
@@ -604,12 +589,7 @@ public abstract class BuildListPanel extends Panel {
 		return new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(component);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
 			}
 			

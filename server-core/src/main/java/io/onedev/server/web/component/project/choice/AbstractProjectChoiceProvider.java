@@ -3,6 +3,7 @@ package io.onedev.server.web.component.project.choice;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.unbescape.html.HtmlEscape;
@@ -25,8 +26,12 @@ public abstract class AbstractProjectChoiceProvider extends ChoiceProvider<Proje
 	@Override
 	public Collection<Project> toChoices(Collection<String> ids) {
 		return ids.stream()
-				.map(it->OneDev.getInstance(ProjectManager.class).load(Long.valueOf(it)))
-				.collect(Collectors.toList());
+				.map(it-> {
+					Project project = OneDev.getInstance(ProjectManager.class).load(Long.valueOf(it));
+					Hibernate.initialize(project);
+					return project;
+					}
+				).collect(Collectors.toList());
 	}
 
 }

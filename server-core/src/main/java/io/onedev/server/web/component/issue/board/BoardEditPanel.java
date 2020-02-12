@@ -52,9 +52,7 @@ public abstract class BoardEditPanel extends Panel {
 		else
 			board = new BoardSpec();
 		
-		board.getEditColumns().clear();
-		for (String column: board.getColumns()) 
-			board.getEditColumns().add(column!=null?column:BoardSpec.NULL_COLUMN);
+		board.populateEditColumns();
 		
 		BeanEditor editor = BeanContext.edit("editor", board);
 		
@@ -77,9 +75,7 @@ public abstract class BoardEditPanel extends Panel {
 							"This name has already been used by another board");
 				}
 				if (editor.isValid()) {
-					board.getColumns().clear();
-					for (String column: board.getEditColumns()) 
-						board.getColumns().add(column.equals(BoardSpec.NULL_COLUMN)?null:column);
+					board.populateColumns();
 					
 					if (boardIndex != -1) {
 						boards.set(boardIndex, board);

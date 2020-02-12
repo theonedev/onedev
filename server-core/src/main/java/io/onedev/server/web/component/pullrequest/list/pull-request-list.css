@@ -1,3 +1,8 @@
+@media(max-width: 991px) {
+	.pull-request-list>.body .pull-right {
+		display: none;
+	}
+}
 .pull-request-list>.head {
 	position: relative;
 }
@@ -5,11 +10,11 @@
 	margin-bottom: 20px;
 }
 .pull-request-list>.head>form.can-create-pull-requests {
-	margin-right: 170px;
+	margin-right: 100px;
 }
 .pull-request-list>.head>.open-new {
 	position: absolute;
-	width: 160px;
+	width: 80px;
 	right: 0;
 	top: 0;
 }
@@ -48,7 +53,7 @@
 	color: #666;
 	margin: 0 4px;
 }
-.pull-request-list>.body td .submission, 
+.pull-request-list>.body td .last-update, 
 .pull-request-list>.body td .comments {
 	color: #888;
 	font-size: 13px;

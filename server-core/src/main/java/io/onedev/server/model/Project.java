@@ -60,6 +60,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -97,16 +98,18 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
-import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
+import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
+import static io.onedev.server.model.Project.*;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -120,7 +123,8 @@ import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 
 @Entity
-@Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name"), @Index(columnList="updateDate")})
+@Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList=PROP_NAME), 
+		@Index(columnList=PROP_UPDATE_DATE)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate 
@@ -128,6 +132,34 @@ import io.onedev.server.web.util.WicketUtils;
 public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String FIELD_NAME = "Name";
+	
+	public static final String PROP_NAME = "name";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String PROP_UPDATE_DATE = "updateDate";
+	
+	public static final String FIELD_DESCRIPTION = "Description";
+	
+	public static final String PROP_DESCRIPTION = "description";
+	
+	public static final String FIELD_OWNER = "Owner";
+	
+	public static final String PROP_OWNER = "owner";
+	
+	public static final String PROP_ID = "id";
+	
+	public static final String PROP_FORKED_FROM = "forkedFrom";
+	
+	public static final List<String> QUERY_FIELDS = 
+			Lists.newArrayList(FIELD_NAME, FIELD_DESCRIPTION, FIELD_UPDATE_DATE);
+
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
+			FIELD_NAME, PROP_NAME, 
+			FIELD_OWNER, PROP_OWNER, 
+			FIELD_UPDATE_DATE, PROP_UPDATE_DATE);
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
@@ -1107,15 +1139,18 @@ public class Project extends AbstractEntity {
 
 	public List<Milestone> getSortedMilestones() {
 		if (sortedMilestones == null) {
-			sortedMilestones = new ArrayList<>(getMilestones());
-			Collections.sort(sortedMilestones, new Comparator<Milestone>() {
-
-				@Override
-				public int compare(Milestone o1, Milestone o2) {
-					return o1.getDueDate().compareTo(o2.getDueDate());
-				}
-				
-			});
+			sortedMilestones = new ArrayList<>();
+			List<Milestone> open = getMilestones().stream()
+					.filter(it->!it.isClosed())
+					.sorted(Comparator.comparing(Milestone::getDueDate))
+					.collect(Collectors.toList());
+			sortedMilestones.addAll(open);
+			List<Milestone> closed = getMilestones().stream()
+					.filter(it->it.isClosed())
+					.sorted(Comparator.comparing(Milestone::getDueDate))
+					.collect(Collectors.toList());
+			Collections.reverse(closed);
+			sortedMilestones.addAll(closed);
 		}
 		return sortedMilestones;
 	}
@@ -1142,29 +1177,6 @@ public class Project extends AbstractEntity {
 		for (TagProtection protection: getTagProtections()) {
 			if (protection.isEnabled() 
 					&& UserMatch.parse(protection.getUserMatch()).matches(this, user)
-					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
-				noCreation = noCreation || protection.isPreventCreation();
-				noDeletion = noDeletion || protection.isPreventDeletion();
-				noUpdate = noUpdate || protection.isPreventUpdate();
-			}
-		}
-		
-		TagProtection protection = new TagProtection();
-		protection.setPreventCreation(noCreation);
-		protection.setPreventDeletion(noDeletion);
-		protection.setPreventUpdate(noUpdate);
-		
-		return protection;
-	}
-	
-	public TagProtection getTagProtection(String tagName, Build build) {
-		boolean noCreation = false;
-		boolean noDeletion = false;
-		boolean noUpdate = false;
-		Project project = build.getProject();
-		for (TagProtection protection: getTagProtections()) {
-			if (protection.isEnabled() 
-					&& (protection.getBuildBranches() == null || project.isCommitOnBranches(build.getCommitId(), protection.getBuildBranches()))
 					&& PatternSet.parse(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				noCreation = noCreation || protection.isPreventCreation();
 				noDeletion = noDeletion || protection.isPreventDeletion();

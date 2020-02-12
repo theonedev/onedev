@@ -48,17 +48,8 @@ public class BuildStatusIcon extends GenericPanel<Status> {
 		add(new WebSocketObserver() {
 			
 			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
-			}
-			
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
-				/*
-				 *  Do not refresh on connection as otherwise project commit status cache will not take
-				 *  effect on commit list page 
-				 */
-				// handler.add(component);
 			}
 			
 			@Override

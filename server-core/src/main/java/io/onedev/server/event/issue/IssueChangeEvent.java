@@ -1,5 +1,6 @@
 package io.onedev.server.event.issue;
 
+import java.util.Collection;
 import java.util.Map;
 
 import io.onedev.server.event.MarkdownAware;
@@ -34,13 +35,18 @@ public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 	}
 
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, Collection<User>> getNewUsers() {
 		return change.getData().getNewUsers();
 	}
 
 	@Override
 	public Map<String, Group> getNewGroups() {
 		return change.getData().getNewGroups();
+	}
+
+	@Override
+	public String getActivity(boolean withEntity) {
+		return getChange().getData().getActivity(withEntity?getChange().getIssue():null);
 	}
 
 }

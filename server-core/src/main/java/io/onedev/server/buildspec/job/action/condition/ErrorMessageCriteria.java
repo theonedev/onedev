@@ -4,7 +4,6 @@ import java.util.regex.Pattern;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.query.BuildQueryConstants;
 
 public class ErrorMessageCriteria extends Criteria<Build> {
 
@@ -23,7 +22,7 @@ public class ErrorMessageCriteria extends Criteria<Build> {
 
 	@Override
 	public String asString() {
-		return quote(BuildQueryConstants.FIELD_ERROR_MESSAGE) + " " 
+		return quote(Build.FIELD_ERROR_MESSAGE) + " " 
 				+ ActionCondition.getRuleName(ActionConditionLexer.Contains) + " "
 				+ quote(value);
 	}

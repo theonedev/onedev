@@ -2,8 +2,6 @@ package io.onedev.server.issue;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Color;
@@ -15,11 +13,7 @@ public class StateSpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Category {OPEN, CLOSED};
-	
 	private String name;
-	
-	private Category category;
 	
 	private String description;
 	
@@ -33,16 +27,6 @@ public class StateSpec implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Editable(order=150, description="Select category of this state")
-	@NotNull
-	public Category getCategory() {
-		return category;
-	}
-
-	public void setCategory(Category category) {
-		this.category = category;
 	}
 
 	@Editable(order=200)

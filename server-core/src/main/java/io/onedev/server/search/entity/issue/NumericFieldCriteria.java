@@ -1,7 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
 import java.util.Objects;
-import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
@@ -28,7 +27,7 @@ public class NumericFieldCriteria extends FieldCriteria {
 
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
-		Path<Integer> attribute = field.get(IssueField.ATTR_ORDINAL);
+		Path<Integer> attribute = field.get(IssueField.PROP_ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
@@ -56,7 +55,7 @@ public class NumericFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
+	public void fill(Issue issue) {
 		issue.setFieldValue(getFieldName(), value);
 	}
 
