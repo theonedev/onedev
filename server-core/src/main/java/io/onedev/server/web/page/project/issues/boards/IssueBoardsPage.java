@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.issues.boards;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -37,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -177,22 +175,10 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			milestone = getProject().getMilestone(milestoneName);
 			if (milestone == null)
 				throw new OneException("Can not find milestone: " + milestoneName);
+		} else if (!getProject().getSortedMilestones().isEmpty()) {
+			milestone = getProject().getSortedMilestones().iterator().next();
 		} else {
 			milestone = null;
-			for (Milestone each: getMilestones()) {
-				if (!each.isClosed()) {
-					milestone = each;
-					break;
-				}
-			}
-			if (milestone == null) {
-				for (Milestone each: getMilestones()) {
-					if (each.isClosed()) {
-						milestone = each;
-						break;
-					}
-				}
-			}
 		}
 
 		Long milestoneId = Milestone.idOf(milestone);
@@ -217,19 +203,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		return OneDev.getInstance(MilestoneManager.class);
 	}
 	
-	private List<Milestone> getMilestones() {
-		List<Milestone> milestones = new ArrayList<>(getProject().getMilestones());
-		Collections.sort(milestones, new Comparator<Milestone>() {
-
-			@Override
-			public int compare(Milestone o1, Milestone o2) {
-				return o1.getDueDate().compareTo(o2.getDueDate());
-			}
-			
-		});
-		return milestones;
-	}
-
 	@Override
 	protected void onDetach() {
 		milestoneModel.detach();
@@ -445,10 +418,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 							@Override
 							protected List<Milestone> load() {
-								List<Milestone> milestones = getMilestones().stream().filter(it->!it.isClosed()).collect(Collectors.toList());
+								List<Milestone> milestones = getProject().getSortedMilestones().stream().filter(it->!it.isClosed()).collect(Collectors.toList());
 								if (getMilestone().isClosed() || showClosed) {
-									List<Milestone> closedMilestones = getMilestones().stream().filter(it->it.isClosed()).collect(Collectors.toList());
-									Collections.reverse(closedMilestones);
+									List<Milestone> closedMilestones = getProject().getSortedMilestones().stream().filter(it->it.isClosed()).collect(Collectors.toList());
 									milestones.addAll(closedMilestones);
 								}
 								return milestones;
@@ -456,6 +428,22 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							
 						}) {
 
+							private void toggleClose(Milestone milestone) {
+								milestone.setClosed(!milestone.isClosed());
+								if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
+									getMilestoneManager().save(milestone);
+									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
+											getProject(), getBoard(), milestone, backlog, query, backlogQuery));
+								} else {
+									getMilestoneManager().save(milestone);
+								}
+								dropdown.close();
+								if (milestone.isClosed())
+									Session.get().success("Milestone '" + milestone.getName() + "' is closed");
+								else
+									Session.get().success("Milestone '" + milestone.getName() + "' is reopened");
+							}
+							
 							@Override
 							protected void populateItem(ListItem<Milestone> item) {
 								Milestone milestone = item.getModelObject();
@@ -481,10 +469,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										Milestone milestone = item.getModelObject();
-										milestone.setClosed(true);
-										getMilestoneManager().save(milestone);
-										dropdown.close();
+										toggleClose(item.getModelObject());
 									}
 
 									@Override
@@ -498,10 +483,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										Milestone milestone = item.getModelObject();
-										milestone.setClosed(false);
-										getMilestoneManager().save(milestone);
-										dropdown.close();
+										toggleClose(item.getModelObject());
 									}
 
 									@Override
@@ -515,6 +497,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
+										super.onClick(target);
 										dropdown.close();
 									}
 
@@ -539,6 +522,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										} else {
 											getMilestoneManager().delete(milestone);
 										}
+										Session.get().success("Milestone '" + milestone.getName() + "' is deleted");
 									}
 
 								});
@@ -557,7 +541,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							protected void onConfigure() {
 								super.onConfigure();
 								setVisible(!showClosed && !getMilestone().isClosed() 
-										&& getMilestones().stream().anyMatch(it->it.isClosed()));
+										&& getProject().getMilestones().stream().anyMatch(it->it.isClosed()));
 							}
 							
 						});
