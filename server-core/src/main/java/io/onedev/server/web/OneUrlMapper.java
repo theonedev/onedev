@@ -4,6 +4,7 @@ import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
+
 import io.onedev.server.web.download.ArchiveDownloadResourceReference;
 import io.onedev.server.web.download.ArtifactDownloadResourceReference;
 import io.onedev.server.web.download.AttachmentDownloadResourceReference;
@@ -43,7 +44,6 @@ import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
-import io.onedev.server.web.page.admin.user.sshkeys.UserSshKeysPage;
 import io.onedev.server.web.page.admin.user.webhook.UserWebHooksPage;
 import io.onedev.server.web.page.build.BuildListPage;
 import io.onedev.server.web.page.init.ServerInitPage;
