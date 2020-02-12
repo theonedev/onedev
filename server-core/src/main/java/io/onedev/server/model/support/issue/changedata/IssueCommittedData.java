@@ -43,9 +43,9 @@ public class IssueCommittedData implements IssueChangeData {
 	@Override
 	public String getActivity(Issue withIssue) {
 		if (withIssue != null)
-			return "Commit added fixing issue " + withIssue.describe();
+			return "Code committed to fix issue " + withIssue.describe();
 		else
-			return "Commit added fixing this issue";
+			return "Code committed to fix issue";
 	}
 
 	@Override

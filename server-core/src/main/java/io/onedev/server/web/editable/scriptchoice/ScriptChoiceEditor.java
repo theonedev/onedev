@@ -15,7 +15,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.script.ScriptContribution;
-import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -39,16 +38,13 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 			protected Map<String, String> load() {
 				Map<String, String> choices = new LinkedHashMap<>();
 				
-				for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
-					if (script.isAuthorized(ScriptIdentity.get())) 
-						choices.put(script.getName(), script.getName());
-				}
+				for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts())
+					choices.put(script.getName(), script.getName());
+				
 				for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
 					GroovyScript script = contribution.getScript();
-					if (script.isAuthorized(ScriptIdentity.get())) { 
-						String displayName = GroovyScript.BUILTIN_PREFIX + script.getName();
-						choices.put(displayName, displayName);
-					}
+					String displayName = GroovyScript.BUILTIN_PREFIX + script.getName();
+					choices.put(displayName, displayName);
 				}
 				
 				return choices;

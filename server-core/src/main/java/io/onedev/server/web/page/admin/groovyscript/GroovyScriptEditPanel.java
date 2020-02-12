@@ -2,6 +2,8 @@ package io.onedev.server.web.page.admin.groovyscript;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -17,6 +19,8 @@ import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 abstract class GroovyScriptEditPanel extends Panel {
@@ -72,12 +76,27 @@ abstract class GroovyScriptEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				if (scriptIndex != -1) 
-					getScripts().set(scriptIndex, script);
-				else 
-					getScripts().add(script);
-				OneDev.getInstance(SettingManager.class).saveGroovyScripts(getScripts());
-				onSave(target);
+				if (scriptIndex != -1) { 
+					GroovyScript oldScript = getScripts().get(scriptIndex);
+					if (!script.getName().equals(oldScript.getName()) && getScript(script.getName()) != null) {
+						editor.error(new Path(new PathNode.Named("name")),
+								"This name has already been used by another script");
+					}
+				} else if (getScript(script.getName()) != null) {
+					editor.error(new Path(new PathNode.Named("name")),
+							"This name has already been used by another script");
+				}
+
+				if (editor.isValid()) {
+					if (scriptIndex != -1) 
+						getScripts().set(scriptIndex, script);
+					else 
+						getScripts().add(script);
+					OneDev.getInstance(SettingManager.class).saveGroovyScripts(getScripts());
+					onSave(target);
+				} else {
+					target.add(form);
+				}
 			}
 			
 		});
@@ -99,6 +118,15 @@ abstract class GroovyScriptEditPanel extends Panel {
 		form.setOutputMarkupId(true);
 		
 		add(form);
+	}
+	
+	@Nullable
+	private GroovyScript getScript(String name) {
+		for (GroovyScript script: getScripts()) {
+			if (script.getName().equals(name))
+				return script;
+		}
+		return null;
 	}
 
 	protected abstract List<GroovyScript> getScripts();

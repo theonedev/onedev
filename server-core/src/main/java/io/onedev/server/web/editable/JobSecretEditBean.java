@@ -34,10 +34,8 @@ public class JobSecretEditBean implements Serializable {
 	private static List<String> getSecretChoices() {
 		List<String> secretNames = new ArrayList<>();
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-		for (JobSecret secret: page.getProject().getBuildSetting().getHierarchySecrets(page.getProject())) {
-			if (secret.isAuthorized(page.getProject(), page.getCommit()))
-				secretNames.add(secret.getName());
-		}
+		for (JobSecret secret: page.getProject().getBuildSetting().getHierarchySecrets(page.getProject())) 
+			secretNames.add(secret.getName());
 		return secretNames;
 	}
 	

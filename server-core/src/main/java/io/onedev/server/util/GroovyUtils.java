@@ -62,31 +62,35 @@ public class GroovyUtils {
     }
 
     public static Object evalScriptByName(String scriptName, Map<String, Object> variables) {
+    	GroovyScript script = null;
     	if (scriptName.startsWith(GroovyScript.BUILTIN_PREFIX)) {
-    		scriptName = scriptName.substring(GroovyScript.BUILTIN_PREFIX.length());
+    		String builtInScriptName = scriptName.substring(GroovyScript.BUILTIN_PREFIX.length());
         	for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
-        		GroovyScript script = contribution.getScript();
-        		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
-        			try {
-        				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
-        			} catch (Exception e) {
-        				throw new OneException("Error evaluating builtin groovy script: " + scriptName, e);
-        			}
+        		if (contribution.getScript().getName().equals(builtInScriptName)) {
+        			script = contribution.getScript();
+        			break;
         		}
         	}
-        	throw new OneException("No authorized groovy script found: " 
-        			+ GroovyScript.BUILTIN_PREFIX + scriptName);
     	} else {
-        	for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
-        		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
-        			try {
-        				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
-        			} catch (Exception e) {
-        				throw new OneException("Error evaluating named groovy script: " + scriptName, e);
-        			}
+        	for (GroovyScript each: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
+        		if (each.getName().equals(scriptName)) {
+        			script = each;
+        			break;
         		}
         	}
-        	throw new OneException("No authorized groovy script found: " + scriptName);
+    	}
+    	if (script != null) {
+    		if (script.isAuthorized(ScriptIdentity.get())) {
+    			try {
+    				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
+    			} catch (Exception e) {
+    				throw new OneException("Error evaluating groovy script: " + scriptName, e);
+    			}
+    		} else {
+    			throw new OneException("Unauthorized groovy script: " + scriptName);
+    		}
+    	} else {
+    		throw new OneException("Groovy script not found: " + scriptName);
     	}
     }
     

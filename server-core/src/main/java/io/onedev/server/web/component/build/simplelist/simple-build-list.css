@@ -18,7 +18,7 @@
     color: #666;
 }
 .simple-build-list>.has-builds>.body>div>.build {
-	padding: 4px 0;
+	padding: 4px 6px;
 	display: block;
 	text-decoration: none;
 	white-space: nowrap;
