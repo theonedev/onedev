@@ -65,8 +65,9 @@
                 <string>mv docker/onedev-${buildVersion} docker/app</string>
                 <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* docker/app/site/lib</string>
                 <string></string>
-                <string>docker build -t 1dev/server:latest 1dev/server:${buildVersion} docker</string>
+                <string>docker build -t 1dev/server:${buildVersion} docker</string>
                 <string>docker push 1dev/server:${buildVersion}</string>
+                <string>docker tag 1dev/server:${buildVersion} 1dev/server:latest</string>
                 <string>docker push 1dev/server:latest</string>
                 <string></string>
                 <string>cp -r server-product/k8s k8s-resources</string>
