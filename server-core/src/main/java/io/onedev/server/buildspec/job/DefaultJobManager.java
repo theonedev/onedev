@@ -76,6 +76,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
@@ -718,9 +719,42 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Override
 	public void cancel(Build build) {
-		JobExecution execution = jobExecutions.get(build.getId());
-		if (execution != null)
-			execution.cancel(User.idOf(SecurityUtils.getUser()));
+		Long buildId = build.getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				executorService.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						synchronized (DefaultJobManager.this) {
+							transactionManager.run(new Runnable() {
+
+								@Override
+								public void run() {
+									JobExecution execution = jobExecutions.get(buildId);
+									if (execution != null) {
+										execution.cancel(User.idOf(SecurityUtils.getUser()));
+									} else {
+										Build build = buildManager.load(buildId);
+										if (!build.isFinished()) {
+											build.setStatus(Status.CANCELLED);
+											build.setFinishDate(new Date());
+											build.setCanceller(SecurityUtils.getUser());
+											listenerRegistry.post(new BuildFinished(build));
+										}
+									}
+								}
+								
+							});
+						}
+					}
+					
+				});
+			}
+			
+		});
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -753,84 +787,86 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public synchronized void run() {
+	public void run() {
 		while (!jobExecutions.isEmpty() || thread != null) {
 			try {
-				transactionManager.run(new Runnable() {
-	
-					@Override
-					public void run() {
-						for (Build build: buildManager.queryUnfinished()) {
-							if (build.getStatus() == Build.Status.RUNNING || build.getStatus() == Build.Status.PENDING) {
-								JobExecution execution = jobExecutions.get(build.getId());
-								if (execution != null) {
-									if (execution.isTimedout())
-										execution.cancel(null);
-								} else if (thread != null) {
-									try {
-										jobExecutions.put(build.getId(), execute(build));
-									} catch (Throwable t) {
-										if (t instanceof OneException)
-											markBuildError(build, t.getMessage());
-										else
-											markBuildError(build, Throwables.getStackTraceAsString(t));
-									}
-								}
-							} else if (build.getStatus() == Build.Status.WAITING) {
-								if (build.getRetryDate() != null) {
+				synchronized (this) {
+					transactionManager.run(new Runnable() {
+		
+						@Override
+						public void run() {
+							for (Build build: buildManager.queryUnfinished()) {
+								if (build.getStatus() == Build.Status.RUNNING || build.getStatus() == Build.Status.PENDING) {
 									JobExecution execution = jobExecutions.get(build.getId());
-									if (execution == null && thread != null) {
+									if (execution != null) {
+										if (execution.isTimedout())
+											execution.cancel(null);
+									} else if (thread != null) {
+										try {
+											jobExecutions.put(build.getId(), execute(build));
+										} catch (Throwable t) {
+											if (t instanceof OneException)
+												markBuildError(build, t.getMessage());
+											else
+												markBuildError(build, Throwables.getStackTraceAsString(t));
+										}
+									}
+								} else if (build.getStatus() == Build.Status.WAITING) {
+									if (build.getRetryDate() != null) {
+										JobExecution execution = jobExecutions.get(build.getId());
+										if (execution == null && thread != null) {
+											build.setStatus(Build.Status.PENDING);
+											build.setPendingDate(new Date());
+											listenerRegistry.post(new BuildPending(build));
+										}
+									} else if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() 
+											&& it.getDependency().isFinished() 
+											&& it.getDependency().getStatus() != Build.Status.SUCCESSFUL)) {
+										markBuildError(build, "Some dependencies are required to be successful but failed");
+									} else if (build.getDependencies().stream().allMatch(it->it.getDependency().isFinished())) {
 										build.setStatus(Build.Status.PENDING);
 										build.setPendingDate(new Date());
 										listenerRegistry.post(new BuildPending(build));
 									}
-								} else if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() 
-										&& it.getDependency().isFinished() 
-										&& it.getDependency().getStatus() != Build.Status.SUCCESSFUL)) {
-									markBuildError(build, "Some dependencies are required to be successful but failed");
-								} else if (build.getDependencies().stream().allMatch(it->it.getDependency().isFinished())) {
-									build.setStatus(Build.Status.PENDING);
-									build.setPendingDate(new Date());
-									listenerRegistry.post(new BuildPending(build));
-								}
-							} 
-						}
-						for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext();) {
-							Map.Entry<Long, JobExecution> entry = it.next();
-							Build build = buildManager.get(entry.getKey());
-							JobExecution execution = entry.getValue();
-							if (build == null || build.isFinished()) {
-								it.remove();
-								execution.cancel(null);
-							} else if (execution.isDone()) {
-								it.remove();
-								try {
-									execution.check();
-									build.setStatus(Build.Status.SUCCESSFUL);
-								} catch (TimeoutException e) {
-									build.setStatus(Build.Status.TIMED_OUT);
-								} catch (CancellationException e) {
-									if (e instanceof CancellerAwareCancellationException) {
-										Long cancellerId = ((CancellerAwareCancellationException) e).getCancellerId();
-										if (cancellerId != null)
-											build.setCanceller(userManager.load(cancellerId));
+								} 
+							}
+							for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext();) {
+								Map.Entry<Long, JobExecution> entry = it.next();
+								Build build = buildManager.get(entry.getKey());
+								JobExecution execution = entry.getValue();
+								if (build == null || build.isFinished()) {
+									it.remove();
+									execution.cancel(null);
+								} else if (execution.isDone()) {
+									it.remove();
+									try {
+										execution.check();
+										build.setStatus(Build.Status.SUCCESSFUL);
+									} catch (TimeoutException e) {
+										build.setStatus(Build.Status.TIMED_OUT);
+									} catch (CancellationException e) {
+										if (e instanceof CancellerAwareCancellationException) {
+											Long cancellerId = ((CancellerAwareCancellationException) e).getCancellerId();
+											if (cancellerId != null)
+												build.setCanceller(userManager.load(cancellerId));
+										}
+										build.setStatus(Build.Status.CANCELLED);
+									} catch (ExecutionException e) {
+										if (e.getCause() instanceof OneException)
+											build.setStatus(Build.Status.FAILED, e.getCause().getMessage());
+										else
+											build.setStatus(Build.Status.FAILED, e.getMessage());
+									} catch (InterruptedException e) {
+									} finally {
+										build.setFinishDate(new Date());
+										listenerRegistry.post(new BuildFinished(build));
 									}
-									build.setStatus(Build.Status.CANCELLED);
-								} catch (ExecutionException e) {
-									if (e.getCause() instanceof OneException)
-										build.setStatus(Build.Status.FAILED, e.getCause().getMessage());
-									else
-										build.setStatus(Build.Status.FAILED, e.getMessage());
-								} catch (InterruptedException e) {
-								} finally {
-									build.setFinishDate(new Date());
-									listenerRegistry.post(new BuildFinished(build));
 								}
 							}
 						}
-					}
-					
-				});
+						
+					});
+				}
 				Thread.sleep(CHECK_INTERVAL);
 			} catch (Throwable e) {
 				logger.error("Error checking unfinished builds", e);
