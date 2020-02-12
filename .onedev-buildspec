@@ -112,7 +112,7 @@
             <retryCondition>never</retryCondition>
             <maxRetries>3</maxRetries>
             <retryDelay>30</retryDelay>
-            <defaultFixedIssuesFilter>not("State" is "Invalid") order by "Type" asc and "Priority" desc</defaultFixedIssuesFilter>
+            <defaultFixedIssuesFilter>"State" is "Closed" order by "Type" asc and "Priority" desc</defaultFixedIssuesFilter>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Master (GitHub)</name>
