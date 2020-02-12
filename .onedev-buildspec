@@ -110,11 +110,12 @@
             <retryCondition>never</retryCondition>
             <maxRetries>3</maxRetries>
             <retryDelay>30</retryDelay>
+            <defaultFixedIssuesFilter>not("State" is "Invalid") order by "Type" asc and "Priority" desc</defaultFixedIssuesFilter>
         </io.onedev.server.buildspec.job.Job>
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Master (GitHub)</name>
             <paramSpecs/>
-            <image>1dev/build-environment:1.0</image>
+            <image>alpine/git:1.0.7</image>
             <commands>
                 <string>git push -f https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
             </commands>
@@ -142,7 +143,7 @@
         <io.onedev.server.buildspec.job.Job>
             <name>Sync Tags (GitHub)</name>
             <paramSpecs/>
-            <image>1dev/build-environment:1.0</image>
+            <image>alpine/git:1.0.7</image>
             <commands>
                 <string>set -e</string>
                 <string>git fetch --tags https://robin:@secrets:onedev-password@\@code.onedev.io/projects/onedev-server</string>
