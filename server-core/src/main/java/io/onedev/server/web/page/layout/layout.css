@@ -4,15 +4,16 @@
 	margin-right: 12px;
 }
 .navbar-brand img {
-	width: 24px;
-	height: 24px;
+	width: 32px;
+	height: 32px;
 	margin-left: -6px;
+	margin-top: -8px;
 }
 .navbar-brand .separator {
 	border-left: 1px solid #444;
 	height: 30px;
 	position: absolute;
-	left: 48px;
+	left: 52px;
 	top: 11px;
 }
 @media(min-width: 768px) {
