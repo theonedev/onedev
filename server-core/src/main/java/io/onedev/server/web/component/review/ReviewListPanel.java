@@ -31,6 +31,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
@@ -170,13 +171,15 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 						review.setExcludeDate(new Date());
 						if (request.isNew()) {
 							OneDev.getInstance(PullRequestManager.class).checkQuality(request);
-							removed = review.getExcludeDate() != null;								
+							removed = review.getExcludeDate() != null;		
 						} else {
 							removed = OneDev.getInstance(PullRequestReviewManager.class).excludeReviewer(review);
 						}
 						if (!removed) {
 							getSession().warn("Reviewer '" + review.getUser().getDisplayName() 
 									+ "' is required and can not be removed");
+						} else if (request.isNew()) {
+							target.add(ReviewListPanel.this);
 						}
 						reviewsModel.detach();
 					}
@@ -200,6 +203,13 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				super.onConfigure();
 
 				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
+			}
+
+			@Override
+			protected void onSelect(AjaxRequestTarget target, User user) {
+				super.onSelect(target, user);
+				if (getPullRequest().isNew())
+					target.add(ReviewListPanel.this);
 			}
 		                                                                                                                              
 		});
