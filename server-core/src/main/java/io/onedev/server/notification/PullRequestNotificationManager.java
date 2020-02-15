@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -46,6 +47,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MentionParser;
 
@@ -143,6 +145,20 @@ public class PullRequestNotificationManager {
 			if (!user.isSystem())
 				pullRequestWatchManager.watch(request, user, true);
 		}
+		if (event instanceof PullRequestUpdated) {
+			PullRequestUpdated pullRequestUpdated = (PullRequestUpdated) event;
+			Set<User> committers = pullRequestUpdated.getUpdate().getCommits()
+					.stream()
+					.map(it->userManager.find(it.getCommitterIdent()))
+					.filter(it->it!=null)
+					.collect(Collectors.toSet());
+			if (committers.size() == 1) 
+				notifiedUsers.add(committers.iterator().next());
+			for (User committer: committers) {
+				if (!committer.isSystem())
+					pullRequestWatchManager.watch(request, committer, true);
+			}
+		}
 		
 		if (event instanceof PullRequestOpened) {
 			for (PullRequestReview review: request.getReviews()) {
@@ -156,14 +172,14 @@ public class PullRequestNotificationManager {
 		if (event instanceof PullRequestChangeEvent 
 				&& request.getSubmitter() != null 
 				&& !notifiedUsers.contains(request.getSubmitter())) {
-			PullRequestChangeEvent actionEvent = (PullRequestChangeEvent) event;
-			PullRequestChangeData actionData = actionEvent.getChange().getData();
+			PullRequestChangeEvent changeEvent = (PullRequestChangeEvent) event;
+			PullRequestChangeData changeData = changeEvent.getChange().getData();
 			String subject = null;
-			if (actionData instanceof PullRequestApproveData) 
+			if (changeData instanceof PullRequestApproveData) 
 				subject = String.format(user.getDisplayName() + " approved pull request %s", request.describe());
-			else if (actionData instanceof PullRequestRequestedForChangesData) 
+			else if (changeData instanceof PullRequestRequestedForChangesData) 
 				subject = String.format(user.getDisplayName() + " requested changes for pull request %s", request.describe());
-			else if (actionData instanceof PullRequestDiscardData) 
+			else if (changeData instanceof PullRequestDiscardData) 
 				subject = String.format(user.getDisplayName() + " discarded pull request %s", request.describe());
 			if (subject != null) { 
 				String url = urlManager.urlFor(request);
@@ -182,7 +198,7 @@ public class PullRequestNotificationManager {
 				
 				for (String userName: new MentionParser().parseMentions(rendered)) {
 					User mentionedUser = userManager.findByName(userName);
-					if (mentionedUser != null && !notifiedUsers.contains(mentionedUser)) { 
+					if (mentionedUser != null) { 
 						pullRequestWatchManager.watch(request, mentionedUser, true);
 						String url;
 						if (event instanceof PullRequestCommentCreated)
@@ -267,7 +283,7 @@ public class PullRequestNotificationManager {
 			PullRequest request = review.getRequest();
 			if (review.getExcludeDate() == null 
 					&& review.getResult() == null 
-					&& (request.getSubmitter() == null || !request.getSubmitter().equals(review.getUser()))) {
+					&& !review.getUser().equals(SecurityUtils.getUser())) {
 				pullRequestWatchManager.watch(request, review.getUser(), true);
 				inviteToReview(review);
 			}

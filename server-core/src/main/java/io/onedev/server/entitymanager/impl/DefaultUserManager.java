@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
@@ -238,7 +239,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     @Sessional
     @Override
     public User find(PersonIdent person) {
-    	return findByEmail(person.getEmailAddress());
+    	if (StringUtils.isNotBlank(person.getEmailAddress()))
+    		return findByEmail(person.getEmailAddress());
+    	else
+    		return null;
     }
     
 	@Override

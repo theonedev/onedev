@@ -161,9 +161,7 @@ public class GlobalIssueSetting implements Serializable {
 		failedBuild.setShowCondition(showCondition);
 		
 		BuildChoiceField affectedBuilds = new BuildChoiceField();
-		affectedBuilds.setName("Affected Builds");
-		affectedBuilds.setAllowEmpty(true);
-		affectedBuilds.setNameOfEmptyValue("Not specified");
+		affectedBuilds.setName("Seen Builds");
 		affectedBuilds.setAllowMultiple(true);
 		
 		showCondition = new ShowCondition();
@@ -261,7 +259,7 @@ public class GlobalIssueSetting implements Serializable {
 		defaultPromptFieldsUponIssueOpen.add("Priority");
 		defaultPromptFieldsUponIssueOpen.add("Assignees");
 		defaultPromptFieldsUponIssueOpen.add("Failed Build");
-		defaultPromptFieldsUponIssueOpen.add("Affected Builds");
+		defaultPromptFieldsUponIssueOpen.add("Seen Builds");
 		
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.FIELD_STATE);

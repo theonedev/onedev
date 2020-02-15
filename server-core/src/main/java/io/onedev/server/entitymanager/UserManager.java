@@ -51,7 +51,8 @@ public interface UserManager extends EntityManager<User> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable User findByName(String userName);
+	@Nullable 
+	User findByName(String userName);
 	
 	/**
 	 * Find user of specified name.
@@ -61,7 +62,8 @@ public interface UserManager extends EntityManager<User> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable User findByEmail(String email);
+	@Nullable 
+	User findByEmail(String email);
 	
 	/**
 	 * Find user by person
@@ -71,7 +73,8 @@ public interface UserManager extends EntityManager<User> {
 	 * @return
 	 * 			matching user, or <tt>null</tt> if not found 
 	 */
-	@Nullable User find(PersonIdent person);
+	@Nullable 
+	User find(PersonIdent person);
 	
 	List<User> queryAndSort(Collection<User> topUsers);
 	

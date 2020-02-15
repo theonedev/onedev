@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jgit.revwalk.RevCommit;
+
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -30,6 +32,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
@@ -134,6 +137,21 @@ public class IssueNotificationManager {
 			if (!user.isSystem())
 				issueWatchManager.watch(issue, user, true);
 		}
+		if (event instanceof IssueChangeEvent) {
+			IssueChangeData changeData = ((IssueChangeEvent) event).getChange().getData();
+			if (changeData instanceof IssueCommittedData) {
+				IssueCommittedData committedData = (IssueCommittedData) changeData;
+				RevCommit commit = issue.getProject().getRevCommit(committedData.getCommitHash(), false);
+				if (commit != null) {
+					User committer = userManager.find(commit.getCommitterIdent());
+					if (committer != null) {
+						notifiedUsers.add(committer);
+						if (!committer.isSystem())
+							issueWatchManager.watch(issue, committer, true);
+					}
+				}
+			}			
+		}
 		
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
@@ -144,6 +162,7 @@ public class IssueNotificationManager {
 			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 			Set<String> emails = entry.getValue().getMembers()
 					.stream()
+					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, subject, body.toString());
@@ -159,6 +178,7 @@ public class IssueNotificationManager {
 			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 			Set<String> emails = entry.getValue()
 					.stream()
+					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, subject, body.toString());
@@ -178,7 +198,7 @@ public class IssueNotificationManager {
 				
 				for (String userName: new MentionParser().parseMentions(rendered)) {
 					User mentionedUser = userManager.findByName(userName);
-					if (mentionedUser != null && !notifiedUsers.contains(mentionedUser)) {
+					if (mentionedUser != null) {
 						if (event instanceof IssueOpened)
 							url = urlManager.urlFor(((IssueOpened)event).getIssue());
 						else if (event instanceof IssueCommented) 
