@@ -108,6 +108,10 @@
                     <condition>successful</condition>
                     <tagName>v@build_version@</tagName>
                 </io.onedev.server.buildspec.job.action.CreateTagAction>
+                <io.onedev.server.buildspec.job.action.CloseMilestoneAction>
+                    <condition>successful</condition>
+                    <milestoneName>@build_version@</milestoneName>
+                </io.onedev.server.buildspec.job.action.CloseMilestoneAction>
             </postBuildActions>
             <retryCondition>never</retryCondition>
             <maxRetries>3</maxRetries>
