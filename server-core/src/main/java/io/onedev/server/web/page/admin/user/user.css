@@ -5,6 +5,9 @@
 	#user>.sidebar+.content {
 		padding-left: 0;
 	}	
+	.user.list .expanded {
+		display: none;
+	}
 }
 .nav-context .user-dropdown .avatar {
 	width: 24px;

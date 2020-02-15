@@ -1,4 +1,4 @@
-body.BranchProtectionPage, body.WebHooksPage {
+body.BranchProtectionsPage, body.TagProtectionsPage, body.WebHooksPage {
 	min-width: 768px;
 }
 @media(max-width: 767px) {

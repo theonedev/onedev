@@ -25,7 +25,7 @@ import io.onedev.server.web.page.admin.issuesetting.DefaultBoardListPage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultStateTransitionsPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
-import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
+import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
@@ -184,7 +184,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 
-		add(new OnePageMapper("administration/settings/job-executors", JobExecutorPage.class));
+		add(new OnePageMapper("administration/settings/job-executors", JobExecutorsPage.class));
 		add(new OnePageMapper("administration/settings/groovy-scripts", GroovyScriptListPage.class));
 		
 		add(new OnePageMapper("administration/settings/issue-fields", IssueFieldListPage.class));

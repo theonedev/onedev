@@ -31,7 +31,7 @@ import io.onedev.server.web.page.admin.group.GroupPage;
 import io.onedev.server.web.page.admin.group.create.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
+import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
@@ -114,8 +114,8 @@ public abstract class LayoutPage extends BasePage {
 			item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
-		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorPage.class));
-		if (getPage() instanceof JobExecutorPage)
+		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorsPage.class));
+		if (getPage() instanceof JobExecutorsPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("groovyScripts"));

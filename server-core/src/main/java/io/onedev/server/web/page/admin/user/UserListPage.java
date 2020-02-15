@@ -143,19 +143,31 @@ public class UserListPage extends AdministrationPage {
 		columns.add(new AbstractColumn<User, Void>(Model.of("Full Name")) {
 
 			@Override
+			public String getCssClass() {
+				return "expanded";
+			}
+			
+			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 					IModel<User> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getFullName()));
 			}
+			
 		});
 		
 		columns.add(new AbstractColumn<User, Void>(Model.of("Email")) {
 
 			@Override
+			public String getCssClass() {
+				return "expanded";
+			}
+			
+			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 					IModel<User> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getEmail()));
 			}
+			
 		});
 		
 		if (OneDev.getInstance(SettingManager.class).getAuthenticator() != null) {

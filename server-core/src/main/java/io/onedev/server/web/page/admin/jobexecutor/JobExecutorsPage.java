@@ -20,13 +20,13 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
-public class JobExecutorPage extends AdministrationPage {
+public class JobExecutorsPage extends AdministrationPage {
 
 	private List<JobExecutor> executors;
 	
 	private WebMarkupContainer container;
 	
-	public JobExecutorPage(PageParameters params) {
+	public JobExecutorsPage(PageParameters params) {
 		super(params);
 		executors = getSettingManager().getJobExecutors();
 	}
