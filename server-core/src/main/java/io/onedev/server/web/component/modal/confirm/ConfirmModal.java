@@ -27,6 +27,7 @@ public abstract class ConfirmModal extends ModalPanel {
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
 				close();
+				ConfirmModal.this.onCancel(target);
 			}
 
 			@Override
@@ -43,6 +44,9 @@ public abstract class ConfirmModal extends ModalPanel {
 	}
 
 	protected abstract void onConfirm(AjaxRequestTarget target);
+	
+	protected void onCancel(AjaxRequestTarget target) {
+	}
 	
 	@Nullable
 	protected abstract String getConfirmInput();

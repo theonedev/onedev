@@ -197,85 +197,78 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			@Override
 			public AuthenticationInfo call() throws Exception {
 		    	User user = userManager.findByName(((UsernamePasswordToken) token).getUsername());
-		    	if (user != null && user.isRoot())
-		    		return user;
+		    	Authenticator authenticator;
+		    	if ((user == null || user.getPassword().equals(User.EXTERNAL_MANAGED)) && 
+		    			((authenticator = settingManager.getAuthenticator()) != null)) {
+	        		Authenticated authenticated;
+	        		try {
+	        			authenticated = authenticator.authenticate((UsernamePasswordToken) token);
+	        		} catch (Exception e) {
+	        			if (e instanceof AuthenticationException) {
+	        				logger.debug("Authentication not passed", e);
+	            			throw ExceptionUtils.unchecked(e);
+	        			} else {
+	        				logger.error("Error authenticating user", e);
+	            			throw new AuthenticationException("Error authenticating user", e);
+	        			}
+	        		}
+	    			if (user != null) {
+	    				user.setEmail(authenticated.getEmail());
+	    				if (authenticated.getFullName() != null)
+	    					user.setFullName(authenticated.getFullName());
 
-		    	if (user == null || user.getPassword().equals(User.EXTERNAL_MANAGED)) {
-		        	Authenticator authenticator = settingManager.getAuthenticator();
-		        	if (authenticator != null) {
-		        		Authenticated authenticated;
-		        		try {
-		        			authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-		        		} catch (Exception e) {
-		        			if (e instanceof AuthenticationException) {
-		        				logger.debug("Authentication not passed", e);
-		            			throw ExceptionUtils.unchecked(e);
-		        			} else {
-		        				logger.error("Error authenticating user", e);
-		            			throw new AuthenticationException("Error authenticating user", e);
-		        			}
-		        		}
-		    			if (user != null) {
-		    				user.setEmail(authenticated.getEmail());
-		    				if (authenticated.getFullName() != null)
-		    					user.setFullName(authenticated.getFullName());
-
-		    				Collection<String> existingGroupNames = new HashSet<>();
-		    				for (Membership membership: user.getMemberships()) 
-		    					existingGroupNames.add(membership.getGroup().getName());
-		    				if (!authenticated.getGroupNames().isEmpty()) {
-		    					Collection<String> retrievedGroupNames = new HashSet<>();
-		    					for (String groupName: authenticated.getGroupNames()) {
-		    						Group group = groupManager.find(groupName);
-		    						if (group != null) {
-		    							if (!existingGroupNames.contains(groupName)) {
-		    								Membership membership = new Membership();
-		    								membership.setGroup(group);
-		    								membership.setUser(user);
-		    								membershipManager.save(membership);
-		    								user.getMemberships().add(membership);
-		    								existingGroupNames.add(groupName);
-		    							}
-		    							retrievedGroupNames.add(groupName);
-		    						} else {
-		    							logger.warn("Group '{}' from external authenticator is not defined", groupName);
-		    						}
-		    					}
-		        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
-		        					Membership membership = it.next();
-		        					if (!retrievedGroupNames.contains(membership.getGroup().getName())) {
-		        						it.remove();
-		        						membershipManager.delete(membership);
-		        					}
-		        				}
-		    				}
-		    				userManager.save(user);
-		    			} else {
-		    				user = new User();
-		    				user.setName(((UsernamePasswordToken) token).getUsername());
-		    				user.setPassword(User.EXTERNAL_MANAGED);
-		    				if (authenticated.getEmail() != null)
-		    					user.setEmail(authenticated.getEmail());
-		    				if (authenticated.getFullName() != null)
-		    					user.setFullName(authenticated.getFullName());
-		    				userManager.save(user);
-		    				if (authenticated.getGroupNames().isEmpty() && authenticator.getDefaultGroup() != null) {
-	    						Group group = groupManager.find(authenticator.getDefaultGroup());
+	    				Collection<String> existingGroupNames = new HashSet<>();
+	    				for (Membership membership: user.getMemberships()) 
+	    					existingGroupNames.add(membership.getGroup().getName());
+	    				if (!authenticated.getGroupNames().isEmpty()) {
+	    					Collection<String> retrievedGroupNames = new HashSet<>();
+	    					for (String groupName: authenticated.getGroupNames()) {
+	    						Group group = groupManager.find(groupName);
 	    						if (group != null) {
-	    							Membership membership = new Membership();
-	    							membership.setGroup(group);
-	    							membership.setUser(user);
-	    							user.getMemberships().add(membership);
-	    							membershipManager.save(membership);
+	    							if (!existingGroupNames.contains(groupName)) {
+	    								Membership membership = new Membership();
+	    								membership.setGroup(group);
+	    								membership.setUser(user);
+	    								membershipManager.save(membership);
+	    								user.getMemberships().add(membership);
+	    								existingGroupNames.add(groupName);
+	    							}
+	    							retrievedGroupNames.add(groupName);
 	    						} else {
-	    							logger.error("Default group '{}' of external authenticator is not defined", 
-	    									authenticator.getDefaultGroup());
+	    							logger.warn("Group '{}' from external authenticator is not defined", groupName);
 	    						}
-		    				}
-		    			}
-		        	} else {
-		        		user = null;
-		        	}
+	    					}
+	        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
+	        					Membership membership = it.next();
+	        					if (!retrievedGroupNames.contains(membership.getGroup().getName())) {
+	        						it.remove();
+	        						membershipManager.delete(membership);
+	        					}
+	        				}
+	    				}
+	    				userManager.save(user);
+	    			} else {
+	    				user = new User();
+	    				user.setName(((UsernamePasswordToken) token).getUsername());
+	    				user.setPassword(User.EXTERNAL_MANAGED);
+	    				user.setEmail(authenticated.getEmail());
+	    				if (authenticated.getFullName() != null)
+	    					user.setFullName(authenticated.getFullName());
+	    				userManager.save(user);
+	    				if (authenticated.getGroupNames().isEmpty() && authenticator.getDefaultGroup() != null) {
+    						Group group = groupManager.find(authenticator.getDefaultGroup());
+    						if (group != null) {
+    							Membership membership = new Membership();
+    							membership.setGroup(group);
+    							membership.setUser(user);
+    							user.getMemberships().add(membership);
+    							membershipManager.save(membership);
+    						} else {
+    							logger.error("Default group '{}' of external authenticator is not defined", 
+    									authenticator.getDefaultGroup());
+    						}
+	    				}
+	    			}
 		    	}
 		    	
 		    	return user;		
