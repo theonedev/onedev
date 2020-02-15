@@ -4,49 +4,47 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
-import org.apache.sshd.common.util.threads.ThreadUtils;
+import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
-
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.ssh.command.AbstractProjectAwareGitCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.work.WorkExecutor;
 
 @Singleton
 public class SimpleGitSshServer {
 
     private final SshServer server;
     
-    //TODO make thread pool size configurable
-    private final ExecutorService executorService = ThreadUtils
-            .newFixedThreadPool("SimpleGitServer", 4);
-
     private final Dao dao;
 
     private final ProjectManager projectManager;
 
     private final ServerConfig serverConfig;
 
+    private final WorkExecutor workExecutor;
+
     @Inject
     public SimpleGitSshServer(
             Dao dao,
             ProjectManager projectManager,
             KeyPairProvider keyPairProvider,
-            ServerConfig serverConfig) {
+            ServerConfig serverConfig,
+            WorkExecutor workExecutor) {
         this.dao = dao;
         this.projectManager = projectManager;
         this.serverConfig = serverConfig;
+        this.workExecutor = workExecutor;
         this.server = SshServer.setUpDefaultServer();
         
         this.server.setKeyPairProvider(keyPairProvider);
@@ -55,9 +53,9 @@ public class SimpleGitSshServer {
         configureAuthentication();
         this.server.setCommandFactory(command -> {
             if (command.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK)) {
-                return new GitUploadPackCommand(command, executorService);
+                return new GitUploadPackCommand(command, workExecutor);
             } else if (command.startsWith(RemoteConfig.DEFAULT_RECEIVE_PACK)) {
-                return new GitReceivePackCommand(command, executorService);
+                return new GitReceivePackCommand(command, workExecutor);
             }
             return new UnknownCommand(command);
         });
@@ -93,28 +91,28 @@ public class SimpleGitSshServer {
     }
 
     public void stop() throws IOException {
-        executorService.shutdownNow();
         server.stop(true);
     }
     
     private class GitUploadPackCommand extends AbstractProjectAwareGitCommand {
 
-        protected GitUploadPackCommand(String command,
-                ExecutorService executorService) {
-            super(command, executorService, false);
+
+        public GitUploadPackCommand(String command, WorkExecutor workExecutor) {
+            super(command, workExecutor);
         }
 
         @Override
-        public void run() {
+        protected void execute(Environment env) {
             String projectName = getGitProjectName();
             Project project = projectManager.find(projectName);
             
             if (project == null) {
                 onExit(-1, "Project not found!");
+                return;
             }
             
             UploadPack uploadPack = new UploadPack(project.getRepository());
-            String gitProtocol = getEnvironment().getEnv().get("GIT_PROTOCOL");
+            String gitProtocol = env.getEnv().get("GIT_PROTOCOL");
             if (gitProtocol != null) {
                 uploadPack
                         .setExtraParameters(Collections.singleton(gitProtocol));
@@ -122,7 +120,7 @@ public class SimpleGitSshServer {
             try {
                 uploadPack.upload(getInputStream(), getOutputStream(),
                         getErrorStream());
-                onExit(0);
+                onExit(0, "Ok");
             } catch (IOException e) {
                 log.warn(
                         MessageFormat.format("Could not run {0}", getCommand()),
@@ -135,24 +133,25 @@ public class SimpleGitSshServer {
 
     private class GitReceivePackCommand extends AbstractProjectAwareGitCommand {
 
-        protected GitReceivePackCommand(String command,
-                ExecutorService executorService) {
-            super(command, executorService, false);
+        
+        public GitReceivePackCommand(String command, WorkExecutor workExecutor) {
+            super(command, workExecutor);
         }
 
         @Override
-        public void run() {
+        protected void execute(Environment env) {
             String projectName = getGitProjectName();
             Project project = projectManager.find(projectName);
             
             if (project == null) {
                 onExit(-1, "Project not found!");
+                return;
             }
             
             try {
                 new ReceivePack(project.getRepository()).receive(getInputStream(),
                         getOutputStream(), getErrorStream());
-                onExit(0);
+                onExit(0, "Ok");
             } catch (IOException e) {
                 log.warn(
                         MessageFormat.format("Could not run {0}", getCommand()),
