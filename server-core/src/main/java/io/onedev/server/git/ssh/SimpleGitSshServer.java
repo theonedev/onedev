@@ -15,6 +15,7 @@ import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.ssh.command.AbstractProjectAwareGitCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
@@ -34,17 +35,21 @@ public class SimpleGitSshServer {
 
     private final WorkExecutor workExecutor;
 
+    private final SshKeyManager sshKeyManager;
+
     @Inject
     public SimpleGitSshServer(
             Dao dao,
             ProjectManager projectManager,
             KeyPairProvider keyPairProvider,
             ServerConfig serverConfig,
-            WorkExecutor workExecutor) {
+            WorkExecutor workExecutor,
+            SshKeyManager sshKeyManager) {
         this.dao = dao;
         this.projectManager = projectManager;
         this.serverConfig = serverConfig;
         this.workExecutor = workExecutor;
+        this.sshKeyManager = sshKeyManager;
         this.server = SshServer.setUpDefaultServer();
         
         this.server.setKeyPairProvider(keyPairProvider);
@@ -82,7 +87,7 @@ public class SimpleGitSshServer {
      */
     private boolean checkUserKeys(String userName, PublicKey publicKey) {
         String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);        
-        return SshKeyUtils.loadKeyByDigest(fingerPrint, dao) != null;
+        return sshKeyManager.loadKeyByDigest(fingerPrint) != null;
     }
     
     public int start() throws IOException {

@@ -18,7 +18,6 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -30,7 +29,6 @@ import javax.validation.Configuration;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.guice.aop.ShiroAopModule;
@@ -61,7 +59,6 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.Type;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -77,7 +74,6 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
-
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
@@ -121,6 +117,7 @@ import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -155,6 +152,7 @@ import io.onedev.server.entitymanager.impl.DefaultPullRequestUpdateManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultRoleManager;
 import io.onedev.server.entitymanager.impl.DefaultSettingManager;
+import io.onedev.server.entitymanager.impl.DefaultSshKeyManager;
 import io.onedev.server.entitymanager.impl.DefaultUserAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.git.GitFilter;
@@ -391,6 +389,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
 		bind(WebHookManager.class);
 		
+		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
 		bind(KeyPairProvider.class).to(DefaultTestKeyPair.class);
 		bind(SimpleGitSshServer.class);
 		

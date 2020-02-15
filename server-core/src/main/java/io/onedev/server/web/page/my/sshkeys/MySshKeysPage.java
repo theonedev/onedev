@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
-import io.onedev.server.git.ssh.SshKeyUtils;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
@@ -54,8 +54,8 @@ public class MySshKeysPage extends MyPage {
 		LoadableDetachableModel<List<SshKey>> detachableModel = new LoadableDetachableModel<List<SshKey>>() {
             @Override
             protected List<SshKey> load() {
-                Dao dao = OneDev.getInstance(Dao.class);
-                return SshKeyUtils.loadUserKeys(user, dao);
+                SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
+                return sshKeyManager.loadUserKeys(user);
             }
 		    
 		};

@@ -9,9 +9,10 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.ssh.SshKeyUtils;
 import io.onedev.server.model.SshKey;
-import io.onedev.server.persistence.dao.Dao;
 
 public class SshValidator implements IValidator<String> {
 
@@ -20,21 +21,19 @@ public class SshValidator implements IValidator<String> {
      * 
      */
     private static final long serialVersionUID = 1L;
-    private Dao dao;
 
-    public SshValidator(IModel<SshKey> formModel, Dao dao) {
-        super();
+    public SshValidator(IModel<SshKey> formModel) {
         this.formModel = formModel;
-        this.dao = dao;
     }
 
     @Override
     public void validate(IValidatable<String> validatable) {
         try {
+            SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
             PublicKey pubEntry = SshKeyUtils.decodePublicKey(validatable.getValue());
             String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
             
-            boolean alreadyInUse = SshKeyUtils.isKeyAlreadyInUse(fingerPrint, dao);
+            boolean alreadyInUse = sshKeyManager.isKeyAlreadyInUse(fingerPrint);
             
             if (alreadyInUse) {
                 IValidationError keyAlreadyInUse = new ValidationError("The key you want to add is already in use.");

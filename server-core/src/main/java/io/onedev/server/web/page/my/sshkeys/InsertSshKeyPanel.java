@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
@@ -27,7 +27,6 @@ public abstract class InsertSshKeyPanel extends Panel {
         this.modal = modal;
         this.user = user;
     }
-    
 
     @Override
     protected void onInitialize() {
@@ -47,8 +46,6 @@ public abstract class InsertSshKeyPanel extends Panel {
 
         FeedbackPanel feedbackPanel = new FeedbackPanel("feedback");
         feedbackPanel.setOutputMarkupId(true);
-
-        Dao dao = OneDev.getInstance(Dao.class);
         
         form.add(new AjaxLink<Void>("cancel") {
             
@@ -63,11 +60,12 @@ public abstract class InsertSshKeyPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
                 super.onSubmit(target, myform);
                 SshKey sshKey = form.getModelObject();
+                SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
                 
                 sshKey.setOwner(user);
                 sshKey.setTimestamp(LocalDateTime.now());
                 
-                dao.persist(sshKey);
+                sshKeyManager.save(sshKey);
                 
                 modal.close();
                 onSave(target);
@@ -83,7 +81,7 @@ public abstract class InsertSshKeyPanel extends Panel {
         TextArea<String> textArea = new TextArea<String>("content");
 
         form.add(new TextField<>("name").setRequired(true));
-        form.add(textArea.add(new SshValidator(model, dao)).setRequired(true));
+        form.add(textArea.add(new SshValidator(model)).setRequired(true));
         form.add(feedbackPanel);
         
         add(form);
