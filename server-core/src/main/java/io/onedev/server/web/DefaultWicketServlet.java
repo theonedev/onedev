@@ -3,6 +3,7 @@ package io.onedev.server.web;
 import java.io.IOException;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -13,6 +14,7 @@ import org.apache.wicket.protocol.http.WicketServlet;
 
 import io.onedev.server.persistence.annotation.Sessional;
 
+@Singleton
 public class DefaultWicketServlet extends WicketServlet {
 
 	private static final long serialVersionUID = 1L;

@@ -43,6 +43,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
 	private final WicketServlet wicketServlet;
 	
+	private final AttachmentUploadServlet attachmentUploadServlet;
+	
 	private final ServletContainer jerseyServlet;
 
 	private final WebSocketManager webSocketManager;
@@ -51,7 +53,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, GitFilter gitFilter, 
 			GitPreReceiveCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet, 
 			WicketServlet wicketServlet, WebSocketManager webSocketManager, 
-			ServletContainer jerseyServlet) {
+			AttachmentUploadServlet attachmentUploadServlet, ServletContainer jerseyServlet) {
 		this.serverConfig = serverConfig;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -60,6 +62,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.wicketServlet = wicketServlet;
 		this.webSocketManager = webSocketManager;
 		this.jerseyServlet = jerseyServlet;
+		this.attachmentUploadServlet = attachmentUploadServlet;
 	}
 	
 	@Override
@@ -70,30 +73,23 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, OneWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
-		FilterHolder shiroFilterHolder = new FilterHolder(shiroFilter);
-		context.addFilter(shiroFilterHolder, "/*", EnumSet.allOf(DispatcherType.class));
+		context.addFilter(new FilterHolder(shiroFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
-        FilterHolder gitFilterHolder = new FilterHolder(gitFilter);
-        context.addFilter(gitFilterHolder, "/*", EnumSet.allOf(DispatcherType.class));
+        context.addFilter(new FilterHolder(gitFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
-		ServletHolder preReceiveServletHolder = new ServletHolder(preReceiveServlet);
-		context.addServlet(preReceiveServletHolder, GitPreReceiveCallback.PATH + "/*");
+		context.addServlet(new ServletHolder(preReceiveServlet), GitPreReceiveCallback.PATH + "/*");
         
-		ServletHolder postReceiveServletHolder = new ServletHolder(postReceiveServlet);
-        context.addServlet(postReceiveServletHolder, GitPostReceiveCallback.PATH + "/*");
+        context.addServlet(new ServletHolder(postReceiveServlet), GitPostReceiveCallback.PATH + "/*");
         
-		ServletHolder wicketServletHolder = new ServletHolder(wicketServlet);
-		
 		/*
 		 * Add wicket servlet as the default servlet which will serve all requests failed to 
 		 * match a path pattern
 		 */
-		context.addServlet(wicketServletHolder, "/");
+		context.addServlet(new ServletHolder(wicketServlet), "/");
 		
-		context.addServlet(AttachmentUploadServlet.class, "/attachment_upload");
+		context.addServlet(new ServletHolder(attachmentUploadServlet), "/attachment_upload");
 		
-		ServletHolder imgServletHolder = new ServletHolder(new ClasspathAssetServlet(Img.class));
-		context.addServlet(imgServletHolder, "/img/*");
+		context.addServlet(new ServletHolder(new ClasspathAssetServlet(Img.class)), "/img/*");
 		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 
@@ -116,8 +112,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.addServlet(fileServletHolder, "/site/*");
 		context.addServlet(fileServletHolder, "/robots.txt");
 		
-		ServletHolder jerseyServletHolder = new ServletHolder(jerseyServlet);
-		context.addServlet(jerseyServletHolder, "/rest/*");
+		context.addServlet(new ServletHolder(jerseyServlet), "/rest/*");
 	}
 
 }

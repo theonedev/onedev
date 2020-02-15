@@ -262,6 +262,7 @@ import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.avatar.DefaultAvatarManager;
 import io.onedev.server.web.component.diff.DiffRenderer;
+import io.onedev.server.web.component.markdown.AttachmentUploadServlet;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -535,6 +536,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebSocketPolicy.class).toProvider(WebSocketPolicyProvider.class);
 		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
+
+		bind(AttachmentUploadServlet.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
 		
