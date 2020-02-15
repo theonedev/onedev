@@ -15,6 +15,8 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.junit.Assert;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.AppLoaderMocker;
@@ -25,12 +27,14 @@ import io.onedev.server.git.config.GitConfig;
 
 public abstract class AbstractGitTest extends AppLoaderMocker {
 
+	private static final Logger logger = LoggerFactory.getLogger(AbstractGitTest.class);
+	
 	protected File gitDir;
 	
 	protected org.eclipse.jgit.api.Git git;
 	
 	protected PersonIdent user = new PersonIdent("foo", "foo@example.com");
-
+	
 	@Override
 	protected void setup() {
 		gitDir = FileUtils.createTempDir();
@@ -62,7 +66,20 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	@Override
 	protected void teardown() {
 		git.close();
-		FileUtils.deleteDir(gitDir);
+		
+		while (gitDir.exists()) {
+			try {
+				FileUtils.deleteDir(gitDir);
+				break;
+			} catch (Exception e) {
+				// git gc might be running, so we'll retry deletion 
+				logger.error("Error deleting directory '" + gitDir.getAbsolutePath() + "', will retry later...", e);
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e2) {
+				}
+			}
+		}
 	}
 
 	protected void createDir(String path) {
