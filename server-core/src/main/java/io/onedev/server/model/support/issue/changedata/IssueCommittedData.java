@@ -3,9 +3,15 @@ package io.onedev.server.model.support.issue.changedata;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
+import org.eclipse.jgit.revwalk.RevCommit;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
@@ -18,6 +24,8 @@ public class IssueCommittedData implements IssueChangeData {
 	private static final long serialVersionUID = 1L;
 
 	private final String commitHash;
+	
+	private transient Optional<User> committer;
 	
 	public IssueCommittedData(String commitHash) {
 		this.commitHash = commitHash;
@@ -43,9 +51,9 @@ public class IssueCommittedData implements IssueChangeData {
 	@Override
 	public String getActivity(Issue withIssue) {
 		if (withIssue != null)
-			return "Code committed to fix issue " + withIssue.describe();
+			return "Code committed for issue " + withIssue.describe();
 		else
-			return "Code committed to fix issue";
+			return "Code committed";
 	}
 
 	@Override
@@ -63,6 +71,18 @@ public class IssueCommittedData implements IssueChangeData {
 		return new HashMap<>();
 	}
 
+	@Nullable
+	public User getCommitter(Issue issue) {
+		if (committer == null) {
+			RevCommit commit = issue.getProject().getRevCommit(getCommitHash(), false);
+			if (commit != null) 
+				committer = Optional.ofNullable(OneDev.getInstance(UserManager.class).find(commit.getCommitterIdent()));
+			else
+				committer = Optional.empty();
+		}
+		return committer.orElse(null);
+	}
+	
 	@Override
 	public boolean affectsBoards() {
 		return false;

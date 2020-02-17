@@ -84,6 +84,7 @@ import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
@@ -669,24 +670,41 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		boolean minorChange = false;
-		if (event instanceof PullRequestChangeEvent) {
-			PullRequestChangeData changeData = ((PullRequestChangeEvent)event).getChange().getData();
-			if (changeData instanceof PullRequestReviewerAddData 
-					|| changeData instanceof PullRequestReviewerRemoveData
-					|| changeData instanceof PullRequestSourceBranchDeleteData
-					|| changeData instanceof PullRequestSourceBranchRestoreData
-					|| changeData instanceof PullRequestReferencedFromCodeCommentData
-					|| changeData instanceof PullRequestReferencedFromIssueData
-					|| changeData instanceof PullRequestReferencedFromPullRequestData) {
-				minorChange = true;
+		if (event instanceof PullRequestUpdated) {
+			Collection<User> committers = ((PullRequestUpdated) event).getCommitters();
+			if (committers.size() == 1) {
+				LastUpdate lastUpdate = new LastUpdate();
+				lastUpdate.setUser(committers.iterator().next());
+				lastUpdate.setActivity("added commits");
+				lastUpdate.setDate(event.getDate());
+				event.getRequest().setLastUpdate(lastUpdate);
+			} else {
+				LastUpdate lastUpdate = new LastUpdate();
+				lastUpdate.setUser(committers.iterator().next());
+				lastUpdate.setActivity("Commits added");
+				lastUpdate.setDate(event.getDate());
+				event.getRequest().setLastUpdate(lastUpdate);
 			}
-		}
-		if (!(event instanceof PullRequestOpened 
-				|| event instanceof PullRequestMergePreviewCalculated
-				|| event instanceof PullRequestBuildEvent
-				|| minorChange)) {
-			event.getRequest().setLastUpdate(event.getLastUpdate());
+		} else {
+			boolean minorChange = false;
+			if (event instanceof PullRequestChangeEvent) {
+				PullRequestChangeData changeData = ((PullRequestChangeEvent)event).getChange().getData();
+				if (changeData instanceof PullRequestReviewerAddData 
+						|| changeData instanceof PullRequestReviewerRemoveData
+						|| changeData instanceof PullRequestSourceBranchDeleteData
+						|| changeData instanceof PullRequestSourceBranchRestoreData
+						|| changeData instanceof PullRequestReferencedFromCodeCommentData
+						|| changeData instanceof PullRequestReferencedFromIssueData
+						|| changeData instanceof PullRequestReferencedFromPullRequestData) {
+					minorChange = true;
+				}
+			}
+			if (!(event instanceof PullRequestOpened 
+					|| event instanceof PullRequestMergePreviewCalculated
+					|| event instanceof PullRequestBuildEvent
+					|| minorChange)) {
+				event.getRequest().setLastUpdate(event.getLastUpdate());
+			}
 		}
 	}
 	

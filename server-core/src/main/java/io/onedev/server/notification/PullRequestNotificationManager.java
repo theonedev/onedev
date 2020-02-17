@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -145,18 +144,18 @@ public class PullRequestNotificationManager {
 			if (!user.isSystem())
 				pullRequestWatchManager.watch(request, user, true);
 		}
+		
+		User committer = null;
 		if (event instanceof PullRequestUpdated) {
 			PullRequestUpdated pullRequestUpdated = (PullRequestUpdated) event;
-			Set<User> committers = pullRequestUpdated.getUpdate().getCommits()
-					.stream()
-					.map(it->userManager.find(it.getCommitterIdent()))
-					.filter(it->it!=null)
-					.collect(Collectors.toSet());
-			if (committers.size() == 1) 
-				notifiedUsers.add(committers.iterator().next());
-			for (User committer: committers) {
-				if (!committer.isSystem())
-					pullRequestWatchManager.watch(request, committer, true);
+			Collection<User> committers = pullRequestUpdated.getCommitters();
+			if (committers.size() == 1) {
+				committer = committers.iterator().next();
+				notifiedUsers.add(committer);
+			}
+			for (User each: committers) {
+				if (!each.isSystem())
+					pullRequestWatchManager.watch(request, each, true);
 			}
 		}
 		
@@ -258,7 +257,9 @@ public class PullRequestNotificationManager {
 				String subject;
 				if (user != null) 
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
-				else 
+				else if (committer != null) 
+					subject = String.format("%s added commits to pull request %s", committer.getDisplayName(), request.describe());
+				else
 					subject = event.getActivity(true);
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);

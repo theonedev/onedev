@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.eclipse.jgit.revwalk.RevCommit;
-
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -137,18 +135,17 @@ public class IssueNotificationManager {
 			if (!user.isSystem())
 				issueWatchManager.watch(issue, user, true);
 		}
+		
+		User committer = null;
 		if (event instanceof IssueChangeEvent) {
 			IssueChangeData changeData = ((IssueChangeEvent) event).getChange().getData();
 			if (changeData instanceof IssueCommittedData) {
 				IssueCommittedData committedData = (IssueCommittedData) changeData;
-				RevCommit commit = issue.getProject().getRevCommit(committedData.getCommitHash(), false);
-				if (commit != null) {
-					User committer = userManager.find(commit.getCommitterIdent());
-					if (committer != null) {
-						notifiedUsers.add(committer);
-						if (!committer.isSystem())
-							issueWatchManager.watch(issue, committer, true);
-					}
+				committer = committedData.getCommitter(issue);
+				if (committer != null) {
+					notifiedUsers.add(committer);
+					if (!committer.isSystem())
+						issueWatchManager.watch(issue, committer, true);
 				}
 			}			
 		}
@@ -251,6 +248,8 @@ public class IssueNotificationManager {
 				String subject;
 				if (user != null) 
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
+				else if (committer != null) 
+					subject = String.format("%s committed code for issue %s", committer.getDisplayName(), issue.describe());
 				else 
 					subject = event.getActivity(true);
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
