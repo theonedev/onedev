@@ -37,7 +37,7 @@ public class IssueDescriptionChangeData implements IssueChangeData {
 	
 	@Override
 	public String getActivity(Issue withIssue) {
-		String activity = "changed title";
+		String activity = "changed description";
 		if (withIssue != null)
 			activity += " of issue " + withIssue.describe();
 		return activity;
