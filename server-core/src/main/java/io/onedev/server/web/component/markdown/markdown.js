@@ -137,7 +137,8 @@ onedev.server.markdown = {
 		}, previewTimeout);
 		
 		$input.doneEvents("keydown", function(e) {
-			if (e.keyCode>=33 && e.keyCode<=40 && $preview.is(":visible")) {
+			if (e.keyCode>=33 && e.keyCode<=40 && $preview.is(":visible") 
+					&& $(".atwho-view").filter(":visible").length == 0) {
 				// Only sync preview scroll when we moved cursor
 				onedev.server.markdown.syncPreviewScroll(containerId);
 			}
@@ -185,7 +186,7 @@ onedev.server.markdown = {
 		 * 
 		 */
 		$input.on("keydown", function(e) {
-			if (e.keyCode == 13) {
+			if (e.keyCode == 13 && $(".atwho-view").filter(":visible").length == 0) {
 				e.preventDefault();
 				var input = $input.val();
 				var caret = $input.caret();
@@ -523,17 +524,19 @@ onedev.server.markdown = {
 		});
 		
 		$input.on("keydown", function(e) {
-			if ((e.ctrlKey|e.metaKey) && e.keyCode == 76) {
-				e.preventDefault();
-				callback("selectLink");
-			} else if ((e.ctrlKey|e.metaKey) && e.keyCode == 73) {
-				e.preventDefault();
-				callback("selectImage");	
-			} 
+			if ($(".atwho-view").filter(":visible").length == 0) {
+				if ((e.ctrlKey|e.metaKey) && e.keyCode == 76) {
+					e.preventDefault();
+					callback("selectLink");
+				} else if ((e.ctrlKey|e.metaKey) && e.keyCode == 73) {
+					e.preventDefault();
+					callback("selectImage");	
+				} 
+			}
 		});
 		
 		$input[0].cachedEmojis = [];
-
+		
 	    $input.atwho({
 	    	at: ':',
 	        callbacks: {
