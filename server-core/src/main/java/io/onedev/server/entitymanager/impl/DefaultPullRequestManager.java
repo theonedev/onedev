@@ -97,6 +97,7 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -1054,7 +1055,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(PullRequest.PROP_ID)));
+			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
 		query.orderBy(orders);
 		
 		return query;

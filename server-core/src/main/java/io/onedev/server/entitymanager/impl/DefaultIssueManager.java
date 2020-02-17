@@ -51,6 +51,7 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
@@ -235,7 +236,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(Issue.PROP_ID)));
+			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
 		query.orderBy(orders);
 		
 		return query;
@@ -247,8 +248,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public List<Issue> query(@Nullable Project project, 
-			io.onedev.server.search.entity.EntityQuery<Issue> issueQuery, 
+	public List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
 			int firstResult, int maxResults) {
 		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(project, getSession(), issueQuery);
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
