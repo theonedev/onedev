@@ -41,7 +41,7 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String sshUrlFor(Project project) {
-	    String serverSshUrl = configManager.getSystemSetting().getServerSshUrl();
+	    String serverSshUrl = configManager.getSshSettings().getServerSshUrl();
         return serverSshUrl + "/" + project.getName() + ".git";
 	}
 	

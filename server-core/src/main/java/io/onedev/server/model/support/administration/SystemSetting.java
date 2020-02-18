@@ -22,8 +22,6 @@ public class SystemSetting implements Serializable, Validatable {
 
 	private String serverUrl;
 
-	private String serverSshUrl;
-	
 	private GitConfig gitConfig = new SystemGit();
 	
 	private CurlConfig curlConfig = new SystemCurl();
@@ -79,15 +77,4 @@ public class SystemSetting implements Serializable, Validatable {
 			serverUrl = StringUtils.stripEnd(serverUrl, "/\\");
 		return true;
 	}
-
-	@Editable(name="Ssh URL", order=90, description="Specify the URL to use with Git to access repositories via SSH")
-    @NotEmpty
-    public String getServerSshUrl() {
-        return serverSshUrl;
-    }
-
-    public void setServerSshUrl(String serverSshUrl) {
-        this.serverSshUrl = serverSshUrl;
-    }
-
 }
