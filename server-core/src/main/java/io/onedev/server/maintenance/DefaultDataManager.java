@@ -8,9 +8,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
@@ -18,9 +20,11 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
@@ -42,6 +46,7 @@ import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.SshSettings;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
 import io.onedev.server.notification.MailManager;
@@ -137,22 +142,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 		Setting setting = settingManager.getSetting(Key.SYSTEM);
 		SystemSetting systemSetting = null;
+		Url serverUrl = OneDev.getInstance().guessServerUrl();
 		
 		if (setting == null || setting.getValue() == null) {
-		    Url serverUrl = OneDev.getInstance().guessServerUrl();
 		    
 		    systemSetting = new SystemSetting();
 			systemSetting.setServerUrl(serverUrl.toString(StringMode.FULL));
-			
-			String sshUrl = serverUrl.getHost();
-			int sshPort = serverConfig.getSshPort();
-			
-			if (sshPort != 22) {
-			    sshUrl +=  ":" + sshPort;
-            }
-			
-			systemSetting.setServerSshUrl("ssh://git@" + sshUrl);
-			
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
 			systemSetting = (SystemSetting) setting.getValue();
 		}
@@ -177,7 +172,44 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-
+		
+		setting = settingManager.getSetting(Key.SSH);
+		SshSettings sshSettings = null;
+		
+		if (setting == null || setting.getValue() == null) {
+            
+		    sshSettings = new SshSettings();
+            String sshUrl = serverUrl.getHost();
+            int sshPort = serverConfig.getSshPort();
+            
+            if (sshPort != 22) {
+                sshUrl +=  ":" + sshPort;
+            }
+            
+            sshSettings.setServerSshUrl("ssh://git@" + sshUrl);
+            
+        } else if (!validator.validate(setting.getValue()).isEmpty()) {
+            sshSettings = (SshSettings) setting.getValue();
+        }
+		if (sshSettings != null) {
+            Collection<String> excludedProps = new HashSet<>();
+           
+            manualConfigs.add(new ManualConfig("Specify System Setting", null, 
+                    sshSettings, excludedProps) {
+    
+                @Override
+                public Skippable getSkippable() {
+                    return null;
+                }
+    
+                @Override
+                public void complete() {
+                    settingManager.saveSshSetting((SshSettings) getSetting());
+                }
+                
+            });
+        }
+		
 		setting = settingManager.getSetting(Key.SECURITY);
 		if (setting == null) {
 			settingManager.saveSecuritySetting(new SecuritySetting());
