@@ -21,7 +21,7 @@ import javax.inject.Singleton;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 
 @Singleton
-public class DefaultTestKeyPair implements KeyPairProvider {
+public class DefaultTestKeyPairProvider implements KeyPairProvider {
 
     private byte[] loadPEM(String resource) throws IOException {
         URL url = getClass().getResource(resource);

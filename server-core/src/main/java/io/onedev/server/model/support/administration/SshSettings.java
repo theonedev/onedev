@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 
 @Editable
 @ClassValidating
@@ -29,7 +30,8 @@ public class SshSettings implements Serializable, Validatable {
         this.serverSshUrl = serverSshUrl;
     }
     
-    @Editable(name="Server private Key", order=90, description="Specify the private key (in PEM format) used by SSH server to establish connections")
+    @Editable(name="Server private Key",  order=90, description="Specify the private key (in PEM format) used by SSH server to establish connections")
+    @Multiline
     @NotEmpty
     public String getPrivateKey() {
         return privateKey;
@@ -40,6 +42,7 @@ public class SshSettings implements Serializable, Validatable {
     }
 
     @Editable(name="Server public Key", order=90, description="Specify the public key (in PEM format) used by SSH server to establish connections")
+    @Multiline
     @NotEmpty
     public String getPublicKey() {
         return publicKey;

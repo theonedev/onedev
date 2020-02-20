@@ -8,11 +8,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
-
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
@@ -20,11 +18,9 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
-
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
@@ -32,6 +28,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.crypto.ServerKeyPairPopulator;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -84,13 +81,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private String backupTaskId;
 
     private ServerConfig serverConfig;
+
+    private ServerKeyPairPopulator keyPairPopulator;
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, UserManager userManager, 
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService, RoleManager roleManager,
-			ServerConfig serverConfig) {
+			ServerConfig serverConfig, ServerKeyPairPopulator keyPairPopulator) {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.validator = validator;
@@ -101,6 +100,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
         this.serverConfig = serverConfig;
+        this.keyPairPopulator = keyPairPopulator;
 	}
 	
 	@SuppressWarnings("serial")
@@ -187,6 +187,7 @@ public class DefaultDataManager implements DataManager, Serializable {
             }
             
             sshSettings.setServerSshUrl("ssh://git@" + sshUrl);
+            keyPairPopulator.populateSettings(sshSettings);
             
         } else if (!validator.validate(setting.getValue()).isEmpty()) {
             sshSettings = (SshSettings) setting.getValue();
