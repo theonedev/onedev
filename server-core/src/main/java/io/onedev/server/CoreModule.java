@@ -85,8 +85,8 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
+import io.onedev.server.crypto.DefaultKeyPairProvider;
 import io.onedev.server.crypto.DefaultServerKeyPairPopulator;
-import io.onedev.server.crypto.DefaultTestKeyPairProvider;
 import io.onedev.server.crypto.ServerKeyPairPopulator;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
@@ -392,7 +392,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebHookManager.class);
 		
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
-		bind(KeyPairProvider.class).to(DefaultTestKeyPairProvider.class);
+		bind(KeyPairProvider.class).to(DefaultKeyPairProvider.class);
 		bind(ServerKeyPairPopulator.class).to(DefaultServerKeyPairPopulator.class);
 		
 		bind(SimpleGitSshServer.class);

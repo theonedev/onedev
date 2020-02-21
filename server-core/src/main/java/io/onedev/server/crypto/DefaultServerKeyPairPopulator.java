@@ -15,13 +15,12 @@ public class DefaultServerKeyPairPopulator implements ServerKeyPairPopulator {
 
     @Override
     public void populateSettings(SshSettings sshSettings) {
-        KeyPair keyPair;
         try (StringWriter privateWriter = new StringWriter();
              StringWriter publicWriter = new StringWriter();
              PemWriter privatePemWriter = new PemWriter(privateWriter);
              PemWriter publicPemWriter = new PemWriter(publicWriter);
         ) {
-            keyPair = KeyUtils.generateKeyPair("ssh-rsa", 4096);
+            KeyPair keyPair = KeyUtils.generateKeyPair("ssh-rsa", 4096);
             
             privatePemWriter.writeObject(new PemObject("RSA PRIVATE KEY", keyPair.getPrivate().getEncoded()));
             privatePemWriter.flush();
@@ -33,7 +32,7 @@ public class DefaultServerKeyPairPopulator implements ServerKeyPairPopulator {
             sshSettings.setPrivateKey(privateWriter.toString());
             
         } catch (GeneralSecurityException | IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }
