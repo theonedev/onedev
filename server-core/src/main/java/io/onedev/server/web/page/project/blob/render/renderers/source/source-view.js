@@ -519,7 +519,7 @@ onedev.server.sourceView = {
 			$(".source-view").data("mark", mark);
 			onedev.server.codemirror.mark(cm, mark);
 			onedev.server.codemirror.scrollTo(cm, mark);
-			cm.setCursor({line: mark.fromRow, ch: 0});
+			cm.setCursor({line: mark.fromRow, ch: mark.fromColumn});
 		} else {
 			$(".source-view").removeData("mark");
 			onedev.server.codemirror.clearMark(cm);			
