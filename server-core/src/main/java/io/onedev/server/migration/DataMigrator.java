@@ -1563,5 +1563,9 @@ public class DataMigrator {
 			}
 		}
 	}	
+
+	// Database schema changed
+	private void migrate36(File dataDir, Stack<Integer> versions) {	
+	}
 	
 }

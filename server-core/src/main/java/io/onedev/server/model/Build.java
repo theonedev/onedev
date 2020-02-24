@@ -204,7 +204,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String ARTIFACTS_DIR = "artifacts";
 	
-	private static final int MAX_ERROR_MESSAGE_LEN = 16384;
+	private static final int MAX_ERROR_MESSAGE_LEN = 16380;
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
