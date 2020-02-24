@@ -52,6 +52,22 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.with-status>.message {
 	padding-right: 175px;
 }
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit:before {
+	font-family: "FontExt";
+	content: "\f220";
+	position: absolute;
+	left: -20px;
+	color: #666;
+}
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content {
+	padding: 0 0 0 10px;
+}
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.head {
+	display: none;
+}
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body {
+	margin: 0;
+}
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.actions {
 	position: absolute;
 	top: 6px;
