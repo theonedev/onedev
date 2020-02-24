@@ -680,7 +680,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				event.getRequest().setLastUpdate(lastUpdate);
 			} else {
 				LastUpdate lastUpdate = new LastUpdate();
-				lastUpdate.setUser(committers.iterator().next());
 				lastUpdate.setActivity("Commits added");
 				lastUpdate.setDate(event.getDate());
 				event.getRequest().setLastUpdate(lastUpdate);
