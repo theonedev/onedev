@@ -21,6 +21,7 @@
 	padding-top: 2px;
 	color: #555;
 	margin-bottom: 8px;
+	word-break: break-word;
 }
 #commit-detail>.info>.message>.subject>.pull-right {
 	margin-left: 8px;
@@ -81,7 +82,10 @@
 #commit-detail>.info>.contribution-and-parents .parents .fa {
 	font-size: 12px;
 }
-
+#commit-detail>.jobs {
+	margin-bottom: 10px;
+}
 #commit-detail>.jobs>.job {
     margin-right: 20px;
+    margin-bottom: 10px;
 }
