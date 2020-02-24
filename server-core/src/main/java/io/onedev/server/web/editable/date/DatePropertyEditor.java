@@ -12,6 +12,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextField;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextFieldConfig;
+import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextFieldConfig.TodayButton;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -32,9 +33,8 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 		super.onInitialize();
 		
 		DateTextFieldConfig config = new DateTextFieldConfig();
-		config.autoClose(true);
-		config.clearButton(true);
-		config.withFormat(DateEditSupport.DATE_INPUT_FORMAT);
+		config.autoClose(true).withFormat(DateEditSupport.DATE_INPUT_FORMAT)
+				.highlightToday(true).showTodayButton(TodayButton.TRUE);
 		input = new DateTextField("input", Model.of(getModelObject()), config);
 		input.setType(getDescriptor().getPropertyClass());
 		Method propertyGetter = getDescriptor().getPropertyGetter();
