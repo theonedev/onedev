@@ -510,7 +510,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.asc(root.get(Project.PROP_NAME)));
+			orders.add(builder.desc(ProjectQuery.getPath(root, Project.PROP_UPDATE_DATE)));
 		query.orderBy(orders);
 		
 		return query;
