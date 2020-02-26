@@ -10,8 +10,13 @@ import io.onedev.server.model.support.administration.SshSettings;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
-public class SshSetting extends AdministrationPage {
-    public SshSetting(PageParameters params) {
+public class SshSettingPage extends AdministrationPage {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
+    public SshSettingPage(PageParameters params) {
         super(params);
     }
 
@@ -29,7 +34,7 @@ public class SshSetting extends AdministrationPage {
                 OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);
                 getSession().success("SSH setting has been updated");
                 
-                setResponsePage(SshSetting.class);
+                setResponsePage(SshSettingPage.class);
             }
             
         };

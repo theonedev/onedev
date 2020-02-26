@@ -61,9 +61,9 @@ public class SshSettings implements Serializable, Validatable {
         boolean hasErrors = false;
         String propertyNode = "privateKey";
         try {
-            SshKeyUtils.decodePrivateKey(privateKey);
+            SshKeyUtils.decodePEMPrivateKey(privateKey);
             propertyNode = "publicKey";
-            SshKeyUtils.decodePublicKey(publicKey);
+            SshKeyUtils.decodePEMPublicKey(publicKey);
         } catch (Exception e) {
             context.buildConstraintViolationWithTemplate("The provided key is not valid. Please check it and try again.")
                     .addPropertyNode(propertyNode).addConstraintViolation()

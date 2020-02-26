@@ -13,14 +13,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -140,7 +143,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		SystemSetting systemSetting = configManager.getSystemSetting();
 		SshSettings sshSettings = configManager.getSshSettings();
         logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
-		logger.info("Git server started at " + sshSettings.getServerSshUrl());
 		initStage = null;
 	}
 

@@ -38,7 +38,7 @@ import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
-import io.onedev.server.web.page.admin.ssh.SshSetting;
+import io.onedev.server.web.page.admin.ssh.SshSettingPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
@@ -115,8 +115,8 @@ public abstract class LayoutPage extends BasePage {
 			item.add(AttributeAppender.append("class", "active"));
 
 		administrationContainer.add(item = new WebMarkupContainer("sshSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", SshSetting.class));
-		if (getPage() instanceof SshSetting)
+		item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
+		if (getPage() instanceof SshSettingPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));

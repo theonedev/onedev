@@ -3,12 +3,14 @@ package io.onedev.server.web.page.my.sshkeys;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
 import org.apache.wicket.validation.ValidationError;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.ssh.SshKeyUtils;
@@ -30,7 +32,7 @@ public class SshValidator implements IValidator<String> {
     public void validate(IValidatable<String> validatable) {
         try {
             SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-            PublicKey pubEntry = SshKeyUtils.decodePublicKey(validatable.getValue());
+            PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(validatable.getValue());
             String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
             
             boolean alreadyInUse = sshKeyManager.isKeyAlreadyInUse(fingerPrint);
