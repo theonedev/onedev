@@ -24,6 +24,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -70,7 +71,8 @@ public abstract class ProjectInfoPanel extends Panel {
 			});
 		}
 
-		add(new ModalLink("forkNow") {
+		boolean canReadCode = SecurityUtils.canReadCode(getProject());
+        add(new ModalLink("forkNow") {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -90,7 +92,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canCreateProjects() &&  SecurityUtils.canReadCode(getProject())));
+		}.setVisible(SecurityUtils.canCreateProjects() &&  canReadCode));
 		
 		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
 				+ Criteria.quote(getProject().getName());
@@ -131,12 +133,14 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getProject()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel)
-				.setVisible(SecurityUtils.canReadCode(getProject())));
+				.setVisible(canReadCode));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 
+		boolean isSshEnabled = OneWebApplication.get().isSshEnabled();
+		
 		Model<String> cloneSshUrlModel = Model.of(urlManager.sshUrlFor(getProject()));
 		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
-		        .setVisible(SecurityUtils.canReadCode(getProject())));
+		        .setVisible(isSshEnabled && canReadCode));
 		add(new WebMarkupContainer("copySshUrl").add(new CopyClipboardBehavior(cloneSshUrlModel)));
 	}
 	

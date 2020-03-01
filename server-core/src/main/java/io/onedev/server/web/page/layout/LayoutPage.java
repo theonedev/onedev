@@ -19,6 +19,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -59,7 +60,7 @@ import io.onedev.server.web.page.security.RegisterPage;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
-	
+    
 	public LayoutPage(PageParameters params) {
 		super(params);
 	}
@@ -114,11 +115,12 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof AuthenticatorPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		administrationContainer.add(item = new WebMarkupContainer("sshSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
-		if (getPage() instanceof SshSettingPage)
-		    item.add(AttributeAppender.append("class", "active"));
-		
+	    administrationContainer.add(item = new WebMarkupContainer("sshSetting"));
+	    item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
+	    if (getPage() instanceof SshSettingPage)
+	        item.add(AttributeAppender.append("class", "active"));
+		item.setVisible(OneWebApplication.get().isSshEnabled());
+	    
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorPage.class));
 		if (getPage() instanceof JobExecutorPage)
@@ -213,7 +215,8 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
-
+		item.setVisible(OneWebApplication.get().isSshEnabled());
+		
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MyJobSecretsPage.class));
 		if (getPage() instanceof MyBuildSettingPage)

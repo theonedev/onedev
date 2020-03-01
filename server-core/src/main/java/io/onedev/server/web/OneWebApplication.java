@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.DefaultExceptionMapper;
@@ -51,11 +49,11 @@ import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.util.IProvider;
 import org.apache.wicket.util.time.Duration;
-
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.ErrorPage;
 import io.onedev.server.web.page.layout.UICustomization;
@@ -69,12 +67,15 @@ public class OneWebApplication extends WebApplication {
 	private final Set<WebApplicationConfigurator> applicationConfigurators;
 	
 	private final UICustomization uiCustomization;
+
+    private final ServerConfig serverConfig;
 	
 	@Inject
 	public OneWebApplication(Set<WebApplicationConfigurator> applicationConfigurators, 
-			UICustomization uiCustomization) {
+			UICustomization uiCustomization, ServerConfig serverConfig) {
 		this.applicationConfigurators = applicationConfigurators;
 		this.uiCustomization = uiCustomization;
+        this.serverConfig = serverConfig;
 	}
 	
 	@Override
@@ -242,6 +243,10 @@ public class OneWebApplication extends WebApplication {
 			
 		};
 	}
+	
+	public boolean isSshEnabled() {
+	    return serverConfig.getSshPort() != 0;
+    }
 	
 	public static OneWebApplication get() {
 		return (OneWebApplication) Application.get();

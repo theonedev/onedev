@@ -13,17 +13,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -38,7 +35,6 @@ import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.maintenance.DataManager;
-import io.onedev.server.model.support.administration.SshSettings;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
@@ -119,11 +115,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			initStage.waitForFinish();
 		}
 		
-		//TODO: provide better config support for Git server its certificates
-		try {
-            simpleGitSshServer.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+		if (serverConfig.getSshPort() != 0) {            
+		    simpleGitSshServer.start();
         }
 		
 		sessionManager.openSession();
@@ -141,7 +134,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		
 		listenerRegistry.post(new SystemStarted());
 		SystemSetting systemSetting = configManager.getSystemSetting();
-		SshSettings sshSettings = configManager.getSshSettings();
         logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
 		initStage = null;
 	}

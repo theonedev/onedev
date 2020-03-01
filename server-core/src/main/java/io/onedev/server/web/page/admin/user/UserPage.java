@@ -17,6 +17,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -97,7 +98,11 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", UserPasswordPage.class));
 		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
-		tabs.add(new UserTab("Ssh Keys", "fa fa-fw fa-shield", UserSshKeys.class));
+		
+		if (OneWebApplication.get().isSshEnabled()) {            
+		    tabs.add(new UserTab("Ssh Keys", "fa fa-fw fa-shield", UserSshKeys.class));
+        }
+		
 		tabs.add(new UserTab("Build Setting", "fa fa-fw fa-cubes", UserJobSecretsPage.class, UserBuildSettingPage.class));
 		tabs.add(new UserTab("Web Hooks", "fa fa-fw fa-volume-up", UserWebHooksPage.class, UserWebHooksPage.class));
 		

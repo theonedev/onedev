@@ -31,6 +31,7 @@ public abstract class InsertSshKeyPanel extends Panel {
     @Override
     protected void onInitialize() {
         super.onInitialize();
+        
         add(new AjaxLink<Void>("close") {
 
             @Override

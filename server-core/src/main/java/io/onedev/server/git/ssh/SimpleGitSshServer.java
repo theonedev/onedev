@@ -90,9 +90,13 @@ public class SimpleGitSshServer {
         return sshKeyManager.loadKeyByDigest(fingerPrint) != null;
     }
     
-    public int start() throws IOException {
-        server.start();
-        return server.getPort();
+    public int start() {
+        try {
+            server.start();
+            return server.getPort();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void stop() throws IOException {
