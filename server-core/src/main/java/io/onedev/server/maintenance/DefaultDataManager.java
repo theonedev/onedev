@@ -8,9 +8,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Validator;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
@@ -18,9 +20,11 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
@@ -188,27 +192,10 @@ public class DefaultDataManager implements DataManager, Serializable {
             
             sshSettings.setServerSshUrl("ssh://git@" + sshUrl);
             keyPairPopulator.populateSettings(sshSettings);
-            
+            //save default values
+            settingManager.saveSshSetting(sshSettings);
         } else if (!validator.validate(setting.getValue()).isEmpty()) {
             sshSettings = (SshSettings) setting.getValue();
-        }
-		if (sshSettings != null) {
-            Collection<String> excludedProps = new HashSet<>();
-           
-            manualConfigs.add(new ManualConfig("Specify System Setting", null, 
-                    sshSettings, excludedProps) {
-    
-                @Override
-                public Skippable getSkippable() {
-                    return null;
-                }
-    
-                @Override
-                public void complete() {
-                    settingManager.saveSshSetting((SshSettings) getSetting());
-                }
-                
-            });
         }
 		
 		setting = settingManager.getSetting(Key.SECURITY);
