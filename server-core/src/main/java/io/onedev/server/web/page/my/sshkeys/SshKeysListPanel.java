@@ -2,10 +2,8 @@ package io.onedev.server.web.page.my.sshkeys;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import org.apache.wicket.Component;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxCallListener;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -13,11 +11,13 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.OneWebApplication;
+import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 
 @SuppressWarnings("serial")
 public class SshKeysListPanel extends Panel {
@@ -46,26 +46,31 @@ public class SshKeysListPanel extends Panel {
                 item.add(new AjaxLink<Void>("delete") {
                     @Override
                     public void onClick(AjaxRequestTarget target) {
-                        Dao dao = OneDev.getInstance(Dao.class);
-                        dao.remove(sshKey);
-                        target.add(keyList);
-                    }
-                    
-                    @Override
-                    protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-                        super.updateAjaxAttributes(attributes);
-                        AjaxCallListener myAjaxCallListener = new AjaxCallListener() {
+                        
+                        new ConfirmModal(target) {
+
                             @Override
-                            public CharSequence getPrecondition(Component component) {
-                                return "return confirm(\"Are you sure you want to delete key \'" 
-                                        + sshKey.getName() + "\'?\")";
+                            protected void onConfirm(AjaxRequestTarget target) {
+                                Dao dao = OneDev.getInstance(Dao.class);
+                                dao.remove(sshKey);
+                                target.add(keyList);
                             }
+
+                            @Override
+                            protected String getConfirmInput() {
+                                return null;
+                            }
+
+                            @Override
+                            protected String getConfirmMessage() {
+                                return "Are you sure you want to delete key '" + sshKey.getName() + "'?";
+                            }
+                            
                         };
-                        attributes.getAjaxCallListeners().add(myAjaxCallListener);
                     }
                 });
             }
-        });
+        }).setOutputMarkupId(true);
         
         add(keyList);
     }
