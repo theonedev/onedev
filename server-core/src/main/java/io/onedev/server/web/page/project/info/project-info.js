@@ -1,14 +1,14 @@
 onedev.server.projectInfo = {
 	onDomReady: function(switchId) {
-		var alternativeProtocol = 'HTTPS';
+		var alternativeProtocol = 'SSH';
 		
 		$("#" + switchId).click(function() {
 			$(".clone").toggleClass('hidden');
 			
-			if (alternativeProtocol === 'SSH') {
-				alternativeProtocol = 'HTTPS';
-			} else {
+			if (alternativeProtocol === 'HTTPS') {
 				alternativeProtocol = 'SSH';
+			} else {
+				alternativeProtocol = 'HTTPS';
 			}
 			
 			$(this).text('Use ' + alternativeProtocol);
