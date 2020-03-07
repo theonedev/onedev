@@ -19,8 +19,6 @@ public class SshSettings implements Serializable, Validatable {
 
     private String privateKey;
 
-    private String publicKey;
-
     @Editable(name = "Ssh URL", order = 90,
             description = "Specify the URL to use with Git to access repositories via SSH")
     @NotEmpty
@@ -44,26 +42,12 @@ public class SshSettings implements Serializable, Validatable {
         this.privateKey = privateKey;
     }
 
-    @Editable(name = "Server public Key", order = 90,
-            description = "Specify the public key (in PEM format) used by SSH server to establish connections")
-    @Multiline
-    @NotEmpty
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
     @Override
     public boolean isValid(ConstraintValidatorContext context) {
         boolean hasErrors = false;
         String propertyNode = "privateKey";
         try {
             SshKeyUtils.decodePEMPrivateKey(privateKey);
-            propertyNode = "publicKey";
-            SshKeyUtils.decodePEMPublicKey(publicKey);
         } catch (Exception e) {
             context.buildConstraintViolationWithTemplate("The provided key is not valid. Please check it and try again.")
                     .addPropertyNode(propertyNode).addConstraintViolation()

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.ssh.SshKeyUtils;
@@ -30,8 +31,9 @@ public class DefaultKeyPairProvider implements KeyPairProvider {
         SshSettings sshSettings = (SshSettings) setting.getValue();
         
         try {
-            PublicKey publicKey = SshKeyUtils.decodePEMPublicKey(sshSettings.getPublicKey());
             PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(sshSettings.getPrivateKey());
+            PublicKey publicKey = KeyUtils.recoverPublicKey(privateKey);
+            
             List<KeyPair> keys = new ArrayList<>();
             
             keys.add(new KeyPair(publicKey, privateKey));
