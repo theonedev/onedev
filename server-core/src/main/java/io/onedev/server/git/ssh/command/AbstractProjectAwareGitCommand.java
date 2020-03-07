@@ -45,9 +45,8 @@ public abstract class AbstractProjectAwareGitCommand
     protected String getGitProjectName() {
         String gitCommand = getCommand();
         int lastSegment = gitCommand.lastIndexOf('/');
-        int postifPos = gitCommand.lastIndexOf(".git");
 
-        return gitCommand.substring(lastSegment + 1, postifPos);
+        return gitCommand.substring(lastSegment + 1, gitCommand.length() - 1);
     }
 
     @Override
