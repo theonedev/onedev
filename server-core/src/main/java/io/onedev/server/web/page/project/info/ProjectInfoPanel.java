@@ -32,6 +32,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -53,10 +54,12 @@ public abstract class ProjectInfoPanel extends Panel {
 		add(new Label("name", getProject().getName()));
 		
 		User owner = getProject().getOwner();
-		if (SecurityUtils.isAdministrator()) {
+		User loggedInUser = SecurityUtils.getUser();
+		
+        if (SecurityUtils.isAdministrator()) {
 			add(new ViewStateAwarePageLink<Void>("owner", UserProfilePage.class, UserProfilePage.paramsOf(owner))
 					.setBody(Model.of(owner.getDisplayName())));
-		} else if (owner.equals(SecurityUtils.getUser())) {
+		} else if (owner.equals(loggedInUser)) {
 			add(new ViewStateAwarePageLink<Void>("owner", MyProfilePage.class)
 					.setBody(Model.of(owner.getDisplayName())));
 		} else {
@@ -136,12 +139,19 @@ public abstract class ProjectInfoPanel extends Panel {
 				.setVisible(canReadCode));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 
+		boolean userHasNoKeys = loggedInUser.getSshKeys().isEmpty();
 		boolean isSshEnabled = OneWebApplication.get().isSshEnabled();
 		
 		Model<String> cloneSshUrlModel = Model.of(urlManager.sshUrlFor(getProject()));
 		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
 		        .setVisible(isSshEnabled && canReadCode));
 		add(new WebMarkupContainer("copySshUrl").add(new CopyClipboardBehavior(cloneSshUrlModel)));
+		
+		WebMarkupContainer noKeyWarning = new WebMarkupContainer("noKeyWarning");
+		BookmarkablePageLink<Void> registerKey = new BookmarkablePageLink<Void>("registerKey", MySshKeysPage.class);
+		noKeyWarning.add(registerKey);
+		
+		add(noKeyWarning.setVisible(userHasNoKeys));
 	}
 	
 	private Project getProject() {
