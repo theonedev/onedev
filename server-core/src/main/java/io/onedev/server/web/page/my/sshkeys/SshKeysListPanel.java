@@ -2,7 +2,6 @@ package io.onedev.server.web.page.my.sshkeys;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -11,12 +10,9 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 
 @SuppressWarnings("serial")
@@ -26,11 +22,6 @@ public class SshKeysListPanel extends Panel {
     
     public SshKeysListPanel(String id, IModel<List<SshKey>> model) {
         super(id);
-        
-        if (!OneWebApplication.get().isSshEnabled()) {            
-            throw new OneException("This page requires Ssh support to be enabled. "
-                    + " You need to specify ssh_port parameter in server.properties");
-        }
         
         WebMarkupContainer keyList = new WebMarkupContainer("keyList");
         
