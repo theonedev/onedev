@@ -2,10 +2,12 @@ package io.onedev.server.web.page.my.sshkeys;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SshKeyManager;
@@ -23,16 +25,16 @@ public class MySshKeysPage extends MyPage {
     
 	public MySshKeysPage(PageParameters params) {
 		super(params);
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
 		
 		if (!OneWebApplication.get().isSshEnabled()) {            
             throw new OneException("This page requires Ssh support to be enabled. "
                     + " You need to specify ssh_port parameter in server.properties");
         }
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		User user = getLoginUser();
 		

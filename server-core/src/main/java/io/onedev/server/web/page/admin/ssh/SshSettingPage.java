@@ -20,16 +20,17 @@ public class SshSettingPage extends AdministrationPage {
 
     public SshSettingPage(PageParameters params) {
         super(params);
-    }
-
-    @Override
-    protected void onInitialize() {
-        super.onInitialize();
         
         if (!OneWebApplication.get().isSshEnabled()) {            
             throw new OneException("This page requires Ssh support to be enabled. "
                     + " You need to specify ssh_port parameter in server.properties");
         }
+        
+    }
+
+    @Override
+    protected void onInitialize() {
+        super.onInitialize();
         
         SshSettings sshSetting = OneDev.getInstance(SettingManager.class).getSshSettings();
 
