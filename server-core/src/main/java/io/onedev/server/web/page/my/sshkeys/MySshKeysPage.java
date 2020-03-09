@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.my.sshkeys;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -20,8 +19,6 @@ import io.onedev.server.web.page.my.MyPage;
 @SuppressWarnings("serial")
 public class MySshKeysPage extends MyPage {
 	
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    
 	public MySshKeysPage(PageParameters params) {
 		super(params);
 		

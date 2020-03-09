@@ -37,7 +37,9 @@ public class SshSettingPage extends AdministrationPage {
 
         Form<?> form = new Form<Void>("form") {
 
-            @Override
+			private static final long serialVersionUID = 1L;
+
+			@Override
             protected void onSubmit() {
                 super.onSubmit();
                 OneDev.getInstance(SettingManager.class).saveSshSetting(sshSetting);

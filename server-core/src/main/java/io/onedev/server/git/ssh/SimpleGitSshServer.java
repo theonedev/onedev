@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.Collections;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.server.Environment;
@@ -14,6 +16,7 @@ import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
+
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.ssh.command.AbstractProjectAwareGitCommand;
@@ -27,13 +30,13 @@ public class SimpleGitSshServer {
 
     private final SshServer server;
     
-    private final Dao dao;
+//    private final Dao dao;
 
     private final ProjectManager projectManager;
 
-    private final ServerConfig serverConfig;
+//    private final ServerConfig serverConfig;
 
-    private final WorkExecutor workExecutor;
+//    private final WorkExecutor workExecutor;
 
     private final SshKeyManager sshKeyManager;
 
@@ -45,10 +48,10 @@ public class SimpleGitSshServer {
             ServerConfig serverConfig,
             WorkExecutor workExecutor,
             SshKeyManager sshKeyManager) {
-        this.dao = dao;
+//        this.dao = dao;
         this.projectManager = projectManager;
-        this.serverConfig = serverConfig;
-        this.workExecutor = workExecutor;
+//        this.serverConfig = serverConfig;
+//        this.workExecutor = workExecutor;
         this.sshKeyManager = sshKeyManager;
         this.server = SshServer.setUpDefaultServer();
         
