@@ -11,9 +11,9 @@ import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.my.sshkeys.SshKeysListPanel;
 
 @SuppressWarnings("serial")
-public class UserSshKeys extends UserPage {
+public class UserSshKeysPage extends UserPage {
 
-    public UserSshKeys(PageParameters params) {
+    public UserSshKeysPage(PageParameters params) {
         super(params);
     }
     
