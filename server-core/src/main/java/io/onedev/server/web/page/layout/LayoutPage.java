@@ -215,7 +215,7 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
-		item.setVisible(!isSshEnabled());
+		item.setVisible(isSshEnabled());
 		
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MyJobSecretsPage.class));

@@ -1,9 +1,11 @@
 <wicket:extend>
 	<div class="page-title">Ssh Keys</div>
-	<div class="body">
-		<div wicket:id="keyList">
+	<div class="key list">
+		<div class="head">
+			<a class="add-new btn btn-success" wicket:id="newKey"><i class="fa fa-plus"></i> New Ssh Key</a>
+		</div>
+		<div class="body">
+			<div wicket:id="keyList"></div>
 		</div>
 	</div>
-	<a class="add-new btn btn-success" wicket:id="newKey"><i
-		class="fa fa-plus"></i> New Ssh Key</a>
 </wicket:extend>
