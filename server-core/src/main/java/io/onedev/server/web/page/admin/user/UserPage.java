@@ -2,6 +2,7 @@ package io.onedev.server.web.page.admin.user;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
@@ -13,11 +14,11 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -34,7 +35,7 @@ import io.onedev.server.web.page.admin.user.buildsetting.UserJobSecretsPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
-import io.onedev.server.web.page.admin.user.ssh.UserSshKeys;
+import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
 import io.onedev.server.web.page.admin.user.webhook.UserWebHooksPage;
 
 @SuppressWarnings("serial")
@@ -99,8 +100,8 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
 		
-		if (OneWebApplication.get().isSshEnabled()) {            
-		    tabs.add(new UserTab("Ssh Keys", "fa fa-fw fa-shield", UserSshKeys.class));
+		if (isSshEnabled()) {            
+		    tabs.add(new UserTab("Ssh Keys", "fa fa-fw fa-shield", UserSshKeysPage.class));
         }
 		
 		tabs.add(new UserTab("Build Setting", "fa fa-fw fa-cubes", UserJobSecretsPage.class, UserBuildSettingPage.class));

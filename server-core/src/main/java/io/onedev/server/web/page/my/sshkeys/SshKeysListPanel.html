@@ -8,7 +8,10 @@
 	<wicket:panel>		
 		<div wicket:id="keyList">
 			<table class="table">
+				<thead>
 				<tr><th>Name</th><th>Owner</th><th>Digest</th><th>Creation time</th><th></th></tr>
+				</thead>
+				<tbody>
 				<tr wicket:id="keys" class="even">
 	     		  <td><span wicket:id="name">Test ID</span></td>
 	     		  <td><span wicket:id="owner">Test ID</span></td>
@@ -16,6 +19,7 @@
 	     		  <td><span wicket:id="timestamp">Test ID</span></td>
 	     		  <td><a class="btn btn-danger" wicket:id="delete">Delete</a></td>
 	     		</tr>
+				</tbody>
 			</table>
 		</div>
 	</wicket:panel>

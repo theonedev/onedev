@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
@@ -24,13 +25,13 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -140,7 +141,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 
 		boolean userHasNoKeys = loggedInUser.getSshKeys().isEmpty();
-		boolean isSshEnabled = OneWebApplication.get().isSshEnabled();
+		boolean isSshEnabled = ((BasePage)getPage()).isSshEnabled();
 		
 		Model<String> cloneSshUrlModel = Model.of(urlManager.sshUrlFor(getProject()));
 		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
