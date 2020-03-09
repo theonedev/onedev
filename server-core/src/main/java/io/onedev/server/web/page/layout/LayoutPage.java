@@ -13,13 +13,13 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.Plugin;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -119,7 +119,7 @@ public abstract class LayoutPage extends BasePage {
 	    item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
 	    if (getPage() instanceof SshSettingPage)
 	        item.add(AttributeAppender.append("class", "active"));
-		item.setVisible(OneWebApplication.get().isSshEnabled());
+		item.setVisible(isSshEnabled());
 	    
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorPage.class));
@@ -215,7 +215,7 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
-		item.setVisible(OneWebApplication.get().isSshEnabled());
+		item.setVisible(!isSshEnabled());
 		
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MyJobSecretsPage.class));
