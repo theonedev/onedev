@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>3.0.9</version>
+		<version>3.0.10</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.maven.MavenModule</moduleClass>
