@@ -64,6 +64,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -1232,7 +1233,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		 */
 		PullRequest request = getPullRequest();
 		if (request != null)
-			OneDev.getInstance(PullRequestManager.class).checkUpdate(request);
+			OneDev.getInstance(PullRequestUpdateManager.class).checkUpdate(request);
 		
 		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 

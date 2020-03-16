@@ -58,14 +58,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
      * 			merge preview, or <tt>null</tt> if preview is being calculating
      */
     MergePreview previewMerge(PullRequest request);
-
-    /**
-     * Delete git refs of this pull request and all its updates.
-     * 
-     * @param request
-     *			pull request whose git refs and update refs to be deleted 	
-     */
-    void deleteRefs(PullRequest request);
     
     void open(PullRequest request);
     
@@ -80,8 +72,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	int countOpen(Project targetProject);
 
-	void checkUpdate(PullRequest request);
-	
 	void checkQuality(PullRequest request);
 	
 	List<PullRequest> query(@Nullable Project targetProject, 

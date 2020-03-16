@@ -313,6 +313,8 @@ public class Project extends AbstractEntity {
     
     private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
+    private transient Optional<RevCommit> lastCommitHolder;
+    
 	private transient List<Milestone> sortedMilestones;
 	
 	private transient List<String> jobNames;
@@ -722,6 +724,29 @@ public class Project extends AbstractEntity {
 			Collections.sort(jobNames);
 		}
 		return jobNames;
+	}
+	
+	public RevCommit getLastCommit() {
+		if (lastCommitHolder == null) {
+			RevCommit lastCommit = null;
+			try {
+				for (Ref ref: getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
+					RevCommit commit = getRevCommit(ref.getObjectId(), false);
+					if (commit != null) {
+						if (lastCommit != null) {
+							if (commit.getCommitTime() > lastCommit.getCommitTime())
+								lastCommit = commit;
+						} else {
+							lastCommit = commit;
+						}
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			lastCommitHolder = Optional.fromNullable(lastCommit);
+		}
+		return lastCommitHolder.orNull();
 	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {

@@ -19,10 +19,12 @@ import javax.persistence.Table;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.annotations.Cache;
@@ -31,6 +33,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentRelationManager;
 import io.onedev.server.git.GitUtils;
 
@@ -239,6 +242,29 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	public RevCommit getHeadCommit() {
 		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
+	}
+	
+	public void writeRef() {
+		ObjectId updateHeadId = ObjectId.fromString(getHeadCommitHash());
+		if (!request.getTargetProject().equals(request.getSourceProject())) {
+			try {
+				request.getTargetProject().git().fetch()
+						.setRemote(request.getSourceProject().getGitDir().getAbsolutePath())
+						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + getHeadRef()))
+						.call();
+				if (!request.getTargetProject().getObjectId(getHeadRef(), true).equals(updateHeadId)) {
+					RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), getHeadRef());
+					refUpdate.setNewObjectId(updateHeadId);
+					GitUtils.updateRef(refUpdate);
+				}
+			} catch (Exception e) {
+				throw ExceptionUtils.unchecked(e);
+			}
+		} else {
+			RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), getHeadRef());
+			refUpdate.setNewObjectId(updateHeadId);
+			GitUtils.updateRef(refUpdate);
+		}
 	}
 	
 }

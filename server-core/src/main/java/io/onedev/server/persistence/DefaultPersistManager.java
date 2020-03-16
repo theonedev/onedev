@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -156,6 +157,10 @@ public class DefaultPersistManager implements PersistManager {
 	
 	@Override
 	public void start() {
+		String dialect = getDialect().toLowerCase();
+		if (dialect.contains("hsql")) 
+			execute(Lists.newArrayList("SET DATABASE TRANSACTION CONTROL MVCC"), true);
+		
 		String dbDataVersion = checkDataVersion(true);
 		
 		Metadata metadata = buildMetadata();

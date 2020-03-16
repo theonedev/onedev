@@ -1,5 +1,12 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.PullRequest.PROP_HEAD_COMMIT_HASH;
+import static io.onedev.server.model.PullRequest.PROP_NO_SPACE_TITLE;
+import static io.onedev.server.model.PullRequest.PROP_NUMBER;
+import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.PullRequest.PROP_TITLE;
+import static io.onedev.server.model.PullRequest.PROP_UUID;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,6 +37,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -62,7 +70,6 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
-import static io.onedev.server.model.PullRequest.*;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
@@ -619,6 +626,24 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		GitUtils.deleteRef(GitUtils.getRefUpdate(getTargetProject().getRepository(), getHeadRef()));
 	}
 	
+	public void writeBaseRef() {
+		RefUpdate refUpdate = GitUtils.getRefUpdate(getTargetProject().getRepository(), getBaseRef());
+		refUpdate.setNewObjectId(ObjectId.fromString(getBaseCommitHash()));
+		GitUtils.updateRef(refUpdate);
+	}
+	
+	public void writeHeadRef() {
+		RefUpdate refUpdate = GitUtils.getRefUpdate(getTargetProject().getRepository(), getHeadRef());
+		refUpdate.setNewObjectId(ObjectId.fromString(getHeadCommitHash()));
+		GitUtils.updateRef(refUpdate);
+	}
+	
+	public void writeMergeRef() {
+		RefUpdate refUpdate = GitUtils.getRefUpdate(getTargetProject().getRepository(), getMergeRef());
+		refUpdate.setNewObjectId(ObjectId.fromString(getLastMergePreview().getMerged()));
+		GitUtils.updateRef(refUpdate);
+	}
+	
 	public static class CriterionHelper {
 		public static Criterion ofOpen() {
 			return Restrictions.isNull("closeInfo");
@@ -999,7 +1024,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public Project getAttachmentProject() {
 		return getTargetProject();
 	}
-
+	
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getTargetProject(), getNumber());
 	}

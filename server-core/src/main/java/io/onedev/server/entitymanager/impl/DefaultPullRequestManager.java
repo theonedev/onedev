@@ -203,17 +203,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void delete(PullRequest request) {
-		deleteRefs(request);
-		dao.remove(request);
-	}
-
-	@Sessional
-	@Override
-	public void deleteRefs(PullRequest request) {
-		for (PullRequestUpdate update : request.getUpdates())
-			update.deleteRefs();
-		
 		request.deleteRefs();
+		for (PullRequestUpdate update: request.getUpdates())
+			update.deleteRefs();
+		dao.remove(request);
 	}
 
 	@Transactional
@@ -320,9 +313,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	        preview = new MergePreview(preview.getTargetHead(), preview.getRequestHead(), 
 	        		preview.getMergeStrategy(), merged);
 	        request.setLastMergePreview(preview);
-			RefUpdate refUpdate = GitUtils.getRefUpdate(targetProject.getRepository(), request.getMergeRef());
-			refUpdate.setNewObjectId(mergedId);
-			GitUtils.updateRef(refUpdate);
+	        request.writeMergeRef();
 		}
 		
 		closeAsMerged(request, false);
@@ -371,17 +362,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		request.setLastUpdate(event.getLastUpdate());
 		
 		dao.persist(request);
-		
-		RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), request.getBaseRef());
-		refUpdate.setNewObjectId(ObjectId.fromString(request.getBaseCommitHash()));
-		GitUtils.updateRef(refUpdate);
-		
-		refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), request.getHeadRef());
-		refUpdate.setNewObjectId(ObjectId.fromString(request.getHeadCommitHash()));
-		GitUtils.updateRef(refUpdate);
+		request.writeBaseRef();
+		request.writeHeadRef();
 		
 		for (PullRequestUpdate update: request.getUpdates())
-			pullRequestUpdateManager.save(update, false);
+			pullRequestUpdateManager.save(update);
 		
 		pullRequestReviewManager.saveReviews(request);
 		pullRequestBuildManager.savePullRequestBuilds(request);
@@ -402,9 +387,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		closeInfo.setStatus(CloseInfo.Status.MERGED);
 		request.setCloseInfo(closeInfo);
 		
-		String reason = null;
+		String reason;
 		if (dueToMerged)
 			reason = "closed pull request as source branch is merged into target branch";
+		else
+			reason = null;
 		
 		PullRequestChange change = new PullRequestChange();
 		change.setUser(userManager.getSystem());
@@ -412,28 +399,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
 		pullRequestChangeManager.save(change);
-	}
-
-	@Override
-	public void checkUpdate(PullRequest request) {
-		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
-			ObjectId mergeBase = GitUtils.getMergeBase(
-					request.getTargetProject().getRepository(), request.getTarget().getObjectId(), 
-					request.getSourceProject().getRepository(), request.getSource().getObjectId());
-			if (mergeBase != null) {
-				PullRequestUpdate update = new PullRequestUpdate();
-				update.setRequest(request);
-				update.setHeadCommitHash(request.getSource().getObjectName());
-				update.setMergeBaseCommitHash(mergeBase.name());
-				request.addUpdate(update);
-				pullRequestUpdateManager.save(update, true);
-				
-				RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), 
-						request.getHeadRef());
-				refUpdate.setNewObjectId(ObjectId.fromString(request.getHeadCommitHash()));
-				GitUtils.updateRef(refUpdate);
-			}
-		}
 	}
 
 	@Transactional
@@ -449,7 +414,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				} else if (request.getTarget().getObjectId(false) == null) {
 					discard(request, "Target branch no longer exists");
 				} else {
-					checkUpdate(request);
+					pullRequestUpdateManager.checkUpdate(request);
 					if (request.isMergeIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
