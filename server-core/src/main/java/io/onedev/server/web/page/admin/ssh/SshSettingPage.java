@@ -2,10 +2,8 @@ package io.onedev.server.web.page.admin.ssh;
 
 import java.util.Collection;
 import java.util.HashSet;
-
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
@@ -23,7 +21,7 @@ public class SshSettingPage extends AdministrationPage {
         super(params);
         
         if (!isSshEnabled()) {            
-            throw new OneException("This page requires Ssh support to be enabled. "
+            throw new OneException("This page requires SSH support to be enabled. "
                     + " You need to specify ssh_port parameter in server.properties");
         }
         
