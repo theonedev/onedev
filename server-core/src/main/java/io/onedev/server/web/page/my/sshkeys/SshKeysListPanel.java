@@ -31,7 +31,6 @@ public class SshKeysListPanel extends Panel {
             {
                 final SshKey sshKey = item.getModelObject();
                 item.add(new Label("name", sshKey.getName()));
-                item.add(new Label("owner", sshKey.getOwner().getName()));
                 item.add(new Label("digest", sshKey.getDigest()));                          
                 item.add(new Label("timestamp", sshKey.getTimestamp().format(formatter)));                          
                 item.add(new AjaxLink<Void>("delete") {
