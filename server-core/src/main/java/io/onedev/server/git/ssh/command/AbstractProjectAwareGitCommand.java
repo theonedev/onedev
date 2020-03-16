@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.shiro.authz.Permission;
 import org.apache.sshd.common.session.Session;
 import org.apache.sshd.common.session.SessionHolder;
 import org.apache.sshd.server.Environment;
@@ -15,12 +16,14 @@ import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.session.ServerSessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.ssh.util.SshServerUtils;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.work.WorkExecutor;
 
 public abstract class AbstractProjectAwareGitCommand
         implements Command, SessionAware, SessionHolder<Session>, ServerSessionHolder {
-
     protected final Logger log;
 
     private static final int PRIORITY = 2;
@@ -34,10 +37,13 @@ public abstract class AbstractProjectAwareGitCommand
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private ServerSession session;
 
+    private ProjectManager projectManager;
 
-    public AbstractProjectAwareGitCommand(String command, WorkExecutor workExecutor) {
+
+    public AbstractProjectAwareGitCommand(String command, WorkExecutor workExecutor, ProjectManager projectManager) {
         this.command = command;
         this.workExecutor = workExecutor;
+        this.projectManager = projectManager;
 
         this.log = LoggerFactory.getLogger(getClass());
     }
@@ -129,5 +135,12 @@ public abstract class AbstractProjectAwareGitCommand
     @Override
     public void setSession(ServerSession session) {
         this.session = session;
+    }
+
+    protected boolean isUserAllowed(Project project, Permission permission) {
+        ServerSession session = getServerSession();
+        Long userId = session.getAttribute(SshServerUtils.SESSION_USER_ID);
+        
+        return projectManager.isUserAuthorized(project, userId, permission);
     }
 }

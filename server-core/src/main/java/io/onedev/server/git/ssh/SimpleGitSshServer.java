@@ -4,24 +4,28 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.text.MessageFormat;
 import java.util.Collections;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.UploadPack;
-
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.ssh.command.AbstractProjectAwareGitCommand;
+import io.onedev.server.git.ssh.util.SshServerUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.SshKey;
+import io.onedev.server.model.User;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.work.WorkExecutor;
 
@@ -30,15 +34,11 @@ public class SimpleGitSshServer {
 
     private final SshServer server;
     
-//    private final Dao dao;
-
     private final ProjectManager projectManager;
 
-//    private final ServerConfig serverConfig;
-
-//    private final WorkExecutor workExecutor;
-
     private final SshKeyManager sshKeyManager;
+
+    private final SessionManager sessionManager;
 
     @Inject
     public SimpleGitSshServer(
@@ -47,12 +47,11 @@ public class SimpleGitSshServer {
             KeyPairProvider keyPairProvider,
             ServerConfig serverConfig,
             WorkExecutor workExecutor,
-            SshKeyManager sshKeyManager) {
-//        this.dao = dao;
+            SshKeyManager sshKeyManager,
+            SessionManager sessionManager) {
         this.projectManager = projectManager;
-//        this.serverConfig = serverConfig;
-//        this.workExecutor = workExecutor;
         this.sshKeyManager = sshKeyManager;
+        this.sessionManager = sessionManager;
         this.server = SshServer.setUpDefaultServer();
         
         this.server.setKeyPairProvider(keyPairProvider);
@@ -61,9 +60,9 @@ public class SimpleGitSshServer {
         configureAuthentication();
         this.server.setCommandFactory(command -> {
             if (command.startsWith(RemoteConfig.DEFAULT_UPLOAD_PACK)) {
-                return new GitUploadPackCommand(command, workExecutor);
+                return new GitUploadPackCommand(command, workExecutor, projectManager);
             } else if (command.startsWith(RemoteConfig.DEFAULT_RECEIVE_PACK)) {
-                return new GitReceivePackCommand(command, workExecutor);
+                return new GitReceivePackCommand(command, workExecutor, projectManager);
             }
             return new UnknownCommand(command);
         });
@@ -71,7 +70,7 @@ public class SimpleGitSshServer {
     
     private void configureAuthentication() {
         server.setPublickeyAuthenticator((userName, publicKey, session) -> {
-            return checkUserKeys(userName, publicKey);
+            return checkUserKeys(userName, publicKey, session);
         });
         
         server.setShellFactory(new WelcomeGitShell());
@@ -83,14 +82,24 @@ public class SimpleGitSshServer {
     }
     
     /**
-     * Just check that public key is present inside OneDev
+     * Check that public key is present inside OneDev and retrieve the owner user
      * @param userName
      * @param publicKey
+     * @param session 
      * @return
      */
-    private boolean checkUserKeys(String userName, PublicKey publicKey) {
+    private boolean checkUserKeys(String userName, PublicKey publicKey, ServerSession session) {
         String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);        
-        return sshKeyManager.loadKeyByDigest(fingerPrint) != null;
+        SshKey sshKey = sshKeyManager.loadKeyByDigest(fingerPrint);
+        
+        if (sshKey == null) {
+            return false;
+        }
+        
+        User owner = sshKey.getOwner();
+        session.setAttribute(SshServerUtils.SESSION_USER_ID, owner.getId());
+
+        return true;
     }
     
     public int start() {
@@ -109,18 +118,29 @@ public class SimpleGitSshServer {
     private class GitUploadPackCommand extends AbstractProjectAwareGitCommand {
 
 
-        public GitUploadPackCommand(String command, WorkExecutor workExecutor) {
-            super(command, workExecutor);
+        public GitUploadPackCommand(String command, WorkExecutor workExecutor, ProjectManager projectManager) {
+            super(command, workExecutor, projectManager);
         }
 
         @Override
         protected void execute(Environment env) {
             String projectName = getGitProjectName();
-            Project project = projectManager.find(projectName);
             
-            if (project == null) {
-                onExit(-1, "Project not found!");
-                return;
+            sessionManager.openSession(); 
+
+            Project project = projectManager.find(projectName);
+            try {
+                if (project == null) {
+                    onExit(-1, "Project not found!");
+                    return;
+                }
+                
+                if (!isUserAllowed(project, new ReadCode())) {
+                    onExit(-1, "User is not allowed to use this project!");
+                    return;
+                }
+            } finally {                
+                sessionManager.closeSession();
             }
             
             UploadPack uploadPack = new UploadPack(project.getRepository());
@@ -146,18 +166,29 @@ public class SimpleGitSshServer {
     private class GitReceivePackCommand extends AbstractProjectAwareGitCommand {
 
         
-        public GitReceivePackCommand(String command, WorkExecutor workExecutor) {
-            super(command, workExecutor);
+        public GitReceivePackCommand(String command, WorkExecutor workExecutor, ProjectManager projectManager) {
+            super(command, workExecutor, projectManager);
         }
 
         @Override
         protected void execute(Environment env) {
             String projectName = getGitProjectName();
-            Project project = projectManager.find(projectName);
             
-            if (project == null) {
-                onExit(-1, "Project not found!");
-                return;
+            sessionManager.openSession(); 
+
+            Project project = projectManager.find(projectName);
+            try {
+                if (project == null) {
+                    onExit(-1, "Project not found!");
+                    return;
+                }
+                
+                if (!isUserAllowed(project, new WriteCode())) {
+                    onExit(-1, "User is not allowed to use this project!");
+                    return;
+                }
+            } finally {                
+                sessionManager.closeSession();
             }
             
             try {

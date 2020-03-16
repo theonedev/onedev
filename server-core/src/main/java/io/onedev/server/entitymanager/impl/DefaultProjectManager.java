@@ -11,16 +11,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.api.Git;
@@ -38,9 +37,7 @@ import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -584,5 +581,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return SimpleScheduleBuilder.repeatMinutelyForever();
 	}
+	
+	@Sessional
+    @Override
+    public boolean isUserAuthorized(Project project, Long userId, Permission permission) {
+        Collection<User> allowedUsers = SecurityUtils.getAuthorizedUsers(project, permission);
+        Optional<User> userOpt = allowedUsers.stream()
+                .filter(user -> user.getId().equals(userId)).findAny();
+        return userOpt.isPresent();
+    }
 
 }
