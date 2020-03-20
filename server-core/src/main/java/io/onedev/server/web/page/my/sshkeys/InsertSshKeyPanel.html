@@ -6,19 +6,17 @@
 		</div>
 		<form wicket:id="form">
 			<div class="modal-body">
-				<div name="feedback"></div>
-
 				<div class="form-group">
 					<label>Key name</label><span class="required">*</span> <input wicket:id="name"
 						class="form-control">
+				</div>
+				<div wicket:id="feedbackName">
 				</div>
 				<div class="form-group">
 					<label>Value</label><span class="required">*</span>
 					<textarea wicket:id="content" rows="10" class="form-control"></textarea>
 				</div>
-				<div wicket:id="feedback">
-					<strong>Warning!</strong> Indicates a warning that might need
-					attention.
+				<div wicket:id="feedbackContent">
 				</div>
 			</div>
 			<div class="modal-footer">

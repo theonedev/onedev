@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.feedback.ComponentFeedbackMessageFilter;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -45,8 +46,11 @@ public abstract class InsertSshKeyPanel extends Panel {
         CompoundPropertyModel<SshKey> model = new CompoundPropertyModel<SshKey>(new SshKey());
         form.setModel(model);
 
-        FeedbackPanel feedbackPanel = new FeedbackPanel("feedback");
-        feedbackPanel.setOutputMarkupId(true);
+        FeedbackPanel feedbackContent = new FeedbackPanel("feedbackContent");
+        feedbackContent.setOutputMarkupId(true);
+
+        FeedbackPanel feedbackName = new FeedbackPanel("feedbackName");
+        feedbackName.setOutputMarkupId(true);
         
         form.add(new AjaxLink<Void>("cancel") {
             
@@ -75,15 +79,21 @@ public abstract class InsertSshKeyPanel extends Panel {
             @Override
             protected void onError(AjaxRequestTarget target, Form<?> form) {
                 super.onError(target, form);
-                target.add(feedbackPanel);
+                target.add(feedbackContent, feedbackName);
             }
         });
         
-        TextArea<String> textArea = new TextArea<String>("content");
+        TextArea<String> keyContent = new TextArea<String>("content");
 
-        form.add(new TextField<>("name").setRequired(true));
-        form.add(textArea.add(new SshValidator(model)).setRequired(true));
-        form.add(feedbackPanel);
+        TextField<String> keyName = new TextField<>("name");
+        form.add(keyName.setRequired(true));
+        form.add(keyContent.add(new SshValidator(model)).setRequired(true));
+        
+        feedbackContent.setFilter(new ComponentFeedbackMessageFilter(keyContent));
+        feedbackName.setFilter(new ComponentFeedbackMessageFilter(keyName));
+        
+        form.add(feedbackContent);
+        form.add(feedbackName);
         
         add(form);
     }
