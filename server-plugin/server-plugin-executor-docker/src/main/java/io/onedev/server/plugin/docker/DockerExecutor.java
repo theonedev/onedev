@@ -1119,7 +1119,10 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 
 				@Override
 				public void consume(String line) {
-					logger.error(line);
+					if (line.contains("Error response from daemon"))
+						logger.error(line);
+					else
+						logger.info(line);
 				}
 				
 			}).checkReturnCode();
