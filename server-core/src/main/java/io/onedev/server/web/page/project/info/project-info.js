@@ -4,6 +4,7 @@ onedev.server.projectInfo = {
 		
 		$("#" + switchId).click(function() {
 			$(".clone").toggleClass('hidden');
+			$("#noKeyWarning").toggleClass('hidden');			
 			
 			if (alternativeProtocol === 'HTTPS') {
 				alternativeProtocol = 'SSH';
