@@ -1,7 +1,7 @@
 grammar CommitQuery;
 
 query
-	: WS* (ALL | criteria (WS+ criteria)*) WS* EOF
+	: WS* criteria (WS+ criteria)* WS* EOF
 	;
 
 criteria
@@ -103,11 +103,7 @@ CommittedByMe
 DefaultBranch
 	: 'default-branch'
 	;
-	
-ALL
-	: 'all'
-	;
-	
+		
 WS
 	: ' '
 	;

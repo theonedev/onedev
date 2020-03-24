@@ -4,13 +4,12 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public abstract class TransitionTrigger implements Serializable {
@@ -19,10 +18,10 @@ public abstract class TransitionTrigger implements Serializable {
 	
 	private String issueQuery;
 	
-	@Editable(order=1000, name="Applicable Issues", description="Specify criteria of issues applicable for this transition")
+	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = true, 
 			withCurrentPullRequestCriteria = true, withCurrentCommitCriteria = true)
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	public String getIssueQuery() {
 		return issueQuery;
 	}

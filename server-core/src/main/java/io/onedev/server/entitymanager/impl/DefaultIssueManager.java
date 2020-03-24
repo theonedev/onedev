@@ -236,8 +236,9 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			}
 		}
 
-		if (orders.isEmpty())
+		if (orders.isEmpty()) {
 			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
+		}
 		query.orderBy(orders);
 		
 		return query;

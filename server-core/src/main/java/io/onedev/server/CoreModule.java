@@ -271,6 +271,7 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.mapper.OnePageMapper;
+import io.onedev.server.web.page.DashboardPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.layout.BuildListTab;
 import io.onedev.server.web.page.layout.IssueListTab;
@@ -278,7 +279,6 @@ import io.onedev.server.web.page.layout.MainTab;
 import io.onedev.server.web.page.layout.ProjectListTab;
 import io.onedev.server.web.page.layout.PullRequestListTab;
 import io.onedev.server.web.page.layout.UICustomization;
-import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.websocket.BuildEventBroadcaster;
@@ -599,7 +599,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public Class<? extends BasePage> getHomePage() {
-				return ProjectListPage.class;
+				return DashboardPage.class;
 			}
 			
 			@Override

@@ -1,7 +1,7 @@
 grammar BuildQuery;
 
 query
-    : WS* (criteria|All) WS* (WS OrderBy WS+ order (WS+ And WS+ order)* WS*)? EOF
+    : WS* criteria WS* (WS OrderBy WS+ order (WS+ And WS+ order)* WS*)? EOF
     | WS* OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
     | WS* EOF
     ;
@@ -19,10 +19,6 @@ criteria
 
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
-	;
-
-All
-	: 'all'
 	;
 
 Successful

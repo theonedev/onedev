@@ -17,7 +17,7 @@ public class GlobalBuildSetting implements Serializable {
 	private List<String> listParams = new ArrayList<>();
 	
 	public GlobalBuildSetting() {
-		namedQueries.add(new NamedBuildQuery("All", "all"));
+		namedQueries.add(new NamedBuildQuery("All", null));
 		namedQueries.add(new NamedBuildQuery("Successful", "successful"));
 		namedQueries.add(new NamedBuildQuery("Failed", "failed"));
 		namedQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));

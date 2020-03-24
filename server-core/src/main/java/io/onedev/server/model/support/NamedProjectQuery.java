@@ -3,6 +3,7 @@ package io.onedev.server.model.support;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ProjectQuery;
 
 @Editable
@@ -35,7 +36,7 @@ public class NamedProjectQuery implements NamedQuery {
 
 	@Editable
 	@ProjectQuery
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	@Override
 	public String getQuery() {
 		return query;

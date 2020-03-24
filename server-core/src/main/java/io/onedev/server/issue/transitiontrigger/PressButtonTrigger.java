@@ -12,7 +12,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -31,11 +30,6 @@ public class PressButtonTrigger extends TransitionTrigger {
 	private List<String> authorizedRoles = new ArrayList<>();
 	
 	private List<String> promptFields = new ArrayList<>();
-	
-	public PressButtonTrigger() {
-		setIssueQuery(io.onedev.server.search.entity.issue.IssueQuery
-				.getRuleName(IssueQueryLexer.All));
-	}
 	
 	@Editable(order=100)
 	@NotEmpty
@@ -143,10 +137,10 @@ public class PressButtonTrigger extends TransitionTrigger {
 		}
 	}
 
-	@Editable(order=1000, name="Applicable Issues", description="Specify criteria of issues applicable for this transition")
+	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentUserCriteria = true, withCurrentBuildCriteria = false, 
-			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
-	@NotEmpty
+			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)	
+	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

@@ -8,8 +8,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -38,27 +36,11 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	private String compareWith;
 	
-	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
-
-		@Override
-		protected String load() {
-			String query = getPageParameters().get(PARAM_COMMIT_QUERY).toString();
-			if (query == null) {
-				if (getProject().getCommitQuerySettingOfCurrentUser() != null 
-						&& !getProject().getCommitQuerySettingOfCurrentUser().getUserQueries().isEmpty()) { 
-					query = getProject().getCommitQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
-				} else if (!getProject().getNamedCommitQueries().isEmpty()) {
-					query = getProject().getNamedCommitQueries().iterator().next().getQuery();
-				}
-			}
-			return query;
-		}
-		
-	};
+	private final String query;
 	
 	public ProjectCommitsPage(PageParameters params) {
 		super(params);
-		
+		query = getPageParameters().get(PARAM_COMMIT_QUERY).toString();
 		compareWith = params.get(PARAM_COMPARE_WITH).toString();
 	}
 
@@ -66,12 +48,6 @@ public class ProjectCommitsPage extends ProjectPage {
 		return OneDev.getInstance(CommitQuerySettingManager.class);
 	}
 	
-	@Override
-	protected void onDetach() {
-		queryModel.detach();
-		super.onDetach();
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -113,7 +89,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(new CommitListPanel("main", queryModel.getObject()) {
+		add(new CommitListPanel("main", query) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
@@ -201,6 +177,17 @@ public class ProjectCommitsPage extends ProjectPage {
 		if (query != null)
 			params.set(PARAM_COMMIT_QUERY, query);
 		return params;
+	}
+	
+	public static PageParameters paramsOf(Project project, @Nullable String compareWith) {
+		String query = null;
+		if (project.getCommitQuerySettingOfCurrentUser() != null 
+				&& !project.getCommitQuerySettingOfCurrentUser().getUserQueries().isEmpty()) { 
+			query = project.getCommitQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+		} else if (!project.getNamedCommitQueries().isEmpty()) {
+			query = project.getNamedCommitQueries().iterator().next().getQuery();
+		}
+		return paramsOf(project, query, compareWith);
 	}
 	
 	@Override

@@ -10,8 +10,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -39,30 +37,15 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class ProjectPullRequestsPage extends ProjectPage {
 
-	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
-
-		@Override
-		protected String load() {
-			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query == null) {
-				if (getProject().getPullRequestQuerySettingOfCurrentUser() != null
-						&& !getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
-					query = getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
-				} else if (!getProject().getPullRequestSetting().getNamedQueries(true).isEmpty()) {
-					query = getProject().getPullRequestSetting().getNamedQueries(true).iterator().next().getQuery();
-				}
-			}
-			return query;
-		}
-		
-	};
+	private final String query;			
 	
 	public ProjectPullRequestsPage(PageParameters params) {
 		super(params);
+		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 	}
 
 	private PullRequestQuerySettingManager getPullRequestQuerySettingManager() {
@@ -73,12 +56,6 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
 	}
 	
-	@Override
-	protected void onDetach() {
-		queryModel.detach();
-		super.onDetach();
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -129,19 +106,19 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), queryModel.getObject(), 0);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				PageParameters params = paramsOf(getProject(), query, 0);
+				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		};
 
-		add(new PullRequestListPanel("main", queryModel.getObject()) {
+		add(new PullRequestListPanel("main", query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -242,8 +219,19 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		if (page != 0)
-			params.add(PARAM_CURRENT_PAGE, page);
+			params.add(PARAM_PAGE, page);
 		return params;
+	}
+
+	public static PageParameters paramsOf(Project project, int page) {
+		String query = null;
+		if (project.getPullRequestQuerySettingOfCurrentUser() != null
+				&& !project.getPullRequestQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
+			query = project.getPullRequestQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+		} else if (!project.getPullRequestSetting().getNamedQueries(true).isEmpty()) {
+			query = project.getPullRequestSetting().getNamedQueries(true).iterator().next().getQuery();
+		}
+		return paramsOf(project, query, page);
 	}
 	
 }

@@ -8,18 +8,18 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -33,45 +33,26 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class BuildListPage extends LayoutPage {
 
-	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
 	
 	private static final String PARAM_EXPECTED_COUNT = "expectedCount";
 	
-	private int expectedCount;
+	private final String query;
 	
-	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
-
-		@Override
-		protected String load() {
-			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query == null) {
-				if (getLoginUser() != null && !getLoginUser().getBuildQuerySetting().getUserQueries().isEmpty()) 
-					query = getLoginUser().getBuildQuerySetting().getUserQueries().iterator().next().getQuery();
-				else if (!getBuildSetting().getNamedQueries().isEmpty())
-					query = getBuildSetting().getNamedQueries().iterator().next().getQuery();
-			}
-			return query;
-		}
-		
-	};
+	private final int expectedCount;
 	
 	public BuildListPage(PageParameters params) {
 		super(params);
+		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 		expectedCount = params.get(PARAM_EXPECTED_COUNT).toInt(0);
 	}
 
-	protected GlobalBuildSetting getBuildSetting() {
+	private static GlobalBuildSetting getBuildSetting() {
 		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
 	}
 	
-	@Override
-	protected void onDetach() {
-		queryModel.detach();
-		super.onDetach();
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -120,19 +101,17 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(queryModel.getObject(), 0, 0);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
-				return params;
+				return paramsOf(query, currentPage+1, 0);
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		};
 		
-		add(new BuildListPanel("main", queryModel.getObject(), expectedCount) {
+		add(new BuildListPanel("main", query, expectedCount) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -220,10 +199,20 @@ public class BuildListPage extends LayoutPage {
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		if (page != 0)
-			params.add(PARAM_CURRENT_PAGE, page);
+			params.add(PARAM_PAGE, page);
 		if (expectedCount != 0)
 			params.add(PARAM_EXPECTED_COUNT, expectedCount);
 		return params;
 	}
-	
+
+	public static PageParameters paramsOf(int page, int expectedCount) {
+		String query = null;
+		User user = SecurityUtils.getUser();
+		if (user != null && !user.getBuildQuerySetting().getUserQueries().isEmpty()) 
+			query = user.getBuildQuerySetting().getUserQueries().iterator().next().getQuery();
+		else if (!getBuildSetting().getNamedQueries().isEmpty())
+			query = getBuildSetting().getNamedQueries().iterator().next().getQuery();
+		
+		return paramsOf(query, page, expectedCount);
+	}
 }

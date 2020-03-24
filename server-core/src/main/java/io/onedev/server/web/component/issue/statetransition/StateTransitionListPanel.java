@@ -160,7 +160,10 @@ public abstract class StateTransitionListPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, transition.getTrigger().getIssueQuery());
+						if (transition.getTrigger().getIssueQuery() != null)
+							return new Label(componentId, transition.getTrigger().getIssueQuery());
+						else
+							return new Label(componentId, "<i>All</i>").setEscapeModelStrings(false);
 					}
 					
 				});

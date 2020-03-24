@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.CommitQuery;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class NamedCommitQuery implements NamedQuery {
@@ -35,7 +36,7 @@ public class NamedCommitQuery implements NamedQuery {
 
 	@Editable
 	@CommitQuery
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	@Override
 	public String getQuery() {
 		return query;

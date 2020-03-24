@@ -94,7 +94,7 @@ public abstract class CommitListPanel extends Panel {
 	
 	private final String query;
 	
-	private int currentPage = 1;
+	private int page = 1;
 	
 	private final IModel<CommitQuery> parsedQueryModel = new LoadableDetachableModel<CommitQuery>() {
 
@@ -142,10 +142,10 @@ public abstract class CommitListPanel extends Panel {
 					RevListCommand command = new RevListCommand(getProject().getGitDir());
 					command.ignoreCase(true);
 					
-					if (currentPage > MAX_PAGES)
+					if (page > MAX_PAGES)
 						throw new OneException("Page should be no more than " + MAX_PAGES);
 					
-					command.count(currentPage * COMMITS_PER_PAGE);
+					command.count(page * COMMITS_PER_PAGE);
 					
 					query.fill(getProject(), command);
 					
@@ -165,10 +165,10 @@ public abstract class CommitListPanel extends Panel {
 				commitHashes = new ArrayList<>();
 			}				
 			
-			commits.hasMore = (commitHashes.size() == currentPage * COMMITS_PER_PAGE);
+			commits.hasMore = (commitHashes.size() == page * COMMITS_PER_PAGE);
 			
 			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-				int lastMaxCount = Math.min((currentPage - 1) * COMMITS_PER_PAGE, commitHashes.size());
+				int lastMaxCount = Math.min((page - 1) * COMMITS_PER_PAGE, commitHashes.size());
 				
 				commits.last = new ArrayList<>();
 				
@@ -383,7 +383,7 @@ public abstract class CommitListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				currentPage++;
+				page++;
 				
 				Commits commits = commitsModel.getObject();
 				int commitIndex = 0;
@@ -432,7 +432,7 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(commitsModel.getObject().hasMore && currentPage < MAX_PAGES);
+				setVisible(commitsModel.getObject().hasMore && page < MAX_PAGES);
 			}
 			
 		});
@@ -442,7 +442,7 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(currentPage == MAX_PAGES);
+				setVisible(page == MAX_PAGES);
 			}
 			
 		});

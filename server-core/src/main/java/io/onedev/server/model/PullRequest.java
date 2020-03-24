@@ -149,8 +149,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String FIELD_CLOSE_DATE = "Close Date";
 	
-	public static final String PROP_CLOSE_DATE = "closeInfo.date";
-	
 	public static final String FIELD_MERGE_STRATEGY = "Merge Strategy";
 	
 	public static final String PROP_MERGE_STRATEGY = "mergeStrategy";
@@ -188,7 +186,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
 			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
-			FIELD_CLOSE_DATE, PROP_CLOSE_DATE,
+			FIELD_CLOSE_DATE, PROP_CLOSE_INFO + "." + CloseInfo.PROP_DATE,
 			FIELD_NUMBER, PROP_NUMBER,
 			FIELD_STATUS, PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS,
 			FIELD_TARGET_PROJECT, PROP_TARGET_PROJECT,

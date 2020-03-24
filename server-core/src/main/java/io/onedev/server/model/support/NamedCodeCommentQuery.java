@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.CodeCommentQuery;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class NamedCodeCommentQuery implements NamedQuery {
@@ -35,7 +36,7 @@ public class NamedCodeCommentQuery implements NamedQuery {
 
 	@Editable
 	@CodeCommentQuery
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	@Override
 	public String getQuery() {
 		return query;

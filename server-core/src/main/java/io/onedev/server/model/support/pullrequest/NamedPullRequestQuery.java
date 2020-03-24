@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.PullRequestQuery;
 
 @Editable
@@ -36,7 +37,7 @@ public class NamedPullRequestQuery implements NamedQuery {
 
 	@Editable
 	@PullRequestQuery
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	@Override
 	public String getQuery() {
 		return query;

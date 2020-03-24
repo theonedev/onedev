@@ -284,7 +284,6 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Committed", "\"State\" is \"Committed\""));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("Invalid", "\"State\" is \"Invalid\""));
-		namedQueries.add(new NamedIssueQuery("All", "all"));
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {

@@ -2,8 +2,6 @@ package io.onedev.server.model.support.build;
 
 import java.io.Serializable;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import io.onedev.server.web.editable.annotation.BuildQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -19,7 +17,7 @@ public class BuildPreservation implements Serializable {
 
 	@Editable(order=100, description="Specify the condition preserved builds must match")
 	@BuildQuery(withOrder = false, withCurrentUserCriteria = false, withUnfinishedCriteria = false)
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	public String getCondition() {
 		return condition;
 	}

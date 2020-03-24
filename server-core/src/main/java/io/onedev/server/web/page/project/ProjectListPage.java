@@ -8,17 +8,17 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -32,45 +32,26 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class ProjectListPage extends LayoutPage {
 
-	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
 	
 	private static final String PARAM_EXPECTED_COUNT = "expectedCount";
 	
-	private int expectedCount;
+	private final String query;
 	
-	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+	private final int expectedCount;
 
-		@Override
-		protected String load() {
-			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query == null) {
-				if (getLoginUser() != null && !getLoginUser().getProjectQuerySetting().getUserQueries().isEmpty())
-					query = getLoginUser().getProjectQuerySetting().getUserQueries().iterator().next().getQuery();
-				else if (!getProjectSetting().getNamedQueries().isEmpty())
-					query = getProjectSetting().getNamedQueries().iterator().next().getQuery();
-			}
-			return query;
-		}
-		
-	};
-	
 	public ProjectListPage(PageParameters params) {
 		super(params);
+		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 		expectedCount = params.get(PARAM_EXPECTED_COUNT).toInt(0);
 	}
 
-	protected GlobalProjectSetting getProjectSetting() {
+	private static GlobalProjectSetting getProjectSetting() {
 		return OneDev.getInstance(SettingManager.class).getProjectSetting();		
 	}
 	
-	@Override
-	protected void onDetach() {
-		queryModel.detach();
-		super.onDetach();
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -119,19 +100,19 @@ public class ProjectListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(queryModel.getObject(), 0, 0);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				PageParameters params = paramsOf(query, 0, 0);
+				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		};
 		
-		add(new ProjectListPanel("main", queryModel.getObject(), expectedCount) {
+		add(new ProjectListPanel("main", query, expectedCount) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -214,10 +195,23 @@ public class ProjectListPage extends LayoutPage {
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		if (page != 0)
-			params.add(PARAM_CURRENT_PAGE, page);
+			params.add(PARAM_PAGE, page);
 		if (expectedCount != 0)
 			params.add(PARAM_EXPECTED_COUNT, expectedCount);
 		return params;
+	}
+	
+	public static PageParameters paramsOf(int page, int expectedCount) {
+		String query = null;
+		
+		User user = SecurityUtils.getUser();
+		if (user != null && !user.getProjectQuerySetting().getUserQueries().isEmpty()) {
+			query = user.getProjectQuerySetting().getUserQueries().iterator().next().getQuery();
+		} else {
+			if (!getProjectSetting().getNamedQueries().isEmpty())
+				query = getProjectSetting().getNamedQueries().iterator().next().getQuery();
+		}
+		return paramsOf(query, page, expectedCount);
 	}
 	
 }

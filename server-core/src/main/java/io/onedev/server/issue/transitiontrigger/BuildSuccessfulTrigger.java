@@ -3,8 +3,6 @@ package io.onedev.server.issue.transitiontrigger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
@@ -72,10 +70,10 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 			return new ArrayList<>();
 	}
 	
-	@Editable(order=1000, name="Applicable Issues", description="Specify criteria of issues applicable for this transition")
+	@Editable(order=1000, name="Applicable Issues", description="Optionally specify issues applicable for this transition. Leave empty for all issues")
 	@IssueQuery(withOrder = false, withCurrentUserCriteria = false, withCurrentBuildCriteria = true, 
 			withCurrentPullRequestCriteria = false, withCurrentCommitCriteria = false)
-	@NotEmpty
+	@NameOfEmptyValue("All")
 	@Override
 	public String getIssueQuery() {
 		return super.getIssueQuery();

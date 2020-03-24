@@ -57,7 +57,22 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 		});
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IssuesTab("Issue List", ProjectIssueListPage.class));
+		tabs.add(new IssuesTab("Issue List", ProjectIssueListPage.class) {
+			
+			@Override
+			public Component render(String componentId) {
+				return new PageTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new ViewStateAwarePageLink<Void>(linkId, 
+								pageClass, ProjectIssueListPage.paramsOf(getProject(), 0));
+					}
+					
+				};
+			}
+			
+		});
 		tabs.add(new IssuesTab("Issue Boards", IssueBoardsPage.class));
 		tabs.add(new IssuesTab("Milestones", MilestoneListPage.class, NewMilestonePage.class, 
 				MilestoneDetailPage.class, MilestoneEditPage.class));

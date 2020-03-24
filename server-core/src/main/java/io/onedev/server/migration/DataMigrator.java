@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Element;
+import org.dom4j.Node;
 
 import com.google.common.base.Preconditions;
 
@@ -1580,5 +1581,57 @@ public class DataMigrator {
 			}
 		}
 	}	
+	
+	private void migrate38(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().contains(".xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.pullrequest.NamedPullRequestQuery")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						if (element.elementTextTrim("query").equals("all"))
+							element.detach();
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.issue.NamedIssueQuery")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						if (element.elementTextTrim("query").equals("all"))
+							element.detach();
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.build.NamedBuildQuery")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						if (element.elementTextTrim("query").equals("all"))
+							element.detach();
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.NamedProjectQuery")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						if (element.elementTextTrim("query").equals("all"))
+							element.detach();
+					}
+				}
+				for (Node node: dom.selectNodes("//issueQuery")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						if (element.getTextTrim().equals("all"))
+							element.detach();
+					}
+				}
+				for (Node node: dom.selectNodes("//io.onedev.server.model.support.build.BuildPreservation")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						Element conditionElement = element.element("condition");
+						if (conditionElement.getTextTrim().equals("all"))
+							conditionElement.detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

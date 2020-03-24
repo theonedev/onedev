@@ -15,7 +15,9 @@ public class ProjectListTab implements MainTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new ViewStateAwarePageLink<Void>(componentId, ProjectListPage.class) {
+
+		return new ViewStateAwarePageLink<Void>(componentId, 
+				ProjectListPage.class, ProjectListPage.paramsOf(0, 0)) {
 
 			private static final long serialVersionUID = 1L;
 

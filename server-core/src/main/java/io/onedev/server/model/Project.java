@@ -1,5 +1,8 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.Project.PROP_NAME;
+import static io.onedev.server.model.Project.PROP_UPDATE_DATE;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -109,7 +112,6 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
-import static io.onedev.server.model.Project.*;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -1028,7 +1030,7 @@ public class Project extends AbstractEntity {
 	public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
 		if (namedCommitQueries == null) {
 			namedCommitQueries = new ArrayList<>();
-			namedCommitQueries.add(new NamedCommitQuery("All", "all"));
+			namedCommitQueries.add(new NamedCommitQuery("All", null));
 			namedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
 			namedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
 			namedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
@@ -1044,7 +1046,7 @@ public class Project extends AbstractEntity {
 	public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
 		if (namedCodeCommentQueries == null) {
 			namedCodeCommentQueries = new ArrayList<>(); 
-			namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", null));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));

@@ -29,6 +29,8 @@ public class CloseInfo implements Serializable {
 	
 	public static final String PROP_STATUS = "status";
 	
+	public static final String PROP_DATE = "date";
+	
 	public enum Status {
 		MERGED, DISCARDED;
 	
