@@ -1,5 +1,8 @@
 package io.onedev.server.model;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,16 +10,30 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.ConstraintValidatorContext;
+import org.apache.sshd.common.config.keys.KeyUtils;
+import org.apache.wicket.util.string.Strings;
+import org.hibernate.validator.constraints.NotEmpty;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SshKeyManager;
+import io.onedev.server.git.ssh.SshKeyUtils;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 
+@Editable
+@ClassValidating
 @Entity
 @Table
-public class SshKey extends AbstractEntity {
+public class SshKey extends AbstractEntity implements Validatable {
     
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
 
+    @NotEmpty
     @Column(nullable=false)
     private String name;
 
@@ -33,6 +50,8 @@ public class SshKey extends AbstractEntity {
     @JoinColumn(nullable=false)
     private User owner;
 
+    @Editable(name = "Name")
+    @NotEmpty
     public String getName() {
         return name;
     }
@@ -41,6 +60,9 @@ public class SshKey extends AbstractEntity {
         this.name = name;
     }
 
+    @Editable(name = "Key Value")
+    @NotEmpty
+    @Multiline
     public String getContent() {
         return content;
     }
@@ -71,5 +93,41 @@ public class SshKey extends AbstractEntity {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public boolean isValid(ConstraintValidatorContext context) {
+        String propertyNode = "content";
+        boolean hasErrors = false;
+        String errorMessage = "";
+        
+        if (Strings.isEmpty(content)) {
+            return false;
+        }
+        
+        try {
+            SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
+            PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
+            String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
+            
+            boolean alreadyInUse = sshKeyManager.isKeyAlreadyInUse(fingerPrint);
+            
+            if (alreadyInUse) {
+                errorMessage = "The provided key is already in use. Please use another one.";
+                hasErrors  = true;
+            } 
+            
+        } catch (Exception exception) {
+            errorMessage = "The value provided as key is invalid. Please checkit and try again.";
+            hasErrors = true;
+        } 
+        
+        if (hasErrors) {            
+            context.buildConstraintViolationWithTemplate(errorMessage)
+                .addPropertyNode(propertyNode).addConstraintViolation()
+                .disableDefaultConstraintViolation();
+            return false;
+        }
+        return true;
     }
 }
