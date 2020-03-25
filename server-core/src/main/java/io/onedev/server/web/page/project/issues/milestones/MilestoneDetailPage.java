@@ -40,7 +40,7 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	private static final String PARAM_PAGE = "page";
 	
 	private final IModel<Milestone> milestoneModel;
 	
@@ -133,13 +133,13 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = paramsOf(getMilestone(), query);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		};
