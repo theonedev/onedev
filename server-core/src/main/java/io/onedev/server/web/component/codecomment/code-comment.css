@@ -1,14 +1,11 @@
 .code-comments>.head>* {
 	margin-bottom: 20px;
 }
-.code-comments>.head>.others:empty {
-	margin-bottom: 0;
-}
-.code-comments>.head>.others>* {
+.code-comments>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
 }
-.code-comments>.head>.others>*:last-child {
+.code-comments>.head>.operations>*:last-child {
 	margin-right: 0;
 }
 .code-comments .new-indicator {

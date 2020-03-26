@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.codecomments;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -35,7 +37,9 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private final String query;
+	private String query;
+	
+	private SavedQueriesPanel<NamedCodeCommentQuery> savedQueries;
 	
 	public ProjectCodeCommentsPage(PageParameters params) {
 		super(params);
@@ -47,10 +51,17 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	}
 	
 	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		CodeCommentListPanel listPanel = newCodeCommentList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		SavedQueriesPanel<NamedCodeCommentQuery> savedQueries;
 		add(savedQueries = new SavedQueriesPanel<NamedCodeCommentQuery>("side") {
 
 			@Override
@@ -87,21 +98,11 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 		});
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
-
-			@Override
-			public PageParameters newPageParameters(int page) {
-				return paramsOf(getProject(), query, page+1);
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
-		add(new CodeCommentListPanel("main", query) {
+		add(newCodeCommentList());
+	}
+	
+	private CodeCommentListPanel newCodeCommentList() {
+		return new CodeCommentListPanel("main", query) {
 
 			@Override
 			protected Project getProject() {
@@ -110,12 +111,26 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return pagingHistorySupport;
+				return new PagingHistorySupport() {
+
+					@Override
+					public PageParameters newPageParameters(int page) {
+						return paramsOf(getProject(), query, page+1);
+					}
+					
+					@Override
+					public int getCurrentPage() {
+						return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+					}
+					
+				};
 			}
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(ProjectCodeCommentsPage.class, paramsOf(getProject(), query, 0));
+				CharSequence url = RequestCycle.get().urlFor(ProjectCodeCommentsPage.class, paramsOf(getProject(), query, 0));
+				ProjectCodeCommentsPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -179,7 +194,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 				};
 			}
 			
-		});
+		};
 	}
 
 	@Override

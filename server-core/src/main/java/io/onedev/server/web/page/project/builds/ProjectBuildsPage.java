@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.builds;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -38,7 +40,9 @@ public class ProjectBuildsPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private final String query;
+	private String query;
+	
+	private SavedQueriesPanel<NamedBuildQuery> savedQueries;
 	
 	public ProjectBuildsPage(PageParameters params) {
 		super(params);
@@ -57,7 +61,6 @@ public class ProjectBuildsPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		SavedQueriesPanel<NamedBuildQuery> savedQueries;
 		add(savedQueries = new SavedQueriesPanel<NamedBuildQuery>("side") {
 
 			@Override
@@ -99,30 +102,42 @@ public class ProjectBuildsPage extends ProjectPage {
 
 		});
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
-
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				return paramsOf(getProject(), query, currentPage+1);
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
-		add(new BuildListPanel("main", query, 0) {
+		add(newBuildList());
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		BuildListPanel listPanel = newBuildList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
+	
+	private BuildListPanel newBuildList() {
+		return new BuildListPanel("main", query, 0) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return pagingHistorySupport;
+				return new PagingHistorySupport() {
+
+					@Override
+					public PageParameters newPageParameters(int currentPage) {
+						return paramsOf(getProject(), query, currentPage+1);
+					}
+					
+					@Override
+					public int getCurrentPage() {
+						return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+					}
+					
+				};
 			}
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(ProjectBuildsPage.class, paramsOf(getProject(), query, 0));
+				CharSequence url = RequestCycle.get().urlFor(ProjectBuildsPage.class, paramsOf(getProject(), query, 0));
+				ProjectBuildsPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -194,8 +209,7 @@ public class ProjectBuildsPage extends ProjectPage {
 				return ProjectBuildsPage.this.getProject();
 			}
 
-		});
-		
+		};
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {

@@ -1,10 +1,12 @@
 package io.onedev.server.web.page.project.builds.detail.issues;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Build;
@@ -13,6 +15,7 @@ import io.onedev.server.search.entity.issue.FixedInBuildCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 
@@ -33,8 +36,11 @@ public class FixedIssuesPage extends BuildDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		add(new IssueListPanel("issues", query) {
+		add(newIssueList());
+	}
+	
+	private IssueListPanel newIssueList() {
+		return new IssueListPanel("issues", query) {
 
 			@Override
 			protected IssueQuery getBaseQuery() {
@@ -62,7 +68,9 @@ public class FixedIssuesPage extends BuildDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild(), getPosition(), query));
+				CharSequence url = RequestCycle.get().urlFor(ProjectIssueListPage.class, paramsOf(getBuild(), getPosition(), query));
+				FixedIssuesPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -70,7 +78,15 @@ public class FixedIssuesPage extends BuildDetailPage {
 				return FixedIssuesPage.this.getProject();
 			}
 			
-		});
+		};
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		IssueListPanel listPanel = newIssueList();
+		replace(listPanel);
+		target.add(listPanel);
 	}
 
 	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, @Nullable String query) {

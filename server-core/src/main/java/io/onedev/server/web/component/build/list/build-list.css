@@ -9,13 +9,10 @@
 .build-list>.head>* {
 	margin-bottom: 20px;
 }
-.build-list>.head>.others:empty {
-	margin-bottom: 0;
-}
-.build-list>.head>.others>* {
+.build-list>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
 }
-.build-list>.head>.others>*:last-child {
+.build-list>.head>.operations>*:last-child {
 	margin-right: 0;
 }

@@ -22,6 +22,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -40,10 +41,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -53,7 +51,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.TitleCriteria;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
@@ -80,8 +81,6 @@ import io.onedev.server.web.util.ReferenceTransformer;
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
 
-	private static final Logger logger = LoggerFactory.getLogger(PullRequestListPanel.class);
-	
 	private final String query;
 	
 	private IModel<PullRequestQuery> parsedQueryModel = new LoadableDetachableModel<PullRequestQuery>() {
@@ -91,13 +90,11 @@ public abstract class PullRequestListPanel extends Panel {
 			try {
 				return PullRequestQuery.parse(getProject(), query);
 			} catch (Exception e) {
-				logger.debug("Error parsing pull request query: " + query, e);
-				if (e.getMessage() != null)
-					error(e.getMessage());
-				else
-					error("Malformed pull request query");
+				warn("Invalid formal query, perform fuzzy query instead");
+				List<EntityCriteria<PullRequest>> criterias = new ArrayList<>();
+				criterias.add(new TitleCriteria("*" + query + "*"));
+				return new PullRequestQuery(new OrEntityCriteria<PullRequest>(criterias));
 			}
-			return null;
 		}
 		
 	};
@@ -139,18 +136,13 @@ public abstract class PullRequestListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer others = new WebMarkupContainer("others");
-		others.setOutputMarkupId(true);
-		
-		add(others);
-		
-		others.add(new AjaxLink<Void>("showSavedQueries") {
+		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				if (event.getPayload() instanceof SavedQueriesClosed) {
-					((SavedQueriesClosed) event.getPayload()).getHandler().add(others);
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
 				}
 			}
 
@@ -163,18 +155,19 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
-				target.add(others);
+				target.add(this);
 			}
 			
-		});
-		
-		others.add(new AjaxLink<Void>("saveQuery") {
+		}.setOutputMarkupPlaceholderTag(true));
+
+		Component saveQueryLink;
+		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setEnabled(StringUtils.isNotBlank(query));
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
 			@Override
@@ -192,7 +185,7 @@ public abstract class PullRequestListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, query);
 			}		
 			
-		});
+		}.setOutputMarkupId(true));
 		
 		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
@@ -207,8 +200,8 @@ public abstract class PullRequestListPanel extends Panel {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null)
-					target.add(others);
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -269,7 +262,7 @@ public abstract class PullRequestListPanel extends Panel {
 			}.setEscapeModelStrings(false));
 		}
 		
-		body.add(new NotificationPanel("feedback", this));
+		body.add(new FencedFeedbackPanel("feedback", this));
 		
 		List<IColumn<PullRequest, Void>> columns = new ArrayList<>();
 		
@@ -369,14 +362,12 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null) {
-					try {
-						return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
-					} catch (OneException e) {
-						error(e.getMessage());
-					}
+				try {
+					return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
+				} catch (OneException e) {
+					error(e.getMessage());
+					return 0;
 				}
-				return 0;
 			}
 
 			@Override
@@ -399,9 +390,9 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected Item<PullRequest> newRowItem(String id, int index, IModel<PullRequest> model) {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
-				PullRequest issue = model.getObject();
+				PullRequest request = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getLastUpdate().getDate())?"request":"request new"));
+						request.isVisitedAfter(request.getLastUpdate().getDate())?"request":"request new"));
 				return item;
 			}
 			
@@ -418,6 +409,8 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		requestsTable.addBottomToolbar(new NoRecordsToolbar(requestsTable));
+		
+		setOutputMarkupId(true);
 	}
 	
 	@Override

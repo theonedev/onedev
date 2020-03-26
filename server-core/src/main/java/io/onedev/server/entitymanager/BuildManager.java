@@ -27,6 +27,7 @@ public interface BuildManager extends EntityManager<Build> {
     @Nullable
     Build find(ProjectScopedNumber buildFQN);
     
+    @Nullable
 	Build findStreamPrevious(Build build, @Nullable Build.Status status);
 
 	Collection<Long> queryNumbersOfStreamPrevious(Build build, @Nullable Build.Status status, int limit);

@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -128,23 +130,11 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 			
 		});
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
-			
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getMilestone(), query);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
-				return params;
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
-			}
-			
-		};
-				
-		add(new IssueListPanel("issues", query) {
+		add(newIssueList());
+	}
+	
+	private IssueListPanel newIssueList() {
+		return new IssueListPanel("issues", query) {
 
 			@Override
 			protected IssueQuery getBaseQuery() {
@@ -153,12 +143,28 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return pagingHistorySupport;
+				return new PagingHistorySupport() {
+					
+					@Override
+					public PageParameters newPageParameters(int currentPage) {
+						PageParameters params = paramsOf(getMilestone(), query);
+						params.add(PARAM_CURRENT_PAGE, currentPage+1);
+						return params;
+					}
+					
+					@Override
+					public int getCurrentPage() {
+						return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+					}
+					
+				};
 			}
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone(), query));
+				CharSequence url = RequestCycle.get().urlFor(MilestoneDetailPage.class, paramsOf(getMilestone(), query));
+				MilestoneDetailPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -166,7 +172,15 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 				return MilestoneDetailPage.this.getProject();
 			}
 
-		});
+		};
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		IssueListPanel listPanel = newIssueList();
+		replace(listPanel);
+		target.add(listPanel);
 	}
 	
 	@Override

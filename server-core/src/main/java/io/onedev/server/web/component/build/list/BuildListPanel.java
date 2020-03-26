@@ -22,6 +22,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -41,12 +42,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -59,7 +57,11 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.JobCriteria;
+import io.onedev.server.search.entity.build.VersionCriteria;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
@@ -86,8 +88,6 @@ import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
-
-	private static final Logger logger = LoggerFactory.getLogger(BuildListPanel.class);
 	
 	private final String query;
 	
@@ -101,13 +101,12 @@ public abstract class BuildListPanel extends Panel {
 				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query, true, true);
 				return BuildQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
-				logger.debug("Error parsing build query: " + query, e);
-				if (e.getMessage() != null)
-					error(e.getMessage());
-				else
-					error("Malformed build query");
+				warn("Invalid formal query, perform fuzzy query instead");
+				List<EntityCriteria<Build>> criterias = new ArrayList<>();
+				criterias.add(new VersionCriteria("*" + query + "*"));
+				criterias.add(new JobCriteria("*" + query + "*"));
+				return new BuildQuery(new OrEntityCriteria<Build>(criterias));
 			}
-			return null;
 		}
 		
 	};
@@ -169,17 +168,13 @@ public abstract class BuildListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer others = new WebMarkupContainer("others");
-		others.setOutputMarkupId(true);
-		add(others);
-		
-		others.add(new AjaxLink<Void>("showSavedQueries") {
+		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				if (event.getPayload() instanceof SavedQueriesClosed) {
-					((SavedQueriesClosed) event.getPayload()).getHandler().add(others);
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
 				}
 			}
 			
@@ -192,12 +187,13 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
-				target.add(others);
+				target.add(this);
 			}
 			
-		});
+		}.setOutputMarkupPlaceholderTag(true));
 		
-		others.add(new AjaxLink<Void>("saveQuery") {
+		Component saveQueryLink;
+		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -221,9 +217,9 @@ public abstract class BuildListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, query);
 			}		
 			
-		});
+		}.setOutputMarkupId(true));
 		
-		others.add(new ModalLink("listParams") {
+		add(new ModalLink("listParams") {
 
 			private List<String> listParams;
 			
@@ -337,7 +333,7 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(others);
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -403,7 +399,7 @@ public abstract class BuildListPanel extends Panel {
 		if (expectedCount != 0 && expectedCount != dataProvider.size())
 			warn("Some builds might be hidden due to permission policy");
 		
-		body.add(new NotificationPanel("feedback", this));
+		body.add(new FencedFeedbackPanel("feedback", this));
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
 		
@@ -576,6 +572,8 @@ public abstract class BuildListPanel extends Panel {
 		
 		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+		
+		setOutputMarkupId(true);
 	}
 	
 	private List<String> getListParams() {

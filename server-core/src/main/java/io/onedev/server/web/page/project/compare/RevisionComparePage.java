@@ -89,9 +89,11 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	
 	private static final String PARAM_PATH_FILTER = "path-filter";
 	
+	private static final String PARAM_COMMIT_QUERY = "commit-query";
+	
 	private static final String PARAM_BLAME_FILE = "blame-file";
 	
-	private static final String PARAM_TAB = "tab-panel";
+	private static final String PARAM_TAB = "tab";
 	
 	private static final String TABS_ID = "tabs";
 	
@@ -109,10 +111,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	
 	private Tabbable tabbable;
 
-	public static PageParameters paramsOf(CodeComment comment) {
-		return paramsOf(comment.getProject(), getState(comment));
-	}
-	
 	public static RevisionComparePage.State getState(CodeComment comment) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.commentId = comment.getId();
@@ -148,6 +146,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
 			params.add(PARAM_PATH_FILTER, state.pathFilter);
+		if (state.commitQuery != null)
+			params.add(PARAM_COMMIT_QUERY, state.commitQuery);
 		if (state.blameFile != null)
 			params.add(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
@@ -164,6 +164,10 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		return params;
 	}
 
+	public static PageParameters paramsOf(CodeComment comment) {
+		return paramsOf(comment.getProject(), getState(comment));
+	}
+	
 	public RevisionComparePage(PageParameters params) {
 		super(params);
 		
@@ -205,6 +209,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		
+		state.commitQuery = params.get(PARAM_COMMIT_QUERY).toString();
+		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
 		
@@ -235,8 +241,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		setOutputMarkupId(true);
 		
 		add(new AffinalRevisionPicker("leftRevSelector", state.leftSide.getProjectId(), state.leftSide.getRevision()) { 
 
@@ -514,6 +518,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 			add(new WebMarkupContainer(TABS_ID).setVisible(false));
 			add(new WebMarkupContainer(TAB_PANEL_ID).setVisible(false));
 		}
+		
+		setOutputMarkupId(true);
 	}
 	
 	@Override
@@ -600,7 +606,13 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			break;
 		default:
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, null) {
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, state.commitQuery) {
+
+				@Override
+				protected void onQueryUpdated(AjaxRequestTarget target, String query) {
+					state.commitQuery = query;
+					pushState(target);
+				}
 
 				@Override
 				protected CommitQuery getBaseQuery() {
@@ -682,6 +694,9 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		
 		@Nullable
 		public TabPanel tabPanel;
+		
+		@Nullable
+		public String commitQuery;
 
 		@Nullable
 		public String pathFilter;

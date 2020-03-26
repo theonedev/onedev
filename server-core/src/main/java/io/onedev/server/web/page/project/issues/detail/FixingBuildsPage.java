@@ -1,10 +1,12 @@
 package io.onedev.server.web.page.project.issues.detail;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Issue;
@@ -32,8 +34,11 @@ public class FixingBuildsPage extends IssueDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new BuildListPanel("builds", query, 0) {
+		add(newBuildList());
+	}
+	
+	private BuildListPanel newBuildList() {
+		return new BuildListPanel("builds", query, 0) {
 
 			@Override
 			protected BuildQuery getBaseQuery() {
@@ -61,7 +66,9 @@ public class FixingBuildsPage extends IssueDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(FixingBuildsPage.class, FixingBuildsPage.paramsOf(getIssue(), getPosition(), query));
+				CharSequence url = RequestCycle.get().urlFor(FixingBuildsPage.class, paramsOf(getIssue(), getPosition(), query));
+				FixingBuildsPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -69,9 +76,17 @@ public class FixingBuildsPage extends IssueDetailPage {
 				return getIssue().getProject();
 			}
 
-		});
+		};
 	}
 
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		BuildListPanel listPanel = newBuildList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
+	
 	public static PageParameters paramsOf(Issue issue, @Nullable QueryPosition position, @Nullable String query) {
 		PageParameters params = paramsOf(issue, position);
 		if (query != null)

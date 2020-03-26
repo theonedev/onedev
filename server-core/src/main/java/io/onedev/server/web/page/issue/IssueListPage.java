@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.issue;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -38,7 +40,9 @@ public class IssueListPage extends LayoutPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private final String query;
+	private String query;
+	
+	private SavedQueriesPanel<NamedIssueQuery> savedQueries;
 	
 	public IssueListPage(PageParameters params) {
 		super(params);
@@ -62,7 +66,6 @@ public class IssueListPage extends LayoutPage {
 			
 		});
 		
-		SavedQueriesPanel<NamedIssueQuery> savedQueries;
 		add(savedQueries = new SavedQueriesPanel<NamedIssueQuery>("side") {
 
 			@Override
@@ -102,32 +105,44 @@ public class IssueListPage extends LayoutPage {
 			
 		});
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		add(newIssueList());
+	}
 
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(query, 0);
-				params.add(PARAM_PAGE, currentPage+1);
-				return params;
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
-		add(new IssueListPanel("main", query) {
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		IssueListPanel listPanel = newIssueList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
+	
+	private IssueListPanel newIssueList() {
+		return new IssueListPanel("main", query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return pagingHistorySupport;
+				return new PagingHistorySupport() {
+
+					@Override
+					public PageParameters newPageParameters(int currentPage) {
+						PageParameters params = paramsOf(query, 0);
+						params.add(PARAM_PAGE, currentPage+1);
+						return params;
+					}
+					
+					@Override
+					public int getCurrentPage() {
+						return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+					}
+					
+				};
 			}
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(IssueListPage.class, paramsOf(query, 0));
+				CharSequence url = RequestCycle.get().urlFor(IssueListPage.class, paramsOf(query, 0));
+				IssueListPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -197,9 +212,9 @@ public class IssueListPage extends LayoutPage {
 				return null;
 			}
 
-		});		
+		};				
 	}
-
+	
 	public static PageParameters paramsOf(@Nullable String query, int page) {
 		PageParameters params = new PageParameters();
 		if (query != null)

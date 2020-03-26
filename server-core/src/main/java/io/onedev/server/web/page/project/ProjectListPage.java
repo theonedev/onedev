@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -38,10 +40,12 @@ public class ProjectListPage extends LayoutPage {
 	
 	private static final String PARAM_EXPECTED_COUNT = "expectedCount";
 	
-	private final String query;
+	private String query;
 	
 	private final int expectedCount;
 
+	private SavedQueriesPanel<NamedProjectQuery> savedQueries;
+	
 	public ProjectListPage(PageParameters params) {
 		super(params);
 		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
@@ -56,7 +60,6 @@ public class ProjectListPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		SavedQueriesPanel<NamedProjectQuery> savedQueries;
 		add(savedQueries = new SavedQueriesPanel<NamedProjectQuery>("side") {
 
 			@Override
@@ -96,32 +99,44 @@ public class ProjectListPage extends LayoutPage {
 
 		});
 		
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+		add(newProjectList());
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		ProjectListPanel listPanel = newProjectList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
 
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(query, 0, 0);
-				params.add(PARAM_PAGE, currentPage+1);
-				return params;
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
-		add(new ProjectListPanel("main", query, expectedCount) {
+	private ProjectListPanel newProjectList() {
+		return new ProjectListPanel("main", query, expectedCount) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
-				return pagingHistorySupport;
+				return new PagingHistorySupport() {
+
+					@Override
+					public PageParameters newPageParameters(int currentPage) {
+						PageParameters params = paramsOf(query, 0, 0);
+						params.add(PARAM_PAGE, currentPage+1);
+						return params;
+					}
+					
+					@Override
+					public int getCurrentPage() {
+						return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+					}
+					
+				};
 			}
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(ProjectListPage.class, paramsOf(query, 0, 0));
+				CharSequence url = RequestCycle.get().urlFor(ProjectListPage.class, paramsOf(query, 0, 0));
+				ProjectListPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -186,8 +201,7 @@ public class ProjectListPage extends LayoutPage {
 				};
 			}
 
-		});
-		
+		};		
 	}
 	
 	public static PageParameters paramsOf(@Nullable String query, int page, int expectedCount) {

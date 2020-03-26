@@ -316,7 +316,7 @@ onedev.server.commitList = {
 		$list.css("margin-left", maxColumns*columnWidth+rightOffset);
 		
 		$graph.empty();
-		$graph.height($list.outerHeight());
+		$graph.height($graph.parent().height());
 		$graph.width(maxColumns*columnWidth);
 		var paper = Snap($graph[0]);
 		

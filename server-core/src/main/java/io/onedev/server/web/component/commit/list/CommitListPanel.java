@@ -65,6 +65,8 @@ import io.onedev.server.search.commit.CommitCriteria;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.MessageCriteria;
 import io.onedev.server.search.commit.PathCriteria;
+import io.onedev.server.search.commit.Revision;
+import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.util.Constants;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.SecurityUtils;
@@ -92,7 +94,7 @@ public abstract class CommitListPanel extends Panel {
 	
 	private static final int MAX_PAGES = 50;
 	
-	private final String query;
+	private String query;
 	
 	private int page = 1;
 	
@@ -100,17 +102,20 @@ public abstract class CommitListPanel extends Panel {
 
 		@Override
 		protected CommitQuery load() {
+			CommitQuery additionalQuery;
 			try {
-				CommitQuery additionalQuery = CommitQuery.parse(getProject(), query);
-				return CommitQuery.merge(getBaseQuery(), additionalQuery);
+				additionalQuery = CommitQuery.parse(getProject(), query);
 			} catch (Exception e) {
-				logger.debug("Error parsing commit query: " + query, e);
-				if (e.getMessage() != null)
-					error(e.getMessage());
+				warn("Invalid formal query, perform fuzzy query instead");
+				List<CommitCriteria> criterias = new ArrayList<>();
+				ObjectId commitId = getProject().getObjectId(query, false);
+				if (commitId != null)
+					criterias.add(new RevisionCriteria(Lists.newArrayList(new Revision(query, null))));
 				else
-					error("Malformed commit query");
+					criterias.add(new MessageCriteria(Lists.newArrayList(query)));
+				additionalQuery = new CommitQuery(criterias);
 			}
-			return null;
+			return CommitQuery.merge(getBaseQuery(), additionalQuery);
 		}
 		
 	};
@@ -137,33 +142,29 @@ public abstract class CommitListPanel extends Panel {
 			CommitQuery query = parsedQueryModel.getObject();
 			Commits commits = new Commits();
 			List<String> commitHashes;
-			if (query != null) {
-				try {
-					RevListCommand command = new RevListCommand(getProject().getGitDir());
-					command.ignoreCase(true);
-					
-					if (page > MAX_PAGES)
-						throw new OneException("Page should be no more than " + MAX_PAGES);
-					
-					command.count(page * COMMITS_PER_PAGE);
-					
-					query.fill(getProject(), command);
-					
-					if (command.revisions().isEmpty() && getCompareWith() != null)
-						command.revisions(Lists.newArrayList(getCompareWith()));
-					
-					commitHashes = command.call();
-				} catch (Exception e) {
-					if (e.getMessage() != null)
-						error(e.getMessage());
-					else
-						error("Error calculating commits: check log for details");
-					commitHashes = new ArrayList<>();
-					logger.error("Error calculating commits: ", e);
-				}
-			} else {
+			try {
+				RevListCommand command = new RevListCommand(getProject().getGitDir());
+				command.ignoreCase(true);
+				
+				if (page > MAX_PAGES)
+					throw new OneException("Page should be no more than " + MAX_PAGES);
+				
+				command.count(page * COMMITS_PER_PAGE);
+				
+				query.fill(getProject(), command);
+				
+				if (command.revisions().isEmpty() && getCompareWith() != null)
+					command.revisions(Lists.newArrayList(getCompareWith()));
+				
+				commitHashes = command.call();
+			} catch (Exception e) {
+				if (e.getMessage() != null)
+					error(e.getMessage());
+				else
+					error("Error calculating commits: check log for details");
 				commitHashes = new ArrayList<>();
-			}				
+				logger.error("Error calculating commits: ", e);
+			}
 			
 			commits.hasMore = (commitHashes.size() == page * COMMITS_PER_PAGE);
 			
@@ -261,17 +262,13 @@ public abstract class CommitListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer others = new WebMarkupContainer("others");
-		others.setOutputMarkupId(true);
-		add(others);
-		
-		others.add(new AjaxLink<Void>("showSavedQueries") {
+		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				if (event.getPayload() instanceof SavedQueriesClosed) {
-					((SavedQueriesClosed) event.getPayload()).getHandler().add(others);
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
 				}
 			}
 			
@@ -284,12 +281,13 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
-				target.add(others);
+				target.add(this);
 			}
 			
-		});
+		}.setOutputMarkupPlaceholderTag(true));
 		
-		others.add(new AjaxLink<Void>("saveQuery") {
+		Component saveQueryLink;
+		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -313,7 +311,7 @@ public abstract class CommitListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, query);
 			}		
 			
-		});
+		}.setOutputMarkupId(true));
 		
 		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
@@ -329,7 +327,7 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(others);
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -343,6 +341,7 @@ public abstract class CommitListPanel extends Panel {
 				super.onSubmit(target, form);
 				target.add(body);
 				target.add(foot);
+				target.appendJavaScript(renderCommitGraph());
 				onQueryUpdated(target, query);
 			}
 			
@@ -446,6 +445,8 @@ public abstract class CommitListPanel extends Panel {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
 	private BuildManager getBuildManager() {

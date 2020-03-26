@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.commits;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -36,7 +38,9 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	private String compareWith;
 	
-	private final String query;
+	private String query;
+	
+	private SavedQueriesPanel<NamedCommitQuery> savedQueries;
 	
 	public ProjectCommitsPage(PageParameters params) {
 		super(params);
@@ -49,10 +53,17 @@ public class ProjectCommitsPage extends ProjectPage {
 	}
 	
 	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		CommitListPanel listPanel = newCommitList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		SavedQueriesPanel<NamedCommitQuery> savedQueries;
 		add(savedQueries = new SavedQueriesPanel<NamedCommitQuery>("side") {
 
 			@Override
@@ -89,11 +100,17 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(new CommitListPanel("main", query) {
+		add(newCommitList());
+	}
+	
+	private CommitListPanel newCommitList() {
+		return new CommitListPanel("main", query) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(ProjectCommitsPage.class, paramsOf(getProject(), query, compareWith));
+				CharSequence url = RequestCycle.get().urlFor(ProjectCommitsPage.class, paramsOf(getProject(), query, compareWith));
+				ProjectCommitsPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -167,7 +184,7 @@ public class ProjectCommitsPage extends ProjectPage {
 				return ProjectCommitsPage.this.getProject();
 			}
 
-		});
+		};
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query, @Nullable String compareWith) {

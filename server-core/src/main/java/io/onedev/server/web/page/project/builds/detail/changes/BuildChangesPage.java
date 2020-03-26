@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.project.builds.detail.changes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
@@ -28,30 +30,50 @@ public class BuildChangesPage extends BuildDetailPage {
 	
 	private String query;
 	
+	private final String baseCommitHash;
+	
 	public BuildChangesPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
+
+		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		Build baseBuild = buildManager.findStreamPrevious(getBuild(), null);
+		if (baseBuild != null)
+			baseCommitHash = baseBuild.getCommitHash();
+		else
+			baseCommitHash = null;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		Build prevBuild = buildManager.findStreamPrevious(getBuild(), null);
-		add(new CommitListPanel("commits", query) {
+		add(newCommitList());
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		CommitListPanel listPanel = newCommitList();
+		replace(listPanel);
+		target.add(listPanel);
+	}
+	
+	private CommitListPanel newCommitList() {
+		return new CommitListPanel("commits", query) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild(), getPosition(), query));
+				CharSequence url = RequestCycle.get().urlFor(BuildChangesPage.class, paramsOf(getBuild(), getPosition(), query));
+				BuildChangesPage.this.query = query;
+				pushState(target, url.toString(), query);
 			}
 			
 			@Override
 			protected CommitQuery getBaseQuery() {
 				List<Revision> revisions = new ArrayList<>();
 
-				if (prevBuild != null)
-					revisions.add(new Revision(prevBuild.getCommitHash(), Revision.Scope.SINCE));
+				if (baseCommitHash != null)
+					revisions.add(new Revision(baseCommitHash, Revision.Scope.SINCE));
 				revisions.add(new Revision(getBuild().getCommitHash(), Revision.Scope.UNTIL));
 				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
 			}
@@ -61,7 +83,7 @@ public class BuildChangesPage extends BuildDetailPage {
 				return BuildChangesPage.this.getProject();
 			}
 			
-		});
+		};
 	}
 
 	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, @Nullable String query) {

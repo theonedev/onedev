@@ -18,14 +18,11 @@
 	right: 0;
 	top: 0;
 }
-.pull-request-list>.head>.others:empty {
-	margin-bottom: 0;
-}
-.pull-request-list>.head>.others>* {
+.pull-request-list>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
 }
-.pull-request-list>.head>.others>*:last-child {
+.pull-request-list>.head>.operations>*:last-child {
 	margin-right: 0;
 }
 

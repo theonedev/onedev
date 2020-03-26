@@ -20,18 +20,6 @@ onedev.server.inputassist = {
 			if (value.trim().length == 0)
 				onedev.server.inputassist.markErrors(inputId, []);
 		});
-		function onFocus() {
-			var value = $input.val();
-			if (value.length == 0 && $input.closest(".has-error").length == 0) {
-				var caret = $input.caret();
-				$input.data("prevValue", value);
-				$input.data("prevCaret", caret);
-				callback("input", value, caret);
-			}
-			$input.off("focus", onFocus);
-		}
-		$input.on("focus", onFocus);
-		
 		$input.on("blur", function(e) {
 			$input.data("prevCaret", -1);
 		});

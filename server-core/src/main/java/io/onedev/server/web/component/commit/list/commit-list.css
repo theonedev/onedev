@@ -4,14 +4,11 @@
 .commit-list>.head>* {
 	margin-bottom: 20px;
 }
-.commit-list>.head>.others:empty {
-	margin-bottom: 0;
-}
-.commit-list>.head>.others>* {
+.commit-list>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
 }
-.commit-list>.head>.others>*:last-child {
+.commit-list>.head>.operations>*:last-child {
 	margin-right: 0;
 }
 
