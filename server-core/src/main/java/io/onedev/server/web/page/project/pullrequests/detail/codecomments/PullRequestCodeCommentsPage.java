@@ -22,7 +22,7 @@ import io.onedev.server.web.util.QueryPosition;
 @SuppressWarnings("serial")
 public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 
-	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_QUERY = "query";
 	
@@ -48,13 +48,13 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = paramsOf(getPullRequest(), getPosition(), query);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		};

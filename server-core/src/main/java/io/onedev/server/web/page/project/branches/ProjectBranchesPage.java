@@ -96,7 +96,7 @@ import io.onedev.server.web.websocket.WebSocketManager;
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
 
-	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	private static final String PARAM_PAGE = "page";
 	
 	private static final String PARAM_BASE = "base";
 	
@@ -288,13 +288,13 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = paramsOf(getProject(), baseBranch, query);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}
 			
 			@Override
 			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+				return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
 			}
 			
 		};
