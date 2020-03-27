@@ -1631,6 +1631,16 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			}
+			if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element dataElement = element.element("data");
+					String className = dataElement.attributeValue("class");
+					if (className.contains("IssueCommittedData") || className.contains("IssuePullRequest")) 
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
 		}
 	}
 	

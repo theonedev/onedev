@@ -55,7 +55,6 @@ import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
@@ -267,27 +266,16 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Listen
 	public void on(IssueEvent event) {
 		boolean minorChange = false;
-		LastUpdate lastUpdate = null;
 		if (event instanceof IssueChangeEvent) {
 			IssueChangeData changeData = ((IssueChangeEvent)event).getChange().getData();
-			if (changeData instanceof IssueCommittedData) {
-				User committer = ((IssueCommittedData) changeData).getCommitter(event.getIssue());
-				if (committer != null) {
-					lastUpdate = new LastUpdate();
-					lastUpdate.setUser(committer);
-					lastUpdate.setDate(event.getDate());
-					lastUpdate.setActivity("committed code");
-				}
-			} else if (changeData instanceof IssueReferencedFromCodeCommentData
+			if (changeData instanceof IssueReferencedFromCodeCommentData
 					|| changeData instanceof IssueReferencedFromIssueData
 					|| changeData instanceof IssueReferencedFromPullRequestData) {
 				minorChange = true;
 			}
 		}
 
-		if (lastUpdate != null)
-			event.getIssue().setLastUpdate(lastUpdate);
-		else if (!(event instanceof IssueOpened || minorChange))
+		if (!(event instanceof IssueOpened || minorChange))
 			event.getIssue().setLastUpdate(event.getLastUpdate());
 	}
 	

@@ -1,0 +1,18 @@
+<wicket:panel>
+	<div class="issue-commits">
+		<div wicket:id="commits" class="commit clearfix">
+			<div wicket:id="author" class="author"></div> 
+			<div wicket:id="message" class="message"></div> 
+			<div class="actions">
+		        <span wicket:id="buildStatus" class="build-status"></span>
+		        <span class="btn-group hash">
+		            <a wicket:id="hashLink" class="hash btn btn-xs btn-default"><span wicket:id="hash"></span></a>
+		            <a wicket:id="copyHash" class="btn btn-xs btn-default"><i class="fa fa-clipboard"></i></a>
+		        </span>
+				<span class="btn-group browse">
+					<a wicket:id="browseCode" title="Browse code" class="btn btn-default btn-xs"><i class="fa fa-file-text-o"></i></a>
+		        </span>
+			</div>
+		</div>
+	</div>
+</wicket:panel>

@@ -62,7 +62,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 	public static final String PARAM_ISSUE = "issue";
 	
-	private final IModel<Issue> issueModel;
+	protected final IModel<Issue> issueModel;
 	
 	private final QueryPosition position;
 	
@@ -143,8 +143,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
 		// Do not calculate fix builds now as it might be slow
-		if (!fixCommits.isEmpty()) 
-			tabs.add(new IssueTab("Fixing Builds", FixingBuildsPage.class));
+		if (!fixCommits.isEmpty()) {
+			if (SecurityUtils.canReadCode(getProject())) {
+				tabs.add(new IssueTab("Fixing Commits", IssueCommitsPage.class));
+				tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
+			}
+			tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
+		}
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		

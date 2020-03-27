@@ -44,8 +44,6 @@ import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
-import io.onedev.server.model.support.issue.changedata.IssuePullRequestData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
@@ -135,14 +133,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 					IssueReferencedFromCodeCommentData referencedFromCodeCommentData = (IssueReferencedFromCodeCommentData) change.getData();
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
 					if (comment != null)
-						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssueCommittedData) {
-					IssueCommittedData issueCommittedData = (IssueCommittedData) change.getData();
-					if (getIssue().getProject().getRevCommit(issueCommittedData.getCommitHash(), false) != null)
-						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssuePullRequestData) {
-					IssuePullRequestData issuePullRequestData = (IssuePullRequestData) change.getData();
-					if (issuePullRequestData.getPullRequest() != null)
 						otherActivities.add(new IssueChangeActivity(change));
 				} else {
 					otherActivities.add(new IssueChangeActivity(change));

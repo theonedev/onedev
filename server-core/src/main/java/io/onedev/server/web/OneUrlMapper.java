@@ -73,7 +73,7 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.FixingBuildsPage;
+import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
@@ -227,7 +227,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/issues", ProjectIssueListPage.class));
 		add(new OnePageMapper("projects/${project}/issues/${issue}", IssueActivitiesPage.class));
 		add(new OnePageMapper("projects/${project}/issues/${issue}/activities", IssueActivitiesPage.class));
-		add(new OnePageMapper("projects/${project}/issues/${issue}/builds", FixingBuildsPage.class));
+		add(new OnePageMapper("projects/${project}/issues/${issue}/builds", IssueBuildsPage.class));
 		add(new OnePageMapper("projects/${project}/issues/new", NewIssuePage.class));
 		add(new OnePageMapper("projects/${project}/milestones", MilestoneListPage.class));
 		add(new OnePageMapper("projects/${project}/milestones/${milestone}", MilestoneDetailPage.class));

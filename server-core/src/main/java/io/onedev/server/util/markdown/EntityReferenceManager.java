@@ -116,9 +116,7 @@ public class EntityReferenceManager {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
 			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(request.getTargetProject(), document)) {
 				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
-				if (referencedIssue != null 
-						&& (!referencedIssue.getProject().equals(request.getTargetProject()) 
-								|| !request.getFixedIssueNumbers().contains(referencedIssue.getNumber()))) {
+				if (referencedIssue != null) {
 					boolean found = false;
 					for (IssueChange change: referencedIssue.getChanges()) {
 						if (change.getData() instanceof io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData) {

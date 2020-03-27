@@ -18,7 +18,7 @@ import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
-public class FixingBuildsPage extends IssueDetailPage {
+public class IssueBuildsPage extends IssueDetailPage {
 
 	private static final String PARAM_QUERY = "query";
 	
@@ -26,7 +26,7 @@ public class FixingBuildsPage extends IssueDetailPage {
 
 	private String query;
 	
-	public FixingBuildsPage(PageParameters params) {
+	public IssueBuildsPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
 	}
@@ -66,8 +66,8 @@ public class FixingBuildsPage extends IssueDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(FixingBuildsPage.class, paramsOf(getIssue(), getPosition(), query));
-				FixingBuildsPage.this.query = query;
+				CharSequence url = RequestCycle.get().urlFor(IssueBuildsPage.class, paramsOf(getIssue(), getPosition(), query));
+				IssueBuildsPage.this.query = query;
 				pushState(target, url.toString(), query);
 			}
 

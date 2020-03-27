@@ -30,7 +30,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
@@ -136,20 +135,6 @@ public class IssueNotificationManager {
 				issueWatchManager.watch(issue, user, true);
 		}
 		
-		User committer = null;
-		if (event instanceof IssueChangeEvent) {
-			IssueChangeData changeData = ((IssueChangeEvent) event).getChange().getData();
-			if (changeData instanceof IssueCommittedData) {
-				IssueCommittedData committedData = (IssueCommittedData) changeData;
-				committer = committedData.getCommitter(issue);
-				if (committer != null) {
-					notifiedUsers.add(committer);
-					if (!committer.isSystem())
-						issueWatchManager.watch(issue, committer, true);
-				}
-			}			
-		}
-		
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
@@ -248,8 +233,6 @@ public class IssueNotificationManager {
 				String subject;
 				if (user != null) 
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
-				else if (committer != null) 
-					subject = String.format("%s committed code for issue %s", committer.getDisplayName(), issue.describe());
 				else 
 					subject = event.getActivity(true);
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);

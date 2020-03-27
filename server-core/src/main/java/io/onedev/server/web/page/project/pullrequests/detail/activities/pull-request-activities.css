@@ -38,9 +38,6 @@
 	position: relative;
 	padding: 6px 0;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit:hover {
-	background: #F7ECB9;
-}
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.author {
 	position: absolute;
 	left: 24px;
@@ -71,7 +68,7 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.actions {
 	position: absolute;
 	top: 6px;
-	right: 4px;
+	right: 0;
 }
 
 #request-detail>.main>.activities .activity>td>.content {

@@ -56,25 +56,6 @@
 .issue-activities .activity>.content>.body .plain.diff {
 	margin-bottom: 12px;
 }
-.issue-activities .activity>.content>.body>.commit {
-	color: #888;
-	position: relative;
-}
-.issue-activities .activity>.content>.body>.commit .author {
-	width: 28px;
-	position: absolute;
-}
-.issue-activities .activity>.content>.body>.commit .message {
-	padding: 0 128px 0 28px;
-}
-.issue-activities .activity>.content>.body>.commit.with-status .message {
-	padding-right: 175px;
-}
-.issue-activities .activity>.content>.body>.commit .actions {
-	position: absolute;
-	right: 0;
-	top: 0;
-}
 .issue-activities .activity>.content>.head a {
 	color: #999;
 	margin-left: 8px;
@@ -90,16 +71,4 @@
 	font-size: 20px;
 	background: #F9F9F9;
 	border-radius: 4px;	
-}
-@media(max-width: 991px) {
-	.issue-activities .activity>.content>.body>.commit .browse, 
-	.issue-activities .activity>.content>.body>.commit .hash {
-		display: none;
-	}
-	.issue-activities .activity>.content>.body>.commit .message {
-		padding-right: 0;
-	} 
-	.issue-activities .activity>.content>.body>.commit.with-status .message {
-		padding-right: 45px;
-	} 
 }

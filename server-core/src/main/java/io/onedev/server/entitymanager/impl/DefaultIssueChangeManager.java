@@ -44,14 +44,9 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
-import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
-import io.onedev.server.model.support.issue.changedata.IssuePullRequestDiscardedData;
-import io.onedev.server.model.support.issue.changedata.IssuePullRequestMergedData;
-import io.onedev.server.model.support.issue.changedata.IssuePullRequestOpenedData;
-import io.onedev.server.model.support.issue.changedata.IssuePullRequestReopenedData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
@@ -329,63 +324,18 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Listen
-	public void on(PullRequestChangeEvent event) {
-		if (event.getChange().getData() instanceof PullRequestMergeData) {
-			for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
-				Issue issue = issueManager.find(event.getProject(), issueNumber);
-				if (issue != null) {
-					IssueChange change = new IssueChange();
-					change.setDate(event.getDate());
-					change.setUser(event.getUser());
-					change.setIssue(issue);
-					change.setData(new IssuePullRequestMergedData(event.getRequest()));
-					save(change);
-				}
-			}
+	public void on(PullRequestChangeEvent event) { 
+		if (event.getChange().getData() instanceof PullRequestMergeData) 
 			on(event.getRequest(), MergePullRequest.class);
-		} else if (event.getChange().getData() instanceof PullRequestDiscardData) {
-			for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
-				Issue issue = issueManager.find(event.getProject(), issueNumber);
-				if (issue != null) {
-					IssueChange change = new IssueChange();
-					change.setDate(event.getDate());
-					change.setUser(event.getUser());
-					change.setIssue(issue);
-					change.setData(new IssuePullRequestDiscardedData(event.getRequest()));
-					save(change);
-				}
-			}
+		else if (event.getChange().getData() instanceof PullRequestDiscardData) 
 			on(event.getRequest(), DiscardPullRequest.class);
-		} else if (event.getChange().getData() instanceof PullRequestReopenData) {
-			for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
-				Issue issue = issueManager.find(event.getProject(), issueNumber);
-				if (issue != null) {
-					IssueChange change = new IssueChange();
-					change.setDate(event.getDate());
-					change.setUser(event.getUser());
-					change.setIssue(issue);
-					change.setData(new IssuePullRequestReopenedData(event.getRequest()));
-					save(change);
-				}
-			}
+		else if (event.getChange().getData() instanceof PullRequestReopenData) 
 			on(event.getRequest(), OpenPullRequest.class);
-		}
 	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestOpened event) {
-		for (Long issueNumber: event.getRequest().getFixedIssueNumbers()) {
-			Issue issue = issueManager.find(event.getProject(), issueNumber);
-			if (issue != null) {
-				IssueChange change = new IssueChange();
-				change.setDate(event.getDate());
-				change.setUser(event.getUser());
-				change.setIssue(issue);
-				change.setData(new IssuePullRequestOpenedData(event.getRequest()));
-				save(change);
-			}
-		}
 		on(event.getRequest(), OpenPullRequest.class);
 	}
 	
@@ -394,16 +344,6 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	public void on(RefUpdated event) {
 		if (!event.getNewCommitId().equals(ObjectId.zeroId()) 
 				&& GitUtils.ref2branch(event.getRefName()) != null) {
-			for (Long issueNumber: event.getCommit().getFixedIssueNumbers()) {
-				Issue issue = issueManager.find(event.getProject(), issueNumber);
-				if (issue != null) {
-					IssueChange change = new IssueChange();
-					change.setIssue(issue);
-					change.setDate(new Date());
-					change.setData(new IssueCommittedData(event.getCommit().getCommitId().name()));
-					save(change);
-				}
-			}
 
 			Long projectId = event.getCommit().getProject().getId();
 			ObjectId commitId = event.getCommit().getCommitId();

@@ -1,0 +1,13 @@
+.issue-pull-requests .pull-request {
+    padding: 8px 80px 8px 0;
+    border-top: 1px solid #E8E8E8;
+    position: relative;
+}
+.issue-pull-requests .pull-request:first-child {
+    border-top: none;
+}
+.issue-pull-requests .pull-request .status {
+	position: absolute;
+	top: 10px;
+	right: 0;
+}

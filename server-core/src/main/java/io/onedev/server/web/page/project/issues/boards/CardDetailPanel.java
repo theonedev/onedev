@@ -36,7 +36,9 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
+import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
+import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -125,7 +127,32 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
 		if (!fixCommits.isEmpty()) {
-			tabs.add(new AjaxActionTab(Model.of("Builds")) {
+			if (SecurityUtils.canReadCode(getProject())) {
+				tabs.add(new AjaxActionTab(Model.of("Fixing Commits")) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+						Component content = new IssueCommitsPanel(TAB_CONTENT_ID, CardDetailPanel.this.getModel());
+						content.setOutputMarkupId(true);
+						CardDetailPanel.this.replace(content);
+						target.add(content);
+					}
+					
+				});
+				tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+						Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID, CardDetailPanel.this.getModel());
+						content.setOutputMarkupId(true);
+						CardDetailPanel.this.replace(content);
+						target.add(content);
+					}
+					
+				});
+			}
+			
+			tabs.add(new AjaxActionTab(Model.of("Fixing Builds")) {
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {

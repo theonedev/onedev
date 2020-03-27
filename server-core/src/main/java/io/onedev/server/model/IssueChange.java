@@ -34,7 +34,7 @@ public class IssueChange extends AbstractEntity {
 	private Date date;
 
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	private IssueChangeData data;
 
 	public Issue getIssue() {
