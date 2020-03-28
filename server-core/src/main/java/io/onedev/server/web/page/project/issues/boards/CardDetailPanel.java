@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.issues.boards;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -18,12 +17,10 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -123,10 +120,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			
 		});
 		
-		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
-		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
-		
-		if (!fixCommits.isEmpty()) {
+		if (!getIssue().getCommits().isEmpty()) {
 			if (SecurityUtils.canReadCode(getProject())) {
 				tabs.add(new AjaxActionTab(Model.of("Fixing Commits")) {
 
@@ -139,17 +133,19 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					}
 					
 				});
-				tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
+				if (!getIssue().getPullRequests().isEmpty()) {
+					tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
 
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-						Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID, CardDetailPanel.this.getModel());
-						content.setOutputMarkupId(true);
-						CardDetailPanel.this.replace(content);
-						target.add(content);
-					}
-					
-				});
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+							Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID, CardDetailPanel.this.getModel());
+							content.setOutputMarkupId(true);
+							CardDetailPanel.this.replace(content);
+							target.add(content);
+						}
+						
+					});
+				}
 			}
 			
 			tabs.add(new AjaxActionTab(Model.of("Fixing Builds")) {

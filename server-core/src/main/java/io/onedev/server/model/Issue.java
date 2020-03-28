@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -50,8 +51,10 @@ import com.google.common.collect.Sets;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
@@ -218,6 +221,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private Collection<IssueWatch> watches = new ArrayList<>();
 	
 	private transient List<RevCommit> commits;
+	
+	private transient List<PullRequest> pullRequests;
 	
 	private transient Map<String, Input> fieldInputs;
 	
@@ -596,6 +601,32 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public IssueFacade getFacade() {
 		return new IssueFacade(getId(), getProject().getId(), getNumber());
+	}
+	
+	public List<PullRequest> getPullRequests() {
+		if (pullRequests == null) {
+			pullRequests = new ArrayList<>();
+
+			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
+			Collection<Long> pullRequestIds = new HashSet<>();
+			for (ObjectId commit: getCommits()) 
+				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
+			
+			for (Long requestId: pullRequestIds) {
+				PullRequest request = OneDev.getInstance(PullRequestManager.class).get(requestId);
+				if (request != null && !pullRequests.contains(request))
+					pullRequests.add(request);
+			}
+			Collections.sort(pullRequests, new Comparator<PullRequest>() {
+
+				@Override
+				public int compare(PullRequest o1, PullRequest o2) {
+					return o2.getId().compareTo(o1.getId());
+				}
+				
+			});
+		}
+		return pullRequests;
 	}
 	
 	public List<RevCommit> getCommits() {

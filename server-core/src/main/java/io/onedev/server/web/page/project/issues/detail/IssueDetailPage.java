@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.issues.detail;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -25,12 +24,10 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
@@ -139,15 +136,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});
 		
-		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
-		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
-		
-		// Do not calculate fix builds now as it might be slow
-		if (!fixCommits.isEmpty()) {
+		if (!getIssue().getCommits().isEmpty()) {
 			if (SecurityUtils.canReadCode(getProject())) {
 				tabs.add(new IssueTab("Fixing Commits", IssueCommitsPage.class));
-				tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
+				if (!getIssue().getPullRequests().isEmpty())
+					tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
 			}
+			// Do not calculate fix builds now as it might be slow
 			tabs.add(new IssueTab("Fixing Builds", IssueBuildsPage.class));
 		}
 		
