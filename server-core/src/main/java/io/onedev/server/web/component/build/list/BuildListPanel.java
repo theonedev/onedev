@@ -168,6 +168,9 @@ public abstract class BuildListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		WebMarkupContainer body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
+		
 		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
@@ -278,7 +281,7 @@ public abstract class BuildListPanel extends Panel {
 							getGlobalBuildSetting().setListParams(listParams);
 							OneDev.getInstance(SettingManager.class).saveBuildSetting(getGlobalBuildSetting());
 						}
-						onQueryUpdated(target, query);
+						target.add(body);
 					}
 					
 				});
@@ -290,7 +293,7 @@ public abstract class BuildListPanel extends Panel {
 						modal.close();
 						getProject().getBuildSetting().setListParams(null);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						onQueryUpdated(target, query);
+						target.add(body);
 					}
 					
 				}.setVisible(getProject() != null && getProject().getBuildSetting().getListParams(false) != null));
@@ -337,9 +340,6 @@ public abstract class BuildListPanel extends Panel {
 			}
 			
 		});
-		
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		add(body.setOutputMarkupId(true));
 		
 		Form<?> form = new Form<Void>("query");
 		form.add(input);

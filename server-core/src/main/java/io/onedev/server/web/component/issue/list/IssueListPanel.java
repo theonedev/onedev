@@ -308,7 +308,7 @@ public abstract class IssueListPanel extends Panel {
 							getGlobalIssueSetting().setListFields(listFields);
 							OneDev.getInstance(SettingManager.class).saveIssueSetting(getGlobalIssueSetting());
 						}
-						onQueryUpdated(target, query);
+						target.add(body);
 					}
 					
 				});
@@ -320,7 +320,7 @@ public abstract class IssueListPanel extends Panel {
 						modal.close();
 						getProject().getIssueSetting().setListFields(null);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						onQueryUpdated(target, query);
+						target.add(body);
 					}
 					
 				}.setVisible(getProject() != null && getProject().getIssueSetting().getListFields(false) != null));
@@ -401,7 +401,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected void onUpdated(AjaxRequestTarget target) {
 						modal.close();
-						onQueryUpdated(target, query);
+						target.add(body);
 					}
 
 					@Override
@@ -456,7 +456,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected void onUpdated(AjaxRequestTarget target) {
 						modal.close();
-						onQueryUpdated(target, query);
+						target.add(body);
 					}
 
 					@Override
