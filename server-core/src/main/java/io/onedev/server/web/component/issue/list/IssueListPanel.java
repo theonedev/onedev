@@ -98,16 +98,17 @@ public abstract class IssueListPanel extends Panel {
 
 		@Override
 		protected IssueQuery load() {
-			IssueQuery additionalQuery;
 			try {
-				additionalQuery = IssueQuery.parse(getProject(), query, true, true, false, false, false);
+				return IssueQuery.merge(getBaseQuery(), IssueQuery.parse(getProject(), query, true, true, false, false, false));
+			} catch (OneException e) {
+				error(e.getMessage());
+				return null;
 			} catch (Exception e) {
-				warn("Invalid formal query, perform fuzzy query instead");
+				warn("Not a valid formal query, performing fuzzy query");
 				List<IssueCriteria> criterias = new ArrayList<>();
 				criterias.add(new TitleCriteria("*" + query + "*"));
-				additionalQuery = new IssueQuery(new OrIssueCriteria(criterias));
+				return IssueQuery.merge(getBaseQuery(), new IssueQuery(new OrIssueCriteria(criterias)));
 			}
-			return IssueQuery.merge(getBaseQuery(), additionalQuery);
 		}
 		
 	};
@@ -347,7 +348,11 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 
-		String query = parsedQueryModel.getObject().toString();
+		String query;
+		if (parsedQueryModel.getObject() != null)
+			query = parsedQueryModel.getObject().toString();
+		else
+			query = null;
 		
 		if (getProject() != null) {
 			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
@@ -503,12 +508,14 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				IssueQuery parsedQuery = parsedQueryModel.getObject();
-				try {
-					return getIssueManager().count(getProject(), parsedQuery.getCriteria());
-				} catch (OneException e) {
-					error(e.getMessage());
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getIssueManager().count(getProject(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
 				}
+				return 0;
 			}
 
 			@Override

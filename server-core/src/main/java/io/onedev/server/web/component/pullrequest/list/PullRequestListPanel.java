@@ -89,8 +89,11 @@ public abstract class PullRequestListPanel extends Panel {
 		protected PullRequestQuery load() {
 			try {
 				return PullRequestQuery.parse(getProject(), query);
+			} catch (OneException e) {
+				error(e.getMessage());
+				return null;
 			} catch (Exception e) {
-				warn("Invalid formal query, perform fuzzy query instead");
+				warn("Not a valid formal query, performing fuzzy query");
 				List<EntityCriteria<PullRequest>> criterias = new ArrayList<>();
 				criterias.add(new TitleCriteria("*" + query + "*"));
 				return new PullRequestQuery(new OrEntityCriteria<PullRequest>(criterias));
@@ -362,12 +365,14 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
-				try {
-					return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
-				} catch (OneException e) {
-					error(e.getMessage());
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
 				}
+				return 0;
 			}
 
 			@Override

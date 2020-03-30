@@ -75,8 +75,11 @@ public class ProjectListPanel extends Panel {
 		protected ProjectQuery load() {
 			try {
 				return ProjectQuery.parse(query);
+			} catch (OneException e) {
+				error(e.getMessage());
+				return null;
 			} catch (Exception e) {
-				warn("Invalid formal query, perform fuzzy query instead");
+				warn("Not a valid formal query, performing fuzzy query");
 				List<EntityCriteria<Project>> criterias = new ArrayList<>();
 				criterias.add(new NameCriteria("*" + query + "*"));
 				return new ProjectQuery(new OrEntityCriteria<Project>(criterias));
@@ -220,12 +223,14 @@ public class ProjectListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				ProjectQuery parsedQuery = parsedQueryModel.getObject();
-				try {
-					return getProjectManager().count(parsedQuery.getCriteria());
-				} catch (OneException e) {
-					error(e.getMessage());
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getProjectManager().count(parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
 				}
+				return 0;
 			}
 
 			@Override

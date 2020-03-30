@@ -102,20 +102,21 @@ public abstract class CommitListPanel extends Panel {
 
 		@Override
 		protected CommitQuery load() {
-			CommitQuery additionalQuery;
 			try {
-				additionalQuery = CommitQuery.parse(getProject(), query);
+				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), query));
+			} catch (OneException e) {
+				error(e.getMessage());
+				return null;
 			} catch (Exception e) {
-				warn("Invalid formal query, perform fuzzy query instead");
+				warn("Not a valid formal query, performing fuzzy query");
 				List<CommitCriteria> criterias = new ArrayList<>();
 				ObjectId commitId = getProject().getObjectId(query, false);
 				if (commitId != null)
 					criterias.add(new RevisionCriteria(Lists.newArrayList(new Revision(query, null))));
 				else
 					criterias.add(new MessageCriteria(Lists.newArrayList(query)));
-				additionalQuery = new CommitQuery(criterias);
+				return CommitQuery.merge(getBaseQuery(), new CommitQuery(criterias));
 			}
-			return CommitQuery.merge(getBaseQuery(), additionalQuery);
 		}
 		
 	};
@@ -142,28 +143,32 @@ public abstract class CommitListPanel extends Panel {
 			CommitQuery query = parsedQueryModel.getObject();
 			Commits commits = new Commits();
 			List<String> commitHashes;
-			try {
-				RevListCommand command = new RevListCommand(getProject().getGitDir());
-				command.ignoreCase(true);
-				
-				if (page > MAX_PAGES)
-					throw new OneException("Page should be no more than " + MAX_PAGES);
-				
-				command.count(page * COMMITS_PER_PAGE);
-				
-				query.fill(getProject(), command);
-				
-				if (command.revisions().isEmpty() && getCompareWith() != null)
-					command.revisions(Lists.newArrayList(getCompareWith()));
-				
-				commitHashes = command.call();
-			} catch (Exception e) {
-				if (e.getMessage() != null)
-					error(e.getMessage());
-				else
-					error("Error calculating commits: check log for details");
+			if (query != null) {
+				try {
+					RevListCommand command = new RevListCommand(getProject().getGitDir());
+					command.ignoreCase(true);
+					
+					if (page > MAX_PAGES)
+						throw new OneException("Page should be no more than " + MAX_PAGES);
+					
+					command.count(page * COMMITS_PER_PAGE);
+					
+					query.fill(getProject(), command);
+					
+					if (command.revisions().isEmpty() && getCompareWith() != null)
+						command.revisions(Lists.newArrayList(getCompareWith()));
+					
+					commitHashes = command.call();
+				} catch (Exception e) {
+					if (e.getMessage() != null)
+						error(e.getMessage());
+					else
+						error("Error calculating commits: check log for details");
+					commitHashes = new ArrayList<>();
+					logger.error("Error calculating commits: ", e);
+				}
+			} else {
 				commitHashes = new ArrayList<>();
-				logger.error("Error calculating commits: ", e);
 			}
 			
 			commits.hasMore = (commitHashes.size() == page * COMMITS_PER_PAGE);

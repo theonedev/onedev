@@ -98,14 +98,16 @@ public abstract class BuildListPanel extends Panel {
 		@Override
 		protected BuildQuery load() {
 			try {
-				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query, true, true);
-				return BuildQuery.merge(getBaseQuery(), additionalQuery);
+				return BuildQuery.merge(getBaseQuery(), BuildQuery.parse(getProject(), query, true, true));
+			} catch (OneException e) {
+				error(e.getMessage());
+				return null;
 			} catch (Exception e) {
-				warn("Invalid formal query, perform fuzzy query instead");
+				warn("Not a valid formal query, performing fuzzy query");
 				List<EntityCriteria<Build>> criterias = new ArrayList<>();
 				criterias.add(new VersionCriteria("*" + query + "*"));
 				criterias.add(new JobCriteria("*" + query + "*"));
-				return new BuildQuery(new OrEntityCriteria<Build>(criterias));
+				return BuildQuery.merge(getBaseQuery(), new BuildQuery(new OrEntityCriteria<Build>(criterias)));
 			}
 		}
 		

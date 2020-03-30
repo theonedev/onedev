@@ -76,8 +76,11 @@ public abstract class CodeCommentListPanel extends Panel {
 		protected CodeCommentQuery load() {
 			try {
 				return CodeCommentQuery.parse(getProject(), query);
+			} catch (OneException e) {
+				error(e.getMessage());
+				return null;
 			} catch (Exception e) {
-				warn("Invalid formal query, perform fuzzy query instead");
+				warn("Not a valid formal query, interpreted as fuzzy query");
 				List<EntityCriteria<CodeComment>> criterias = new ArrayList<>();
 				criterias.add(new ContentCriteria(query));
 				criterias.add(new PathCriteria("*" + query + "*"));
@@ -205,12 +208,14 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			public long calcSize() {
 				CodeCommentQuery parsedQuery = parsedQueryModel.getObject();
-				try {
-					return getCodeCommentManager().count(getProject(), getPullRequest(), parsedQuery.getCriteria());
-				} catch (OneException e) {
-					error(e.getMessage());
-					return 0;
-				}
+				if (parsedQuery != null) {
+					try {
+						return getCodeCommentManager().count(getProject(), getPullRequest(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
+				} 
+				return 0;
 			}
 
 			@Override
