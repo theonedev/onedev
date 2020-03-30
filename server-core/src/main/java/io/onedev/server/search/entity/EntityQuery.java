@@ -154,7 +154,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new OneException("Unable to find build: " + value);
 	}
 	
-	public static ProjectScopedNumber getEntityNumber(@Nullable Project project, String value) {
+	public static ProjectScopedNumber getProjectScopedNumber(@Nullable Project project, String value) {
 		if (project != null) {
 			if (value.startsWith("#"))
 				value = project.getName() + value;

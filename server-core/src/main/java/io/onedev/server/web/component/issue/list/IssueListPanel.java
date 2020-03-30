@@ -56,9 +56,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.OrIssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.NumberCriteria;
 import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
@@ -105,9 +106,13 @@ public abstract class IssueListPanel extends Panel {
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
-				List<IssueCriteria> criterias = new ArrayList<>();
-				criterias.add(new TitleCriteria("*" + query + "*"));
-				return IssueQuery.merge(getBaseQuery(), new IssueQuery(new OrIssueCriteria(criterias)));
+				try {
+					EntityQuery.getProjectScopedNumber(getProject(), query);
+					return IssueQuery.merge(getBaseQuery(), 
+							new IssueQuery(new NumberCriteria(getProject(), query, IssueQueryLexer.Is)));
+				} catch (Exception e2) {
+					return IssueQuery.merge(getBaseQuery(), new IssueQuery(new TitleCriteria("*" + query + "*")));
+				}
 			}
 		}
 		

@@ -25,7 +25,7 @@ public class NumberCriteria extends EntityCriteria<Build> {
 	public NumberCriteria(@Nullable Project project, String value, int operator) {
 		this.operator = operator;
 		this.value = value;
-		number = EntityQuery.getEntityNumber(project, value);
+		number = EntityQuery.getProjectScopedNumber(project, value);
 	}
 
 	@Override

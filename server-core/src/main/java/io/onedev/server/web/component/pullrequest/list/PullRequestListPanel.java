@@ -51,9 +51,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
-import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.OrEntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.pullrequest.NumberCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.search.entity.pullrequest.TitleCriteria;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
@@ -94,9 +95,12 @@ public abstract class PullRequestListPanel extends Panel {
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
-				List<EntityCriteria<PullRequest>> criterias = new ArrayList<>();
-				criterias.add(new TitleCriteria("*" + query + "*"));
-				return new PullRequestQuery(new OrEntityCriteria<PullRequest>(criterias));
+				try {
+					EntityQuery.getProjectScopedNumber(getProject(), query);
+					return new PullRequestQuery(new NumberCriteria(getProject(), query, PullRequestQueryLexer.Is));
+				} catch (Exception e2) {
+					return new PullRequestQuery(new TitleCriteria("*" + query + "*"));
+				}
 			}
 		}
 		

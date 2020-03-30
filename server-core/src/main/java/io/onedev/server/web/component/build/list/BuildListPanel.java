@@ -58,9 +58,12 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.JobCriteria;
+import io.onedev.server.search.entity.build.NumberCriteria;
 import io.onedev.server.search.entity.build.VersionCriteria;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
@@ -104,10 +107,16 @@ public abstract class BuildListPanel extends Panel {
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
-				List<EntityCriteria<Build>> criterias = new ArrayList<>();
-				criterias.add(new VersionCriteria("*" + query + "*"));
-				criterias.add(new JobCriteria("*" + query + "*"));
-				return BuildQuery.merge(getBaseQuery(), new BuildQuery(new OrEntityCriteria<Build>(criterias)));
+				try {
+					EntityQuery.getProjectScopedNumber(getProject(), query);
+					return BuildQuery.merge(getBaseQuery(), 
+							new BuildQuery(new NumberCriteria(getProject(), query, BuildQueryLexer.Is)));
+				} catch (Exception e2) {
+					List<EntityCriteria<Build>> criterias = new ArrayList<>();
+					criterias.add(new VersionCriteria("*" + query + "*"));
+					criterias.add(new JobCriteria("*" + query + "*"));
+					return BuildQuery.merge(getBaseQuery(), new BuildQuery(new OrEntityCriteria<Build>(criterias)));
+				}
 			}
 		}
 		
