@@ -9,7 +9,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -80,7 +79,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new IssueTitlePanel("title") {
+		add(new IssueTitlePanel("title", false) {
 
 			@Override
 			protected Issue getIssue() {
@@ -94,11 +93,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			@Override
 			protected Issue getIssue() {
 				return CardDetailPanel.this.getIssue();
-			}
-
-			@Override
-			protected Component newCreateIssueButton(String componentId, String templateQuery) {
-				return new WebMarkupContainer(componentId).setVisible(false);
 			}
 
 		});

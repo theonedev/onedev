@@ -13,8 +13,13 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="titleViewFrag">
-		<span wicket:id="title"></span>
-		<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
-		<a wicket:id="copy" title="Copy issue number and title" class="copy"><i class="fa fa-copy"></i></a>
+		<div class="view clearfix">
+			<span class="pull-left">
+				<span wicket:id="title"></span>
+				<a wicket:id="copy" title="Copy issue number and title" class="copy"><i class="fa fa-copy"></i></a>
+				<a wicket:id="edit" title="Edit issue title" class="edit"><i class="fa fa-pencil"></i></a>
+			</span>
+			<a wicket:id="create" class="create btn btn-success btn-sm pull-right"><i class="fa fa-plus"></i> New</a>
+		</div>
 	</wicket:fragment>
 </wicket:panel>

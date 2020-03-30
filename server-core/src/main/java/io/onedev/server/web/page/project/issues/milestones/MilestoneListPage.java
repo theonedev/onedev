@@ -156,13 +156,8 @@ public class MilestoneListPage extends ProjectIssuesPage {
 			
 		});
 		
-		add(new Link<Void>("newMilestone") {
+		add(new BookmarkablePageLink<Void>("newMilestone", NewMilestonePage.class, NewMilestonePage.paramsOf(getProject())) {
 
-			@Override
-			public void onClick() {
-				setResponsePage(NewMilestonePage.class, NewMilestonePage.paramsOf(getProject()));
-			}
-			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
@@ -263,7 +258,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 			
 		});
 		
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canManageIssues(getProject())) {
 			columns.add(new AbstractColumn<Milestone, Void>(Model.of("Actions")) {
 
 				@Override
@@ -274,7 +269,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 				@Override
 				public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 						IModel<Milestone> rowModel) {
-					cellItem.add(new MilestoneActionsPanel(componentId, rowModel) {
+					cellItem.add(new MilestoneActionsPanel(componentId, rowModel, false) {
 
 						@Override
 						protected void onUpdated(AjaxRequestTarget target) {

@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.issue.operation;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,24 +30,15 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.TransitionSpec;
-import io.onedev.server.issue.fieldspec.DateField;
-import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
-import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -94,7 +84,6 @@ public abstract class IssueOperationsPanel extends Panel {
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
 		
 		AtomicReference<Component> activeTransitionLinkRef = new AtomicReference<>(null);  
@@ -209,49 +198,11 @@ public abstract class IssueOperationsPanel extends Panel {
 		
 		addOrReplace(transitionsView);
 
-		List<String> criterias = new ArrayList<>();
-		if (getIssue().getMilestone() != null) {
-			criterias.add(Criteria.quote(Issue.FIELD_MILESTONE) + " " 
-					+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
-					+ Criteria.quote(getIssue().getMilestoneName()));
-		}
-		for (Map.Entry<String, Input> entry: getIssue().getFieldInputs().entrySet()) {
-			if (getIssue().isFieldVisible(entry.getKey())) {
-				List<String> strings = entry.getValue().getValues();
-				if (strings.isEmpty()) {
-					criterias.add(Criteria.quote(entry.getKey()) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty));
-				} else { 
-					FieldSpec field = issueSetting.getFieldSpec(entry.getKey());
-					if (field.isAllowMultiple()) {
-						for (String string: strings) {
-							criterias.add(Criteria.quote(entry.getKey()) + " " 
-									+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
-									+ Criteria.quote(string));
-						}
-					} else if (!(field instanceof DateField)) { 
-						criterias.add(Criteria.quote(entry.getKey()) + " " 
-								+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
-								+ Criteria.quote(strings.iterator().next()));
-					}
-				}
-			}
-		}
-
-		String query;
-		if (!criterias.isEmpty())
-			query = StringUtils.join(criterias, " and ");
-		else
-			query = null;
-		
-		Component createIssueButton = newCreateIssueButton("newIssue", query);
-		addOrReplace(createIssueButton);
-		
 		stateContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				createIssueButton.configure();
-				if (createIssueButton.isVisible() || transitionsView.size() != 0)
+				if (transitionsView.size() != 0)
 					return "with-separator";
 				else
 					return "";
@@ -294,7 +245,5 @@ public abstract class IssueOperationsPanel extends Panel {
 	}
 
 	protected abstract Issue getIssue();
-	
-	protected abstract Component newCreateIssueButton(String componentId, String templateQuery);
 	
 }

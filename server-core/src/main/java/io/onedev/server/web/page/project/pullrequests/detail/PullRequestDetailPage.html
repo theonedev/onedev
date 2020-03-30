@@ -1,9 +1,12 @@
 <wicket:extend>
 	<div id="request-detail">
 		<div class="main">
-			<div wicket:id="requestHead" class="title">
-				<span wicket:id="title" class="title"></span>
-				<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
+			<div wicket:id="requestHead" class="title clearfix">
+				<span class="pull-left">
+					<span wicket:id="title" class="title"></span>
+					<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
+				</span>
+				<a wicket:id="create" class="create btn btn-success btn-sm pull-right"><i class="fa fa-plus"></i> New</a>
 				<form wicket:id="editForm" class="form">
 					<div class="clearable-wrapper">
 						<input wicket:id="title" type="text" placeholder="Input title" class="form-control">

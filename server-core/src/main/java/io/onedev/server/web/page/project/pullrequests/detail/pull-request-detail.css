@@ -24,6 +24,9 @@ body.PullRequestDetailPage #layout>.body {
 	font-weight: bold;
 	position: relative;
 }
+#request-detail>.main>.title .create {
+	margin-left: 8px;
+}
 #request-detail>.main>.title form {
 	position: relative;
 	padding-right: 100px;

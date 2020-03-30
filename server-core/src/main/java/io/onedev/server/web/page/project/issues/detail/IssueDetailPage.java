@@ -14,7 +14,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -48,7 +47,6 @@ import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
@@ -102,7 +100,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			}
 			
 		});
-		add(new IssueTitlePanel("title") {
+		add(new IssueTitlePanel("title", true) {
 
 			@Override
 			protected Issue getIssue() {
@@ -116,11 +114,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			@Override
 			protected Issue getIssue() {
 				return IssueDetailPage.this.getIssue();
-			}
-
-			@Override
-			protected Component newCreateIssueButton(String componentId, String templateQuery) {
-				return new BookmarkablePageLink<Void>(componentId, NewIssuePage.class, NewIssuePage.paramsOf(getProject(), templateQuery));
 			}
 
 		});

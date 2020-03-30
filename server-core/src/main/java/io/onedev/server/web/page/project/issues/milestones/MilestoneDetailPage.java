@@ -82,7 +82,7 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 		
 		add(new MilestoneDueLabel("due", milestoneModel));
 		
-		add(new MilestoneActionsPanel("actions", milestoneModel) {
+		add(new MilestoneActionsPanel("actions", milestoneModel, true) {
 
 			@Override
 			protected void onDeleted(AjaxRequestTarget target) {

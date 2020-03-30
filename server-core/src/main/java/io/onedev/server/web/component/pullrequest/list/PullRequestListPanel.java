@@ -233,12 +233,8 @@ public abstract class PullRequestListPanel extends Panel {
 		add(form);
 
 		if (getProject() != null) {
-			if (SecurityUtils.canReadCode(getProject())) {
-				add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
-						NewPullRequestPage.paramsOf(getProject())));		
-			} else {
-				add(new WebMarkupContainer("newRequest").setVisible(false));
-			}
+			add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
+					NewPullRequestPage.paramsOf(getProject())));		
 		} else {
 			add(new DropdownLink("newRequest") {
 
