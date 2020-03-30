@@ -171,14 +171,16 @@ public class DefaultWebSocketManager implements WebSocketManager {
 		});
 		notifiedObservableCleanupTaskId = taskScheduler.schedule(new SchedulableTask() {
 			
+			private static final int TOLERATE_SECONDS = 10;
+			
 			@Override
 			public ScheduleBuilder<?> getScheduleBuilder() {
-				return SimpleScheduleBuilder.repeatMinutelyForever();
+				return SimpleScheduleBuilder.repeatSecondlyForever(TOLERATE_SECONDS);
 			}
 			
 			@Override
 			public void execute() {
-				Date threshold = new DateTime().minusMinutes(1).toDate();
+				Date threshold = new DateTime().minusSeconds(TOLERATE_SECONDS).toDate();
 				for (Iterator<Map.Entry<String, Date>> it = notifiedObservables.entrySet().iterator(); it.hasNext();) {
 					if (it.next().getValue().before(threshold))
 						it.remove();
