@@ -10,6 +10,9 @@ import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.SshServer;
+import org.apache.sshd.server.auth.AsyncAuthException;
+import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
+import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.shell.UnknownCommand;
 import org.eclipse.jgit.transport.ReceivePack;
@@ -69,9 +72,9 @@ public class SimpleGitSshServer {
     }
     
     private void configureAuthentication() {
-        server.setPublickeyAuthenticator((userName, publicKey, session) -> {
-            return checkUserKeys(userName, publicKey, session);
-        });
+        CachingPublicKeyAuthenticator cachingAuthenticator = 
+                new CachingPublicKeyAuthenticator(new OneDevPublickeyAuthenticator());
+        server.setPublickeyAuthenticator(cachingAuthenticator);
         
         server.setShellFactory(new WelcomeGitShell());
         server.setPasswordAuthenticator(null);
@@ -79,27 +82,6 @@ public class SimpleGitSshServer {
         server.setGSSAuthenticator(null);
         server.setHostBasedAuthenticator(null);
         server.setUserAuthFactories(null);
-    }
-    
-    /**
-     * Check that public key is present inside OneDev and retrieve the owner user
-     * @param userName
-     * @param publicKey
-     * @param session 
-     * @return
-     */
-    private boolean checkUserKeys(String userName, PublicKey publicKey, ServerSession session) {
-        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);        
-        SshKey sshKey = sshKeyManager.loadKeyByDigest(fingerPrint);
-        
-        if (sshKey == null) {
-            return false;
-        }
-        
-        User owner = sshKey.getOwner();
-        session.setAttribute(SshServerUtils.SESSION_USER_ID, owner.getId());
-
-        return true;
     }
     
     public int start() {
@@ -115,6 +97,35 @@ public class SimpleGitSshServer {
         server.stop(true);
     }
     
+    private class OneDevPublickeyAuthenticator implements PublickeyAuthenticator {
+        @Override
+        public boolean authenticate(String userName, PublicKey publicKey, ServerSession session)
+                throws AsyncAuthException {
+            return checkUserKeys(userName, publicKey, session);
+        }
+        
+        /**
+         * Check that public key is present inside OneDev and retrieve the owner user
+         * @param userName
+         * @param publicKey
+         * @param session 
+         * @return
+         */
+        protected boolean checkUserKeys(String userName, PublicKey publicKey, ServerSession session) {
+            String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, publicKey);        
+            SshKey sshKey = sshKeyManager.loadKeyByDigest(fingerPrint);
+            
+            if (sshKey == null) {
+                return false;
+            }
+            
+            User owner = sshKey.getOwner();
+            session.setAttribute(SshServerUtils.SESSION_USER_ID, owner.getId());
+
+            return true;
+        }
+    }
+
     private class GitUploadPackCommand extends AbstractProjectAwareGitCommand {
 
 
