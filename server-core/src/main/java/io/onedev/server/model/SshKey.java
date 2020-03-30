@@ -1,19 +1,22 @@
 package io.onedev.server.model;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.ConstraintValidatorContext;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.wicket.util.string.Strings;
 import org.hibernate.validator.constraints.NotEmpty;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.git.ssh.SshKeyUtils;
@@ -25,15 +28,16 @@ import io.onedev.server.web.editable.annotation.Multiline;
 @Editable
 @ClassValidating
 @Entity
-@Table
+@Table(
+		indexes={@Index(columnList="o_owner_id"), @Index(columnList="name"), @Index(columnList="digest")},
+		uniqueConstraints={
+				@UniqueConstraint(columnNames={"o_owner_id", "name"}), 
+				@UniqueConstraint(columnNames={"digest"})}
+)
 public class SshKey extends AbstractEntity implements Validatable {
     
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
-    @NotEmpty
     @Column(nullable=false)
     private String name;
 
