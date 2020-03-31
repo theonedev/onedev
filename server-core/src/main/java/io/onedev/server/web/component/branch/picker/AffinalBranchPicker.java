@@ -70,7 +70,8 @@ public abstract class AffinalBranchPicker extends Panel {
 			@Override
 			protected Collection<Project> load() {
 				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
-				List<Project> affinals = project.getForkRoot().getForkDescendants();
+				List<Project> affinals = project.getForkRoot().getForkChildren();
+				affinals.add(0, project.getForkRoot());
 				for (Iterator<Project> it = affinals.iterator(); it.hasNext();) {
 					if (!SecurityUtils.canReadCode(it.next()))
 						it.remove();

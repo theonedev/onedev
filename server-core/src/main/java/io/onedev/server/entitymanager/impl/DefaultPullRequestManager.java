@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -354,10 +355,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public void open(PullRequest request) {
 		Preconditions.checkArgument(request.isNew());
-		Query<?> query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
-		query.setParameter("project", request.getTargetProject());
-		request.setNumber(getNextNumber(request.getTargetProject(), query));
-
+		
+		request.setNumberScope(request.getTargetProject().getForkRoot());
+		Query<?> query = getSession().createQuery(String.format("select max(%s) from PullRequest where %s=:numberScope", 
+				PullRequest.PROP_NUMBER, PullRequest.PROP_NUMBER_SCOPE));
+		query.setParameter("numberScope", request.getNumberScope());
+		request.setNumber(getNextNumber(request.getNumberScope(), query));
+		
 		PullRequestOpened event = new PullRequestOpened(request);
 		request.setLastUpdate(event.getLastUpdate());
 		
@@ -1003,7 +1007,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			Root<PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
-			predicates.add(builder.equal(root.get("targetProject"), targetProject));
+			predicates.add(builder.equal(root.get(PullRequest.PROP_TARGET_PROJECT), targetProject));
 		} else if (!SecurityUtils.isAdministrator()) {
 			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
 			if (!projects.isEmpty())
@@ -1111,8 +1115,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public PullRequest find(Project targetProject, long number) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq("targetProject", targetProject));
-		criteria.add(Restrictions.eq("number", number));
+		criteria.add(Restrictions.eq(PullRequest.PROP_NUMBER_SCOPE, targetProject.getForkRoot()));
+		criteria.add(Restrictions.eq(PullRequest.PROP_NUMBER, number));
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
@@ -1135,22 +1139,26 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq(PullRequest.PROP_TARGET_PROJECT, project));
+
+		Set<Project> projects = Sets.newHashSet(project);
+		projects.addAll(project.getForkParents().stream().filter(it->SecurityUtils.canReadCode(it)).collect(Collectors.toSet()));
+		criteria.add(Restrictions.in(PullRequest.PROP_TARGET_PROJECT, projects));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);
 		if (term.length() != 0) {
 			try {
 				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
+				criteria.add(Restrictions.eq(PullRequest.PROP_NUMBER, buildNumber));
 			} catch (NumberFormatException e) {
 				criteria.add(Restrictions.or(
-						Restrictions.ilike("title", term, MatchMode.ANYWHERE),
-						Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
+						Restrictions.ilike(PullRequest.PROP_TITLE, term, MatchMode.ANYWHERE),
+						Restrictions.ilike(PullRequest.PROP_NO_SPACE_TITLE, term, MatchMode.ANYWHERE)));
 			}
 		}
 		
-		criteria.addOrder(Order.desc("number"));
+		criteria.addOrder(Order.desc(PullRequest.PROP_TARGET_PROJECT));
+		criteria.addOrder(Order.desc(PullRequest.PROP_NUMBER));
 		requests.addAll(query(criteria, 0, count));
 		
 		return requests;

@@ -67,7 +67,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
 
-	protected static final int ATWHO_LIMIT = 5;
+	protected static final int ATWHO_LIMIT = 10;
 	
 	private final boolean compactMode;
 	
@@ -318,16 +318,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					else
 						referenceProject = null;
 					if (referenceProject != null || StringUtils.isBlank(referenceProjectName)) {
-						int count;
-						if ("issue".equals(referenceQueryType) 
-								|| "pull request".equals(referenceQueryType) 
-								|| "build".equals(referenceQueryType)) {
-							count = ATWHO_LIMIT*3;
-						} else {
-							count = ATWHO_LIMIT;
-						}
-						if (StringUtils.isBlank(referenceQueryType) || "issue".equals(referenceQueryType)) {
-							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, count)) {
+						if ("issue".equals(referenceQueryType)) {
+							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "issue");
 								referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
@@ -335,9 +327,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
 								referenceList.add(referenceMap);
 							}
-						}
-						if (StringUtils.isBlank(referenceQueryType) || "pullrequest".equals(referenceQueryType)) {
-							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, count)) {
+						} else if ("pullrequest".equals(referenceQueryType)) {
+							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "pull request");
 								referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
@@ -345,9 +336,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
 								referenceList.add(referenceMap);
 							}
-						}
-						if (StringUtils.isBlank(referenceQueryType) || "build".equals(referenceQueryType)) {
-							for (Build build: getReferenceSupport().findBuilds(referenceProject, referenceQuery, count)) {
+						} else if ("build".equals(referenceQueryType)) {
+							for (Build build: getReferenceSupport().findBuilds(referenceProject, referenceQuery, ATWHO_LIMIT)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "build");
 								referenceMap.put("referenceNumber", String.valueOf(build.getNumber()));

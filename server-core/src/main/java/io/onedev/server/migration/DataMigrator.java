@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -1582,7 +1584,17 @@ public class DataMigrator {
 		}
 	}	
 	
+	private Long getForkedRoot38(Map<Long, Long> forkedFroms, Long projectId) {
+		Long forkedFrom = forkedFroms.get(projectId);
+		if (forkedFrom != null)
+			return getForkedRoot38(forkedFroms, forkedFrom);
+		else
+			return projectId;
+	}
+	
 	private void migrate38(File dataDir, Stack<Integer> versions) {
+		Map<Long, Long> forkedFroms = new HashMap<>();
+		
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().contains(".xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
@@ -1590,28 +1602,28 @@ public class DataMigrator {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
-							element.detach();
+							element.element("query").detach();
 					}
 				}
 				for (Node node: dom.selectNodes("//io.onedev.server.model.support.issue.NamedIssueQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
-							element.detach();
+							element.element("query").detach();
 					}
 				}
 				for (Node node: dom.selectNodes("//io.onedev.server.model.support.build.NamedBuildQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
-							element.detach();
+							element.element("query").detach();
 					}
 				}
 				for (Node node: dom.selectNodes("//io.onedev.server.model.support.NamedProjectQuery")) {
 					if (node instanceof Element) {
 						Element element = (Element) node;
 						if (element.elementTextTrim("query").equals("all"))
-							element.detach();
+							element.element("query").detach();
 					}
 				}
 				for (Node node: dom.selectNodes("//issueQuery")) {
@@ -1640,7 +1652,118 @@ public class DataMigrator {
 						element.detach();
 				}
 				dom.writeToFile(file, false);
-			}
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Long projectId = Long.valueOf(element.elementTextTrim("id"));
+					Element forkedFromElement = element.element("forkedFrom");
+					if (forkedFromElement != null)
+						forkedFroms.put(projectId, Long.valueOf(forkedFromElement.getTextTrim()));
+					else
+						forkedFroms.put(projectId, null);
+				}				
+			} 
+		}
+		
+		Map<Long, Long> forkedRoots = new HashMap<>();
+		for (Long projectId: forkedFroms.keySet()) {
+			forkedRoots.put(projectId, getForkedRoot38(forkedFroms, projectId));
+		}
+		
+		Map<Long, Set<Long>> issueNumbers = new HashMap<>();
+		Map<Long, Set<Long>> buildNumbers = new HashMap<>();
+		Map<Long, Set<Long>> pullRequestNumbers = new HashMap<>();
+		
+		for (Long forkedRoot: forkedRoots.values()) {
+			issueNumbers.put(forkedRoot, new HashSet<>());
+			buildNumbers.put(forkedRoot, new HashSet<>());
+			pullRequestNumbers.put(forkedRoot, new HashSet<>());
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Long issueNumber = Long.valueOf(element.elementTextTrim("number"));
+					Long projectId = Long.valueOf(element.elementTextTrim("project"));
+					if (projectId.equals(forkedRoots.get(projectId)))
+						issueNumbers.get(projectId).add(issueNumber); 
+				}
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Long buildNumber = Long.valueOf(element.elementTextTrim("number"));
+					Long projectId = Long.valueOf(element.elementTextTrim("project"));
+					if (projectId.equals(forkedRoots.get(projectId)))
+						buildNumbers.get(projectId).add(buildNumber);
+				}
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Long requestNumber = Long.valueOf(element.elementTextTrim("number"));
+					Long projectId = Long.valueOf(element.elementTextTrim("targetProject"));
+					if (projectId.equals(forkedRoots.get(projectId)))
+						pullRequestNumbers.get(projectId).add(requestNumber);
+				}
+			} 
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issues.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Element numberElement = element.element("number");
+					Long issueNumber = Long.valueOf(numberElement.getTextTrim());
+					Long projectId = Long.valueOf(element.elementTextTrim("project"));
+					Long forkedRoot = forkedRoots.get(projectId);
+					element.addElement("numberScope").setText(forkedRoot.toString());
+					if (!projectId.equals(forkedRoot)) {
+						Set<Long> issueNumbersOfForkedRoot = issueNumbers.get(forkedRoot);
+						if (issueNumbersOfForkedRoot.contains(issueNumber)) {
+							issueNumber = Collections.max(issueNumbersOfForkedRoot) + 1;
+							numberElement.setText(issueNumber.toString());
+						} 
+						issueNumbersOfForkedRoot.add(issueNumber);
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Element numberElement = element.element("number");
+					Long buildNumber = Long.valueOf(numberElement.getTextTrim());
+					Long projectId = Long.valueOf(element.elementTextTrim("project"));
+					Long forkedRoot = forkedRoots.get(projectId);
+					element.addElement("numberScope").setText(forkedRoot.toString());
+					if (!projectId.equals(forkedRoot)) {
+						Set<Long> buildNumbersOfForkedRoot = buildNumbers.get(forkedRoot);
+						if (buildNumbersOfForkedRoot.contains(buildNumber)) {
+							buildNumber = Collections.max(buildNumbersOfForkedRoot) + 1;
+							numberElement.setText(buildNumber.toString());
+						} 
+						buildNumbersOfForkedRoot.add(buildNumber);
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Element numberElement = element.element("number");
+					Long requestNumber = Long.valueOf(numberElement.getTextTrim());
+					Long projectId = Long.valueOf(element.elementTextTrim("targetProject"));
+					Long forkedRoot = forkedRoots.get(projectId);
+					element.addElement("numberScope").setText(forkedRoot.toString());
+					if (!projectId.equals(forkedRoot)) {
+						Set<Long> requestNumbersOfForkedRoot = pullRequestNumbers.get(forkedRoot);
+						if (requestNumbersOfForkedRoot.contains(requestNumber)) {
+							requestNumber = Collections.max(requestNumbersOfForkedRoot) + 1;
+							numberElement.setText(requestNumber.toString());
+						} 
+						requestNumbersOfForkedRoot.add(requestNumber);
+					}
+				}
+				dom.writeToFile(file, false);
+			} 
 		}
 	}
 	

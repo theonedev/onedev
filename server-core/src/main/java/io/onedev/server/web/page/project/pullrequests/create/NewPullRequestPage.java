@@ -62,6 +62,7 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
@@ -174,7 +175,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
 		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
 			pullRequestRef.set(prevRequest);
-		else if (target.getBranch() != null || source.getBranch() != null)
+		else if (target.getBranch() != null && source.getBranch() != null)
 			pullRequestRef.set(OneDev.getInstance(PullRequestManager.class).findEffective(target, source));
 		
 		if (pullRequestRef.get() == null) {
@@ -772,7 +773,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new NewPullRequestResourceReference()));
+		response.render(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new NewPullRequestCssResourceReference()));
 	}
 
 	@Override

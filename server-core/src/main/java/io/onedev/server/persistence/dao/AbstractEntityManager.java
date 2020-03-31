@@ -32,10 +32,10 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 		this.dao = dao;
     }
 	
-	protected long getNextNumber(Project project, Query<?> maxNumberQuery) {
+	protected long getNextNumber(Project numberScope, Query<?> maxNumberQuery) {
 		AtomicLong nextNumber;
 		synchronized (nextNumbers) {
-			nextNumber = nextNumbers.get(project.getId());
+			nextNumber = nextNumbers.get(numberScope.getId());
 		}
 		if (nextNumber == null) {
 			long maxNumber;
@@ -51,10 +51,10 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 			 * if there are limited connections. 
 			 */
 			synchronized (nextNumbers) {
-				nextNumber = nextNumbers.get(project.getId());
+				nextNumber = nextNumbers.get(numberScope.getId());
 				if (nextNumber == null) {
 					nextNumber = new AtomicLong(maxNumber+1);
-					nextNumbers.put(project.getId(), nextNumber);
+					nextNumbers.put(numberScope.getId(), nextNumber);
 				}
 			}
 		} 

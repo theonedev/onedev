@@ -82,8 +82,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
 				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_milestone_id"), 
-				@Index(columnList=LastUpdate.COLUMN_DATE)}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_NUMBER})})
+				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -92,6 +92,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_NUMBER_SCOPE = "numberScope";
+	
 	public static final String FIELD_NUMBER = "Number";
 	
 	public static final String PROP_NUMBER = "number";
@@ -175,6 +177,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	private Project numberScope;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Project project;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -251,6 +257,14 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Project getNumberScope() {
+		return numberScope;
+	}
+
+	public void setNumberScope(Project numberScope) {
+		this.numberScope = numberScope;
 	}
 
 	public Project getProject() {

@@ -61,8 +61,10 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
@@ -209,16 +211,42 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
     	
     	usage.checkInUse("Project '" + project.getName() + "'");
 
-    	for (Build build: project.getBuilds()) 
-    		buildManager.delete(build);
+    	for (Project fork: project.getForks()) {
+    		Collection<Project> descendants = fork.getForkChildren();
+    		descendants.add(fork);
+    		for (Project descendant: descendants) {
+            	Query<?> query = getSession().createQuery(String.format("update Issue set %s=:fork where %s=:descendant", 
+            			Issue.PROP_NUMBER_SCOPE, Issue.PROP_PROJECT));
+            	query.setParameter("fork", fork);
+            	query.setParameter("descendant", descendant);
+            	query.executeUpdate();
+            	
+            	query = getSession().createQuery(String.format("update Build set %s=:fork where %s=:descendant", 
+            			Build.PROP_NUMBER_SCOPE, Build.PROP_PROJECT));
+            	query.setParameter("fork", fork);
+            	query.setParameter("descendant", descendant);
+            	query.executeUpdate();
+            	
+            	query = getSession().createQuery(String.format("update PullRequest set %s=:fork where %s=:descendant", 
+            			PullRequest.PROP_NUMBER_SCOPE, PullRequest.PROP_TARGET_PROJECT));
+            	query.setParameter("fork", fork);
+            	query.setParameter("descendant", descendant);
+            	query.executeUpdate();
+    		}
+    	}
     	
-    	Query<?> query = getSession().createQuery("update Project set forkedFrom=null where forkedFrom=:forkedFrom");
+    	Query<?> query = getSession().createQuery(String.format("update Project set %s=null where %s=:forkedFrom", 
+    			Project.PROP_FORKED_FROM, Project.PROP_FORKED_FROM));
     	query.setParameter("forkedFrom", project);
     	query.executeUpdate();
 
-    	query = getSession().createQuery("update PullRequest set sourceProject=null where sourceProject=:sourceProject");
+    	query = getSession().createQuery(String.format("update PullRequest set %s=null where %s=:sourceProject", 
+    			PullRequest.PROP_SOURCE_PROJECT, PullRequest.PROP_SOURCE_PROJECT));
     	query.setParameter("sourceProject", project);
     	query.executeUpdate();
+
+    	for (Build build: project.getBuilds()) 
+    		buildManager.delete(build);
     	
     	dao.remove(project);
     	

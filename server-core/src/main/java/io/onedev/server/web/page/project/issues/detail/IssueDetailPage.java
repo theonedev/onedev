@@ -76,7 +76,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Issue issue = OneDev.getInstance(IssueManager.class).find(getProject(), issueNumber);
 				if (issue == null)
 					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
-				return issue;
+				else if (!issue.getProject().equals(getProject()))
+					throw new RestartResponseException(getPageClass(), paramsOf(issue, position));
+				else
+					return issue;
 			}
 
 		};

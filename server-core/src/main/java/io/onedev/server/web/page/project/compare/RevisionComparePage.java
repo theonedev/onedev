@@ -525,7 +525,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new RevisionCompareResourceReference()));
+		response.render(CssHeaderItem.forReference(new io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
 	}
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {

@@ -80,9 +80,9 @@ public abstract class CommentInput extends MarkdownEditor {
 
 			@Override
 			public List<Issue> findIssues(@Nullable Project project, String query, int count) {
-				if (project == null)
+				if (project == null) 
 					project = getProject();
-				if (SecurityUtils.canAccess(project))
+				if (SecurityUtils.canAccess(project)) 
 					return OneDev.getInstance(IssueManager.class).query(project, query, count);
 				else
 					return new ArrayList<>();

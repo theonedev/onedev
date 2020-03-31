@@ -87,9 +87,9 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS), 
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
-				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), 
+				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
 				@Index(columnList="o_project_id, " + PROP_COMMIT)},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", PROP_NUMBER})}
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Build extends AbstractEntity implements Referenceable {
@@ -98,6 +98,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_ID = "id";
 
+	public static final String PROP_NUMBER_SCOPE = "numberScope";
+	
 	public static final String FIELD_NUMBER = "Number";
 	
 	public static final String PROP_NUMBER = "number";
@@ -227,6 +229,10 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
+	private Project numberScope; 
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private Project project; 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -297,6 +303,14 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Map<Integer, Collection<Long>> numbersOfStreamPreviousCache = new HashMap<>();
 	
+	public Project getNumberScope() {
+		return numberScope;
+	}
+
+	public void setNumberScope(Project numberScope) {
+		this.numberScope = numberScope;
+	}
+
 	public Project getProject() {
 		return project;
 	}

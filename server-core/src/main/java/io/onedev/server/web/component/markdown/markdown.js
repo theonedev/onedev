@@ -495,23 +495,29 @@ onedev.server.markdown = {
 		if (!canMentionUser)
 			$head.find(".do-mention").remove();
 		if (!canReferenceEntity)
-			$head.find(".do-hashtag").remove();
+			$head.find(".do-reference").remove();
 			
-		$head.find(".do-mention, .do-hashtag").click(function() {
+		$head.find(".do-mention, .do-reference").click(function() {
 			if (!$edit.is(":visible")) 
 				return;
 
-			var atChar = $(this).hasClass("do-mention")? "@": "#";
+			var atChar = $(this).hasClass("do-mention")? "@": "#";	
 			var prevChar;
 			var caret = $input.caret();
-			if (caret != 0) {
+			if (caret != 0) 
 				prevChar = $input.val().charAt(caret-1);
-			}
-			if (prevChar === undefined || prevChar === ' ') {
-				$input.caret(atChar);
-			} else {
-				$input.caret(" " + atChar);
-			}
+			
+			var prefix = $(this).data("reference");
+			if (prefix === undefined)
+				prefix = "";
+			else 
+				prefix = prefix + " ";
+			
+			if (prevChar === undefined || prevChar === ' ' || prevChar === '\n') 
+				$input.caret(prefix + atChar);
+			else 
+				$input.caret(" " + prefix + atChar);
+			
 			$input.atwho("run");
 			onedev.server.markdown.fireInputEvent($input);
 		});

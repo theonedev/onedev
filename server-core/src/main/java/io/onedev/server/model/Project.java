@@ -491,13 +491,23 @@ public class Project extends AbstractEntity {
 	 * @return
 	 * 			all descendant projects forking from current project
 	 */
-	public List<Project> getForkDescendants() {
-		List<Project> descendants = new ArrayList<>();
-		descendants.add(this);
-		for (Project fork: getForks())  
-			descendants.addAll(fork.getForkDescendants());
+	public List<Project> getForkChildren() {
+		List<Project> children = new ArrayList<>();
+		for (Project fork: getForks()) {  
+			children.add(fork);
+			children.addAll(fork.getForkChildren());
+		}
 		
-		return descendants;
+		return children;
+	}
+	
+	public List<Project> getForkParents() {
+		List<Project> forkParents = new ArrayList<>();
+		if (getForkedFrom() != null) {
+			forkParents.add(getForkedFrom());
+			forkParents.addAll(getForkedFrom().getForkParents());
+		}
+		return forkParents;
 	}
 	
 	public Repository getRepository() {

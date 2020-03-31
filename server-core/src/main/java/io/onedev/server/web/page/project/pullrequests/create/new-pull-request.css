@@ -7,38 +7,11 @@
     }
 }
 
-#new-request>div {
+#new-request>* {
 	margin-bottom: 20px;
 }
-#new-request>.branches {
-	margin-bottom: 20px;
-	width: auto;
-}
-#new-request>.branches td {
-	vertical-align: middle;
-	background: #F5F5F5; 
-	border: 2px solid #DDD;
-	border-radius: 4px;
-	padding: 20px;
-}
-#new-request>.branches td.action {
-	text-align: center;
-	background: white;
-	border-top: none;
-	border-bottom: none;
-	padding-left: 20px;
-	padding-right: 20px;
-}
-#new-request>.branches td.action a {
-	font-size: 18px;
-	color: #666;
-}
-#new-request>.branches .branch .message {
-	margin-top: 8px;
-}
-#new-request>.branches .branch .message a {
-	font-size: 13px;
-	color: #888;
+#new-request>:last-child {
+	margin-bottom: 0;
 }
 #new-request>.status .summary {
 	font-size: 16px; 

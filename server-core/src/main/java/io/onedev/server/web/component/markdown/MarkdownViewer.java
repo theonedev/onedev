@@ -35,6 +35,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -132,7 +133,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 				switch (referenceType) {
 				case "issue":
 					Issue issue = OneDev.getInstance(IssueManager.class).find(referenceId);
-					if (issue != null) {
+					// check permission here as issue project may not be the same as current project
+					if (issue != null && SecurityUtils.canAccess(issue.getProject())) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
 						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s')", 
 								JavaScriptEscape.escapeJavaScript(issue.getTitle()), JavaScriptEscape.escapeJavaScript(issue.getState()), 
@@ -142,7 +144,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 					break;
 				case "pull request":
 					PullRequest request = OneDev.getInstance(PullRequestManager.class).find(referenceId);
-					if (request != null) {
+					// check permission here as target project may not be the same as current project
+					if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
 						String statusCss;
 						String status;
 						CloseInfo closeInfo = request.getCloseInfo();
@@ -164,7 +167,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 					break;
 				case "build":
 					Build build = OneDev.getInstance(BuildManager.class).find(referenceId);
-					if (build != null) {
+					// check permission here as build project may not be the same as current project
+					if (build != null && SecurityUtils.canAccess(build)) {
 						String statusCss = "fa build-status build-status-" + build.getStatus().name().toLowerCase();
 						String statusTitle = build.getStatus().getDisplayName();
 						

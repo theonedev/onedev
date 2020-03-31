@@ -251,7 +251,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		});
 		
-		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, ProjectBuildsPage.class, 
+		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-play-circle", 0, ProjectBuildsPage.class, 
 				BuildDetailPage.class, InvalidBuildPage.class) {
 
 			@Override
@@ -354,7 +354,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionsPage.class));
 		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", 
 				StateTransitionsPage.class, ProjectIssueSettingPage.class));
-		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-cubes", 
+		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-play-circle", 
 				ProjectJobSecretsPage.class, ProjectBuildSettingPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", ProjectWebHooksPage.class));
 		return tabs;

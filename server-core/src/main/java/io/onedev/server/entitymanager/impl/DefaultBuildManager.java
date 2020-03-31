@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
@@ -161,8 +163,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Override
 	public Build find(Project project, long number) {
 		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq("project", project));
-		criteria.add(Restrictions.eq("number", number));
+		criteria.add(Restrictions.eq(Build.PROP_NUMBER_SCOPE, project.getForkRoot()));
+		criteria.add(Restrictions.eq(Build.PROP_NUMBER, number));
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
@@ -260,10 +262,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		Root<Build> root = query.from(Build.class);
 		
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(root.get("project"), project));
-		predicates.add(builder.equal(root.get("commitHash"), commitId.name()));
+		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
+		predicates.add(builder.equal(root.get(Build.PROP_COMMIT), commitId.name()));
 		if (jobName != null)
-			predicates.add(builder.equal(root.get("jobName"), jobName));
+			predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
 		
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
@@ -288,9 +290,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public Collection<Build> queryUnfinished() {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.or(
-				Restrictions.eq("status", Status.PENDING), 
-				Restrictions.eq("status", Status.RUNNING), 
-				Restrictions.eq("status", Status.WAITING)));
+				Restrictions.eq(Build.PROP_STATUS, Status.PENDING), 
+				Restrictions.eq(Build.PROP_STATUS, Status.RUNNING), 
+				Restrictions.eq(Build.PROP_STATUS, Status.WAITING)));
 		criteria.setCacheable(true);
 		return query(criteria);
 	}
@@ -301,34 +303,43 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq(Build.PROP_PROJECT, project));
+		
+		Set<Project> projects = Sets.newHashSet(project);
+		projects.addAll(project.getForkParents());
 
-		if (!SecurityUtils.canManage(project)) {
+		List<Criterion> projectCriterions = new ArrayList<>();
+		for (Project each: projects) {
 			List<Criterion> jobCriterions = new ArrayList<>();
-			for (String jobName: getAccessibleJobNames(project).get(project)) 
+			for (String jobName: getAccessibleJobNames(each).get(each)) 
 				jobCriterions.add(Restrictions.eq(Build.PROP_JOB, jobName));
-			if (!jobCriterions.isEmpty())
-				criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
-			else
-				return builds;
-		}
-
-		if (term.startsWith("#"))
-			term = term.substring(1);
-		if (term.length() != 0) {
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("version", term, MatchMode.ANYWHERE),
-						Restrictions.ilike("jobName", term, MatchMode.ANYWHERE)));
+			if (!jobCriterions.isEmpty()) {
+				projectCriterions.add(Restrictions.and(
+						Restrictions.eq(Build.PROP_PROJECT, each), 
+						Restrictions.or(jobCriterions.toArray(new Criterion[0]))));
 			}
 		}
 		
-		criteria.addOrder(Order.desc("number"));
-		builds.addAll(query(criteria, 0, count));
-		
+		if (!projectCriterions.isEmpty()) {
+			criteria.add(Restrictions.or(projectCriterions.toArray(new Criterion[0])));
+			
+			if (term.startsWith("#"))
+				term = term.substring(1);
+			if (term.length() != 0) {
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq(Build.PROP_NUMBER, buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.or(
+							Restrictions.ilike(Build.PROP_VERSION, term, MatchMode.ANYWHERE),
+							Restrictions.ilike(Build.PROP_JOB, term, MatchMode.ANYWHERE)));
+				}
+			}
+
+			criteria.addOrder(Order.desc(Build.PROP_PROJECT));
+			criteria.addOrder(Order.desc(Build.PROP_NUMBER));
+			builds.addAll(query(criteria, 0, count));
+		} 
+
 		return builds;
 	}
 	
@@ -358,9 +369,11 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Override
 	public void create(Build build) {
 		Preconditions.checkArgument(build.isNew());
-		Query<?> query = getSession().createQuery("select max(number) from Build where project=:project");
-		query.setParameter("project", build.getProject());
-		build.setNumber(getNextNumber(build.getProject(), query));
+		build.setNumberScope(build.getProject().getForkRoot());
+		Query<?> query = getSession().createQuery(String.format("select max(%s) from Build where %s=:numberScope", 
+				Build.PROP_NUMBER, Build.PROP_NUMBER_SCOPE));
+		query.setParameter("numberScope", build.getNumberScope());
+		build.setNumber(getNextNumber(build.getNumberScope(), query));
 		save(build);
 		for (BuildParam param: build.getParams())
 			buildParamManager.save(param);

@@ -1,0 +1,38 @@
+table.revision-compare {
+	width: auto;
+}
+table.revision-compare td {
+	vertical-align: top;
+	background: #FAFAFA; 
+	border: 2px solid #E0E0E0;
+    padding: 20px;
+}
+table.revision-compare td.action {
+	text-align: center;
+	background: white;
+	padding-top: 47px;
+	border-top: none;
+	border-bottom: none;
+}
+table.revision-compare .revision .title .checkbox {
+	margin: 0 0 0 16px;
+}
+table.revision-compare .revision .title label {
+	font-size: 16px;
+	font-weight: normal;
+}
+table.revision-compare .revision .title span {
+	color: #888;
+	margin-left: 4px;
+}
+table.revision-compare .revision .title a {
+	color: #666;
+	margin-left: 4px;
+}
+table.revision-compare .revision .message {
+	margin-top: 8px;
+}
+table.revision-compare .revision .message a {
+	font-size: 13px;
+	color: #888;
+}

@@ -86,14 +86,16 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_HEAD_COMMIT_HASH), 
 				@Index(columnList=MergePreview.COLUMN_REQUEST_HEAD), @Index(columnList=CloseInfo.COLUMN_DATE), 
 				@Index(columnList=CloseInfo.COLUMN_STATUS), @Index(columnList=CloseInfo.COLUMN_USER), 
-				@Index(columnList=CloseInfo.COLUMN_USER_NAME)},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", PROP_NUMBER})})
+				@Index(columnList=CloseInfo.COLUMN_USER_NAME), @Index(columnList="o_numberScope_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
 	public static final String FIELD_NUMBER = "Number";
 
@@ -218,6 +220,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private User submitter;
 	
 	private String submitterName;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
+	private Project numberScope;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -346,6 +352,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Nullable
 	public String getSubmitterName() {
 		return submitterName;
+	}
+
+	public Project getNumberScope() {
+		return numberScope;
+	}
+
+	public void setNumberScope(Project numberScope) {
+		this.numberScope = numberScope;
 	}
 
 	public Project getTargetProject() {

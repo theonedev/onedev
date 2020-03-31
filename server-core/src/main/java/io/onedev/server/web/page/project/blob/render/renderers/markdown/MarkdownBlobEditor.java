@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.blob.render.renderers.markdown;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -26,6 +27,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ContentDetector;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.util.match.MatchScoreUtils;
@@ -109,9 +111,12 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 
 					@Override
 					public List<Issue> findIssues(@Nullable Project project, String query, int count) {
-						if (project == null)
+						if (project == null) 
 							project = context.getProject();
-						return OneDev.getInstance(IssueManager.class).query(project, query, count);
+						if (SecurityUtils.canAccess(project))
+							return OneDev.getInstance(IssueManager.class).query(project, query, count);
+						else
+							return new ArrayList<>();
 					}
 
 					@Override

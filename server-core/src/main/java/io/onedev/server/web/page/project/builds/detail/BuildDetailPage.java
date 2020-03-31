@@ -99,7 +99,10 @@ public abstract class BuildDetailPage extends ProjectPage
 				Build build = OneDev.getInstance(BuildManager.class).find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException("Unable to find build #" + buildNumber + " in project " + getProject());
-				return build;
+				else if (!build.getProject().equals(getProject()))
+					throw new RestartResponseException(getPageClass(), paramsOf(build, position));
+				else
+					return build;
 			}
 
 		};

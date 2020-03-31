@@ -123,7 +123,7 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 		reporter.setName("Reporter");
 		reporter.setCodePrivilege(CodePrivilege.NONE);
 		ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
-		allfieldsExcept.getExcludeFields().add("Assignee");
+		allfieldsExcept.getExcludeFields().add("Assignees");
 		reporter.setEditableIssueFields(allfieldsExcept);
 		
 		jobPrivilege = new JobPrivilege();
