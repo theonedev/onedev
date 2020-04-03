@@ -48,5 +48,5 @@ public class EnvVar implements Serializable {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return Job.suggestVariables(matchWith);
 	}
-	
+
 }

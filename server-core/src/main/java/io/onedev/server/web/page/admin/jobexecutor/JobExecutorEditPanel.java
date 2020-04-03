@@ -20,13 +20,13 @@ import org.apache.wicket.util.visit.IVisitor;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.util.Testable;
 
 @SuppressWarnings("serial")

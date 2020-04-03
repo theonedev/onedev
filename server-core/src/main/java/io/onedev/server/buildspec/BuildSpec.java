@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -24,7 +23,7 @@ import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
-import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -35,7 +34,7 @@ public class BuildSpec implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String BLOB_PATH = ".onedev-buildspec";
+	public static final String BLOB_PATH = ".onedev-buildspec.yml";
 	
 	public static final String PROP_JOBS = "jobs";
 	
@@ -208,18 +207,13 @@ public class BuildSpec implements Serializable, Validatable {
 		String buildSpecString = new String(bytes, StandardCharsets.UTF_8); 
 		if (StringUtils.isNotBlank(buildSpecString)) {
 			try {
-				return (BuildSpec) VersionedDocument.fromXML(buildSpecString).toBean();
+				return VersionedYamlDoc.fromYaml(buildSpecString).toBean(BuildSpec.class);
 			} catch (Exception e) {
 				throw new InvalidBuildSpecException("Invalid build spec", e);
 			}
 		} else {
 			return null;
 		}
-	}
-
-	@SuppressWarnings("unused")
-	private void migrate1(VersionedDocument dom, Stack<Integer> versions) {
-		dom.getRootElement().addElement("properties");
 	}
 	
 }

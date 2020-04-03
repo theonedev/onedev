@@ -95,7 +95,7 @@ import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
@@ -708,9 +708,9 @@ public class Project extends AbstractEntity {
 		Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
 		if (buildSpec == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
-			if (blob != null) 
+			if (blob != null)  
 				buildSpec = Optional.fromNullable(BuildSpec.parse(blob.getBytes()));
-			else
+			else 
 				buildSpec = Optional.absent();
 			buildSpecCache.put(commitId, buildSpec);
 		}
@@ -725,7 +725,7 @@ public class Project extends AbstractEntity {
 						BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 				if (blob != null && blob.getText() != null) {
 					try {
-						VersionedDocument dom = VersionedDocument.fromXML(blob.getText().getContent());
+						VersionedXmlDoc dom = VersionedXmlDoc.fromXML(blob.getText().getContent());
 						for (Element jobElement: dom.getRootElement().element("jobs").elements())
 							jobNameSet.add(jobElement.elementTextTrim("name"));
 					} catch (Exception e) {

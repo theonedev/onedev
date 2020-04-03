@@ -48,5 +48,5 @@ public abstract class JobReport implements Serializable {
 	}
 	
 	public abstract void process(Build build, File workspace, JobLogger logger);
-	
+
 }

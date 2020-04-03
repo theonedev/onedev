@@ -13,11 +13,11 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;

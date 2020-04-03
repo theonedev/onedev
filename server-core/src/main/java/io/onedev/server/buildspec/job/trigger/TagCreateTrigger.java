@@ -17,7 +17,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=200, name="When create tags")
+@Editable(order=200, name="Tag creation")
 public class TagCreateTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;

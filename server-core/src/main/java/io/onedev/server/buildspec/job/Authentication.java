@@ -45,5 +45,5 @@ public class Authentication implements Serializable {
 		return Project.get().getBuildSetting().getHierarchySecrets(Project.get())
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
-	
+
 }

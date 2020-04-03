@@ -54,7 +54,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.migration.DataMigrator;
 import io.onedev.server.migration.MigrationHelper;
-import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.ModelVersion;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -301,7 +301,7 @@ public class DefaultPersistManager implements PersistManager {
 	protected void migrateData(File dataDir) {
 		File versionFile = getVersionFile(dataDir);
 		
-		VersionedDocument dom = VersionedDocument.fromFile(versionFile);
+		VersionedXmlDoc dom = VersionedXmlDoc.fromFile(versionFile);
 		List<Element> elements = dom.getRootElement().elements();
 		if (elements.size() != 1)
 			throw new RuntimeException("Incorrect data format: illegal data version");
@@ -313,7 +313,7 @@ public class DefaultPersistManager implements PersistManager {
 		if (MigrationHelper.migrate(versionElement.getText(), new DataMigrator(), dataDir)) {
 			// load version file again in case we changed something of it while migrating
 			versionFile = getVersionFile(dataDir);
-			dom = VersionedDocument.fromFile(versionFile);
+			dom = VersionedXmlDoc.fromFile(versionFile);
 			elements = dom.getRootElement().elements();
 			Preconditions.checkState(elements.size() == 1);
 			versionElement = Preconditions.checkNotNull(elements.iterator().next().element(getVersionFieldName()));		
@@ -429,10 +429,10 @@ public class DefaultPersistManager implements PersistManager {
 		query.setParameter("toId", ids.get(start+count-1));
 		
 		logger.info("Converting table rows to XML...");
-		VersionedDocument dom = new VersionedDocument();
+		VersionedXmlDoc dom = new VersionedXmlDoc();
 		Element rootElement = dom.addElement("list");
 		for (Object entity: query.list())
-			rootElement.appendContent(VersionedDocument.fromBean(entity));
+			rootElement.appendContent(VersionedXmlDoc.fromBean(entity));
 		String fileName;
 
 		if (start == 0)
@@ -467,11 +467,11 @@ public class DefaultPersistManager implements PersistManager {
 				Transaction transaction = session.beginTransaction();
 				try {
 					logger.info("Importing from data file '" + file.getName() + "'...");
-					VersionedDocument dom = VersionedDocument.fromFile(file);
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 					
 					for (Element element: dom.getRootElement().elements()) {
 						element.detach();
-						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
+						AbstractEntity entity = (AbstractEntity) new VersionedXmlDoc(DocumentHelper.createDocument(element)).toBean();
 						session.replicate(entity, ReplicationMode.EXCEPTION);
 					}
 					session.flush();
@@ -500,11 +500,11 @@ public class DefaultPersistManager implements PersistManager {
 			for (File file: dataFiles) {
 				try {
 					logger.info("Validating data file '" + file.getName() + "'...");
-					VersionedDocument dom = VersionedDocument.fromFile(file);
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 					
 					for (Element element: dom.getRootElement().elements()) {
 						element.detach();
-						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
+						AbstractEntity entity = (AbstractEntity) new VersionedXmlDoc(DocumentHelper.createDocument(element)).toBean();
 						validator.validate(entity);
 					}
 				} catch (Exception e) {

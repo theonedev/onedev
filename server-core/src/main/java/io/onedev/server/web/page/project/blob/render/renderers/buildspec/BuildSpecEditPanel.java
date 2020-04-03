@@ -37,7 +37,11 @@ import io.onedev.server.buildspec.Property;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.migration.VersionedYamlDoc;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.PathNode.Indexed;
+import io.onedev.server.util.PathNode.Named;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -47,12 +51,8 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PathNode.Indexed;
-import io.onedev.server.web.editable.PathNode.Named;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -297,7 +297,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	public void convertInput() {
 		if (parseResult instanceof BuildSpec) {
 			BuildSpec buildSpec = getBuildSpec();
-			setConvertedInput(VersionedDocument.fromBean(buildSpec).toXML().getBytes(StandardCharsets.UTF_8));
+			setConvertedInput(VersionedYamlDoc.fromBean(buildSpec).toYaml().getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(getModelObject());
 		}

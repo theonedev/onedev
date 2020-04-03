@@ -13,11 +13,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.issue.BoardSpec;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 public abstract class BoardEditPanel extends Panel {

@@ -31,5 +31,5 @@ public class SubmoduleCredential extends Authentication {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return Job.suggestVariables(matchWith);
 	}
-	
+
 }

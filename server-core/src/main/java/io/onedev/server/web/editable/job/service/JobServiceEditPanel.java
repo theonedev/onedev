@@ -14,11 +14,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobService;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathNode;
-import io.onedev.server.web.editable.Path;
 
 @SuppressWarnings("serial")
 abstract class JobServiceEditPanel extends Panel implements BuildSpecAware, JobAware {

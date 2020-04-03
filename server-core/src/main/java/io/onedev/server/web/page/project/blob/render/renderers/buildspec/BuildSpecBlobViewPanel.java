@@ -44,6 +44,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 		try {
 			Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 			BuildSpec buildSpec = BuildSpec.parse(blob.getBytes());
+			
 			if (buildSpec != null) {
 				Fragment validFrag = new Fragment("content", "validFrag", this);			
 				if (!buildSpec.getJobs().isEmpty()) {

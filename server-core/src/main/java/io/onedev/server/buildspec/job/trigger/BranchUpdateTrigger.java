@@ -19,7 +19,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=100, name="When update branches")
+@Editable(order=100, name="Branch update")
 public class BranchUpdateTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;

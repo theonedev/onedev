@@ -22,6 +22,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -30,8 +32,6 @@ import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoic
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 abstract class FieldEditPanel extends Panel implements InputContext {

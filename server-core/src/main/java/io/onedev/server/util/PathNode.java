@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable;
+package io.onedev.server.util;
 
 import java.io.Serializable;
 

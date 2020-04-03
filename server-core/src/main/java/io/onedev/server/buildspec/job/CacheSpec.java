@@ -6,8 +6,8 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.util.validation.annotation.Path;
+import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 

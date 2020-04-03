@@ -6,7 +6,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.migration.VersionedXmlDoc;
 
 public class MapConverter extends com.thoughtworks.xstream.converters.collections.MapConverter {
 
@@ -20,8 +20,8 @@ public class MapConverter extends com.thoughtworks.xstream.converters.collection
     
 	@Override
 	protected void writeCompleteItem(Object item, MarshallingContext context, HierarchicalStreamWriter writer) {
-		if (item instanceof VersionedDocument) 
-			((VersionedDocument)item).marshall(writer);
+		if (item instanceof VersionedXmlDoc) 
+			((VersionedXmlDoc)item).marshall(writer);
 		else 
 			super.writeCompleteItem(item, context, writer);
 	}
@@ -29,7 +29,7 @@ public class MapConverter extends com.thoughtworks.xstream.converters.collection
 	@Override
 	protected Object readCompleteItem(HierarchicalStreamReader reader, UnmarshallingContext context, Object current) {
 		if (reader.getAttribute("revision") != null) 
-			return VersionedDocument.unmarshall(reader);
+			return VersionedXmlDoc.unmarshall(reader);
 		else 
 			return super.readCompleteItem(reader, context, current);
 	}

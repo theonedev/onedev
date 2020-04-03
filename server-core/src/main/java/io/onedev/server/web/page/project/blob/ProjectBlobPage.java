@@ -1157,7 +1157,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		public Mode mode = Mode.VIEW;
 		
 		/*
-		 * Some blob can be rendered in a way for easier understanding, such as .onedev-buildspec, 
+		 * Some blob can be rendered in a way for easier understanding, such as .onedev-buildspec.yml, 
 		 * In these cases, the VIEW_PLAIN mode enables to view plain text of the blob. Applicable
 		 * only when mode is VIEW 
 		 */

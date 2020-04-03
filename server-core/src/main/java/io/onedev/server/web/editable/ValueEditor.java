@@ -9,6 +9,9 @@ import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+
 @SuppressWarnings("serial")
 public abstract class ValueEditor<T> extends FormComponentPanel<T> {
 

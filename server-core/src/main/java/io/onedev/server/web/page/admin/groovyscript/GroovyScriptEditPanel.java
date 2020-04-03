@@ -16,11 +16,11 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 abstract class GroovyScriptEditPanel extends Panel {

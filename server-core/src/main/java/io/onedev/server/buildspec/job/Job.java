@@ -1,10 +1,10 @@
 package io.onedev.server.buildspec.job;
 
+import static io.onedev.server.model.Build.FIELD_COMMIT;
+import static io.onedev.server.model.Build.FIELD_JOB;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.model.Build.FIELD_COMMIT;
-import static io.onedev.server.model.Build.FIELD_JOB;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -516,5 +516,5 @@ public class Job implements Serializable, Validatable {
 		}
 		return choices;
 	}
-	
+
 }

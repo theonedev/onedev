@@ -53,7 +53,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 
-public final class VersionedDocument implements Document, Externalizable {
+public final class VersionedXmlDoc implements Document, Externalizable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -61,11 +61,11 @@ public final class VersionedDocument implements Document, Externalizable {
 	
 	private transient Document wrapped;
 
-	public VersionedDocument() {
+	public VersionedXmlDoc() {
 		wrapped = DocumentHelper.createDocument();
 	}
 	
-	public VersionedDocument(Document wrapped) {
+	public VersionedXmlDoc(Document wrapped) {
 		this.wrapped = Preconditions.checkNotNull(wrapped);
 	}
 	
@@ -359,7 +359,7 @@ public final class VersionedDocument implements Document, Externalizable {
 	
     @Override
 	public Object clone() {
-    	return new VersionedDocument((Document) getWrapped().clone());
+    	return new VersionedXmlDoc((Document) getWrapped().clone());
     }
 
     public String toXML() {
@@ -403,15 +403,15 @@ public final class VersionedDocument implements Document, Externalizable {
 		}
 	}
 	
-	public static VersionedDocument fromXML(String xml) {
+	public static VersionedXmlDoc fromXML(String xml) {
 		try {
-			return new VersionedDocument(new SAXReader().read(new StringReader(xml)));
+			return new VersionedXmlDoc(new SAXReader().read(new StringReader(xml)));
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
-	public static VersionedDocument fromFile(File file) {
+	public static VersionedXmlDoc fromFile(File file) {
 		try {
 			return fromXML(FileUtils.readFileToString(file, StandardCharsets.UTF_8.name()));
 		} catch (IOException e) {
@@ -426,10 +426,10 @@ public final class VersionedDocument implements Document, Externalizable {
 		return wrapped;
 	}
 	
-	public static VersionedDocument fromBean(@Nullable Object bean) {
+	public static VersionedXmlDoc fromBean(@Nullable Object bean) {
 		Document dom = DocumentHelper.createDocument();
 		AppLoader.getInstance(XStream.class).marshal(bean, new Dom4JWriter(dom));
-		VersionedDocument versionedDom = new VersionedDocument(dom);
+		VersionedXmlDoc versionedDom = new VersionedXmlDoc(dom);
 		if (bean != null) {
 			versionedDom.setVersion(MigrationHelper.getVersion(HibernateProxyHelper.getClassWithoutInitializingProxy(bean)));
 		}
@@ -531,8 +531,8 @@ public final class VersionedDocument implements Document, Externalizable {
 		writer.endNode();
 	}
 	
-	public static VersionedDocument unmarshall(HierarchicalStreamReader reader) {
-		VersionedDocument dom = new VersionedDocument();
+	public static VersionedXmlDoc unmarshall(HierarchicalStreamReader reader) {
+		VersionedXmlDoc dom = new VersionedXmlDoc();
 		unmarshallElement(reader, dom);
 		return dom;
 	}

@@ -20,7 +20,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=300, name="When open/update pull requests")
+@Editable(order=300, name="Pull request open or update")
 public class PullRequestTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;

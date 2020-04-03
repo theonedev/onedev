@@ -25,13 +25,13 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.ImplementationRegistry;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.Path;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;

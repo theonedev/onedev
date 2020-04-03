@@ -6,6 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import io.onedev.server.web.editable.annotation.Editable;
+
+@Editable
 public class SpecifiedValues implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;

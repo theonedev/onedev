@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable;
+package io.onedev.server.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,6 +27,19 @@ public class Path implements Serializable {
 		this.nodes = new ArrayList<>(path.getNodes());
 	}
 	
+	public Path(Path path, PathNode node) {
+		nodes = new ArrayList<>(path.getNodes());
+		nodes.add(node);
+	}
+	
+	public Path(Path path, String namedPathNode) {
+		this(path, new PathNode.Named(namedPathNode));
+	}
+	
+	public Path(Path path, int indexedPathNode) {
+		this(path, new PathNode.Indexed(indexedPathNode));
+	}
+	
 	public Path(javax.validation.Path path) {
 		for (javax.validation.Path.Node node: path) {
 			if (node.getIndex() != null) 
@@ -50,7 +63,7 @@ public class Path implements Serializable {
 
 	@Override
 	public String toString() {
-		return nodes.stream().map(it->it.toString()).collect(Collectors.joining(" -> "));
+		return nodes.stream().map(it->it.toString()).collect(Collectors.joining("->"));
 	}
 	
 	public static String describe(PathNode propertyNode, Path pathInProperty) {
