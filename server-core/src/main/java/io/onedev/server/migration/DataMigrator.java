@@ -1641,6 +1641,15 @@ public class DataMigrator {
 							conditionElement.detach();
 					}
 				}
+				for (Node node: dom.selectNodes("//listFields")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						Element stateElement = element.addElement("string");
+						stateElement.setText("State");
+						stateElement.detach();
+						element.elements().add(0, stateElement);
+					}
+				}
 				dom.writeToFile(file, false);
 			}
 			if (file.getName().startsWith("IssueChanges.xml")) {
@@ -1662,7 +1671,17 @@ public class DataMigrator {
 					else
 						forkedFroms.put(projectId, null);
 				}				
-			} 
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Long projectId = Long.valueOf(element.elementTextTrim("id"));
+					Element forkedFromElement = element.element("forkedFrom");
+					if (forkedFromElement != null)
+						forkedFroms.put(projectId, Long.valueOf(forkedFromElement.getTextTrim()));
+					else
+						forkedFroms.put(projectId, null);
+				}				
+			}
 		}
 		
 		Map<Long, Long> forkedRoots = new HashMap<>();
