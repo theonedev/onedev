@@ -1592,6 +1592,7 @@ public class DataMigrator {
 			return projectId;
 	}
 	
+	// from 3.0.10 to 3.0.11
 	private void migrate38(File dataDir, Stack<Integer> versions) {
 		Map<Long, Long> forkedFroms = new HashMap<>();
 		
@@ -1674,13 +1675,15 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Settings.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					Long projectId = Long.valueOf(element.elementTextTrim("id"));
-					Element forkedFromElement = element.element("forkedFrom");
-					if (forkedFromElement != null)
-						forkedFroms.put(projectId, Long.valueOf(forkedFromElement.getTextTrim()));
-					else
-						forkedFroms.put(projectId, null);
-				}				
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("enableStartTLS").setText("true");
+							valueElement.element("enableSSL").detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 		

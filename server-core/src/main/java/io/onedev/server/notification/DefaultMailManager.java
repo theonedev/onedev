@@ -78,8 +78,8 @@ public class DefaultMailManager implements MailManager {
 	        if (mailSetting.getTimeout() != 0)
 	        	email.setSocketTimeout(mailSetting.getTimeout()*1000);
 	        
-	        email.setStartTLSEnabled(true);
-	        email.setSSLOnConnect(mailSetting.isEnableSSL());
+	        email.setStartTLSEnabled(mailSetting.isEnableStartTLS());
+	        email.setSSLOnConnect(false);
 	        email.setSSLCheckServerIdentity(false);
 			
 			String senderEmail = mailSetting.getSenderAddress();
