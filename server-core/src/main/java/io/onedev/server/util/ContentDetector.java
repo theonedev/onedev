@@ -58,6 +58,7 @@ public class ContentDetector {
 		return !mediaType.getType().equalsIgnoreCase("text")
 				&& !mediaType.equals(MediaType.application("xhtml+xml"))
 				&& !mediaType.equals(MediaType.APPLICATION_XML)
+				&& !mediaType.equals(MediaType.application("x-bat"))
 				&& !mediaType.equals(MediaType.application("json"))
 				&& !mediaType.equals(MediaType.application("x-sh"))
 				&& !mediaType.equals(MediaType.application("javascript"))

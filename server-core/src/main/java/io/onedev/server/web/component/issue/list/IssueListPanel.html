@@ -41,13 +41,15 @@
 		</div>
 		<div class="secondary clearfix">
 			<div class="pull-left clearfix">
-				<div class="state pull-left"><span wicket:id="state"></span></div>
 				<div wicket:id="fields" class="field pull-left"></div>
 			</div>
 			<div class="last-update pull-right">
 				<a wicket:id="user"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
 			</div>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="stateFrag">
+		<span wicket:id="state"></span>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="listFieldsFrag">
 		<div class="issue-list-fields">

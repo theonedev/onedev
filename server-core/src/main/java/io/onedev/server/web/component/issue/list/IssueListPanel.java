@@ -285,6 +285,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected Map<String, String> load() {
 						Map<String, String> choices = new LinkedHashMap<>();
+						choices.put(Issue.FIELD_STATE, Issue.FIELD_STATE);
 						for (String fieldName: getGlobalIssueSetting().getFieldNames())
 							choices.put(fieldName, fieldName);
 						return choices;
@@ -600,27 +601,32 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new Label("votes", issue.getVoteCount()));
 				fragment.add(new Label("comments", issue.getCommentCount()));
 				
-				fragment.add(new IssueStateLabel("state", rowModel));
-
 				RepeatingView fieldsView = new RepeatingView("fields");
 				for (String field: getListFields()) {
-					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME) {
+					if (field.equals(Issue.FIELD_STATE)) {
+						Fragment stateFragment = new Fragment(fieldsView.newChildId(), 
+								"stateFrag", IssueListPanel.this);
+						stateFragment.add(new IssueStateLabel("state", rowModel));
+						fieldsView.add(stateFragment);
+					} else {
+						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME) {
 
-						@Override
-						protected Issue getIssue() {
-							return rowModel.getObject();
-						}
+							@Override
+							protected Issue getIssue() {
+								return rowModel.getObject();
+							}
 
-						@Override
-						protected Input getField() {
-							Issue issue = rowModel.getObject();
-							if (issue.isFieldVisible(field))
-								return issue.getFieldInputs().get(field);
-							else
-								return null;
-						}
-						
-					});
+							@Override
+							protected Input getField() {
+								Issue issue = rowModel.getObject();
+								if (issue.isFieldVisible(field))
+									return issue.getFieldInputs().get(field);
+								else
+									return null;
+							}
+							
+						});
+					}
 				}	
 				fragment.add(fieldsView);
 				

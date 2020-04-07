@@ -1592,6 +1592,7 @@ public class DataMigrator {
 			return projectId;
 	}
 	
+	// from 3.0.10 to 3.0.11
 	private void migrate38(File dataDir, Stack<Integer> versions) {
 		Map<Long, Long> forkedFroms = new HashMap<>();
 		
@@ -1641,6 +1642,15 @@ public class DataMigrator {
 							conditionElement.detach();
 					}
 				}
+				for (Node node: dom.selectNodes("//listFields")) {
+					if (node instanceof Element) {
+						Element element = (Element) node;
+						Element stateElement = element.addElement("string");
+						stateElement.setText("State");
+						stateElement.detach();
+						element.elements().add(0, stateElement);
+					}
+				}
 				dom.writeToFile(file, false);
 			}
 			if (file.getName().startsWith("IssueChanges.xml")) {
@@ -1662,7 +1672,19 @@ public class DataMigrator {
 					else
 						forkedFroms.put(projectId, null);
 				}				
-			} 
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.addElement("enableStartTLS").setText("true");
+							valueElement.element("enableSSL").detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
 		}
 		
 		Map<Long, Long> forkedRoots = new HashMap<>();

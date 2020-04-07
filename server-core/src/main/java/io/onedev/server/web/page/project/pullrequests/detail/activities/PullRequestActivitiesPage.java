@@ -51,6 +51,7 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
@@ -169,7 +170,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
 					if (comment != null)
 						otherActivities.add(new PullRequestChangeActivity(change));
-				} else {
+				} else if (!(change.getData() instanceof PullRequestDescriptionChangeData)) {
 					otherActivities.add(new PullRequestChangeActivity(change));
 				}
 			}

@@ -38,7 +38,8 @@
 }
 
 .issue-list>.body td .issue-state {
-	font-size: 12px;
+	margin-right: 4px;
+	font-size: 11px;
 }
 .issue-list>.body td .secondary>.pull-left>div {
 	margin-right: 12px;

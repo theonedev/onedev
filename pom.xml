@@ -7,7 +7,7 @@
     	<version>1.0.5</version>
     </parent>
     <artifactId>server</artifactId>  
-    <version>3.1.0</version>  
+    <version>3.0.11</version>  
     <packaging>pom</packaging>  
     <build> 
         <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
@@ -379,7 +379,7 @@
 			<dependency>
 				<groupId>org.apache.tika</groupId>
 				<artifactId>tika-core</artifactId>
-				<version>1.22</version>
+				<version>1.24</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
