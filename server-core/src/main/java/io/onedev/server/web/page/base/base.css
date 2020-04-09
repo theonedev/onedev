@@ -666,3 +666,6 @@ td.ellipsis {
 .tree-theme-human span.tree-content a {
 	color: #1f3b7b !important;
 }
+.vertical-middle {
+	vertical-align: middle !important;
+}

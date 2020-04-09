@@ -2,12 +2,9 @@ package io.onedev.server.entitymanager;
 
 import java.util.Collection;
 import java.util.List;
-
 import javax.annotation.Nullable;
-
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
-
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -47,6 +44,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	Repository getRepository(Project project);
 	
 	Collection<Project> getPermittedProjects(Permission permission);
+	
+	boolean isUserAuthorized(Project project, Long userId, Permission permission);
 	
 	List<Project> query(EntityQuery<Project> projecQuery, int firstResult, int maxResults);
 	

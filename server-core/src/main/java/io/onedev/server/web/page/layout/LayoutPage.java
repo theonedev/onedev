@@ -39,6 +39,7 @@ import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
+import io.onedev.server.web.page.admin.ssh.SshSettingPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
@@ -50,6 +51,7 @@ import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
 import io.onedev.server.web.page.my.buildsetting.MyJobSecretsPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.my.webhook.MyWebHooksPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.security.LoginPage;
@@ -58,7 +60,7 @@ import io.onedev.server.web.page.security.RegisterPage;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
-	
+    
 	public LayoutPage(PageParameters params) {
 		super(params);
 	}
@@ -112,7 +114,13 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", AuthenticatorPage.class));
 		if (getPage() instanceof AuthenticatorPage)
 			item.add(AttributeAppender.append("class", "active"));
-		
+
+	    administrationContainer.add(item = new WebMarkupContainer("sshSetting"));
+	    item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
+	    if (getPage() instanceof SshSettingPage)
+	        item.add(AttributeAppender.append("class", "active"));
+		item.setVisible(isSshEnabled());
+	    
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorsPage.class));
 		if (getPage() instanceof JobExecutorsPage)
@@ -203,6 +211,12 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
 
+		signedInContainer.add(item = new WebMarkupContainer("mySshKeys"));
+		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
+		if (getPage() instanceof MySshKeysPage)
+		    item.add(AttributeAppender.append("class", "active"));
+		item.setVisible(isSshEnabled());
+		
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MyJobSecretsPage.class));
 		if (getPage() instanceof MyBuildSettingPage)

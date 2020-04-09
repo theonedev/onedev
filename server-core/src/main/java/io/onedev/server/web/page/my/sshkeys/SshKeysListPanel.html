@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<wicket:panel>		
+		<div wicket:id="keyList">
+			<table class="table">
+				<thead>
+				<tr><th>Name</th><th>Digest</th><th>Creation time</th><th></th></tr>
+				</thead>
+				<tbody>
+				<tr wicket:id="keys" class="even">
+	     		  <td class="vertical-middle"><span wicket:id="name">Test ID</span></td>
+	     		  <td class="vertical-middle"><span wicket:id="digest">Test ID</span></td>
+	     		  <td class="vertical-middle"><span wicket:id="timestamp">Test ID</span></td>
+	     		  <td class="vertical-middle"><a class="btn btn-danger" wicket:id="delete">Delete</a></td>
+	     		</tr>
+	     		<wicket:enclosure>
+		     		<tr class="norecords-tr" >
+						<td class="norecords-td" colspan="4">
+							<div wicket:id="msg">No records found</div>
+						</td>
+					</tr>
+				</wicket:enclosure>
+				</tbody>
+			</table>
+		</div>
+	</wicket:panel>
+</body>
+</html>

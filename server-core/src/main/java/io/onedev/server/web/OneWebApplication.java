@@ -69,7 +69,7 @@ public class OneWebApplication extends WebApplication {
 	private final Set<WebApplicationConfigurator> applicationConfigurators;
 	
 	private final UICustomization uiCustomization;
-	
+
 	@Inject
 	public OneWebApplication(Set<WebApplicationConfigurator> applicationConfigurators, 
 			UICustomization uiCustomization) {

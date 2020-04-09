@@ -5,6 +5,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
@@ -29,7 +31,9 @@ import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -51,10 +55,12 @@ public abstract class ProjectInfoPanel extends Panel {
 		add(new Label("name", getProject().getName()));
 		
 		User owner = getProject().getOwner();
-		if (SecurityUtils.isAdministrator()) {
+		User loggedInUser = SecurityUtils.getUser();
+		
+        if (SecurityUtils.isAdministrator()) {
 			add(new ViewStateAwarePageLink<Void>("owner", UserProfilePage.class, UserProfilePage.paramsOf(owner))
 					.setBody(Model.of(owner.getDisplayName())));
-		} else if (owner.equals(SecurityUtils.getUser())) {
+		} else if (owner.equals(loggedInUser)) {
 			add(new ViewStateAwarePageLink<Void>("owner", MyProfilePage.class)
 					.setBody(Model.of(owner.getDisplayName())));
 		} else {
@@ -69,7 +75,8 @@ public abstract class ProjectInfoPanel extends Panel {
 			});
 		}
 
-		add(new ModalLink("forkNow") {
+		boolean canReadCode = SecurityUtils.canReadCode(getProject());
+        add(new ModalLink("forkNow") {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -89,7 +96,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canCreateProjects() &&  SecurityUtils.canReadCode(getProject())));
+		}.setVisible(SecurityUtils.canCreateProjects() &&  canReadCode));
 		
 		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
 				+ Criteria.quote(getProject().getName());
@@ -127,10 +134,25 @@ public abstract class ProjectInfoPanel extends Panel {
 		}
 		
 		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
+		
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getProject()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel)
-				.setVisible(SecurityUtils.canReadCode(getProject())));
+				.setVisible(canReadCode));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
+
+		boolean userHasNoKeys = loggedInUser.getSshKeys().isEmpty();
+		boolean isSshEnabled = ((BasePage)getPage()).isSshEnabled();
+		
+		Model<String> cloneSshUrlModel = Model.of(urlManager.sshUrlFor(getProject()));
+		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
+		        .setVisible(isSshEnabled && canReadCode));
+		add(new WebMarkupContainer("copySshUrl").add(new CopyClipboardBehavior(cloneSshUrlModel)));
+		
+		WebMarkupContainer noKeyWarning = new WebMarkupContainer("noKeyWarning");
+		BookmarkablePageLink<Void> registerKey = new BookmarkablePageLink<Void>("registerKey", MySshKeysPage.class);
+		noKeyWarning.add(registerKey);
+		
+		add(noKeyWarning.setVisible(userHasNoKeys));
 	}
 	
 	private Project getProject() {
@@ -147,6 +169,9 @@ public abstract class ProjectInfoPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ProjectInfoResourceReference()));
+		
+		response.render(JavaScriptHeaderItem.forReference(new ProjectInfoJsResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.projectInfo.onDomReady('sshHttpsSwitch');"));
 	}
 
 	protected abstract void onPromptForkOption(AjaxRequestTarget target);

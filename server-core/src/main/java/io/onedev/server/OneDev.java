@@ -1,5 +1,6 @@
 package io.onedev.server;
 
+import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.DatagramSocket;
@@ -7,19 +8,19 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.Url.StringMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -32,7 +33,9 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.maintenance.DataManager;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -68,12 +71,14 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	private final ExecutorService executorService;
 	
 	private volatile InitStage initStage;
+
+    private SimpleGitSshServer simpleGitSshServer;
 	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
 			SettingManager configManager, ExecutorService executorService, 
-			ListenerRegistry listenerRegistry) {
+			ListenerRegistry listenerRegistry, SimpleGitSshServer simpleGitSshServer) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -83,6 +88,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.serverConfig = serverConfig;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
+        this.simpleGitSshServer = simpleGitSshServer;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -102,12 +108,17 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		
 		List<ManualConfig> manualConfigs = dataManager.init();
 		if (!manualConfigs.isEmpty()) {
-			logger.warn("Please set up the server at " + guessServerUrl());
+			logger.warn("Please set up the server at " 
+			            + guessServerUrl().toString(StringMode.FULL));
 			initStage = new InitStage("Server Setup", manualConfigs);
 			
 			initStage.waitForFinish();
 		}
-
+		
+		if (serverConfig.getSshPort() != 0) {            
+		    simpleGitSshServer.start();
+        }
+		
 		sessionManager.openSession();
 		try {
 			listenerRegistry.post(new SystemStarting());
@@ -122,12 +133,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		SecurityUtils.bindAsSystem();
 		
 		listenerRegistry.post(new SystemStarted());
-		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
+		SystemSetting systemSetting = configManager.getSystemSetting();
+        logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
 		initStage = null;
 	}
 
-	public String guessServerUrl() {
-		String serverUrl = null;
+	public Url guessServerUrl() {
+	    Url serverUrl = null;
 		
 		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
 		if (serviceHost != null) { // we are running inside Kubernetes  
@@ -212,28 +224,31 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			}
 			
 			if (serverConfig.getHttpsPort() != 0)
-				serverUrl = "https://" + host + ":" + serverConfig.getHttpsPort();
-			else 
-				serverUrl = "http://" + host + ":" + serverConfig.getHttpPort();
+                serverUrl = buildServerUrl(host, null, Integer.toString(serverConfig.getHttpsPort()));
+            else 
+                serverUrl = buildServerUrl(host, Integer.toString(serverConfig.getHttpPort()), null);
+			
 		}
 		
 		return serverUrl;
 	}
 	
-	private String buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
-		String serverUrl = null;
-		if (httpsPort != null) {
-			serverUrl = "https://" + host;
-			if (!httpsPort.equals("443"))
-				serverUrl += ":" + httpsPort;
-		} else if (httpPort != null) {
-			serverUrl = "http://" + host;
-			if (!httpPort.equals("80"))
-				serverUrl += ":" + httpPort;
-		} else {
-			logger.warn("This OneDev deployment looks odd to me: "
-					+ "both http and https port are not specified");
-		}
+	private Url buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
+        Url serverUrl = new Url(Charset.forName("UTF8"));
+        boolean haveHttpPort = httpPort != null;
+        boolean haveHttpsPort = httpsPort != null;
+
+        serverUrl.setHost(host);
+        serverUrl.setProtocol(haveHttpsPort ? "https" : "http");
+        
+        //Url class already strips out default ports (80, 443) in its toString method, so we don't need to check it. 
+        if (haveHttpsPort || haveHttpPort ) {
+            serverUrl.setPort(haveHttpsPort ? Integer.parseInt(httpsPort) : Integer.parseInt(httpPort));
+        } else {            
+            logger.warn("This OneDev deployment looks odd to me: "
+                    + "both http and https port are not specified");
+        }
+       
 		return serverUrl;
 	}
 	
@@ -286,6 +301,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		taskScheduler.stop();
 		jettyRunner.stop();
 		executorService.shutdown();
+		
+		try {
+            simpleGitSshServer.stop();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 	}
 		
 	public Object writeReplace() throws ObjectStreamException {

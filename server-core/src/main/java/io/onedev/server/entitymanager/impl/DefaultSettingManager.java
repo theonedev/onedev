@@ -22,6 +22,7 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.SshSettings;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -57,6 +58,8 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long buildSettingId;
 	
 	private volatile Long projectSettingId;
+
+    private volatile Long sshSettingId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -362,5 +365,31 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 		setting.setValue(projectSetting);
 		dao.persist(setting);
 	}
+	
+	@Sessional
+    @Override
+    public SshSettings getSshSettings() {
+        Setting setting;
+        if (sshSettingId == null) {
+            setting = getSetting(Key.SSH);
+            Preconditions.checkNotNull(setting);
+            sshSettingId = setting.getId();
+        } else {
+            setting = load(sshSettingId);
+        }
+        return (SshSettings)setting.getValue();
+    }
+
+    @Transactional
+    @Override
+    public void saveSshSetting(SshSettings sshSettings) {
+        Setting setting = getSetting(Key.SSH);
+        if (setting == null) {
+            setting = new Setting();
+            setting.setKey(Key.SSH);
+        }
+        setting.setValue(sshSettings);
+        dao.persist(setting);
+    }
 
 }
