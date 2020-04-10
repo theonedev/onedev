@@ -59,6 +59,7 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.Type;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -312,7 +313,10 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public ValidatorFactory get() {
-				Configuration<?> configuration = Validation.byDefaultProvider().configure();
+				Configuration<?> configuration = Validation
+						.byDefaultProvider()
+						.configure()
+						.messageInterpolator(new ParameterMessageInterpolator());
 				return configuration.buildValidatorFactory();
 			}
 			
@@ -391,13 +395,11 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CommitQuerySettingManager.class).to(DefaultCommitQuerySettingManager.class);
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
 		bind(WebHookManager.class);
-		
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
 		bind(KeyPairProvider.class).to(DefaultKeyPairProvider.class);
 		bind(ServerKeyPairPopulator.class).to(DefaultServerKeyPairPopulator.class);
 		
 		bind(SimpleGitSshServer.class);
-		
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
 	    
