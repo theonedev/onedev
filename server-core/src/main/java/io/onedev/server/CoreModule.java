@@ -60,6 +60,7 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.Type;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -309,7 +310,10 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public ValidatorFactory get() {
-				Configuration<?> configuration = Validation.byDefaultProvider().configure();
+				Configuration<?> configuration = Validation
+						.byDefaultProvider()
+						.configure()
+						.messageInterpolator(new ParameterMessageInterpolator());
 				return configuration.buildValidatorFactory();
 			}
 			
