@@ -49,7 +49,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -356,11 +356,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		super.onDetach();
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, String oldCommit, String newCommit) {
+	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor, String oldCommit, String newCommit) {
 		State state = new State();
 		state.oldCommit = oldCommit;
 		state.newCommit = newCommit;
-		return paramsOf(request, position, state);
+		return paramsOf(request, cursor, state);
 	}
 
 	public static State getState(CodeComment comment) {
@@ -372,12 +372,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		return state;
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, CodeComment comment) {
-		return paramsOf(request, position, getState(comment));
+	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor, CodeComment comment) {
+		return paramsOf(request, cursor, getState(comment));
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, State state) {
-		PageParameters params = PullRequestDetailPage.paramsOf(request, position);
+	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor, State state) {
+		PageParameters params = PullRequestDetailPage.paramsOf(request, cursor);
 		fillParams(params, state);
 		return params;
 	}
@@ -409,7 +409,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), getPosition(), state);
+		PageParameters params = paramsOf(getPullRequest(), getCursor(), state);
 		CharSequence url = RequestCycle.get().urlFor(PullRequestChangesPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -501,7 +501,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		markState.newCommit = state.newCommit;
 		markState.pathFilter = state.pathFilter;
 		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), getPosition(), markState)).toString();
+		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), getCursor(), markState)).toString();
 	}
 
 	@Override
@@ -513,7 +513,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		commentState.newCommit = state.newCommit;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
-		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), getPosition(), commentState)).toString();
+		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), getCursor(), commentState)).toString();
 	}
 	
 	@Override
@@ -557,7 +557,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 
 	@Override
 	public PageParameters getParamsBeforeEdit() {
-		return paramsOf(getPullRequest(), getPosition(), state);
+		return paramsOf(getPullRequest(), getCursor(), state);
 	}
 
 	@Override

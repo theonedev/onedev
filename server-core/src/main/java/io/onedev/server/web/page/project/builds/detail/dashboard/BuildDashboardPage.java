@@ -16,11 +16,11 @@ public class BuildDashboardPage extends BuildDetailPage {
 		super(params);
 		
 		if (SecurityUtils.canAccessLog(getBuild()))
-			throw new RestartResponseException(BuildLogPage.class, BuildLogPage.paramsOf(getBuild(), getPosition()));
+			throw new RestartResponseException(BuildLogPage.class, BuildLogPage.paramsOf(getBuild(), getCursor()));
 		else if (getBuild().getArtifactsDir().exists())
-			throw new RestartResponseException(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild(), getPosition()));
+			throw new RestartResponseException(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild(), getCursor()));
 		else
-			throw new RestartResponseException(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild(), getPosition()));
+			throw new RestartResponseException(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild(), getCursor()));
 		
 	}
 

@@ -86,7 +86,7 @@ import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
@@ -161,10 +161,10 @@ public abstract class BuildListPanel extends Panel {
 	}
 
 	@Nullable
-	private QueryPosition getQueryPosition(Item<ICellPopulator<Build>> cellItem) {
+	private Cursor getCursor(Item<ICellPopulator<Build>> cellItem) {
 		if (getProject() != null) {
 			OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-			return new QueryPosition(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
+			return new Cursor(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
 					(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 		} else {
 			return null;
@@ -428,7 +428,7 @@ public abstract class BuildListPanel extends Panel {
 				Long buildId = build.getId();
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
-						BuildDashboardPage.paramsOf(build, getQueryPosition(cellItem)));
+						BuildDashboardPage.paramsOf(build, getCursor(cellItem)));
 				link.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
 
 					@Override

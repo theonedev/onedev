@@ -9,11 +9,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.WebConstants;
 
-public class QueryPosition implements Serializable {
+public class Cursor implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static String QUERY_POSITION_PARAM = "query-position";
+	public static String PARAM = "cursor";
 	
 	private final String query;
 	
@@ -21,7 +21,7 @@ public class QueryPosition implements Serializable {
 	
 	private final int offset;
 	
-	public QueryPosition(String query, int count, int offset) {
+	public Cursor(String query, int count, int offset) {
 		this.query = query;
 		this.count = count;
 		this.offset = offset;
@@ -40,34 +40,34 @@ public class QueryPosition implements Serializable {
 	}
 
 	public void fill(PageParameters params) {
-		params.add(QUERY_POSITION_PARAM, query + ":" + count + ":" + offset);
+		params.add(PARAM, query + ":" + count + ":" + offset);
 	}
 	
 	@Nullable
-	public static QueryPosition from(PageParameters params) {
-		String positionStr = params.get(QUERY_POSITION_PARAM).toOptionalString();
-		if (positionStr != null) {
-			String tempStr = StringUtils.substringBeforeLast(positionStr, ":");
-			int offset = Integer.parseInt(StringUtils.substringAfterLast(positionStr, ":"));
+	public static Cursor from(PageParameters params) {
+		String cursorStr = params.get(PARAM).toOptionalString();
+		if (cursorStr != null) {
+			String tempStr = StringUtils.substringBeforeLast(cursorStr, ":");
+			int offset = Integer.parseInt(StringUtils.substringAfterLast(cursorStr, ":"));
 			int count = Integer.parseInt(StringUtils.substringAfterLast(tempStr, ":"));
 			String query = StringUtils.substringBeforeLast(tempStr, ":");
-			return new QueryPosition(query, count, offset);
+			return new Cursor(query, count, offset);
 		} else {
 			return null;
 		}
 	}
 	
 	@Nullable
-	public static String getQuery(@Nullable QueryPosition position) {
-		if (position != null)
-			return position.getQuery();
+	public static String getQuery(@Nullable Cursor cursor) {
+		if (cursor != null)
+			return cursor.getQuery();
 		else
 			return null;
 	}
 	
-	public static int getPage(@Nullable QueryPosition position) {
-		if (position != null)
-			return position.getOffset() / WebConstants.PAGE_SIZE;
+	public static int getPage(@Nullable Cursor cursor) {
+		if (cursor != null)
+			return cursor.getOffset() / WebConstants.PAGE_SIZE;
 		else
 			return 0;
 	}

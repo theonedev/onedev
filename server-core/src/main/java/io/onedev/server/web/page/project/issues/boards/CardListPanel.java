@@ -25,7 +25,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.OneException;
 
 @SuppressWarnings("serial")
@@ -58,10 +58,10 @@ abstract class CardListPanel extends Panel {
 				cardsView.add(new BoardCardPanel(cardsView.newChildId(), model) {
 	
 					@Override
-					protected QueryPosition getPosition() {
+					protected Cursor getCursor() {
 						IssueQuery query = getQuery();
 						if (query != null)
-							return new QueryPosition(query.toString(), getCardCount(), cardOffset);
+							return new Cursor(query.toString(), getCardCount(), cardOffset);
 						else
 							return null;
 					}
@@ -99,10 +99,10 @@ abstract class CardListPanel extends Panel {
 					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), model) {
 
 						@Override
-						protected QueryPosition getPosition() {
+						protected Cursor getCursor() {
 							IssueQuery query = getQuery();
 							if (query != null)
-								return new QueryPosition(query.toString(), getCardCount(), cardOffset);
+								return new Cursor(query.toString(), getCardCount(), cardOffset);
 							else
 								return null;
 						}

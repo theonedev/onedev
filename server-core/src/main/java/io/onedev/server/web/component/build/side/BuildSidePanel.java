@@ -49,7 +49,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.build.BuildListPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class BuildSidePanel extends Panel {
@@ -80,8 +80,8 @@ public abstract class BuildSidePanel extends Panel {
 			}
 
 			@Override
-			protected QueryPositionSupport<Build> getQueryPositionSupport() {
-				return BuildSidePanel.this.getQueryPositionSupport();
+			protected CursorSupport<Build> getCursorSupport() {
+				return BuildSidePanel.this.getCursorSupport();
 			}
 			
 		});
@@ -313,7 +313,7 @@ public abstract class BuildSidePanel extends Panel {
 	protected abstract Build getBuild();
 
 	@Nullable
-	protected abstract QueryPositionSupport<Build> getQueryPositionSupport();
+	protected abstract CursorSupport<Build> getCursorSupport();
 	
 	protected abstract Component newDeleteLink(String componentId);
 	

@@ -26,7 +26,7 @@ public class UnreviewedChangesPanel extends GenericPanel<PullRequestUpdate> {
 		
 		PullRequestDetailPage page = (PullRequestDetailPage) getPage();
 		add(new ViewStateAwarePageLink<Void>("link", PullRequestChangesPage.class, 
-				PullRequestChangesPage.paramsOf(update.getRequest(), page.getPosition(), state)));
+				PullRequestChangesPage.paramsOf(update.getRequest(), page.getCursor(), state)));
 	}
 
 	@Override

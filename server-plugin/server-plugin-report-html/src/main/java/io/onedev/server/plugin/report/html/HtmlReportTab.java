@@ -25,7 +25,7 @@ public class HtmlReportTab extends BuildTab {
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
 				PageParameters params = HtmlReportPage.paramsOf(
-						page.getBuild(), page.getPosition(), getTitle());
+						page.getBuild(), page.getCursor(), getTitle());
 				return new ViewStateAwarePageLink<Void>(linkId, pageClass, params);
 			}
 			

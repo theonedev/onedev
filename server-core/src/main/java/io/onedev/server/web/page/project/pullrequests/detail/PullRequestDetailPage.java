@@ -138,8 +138,8 @@ import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergeP
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.PullRequestAware;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -152,7 +152,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	
 	protected final IModel<PullRequest> requestModel;
 	
-	private final QueryPosition position;
+	private final Cursor cursor;
 	
 	private boolean isEditingTitle;
 	
@@ -180,7 +180,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				if (request == null)
 					throw new EntityNotFoundException("Unable to find pull request #" + requestNumber + " in project " + getProject());
 				else if (!request.getTargetProject().equals(getProject()))
-					throw new RestartResponseException(getPageClass(), paramsOf(request, position));
+					throw new RestartResponseException(getPageClass(), paramsOf(request, cursor));
 				else
 					return request;
 			}
@@ -192,7 +192,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		reviewUpdateId = requestModel.getObject().getLatestUpdate().getId();
 		
-		position = QueryPosition.from(params);
+		cursor = Cursor.from(params);
 	}
 
 	private PullRequestManager getPullRequestManager() {
@@ -485,17 +485,17 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 					@Override
-					protected QueryPositionSupport<PullRequest> getQueryPositionSupport() {
-						return new QueryPositionSupport<PullRequest>() {
+					protected CursorSupport<PullRequest> getCursorSupport() {
+						return new CursorSupport<PullRequest>() {
 
 							@Override
-							public QueryPosition getPosition() {
-								return position;
+							public Cursor getCursor() {
+								return cursor;
 							}
 
 							@Override
-							public void navTo(AjaxRequestTarget target, PullRequest entity, QueryPosition position) {
-								PageParameters params = PullRequestDetailPage.paramsOf(entity, position);
+							public void navTo(AjaxRequestTarget target, PullRequest entity, Cursor cursor) {
+								PageParameters params = PullRequestDetailPage.paramsOf(entity, cursor);
 								setResponsePage(getPageClass(), params);
 							}
 							
@@ -683,8 +683,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
 				PageParameters params = ProjectPullRequestsPage.paramsOf(
 						getProject(), 
-						QueryPosition.getQuery(position), 
-						QueryPosition.getPage(position) + 1);
+						Cursor.getQuery(cursor), 
+						Cursor.getPage(cursor) + 1);
 				setResponsePage(ProjectPullRequestsPage.class, params);
 			}
 			
@@ -1146,7 +1146,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				} else {
 					try {
 						operation.operate(request, noteInput.getModelObject());
-						setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest(), position));
+						setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest(), cursor));
 					} catch (OneException e) {
 						error(e.getMessage());
 						target.add(feedback);
@@ -1268,15 +1268,15 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position) {
-		return paramsOf(request.getFQN(), position);
+	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor) {
+		return paramsOf(request.getFQN(), cursor);
 	}
 	
-	public static PageParameters paramsOf(ProjectScopedNumber requestFQN, @Nullable QueryPosition position) {
+	public static PageParameters paramsOf(ProjectScopedNumber requestFQN, @Nullable Cursor cursor) {
 		PageParameters params = ProjectPage.paramsOf(requestFQN.getProject());
 		params.add(PARAM_REQUEST, requestFQN.getNumber());
-		if (position != null)
-			position.fill(params);
+		if (cursor != null)
+			cursor.fill(params);
 		return params;
 	}
 	
@@ -1285,8 +1285,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return requestModel.getObject();
 	}
 	
-	public QueryPosition getPosition() {
-		return position;
+	public Cursor getCursor() {
+		return cursor;
 	}
 	
 	@Override
@@ -1313,7 +1313,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			if (getMainPageClass() == PullRequestCodeCommentsPage.class) {
 				Fragment fragment = new Fragment(componentId, "codeCommentsTabLinkFrag", PullRequestDetailPage.this);
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
-						PullRequestCodeCommentsPage.class, paramsOf(getPullRequest(), position));
+						PullRequestCodeCommentsPage.class, paramsOf(getPullRequest(), cursor));
 				link.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
@@ -1349,7 +1349,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest(), position));
+						return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getPullRequest(), cursor));
 					}
 					
 				};

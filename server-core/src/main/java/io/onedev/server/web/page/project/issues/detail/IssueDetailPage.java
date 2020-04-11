@@ -49,8 +49,8 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
@@ -59,7 +59,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	
 	protected final IModel<Issue> issueModel;
 	
-	private final QueryPosition position;
+	private final Cursor cursor;
 	
 	public IssueDetailPage(PageParameters params) {
 		super(params);
@@ -77,14 +77,14 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				if (issue == null)
 					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
 				else if (!issue.getProject().equals(getProject()))
-					throw new RestartResponseException(getPageClass(), paramsOf(issue, position));
+					throw new RestartResponseException(getPageClass(), paramsOf(issue, cursor));
 				else
 					return issue;
 			}
 
 		};
 	
-		position = QueryPosition.from(params);
+		cursor = Cursor.from(params);
 	}
 	
 	public Issue getIssue() {
@@ -156,17 +156,17 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					}
 
 					@Override
-					protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-						return new QueryPositionSupport<Issue>() {
+					protected CursorSupport<Issue> getCursorSupport() {
+						return new CursorSupport<Issue>() {
 
 							@Override
-							public QueryPosition getPosition() {
-								return position;
+							public Cursor getCursor() {
+								return cursor;
 							}
 
 							@Override
-							public void navTo(AjaxRequestTarget target, Issue entity, QueryPosition position) {
-								PageParameters params = IssueDetailPage.paramsOf(entity, position);
+							public void navTo(AjaxRequestTarget target, Issue entity, Cursor cursor) {
+								PageParameters params = IssueDetailPage.paramsOf(entity, cursor);
 								setResponsePage(getPageClass(), params);
 							}
 							
@@ -182,8 +182,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
 								PageParameters params = ProjectIssueListPage.paramsOf(
 										getProject(), 
-										QueryPosition.getQuery(position), 
-										QueryPosition.getPage(position) + 1); 
+										Cursor.getQuery(cursor), 
+										Cursor.getPage(cursor) + 1); 
 								setResponsePage(ProjectIssueListPage.class, params);
 							}
 							
@@ -243,8 +243,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 	}
 	
-	public QueryPosition getPosition() {
-		return position;
+	public Cursor getCursor() {
+		return cursor;
 	}
 	
 	@Override
@@ -260,15 +260,15 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Issue issue, @Nullable QueryPosition position) {
-		return paramsOf(issue.getFQN(), position);
+	public static PageParameters paramsOf(Issue issue, @Nullable Cursor cursor) {
+		return paramsOf(issue.getFQN(), cursor);
 	}
 
-	public static PageParameters paramsOf(ProjectScopedNumber issueFQN, @Nullable QueryPosition position) {
+	public static PageParameters paramsOf(ProjectScopedNumber issueFQN, @Nullable Cursor cursor) {
 		PageParameters params = ProjectPage.paramsOf(issueFQN.getProject());
 		params.add(PARAM_ISSUE, issueFQN.getNumber());
-		if (position != null)
-			position.fill(params);
+		if (cursor != null)
+			cursor.fill(params);
 		return params;
 	}
 	
@@ -299,7 +299,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue(), position));
+					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue(), cursor));
 				}
 				
 			};

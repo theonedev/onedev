@@ -18,8 +18,8 @@ import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
@@ -36,12 +36,12 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(getPosition() != null);
+		setVisible(getCursor() != null);
 	}
 	
-	private QueryPosition getPosition() {
-		if (getQueryPositionSupport() != null)
-			return getQueryPositionSupport().getPosition();
+	private Cursor getCursor() {
+		if (getCursorSupport() != null)
+			return getCursorSupport().getCursor();
 		else
 			return null;
 	}
@@ -54,28 +54,28 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(getPosition().getOffset()>0);
+				setEnabled(getCursor().getOffset()>0);
 			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				if (getPosition().getOffset() <= 0)
+				if (getCursor().getOffset() <= 0)
 					tag.put("disabled", "disabled");
 				tag.put("title", "Next " + entityName);
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				EntityQuery<T> query = parse(getPosition().getQuery());
-				int count = getPosition().getCount();
-				int offset = getPosition().getOffset() - 1;
+				EntityQuery<T> query = parse(getCursor().getQuery());
+				int count = getCursor().getCount();
+				int offset = getCursor().getOffset() - 1;
 				List<T> entities = query(query, offset, 1);
 				if (!entities.isEmpty()) {
 					if (!query.matches(getEntity()))
 						count--;
-					QueryPosition prevPosition = new QueryPosition(getPosition().getQuery(), count, offset);
-					getQueryPositionSupport().navTo(target, entities.get(0), prevPosition);
+					Cursor prevCursor = new Cursor(getCursor().getQuery(), count, offset);
+					getCursorSupport().navTo(target, entities.get(0), prevCursor);
 				} else {
 					WebSession.get().warn("No more " + entityName + "s");
 				}
@@ -87,22 +87,22 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(getPosition().getOffset()<getPosition().getCount()-1);
+				setEnabled(getCursor().getOffset()<getCursor().getCount()-1);
 			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				if (getPosition().getOffset() >= getPosition().getCount()-1)
+				if (getCursor().getOffset() >= getCursor().getCount()-1)
 					tag.put("disabled", "disabled");
 				tag.put("title", "Previous " + entityName);
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				EntityQuery<T> query = parse(getPosition().getQuery());
-				int offset = getPosition().getOffset();
-				int count = getPosition().getCount();
+				EntityQuery<T> query = parse(getCursor().getQuery());
+				int offset = getCursor().getOffset();
+				int count = getCursor().getCount();
 				if (query.matches(getEntity())) 
 					offset++;
 				else
@@ -110,8 +110,8 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				
 				List<T> entities = query(query, offset, 1);
 				if (!entities.isEmpty()) {
-					QueryPosition nextPosition = new QueryPosition(getPosition().getQuery(), count, offset);
-					getQueryPositionSupport().navTo(target, entities.get(0), nextPosition);
+					Cursor nextCursor = new Cursor(getCursor().getQuery(), count, offset);
+					getCursorSupport().navTo(target, entities.get(0), nextCursor);
 				} else {
 					WebSession.get().warn("No more " + entityName + "s");
 				}
@@ -123,7 +123,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 
 			@Override
 			public String getObject() {
-				return entityName + " " + (getPosition().getCount()-getPosition().getOffset()) + " of " + getPosition().getCount();				
+				return entityName + " " + (getCursor().getCount()-getCursor().getOffset()) + " of " + getCursor().getCount();				
 			}
 			
 		}));
@@ -140,7 +140,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 	protected abstract T getEntity();
 	
 	@Nullable
-	protected abstract QueryPositionSupport<T> getQueryPositionSupport();
+	protected abstract CursorSupport<T> getCursorSupport();
 	
 	protected abstract List<T> query(EntityQuery<T> query, int offset, int count);
 	

@@ -75,7 +75,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 
@@ -290,17 +290,17 @@ public abstract class PullRequestListPanel extends Panel {
 				PullRequest request = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "contentFrag", PullRequestListPanel.this);
 				
-				QueryPosition position;
+				Cursor cursor;
 				if (getProject() != null) {
 					Item<?> row = cellItem.findParent(Item.class);
-					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+					cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 							(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				} else {
-					position = null;
+					cursor = null;
 				}
 				
 				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(request, position)).toString();
+						PullRequestActivitiesPage.paramsOf(request, cursor)).toString();
 				
 				String label = "#" + request.getNumber();
 				if (getProject() == null)

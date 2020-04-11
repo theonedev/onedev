@@ -259,7 +259,7 @@ public abstract class CodeCommentListPanel extends Panel {
 					PullRequest request = getPullRequest();
 					if (request != null) {
 						PullRequestDetailPage page = (PullRequestDetailPage) getPage();
-						setResponsePage(PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(request, page.getPosition(), comment));
+						setResponsePage(PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(request, page.getCursor(), comment));
 					} else {
 						String compareCommit = comment.getCompareContext().getCompareCommit();
 						if (!compareCommit.equals(comment.getMarkPos().getCommit())

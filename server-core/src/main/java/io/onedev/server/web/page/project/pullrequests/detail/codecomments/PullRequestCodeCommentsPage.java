@@ -17,7 +17,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 
 @SuppressWarnings("serial")
 public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
@@ -47,7 +47,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getPullRequest(), getPosition(), query);
+				PageParameters params = paramsOf(getPullRequest(), getCursor(), query);
 				params.add(PARAM_PAGE, currentPage+1);
 				return params;
 			}
@@ -73,7 +73,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				PageParameters params = paramsOf(getPullRequest(), getPosition(), query);
+				PageParameters params = paramsOf(getPullRequest(), getCursor(), query);
 				setResponsePage(PullRequestCodeCommentsPage.class, params);
 			}
 
@@ -129,8 +129,8 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 		});		
 	}
 
-	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, @Nullable String query) {
-		PageParameters params = paramsOf(request, position);
+	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor, @Nullable String query) {
+		PageParameters params = paramsOf(request, cursor);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;

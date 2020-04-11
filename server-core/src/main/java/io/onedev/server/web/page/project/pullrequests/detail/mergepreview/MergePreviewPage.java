@@ -36,7 +36,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 
 @SuppressWarnings("serial")
 public class MergePreviewPage extends PullRequestDetailPage implements EditParamsAware {
@@ -69,8 +69,8 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 		newContent(null);
 	}
 
-	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, State state) {
-		PageParameters params = PullRequestDetailPage.paramsOf(request, position);
+	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor, State state) {
+		PageParameters params = PullRequestDetailPage.paramsOf(request, cursor);
 
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
@@ -259,7 +259,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), getPosition(), state);
+		PageParameters params = paramsOf(getPullRequest(), getCursor(), state);
 		CharSequence url = RequestCycle.get().urlFor(MergePreviewPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -272,12 +272,12 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 
 	@Override
 	public PageParameters getParamsBeforeEdit() {
-		return paramsOf(getPullRequest(), getPosition(), state);
+		return paramsOf(getPullRequest(), getCursor(), state);
 	}
 
 	@Override
 	public PageParameters getParamsAfterEdit() {
-		return paramsOf(getPullRequest(), getPosition(), state);
+		return paramsOf(getPullRequest(), getCursor(), state);
 	}
 	
 	public static class State implements Serializable {

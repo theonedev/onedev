@@ -24,7 +24,7 @@ public class BuildTab extends PageTab {
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
 				return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
-						BuildDetailPage.paramsOf(page.getBuild(), page.getPosition()));
+						BuildDetailPage.paramsOf(page.getBuild(), page.getCursor()));
 			}
 			
 		};

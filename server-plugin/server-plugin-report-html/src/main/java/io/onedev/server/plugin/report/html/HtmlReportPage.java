@@ -22,7 +22,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 
 @SuppressWarnings("serial")
 public class HtmlReportPage extends BuildDetailPage {
@@ -93,14 +93,14 @@ public class HtmlReportPage extends BuildDetailPage {
 	}
 
 	@Override
-	protected void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
-		PageParameters params = BuildDetailPage.paramsOf(entity, position);
+	protected void navTo(AjaxRequestTarget target, Build entity, Cursor cursor) {
+		PageParameters params = BuildDetailPage.paramsOf(entity, cursor);
 		params.add(PARAM_REPORT, getReportName());
 		setResponsePage(getPageClass(), params);
 	}
 
-	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, String reportName) {
-		PageParameters params = paramsOf(build, position);
+	public static PageParameters paramsOf(Build build, @Nullable Cursor cursor, String reportName) {
+		PageParameters params = paramsOf(build, cursor);
 		params.add(PARAM_REPORT, reportName);
 		return params;
 	}

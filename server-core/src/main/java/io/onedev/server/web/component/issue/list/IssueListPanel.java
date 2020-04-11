@@ -86,7 +86,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 
@@ -575,16 +575,16 @@ public abstract class IssueListPanel extends Panel {
 				Issue issue = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
-				QueryPosition position;
+				Cursor cursor;
 				if (getProject() != null) {
-					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+					cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				} else {
-					position = null;
+					cursor = null;
 				}
 				
 				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue, position)).toString();
+						IssueActivitiesPage.paramsOf(issue, cursor)).toString();
 
 				String label = "#" + issue.getNumber();
 				if (getProject() == null)

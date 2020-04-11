@@ -52,7 +52,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 		state.oldCommit = oldCommitModel.getObject();
 		state.newCommit = request.getHeadCommitHash();
 		PullRequestDetailPage page = (PullRequestDetailPage) getPage();
-		return PullRequestChangesPage.paramsOf(request, page.getPosition(), state);
+		return PullRequestChangesPage.paramsOf(request, page.getCursor(), state);
 	}
 
 	@Override

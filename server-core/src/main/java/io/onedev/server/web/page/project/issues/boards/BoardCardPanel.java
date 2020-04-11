@@ -35,8 +35,8 @@ import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -126,7 +126,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 				return "modal-lg";
 			}
 			
-			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, QueryPosition position) {
+			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, Cursor cursor) {
 				return new CardDetailPanel(id, issueModel) {
 
 					@Override
@@ -136,16 +136,16 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					}
 
 					@Override
-					protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-						return new QueryPositionSupport<Issue>() {
+					protected CursorSupport<Issue> getCursorSupport() {
+						return new CursorSupport<Issue>() {
 
 							@Override
-							public QueryPosition getPosition() {
-								return position;
+							public Cursor getCursor() {
+								return cursor;
 							}
 
 							@Override
-							public void navTo(AjaxRequestTarget target, Issue entity, QueryPosition position) {
+							public void navTo(AjaxRequestTarget target, Issue entity, Cursor cursor) {
 								Long issueId = entity.getId();
 								Component cardDetail = newCardDetail(id, modal, new LoadableDetachableModel<Issue>() {
 
@@ -154,7 +154,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 										return OneDev.getInstance(IssueManager.class).load(issueId);
 									}
 									
-								}, position);
+								}, cursor);
 								
 								replaceWith(cardDetail);
 								target.add(cardDetail);
@@ -180,13 +180,13 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return newCardDetail(id, modal, BoardCardPanel.this.getModel(), getPosition());
+				return newCardDetail(id, modal, BoardCardPanel.this.getModel(), getCursor());
 			}
 
 		});
 		
 		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(getIssue(), getPosition())).toString();
+				IssueActivitiesPage.paramsOf(getIssue(), getCursor())).toString();
 		
 		add(new Label("number", "<a href='" + url + "'>#" + getIssue().getNumber() + "</a>")
 				.setEscapeModelStrings(false));
@@ -229,6 +229,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract QueryPosition getPosition();
+	protected abstract Cursor getCursor();
 	
 }

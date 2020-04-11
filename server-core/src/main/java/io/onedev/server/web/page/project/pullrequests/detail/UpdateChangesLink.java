@@ -9,19 +9,19 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
-import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.Cursor;
 
 @SuppressWarnings("serial")
 public class UpdateChangesLink extends ViewStateAwarePageLink<Void> {
 	
-	public UpdateChangesLink(String id, PullRequestUpdate update, @Nullable QueryPosition position) {
-		super(id, PullRequestChangesPage.class, paramsOf(update, position));
+	public UpdateChangesLink(String id, PullRequestUpdate update, @Nullable Cursor cursor) {
+		super(id, PullRequestChangesPage.class, paramsOf(update, cursor));
 		
 		setEscapeModelStrings(false);
 	}
 
-	private static PageParameters paramsOf(PullRequestUpdate update, @Nullable QueryPosition position) {
-		return PullRequestChangesPage.paramsOf(update.getRequest(), position, update.getBaseCommitHash(), update.getHeadCommitHash());
+	private static PageParameters paramsOf(PullRequestUpdate update, @Nullable Cursor cursor) {
+		return PullRequestChangesPage.paramsOf(update.getRequest(), cursor, update.getBaseCommitHash(), update.getHeadCommitHash());
 	}
 
 	public IModel<?> getBody() {
