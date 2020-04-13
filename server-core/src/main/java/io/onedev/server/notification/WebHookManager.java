@@ -1,6 +1,7 @@
 package io.onedev.server.notification;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
@@ -66,10 +67,11 @@ public class WebHookManager {
 							try {
 							    HttpPost httpPost = new HttpPost(webHook.getPostUrl());
 							 
-							    StringEntity entity = new StringEntity(jsonOfEvent);
+							    StringEntity entity = new StringEntity(jsonOfEvent, StandardCharsets.UTF_8.name());
 							    httpPost.setEntity(entity);
 							    httpPost.setHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
 							    httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+							    httpPost.setHeader(HttpHeaders.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
 							    httpPost.setHeader(SIGNATURE_HEAD, webHook.getSecret());
 							 
 							    CloseableHttpResponse response = client.execute(httpPost);
