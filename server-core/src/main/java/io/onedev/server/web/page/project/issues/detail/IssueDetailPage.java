@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.issues.detail;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +35,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.util.script.identity.SiteAdministrator;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
@@ -59,8 +59,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	
 	protected final IModel<Issue> issueModel;
 	
-	private final Cursor cursor;
-	
 	public IssueDetailPage(PageParameters params) {
 		super(params);
 		
@@ -77,14 +75,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				if (issue == null)
 					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
 				else if (!issue.getProject().equals(getProject()))
-					throw new RestartResponseException(getPageClass(), paramsOf(issue, cursor));
+					throw new RestartResponseException(getPageClass(), paramsOf(issue));
 				else
 					return issue;
 			}
 
 		};
-	
-		cursor = Cursor.from(params);
 	}
 	
 	public Issue getIssue() {
@@ -161,13 +157,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 							@Override
 							public Cursor getCursor() {
-								return cursor;
+								return WebSession.get().getIssueCursor(getProject());
 							}
 
 							@Override
 							public void navTo(AjaxRequestTarget target, Issue entity, Cursor cursor) {
-								PageParameters params = IssueDetailPage.paramsOf(entity, cursor);
-								setResponsePage(getPageClass(), params);
+								WebSession.get().setIssueCursor(getProject(), cursor);
+								setResponsePage(getPageClass(), paramsOf(entity));
 							}
 							
 						};
@@ -180,6 +176,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							@Override
 							public void onClick() {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								Cursor cursor = WebSession.get().getIssueCursor(getProject());
 								PageParameters params = ProjectIssueListPage.paramsOf(
 										getProject(), 
 										Cursor.getQuery(cursor), 
@@ -243,10 +240,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 	}
 	
-	public Cursor getCursor() {
-		return cursor;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -260,15 +253,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Issue issue, @Nullable Cursor cursor) {
-		return paramsOf(issue.getFQN(), cursor);
+	public static PageParameters paramsOf(Issue issue) {
+		return paramsOf(issue.getFQN());
 	}
 
-	public static PageParameters paramsOf(ProjectScopedNumber issueFQN, @Nullable Cursor cursor) {
+	public static PageParameters paramsOf(ProjectScopedNumber issueFQN) {
 		PageParameters params = ProjectPage.paramsOf(issueFQN.getProject());
 		params.add(PARAM_ISSUE, issueFQN.getNumber());
-		if (cursor != null)
-			cursor.fill(params);
 		return params;
 	}
 	
@@ -299,7 +290,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue(), cursor));
+					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue()));
 				}
 				
 			};

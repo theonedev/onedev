@@ -50,7 +50,7 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 					Build build = item.getModelObject();
 					
 					Link<Void> buildLink = new BookmarkablePageLink<Void>("build", 
-							BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
+							BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 					
 					Long buildId = build.getId();
 					buildLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {

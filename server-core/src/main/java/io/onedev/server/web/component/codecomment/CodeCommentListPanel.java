@@ -58,7 +58,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -258,8 +257,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				} else {
 					PullRequest request = getPullRequest();
 					if (request != null) {
-						PullRequestDetailPage page = (PullRequestDetailPage) getPage();
-						setResponsePage(PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(request, page.getCursor(), comment));
+						setResponsePage(PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(request, comment));
 					} else {
 						String compareCommit = comment.getCompareContext().getCompareCommit();
 						if (!compareCommit.equals(comment.getMarkPos().getCommit())

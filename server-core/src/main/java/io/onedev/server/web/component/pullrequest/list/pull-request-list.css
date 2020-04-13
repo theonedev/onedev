@@ -26,13 +26,8 @@
 	margin-right: 0;
 }
 
-.pull-request-list>.body td .number>a {
-	margin-right: 12px;
-}
-.pull-request-list>.body td .title>a {
+.pull-request-list>.body td a.number, .pull-request-list>.body td .title>a {
 	margin-right: 4px;
-}
-.pull-request-list>.body td .number>a, .pull-request-list>.body td .title>a {
 	font-weight: bold;
 	font-size: 15px;
 }

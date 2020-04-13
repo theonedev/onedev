@@ -26,6 +26,7 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -60,11 +61,13 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
@@ -74,8 +77,8 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 
@@ -298,16 +301,49 @@ public abstract class PullRequestListPanel extends Panel {
 				} else {
 					cursor = null;
 				}
-				
-				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(request, cursor)).toString();
-				
-				String label = "#" + request.getNumber();
+
+				String label;
 				if (getProject() == null)
-					label = request.getTargetProject().getName() + label;
-				fragment.add(new Label("number", "<a href='" + url + "'>" + label + "</a>").setEscapeModelStrings(false));
+					label = request.getTargetProject().getName() + "#" + request.getNumber();
+				else
+					label = "#" + request.getNumber();
+					
+				ActionablePageLink<Void> numberLink;
+				fragment.add(numberLink = new ActionablePageLink<Void>("number", 
+						PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request)) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of(label);
+					}
+
+					@Override
+					protected void doBeforeNav(AjaxRequestTarget target) {
+						WebSession.get().setPullRequestCursor(rowModel.getObject().getTargetProject(), cursor);
+					}
+					
+				});
+
+				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
+						PullRequestActivitiesPage.paramsOf(request)).toString();
+				
 				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
-				fragment.add(new Label("title", transformer.apply(request.getTitle())).setEscapeModelStrings(false));
+				
+				fragment.add(new Label("title", transformer.apply(request.getTitle())) {
+
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						String script = String.format(""
+								+ "$('#%s a:not(.embedded-reference)').click(function() {"
+								+ "  $('#%s').click();"
+								+ "  return false;"
+								+ "});", 
+								getMarkupId(), numberLink.getMarkupId());
+						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+					
+				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 
 				fragment.add(new Label("comments", request.getCommentCount()));
 				

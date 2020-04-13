@@ -36,7 +36,6 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.util.Cursor;
 
 @SuppressWarnings("serial")
 public class MergePreviewPage extends PullRequestDetailPage implements EditParamsAware {
@@ -69,8 +68,8 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 		newContent(null);
 	}
 
-	public static PageParameters paramsOf(PullRequest request, @Nullable Cursor cursor, State state) {
-		PageParameters params = PullRequestDetailPage.paramsOf(request, cursor);
+	public static PageParameters paramsOf(PullRequest request, State state) {
+		PageParameters params = PullRequestDetailPage.paramsOf(request);
 
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
@@ -259,7 +258,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), getCursor(), state);
+		PageParameters params = paramsOf(getPullRequest(), state);
 		CharSequence url = RequestCycle.get().urlFor(MergePreviewPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -272,12 +271,12 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 
 	@Override
 	public PageParameters getParamsBeforeEdit() {
-		return paramsOf(getPullRequest(), getCursor(), state);
+		return paramsOf(getPullRequest(), state);
 	}
 
 	@Override
 	public PageParameters getParamsAfterEdit() {
-		return paramsOf(getPullRequest(), getCursor(), state);
+		return paramsOf(getPullRequest(), state);
 	}
 	
 	public static class State implements Serializable {

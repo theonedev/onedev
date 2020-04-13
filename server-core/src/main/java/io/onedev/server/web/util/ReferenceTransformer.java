@@ -27,6 +27,10 @@ public class ReferenceTransformer implements Function<String, String> {
 	
 	private final String url;
 	
+	public ReferenceTransformer(Project project) {
+		this(project, null);
+	}
+	
 	public ReferenceTransformer(Project project, @Nullable String url) {
 		this.project = project;
 		this.url = url;
@@ -42,7 +46,7 @@ public class ReferenceTransformer implements Function<String, String> {
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(referenceable, null)) + "'>" + referenceText + "</a>";
+						IssueActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
 		}.parseReferences(project, doc);
@@ -52,7 +56,7 @@ public class ReferenceTransformer implements Function<String, String> {
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(referenceable, null)) + "'>" + referenceText + "</a>";
+						PullRequestActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
 		}.parseReferences(project, doc);
@@ -62,7 +66,7 @@ public class ReferenceTransformer implements Function<String, String> {
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(BuildDashboardPage.class, 
-						BuildDashboardPage.paramsOf(referenceable, null)) + "'>" + referenceText + "</a>";
+						BuildDashboardPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
 		}.parseReferences(project, doc);
@@ -71,7 +75,7 @@ public class ReferenceTransformer implements Function<String, String> {
 			StringBuilder builder = new StringBuilder();
 			for (Node node: Jsoup.parseBodyFragment(doc.body().html()).body().child(0).childNodes()) {
 				if (node instanceof TextNode) 
-					builder.append("<a href='" + url + "'>" + node.outerHtml() + "</a>");
+					builder.append(String.format("<a href='%s'>%s</a>", url, node.outerHtml()));
 				else 
 					builder.append(node.outerHtml());
 			}

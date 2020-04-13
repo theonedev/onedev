@@ -30,7 +30,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -69,6 +68,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
@@ -77,6 +77,7 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobDefLink;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -85,8 +86,8 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
@@ -427,8 +428,15 @@ public abstract class BuildListPanel extends Panel {
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
 				
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
-						BuildDashboardPage.paramsOf(build, getCursor(cellItem)));
+				AjaxLink<Void> link = new ActionablePageLink<Void>("link", 
+						BuildDashboardPage.class, BuildDashboardPage.paramsOf(build)) {
+
+					@Override
+					protected void doBeforeNav(AjaxRequestTarget target) {
+						WebSession.get().setBuildCursor(rowModel.getObject().getProject(), getCursor(cellItem));								
+					}
+					
+				};
 				link.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
 
 					@Override

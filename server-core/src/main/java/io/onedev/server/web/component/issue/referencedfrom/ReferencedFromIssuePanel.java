@@ -44,7 +44,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 		
 		if (SecurityUtils.canAccess(issue.getProject())) {
 			String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-					IssueActivitiesPage.paramsOf(issue, null)).toString();
+					IssueActivitiesPage.paramsOf(issue)).toString();
 			ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), url);
 			String transformed = transformer.apply(issue.getTitle());
 			String title;

@@ -24,7 +24,7 @@ public class IssueProcessor extends ReferenceParser implements MarkdownProcessor
 	@Override
 	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 		CharSequence url = RequestCycle.get().urlFor(
-				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(referenceable, null)); 
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(referenceable)); 
 		return String.format("<a href='%s' class='issue reference' data-reference='%s'>%s</a>", 
 				url, referenceable.toString(), referenceText);
 	}

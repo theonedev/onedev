@@ -26,13 +26,8 @@
 .issue-list>.head>.operations>*:last-child {
 	margin-right: 0;
 }
-.issue-list>.body td .number>a {
-	margin-right: 12px;
-}
-.issue-list>.body td .title>a {
+.issue-list>.body td a.number, .issue-list>.body td .title>a {
 	margin-right: 4px;
-}
-.issue-list>.body td .number>a, .issue-list>.body td .title>a {
 	font-weight: bold;
 	font-size: 15px;
 }

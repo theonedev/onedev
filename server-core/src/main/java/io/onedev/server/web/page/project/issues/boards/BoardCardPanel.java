@@ -15,6 +15,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
@@ -26,9 +27,11 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
@@ -185,15 +188,42 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 		});
 		
-		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(getIssue(), getCursor())).toString();
+		ActionablePageLink<Void> numberLink;
+		add(numberLink = new ActionablePageLink<Void>("number", 
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
+
+			@Override
+			public IModel<?> getBody() {
+				return Model.of("#" + getIssue().getNumber());
+			}
+
+			@Override
+			protected void doBeforeNav(AjaxRequestTarget target) {
+				WebSession.get().setIssueCursor(getIssue().getProject(), getCursor());
+			}
+			
+		});
 		
-		add(new Label("number", "<a href='" + url + "'>#" + getIssue().getNumber() + "</a>")
-				.setEscapeModelStrings(false));
+		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+				IssueActivitiesPage.paramsOf(getIssue())).toString();
 
 		ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), url);
-		add(new Label("title", transformer.apply(getIssue().getTitle()))
-				.setEscapeModelStrings(false));
+		
+		add(new Label("title", transformer.apply(getIssue().getTitle())) {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				String script = String.format(""
+						+ "$('#%s a:not(.embedded-reference)').click(function() {"
+						+ "  $('#%s').click();"
+						+ "  return false;"
+						+ "});", 
+						getMarkupId(), numberLink.getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		}.setEscapeModelStrings(false).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
 		

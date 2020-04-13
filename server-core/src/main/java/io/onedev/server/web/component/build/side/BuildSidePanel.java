@@ -278,7 +278,7 @@ public abstract class BuildSidePanel extends Panel {
 
 				Link<Void> link = new ViewStateAwarePageLink<Void>("title", 
 						PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(request, null));
+						PullRequestActivitiesPage.paramsOf(request));
 				link.add(new Label("label", "#" + request.getNumber() + " " + request.getTitle()));
 				item.add(link);
 				item.add(new RequestStatusLabel("status", item.getModel()));

@@ -4,17 +4,12 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-
 import io.onedev.server.web.WebConstants;
 
 public class Cursor implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static String PARAM = "cursor";
-	
 	private final String query;
 	
 	private final int count;
@@ -39,24 +34,6 @@ public class Cursor implements Serializable {
 		return count;
 	}
 
-	public void fill(PageParameters params) {
-		params.add(PARAM, query + ":" + count + ":" + offset);
-	}
-	
-	@Nullable
-	public static Cursor from(PageParameters params) {
-		String cursorStr = params.get(PARAM).toOptionalString();
-		if (cursorStr != null) {
-			String tempStr = StringUtils.substringBeforeLast(cursorStr, ":");
-			int offset = Integer.parseInt(StringUtils.substringAfterLast(cursorStr, ":"));
-			int count = Integer.parseInt(StringUtils.substringAfterLast(tempStr, ":"));
-			String query = StringUtils.substringBeforeLast(tempStr, ":");
-			return new Cursor(query, count, offset);
-		} else {
-			return null;
-		}
-	}
-	
 	@Nullable
 	public static String getQuery(@Nullable Cursor cursor) {
 		if (cursor != null)

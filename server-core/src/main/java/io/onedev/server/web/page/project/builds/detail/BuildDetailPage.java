@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +45,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
@@ -82,8 +82,6 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 	protected final IModel<Build> buildModel;
 	
-	private final Cursor cursor;
-	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
 		
@@ -100,7 +98,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (build == null)
 					throw new EntityNotFoundException("Unable to find build #" + buildNumber + " in project " + getProject());
 				else if (!build.getProject().equals(getProject()))
-					throw new RestartResponseException(getPageClass(), paramsOf(build, cursor));
+					throw new RestartResponseException(getPageClass(), paramsOf(build));
 				else
 					return build;
 			}
@@ -109,8 +107,6 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 		if (!getBuild().isValid())
 			throw new RestartResponseException(InvalidBuildPage.class, InvalidBuildPage.paramsOf(getBuild()));
-		
-		cursor = Cursor.from(params);
 	}
 	
 	@Override
@@ -192,7 +188,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
 				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap);
-				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild(), cursor));
+				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 			}
 			
 			@Override
@@ -339,7 +335,7 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 								return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
-										FixedIssuesPage.paramsOf(getBuild(), getCursor(), 
+										FixedIssuesPage.paramsOf(getBuild(), 
 										getBuild().getJob().getDefaultFixedIssuesFilter()));
 							}
 							
@@ -388,12 +384,15 @@ public abstract class BuildDetailPage extends ProjectPage
 
 							@Override
 							public Cursor getCursor() {
-								return cursor;
+								return WebSession.get().getBuildCursor(getProject());
 							}
 
 							@Override
 							public void navTo(AjaxRequestTarget target, Build entity, Cursor cursor) {
-								BuildDetailPage.this.navTo(target, entity, cursor);
+								WebSession.get().setBuildCursor(getProject(), cursor);
+								PageParameters params = getPageParameters();
+								params.set(PARAM_BUILD, entity.getNumber());
+								setResponsePage(getPageClass(), params);
 							}
 							
 						};
@@ -406,9 +405,9 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
+								Cursor cursor = WebSession.get().getBuildCursor(getProject());
 								PageParameters params = ProjectBuildsPage.paramsOf(
-										getProject(), 
-										Cursor.getQuery(cursor), 
+										getProject(), Cursor.getQuery(cursor), 
 										Cursor.getPage(cursor) + 1); 
 								setResponsePage(ProjectBuildsPage.class, params);
 							}
@@ -426,10 +425,6 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 	}
 	
-	public Cursor getCursor() {
-		return cursor;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -442,23 +437,16 @@ public abstract class BuildDetailPage extends ProjectPage
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Build build, @Nullable Cursor cursor) {
-		return paramsOf(build.getFQN(), cursor);
+	public static PageParameters paramsOf(Build build) {
+		return paramsOf(build.getFQN());
 	}
 	
-	public static PageParameters paramsOf(ProjectScopedNumber buildFQN, @Nullable Cursor cursor) {
+	public static PageParameters paramsOf(ProjectScopedNumber buildFQN) {
 		PageParameters params = ProjectPage.paramsOf(buildFQN.getProject());
 		params.add(PARAM_BUILD, buildFQN.getNumber());
-		if (cursor != null)
-			cursor.fill(params);
 		return params;
 	}
 	
-	protected void navTo(AjaxRequestTarget target, Build entity, Cursor cursor) {
-		PageParameters params = BuildDetailPage.paramsOf(entity, cursor);
-		setResponsePage(getPageClass(), params);
-	}
-
 	@Override
 	public List<String> getInputNames() {
 		return new ArrayList<>(getBuild().getJob().getParamSpecMap().keySet());

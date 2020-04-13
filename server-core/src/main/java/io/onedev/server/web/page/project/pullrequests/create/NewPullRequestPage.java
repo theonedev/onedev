@@ -530,7 +530,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			public void onClick() {
-				PageParameters params = PullRequestDetailPage.paramsOf(getPullRequest(), null);
+				PageParameters params = PullRequestDetailPage.paramsOf(getPullRequest());
 				setResponsePage(PullRequestActivitiesPage.class, params);
 			}
 			
@@ -599,7 +599,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 					
 					OneDev.getInstance(PullRequestManager.class).open(getPullRequest());
 					
-					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest(), null));
+					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest()));
 				}			
 				
 			}

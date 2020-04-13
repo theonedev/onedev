@@ -15,7 +15,6 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.Cursor;
 
 @SuppressWarnings("serial")
 public class IssueBuildsPage extends IssueDetailPage {
@@ -51,7 +50,7 @@ public class IssueBuildsPage extends IssueDetailPage {
 					
 					@Override
 					public PageParameters newPageParameters(int currentPage) {
-						PageParameters params = paramsOf(getIssue(), getCursor(), query);
+						PageParameters params = paramsOf(getIssue(), query);
 						params.add(PARAM_PAGE, currentPage+1);
 						return params;
 					}
@@ -66,7 +65,7 @@ public class IssueBuildsPage extends IssueDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(IssueBuildsPage.class, paramsOf(getIssue(), getCursor(), query));
+				CharSequence url = RequestCycle.get().urlFor(IssueBuildsPage.class, paramsOf(getIssue(), query));
 				IssueBuildsPage.this.query = query;
 				pushState(target, url.toString(), query);
 			}
@@ -87,8 +86,8 @@ public class IssueBuildsPage extends IssueDetailPage {
 		target.add(listPanel);
 	}
 	
-	public static PageParameters paramsOf(Issue issue, @Nullable Cursor cursor, @Nullable String query) {
-		PageParameters params = paramsOf(issue, cursor);
+	public static PageParameters paramsOf(Issue issue, @Nullable String query) {
+		PageParameters params = paramsOf(issue);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;
