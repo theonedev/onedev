@@ -1,23 +1,24 @@
 onedev.server.issueBoards = {
 	onDomReady: function() {
 		$("body").css("overflow-y", "hidden");
-		var $head = $("#issue-boards>.head");
-		var $body = $("#issue-boards>.body");
-		if ($body.length != 0) {
+	}, 
+	onBodyDomReady: function() {
+		var $columns = $("#issue-boards>.body>.columns");
+		if ($columns.length != 0) {
 			// Do not use perfect scroll on Device as it may cause scroll issue
 			if (onedev.server.util.isDevice()) {
-				$body.addClass("resize-aware").on("resized", function() {
-					$body.outerHeight($(window).height()-$body.offset().top);
+				$columns.addClass("resize-aware").on("resized", function() {
+					$columns.outerHeight($(window).height()-$columns.offset().top);
 				});
 			} else {
-				var ps = new PerfectScrollbar($body[0]);
-				$body.addClass("resize-aware").on("resized", function() {
-					$body.outerHeight($(window).height()-$body.offset().top);
+				var ps = new PerfectScrollbar($columns[0]);
+				$columns.addClass("resize-aware").on("resized", function() {
+					$columns.outerHeight($(window).height()-$columns.offset().top);
 					ps.update();
 				});
 			}
 		}
-	}, 
+	},
 	onColumnLoad: function(containerId, callback) {
 		var $body = $("#" + containerId);
 		
@@ -48,7 +49,7 @@ onedev.server.issueBoards = {
 	onCardDomReady: function(cardId, callback) {
 		var $card = $("#" + cardId);
         var $body = $card.closest(".body");
-        var $container = $body.parent().closest(".body");
+        var $container = $card.closest(".columns");
 		var containerContentWidth;
 		if (callback) {
 			$card.draggable({

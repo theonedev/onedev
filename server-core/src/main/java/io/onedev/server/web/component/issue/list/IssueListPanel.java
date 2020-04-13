@@ -96,7 +96,7 @@ import io.onedev.server.web.util.ReferenceTransformer;
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
-	private final String query;
+	private String query;
 	
 	private IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
 

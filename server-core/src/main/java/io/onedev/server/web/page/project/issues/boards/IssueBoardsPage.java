@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,13 +13,16 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.feedback.FeedbackMessage;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.feedback.IFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -31,12 +35,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -44,7 +45,11 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.NumberCriteria;
+import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
@@ -64,8 +69,6 @@ import io.onedev.server.web.util.ConfirmOnClick;
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(IssueBoardsPage.class);
-	
 	private static final String PARAM_BOARD = "board";
 	
 	private static final String PARAM_MILESTONE = "milestone";
@@ -84,11 +87,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private final boolean backlog;
 	
-	private final String query;
+	private String query;
 	
-	private final String backlogQuery;
+	private String backlogQuery;
 	
-	private RepeatingView columnsView;
+	private Fragment contentFrag;
 	
 	private final IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
 
@@ -108,49 +111,43 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		
 	};
 	
-	private NotificationPanel feedback;
-	
-	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String additionalQueryString) {
-		IssueQuery additionalQuery;
-		try {
-			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true, true, false, false, false);
-		} catch (Exception e) {
-			if (backlog) {
-				logger.debug("Error parsing backlog query: " + additionalQueryString, e);
-				if (e.getMessage() != null)
-					error("Error parsing backlog query: " + HtmlUtils.formatAsHtml(e.getMessage()));
-				else 
-					error("Malformed backlog query");
-			} else {
-				logger.debug("Error parsing issue query: " + additionalQueryString, e);
-				if (e.getMessage() != null)
-					error("Error parsing issue query: " + HtmlUtils.formatAsHtml(e.getMessage()));
-				else 
-					error("Malformed issue query");
+	private IssueQuery parse(boolean backlog, @Nullable String baseQuery, @Nullable String query) {
+		contentFrag.getFeedbackMessages().clear(new IFeedbackMessageFilter() {
+			
+			@Override
+			public boolean accept(FeedbackMessage message) {
+				return ((QueryParseMessage)message.getMessage()).backlog == backlog;
 			}
+			
+		});
+		
+		IssueQuery parsedQuery;
+		try {
+			parsedQuery = IssueQuery.parse(getProject(), query, true, true, false, false, false);
+		} catch (OneException e) {
+			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
-		}			
-
-		IssueQuery baseQuery;
-		try {
-			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
 		} catch (Exception e) {
-			if (backlog) {
-				logger.debug("Error parsing backlog base query: " + baseQueryString, e);
-				if (e.getMessage() != null)
-					error("Error parsing backlog base query: " + HtmlUtils.formatAsHtml(e.getMessage()));
-				else 
-					error("Malformed backlog base query");
-			} else {
-				logger.debug("Error parsing base query: " + baseQueryString, e);
-				if (e.getMessage() != null)
-					error("Error parsing base query: " + HtmlUtils.formatAsHtml(e.getMessage()));
-				else 
-					error("Malformed issue query");
+			contentFrag.warn(new QueryParseMessage(backlog, "Not a valid %sformal query, performing fuzzy query"));
+			try {
+				EntityQuery.getProjectScopedNumber(getProject(), query);
+				parsedQuery = new IssueQuery(new NumberCriteria(getProject(), query, IssueQueryLexer.Is));
+			} catch (Exception e2) {
+				parsedQuery = new IssueQuery(new TitleCriteria("*" + query + "*"));
 			}
+		}
+
+		IssueQuery parsedBaseQuery;
+		try {
+			parsedBaseQuery = IssueQuery.parse(getProject(), baseQuery, true, true, false, false, false);
+		} catch (OneException e) {
+			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
+			return null;
+		} catch (Exception e) {
+			contentFrag.error(new QueryParseMessage(backlog, "Malformed %sbase query: " + e.getMessage()));
 			return null;
 		}
-		return IssueQuery.merge(baseQuery, additionalQuery);
+		return IssueQuery.merge(parsedBaseQuery, parsedQuery);
 	}
 	
 	public IssueBoardsPage(PageParameters params) {
@@ -229,7 +226,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		super.onInitialize();
 		
 		if (getBoard() != null) {
-			Fragment boardFragment = new Fragment("content", "hasBoardsFrag", this);
+			contentFrag = new Fragment("content", "hasBoardsFrag", this);
 
 			Form<?> form = new Form<Void>("query");
 			if (!SecurityUtils.canManageIssues(getProject()))
@@ -579,12 +576,26 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				form.add(new WebMarkupContainer("milestone").setVisible(false));
 			}
 			
-			IModel<String> model;
-			if (backlog)
-				model = Model.of(backlogQuery);
-			else
-				model = Model.of(query);
-			TextField<String> input = new TextField<String>("input", model);
+			TextField<String> input = new TextField<String>("input", new IModel<String>() {
+
+				@Override
+				public void detach() {
+				}
+
+				@Override
+				public String getObject() {
+					return backlog?backlogQuery:query;
+				}
+
+				@Override
+				public void setObject(String object) {
+					if (backlog)
+						backlogQuery = object;
+					else
+						query = object;
+				}
+				
+			});
 			input.add(new IssueQueryBehavior(projectModel, true, true, false, false, false));
 			if (backlog)
 				input.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
@@ -593,31 +604,45 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				
 			form.add(input);
 
-			form.add(new Button("submit") {
+			WebMarkupContainer body = new WebMarkupContainer("body") {
 
 				@Override
-				public void onSubmit() {
-					super.onSubmit();
-					PageParameters params;
-					if (backlog) {
-						params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-								getMilestone(), backlog, query, input.getModelObject());
-					} else {
-						params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-								getMilestone(), backlog, input.getModelObject(), backlogQuery);
-					}
+				public void renderHead(IHeaderResponse response) {
+					super.renderHead(response);
+					response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueBoards.onBodyDomReady();"));
+				}
+
+			};
+			body.setOutputMarkupId(true);
+			body.add(new FencedFeedbackPanel("feedback", contentFrag));
+			contentFrag.add(body);
+			
+			form.add(new AjaxButton("submit") {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					
+					if (backlog) 
+						backlogQuery = input.getModelObject();
+					else 
+						query = input.getModelObject();
+
+					PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+							getMilestone(), backlog, query, backlogQuery);
 						
-					setResponsePage(IssueBoardsPage.class, params);
+					CharSequence url = RequestCycle.get().urlFor(IssueBoardsPage.class, params);
+					pushState(target, url.toString(), input.getModelObject());
+					
+					target.add(body);
+					target.appendJavaScript("$(window).resize();");
 				}
 				
 			});
 			
-			boardFragment.add(form);
+			contentFrag.add(form);
 			
-			boardFragment.add(feedback = new NotificationPanel("feedback", IssueBoardsPage.this));
-			feedback.setOutputMarkupPlaceholderTag(true);
-			
-			columnsView = new RepeatingView("columns");
+			RepeatingView columnsView = new RepeatingView("columns");
 			if (backlog) {
 				columnsView.add(new BacklogColumnPanel("backlog") {
 
@@ -664,12 +689,10 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				});
 			}
-			boardFragment.add(columnsView);
-			
-			add(boardFragment);
+			body.add(columnsView);
 		} else {
-			Fragment fragment = new Fragment("content", "noBoardsFrag", this);
-			fragment.add(new CreateBoardLink("newBoard") {
+			contentFrag = new Fragment("content", "noBoardsFrag", this);
+			contentFrag.add(new CreateBoardLink("newBoard") {
 
 				@Override
 				protected void onConfigure() {
@@ -678,7 +701,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				}
 				
 			});
-			fragment.add(new Link<Void>("useDefault") {
+			contentFrag.add(new Link<Void>("useDefault") {
 
 				@Override
 				protected void onConfigure() {
@@ -695,8 +718,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				}
 				
 			});
-			add(fragment);
 		}
+		contentFrag.setOutputMarkupId(true);
+		add(contentFrag);
 	}
 	
 	@Override
@@ -704,6 +728,16 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new IssueBoardsResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueBoards.onDomReady();"));
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		if (backlog)
+			backlogQuery = (String) data; 
+		else
+			query = (String) data;
+		target.add(contentFrag);
+		target.appendJavaScript("$(window).resize();");
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board, 
@@ -843,4 +877,22 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			};
 		}
 	}	
+	
+	private static class QueryParseMessage implements Serializable {
+		
+		final boolean backlog;
+		
+		final String template;
+		
+		public QueryParseMessage(boolean backlog, String template) {
+			this.backlog = backlog;
+			this.template = template;
+		}
+
+		@Override
+		public String toString() {
+			return String.format(template, backlog?"backlog ":"");
+		}
+		
+	}
 }

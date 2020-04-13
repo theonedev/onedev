@@ -77,7 +77,7 @@ ul.feedbackPanel {
 }
 ul.feedbackPanel>li {
     margin: 0;
-    padding: 8px 0 8px 12px;
+    padding: 0 0 0 12px;
     border-left: 6px solid;
 }
 li.feedbackPanelERROR, li.feedbackPanelFATAL {
@@ -103,9 +103,11 @@ li.feedbackPanelWARNING {
 
 ul.feedbackPanel>li:first-child {
     border-radius: 4px 4px 0 0;
+    padding-top: 8px;
 }
 ul.feedbackPanel>li:last-child {
     border-radius: 0 0 4px 4px;
+    padding-bottom: 8px;
 }
 ul.feedbackPanel>li:first-child:last-child {
     border-radius: 4px;

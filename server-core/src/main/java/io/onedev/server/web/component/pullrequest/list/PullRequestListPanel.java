@@ -85,7 +85,7 @@ import io.onedev.server.web.util.ReferenceTransformer;
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
 
-	private final String query;
+	private String query;
 	
 	private IModel<PullRequestQuery> parsedQueryModel = new LoadableDetachableModel<PullRequestQuery>() {
 

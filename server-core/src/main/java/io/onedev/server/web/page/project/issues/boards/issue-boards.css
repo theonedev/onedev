@@ -1,6 +1,7 @@
 /* Make sure we have enough room for query input in mobile devices */
 #issue-boards>.head {
 	min-width: 570px;
+	margin-bottom: 20px;
 }
 #issue-boards .no-boards {
 	font-size: 16px;
@@ -42,25 +43,21 @@
 	display: none;
 }
 
-#issue-boards>.feedback .alert {
-	margin-top: 20px;
-	margin-bottom: 0;
-}
-#issue-boards>.body {
+#issue-boards>.body>.columns {
 	position: relative;
 	margin: 0 -20px;
 	/* hack to makes all column of same width and same space */
-	padding: 20px 0 20px 20px; 
+	padding: 0 0 20px 20px; 
 	display: flex;
 }
-#issue-boards>.body>.column {
+#issue-boards>.body>.columns>.column {
 	flex: 1 1 auto;
 	min-width: 360px;
 	height: 100%;
 	/* hack to makes all column of same width and same space */
 	padding-right: 20px;
 }
-#issue-boards>.body>.column>.content {
+#issue-boards>.body>.columns>.column>.content {
 	border: 1px solid #E0E0E0;
 	border-radius: 4px;
 	height: 100%;
@@ -68,39 +65,39 @@
 	flex-direction: column;
 	background: #F9F9F9;
 }
-#issue-boards>.body>.column>.content>.head {
+#issue-boards>.body>.columns>.column>.content>.head {
 	font-weight: bold;
 	padding: 6px 12px;
 	font-size: 15px;
 	border-bottom: 1px solid #E0E0E0;
 	border-top: 3px solid #E0E0E0;
 }
-#issue-boards>.body>.column>.content>.head .badge {
+#issue-boards>.body>.columns>.column>.content>.head .badge {
 	margin-left: 8px;
 	margin-top: 2px;
 	font-size: 10px;
 }
-#issue-boards>.body>.column>.content>.head a {
+#issue-boards>.body>.columns>.column>.content>.head a {
 	color: #666;
 	margin-left: 8px;
 }
 
-#issue-boards>.body>.column>.content>.body {
+#issue-boards>.body>.columns>.column>.content>.body {
 	position: relative;
 	padding: 16px 16px 0 16px;
 	height: 100%;
 	overflow: auto;
 } 
-#issue-boards>.body>.column>.content>.body.issue-droppable.ui-droppable-active {
+#issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-active {
 	background: #FDF2C5;
 } 
-#issue-boards>.body>.column>.content>.body.issue-droppable.ui-droppable-hover {
+#issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-hover {
 	background: #FAE280;
 } 
-#issue-boards>.body>.column>.content>.body>.loading-indicator {
+#issue-boards>.body>.columns>.column>.content>.body>.loading-indicator {
 	margin-top: 8px;
 }
-#issue-boards>.body>.column>.content>.body>.card {
+#issue-boards>.body>.columns>.column>.content>.body>.card {
 	margin-bottom: 16px;
 } 
 
@@ -167,7 +164,7 @@
 #issue-boards>.body .card .field-values a {
 	font-size: 12px;
 }
-#issue-boards>.body>.column>.content>.body .loading-indicator {
+#issue-boards>.body>.columns>.column>.content>.body .loading-indicator {
 	margin-bottom: 16px;
 }
 #issue-boards>.body .card .detail {
