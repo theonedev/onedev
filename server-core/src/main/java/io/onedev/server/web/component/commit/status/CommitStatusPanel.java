@@ -35,6 +35,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -51,19 +52,33 @@ public abstract class CommitStatusPanel extends Panel {
 	
 	private final ObjectId commitId;
 	
-	private final IModel<List<Job>> jobsModel = new LoadableDetachableModel<List<Job>>() {
+	private final IModel<List<Job>> allJobsModel = new LoadableDetachableModel<List<Job>>() {
 
 		@Override
 		protected List<Job> load() {
 			try {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
-				if (buildSpec != null) 
+				if (buildSpec != null)
 					return buildSpec.getJobs();
 			} catch (Exception e) {
 				logger.error("Error retrieving build spec (project: {}, commit: {})", 
 						getProject().getName(), commitId.name(), e);
 			}
 			return new ArrayList<>();
+		}
+		
+	};
+	
+	private final IModel<List<Job>> accessibleJobsModel = new LoadableDetachableModel<List<Job>>() {
+
+		@Override
+		protected List<Job> load() {
+			List<Job> jobs = new ArrayList<>();
+			for (Job job: allJobsModel.getObject()) {
+				if (SecurityUtils.canAccess(getProject(), job.getName()))
+					jobs.add(job);
+			}
+			return jobs;
 		}
 		
 	};
@@ -94,9 +109,19 @@ public abstract class CommitStatusPanel extends Panel {
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				Fragment fragment = new Fragment(id, "detailFrag", CommitStatusPanel.this);
 				
+				fragment.add(new WebMarkupContainer("note") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(accessibleJobsModel.getObject().size() != allJobsModel.getObject().size());
+					}
+					
+				});
+				
 				RepeatingView jobsView = new RepeatingView("jobs");
 				fragment.add(jobsView);
-				for (Job job: jobsModel.getObject()) {
+				for (Job job: accessibleJobsModel.getObject()) {
 					WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
 					Status status = getProject().getCommitStatus(commitId).get(job.getName());
 					
@@ -211,7 +236,8 @@ public abstract class CommitStatusPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		jobsModel.detach();
+		allJobsModel.detach();
+		accessibleJobsModel.detach();
 		statusModel.detach();
 		super.onDetach();
 	}
@@ -219,7 +245,7 @@ public abstract class CommitStatusPanel extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!jobsModel.getObject().isEmpty());
+		setVisible(!allJobsModel.getObject().isEmpty());
 	}
 
 	@Override

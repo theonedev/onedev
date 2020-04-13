@@ -4,6 +4,10 @@
 .commit-status-detail {
     padding: 12px;
 }
+.commit-status-detail>.note {
+	font-size: 12px;
+	color: #666;
+}
 .commit-status-detail>.job {
 	margin-bottom: 8px;
 }
