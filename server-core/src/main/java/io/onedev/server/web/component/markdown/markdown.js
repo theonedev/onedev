@@ -795,12 +795,16 @@ onedev.server.markdown = {
 			$input.outerHeight(defaultHeight);
 		}
 		$edit.outerHeight($input.outerHeight());
-		var renderedHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight");
-		if (renderedHeight) {
-			$rendered.outerHeight(parseInt(renderedHeight));
+		
+		var renderedHeight;
+		if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+			renderedHeight = $input.outerHeight();
 		} else {
-			$rendered.outerHeight(defaultHeight);
+			renderedHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight");
+			if (!renderedHeight) 
+				renderedHeight  = defaultHeight;
 		}
+		$rendered.outerHeight(renderedHeight);
 		$preview.outerHeight($rendered.outerHeight());
     },
 	onWindowLoad: function(containerId) {
