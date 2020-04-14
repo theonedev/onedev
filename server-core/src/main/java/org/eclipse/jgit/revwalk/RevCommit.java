@@ -407,7 +407,7 @@ public class RevCommit extends RevObject {
 	 * @return contents of the gpg signature; null if the commit was not signed.
 	 * @since 5.1
 	 */
-	public final @Nullable byte[] getRawGpgSignature() {
+	public final byte[] getRawGpgSignature() {
 		final byte[] raw = buffer;
 		final byte[] header = {'g', 'p', 'g', 's', 'i', 'g'};
 		final int start = RawParseUtils.headerStart(header, raw, 0);

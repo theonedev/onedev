@@ -48,6 +48,7 @@ import java.io.IOException;
 
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Only produce commits which are below a specified depth.
@@ -58,6 +59,8 @@ class DepthGenerator extends Generator {
 	private final FIFORevQueue pending;
 
 	private final int depth;
+
+	private final int deepenSince;
 
 	private final RevWalk walk;
 
@@ -79,6 +82,11 @@ class DepthGenerator extends Generator {
 	private final RevFlag REINTERESTING;
 
 	/**
+	 * Commits reachable from commits that the client specified using --shallow-exclude.
+	 */
+	private final RevFlag DEEPEN_NOT;
+
+	/**
 	 * @param w
 	 * @param s Parent generator
 	 * @throws MissingObjectException
@@ -91,8 +99,10 @@ class DepthGenerator extends Generator {
 		walk = (RevWalk)w;
 
 		this.depth = w.getDepth();
+		this.deepenSince = w.getDeepenSince();
 		this.UNSHALLOW = w.getUnshallowFlag();
 		this.REINTERESTING = w.getReinterestingFlag();
+		this.DEEPEN_NOT = w.getDeepenNotFlag();
 
 		s.shareFreeList(pending);
 
@@ -104,6 +114,37 @@ class DepthGenerator extends Generator {
 				break;
 			if (((DepthWalk.Commit) c).getDepth() == 0)
 				pending.add(c);
+		}
+
+		// Mark DEEPEN_NOT on all deepen-not commits and their ancestors.
+		// TODO(jonathantanmy): This implementation is somewhat
+		// inefficient in that any "deepen-not <ref>" in the request
+		// results in all commits reachable from that ref being parsed
+		// and marked, even if the commit topology is such that it is
+		// not necessary.
+		for (ObjectId oid : w.getDeepenNots()) {
+			RevCommit c;
+			try {
+				c = walk.parseCommit(oid);
+			} catch (IncorrectObjectTypeException notCommit) {
+				// The C Git implementation silently tolerates
+				// non-commits, so do the same here.
+				continue;
+			}
+
+			FIFORevQueue queue = new FIFORevQueue();
+			queue.add(c);
+			while ((c = queue.next()) != null) {
+				if (c.has(DEEPEN_NOT)) {
+					continue;
+				}
+
+				walk.parseHeaders(c);
+				c.add(DEEPEN_NOT);
+				for (RevCommit p : c.getParents()) {
+					queue.add(p);
+				}
+			}
 		}
 	}
 
@@ -132,6 +173,14 @@ class DepthGenerator extends Generator {
 			if ((c.flags & RevWalk.PARSED) == 0)
 				c.parseHeaders(walk);
 
+			if (c.getCommitTime() < deepenSince) {
+				continue;
+			}
+
+			if (c.has(DEEPEN_NOT)) {
+				continue;
+			}
+
 			int newDepth = c.depth + 1;
 
 			for (RevCommit p : c.parents) {
@@ -142,12 +191,29 @@ class DepthGenerator extends Generator {
 				// this depth is guaranteed to be the smallest value that
 				// any path could produce.
 				if (dp.depth == -1) {
+					boolean failsDeepenSince = false;
+					if (deepenSince != 0) {
+						if ((p.flags & RevWalk.PARSED) == 0) {
+							p.parseHeaders(walk);
+						}
+						failsDeepenSince =
+							p.getCommitTime() < deepenSince;
+					}
+
 					dp.depth = newDepth;
 
-					// If the parent is not too deep, add it to the queue
-					// so that we can produce it later
-					if (newDepth <= depth)
+					// If the parent is not too deep and was not excluded, add
+					// it to the queue so that we can produce it later
+					if (newDepth <= depth && !failsDeepenSince &&
+							!p.has(DEEPEN_NOT)) {
 						pending.add(p);
+					} else {
+						dp.makesChildBoundary = true;
+					}
+				}
+
+				if (dp.makesChildBoundary) {
+					c.isBoundary = true;
 				}
 
 				// If the current commit has become unshallowed, everything
@@ -160,14 +226,17 @@ class DepthGenerator extends Generator {
 				}
 			}
 
-			// Produce all commits less than the depth cutoff
-			boolean produce = c.depth <= depth;
+			boolean produce = true;
 
 			// Unshallow commits are uninteresting, but still need to be sent
 			// up to the PackWriter so that it will exclude objects correctly.
 			// All other uninteresting commits should be omitted.
 			if ((c.flags & RevWalk.UNINTERESTING) != 0 && !c.has(UNSHALLOW))
 				produce = false;
+
+			if (c.getCommitTime() < deepenSince) {
+				produce = false;
+			}
 
 			if (produce)
 				return c;

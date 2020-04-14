@@ -66,5 +66,5 @@ public interface AsyncRevObjectQueue extends AsyncOperation {
 	 * @throws java.io.IOException
 	 *             the object store cannot be accessed.
 	 */
-	public RevObject next() throws MissingObjectException, IOException;
+	RevObject next() throws MissingObjectException, IOException;
 }

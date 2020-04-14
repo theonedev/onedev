@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jgit.annotations.NonNull;
+import org.eclipse.jgit.annotations.Nullable;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.LargeObjectException;
@@ -1336,6 +1337,22 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	}
 
 	/**
+	 * Like {@link #next()}, but if a checked exception is thrown during the
+	 * walk it is rethrown as a {@link RevWalkException}.
+	 *
+	 * @throws RevWalkException if an {@link IOException} was thrown.
+	 * @return next most recent commit; null if traversal is over.
+	 */
+	@Nullable
+	private RevCommit nextForIterator() {
+		try {
+			return next();
+		} catch (IOException e) {
+			throw new RevWalkException(e);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * Returns an Iterator over the commits of this walker.
@@ -1353,16 +1370,7 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 */
 	@Override
 	public Iterator<RevCommit> iterator() {
-		final RevCommit first;
-		try {
-			first = RevWalk.this.next();
-		} catch (MissingObjectException e) {
-			throw new RevWalkException(e);
-		} catch (IncorrectObjectTypeException e) {
-			throw new RevWalkException(e);
-		} catch (IOException e) {
-			throw new RevWalkException(e);
-		}
+		RevCommit first = nextForIterator();
 
 		return new Iterator<RevCommit>() {
 			RevCommit next = first;
@@ -1374,17 +1382,9 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 
 			@Override
 			public RevCommit next() {
-				try {
-					final RevCommit r = next;
-					next = RevWalk.this.next();
-					return r;
-				} catch (MissingObjectException e) {
-					throw new RevWalkException(e);
-				} catch (IncorrectObjectTypeException e) {
-					throw new RevWalkException(e);
-				} catch (IOException e) {
-					throw new RevWalkException(e);
-				}
+				RevCommit r = next;
+				next = nextForIterator();
+				return r;
 			}
 
 			@Override
