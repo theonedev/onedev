@@ -6,6 +6,8 @@ import org.apache.wicket.Component;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -36,13 +38,14 @@ public class PullRequestMergeStrategyChangeData implements PullRequestChangeData
 
 	@Override
 	public Component render(String componentId, PullRequestChange change) {
+		Long changeId = change.getId();
 		return new DiffAndCommentAwarePanel(componentId) {
 			
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected PullRequestChange getChange() {
-				return change;
+				return OneDev.getInstance(PullRequestChangeManager.class).load(changeId);
 			}
 
 			@Override

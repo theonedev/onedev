@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentSupport;
@@ -49,13 +51,14 @@ public class PullRequestReopenData implements PullRequestChangeData {
 
 	@Override
 	public Component render(String componentId, PullRequestChange change) {
+		Long changeId = change.getId();
 		return new DiffAndCommentAwarePanel(componentId) {
 			
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected PullRequestChange getChange() {
-				return change;
+				return OneDev.getInstance(PullRequestChangeManager.class).load(changeId);
 			}
 
 			@Override

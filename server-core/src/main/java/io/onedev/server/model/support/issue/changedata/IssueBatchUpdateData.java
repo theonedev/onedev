@@ -9,6 +9,8 @@ import org.apache.wicket.Component;
 
 import com.google.common.base.Objects;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
@@ -108,13 +110,14 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 
 	@Override
 	public Component render(String componentId, IssueChange change) {
+		Long changeId = change.getId();
 		return new DiffAndCommentAwarePanel(componentId) {
 			
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			protected IssueChange getChange() {
-				return change;
+				return OneDev.getInstance(IssueChangeManager.class).load(changeId);
 			}
 
 			@Override
