@@ -15,6 +15,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
@@ -26,17 +27,19 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -126,7 +129,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 				return "modal-lg";
 			}
 			
-			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, QueryPosition position) {
+			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, Cursor cursor) {
 				return new CardDetailPanel(id, issueModel) {
 
 					@Override
@@ -136,16 +139,16 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 					}
 
 					@Override
-					protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-						return new QueryPositionSupport<Issue>() {
+					protected CursorSupport<Issue> getCursorSupport() {
+						return new CursorSupport<Issue>() {
 
 							@Override
-							public QueryPosition getPosition() {
-								return position;
+							public Cursor getCursor() {
+								return cursor;
 							}
 
 							@Override
-							public void navTo(AjaxRequestTarget target, Issue entity, QueryPosition position) {
+							public void navTo(AjaxRequestTarget target, Issue entity, Cursor cursor) {
 								Long issueId = entity.getId();
 								Component cardDetail = newCardDetail(id, modal, new LoadableDetachableModel<Issue>() {
 
@@ -154,7 +157,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 										return OneDev.getInstance(IssueManager.class).load(issueId);
 									}
 									
-								}, position);
+								}, cursor);
 								
 								replaceWith(cardDetail);
 								target.add(cardDetail);
@@ -180,20 +183,47 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return newCardDetail(id, modal, BoardCardPanel.this.getModel(), getPosition());
+				return newCardDetail(id, modal, BoardCardPanel.this.getModel(), getCursor());
 			}
 
 		});
 		
-		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-				IssueActivitiesPage.paramsOf(getIssue(), getPosition())).toString();
+		ActionablePageLink<Void> numberLink;
+		add(numberLink = new ActionablePageLink<Void>("number", 
+				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue())) {
+
+			@Override
+			public IModel<?> getBody() {
+				return Model.of("#" + getIssue().getNumber());
+			}
+
+			@Override
+			protected void doBeforeNav(AjaxRequestTarget target) {
+				WebSession.get().setIssueCursor(getIssue().getProject(), getCursor());
+			}
+			
+		});
 		
-		add(new Label("number", "<a href='" + url + "'>#" + getIssue().getNumber() + "</a>")
-				.setEscapeModelStrings(false));
+		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+				IssueActivitiesPage.paramsOf(getIssue())).toString();
 
 		ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), url);
-		add(new Label("title", transformer.apply(getIssue().getTitle()))
-				.setEscapeModelStrings(false));
+		
+		add(new Label("title", transformer.apply(getIssue().getTitle())) {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				String script = String.format(""
+						+ "$('#%s a:not(.embedded-reference)').click(function() {"
+						+ "  $('#%s').click();"
+						+ "  return false;"
+						+ "});", 
+						getMarkupId(), numberLink.getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+			
+		}.setEscapeModelStrings(false).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
 		
@@ -229,6 +259,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	protected abstract QueryPosition getPosition();
+	protected abstract Cursor getCursor();
 	
 }

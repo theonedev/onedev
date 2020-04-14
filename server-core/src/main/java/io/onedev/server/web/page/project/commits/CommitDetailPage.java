@@ -267,15 +267,20 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected List<Job> load() {
+				List<Job> jobs = new ArrayList<>();
 				try {
 					BuildSpec buildSpec = getProject().getBuildSpec(getCommit().copy());
-					if (buildSpec != null) 
-						return buildSpec.getJobs();
+					if (buildSpec != null) {
+						for (Job job: buildSpec.getJobs()) {
+							if (SecurityUtils.canAccess(getProject(), job.getName()))
+								jobs.add(job);
+						}
+					}
 				} catch (Exception e) {
 					logger.error("Error retrieving build spec (project: {}, commit: {})", 
 							getProject().getName(), getCommit().name(), e);
 				}
-				return new ArrayList<>();
+				return jobs;
 			}
 			
 		}) {

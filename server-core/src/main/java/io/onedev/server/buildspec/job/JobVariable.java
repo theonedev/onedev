@@ -23,6 +23,14 @@ public enum JobVariable {
 		}
 		
 	}, 
+	UPDATED_REF {
+
+		@Override
+		public String getValue(Build build) {
+			return build.getUpdatedRef();
+		}
+		
+	},
 	COMMIT_HASH {
 
 		@Override

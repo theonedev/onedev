@@ -15,7 +15,8 @@ public interface JobManager {
 	
 	public static final String JOB_TOKEN_HTTP_HEADER = "X-ONEDEV-JOB-TOKEN";
 	
-	Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap);
+	Build submit(Project project, ObjectId commitId, String jobName, 
+			Map<String, List<String>> paramMap, String updatedRef);
 	
 	void resubmit(Build build, Map<String, List<String>> paramMap);
 	

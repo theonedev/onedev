@@ -27,7 +27,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class FixedBetweenCriteria extends IssueCriteria {
 
@@ -54,8 +54,8 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		this.secondType = secondType;
 		this.secondValue = secondValue;
 
-		ProjectAwareCommit first = getCommitId(project, firstType, firstValue);
-		ProjectAwareCommit second = getCommitId(project, secondType, secondValue);
+		ProjectScopedCommit first = getCommitId(project, firstType, firstValue);
+		ProjectScopedCommit second = getCommitId(project, secondType, secondValue);
 		firstCommitId = first.getCommitId();
 		secondCommitId = second.getCommitId();
 		if (first.getProject().equals(second.getProject())) { 
@@ -66,10 +66,10 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		}
 	}
 	
-	private static ProjectAwareCommit getCommitId(@Nullable Project project, int type, String value) {
+	private static ProjectScopedCommit getCommitId(@Nullable Project project, int type, String value) {
 		if (type == IssueQueryLexer.Build) {
 			Build build = EntityQuery.getBuild(project, value);
-			return new ProjectAwareCommit(build.getProject(), build.getCommitId());
+			return new ProjectScopedCommit(build.getProject(), build.getCommitId());
 		} else {
 			return EntityQuery.getCommitId(project, value);
 		}

@@ -8,13 +8,13 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class FixedInCommitCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final ProjectAwareCommit commit;
+	private final ProjectScopedCommit commit;
 	
 	private final String value;
 	
@@ -23,7 +23,7 @@ public class FixedInCommitCriteria extends IssueCriteria {
 		this.value = value;
 	}
 
-	public FixedInCommitCriteria(ProjectAwareCommit commit) {
+	public FixedInCommitCriteria(ProjectScopedCommit commit) {
 		this.commit = commit;
 		value = commit.getCommitId().name();
 	}

@@ -9,7 +9,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 
-public class ProjectAwareRevision implements Serializable {
+public class ProjectScopedRevision implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,7 +17,7 @@ public class ProjectAwareRevision implements Serializable {
 	
 	private final String revision;
 	
-	public ProjectAwareRevision(Project project, String revision) {
+	public ProjectScopedRevision(Project project, String revision) {
 		this.project = project;
 		this.revision = revision;
 	}
@@ -31,12 +31,12 @@ public class ProjectAwareRevision implements Serializable {
 	}
 
 	@Nullable
-	public static ProjectAwareRevision from(String revisionFQN) {
+	public static ProjectScopedRevision from(String revisionFQN) {
 		String projectName = StringUtils.substringBefore(revisionFQN, ":");
 		String revision = StringUtils.substringAfter(revisionFQN, ":");
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		if (project != null)
-			return new ProjectAwareRevision(project, revision);
+			return new ProjectScopedRevision(project, revision);
 		else
 			return null;
 	}

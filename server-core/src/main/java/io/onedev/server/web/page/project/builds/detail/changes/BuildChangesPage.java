@@ -21,7 +21,6 @@ import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public class BuildChangesPage extends BuildDetailPage {
@@ -63,7 +62,7 @@ public class BuildChangesPage extends BuildDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(BuildChangesPage.class, paramsOf(getBuild(), getPosition(), query));
+				CharSequence url = RequestCycle.get().urlFor(BuildChangesPage.class, paramsOf(getBuild(), query));
 				BuildChangesPage.this.query = query;
 				pushState(target, url.toString(), query);
 			}
@@ -86,8 +85,8 @@ public class BuildChangesPage extends BuildDetailPage {
 		};
 	}
 
-	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, @Nullable String query) {
-		PageParameters params = paramsOf(build, position);
+	public static PageParameters paramsOf(Build build, @Nullable String query) {
+		PageParameters params = paramsOf(build);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;

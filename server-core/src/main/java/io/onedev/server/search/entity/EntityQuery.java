@@ -28,8 +28,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.ProjectAwareCommit;
-import io.onedev.server.util.ProjectAwareRevision;
+import io.onedev.server.util.ProjectScopedCommit;
+import io.onedev.server.util.ProjectScopedRevision;
 import io.onedev.server.util.ProjectScopedNumber;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
@@ -92,20 +92,20 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		return dateValue;
 	}
 	
-	public static ProjectAwareCommit getCommitId(@Nullable Project project, String value) {
+	public static ProjectScopedCommit getCommitId(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":"))
 			value = project.getName() + ":" + value;
-		ProjectAwareCommit commitId = ProjectAwareCommit.from(value);
+		ProjectScopedCommit commitId = ProjectScopedCommit.from(value);
 		if (commitId != null && commitId.getCommitId() != null)
 			return commitId;
 		else
 			throw new OneException("Unable to find revision: " + value);
 	}
 
-	public static ProjectAwareRevision getRevision(@Nullable Project project, String value) {
+	public static ProjectScopedRevision getRevision(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":"))
 			value = project.getName() + ":" + value;
-		ProjectAwareRevision revision = ProjectAwareRevision.from(value);
+		ProjectScopedRevision revision = ProjectScopedRevision.from(value);
 		if (revision != null)
 			return revision;
 		else

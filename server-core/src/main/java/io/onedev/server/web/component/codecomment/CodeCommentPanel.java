@@ -62,10 +62,8 @@ import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
-import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public abstract class CodeCommentPanel extends Panel {
@@ -415,12 +413,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 		Component outdatedLink;
 		if (getPullRequest() != null) {
-			QueryPosition position;
-			if (getPage() instanceof PullRequestDetailPage) 
-				position = ((PullRequestDetailPage)getPage()).getPosition();
-			else
-				position = null;
-			PageParameters params = PullRequestChangesPage.paramsOf(getPullRequest(), position, getComment());
+			PageParameters params = PullRequestChangesPage.paramsOf(getPullRequest(), getComment());
 
 			add(outdatedLink = new BookmarkablePageLink<Void>("outdatedContext", PullRequestChangesPage.class, params) {
 

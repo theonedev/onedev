@@ -17,7 +17,6 @@ import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public class FixedIssuesPage extends BuildDetailPage {
@@ -53,7 +52,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 					
 					@Override
 					public PageParameters newPageParameters(int currentPage) {
-						PageParameters params = paramsOf(getBuild(), getPosition(), query);
+						PageParameters params = paramsOf(getBuild(), query);
 						params.add(PARAM_PAGE, currentPage+1);
 						return params;
 					}
@@ -68,7 +67,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(ProjectIssueListPage.class, paramsOf(getBuild(), getPosition(), query));
+				CharSequence url = RequestCycle.get().urlFor(ProjectIssueListPage.class, paramsOf(getBuild(), query));
 				FixedIssuesPage.this.query = query;
 				pushState(target, url.toString(), query);
 			}
@@ -89,8 +88,8 @@ public class FixedIssuesPage extends BuildDetailPage {
 		target.add(listPanel);
 	}
 
-	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, @Nullable String query) {
-		PageParameters params = paramsOf(build, position);
+	public static PageParameters paramsOf(Build build, @Nullable String query) {
+		PageParameters params = paramsOf(build);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;

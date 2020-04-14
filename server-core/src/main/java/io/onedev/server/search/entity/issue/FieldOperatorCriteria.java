@@ -22,7 +22,7 @@ import io.onedev.server.model.IssueField;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.SecurityUtils;
 
 public class FieldOperatorCriteria extends FieldCriteria {
@@ -70,7 +70,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 					throw new OneException("No current pull request in query context");
 				}
 			} else if (getFieldSpec() instanceof CommitField) {
-				ProjectAwareCommit commit = ProjectAwareCommit.get();
+				ProjectScopedCommit commit = ProjectScopedCommit.get();
 				if (commit != null) {
 					return builder.and(
 							builder.equal(projectAttribute, commit.getProject()),
@@ -128,7 +128,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				else  
 					throw new OneException("No pull request in query context");
 			} else if (getFieldSpec() instanceof CommitField) {
-				ProjectAwareCommit commit = ProjectAwareCommit.get();
+				ProjectScopedCommit commit = ProjectScopedCommit.get();
 				if (commit != null) 
 					return commit.getProject().equals(issue.getProject()) && commit.getCommitId().name().equals(fieldValue);
 				else  

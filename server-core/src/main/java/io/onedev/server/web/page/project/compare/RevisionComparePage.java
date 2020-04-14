@@ -446,7 +446,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 
 					@Override
 					public void onClick() {
-						PageParameters params = PullRequestDetailPage.paramsOf(requestModel.getObject(), null);
+						PageParameters params = PullRequestDetailPage.paramsOf(requestModel.getObject());
 						setResponsePage(PullRequestActivitiesPage.class, params);
 					}
 					

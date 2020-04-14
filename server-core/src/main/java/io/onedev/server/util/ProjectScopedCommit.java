@@ -12,14 +12,14 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.util.WicketUtils;
 
-public class ProjectAwareCommit implements Serializable {
+public class ProjectScopedCommit implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private static ThreadLocal<Stack<ProjectAwareCommit>> stack =  new ThreadLocal<Stack<ProjectAwareCommit>>() {
+	private static ThreadLocal<Stack<ProjectScopedCommit>> stack =  new ThreadLocal<Stack<ProjectScopedCommit>>() {
 
 		@Override
-		protected Stack<ProjectAwareCommit> initialValue() {
+		protected Stack<ProjectScopedCommit> initialValue() {
 			return new Stack<>();
 		}
 	
@@ -31,7 +31,7 @@ public class ProjectAwareCommit implements Serializable {
 	
 	private transient Collection<Long> fixedIssueNumbers;
 	
-	public ProjectAwareCommit(Project project, ObjectId commitId) {
+	public ProjectScopedCommit(Project project, ObjectId commitId) {
 		this.project = project;
 		this.commitId = commitId;
 	}
@@ -53,17 +53,17 @@ public class ProjectAwareCommit implements Serializable {
 	}
 	
 	@Nullable
-	public static ProjectAwareCommit from(String revisionFQN) {
-		ProjectAwareRevision revision = ProjectAwareRevision.from(revisionFQN);
+	public static ProjectScopedCommit from(String revisionFQN) {
+		ProjectScopedRevision revision = ProjectScopedRevision.from(revisionFQN);
 		if (revision != null) {
 			Project project = revision.getProject();
-			return new ProjectAwareCommit(project, project.getObjectId(revision.getRevision(), false));
+			return new ProjectScopedCommit(project, project.getObjectId(revision.getRevision(), false));
 		} else {
 			return null;
 		}
 	}
 	
-	public static void push(ProjectAwareCommit commitId) {
+	public static void push(ProjectScopedCommit commitId) {
 		stack.get().push(commitId);
 	}
 
@@ -72,7 +72,7 @@ public class ProjectAwareCommit implements Serializable {
 	}
 	
 	@Nullable
-	public static ProjectAwareCommit get() {
+	public static ProjectScopedCommit get() {
 		if (!stack.get().isEmpty()) { 
 			return stack.get().peek();
 		} else {

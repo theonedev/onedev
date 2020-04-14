@@ -27,7 +27,7 @@ public class BuildProcessor extends ReferenceParser implements MarkdownProcessor
 	@Override
 	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 		CharSequence url = RequestCycle.get().urlFor(
-				BuildDashboardPage.class, BuildDashboardPage.paramsOf(referenceable, null)); 
+				BuildDashboardPage.class, BuildDashboardPage.paramsOf(referenceable)); 
 		Build build = OneDev.getInstance(BuildManager.class).find(referenceable);
 		if (build != null && build.getVersion() != null)
 			referenceText += " (" + HtmlEscape.escapeHtml5(build.getVersion()) + ")";

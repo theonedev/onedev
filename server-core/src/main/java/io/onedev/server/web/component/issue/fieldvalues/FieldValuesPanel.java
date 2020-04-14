@@ -85,7 +85,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						if (issue != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
-									IssueActivitiesPage.paramsOf(issue, null));
+									IssueActivitiesPage.paramsOf(issue));
 							link.add(new Label("label", "#" + issue.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);
@@ -98,7 +98,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", 
-									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
+									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 							String buildInfo = "#" + build.getNumber();
 							if (build.getVersion() != null)
 								buildInfo += " (" + build.getVersion() + ")";
@@ -114,7 +114,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
-									PullRequestActivitiesPage.paramsOf(request, null));
+									PullRequestActivitiesPage.paramsOf(request));
 							link.add(new Label("label", "#" + request.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);

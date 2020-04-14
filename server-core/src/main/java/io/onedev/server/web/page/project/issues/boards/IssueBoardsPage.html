@@ -1,7 +1,5 @@
 <wicket:extend>
-	<div id="issue-boards">
-		<wicket:container wicket:id="content"></wicket:container>
-	</div>
+	<div wicket:id="content" id="issue-boards"></div>
 	<wicket:fragment wicket:id="hasBoardsFrag">
 		<div class="head">
 			<form wicket:id="query" class="clearable-wrapper">
@@ -22,9 +20,11 @@
 				</div>
 			</form>
 		</div>
-		<div wicket:id="feedback" class="feedback"></div>
-		<div class="body">
-			<div wicket:id="columns" class="column"></div>
+		<div wicket:id="body" class="body">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div class="columns">
+				<div wicket:id="columns" class="column"></div>
+			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">

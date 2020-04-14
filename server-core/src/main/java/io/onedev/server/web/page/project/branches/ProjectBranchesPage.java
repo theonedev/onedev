@@ -659,7 +659,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				WebMarkupContainer requestLink;
 				if (effectiveRequest != null && ab.getAhead() != 0) {
 					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
-							PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(effectiveRequest, null)); 
+							PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(effectiveRequest)); 
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
 						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));

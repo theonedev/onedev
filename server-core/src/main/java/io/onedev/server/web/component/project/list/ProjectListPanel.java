@@ -65,7 +65,7 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 	
-	private final String query;
+	private String query;
 	
 	private final int expectedCount;
 	

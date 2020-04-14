@@ -43,7 +43,7 @@ public class IssuePullRequestsPanel extends GenericPanel<Issue> {
 				PullRequest request = item.getModelObject();
 
 				Link<Void> link = new BookmarkablePageLink<Void>("title", PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(request, null));
+						PullRequestActivitiesPage.paramsOf(request));
 				link.add(new Label("label",  "#" + request.getNumber() + " - " + request.getTitle()));
 				item.add(link);
 				item.add(new RequestStatusLabel("status", item.getModel()));

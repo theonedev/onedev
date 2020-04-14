@@ -28,6 +28,7 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -66,6 +67,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
@@ -74,6 +76,7 @@ import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -85,15 +88,15 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
-	private final String query;
+	private String query;
 	
 	private IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
 
@@ -575,25 +578,55 @@ public abstract class IssueListPanel extends Panel {
 				Issue issue = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
-				QueryPosition position;
+				Cursor cursor;
 				if (getProject() != null) {
-					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+					cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				} else {
-					position = null;
+					cursor = null;
 				}
 				
-				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue, position)).toString();
-
-				String label = "#" + issue.getNumber();
+				String label;
 				if (getProject() == null)
-					label = issue.getProject().getName() + label;
-				fragment.add(new Label("number", "<a href='" + url + "'>" + label + "</a>")
-						.setEscapeModelStrings(false));
+					label = issue.getProject().getName() + "#" + issue.getNumber();
+				else
+					label = "#" + issue.getNumber();
 				
+				ActionablePageLink<Void> numberLink;
+				fragment.add(numberLink = new ActionablePageLink<Void>("number", 
+						IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue)) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of(label);
+					}
+
+					@Override
+					protected void doBeforeNav(AjaxRequestTarget target) {
+						WebSession.get().setIssueCursor(rowModel.getObject().getProject(), cursor);
+					}
+					
+				});
+				
+				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+						IssueActivitiesPage.paramsOf(issue)).toString();
+
 				String transformed = new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle());
-				fragment.add(new Label("title", transformed).setEscapeModelStrings(false));
+				fragment.add(new Label("title", transformed) {
+
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						String script = String.format(""
+								+ "$('#%s a:not(.embedded-reference)').click(function() {"
+								+ "  $('#%s').click();"
+								+ "  return false;"
+								+ "});", 
+								getMarkupId(), numberLink.getMarkupId());
+						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+					
+				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 				
 				fragment.add(new WebMarkupContainer("copy").add(
 						new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));

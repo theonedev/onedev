@@ -787,19 +787,24 @@ onedev.server.markdown = {
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
 
+		var defaultHeight = 200;
 		var inputHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".inputHeight");
 		if (inputHeight) {
 			$input.outerHeight(parseInt(inputHeight));
 		} else {
-			$input.outerHeight(100);
+			$input.outerHeight(defaultHeight);
 		}
 		$edit.outerHeight($input.outerHeight());
-		var renderedHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight");
-		if (renderedHeight) {
-			$rendered.outerHeight(parseInt(renderedHeight));
+		
+		var renderedHeight;
+		if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
+			renderedHeight = $input.outerHeight();
 		} else {
-			$rendered.outerHeight(100);
+			renderedHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight");
+			if (!renderedHeight) 
+				renderedHeight  = defaultHeight;
 		}
+		$rendered.outerHeight(renderedHeight);
 		$preview.outerHeight($rendered.outerHeight());
     },
 	onWindowLoad: function(containerId) {

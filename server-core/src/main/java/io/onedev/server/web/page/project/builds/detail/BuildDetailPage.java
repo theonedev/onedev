@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +45,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
@@ -69,8 +69,8 @@ import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class BuildDetailPage extends ProjectPage 
@@ -81,8 +81,6 @@ public abstract class BuildDetailPage extends ProjectPage
 	private static final int MAX_TABS_BEFORE_COLLAPSE = 10;
 	
 	protected final IModel<Build> buildModel;
-	
-	private final QueryPosition position;
 	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
@@ -100,7 +98,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				if (build == null)
 					throw new EntityNotFoundException("Unable to find build #" + buildNumber + " in project " + getProject());
 				else if (!build.getProject().equals(getProject()))
-					throw new RestartResponseException(getPageClass(), paramsOf(build, position));
+					throw new RestartResponseException(getPageClass(), paramsOf(build));
 				else
 					return build;
 			}
@@ -109,8 +107,6 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 		if (!getBuild().isValid())
 			throw new RestartResponseException(InvalidBuildPage.class, InvalidBuildPage.paramsOf(getBuild()));
-		
-		position = QueryPosition.from(params);
 	}
 	
 	@Override
@@ -192,7 +188,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
 				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap);
-				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild(), position));
+				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 			}
 			
 			@Override
@@ -339,7 +335,7 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 								return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
-										FixedIssuesPage.paramsOf(getBuild(), getPosition(), 
+										FixedIssuesPage.paramsOf(getBuild(), 
 										getBuild().getJob().getDefaultFixedIssuesFilter()));
 							}
 							
@@ -383,17 +379,20 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					@Override
-					protected QueryPositionSupport<Build> getQueryPositionSupport() {
-						return new QueryPositionSupport<Build>() {
+					protected CursorSupport<Build> getCursorSupport() {
+						return new CursorSupport<Build>() {
 
 							@Override
-							public QueryPosition getPosition() {
-								return position;
+							public Cursor getCursor() {
+								return WebSession.get().getBuildCursor(getProject());
 							}
 
 							@Override
-							public void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
-								BuildDetailPage.this.navTo(target, entity, position);
+							public void navTo(AjaxRequestTarget target, Build entity, Cursor cursor) {
+								WebSession.get().setBuildCursor(getProject(), cursor);
+								PageParameters params = getPageParameters();
+								params.set(PARAM_BUILD, entity.getNumber());
+								setResponsePage(getPageClass(), params);
 							}
 							
 						};
@@ -406,10 +405,10 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
+								Cursor cursor = WebSession.get().getBuildCursor(getProject());
 								PageParameters params = ProjectBuildsPage.paramsOf(
-										getProject(), 
-										QueryPosition.getQuery(position), 
-										QueryPosition.getPage(position) + 1); 
+										getProject(), Cursor.getQuery(cursor), 
+										Cursor.getPage(cursor) + 1); 
 								setResponsePage(ProjectBuildsPage.class, params);
 							}
 							
@@ -426,10 +425,6 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 	}
 	
-	public QueryPosition getPosition() {
-		return position;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -442,23 +437,16 @@ public abstract class BuildDetailPage extends ProjectPage
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position) {
-		return paramsOf(build.getFQN(), position);
+	public static PageParameters paramsOf(Build build) {
+		return paramsOf(build.getFQN());
 	}
 	
-	public static PageParameters paramsOf(ProjectScopedNumber buildFQN, @Nullable QueryPosition position) {
+	public static PageParameters paramsOf(ProjectScopedNumber buildFQN) {
 		PageParameters params = ProjectPage.paramsOf(buildFQN.getProject());
 		params.add(PARAM_BUILD, buildFQN.getNumber());
-		if (position != null)
-			position.fill(params);
 		return params;
 	}
 	
-	protected void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
-		PageParameters params = BuildDetailPage.paramsOf(entity, position);
-		setResponsePage(getPageClass(), params);
-	}
-
 	@Override
 	public List<String> getInputNames() {
 		return new ArrayList<>(getBuild().getJob().getParamSpecMap().keySet());

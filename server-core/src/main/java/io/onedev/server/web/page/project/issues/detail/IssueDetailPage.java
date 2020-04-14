@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.issues.detail;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +35,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.util.script.identity.SiteAdministrator;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
@@ -49,8 +49,8 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class IssueDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
@@ -58,8 +58,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	public static final String PARAM_ISSUE = "issue";
 	
 	protected final IModel<Issue> issueModel;
-	
-	private final QueryPosition position;
 	
 	public IssueDetailPage(PageParameters params) {
 		super(params);
@@ -77,14 +75,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				if (issue == null)
 					throw new EntityNotFoundException("Unable to find issue #" + issueNumber + " in project " + getProject());
 				else if (!issue.getProject().equals(getProject()))
-					throw new RestartResponseException(getPageClass(), paramsOf(issue, position));
+					throw new RestartResponseException(getPageClass(), paramsOf(issue));
 				else
 					return issue;
 			}
 
 		};
-	
-		position = QueryPosition.from(params);
 	}
 	
 	public Issue getIssue() {
@@ -156,18 +152,18 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					}
 
 					@Override
-					protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-						return new QueryPositionSupport<Issue>() {
+					protected CursorSupport<Issue> getCursorSupport() {
+						return new CursorSupport<Issue>() {
 
 							@Override
-							public QueryPosition getPosition() {
-								return position;
+							public Cursor getCursor() {
+								return WebSession.get().getIssueCursor(getProject());
 							}
 
 							@Override
-							public void navTo(AjaxRequestTarget target, Issue entity, QueryPosition position) {
-								PageParameters params = IssueDetailPage.paramsOf(entity, position);
-								setResponsePage(getPageClass(), params);
+							public void navTo(AjaxRequestTarget target, Issue entity, Cursor cursor) {
+								WebSession.get().setIssueCursor(getProject(), cursor);
+								setResponsePage(getPageClass(), paramsOf(entity));
 							}
 							
 						};
@@ -180,10 +176,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							@Override
 							public void onClick() {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								Cursor cursor = WebSession.get().getIssueCursor(getProject());
 								PageParameters params = ProjectIssueListPage.paramsOf(
 										getProject(), 
-										QueryPosition.getQuery(position), 
-										QueryPosition.getPage(position) + 1); 
+										Cursor.getQuery(cursor), 
+										Cursor.getPage(cursor) + 1); 
 								setResponsePage(ProjectIssueListPage.class, params);
 							}
 							
@@ -243,10 +240,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 	}
 	
-	public QueryPosition getPosition() {
-		return position;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -260,15 +253,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Issue issue, @Nullable QueryPosition position) {
-		return paramsOf(issue.getFQN(), position);
+	public static PageParameters paramsOf(Issue issue) {
+		return paramsOf(issue.getFQN());
 	}
 
-	public static PageParameters paramsOf(ProjectScopedNumber issueFQN, @Nullable QueryPosition position) {
+	public static PageParameters paramsOf(ProjectScopedNumber issueFQN) {
 		PageParameters params = ProjectPage.paramsOf(issueFQN.getProject());
 		params.add(PARAM_ISSUE, issueFQN.getNumber());
-		if (position != null)
-			position.fill(params);
 		return params;
 	}
 	
@@ -299,7 +290,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue(), position));
+					return new ViewStateAwarePageLink<Void>(linkId, pageClass, paramsOf(getIssue()));
 				}
 				
 			};

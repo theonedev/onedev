@@ -4,9 +4,6 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
-
-import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -22,7 +19,6 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public class HtmlReportPage extends BuildDetailPage {
@@ -92,15 +88,8 @@ public class HtmlReportPage extends BuildDetailPage {
 		return reportName;
 	}
 
-	@Override
-	protected void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
-		PageParameters params = BuildDetailPage.paramsOf(entity, position);
-		params.add(PARAM_REPORT, getReportName());
-		setResponsePage(getPageClass(), params);
-	}
-
-	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, String reportName) {
-		PageParameters params = paramsOf(build, position);
+	public static PageParameters paramsOf(Build build, String reportName) {
+		PageParameters params = paramsOf(build);
 		params.add(PARAM_REPORT, reportName);
 		return params;
 	}

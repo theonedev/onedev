@@ -8,7 +8,7 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class BuildEvent extends ProjectEvent implements CommitAware {
 
@@ -28,8 +28,8 @@ public class BuildEvent extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectAwareCommit getCommit() {
-		return new ProjectAwareCommit(build.getProject(), ObjectId.fromString(build.getCommitHash()));
+	public ProjectScopedCommit getCommit() {
+		return new ProjectScopedCommit(build.getProject(), ObjectId.fromString(build.getCommitHash()));
 	}
 
 	@Override

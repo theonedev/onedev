@@ -89,7 +89,7 @@ public class RunJobAction extends PostBuildAction {
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
 				OneDev.getInstance(JobManager.class).submit(build.getProject(), 
-						build.getCommitId(), getJobName(), paramMap); 
+						build.getCommitId(), getJobName(), paramMap, null); 
 			}
 			
 		}.run();

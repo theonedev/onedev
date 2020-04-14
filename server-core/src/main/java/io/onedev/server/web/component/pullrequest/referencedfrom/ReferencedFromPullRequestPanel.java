@@ -44,7 +44,7 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 
 		if (SecurityUtils.canReadCode(request.getTargetProject())) {
 			String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
-					PullRequestActivitiesPage.paramsOf(request, null)).toString();
+					PullRequestActivitiesPage.paramsOf(request)).toString();
 			ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
 			String transformed = transformer.apply(request.getTitle());
 			String title;

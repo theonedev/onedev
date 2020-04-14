@@ -42,8 +42,10 @@ public class VariableInterpolator implements Function<String, String> {
 	@Override
 	public String apply(String t) {
 		for (JobVariable var: JobVariable.values()) {
-			if (var.name().toLowerCase().equals(t))
-				return var.getValue(build);
+			if (var.name().toLowerCase().equals(t)) {
+				String value = var.getValue(build);
+				return value!=null?value:"";
+			}
 		}
 		if (t.startsWith(PREFIX_PARAMS)) {
 			String paramName = t.substring(PREFIX_PARAMS.length());

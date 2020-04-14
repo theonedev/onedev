@@ -76,7 +76,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
@@ -107,8 +107,8 @@ public abstract class IssueSidePanel extends Panel {
 			}
 
 			@Override
-			protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-				return IssueSidePanel.this.getQueryPositionSupport();
+			protected CursorSupport<Issue> getCursorSupport() {
+				return IssueSidePanel.this.getCursorSupport();
 			}
 			
 		});
@@ -556,7 +556,7 @@ public abstract class IssueSidePanel extends Panel {
 	protected abstract Issue getIssue();
 
 	@Nullable
-	protected abstract QueryPositionSupport<Issue> getQueryPositionSupport();
+	protected abstract CursorSupport<Issue> getCursorSupport();
 	
 	protected abstract Component newDeleteLink(String componentId);
 }

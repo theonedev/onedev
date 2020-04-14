@@ -15,7 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 
@@ -28,7 +28,7 @@ public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 	private final String value;
 	
 	public IncludesCommitCriteria(@Nullable Project project, String value) {
-		ProjectAwareCommit commitId = EntityQuery.getCommitId(project, value);
+		ProjectScopedCommit commitId = EntityQuery.getCommitId(project, value);
 		this.project = commitId.getProject();
 		this.commitId = commitId.getCommitId();
 		this.value = value;

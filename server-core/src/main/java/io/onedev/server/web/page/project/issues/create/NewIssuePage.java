@@ -97,7 +97,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 				super.onSubmit();
 				Issue issue = editor.getConvertedInput();
 				OneDev.getInstance(IssueManager.class).open(issue);
-				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
+				setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue));
 			}
 			
 		};

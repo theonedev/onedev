@@ -24,7 +24,7 @@ public class PullRequestProcessor extends ReferenceParser implements MarkdownPro
 	@Override
 	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
 		CharSequence url = RequestCycle.get().urlFor(
-				PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(referenceable, null)); 
+				PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(referenceable)); 
 		return String.format("<a href='%s' class='pull-request reference' data-reference='%s'>%s</a>", 
 				url, referenceable.toString(), referenceText);
 	}

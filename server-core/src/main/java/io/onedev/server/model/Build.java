@@ -269,6 +269,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private Date retryDate;
 	
+	private String updatedRef;
+	
 	@Column(length=MAX_ERROR_MESSAGE_LEN)
 	private String errorMessage;
 
@@ -505,6 +507,15 @@ public class Build extends AbstractEntity implements Referenceable {
 				errorMessage = StringUtils.replace(errorMessage, secretValue, SecretInput.MASK);
 		}
 		this.errorMessage = errorMessage;
+	}
+
+	@Nullable
+	public String getUpdatedRef() {
+		return updatedRef;
+	}
+
+	public void setUpdatedRef(String updatedRef) {
+		this.updatedRef = updatedRef;
 	}
 
 	public Collection<PullRequestBuild> getPullRequestBuilds() {
