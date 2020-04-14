@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.event.Event;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -63,7 +62,6 @@ public class ScriptingValue implements ValueProvider {
 	public List<String> getValue() {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("build", Build.get());
-		variables.put("event", Event.get());
 		List<String> values = new ArrayList<>();
 		Object result = GroovyUtils.evalScriptByName(scriptName, variables);
 		if (result instanceof Collection) {

@@ -50,7 +50,7 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class BuildQuery extends EntityQuery<Build> {
 
@@ -200,7 +200,7 @@ public class BuildQuery extends EntityQuery<Build> {
 							case FIELD_PROJECT:
 								return new ProjectCriteria(value);
 							case FIELD_COMMIT:
-								ProjectAwareCommit commitId = getCommitId(project, value); 
+								ProjectScopedCommit commitId = getCommitId(project, value); 
 								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());
 							case FIELD_JOB:
 								return new JobCriteria(value);

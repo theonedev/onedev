@@ -1789,4 +1789,8 @@ public class DataMigrator {
 		}
 	}
 	
+	// from 3.0.11 to 3.0.12
+	private void migrate39(File dataDir, Stack<Integer> versions) {
+	}
+	
 }

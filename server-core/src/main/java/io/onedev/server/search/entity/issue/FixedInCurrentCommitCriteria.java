@@ -6,7 +6,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneException;
 import io.onedev.server.model.Issue;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class FixedInCurrentCommitCriteria extends IssueCriteria {
 
@@ -14,16 +14,16 @@ public class FixedInCurrentCommitCriteria extends IssueCriteria {
 	
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		if (ProjectAwareCommit.get() != null)
-			return new FixedInCommitCriteria(ProjectAwareCommit.get()).getPredicate(root, builder);
+		if (ProjectScopedCommit.get() != null)
+			return new FixedInCommitCriteria(ProjectScopedCommit.get()).getPredicate(root, builder);
 		else
 			throw new OneException("No commit id in query context");
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (ProjectAwareCommit.get() != null)
-			return new FixedInCommitCriteria(ProjectAwareCommit.get()).matches(issue);
+		if (ProjectScopedCommit.get() != null)
+			return new FixedInCommitCriteria(ProjectScopedCommit.get()).matches(issue);
 		else
 			throw new OneException("No commit in query context");
 	}

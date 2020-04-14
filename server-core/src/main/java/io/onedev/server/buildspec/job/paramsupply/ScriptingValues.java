@@ -10,7 +10,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.event.Event;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -62,7 +61,6 @@ public class ScriptingValues implements ValuesProvider {
 	public List<List<String>> getValues() {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("build", Build.get());
-		variables.put("event", Event.get());
 		List<List<String>> values = new ArrayList<>();
 		Object result = GroovyUtils.evalScriptByName(scriptName, variables);
 		if (result instanceof List) {

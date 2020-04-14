@@ -65,8 +65,8 @@ import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.Event;
 import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRetrying;
@@ -174,7 +174,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Transactional
 	@Override
-	public Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap) {
+	public Build submit(Project project, ObjectId commitId, String jobName, 
+			Map<String, List<String>> paramMap, @Nullable String updatedRef) {
     	Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
     	transactionManager.mustRunAfterTransaction(new Runnable() {
 
@@ -191,14 +192,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         	
         	validate(project, commitId);
         	
-			return submit(project, commitId, jobName, paramMap, new LinkedHashSet<>()); 
+			return submit(project, commitId, jobName, paramMap, updatedRef, new LinkedHashSet<>()); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
 	private Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, Set<String> checkedJobNames) {
+			Map<String, List<String>> paramMap, String updatedRef, Set<String> checkedJobNames) {
 		
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
@@ -209,6 +210,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setSubmitDate(new Date());
 			build.setStatus(Build.Status.WAITING);
 			build.setSubmitter(SecurityUtils.getUser());
+			build.setUpdatedRef(updatedRef);
 			
 			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 			
@@ -254,7 +256,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							@Override
 							public void run(Map<String, List<String>> params) {
 								Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-										params, new LinkedHashSet<>(checkedJobNames));
+										params, updatedRef, new LinkedHashSet<>(checkedJobNames));
 								BuildDependence dependence = new BuildDependence();
 								dependence.setDependency(dependencyBuild);
 								dependence.setDependent(build);
@@ -607,65 +609,66 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		Event.push(event);
-		try {
-			if (event instanceof CommitAware) {
-				ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
-				if (!commitId.equals(ObjectId.zeroId())) {
-					ScriptIdentity.push(new JobIdentity(event.getProject(), commitId));
-					try {
-						BuildSpec buildSpec = event.getProject().getBuildSpec(commitId);
-						if (buildSpec != null) {
-							for (Job job: buildSpec.getJobs()) {
-								JobTrigger trigger = job.getMatchedTrigger(event);
-								if (trigger != null) {
-									Map<String, List<List<String>>> paramMatrix = ParamSupply.getParamMatrix(trigger.getParams());						
-									Long projectId = event.getProject().getId();
-									
-									// run asynchrously as session may get closed due to exception
-									transactionManager.runAfterCommit(new Runnable() {
+		if (event instanceof CommitAware) {
+			ObjectId commitId = ((CommitAware) event).getCommit().getCommitId();
+			if (!commitId.equals(ObjectId.zeroId())) {
+				ScriptIdentity.push(new JobIdentity(event.getProject(), commitId));
+				try {
+					BuildSpec buildSpec = event.getProject().getBuildSpec(commitId);
+					if (buildSpec != null) {
+						for (Job job: buildSpec.getJobs()) {
+							JobTrigger trigger = job.getMatchedTrigger(event);
+							if (trigger != null) {
+								Map<String, List<List<String>>> paramMatrix = ParamSupply.getParamMatrix(trigger.getParams());						
+								Long projectId = event.getProject().getId();
+								
+								String updatedRef;
+								if (event instanceof RefUpdated)
+									updatedRef = ((RefUpdated)event).getRefName();
+								else
+									updatedRef = null;
+								
+								// run asynchrously as session may get closed due to exception
+								transactionManager.runAfterCommit(new Runnable() {
 
-										@Override
-										public void run() {
-											sessionManager.runAsync(new Runnable() {
-												
-												@Override
-												public void run() {
-													Project project = projectManager.load(projectId);
-													try {
-														new MatrixRunner<List<String>>(paramMatrix) {
-															
-															@Override
-															public void run(Map<String, List<String>> paramMap) {
-																submit(project, commitId, job.getName(), paramMap); 
-															}
-															
-														}.run();
-													} catch (Throwable e) {
-														String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
-																project.getName(), commitId.name(), job.getName());
-														logger.error(message, e);
-													}
+									@Override
+									public void run() {
+										sessionManager.runAsync(new Runnable() {
+											
+											@Override
+											public void run() {
+												Project project = projectManager.load(projectId);
+												try {
+													new MatrixRunner<List<String>>(paramMatrix) {
+														
+														@Override
+														public void run(Map<String, List<String>> paramMap) {
+															submit(project, commitId, job.getName(), paramMap, updatedRef); 
+														}
+														
+													}.run();
+												} catch (Throwable e) {
+													String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
+															project.getName(), commitId.name(), job.getName());
+													logger.error(message, e);
 												}
-												
-											});
-										}
-										
-									});
-								}
+											}
+											
+										});
+									}
+									
+								});
 							}
 						}
-					} catch (Throwable e) {
-						String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
-								event.getProject().getName(), commitId.name());
-						logger.error(message, e);
-					} finally {
-						ScriptIdentity.pop();
 					}
+				} catch (Throwable e) {
+					String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
+							event.getProject().getName(), commitId.name());
+					logger.error(message, e);
+				} finally {
+					ScriptIdentity.pop();
 				}
 			}
-		} finally {
-			Event.pop();
 		}
 	}
 	
@@ -684,6 +687,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setSubmitter(SecurityUtils.getUser());
 			build.setCanceller(null);
 			build.setCancellerName(null);
+			build.setUpdatedRef(null);
+			
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());

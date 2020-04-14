@@ -44,7 +44,7 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCrite
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
@@ -103,7 +103,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						if (operator == CodeCommentQueryLexer.CreatedBy) {
 							return new CreatedByCriteria(value);
 						} else {
-							ProjectAwareCommit commitId = getCommitId(project, value); 
+							ProjectScopedCommit commitId = getCommitId(project, value); 
 							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());
 						}
 					}

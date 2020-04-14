@@ -73,7 +73,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -474,7 +474,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 															criterias.add(IssueCriteria.or(fromStateCriterias));
 															criterias.add(query.getCriteria());
 															query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
-															ProjectAwareCommit.push(new ProjectAwareCommit(project, newCommitId) {
+															ProjectScopedCommit.push(new ProjectScopedCommit(project, newCommitId) {
 
 																private static final long serialVersionUID = 1L;
 
@@ -490,7 +490,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 																	changeState(issue, transition.getToState(), new HashMap<>(), null);
 																}
 															} finally {
-																ProjectAwareCommit.pop();
+																ProjectScopedCommit.pop();
 															}
 														}
 													}

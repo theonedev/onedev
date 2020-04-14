@@ -6,7 +6,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.ProjectAwareCommit;
+import io.onedev.server.util.ProjectScopedCommit;
 
 public class RefUpdated extends ProjectEvent implements CommitAware {
 	
@@ -16,7 +16,7 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	
 	private final ObjectId newCommitId;
 	
-	private transient ProjectAwareCommit commit;
+	private transient ProjectScopedCommit commit;
 	
 	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
 		super(null, new Date(), project);
@@ -38,9 +38,9 @@ public class RefUpdated extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
-	public ProjectAwareCommit getCommit() {
+	public ProjectScopedCommit getCommit() {
 		if (commit == null)
-			commit = new ProjectAwareCommit(getProject(), newCommitId);
+			commit = new ProjectScopedCommit(getProject(), newCommitId);
 		return commit;
 	}
 
