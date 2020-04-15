@@ -166,8 +166,7 @@ public class VersionedYamlDoc extends MappingNode {
 			    		Object propertyValue,Tag customTag) {
 			        if (propertyValue == null 
 			        		|| propertyValue instanceof Collection && ((Collection) propertyValue).isEmpty()
-			        		|| propertyValue instanceof Map && ((Map) propertyValue).isEmpty()
-			        		|| property.getName().equals("uuid")) { // exclude uuid from ChoiceParam.SpecifiedChoices.Choice
+			        		|| propertyValue instanceof Map && ((Map) propertyValue).isEmpty()) { 
 			        	return null;
 			        } else {
 			        	return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);

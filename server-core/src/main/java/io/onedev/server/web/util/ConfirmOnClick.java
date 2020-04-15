@@ -7,7 +7,7 @@ import org.apache.wicket.AttributeModifier;
 public class ConfirmOnClick extends AttributeModifier {
 
 	public ConfirmOnClick(String message) {
-		super("onclick", String.format("return confirm('%s');", StringEscapeUtils.escapeEcmaScript(message)));
+		super("onclick", String.format("return !$(this).is('[disabled=disabled]') && confirm('%s');", StringEscapeUtils.escapeEcmaScript(message)));
 	}
 
 }

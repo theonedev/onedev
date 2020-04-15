@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -31,7 +32,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -39,6 +39,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
@@ -254,7 +255,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldListPage.this);
 							fragment.add(BeanContext.view("viewer1", field, Sets.newHashSet("name"), true));
 							FieldBean bean = new FieldBean();
-							bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(field.getName()));
+							bean.setPromptUponIssueOpen(getSetting().getPromptFieldsUponIssueOpen().contains(field.getName()));
 							fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
 							fragment.add(new ModalLink("edit") {
 
@@ -294,11 +295,8 @@ public class IssueFieldListPage extends IssueSettingPage {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									getSetting().getFieldSpecs().remove(index);
-									getSetting().getDefaultPromptFieldsUponIssueOpen().remove(field.getName());
-									getSetting().getListFields().remove(field.getName());
-									getSetting().onDeleteField(field.getName());
-									OneDev.getInstance(RoleManager.class).onDeleteIssueField(field.getName());
 									getSetting().setReconciled(false);
+									send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 									target.add(fieldsTable);
 									close();

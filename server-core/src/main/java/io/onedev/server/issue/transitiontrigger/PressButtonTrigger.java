@@ -2,8 +2,8 @@ package io.onedev.server.issue.transitiontrigger;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -14,6 +14,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
@@ -73,24 +75,25 @@ public class PressButtonTrigger extends TransitionTrigger {
 	}
 
 	@Override
-	public void onRenameField(String oldName, String newName) {
-		super.onRenameField(oldName, newName);
-		int index = getPromptFields().indexOf(oldName);
-		if (index != -1) {
-			if (getPromptFields().contains(newName))				
-				getPromptFields().remove(index);
-			else
-				getPromptFields().set(index, newName);
+	public Collection<String> getUndefinedFields() {
+		Collection<String> undefinedFields = super.getUndefinedFields();
+		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		for (String field: getPromptFields()) {
+			if (setting.getFieldSpec(field) == null)
+				undefinedFields.add(field);
 		}
+		return undefinedFields;
 	}
 
 	@Override
-	public boolean onDeleteField(String fieldName) {
-		if (super.onDeleteField(fieldName))
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		if (super.fixUndefinedFields(resolutions))
 			return true;
-		for (Iterator<String> it = getPromptFields().iterator(); it.hasNext();) {
-			if (it.next().equals(fieldName))
-				it.remove();
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) 
+				ReconcileUtils.renameItem(getPromptFields(), entry.getKey(), entry.getValue().getNewField());
+			else 
+				getPromptFields().remove(entry.getKey());
 		}
 		return false;
 	}
@@ -108,17 +111,6 @@ public class PressButtonTrigger extends TransitionTrigger {
 		if (getAuthorizedRoles().contains(roleName))
 			usage.add("authorized roles");
 		return usage;
-	}
-
-	@Override
-	public Collection<String> getUndefinedFields() {
-		Collection<String> undefinedFields = super.getUndefinedFields();
-		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		for (String field: getPromptFields()) {
-			if (setting.getFieldSpec(field) == null)
-				undefinedFields.add(field);
-		}
-		return undefinedFields;
 	}
 
 	public boolean isAuthorized(Project project) {

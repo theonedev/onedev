@@ -4,8 +4,8 @@ public interface IdManager {
 	
 	void init();
 	
-	void init(Class<?> entityClass);
-	
 	long nextId(Class<?> entityClass);
+	
+	void useId(Class<?> entityClass, long id);
 	
 }

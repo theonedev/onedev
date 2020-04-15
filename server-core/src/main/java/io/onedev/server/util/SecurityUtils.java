@@ -69,8 +69,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static Collection<User> getAuthorizedUsers(Project project, Permission permission) {
 		Collection<User> authorizedUsers = new HashSet<>();
 		authorizedUsers.add(OneDev.getInstance(UserManager.class).getRoot());
-		if (project.getOwner() != null)
-			authorizedUsers.add(project.getOwner());
 		Group anonymousGroup = OneDev.getInstance(GroupManager.class).findAnonymous();
 		for (GroupAuthorization authorization: project.getGroupAuthorizations()) {
 			Group group = authorization.getGroup();

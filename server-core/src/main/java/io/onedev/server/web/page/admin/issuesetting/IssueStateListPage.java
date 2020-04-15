@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -36,6 +37,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
@@ -262,12 +264,11 @@ public class IssueStateListPage extends IssueSettingPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									StateSpec state = getState();
 									getSetting().getStateSpecs().remove(index);
-									getSetting().onDeleteState(state.getName());
 									getSetting().setReconciled(false);
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 									target.add(statesTable);
+									send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 									close();
 								}
 								

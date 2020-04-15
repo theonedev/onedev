@@ -27,7 +27,6 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.AndCriteriaCont
 import io.onedev.server.search.entity.project.ProjectQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.NotCriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorValueCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
@@ -89,16 +88,9 @@ public class ProjectQuery extends EntityQuery<Project> {
 				projectCriteria = new ProjectQueryBaseVisitor<EntityCriteria<Project>>() {
 
 					@Override
-					public EntityCriteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
-						return new OwnedByMeCriteria();
-					}
-					
 					public EntityCriteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
-							return new ForksOfCriteria(value);
-						else
-							return new OwnedByCriteria(value);
+						return new ForksOfCriteria(value);
 					}
 					
 					@Override

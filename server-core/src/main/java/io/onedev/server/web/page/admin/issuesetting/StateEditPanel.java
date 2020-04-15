@@ -5,6 +5,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -16,6 +17,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -88,8 +90,8 @@ abstract class StateEditPanel extends Panel {
 					if (stateIndex != -1) {
 						StateSpec oldState = getSetting().getStateSpecs().get(stateIndex);
 						if (!state.getName().equals(oldState.getName())) { 
-							getSetting().onRenameState(oldState.getName(), state.getName());
 							getSetting().setReconciled(false);
+							send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 						}
 						getSetting().getStateSpecs().set(stateIndex, state);
 					} else {

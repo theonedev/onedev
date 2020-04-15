@@ -640,7 +640,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
-		for (JobSecret secret: getProject().getBuildSetting().getHierarchySecrets(getProject())) {
+		for (JobSecret secret: getProject().getBuildSetting().getJobSecrets()) {
 			if (secret.isAuthorized(getProject(), getCommitId()))
 				secretValuesToMask.add(secret.getValue());
 		}

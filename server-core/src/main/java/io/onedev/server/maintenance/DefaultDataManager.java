@@ -37,6 +37,7 @@ import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarting;
+import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
@@ -51,7 +52,6 @@ import io.onedev.server.model.support.administration.SshSettings;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
 import io.onedev.server.notification.MailManager;
-import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -68,8 +68,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final SettingManager settingManager;
 	
-	private final IdManager idManager;
-	
 	private final Validator validator;
 	
 	private final PersistManager persistManager;
@@ -85,11 +83,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	private String backupTaskId;
 
     private ServerConfig serverConfig;
-
+    
     private ServerKeyPairPopulator keyPairPopulator;
-	
+    
 	@Inject
-	public DefaultDataManager(IdManager idManager, UserManager userManager, 
+	public DefaultDataManager(UserManager userManager, 
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService, RoleManager roleManager,
@@ -98,7 +96,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.settingManager = settingManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
-		this.idManager = idManager;
 		this.persistManager = persistManager;
 		this.mailManager = mailManager;
 		this.passwordService = passwordService;
@@ -119,7 +116,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			system.setName(OneDev.NAME);
 			system.setEmail("no email");
 			system.setPassword("no password");
-			userManager.save(system, null);
+    		userManager.replicate(system);
 		}
 		User administrator = userManager.get(User.ROOT_ID);		
 		if (administrator == null) {
@@ -137,8 +134,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				public void complete() {
 					User user = (User) getSetting();
 					user.setPassword(passwordService.encryptPassword(user.getPassword()));
-					userManager.save(user, null);
-					idManager.init(User.class);
+		    		userManager.replicate(user);
 				}
 				
 			});
@@ -272,8 +268,14 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		if (roleManager.count() == 0) 
+		if (roleManager.get(Role.MANAGER_ID) == null) {
+			Role manager = new Role();
+			manager.setName("Manager");
+			manager.setId(Role.MANAGER_ID);
+			manager.setManageProject(true);
+			roleManager.replicate(manager);
 			roleManager.setupDefaults();
+		}
 		
 		return manualConfigs;
 	}

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -13,8 +14,10 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.search.entity.AndEntityCriteria;
-import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 public class AndIssueCriteria extends IssueCriteria {
 	
@@ -50,50 +53,11 @@ public class AndIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void onRenameState(String oldName, String newName) {
-		for (IssueCriteria criteria: criterias)
-			criteria.onRenameState(oldName, newName);
-	}
-
-	@Override
-	public boolean onDeleteState(String stateName) {
-		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().onDeleteState(stateName))
-				it.remove();
-		}
-		return criterias.isEmpty();
-	}
-	
-	@Override
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
 		for (IssueCriteria criteria: criterias)
 			undefinedFields.addAll(criteria.getUndefinedFields());
 		return undefinedFields;
-	}
-
-	@Override
-	public void onRenameField(String oldName, String newName) {
-		for (IssueCriteria criteria: criterias)
-			criteria.onRenameField(oldName, newName);
-	}
-
-	@Override
-	public boolean onDeleteField(String fieldName) {
-		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().onDeleteField(fieldName))
-				it.remove();
-		}
-		return criterias.isEmpty();
-	}
-
-	@Override
-	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().onEditFieldValues(fieldName, valueSetEdit))
-				it.remove();
-		}
-		return criterias.isEmpty();
 	}
 
 	@Override
@@ -104,6 +68,33 @@ public class AndIssueCriteria extends IssueCriteria {
 		return undefinedFieldValues;
 	}
 
+	@Override
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
+			if (it.next().fixUndefinedStates(resolutions))
+				it.remove();
+		}
+		return criterias.isEmpty();
+	}
+	
+	@Override
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
+			if (it.next().fixUndefinedFields(resolutions))
+				it.remove();
+		}
+		return criterias.isEmpty();
+	}
+	
+	@Override
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
+			if (it.next().fixUndefinedFieldValues(resolutions))
+				it.remove();
+		}
+		return criterias.isEmpty();
+	}
+	
 	@Override
 	public void fill(Issue issue) {
 		for (IssueCriteria criteria: criterias)

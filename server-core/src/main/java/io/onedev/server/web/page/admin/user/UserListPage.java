@@ -48,7 +48,6 @@ import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
-import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
@@ -56,6 +55,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
@@ -279,19 +279,34 @@ public class UserListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
 				
-				fragment.add(new UserDeleteLink("delete") {
+				fragment.add(new Link<Void>("delete") {
 
 					@Override
-					protected User getUser() {
-						return rowModel.getObject();
-					}
-
-					@Override
-					protected void onDeleted(AjaxRequestTarget target) {
+					public void onClick() {
+						OneDev.getInstance(UserManager.class).delete(rowModel.getObject());
 						setResponsePage(UserListPage.class, getPageParameters());
 					}
-										
-				});
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						if (!isEnabled())
+							tag.put("disabled", "disabled");
+						User user = rowModel.getObject();
+						if (user.isRoot())
+							tag.put("title", "Root user can not be deleted");
+						else if (user.equals(SecurityUtils.getUser()))
+							tag.put("title", "You can not delete yourself");
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						User user = rowModel.getObject();
+						setEnabled(!user.isRoot() && !user.equals(SecurityUtils.getUser()));
+					}
+
+				}.add(new ConfirmOnClick("Do you really want to delete user '" + rowModel.getObject().getDisplayName() + "'?")));
 				
 				fragment.add(new Link<Void>("impersonate") {
 

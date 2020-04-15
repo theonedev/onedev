@@ -13,17 +13,16 @@ import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
-import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -40,28 +39,30 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final IssueFieldManager issueFieldManager;
     
-    private final ListenerRegistry listenerRegistry;
+    private final IdManager idManager;
     
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-    		IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry) {
+    		IssueFieldManager issueFieldManager, IdManager idManager) {
         super(dao);
         
         this.projectManager = projectManager;
         this.settingManager = settingManager;
         this.issueFieldManager = issueFieldManager;
-        this.listenerRegistry = listenerRegistry;
+        this.idManager = idManager;
     }
 
+	@Transactional
+	@Override
+	public void replicate(User user) {
+		getSession().replicate(user, ReplicationMode.OVERWRITE);
+		idManager.useId(User.class, user.getId());
+	}
+	
     @Transactional
     @Override
 	public void save(User user, String oldName) {
-    	if (user.isRoot() || user.isSystem()) {
-    		getSession().replicate(user, ReplicationMode.OVERWRITE);
-    		listenerRegistry.post(new EntityPersisted(user, false));
-    	} else {
-    		dao.persist(user);
-    	}
+    	dao.persist(user);
 
     	if (oldName != null && !oldName.equals(user.getName())) {
     		for (Project project: projectManager.query()) {

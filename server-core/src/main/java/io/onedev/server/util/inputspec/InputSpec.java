@@ -16,11 +16,7 @@ import org.unbescape.java.JavaEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.util.Usage;
-import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
-import io.onedev.server.util.inputspec.showcondition.ValueIsNotAnyOf;
-import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -209,18 +205,6 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("\n");
 		}
 	}
-
-	public void onRenameInput(String oldName, String newName) {
-		if (showCondition != null) {
-			if (oldName.equals(showCondition.getInputName()))
-				showCondition.setInputName(newName);
-		}
-	}
-	
-	public void onDeleteInput(String inputName) {
-		if (showCondition != null && showCondition.getInputName().equals(inputName))
-			showCondition = null;
-	}
 	
 	public static Class<?> defineClass(String className, String description, Collection<? extends InputSpec> inputs) {
 		StringBuffer buffer = new StringBuffer();
@@ -255,22 +239,6 @@ public abstract class InputSpec implements Serializable {
 		return (Class<?>) GroovyUtils.evalScript(buffer.toString(), new HashMap<>());
 	}
 
-	public void onRenameUser(String oldName, String newName) {
-		
-	}
-	
-	public void onRenameGroup(String oldName, String newName) {
-		
-	}
-
-	public Usage onDeleteUser(String userName) {
-		return new Usage();
-	}
-	
-	public Usage onDeleteGroup(String groupName) {
-		return new Usage();
-	}
-	
 	public abstract List<String> convertToStrings(@Nullable Object object);
 
 	/**
@@ -292,41 +260,6 @@ public abstract class InputSpec implements Serializable {
 		return EditableUtils.getDisplayName(getClass());		
 	}
 
-	public boolean onEditInputValues(String fieldName, ValueSetEdit valueSetEdit) {
-		if (showCondition != null && showCondition.getInputName().equals(fieldName)) {
-			if (showCondition.getValueMatcher() instanceof ValueIsOneOf) {
-				ValueIsOneOf valueIsOneOf = (ValueIsOneOf) showCondition.getValueMatcher(); 
-				valueIsOneOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
-					int index = valueIsOneOf.getValues().indexOf(entry.getKey());
-					if (index != -1) {
-						if (valueIsOneOf.getValues().contains(entry.getValue()))
-							valueIsOneOf.getValues().remove(index);
-						else
-							valueIsOneOf.getValues().set(index, entry.getValue());
-					}
-				}
-				if (valueIsOneOf.getValues().isEmpty())
-					showCondition = null;
-			} else if (showCondition.getValueMatcher() instanceof ValueIsNotAnyOf) {
-				ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) showCondition.getValueMatcher();
-				valueIsNotAnyOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
-					int index = valueIsNotAnyOf.getValues().indexOf(entry.getKey());
-					if (index != -1) {
-						if (valueIsNotAnyOf.getValues().contains(entry.getValue()))
-							valueIsNotAnyOf.getValues().remove(index);
-						else
-							valueIsNotAnyOf.getValues().set(index, entry.getValue());
-					}
-				}
-				if (valueIsNotAnyOf.getValues().isEmpty())
-					showCondition = null;
-			}
-		}
-		return false;
-	}
-	
 	public boolean checkListElements(Object value, Class<?> elementClass) {
 		if (value instanceof List) {
 			for (Object element: (List<?>)value) {

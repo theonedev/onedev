@@ -50,7 +50,7 @@ public class JobSecret implements Serializable {
 		Project project = Project.get();
 		List<InputCompletion> suggestions = new ArrayList<>();
 		if (project != null) {
-			for (JobSecret secret: project.getBuildSetting().getInheritedSecrets(project)) {
+			for (JobSecret secret: project.getBuildSetting().getJobSecrets()) {
 				LinearRange match = LinearRange.match(secret.getName(), inputStatus.getContentBeforeCaret());
 				if (match != null) {
 					InputCompletion suggestion = new InputCompletion(secret.getName(), 

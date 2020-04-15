@@ -1,13 +1,27 @@
 package io.onedev.server.issue.fieldspec;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+
 import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
+import io.onedev.server.util.inputspec.showcondition.ValueIsNotAnyOf;
+import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.validation.annotation.FieldName;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
@@ -101,4 +115,112 @@ public abstract class FieldSpec extends InputSpec {
 			buffer.append("    @NameOfEmptyValue(\"" + escape(getNameOfEmptyValue()) + "\")");
 	}
 
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
+	public Collection<String> getUndefinedFields() {
+		Collection<String> undefinedFields = new HashSet<>();
+		ShowCondition showCondition = getShowCondition();
+		if (showCondition != null && getIssueSetting().getFieldSpec(showCondition.getInputName()) == null)
+			undefinedFields.add(showCondition.getInputName());
+		return undefinedFields;
+	}
+	
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
+		ShowCondition showCondition = getShowCondition();
+		if (showCondition != null) {
+			FieldSpec field = getIssueSetting().getFieldSpec(showCondition.getInputName());
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(field);
+			if (specifiedChoices != null) {
+				if (showCondition.getValueMatcher() instanceof ValueIsOneOf) {
+					ValueIsOneOf valueIsOneOf = (ValueIsOneOf) showCondition.getValueMatcher(); 
+					for (String value: valueIsOneOf.getValues()) {
+						if (!specifiedChoices.getChoiceValues().contains(value))
+							undefinedFieldValues.add(new UndefinedFieldValue(field.getName(), value));
+					}
+				} else if (showCondition.getValueMatcher() instanceof ValueIsNotAnyOf) {
+					ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) showCondition.getValueMatcher(); 
+					for (String value: valueIsNotAnyOf.getValues()) {
+						if (!specifiedChoices.getChoiceValues().contains(value))
+							undefinedFieldValues.add(new UndefinedFieldValue(field.getName(), value));
+					}
+				}
+			}
+		}
+		return undefinedFieldValues;
+	}
+	
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		ShowCondition showCondition = getShowCondition();
+		if (showCondition != null) {
+			for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+				if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
+					if (entry.getKey().equals(showCondition.getInputName()))
+						showCondition.setInputName(entry.getValue().getNewField());
+				} else if (showCondition.getInputName().equals(entry.getKey())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		ShowCondition showCondition = getShowCondition();
+		if (showCondition != null) {
+			for (Map.Entry<String, UndefinedFieldValuesResolution> resolutionEntry: resolutions.entrySet()) {
+				if (showCondition.getInputName().equals(resolutionEntry.getKey())) {
+					if (showCondition.getValueMatcher() instanceof ValueIsOneOf) {
+						ValueIsOneOf valueIsOneOf = (ValueIsOneOf) showCondition.getValueMatcher(); 
+						valueIsOneOf.getValues().removeAll(resolutionEntry.getValue().getDeletions());
+						for (Map.Entry<String, String> renameEntry: resolutionEntry.getValue().getRenames().entrySet()) {
+							int index = valueIsOneOf.getValues().indexOf(renameEntry.getKey());
+							if (index != -1) {
+								if (valueIsOneOf.getValues().contains(renameEntry.getValue()))
+									valueIsOneOf.getValues().remove(index);
+								else
+									valueIsOneOf.getValues().set(index, renameEntry.getValue());
+							}
+						}
+						if (valueIsOneOf.getValues().isEmpty())
+							return true;
+					} else if (showCondition.getValueMatcher() instanceof ValueIsNotAnyOf) {
+						ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) showCondition.getValueMatcher();
+						valueIsNotAnyOf.getValues().removeAll(resolutionEntry.getValue().getDeletions());
+						for (Map.Entry<String, String> renameEntry: resolutionEntry.getValue().getRenames().entrySet()) {
+							int index = valueIsNotAnyOf.getValues().indexOf(renameEntry.getKey());
+							if (index != -1) {
+								if (valueIsNotAnyOf.getValues().contains(renameEntry.getValue()))
+									valueIsNotAnyOf.getValues().remove(index);
+								else
+									valueIsNotAnyOf.getValues().set(index, renameEntry.getValue());
+							}
+						}
+						if (valueIsNotAnyOf.getValues().isEmpty())
+							return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+		
+	public void onRenameUser(String oldName, String newName) {
+		
+	}
+	
+	public void onRenameGroup(String oldName, String newName) {
+		
+	}
+
+	public Usage onDeleteUser(String userName) {
+		return new Usage();
+	}
+	
+	public Usage onDeleteGroup(String groupName) {
+		return new Usage();
+	}
+	
 }

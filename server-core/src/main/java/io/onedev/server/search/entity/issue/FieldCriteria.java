@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.issue;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -19,6 +20,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 
 public abstract class FieldCriteria extends IssueCriteria {
 
@@ -70,20 +72,22 @@ public abstract class FieldCriteria extends IssueCriteria {
 		return undefinedFields;
 	}
 	
+	@Override
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
+				if (entry.getKey().equals(fieldName))
+					fieldName = entry.getValue().getNewField();
+			} else if (entry.getKey().equals(fieldName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public FieldSpec getFieldSpec() {
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 		return Preconditions.checkNotNull(settingManager.getIssueSetting().getFieldSpec(fieldName));
-	}
-
-	@Override
-	public void onRenameField(String oldField, String newField) {
-		if (oldField.equals(fieldName))
-			fieldName = newField;
-	}
-
-	@Override
-	public boolean onDeleteField(String fieldName) {
-		return fieldName.equals(this.fieldName);
 	}
 	
 }

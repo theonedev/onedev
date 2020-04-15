@@ -5,7 +5,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.page.pullrequest.PullRequestListPage;
+import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 
 public class PullRequestListTab implements MainTab {
 

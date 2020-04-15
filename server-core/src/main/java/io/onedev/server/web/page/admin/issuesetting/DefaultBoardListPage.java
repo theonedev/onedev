@@ -53,8 +53,8 @@ public class DefaultBoardListPage extends IssueSettingPage {
 	}
 
 	private int getBoardSpecIndex(String boardName) {
-		for (int i=0; i<getSetting().getDefaultBoardSpecs().size(); i++) {
-			if (getSetting().getDefaultBoardSpecs().get(i).getName().equals(boardName))
+		for (int i=0; i<getSetting().getBoardSpecs().size(); i++) {
+			if (getSetting().getBoardSpecs().get(i).getName().equals(boardName))
 				return i;
 		}
 		return -1;
@@ -68,7 +68,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new BoardEditPanel(id, getSetting().getDefaultBoardSpecs(), -1) {
+				return new BoardEditPanel(id, getSetting().getBoardSpecs(), -1) {
 
 					@Override
 					protected void onBoardSaved(AjaxRequestTarget target, BoardSpec board) {
@@ -155,7 +155,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 			@Override
 			protected List<BoardSpec> getData() {
-				return getSetting().getDefaultBoardSpecs();
+				return getSetting().getBoardSpecs();
 			}
 
 		};
@@ -173,10 +173,10 @@ public class DefaultBoardListPage extends IssueSettingPage {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(getSetting().getDefaultBoardSpecs(), fromIndex+i, fromIndex+i+1);
+						Collections.swap(getSetting().getBoardSpecs(), fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(getSetting().getDefaultBoardSpecs(), fromIndex-i, fromIndex-i-1);
+						Collections.swap(getSetting().getBoardSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
@@ -208,7 +208,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 					new SideFloating(target, SideFloating.Placement.RIGHT) {
 
 						private BoardSpec getBoard() {
-							return getSetting().getDefaultBoardSpecs().get(index);
+							return getSetting().getBoardSpecs().get(index);
 							
 						}
 						@Override
@@ -235,7 +235,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 								@Override
 								protected Component newContent(String id, ModalPanel modal) {
 									sideFloating.close();
-									return new BoardEditPanel(id, getSetting().getDefaultBoardSpecs(), index) {
+									return new BoardEditPanel(id, getSetting().getBoardSpecs(), index) {
 
 										@Override
 										protected void onBoardSaved(AjaxRequestTarget target, BoardSpec board) {
@@ -263,7 +263,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getSetting().getDefaultBoardSpecs().remove(index);
+									getSetting().getBoardSpecs().remove(index);
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 									target.add(boardsTable);
 									close();

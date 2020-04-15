@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.issue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
@@ -12,6 +13,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 public class StateCriteria extends IssueCriteria {
 
@@ -55,14 +57,16 @@ public class StateCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public void onRenameState(String oldName, String newName) {
-		if (value.equals(oldName))
-			value = newName;
-	}
-	
-	@Override
-	public boolean onDeleteState(String stateName) {
-		return value.equals(stateName);
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == UndefinedStateResolution.FixType.CHANGE_TO_ANOTHER_STATE) {
+				if (entry.getKey().equals(value))
+					value = entry.getValue().getNewState();
+			} else if (entry.getKey().equals(value)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }

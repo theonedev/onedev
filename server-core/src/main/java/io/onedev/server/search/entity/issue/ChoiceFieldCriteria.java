@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -15,9 +16,9 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
 
@@ -83,13 +84,15 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 	
 	@Override
-	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		if (fieldName.equals(getFieldName())) {
-			if (valueSetEdit.getDeletions().contains(value))
-				return true;
-			String newValue = valueSetEdit.getRenames().get(value);
-			if (newValue != null)
-				value = newValue;
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		for (Map.Entry<String, UndefinedFieldValuesResolution> entry: resolutions.entrySet()) {
+			if (entry.getKey().equals(getFieldName())) {
+				if (entry.getValue().getDeletions().contains(value))
+					return true;
+				String newValue = entry.getValue().getRenames().get(value);
+				if (newValue != null)
+					value = newValue;
+			}
 		}
 		return false;
 	}

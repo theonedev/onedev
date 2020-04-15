@@ -2,10 +2,7 @@ package io.onedev.server.model.support.build;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -101,22 +98,8 @@ public class ProjectBuildSetting implements Serializable {
 		return null;
 	}
 	
-	public List<JobSecret> getInheritedSecrets(Project project) {
-		Map<String, JobSecret> inheritedSecrets = new LinkedHashMap<>();
-		for (JobSecret secret: project.getOwner().getBuildSetting().getJobSecrets())
-			inheritedSecrets.put(secret.getName(), secret);
-		inheritedSecrets.keySet().removeAll(jobSecrets.stream().map(it->it.getName()).collect(Collectors.toSet()));
-		return new ArrayList<>(inheritedSecrets.values());
-	}
-	
-	public List<JobSecret> getHierarchySecrets(Project project) {
-		List<JobSecret> hierarchySecrets = new ArrayList<>(getJobSecrets());
-		hierarchySecrets.addAll(getInheritedSecrets(project));
-		return hierarchySecrets;
-	}
-	
 	public String getSecretValue(Project project, String secretName, ObjectId commitId) {
-		for (JobSecret secret: getHierarchySecrets(project)) {
+		for (JobSecret secret: getJobSecrets()) {
 			if (secret.getName().equals(secretName)) {
 				if (secret.isAuthorized(project, commitId))				
 					return secret.getValue();
@@ -127,20 +110,8 @@ public class ProjectBuildSetting implements Serializable {
 		throw new OneException("No job secret found: " + secretName);
 	}
 	
-	public List<BuildPreservation> getHierarchyBuildPreservations(Project project) {
-		List<BuildPreservation> hierarchyBuildPreservations = new ArrayList<>(getBuildPreservations());
-		hierarchyBuildPreservations.addAll(project.getOwner().getBuildSetting().getBuildPreservations());
-		return hierarchyBuildPreservations;
-	}
-	
-	public List<ActionAuthorization> getHierarchyActionAuthorizations(Project project) {
-		List<ActionAuthorization> hierarchyBranchAuthorizations = new ArrayList<>(getActionAuthorizations());
-		hierarchyBranchAuthorizations.addAll(project.getOwner().getBuildSetting().getActionAuthorizations());
-		return hierarchyBranchAuthorizations;
-	}
-	
 	public boolean isActionAuthorized(Build build, PostBuildAction action) {
-		List<ActionAuthorization> authorizations = getHierarchyActionAuthorizations(build.getProject());
+		List<ActionAuthorization> authorizations = getActionAuthorizations();
 		if (!authorizations.isEmpty()) {
 			for (ActionAuthorization authorization: authorizations) {
 				if (authorization.isAuthorized(build, action)) 

@@ -56,7 +56,7 @@ public class WebHookManager {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
-		for (WebHook webHook: event.getProject().getHierarchyWebHooks()) {
+		for (WebHook webHook: event.getProject().getWebHooks()) {
 			for (WebHook.EventType eventType: webHook.getEventTypes()) {
 				if (eventType.includes(event)) {
 					executor.submit(new Runnable() {

@@ -12,6 +12,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.TextField;
@@ -144,9 +145,18 @@ public class RoleListPage extends AdministrationPage {
 					}
 
 					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						if (!isEnabled()) {
+							tag.put("disabled", "disabled");
+							tag.put("title", "This is a built-in role and can not be deleted");
+						}
+					}
+
+					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.isAdministrator());
+						setEnabled(!rowModel.getObject().isManager());
 					}
 					
 				}.add(new ConfirmOnClick("Do you really want to delete role '" + role.getName() + "'?")));

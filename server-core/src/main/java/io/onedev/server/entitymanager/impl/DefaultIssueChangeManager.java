@@ -30,12 +30,14 @@ import com.google.common.base.Optional;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.issue.IssueChangeEvent;
@@ -242,6 +244,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		}
 	}
 	
+	private List<TransitionSpec> getTransitionSpecs() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getTransitionSpecs();
+	}
+	
 	@Transactional
 	@Listen
 	public void on(BuildFinished event) {
@@ -266,7 +272,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 										try {
 											SecurityUtils.bindAsSystem();
 											Build build = buildManager.load(buildId);
-											for (TransitionSpec transition: build.getProject().getIssueSetting().getTransitionSpecs(true)) {
+											for (TransitionSpec transition: getTransitionSpecs()) {
 												if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 													Project project = build.getProject();
 													BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
@@ -335,7 +341,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 											Matcher matcher = new PathMatcher();
 											PullRequest request = pullRequestManager.load(requestId);
 											Project project = request.getTargetProject();
-											for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
+											for (TransitionSpec transition: getTransitionSpecs()) {
 												if (transition.getTrigger().getClass() == triggerClass) {
 													PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
 													if (trigger.getBranches() == null || PatternSet.parse(trigger.getBranches()).matches(matcher, request.getTargetBranch())) {
@@ -457,7 +463,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 															break;
 													}
 												} 
-												for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
+												for (TransitionSpec transition: getTransitionSpecs()) {
 													if (transition.getTrigger() instanceof BranchUpdateTrigger) {
 														BranchUpdateTrigger trigger = (BranchUpdateTrigger) transition.getTrigger();
 														String branches = trigger.getBranches();

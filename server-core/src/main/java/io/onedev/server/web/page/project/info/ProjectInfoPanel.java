@@ -30,9 +30,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -54,27 +52,6 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		add(new Label("name", getProject().getName()));
 		
-		User owner = getProject().getOwner();
-		User loggedInUser = SecurityUtils.getUser();
-		
-        if (SecurityUtils.isAdministrator()) {
-			add(new ViewStateAwarePageLink<Void>("owner", UserProfilePage.class, UserProfilePage.paramsOf(owner))
-					.setBody(Model.of(owner.getDisplayName())));
-		} else if (owner.equals(loggedInUser)) {
-			add(new ViewStateAwarePageLink<Void>("owner", MyProfilePage.class)
-					.setBody(Model.of(owner.getDisplayName())));
-		} else {
-			add(new Label("owner", owner.getDisplayName()) {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.setName("span");
-				}
-				
-			});
-		}
-
 		boolean canReadCode = SecurityUtils.canReadCode(getProject());
         add(new ModalLink("forkNow") {
 			
@@ -140,6 +117,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				.setVisible(canReadCode));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 
+		User loggedInUser = SecurityUtils.getUser();
 		boolean userHasNoKeys = loggedInUser.getSshKeys().isEmpty();
 		boolean isSshEnabled = ((BasePage)getPage()).isSshEnabled();
 		

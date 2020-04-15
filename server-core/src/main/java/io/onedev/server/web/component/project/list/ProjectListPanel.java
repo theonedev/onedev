@@ -55,8 +55,6 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -273,22 +271,6 @@ public class ProjectListPanel extends Panel {
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
-		});
-		
-		columns.add(new AbstractColumn<Project, Void>(Model.of("Owner")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
-					IModel<Project> rowModel) {
-				Project project = rowModel.getObject();
-				cellItem.add(new UserIdentPanel(componentId, project.getOwner(), Mode.AVATAR_AND_NAME));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "owner";
-			}
-			
 		});
 		
 		columns.add(new AbstractColumn<Project, Void>(Model.of("Last Update")) {

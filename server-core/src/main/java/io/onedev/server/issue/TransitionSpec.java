@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,14 +20,14 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
-import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -110,83 +109,6 @@ public class TransitionSpec implements Serializable {
 		return trigger.onDeleteRole(roleName).prefix("trigger");
 	}
 	
-	public void onRenameState(String oldName, String newName) {
-		int index = fromStates.indexOf(oldName);
-		if (index != -1) {
-			if (fromStates.contains(newName))
-				fromStates.remove(index);
-			else
-				fromStates.set(index, newName);
-		}
-		if (toState.equals(oldName))
-			toState = newName;
-		trigger.onRenameState(oldName, newName);
-	}
-	
-	public void onRenameField(String oldName, String newName) {
-		int index = getRemoveFields().indexOf(oldName);
-		if (index != -1) {
-			if (getRemoveFields().contains(newName))				
-				getRemoveFields().remove(index);
-			else
-				getRemoveFields().set(index, newName);
-		}
-		trigger.onRenameField(oldName, newName);
-	}
-	
-	public boolean onDeleteField(String fieldName) {
-		if (getTrigger().onDeleteField(fieldName))
-			return true;
-		
-		for (Iterator<String> it = getRemoveFields().iterator(); it.hasNext();) {
-			if (it.next().equals(fieldName))
-				it.remove();
-		}
-		
-		return false;
-	}
-	
-	public boolean onDeleteState(String stateName) {
-		fromStates.remove(stateName);
-		if (fromStates.isEmpty() || toState.equals(stateName)) 
-			return true;
-		else
-			return trigger.onDeleteState(stateName);
-	}
-
-	public Collection<String> getUndefinedFields(Project project) {
-		Collection<String> undefinedFields = new HashSet<>();
-		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		undefinedFields.addAll(getTrigger().getUndefinedFields());
-		for (String field: getRemoveFields()) {
-			if (setting.getFieldSpec(field) == null)
-				undefinedFields.add(field);
-		}
-		return undefinedFields;
-	}
-	
-	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
-			if (entry.getValue().getFixType() == FixType.CHANGE_TO_ANOTHER_FIELD)
-				onRenameField(entry.getKey(), entry.getValue().getNewField());
-			else if (onDeleteField(entry.getKey()))
-				return true;
-		}
-		return false;
-	}
-	
-	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		return trigger.onEditFieldValues(fieldName, valueSetEdit);
-	}
-	
-	public boolean fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
-		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
-			if (onEditFieldValues(entry.getKey(), entry.getValue()))
-				return true;
-		}
-		return false;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
 		List<String> stateNames = new ArrayList<>();
@@ -218,10 +140,6 @@ public class TransitionSpec implements Serializable {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		return trigger.getUndefinedFieldValues();
-	}
-
 	public Collection<? extends String> getUndefinedStates() {
 		Collection<String> undefinedStates = new HashSet<>();
 		if (getIssueSetting().getStateSpec(toState) == null)
@@ -234,9 +152,48 @@ public class TransitionSpec implements Serializable {
 		return undefinedStates;
 	}
 
-	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
-		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet())
-			onRenameState(entry.getKey(), entry.getValue().getNewState());
+	public Collection<String> getUndefinedFields() {
+		Collection<String> undefinedFields = new HashSet<>();
+		undefinedFields.addAll(getTrigger().getUndefinedFields());
+		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		for (String field: getRemoveFields()) {
+			if (setting.getFieldSpec(field) == null)
+				undefinedFields.add(field);
+		}
+		return undefinedFields;
+	}
+	
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		return trigger.getUndefinedFieldValues();
 	}
 
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == UndefinedStateResolution.FixType.CHANGE_TO_ANOTHER_STATE) {
+				ReconcileUtils.renameItem(fromStates, entry.getKey(), entry.getValue().getNewState());
+				if (toState.equals(entry.getKey()))
+					toState = entry.getValue().getNewState();
+			} else {
+				fromStates.remove(entry.getKey());
+				if (fromStates.isEmpty() || toState.equals(entry.getKey())) 
+					return true;
+			}
+		}
+		return trigger.fixUndefinedStates(resolutions);
+	}
+	
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == FixType.CHANGE_TO_ANOTHER_FIELD) 
+				ReconcileUtils.renameItem(getRemoveFields(), entry.getKey(), entry.getValue().getNewField());
+			else 
+				getRemoveFields().remove(entry.getKey());
+		}
+		return trigger.fixUndefinedFields(resolutions);
+	}
+	
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		return trigger.fixUndefinedFieldValues(resolutions);
+	}
+	
 }

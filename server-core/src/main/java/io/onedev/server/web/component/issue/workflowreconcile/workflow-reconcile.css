@@ -3,14 +3,12 @@
 	font-size: 18px;
 }
 .fix-states .undefined {
-	font-size: 18px;
 	width: 50%;
 }
 
 .fix-fields td.name, .fix-fields td.type, 
 .fix-field-values td.name, .fix-field-values td.value  {
 	width: 25%;
-	font-size: 18px;
 }
 .fix-fields td.resolution, .fix-field-values td.resolution {
 	width: 50%;

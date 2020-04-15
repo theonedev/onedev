@@ -570,7 +570,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			public void run() {
 				for (Project project: projectManager.query()) {
 					logger.debug("Populating preserved build ids of project '" + project.getName() + "'...");
-					List<BuildPreservation> preservations = project.getBuildSetting().getHierarchyBuildPreservations(project);
+					List<BuildPreservation> preservations = project.getBuildSetting().getBuildPreservations();
 					if (preservations.isEmpty()) {
 						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
 					} else {

@@ -79,13 +79,20 @@ body.BranchProtectionsPage, body.TagProtectionsPage, body.WebHooksPage {
 #project-setting .avatar-edit form>button {
 	margin-top: 20px;
 }
-#project-setting .commit-message-transforms th {
-	font-weight: normal;
-}
 #project-setting .authorization.list .select2-container,
 #project-setting .authorization.list .property-roleName .select2-container {
 	width: 360px;
 } 
+
+#project-setting .web-hooks table thead th {
+	font-weight: bold !important;
+}
+#project-setting .web-hooks table thead th.property-eventTypes {
+	width: 25%;
+}
+#project-setting .web-hooks table .select2-container {
+    width: 100%;
+}
 
 body.SecretListPage .help-block {
 	margin: 0 0 16px 0;

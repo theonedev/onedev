@@ -3,7 +3,6 @@ package io.onedev.server.search.entity.issue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,8 +52,10 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.OrderContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
-import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -156,7 +157,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 							return new MilestoneIsEmptyCriteria();
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-							return new FieldOperatorCriteria(fieldName, operator, fieldSpec.isAllowMultiple());
+							if (fieldSpec != null)
+								return new FieldOperatorCriteria(fieldName, operator, fieldSpec.isAllowMultiple());
+							else
+								return new FieldOperatorCriteria(fieldName, operator, false);
 						}
 					}
 					
@@ -313,7 +317,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 				String fieldName = getValue(order.Quoted().getText());
 				if (validate && !Issue.ORDER_FIELDS.containsKey(fieldName)) {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-					if (!(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
+					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
 							&& !(fieldSpec instanceof NumberField)) {
 						throw new OneException("Can not order by field: " + fieldName);
 					}
@@ -440,19 +444,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 			return new ArrayList<>();
 	}
 	
-	public void onRenameState(String oldName, String newName) {
-		if (criteria != null)
-			criteria.onRenameState(oldName, newName);
-	}
-
-	public boolean onDeleteState(String stateName) {
-		return criteria != null && criteria.onDeleteState(stateName);
-	}
-	
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		if (criteria != null)
+		if (criteria != null) {
 			undefinedFields.addAll(criteria.getUndefinedFields());
+		}
 		for (EntitySort sort: sorts) {
 			if (!Issue.QUERY_FIELDS.contains(sort.getField()) 
 					&& getGlobalIssueSetting().getFieldSpec(sort.getField()) == null) {
@@ -462,25 +458,6 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return undefinedFields;
 	}
 
-	public void onRenameField(String oldName, String newName) {
-		if (criteria != null)
-			criteria.onRenameField(oldName, newName);
-		for (EntitySort sort: sorts) {
-			if (sort.getField().equals(oldName))
-				sort.setField(newName);
-		}
-	}
-
-	public boolean onDeleteField(String fieldName) {
-		if (criteria != null && criteria.onDeleteField(fieldName))
-			return true;
-		for (Iterator<EntitySort> it = sorts.iterator(); it.hasNext();) {
-			if (it.next().getField().equals(fieldName))
-				it.remove();
-		}
-		return false;
-	}
-	
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		if (criteria != null)
 			return criteria.getUndefinedFieldValues();
@@ -488,16 +465,25 @@ public class IssueQuery extends EntityQuery<Issue> {
 			return new HashSet<>();
 	}
 
-	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		return criteria != null && criteria.onEditFieldValues(fieldName, valueSetEdit);
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		if (criteria != null) 
+			return criteria.fixUndefinedStates(resolutions);
+		else 
+			return false;
 	}
 	
-	public boolean fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
-		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
-			if (onEditFieldValues(entry.getKey(), entry.getValue()))
-				return true;
-		}
-		return false;
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		if (criteria != null) 
+			return criteria.fixUndefinedFields(resolutions);
+		else 
+			return false;
+	}
+	
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		if (criteria != null) 
+			return criteria.fixUndefinedFieldValues(resolutions);
+		else 
+			return false;
 	}
 	
 	public static IssueQuery merge(IssueQuery query1, IssueQuery query2) {

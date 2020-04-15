@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.stream.Collectors;
+
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,6 +15,7 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -23,14 +25,13 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
 
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.NamedBuildQuery;
-import io.onedev.server.model.support.build.UserBuildSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
@@ -109,10 +110,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings = new ArrayList<>();
     
-    @OneToMany(mappedBy="owner")
-	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-    private Collection<Project> projects = new ArrayList<>();
-    
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
     private Collection<SshKey> sshKeys = new ArrayList<>();
     
@@ -155,15 +152,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
-	
-	@Lob
-	@Column(length=65535, nullable=false)
-	private UserBuildSetting buildSetting = new UserBuildSetting();
-	
-	@Lob
-	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
-	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
     private transient Collection<Group> groups;
     
@@ -361,14 +349,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	return SecurityUtils.asSubject(getId());
     }
 
-    public Collection<Project> getProjects() {
-		return projects;
-	}
-
-	public void setProjects(Collection<Project> projects) {
-		this.projects = projects;
-	}
-
 	@Editable(name="Login Name", order=100)
 	@UserName
 	@NotEmpty
@@ -460,22 +440,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setProjectAuthorizations(Collection<UserAuthorization> projectAuthorizations) {
 		this.projectAuthorizations = projectAuthorizations;
-	}
-	
-	public UserBuildSetting getBuildSetting() {
-		return buildSetting;
-	}
-
-	public void setBuildSetting(UserBuildSetting buildSetting) {
-		this.buildSetting = buildSetting;
-	}
-
-	public ArrayList<WebHook> getWebHooks() {
-		return webHooks;
-	}
-
-	public void setWebHooks(ArrayList<WebHook> webHooks) {
-		this.webHooks = webHooks;
 	}
 
 	@Override

@@ -7,8 +7,7 @@ query
     ;
 
 criteria
-	: operator=OwnedByMe #OperatorCriteria
-    | operator=(OwnedBy|ForksOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	: operator=ForksOf WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|Contains|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -26,14 +25,6 @@ OrderBy
 
 Is
 	: 'is'
-	;
-
-OwnedBy
-	: 'owned' WS+ 'by'
-	;
-	
-OwnedByMe
-	: 'owned' WS+ 'by' WS+ 'me'
 	;
 
 IsAfter

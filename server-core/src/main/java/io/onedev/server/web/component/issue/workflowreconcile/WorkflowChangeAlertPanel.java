@@ -2,11 +2,10 @@ package io.onedev.server.web.component.issue.workflowreconcile;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -19,6 +18,13 @@ public abstract class WorkflowChangeAlertPanel extends Panel {
 
 	public WorkflowChangeAlertPanel(String id) {
 		super(id);
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		if (event.getPayload() instanceof WorkflowChanged)
+			((WorkflowChanged)event.getPayload()).getHandler().add(this);
 	}
 
 	@Override
@@ -44,15 +50,10 @@ public abstract class WorkflowChangeAlertPanel extends Panel {
 						
 					};
 				}
-
-				@Override
-				public IModel<?> getBody() {
-					return Model.of("reconcile");
-				}
 				
 			});
 		} else {
-			add(new Label("reconcile", "contact site administrator to reconcile") {
+			add(new Label("reconcile", "reconciliation (need administrator permission)") {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
@@ -62,7 +63,8 @@ public abstract class WorkflowChangeAlertPanel extends Panel {
 				
 			});
 		}
-				
+			
+		setOutputMarkupPlaceholderTag(true);
 	}
 
 	@Override

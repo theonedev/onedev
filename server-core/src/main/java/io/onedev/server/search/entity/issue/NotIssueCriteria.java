@@ -1,16 +1,18 @@
 package io.onedev.server.search.entity.issue;
 
 import java.util.Collection;
+import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-
 import io.onedev.server.search.entity.NotEntityCriteria;
-import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 public class NotIssueCriteria extends IssueCriteria {
 	
@@ -38,26 +40,6 @@ public class NotIssueCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public void onRenameField(String oldName, String newName) {
-		criteria.onRenameField(oldName, newName);
-	}
-
-	@Override
-	public boolean onDeleteField(String fieldName) {
-		return criteria.onDeleteField(fieldName);
-	}
-	
-	@Override
-	public void onRenameState(String oldName, String newName) {
-		criteria.onRenameState(oldName, newName);
-	}
-
-	@Override
-	public boolean onDeleteState(String stateName) {
-		return criteria.onDeleteState(stateName);
-	}
-
-	@Override
 	public Collection<String> getUndefinedStates() {
 		return criteria.getUndefinedStates();
 	}
@@ -73,8 +55,18 @@ public class NotIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
-		return criteria.onEditFieldValues(fieldName, valueSetEdit);
+	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		return criteria.fixUndefinedStates(resolutions);
+	}
+
+	@Override
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		return criteria.fixUndefinedFields(resolutions);
+	}
+
+	@Override
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		return criteria.fixUndefinedFieldValues(resolutions);
 	}
 	
 }

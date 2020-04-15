@@ -34,5 +34,5 @@ public class CollectionUtils extends org.apache.commons.collections.CollectionUt
 		for (int i=0; i<args.length/2; i++)
 			map.put(args[i*2], args[i*2+1]);
 	}
-	
+
 }

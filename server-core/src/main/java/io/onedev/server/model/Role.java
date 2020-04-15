@@ -59,6 +59,8 @@ public class Role extends AbstractEntity implements Permission {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final Long MANAGER_ID = 1L;
+	
 	@Column(nullable=false, unique=true)
 	private String name;
 	
@@ -100,6 +102,10 @@ public class Role extends AbstractEntity implements Permission {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public boolean isManager() {
+		return getId().equals(MANAGER_ID);
 	}
 
 	@Editable(order=200)

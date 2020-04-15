@@ -47,12 +47,9 @@ import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
-import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
-import io.onedev.server.web.page.my.buildsetting.MyJobSecretsPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
-import io.onedev.server.web.page.my.webhook.MyWebHooksPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
@@ -217,16 +214,6 @@ public abstract class LayoutPage extends BasePage {
 		    item.add(AttributeAppender.append("class", "active"));
 		item.setVisible(isSshEnabled());
 		
-		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyJobSecretsPage.class));
-		if (getPage() instanceof MyBuildSettingPage)
-			item.add(AttributeAppender.append("class", "active"));
-
-		signedInContainer.add(item = new WebMarkupContainer("myWebHooks"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyWebHooksPage.class));
-		if (getPage() instanceof MyWebHooksPage)
-			item.add(AttributeAppender.append("class", "active"));
-
 		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
 		if (prevPrincipals != null && !prevPrincipals.getPrimaryPrincipal().equals(0L)) {
 			Link<Void> signOutLink = new Link<Void>("signOut") {

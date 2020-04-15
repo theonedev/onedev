@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -13,6 +14,8 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -75,7 +78,7 @@ public class RoleDetailPage extends AdministrationPage {
 				editor.getDescriptor().copyProperties(object, getRole());
 			}
 			
-		});
+		}, getRole().isManager()?Sets.newHashSet("name"):Sets.newHashSet(), !getRole().isManager());
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -98,6 +101,10 @@ public class RoleDetailPage extends AdministrationPage {
 			}
 			
 		};	
+		
+		if (getRole().isManager())
+			form.add(AttributeAppender.append("class", "manager"));
+		
 		form.add(editor);
 		form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
 		
@@ -111,6 +118,12 @@ public class RoleDetailPage extends AdministrationPage {
 				} catch (OneException e) {
 					error(e.getMessage());
 				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getRole().isManager());
 			}
 			
 		}.add(new ConfirmOnClick("Do you really want to delete role '" + getRole().getName() + "'?")));

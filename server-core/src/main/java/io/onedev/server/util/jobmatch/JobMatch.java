@@ -84,8 +84,6 @@ public class JobMatch extends Criteria<Build> {
 					switch (fieldName) {
 					case Build.FIELD_PROJECT:
 						return new ProjectCriteria(fieldValue);
-					case Build.FIELD_PROJECT_OWNER:
-						return new ProjectOwnerCriteria(fieldValue);
 					case Build.FIELD_JOB:
 						return new NameCriteria(fieldValue);
 					default:

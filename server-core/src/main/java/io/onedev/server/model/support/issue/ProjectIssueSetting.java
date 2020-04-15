@@ -14,24 +14,19 @@ import javax.annotation.Nullable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.BoardSpec;
-import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
-import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 public class ProjectIssueSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private List<TransitionSpec> transitionSpecs;
-	
-	private Collection<String> promptFieldsUponIssueOpen;
 	
 	private List<String> listFields;
 	
@@ -45,30 +40,6 @@ public class ProjectIssueSetting implements Serializable {
 		if (setting == null)
 			setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		return setting;
-	}
-
-	@Nullable
-	public List<TransitionSpec> getTransitionSpecs(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && transitionSpecs == null)
-			return new ArrayList<>(getGlobalSetting().getDefaultTransitionSpecs());
-		else
-			return transitionSpecs;
-	}
-
-	public void setTransitionSpecs(List<TransitionSpec> stateTransitions) {
-		this.transitionSpecs = stateTransitions;
-	}
-
-	@Nullable
-	public Collection<String> getPromptFieldsUponIssueOpen(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && promptFieldsUponIssueOpen == null)
-			return new HashSet<>(getGlobalSetting().getDefaultPromptFieldsUponIssueOpen());
-		else
-			return promptFieldsUponIssueOpen;
-	}
-
-	public void setPromptFieldsUponIssueOpen(@Nullable Collection<String> promptFieldsUponIssueOpen) {
-		this.promptFieldsUponIssueOpen = promptFieldsUponIssueOpen;
 	}
 
 	@Nullable
@@ -86,7 +57,7 @@ public class ProjectIssueSetting implements Serializable {
 	@Nullable
 	public List<BoardSpec> getBoardSpecs(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && boardSpecs == null)
-			return new ArrayList<>(getGlobalSetting().getDefaultBoardSpecs());
+			return new ArrayList<>(getGlobalSetting().getBoardSpecs());
 		else
 			return boardSpecs;
 	}
@@ -123,18 +94,6 @@ public class ProjectIssueSetting implements Serializable {
 		}
 	}
 
-	public Usage onDeleteBranch(String branchName) {
-		Usage usage = new Usage();
-		if (transitionSpecs != null) {
-			int index = 1;
-			for (TransitionSpec transitionSpec: transitionSpecs) {
-				usage.add(transitionSpec.onDeleteBranch(branchName)).prefix("transition #" + index);
-				index++;
-			}
-		}
-		return usage.prefix("issue setting");
-	}
-	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		if (boardSpecs != null) {
@@ -146,110 +105,6 @@ public class ProjectIssueSetting implements Serializable {
 		return usage.prefix("issue setting");
 	}
 
-	public void onRenameRole(String oldName, String newName) {
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs)
-				transition.onRenameRole(oldName, newName);
-		}
-	}
-
-	public Usage onDeleteRole(String roleName) {
-		Usage usage = new Usage();
-		if (transitionSpecs != null) {
-			int index = 1;
-			for (TransitionSpec transition: transitionSpecs) { 
-				usage.add(transition.onDeleteRole(roleName).prefix("transition #" + index));
-				index ++;
-			}
-		}
-		return usage.prefix("issue setting");
-	}
-
-	public Collection<String> getUndefinedFields(Project project) {
-		Set<String> undefinedFields = new HashSet<>();
-		if (listFields != null) {
-			for (String fieldName: listFields) {
-				if (getGlobalSetting().getFieldSpec(fieldName) == null)
-					undefinedFields.add(fieldName);
-			}
-		}
-		if (promptFieldsUponIssueOpen != null) {
-			for (String fieldName: promptFieldsUponIssueOpen) {
-				if (getGlobalSetting().getFieldSpec(fieldName) == null)
-					undefinedFields.add(fieldName);
-			}
-		}
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs)
-				undefinedFields.addAll(transition.getUndefinedFields(project));
-		}
-		if (namedQueries != null) {
-			for (NamedIssueQuery namedQuery: namedQueries) {
-				try {
-					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFields());
-				} catch (Exception e) {
-				}
-			}
-		}
-		if (boardSpecs != null) {
-			for (BoardSpec board: boardSpecs) 
-				undefinedFields.addAll(board.getUndefinedFields(project));
-		}
-		return undefinedFields;
-	}
-
-	public void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
-			if (listFields != null) {
-				listFields.remove(entry.getKey());
-				if (entry.getValue().getFixType() == FixType.CHANGE_TO_ANOTHER_FIELD)
-					listFields.add(entry.getValue().getNewField());
-			}
-			if (promptFieldsUponIssueOpen != null) {
-				promptFieldsUponIssueOpen.remove(entry.getKey());
-				if (entry.getValue().getFixType() == FixType.CHANGE_TO_ANOTHER_FIELD)
-					promptFieldsUponIssueOpen.add(entry.getValue().getNewField());
-			}
-		}
-		if (namedQueries != null) {
-			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
-				NamedIssueQuery namedQuery = it.next();
-				try {
-					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
-					boolean remove = false;
-					for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
-						UndefinedFieldResolution resolution = entry.getValue();
-						if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-							query.onRenameField(entry.getKey(), resolution.getNewField());
-						} else if (query.onDeleteField(entry.getKey())) {
-							remove = true;
-							break;
-						}
-					}				
-					if (remove)
-						it.remove();
-					else
-						namedQuery.setQuery(query.toString());
-				} catch (Exception e) {
-				}
-			}
-		}
-		
-		if (transitionSpecs != null) {
-			for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFields(resolutions))
-					it.remove();
-			}		
-		}
-		
-		if (boardSpecs != null) {
-			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFields(resolutions))
-					it.remove();
-			}		
-		}
-	}	
-	
 	public Collection<String> getUndefinedStates(Project project) {
 		Set<String> undefinedStates = new HashSet<>();
 
@@ -267,38 +122,32 @@ public class ProjectIssueSetting implements Serializable {
 				undefinedStates.addAll(board.getUndefinedStates(project));
 		}
 		
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs) 
-				undefinedStates.addAll(transition.getUndefinedStates());
-		}
-
 		return undefinedStates;
 	}
 
-	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
+	public Collection<String> getUndefinedFields(Project project) {
+		Set<String> undefinedFields = new HashSet<>();
+		if (listFields != null) {
+			for (String fieldName: listFields) {
+				if (getGlobalSetting().getFieldSpec(fieldName) == null)
+					undefinedFields.add(fieldName);
+			}
+		}
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
-					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
-						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
-					namedQuery.setQuery(query.toString());
+					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true).getUndefinedFields());
 				} catch (Exception e) {
 				}
 			}
 		}
-		
 		if (boardSpecs != null) {
-			for (BoardSpec board: boardSpecs)
-				board.fixUndefinedStates(project, resolutions);
+			for (BoardSpec board: boardSpecs) 
+				undefinedFields.addAll(board.getUndefinedFields(project));
 		}
-		
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs)
-				transition.fixUndefinedStates(resolutions);
-		}
+		return undefinedFields;
 	}
-	
+
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		if (namedQueries != null) {
@@ -313,45 +162,78 @@ public class ProjectIssueSetting implements Serializable {
 			for (BoardSpec board: boardSpecs)
 				undefinedFieldValues.addAll(board.getUndefinedFieldValues(project));
 		}
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs)
-				undefinedFieldValues.addAll(transition.getUndefinedFieldValues());
-		}
 		return undefinedFieldValues;
 	}
 	
-	public void fixUndefinedFieldValues(Project project, Map<String, ValueSetEdit> valueSetEdits) {
+	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
 		if (namedQueries != null) {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					boolean remove = false;
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
-					for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
-						if (query.onEditFieldValues(entry.getKey(), entry.getValue())) {
-							remove = true;
-							break;
-						}
-					}
-					if (remove) 
+					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+					if (parsedQuery.fixUndefinedStates(resolutions))
 						it.remove();
 					else
-						namedQuery.setQuery(query.toString());
+						namedQuery.setQuery(parsedQuery.toString());
+				} catch (Exception e) {
+				}
+			}
+		}
+		
+		if (boardSpecs != null) {
+			for (BoardSpec board: boardSpecs)
+				board.fixUndefinedStates(project, resolutions);
+		}
+	}
+	
+	public void fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			if (listFields != null) {
+				if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) 
+					ReconcileUtils.renameItem(listFields, entry.getKey(), entry.getValue().getNewField());
+				else 
+					listFields.remove(entry.getKey());
+			}
+		}
+		if (namedQueries != null) {
+			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
+				NamedIssueQuery namedQuery = it.next();
+				try {
+					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+					if (parsedQuery.fixUndefinedFields(resolutions))
+						it.remove();
+					else
+						namedQuery.setQuery(parsedQuery.toString());
+				} catch (Exception e) {
+				}
+			}
+		}
+		
+		if (boardSpecs != null) {
+			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
+				if (it.next().fixUndefinedFields(project, resolutions))
+					it.remove();
+			}		
+		}
+	}	
+	
+	public void fixUndefinedFieldValues(Project project, Map<String, UndefinedFieldValuesResolution> resolutions) {
+		if (namedQueries != null) {
+			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
+				NamedIssueQuery namedQuery = it.next();
+				try {
+					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
+					if (parsedQuery.fixUndefinedFieldValues(resolutions))
+						it.remove();
+					else
+						namedQuery.setQuery(parsedQuery.toString());
 				} catch (Exception e) {
 				}
 			}
 		}
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFieldValues(project, valueSetEdits)) {
-					it.remove();
-					break;
-				}
-			}
-		}
-		if (transitionSpecs != null) {
-			for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFieldValues(valueSetEdits)) {
+				if (it.next().fixUndefinedFieldValues(project, resolutions)) {
 					it.remove();
 					break;
 				}

@@ -15,16 +15,13 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.project.ProjectOwnerBean;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
@@ -45,8 +42,6 @@ public class GeneralSettingPage extends ProjectSettingPage {
 		add(new Label("help", "Git repository of this project is stored at: " + getProject().getGitDir()));
 		
 		Collection<String> properties = Sets.newHashSet("name", "description");
-		ProjectOwnerBean ownerBean = new ProjectOwnerBean();
-		ownerBean.setOwner(getProject().getOwner().getName());
 		
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
@@ -86,7 +81,6 @@ public class GeneralSettingPage extends ProjectSettingPage {
 					String errorMessage = "This name has already been used by another project"; 
 					editor.error(new Path(new PathNode.Named("name")), errorMessage);
 				} else {
-					project.setOwner(OneDev.getInstance(UserManager.class).findByName(ownerBean.getOwner()));
 					projectManager.save(project, oldName);
 					Session.get().success("General setting has been updated");
 					setResponsePage(GeneralSettingPage.class, paramsOf(project));
@@ -95,7 +89,6 @@ public class GeneralSettingPage extends ProjectSettingPage {
 			
 		};
 		form.add(editor);
-		form.add(BeanContext.edit("ownerEditor", ownerBean).setVisible(SecurityUtils.isAdministrator()));
 
 		form.add(new AjaxLink<Void>("delete") {
 

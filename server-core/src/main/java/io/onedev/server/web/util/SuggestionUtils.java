@@ -148,7 +148,7 @@ public class SuggestionUtils {
 			variables.put(VariableInterpolator.PREFIX_PARAMS + paramSpec.getName(), paramSpec.getDescription());
 		for (Property property: buildSpec.getProperties())
 			variables.put(VariableInterpolator.PREFIX_PROPERTIES + property.getName(), null);
-		for (JobSecret secret: project.getBuildSetting().getHierarchySecrets(project))
+		for (JobSecret secret: project.getBuildSetting().getJobSecrets())
 			variables.put(VariableInterpolator.PREFIX_SECRETS + secret.getName(), null);
 		for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) 
 			variables.put(VariableInterpolator.PREFIX_SCRIPTS + script.getName(), null);

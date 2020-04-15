@@ -22,7 +22,7 @@ import io.onedev.server.web.page.admin.group.create.NewGroupPage;
 import io.onedev.server.web.page.admin.group.membership.GroupMembershipsPage;
 import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultBoardListPage;
-import io.onedev.server.web.page.admin.issuesetting.DefaultStateTransitionsPage;
+import io.onedev.server.web.page.admin.issuesetting.StateTransitionsPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
@@ -37,24 +37,16 @@ import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
-import io.onedev.server.web.page.admin.user.buildsetting.UserActionAuthorizationsPage;
-import io.onedev.server.web.page.admin.user.buildsetting.UserBuildPreservationsPage;
-import io.onedev.server.web.page.admin.user.buildsetting.UserJobSecretsPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
-import io.onedev.server.web.page.admin.user.webhook.UserWebHooksPage;
-import io.onedev.server.web.page.build.BuildListPage;
+import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.init.ServerInitPage;
-import io.onedev.server.web.page.issue.IssueListPage;
+import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
-import io.onedev.server.web.page.my.buildsetting.MyActionAuthorizationsPage;
-import io.onedev.server.web.page.my.buildsetting.MyBuildPreservationsPage;
-import io.onedev.server.web.page.my.buildsetting.MyJobSecretsPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
-import io.onedev.server.web.page.my.webhook.MyWebHooksPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -73,8 +65,8 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
@@ -90,18 +82,16 @@ import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergeP
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
-import io.onedev.server.web.page.project.setting.build.ProjectActionAuthorizationsPage;
-import io.onedev.server.web.page.project.setting.build.ProjectBuildPreservationsPage;
-import io.onedev.server.web.page.project.setting.build.ProjectJobSecretsPage;
+import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
-import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
-import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
-import io.onedev.server.web.page.project.setting.webhook.ProjectWebHooksPage;
+import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
-import io.onedev.server.web.page.pullrequest.PullRequestListPage;
+import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 import io.onedev.server.web.page.security.ForgetPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
@@ -127,10 +117,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("my/profile", MyProfilePage.class));
 		add(new OnePageMapper("my/avatar", MyAvatarPage.class));
 		add(new OnePageMapper("my/password", MyPasswordPage.class));
-		add(new OnePageMapper("my/build-setting/job-secrets", MyJobSecretsPage.class));
-		add(new OnePageMapper("my/build-setting/action-authorizations", MyActionAuthorizationsPage.class));
-		add(new OnePageMapper("my/build-setting/build-preserve-rules", MyBuildPreservationsPage.class));
-		add(new OnePageMapper("my/web-hooks", MyWebHooksPage.class));
 	}
 
 	private void addResources() {
@@ -160,11 +146,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/users/${user}/authorizations", UserAuthorizationsPage.class));
 		add(new OnePageMapper("administration/users/${user}/avatar", UserAvatarPage.class));
 		add(new OnePageMapper("administration/users/${user}/password", UserPasswordPage.class));
-		add(new OnePageMapper("administration/users/${user}/build-setting", UserJobSecretsPage.class));
-		add(new OnePageMapper("administration/users/${user}/build-setting/job-secrets", UserJobSecretsPage.class));
-		add(new OnePageMapper("administration/users/${user}/build-setting/action-authorizations", UserActionAuthorizationsPage.class));
-		add(new OnePageMapper("administration/users/${user}/build-setting/build-preserve-rules", UserBuildPreservationsPage.class));
-		add(new OnePageMapper("administration/users/${user}/web-hooks", UserWebHooksPage.class));
 		
 		add(new OnePageMapper("administration/roles", RoleListPage.class));
 		add(new OnePageMapper("administration/roles/new", NewRolePage.class));
@@ -189,7 +170,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		
 		add(new OnePageMapper("administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));
-		add(new OnePageMapper("administration/settings/state-transitions", DefaultStateTransitionsPage.class));
+		add(new OnePageMapper("administration/settings/state-transitions", StateTransitionsPage.class));
 		add(new OnePageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
 		
 		add(new OnePageMapper("administration/server-log", ServerLogPage.class));
@@ -248,13 +229,10 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/avatar-edit", AvatarEditPage.class));
 		add(new OnePageMapper("projects/${project}/settings/branch-protection", BranchProtectionsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/tag-protection", TagProtectionsPage.class));
-		add(new OnePageMapper("projects/${project}/settings/build/job-secrets", ProjectJobSecretsPage.class));
-		add(new OnePageMapper("projects/${project}/settings/build/action-authorizations", ProjectActionAuthorizationsPage.class));
-		add(new OnePageMapper("projects/${project}/settings/build/build-preserve-rules", ProjectBuildPreservationsPage.class));
-		add(new OnePageMapper("projects/${project}/settings/issue/state-transitions", StateTransitionsPage.class));
-		add(new OnePageMapper("projects/${project}/settings/issue/prompt-fields-upon-issue-open", 
-				PromptFieldsUponIssueOpenSettingPage.class));
-		add(new OnePageMapper("projects/${project}/settings/web-hooks", ProjectWebHooksPage.class));
+		add(new OnePageMapper("projects/${project}/settings/build/job-secrets", JobSecretsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/build/action-authorizations", ActionAuthorizationsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/build/build-preserve-rules", BuildPreservationsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 	}
 
 }

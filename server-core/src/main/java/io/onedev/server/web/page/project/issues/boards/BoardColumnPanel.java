@@ -47,7 +47,6 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -153,11 +152,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							Issue issue = issueDragging.getIssue();
 							if (Objects.equals(issue.getMilestone(), getMilestone())) { 
 								// move issue between board columns
-								ProjectIssueSetting workflow = getProject().getIssueSetting();
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(Issue.FIELD_STATE)) {
 									issue = SerializationUtils.clone(issue);
-									for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
+									for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
 										if (transition.canTransitManually(issue, getColumn())) {
 											issue.setState(getColumn());
 											break;
@@ -341,9 +339,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
 				} else if (fieldName.equals(Issue.FIELD_STATE)) {
-					ProjectIssueSetting workflow = getProject().getIssueSetting();
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
-					for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
+					for (TransitionSpec transition: getIssueSetting().getTransitionSpecs()) {
 						if (transition.canTransitManually(issue, getColumn())) {
 							transitionRef.set(transition);
 							break;

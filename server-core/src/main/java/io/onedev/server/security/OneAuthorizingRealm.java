@@ -52,7 +52,6 @@ import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
-import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.SystemAdministration;
@@ -137,8 +136,6 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		           		permissions.addAll(getGroupPermissions(group, user));
 		        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
     					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-		        	for (Project project: user.getProjects()) 
-		        		permissions.add(new ProjectPermission(project, new ManageProject()));
 		        } 
 	        	Group group = groupManager.findAnonymous();
 	        	if (group != null)

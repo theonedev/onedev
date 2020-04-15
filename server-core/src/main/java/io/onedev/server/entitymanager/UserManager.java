@@ -25,6 +25,8 @@ public interface UserManager extends EntityManager<User> {
 	 */
 	void save(User user, @Nullable String oldName);
 	
+	void replicate(User user);
+	
 	void delete(User user);
 	
 	/**

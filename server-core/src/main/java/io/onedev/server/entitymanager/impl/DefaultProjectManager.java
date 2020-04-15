@@ -14,12 +14,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.api.Git;
@@ -37,7 +39,9 @@ import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
+
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -46,7 +50,9 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.ProjectCreated;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
@@ -111,6 +117,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
     
     private final ListenerRegistry listenerRegistry;
     
+    private final RoleManager roleManager;
+    
+    private final UserAuthorizationManager userAuthorizationManager;
+    
     private final String gitReceiveHook;
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
@@ -124,7 +134,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
     		BuildManager buildManager, AvatarManager avatarManager, GroupManager groupManager,
     		SettingManager settingManager, TransactionManager transactionManager, 
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
-    		TaskScheduler taskScheduler) {
+    		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
+    		RoleManager roleManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -136,6 +147,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
         this.sessionManager = sessionManager;
         this.listenerRegistry = listenerRegistry;
         this.taskScheduler = taskScheduler;
+        this.userAuthorizationManager = userAuthorizationManager;
+        this.roleManager = roleManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -188,7 +201,11 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
     public void create(Project project) {
     	dao.persist(project);
        	checkSanity(project);
-       	
+       	UserAuthorization authorization = new UserAuthorization();
+       	authorization.setProject(project);
+       	authorization.setUser(SecurityUtils.getUser());
+       	authorization.setRole(roleManager.getManager());
+       	userAuthorizationManager.save(authorization);
        	listenerRegistry.post(new ProjectCreated(project));
     }
     
@@ -267,6 +284,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 	@Override
 	public void fork(Project from, Project to) {
     	dao.persist(to);
+    	
+       	UserAuthorization authorization = new UserAuthorization();
+       	authorization.setProject(to);
+       	authorization.setUser(SecurityUtils.getUser());
+       	authorization.setRole(roleManager.getManager());
+       	userAuthorizationManager.save(authorization);
+    	
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
         checkSanity(to);
@@ -387,8 +411,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 				it.remove();
 		}
 		
-		usage.add(project.getIssueSetting().onDeleteBranch(branchName));
-		
 		usage.prefix("project setting").checkInUse("Branch '" + branchName + "'");
 	}
 	
@@ -494,7 +516,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		} else {
 			User user = SecurityUtils.getUser();
 			if (user != null) {
-				projects.addAll(user.getProjects());
 				for (Membership membership: user.getMemberships()) {
 					for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations()) {
 						if (authorization.getRole().implies(permission))

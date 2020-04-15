@@ -48,15 +48,23 @@ public class DefaultIdManager implements IdManager {
 		}
 	}
 
-	@Sessional
-	@Override
-	public void init(Class<?> entityClass) {
-		nextIds.get(entityClass).set(getMaxId(entityClass)+1);
-	}
-
 	@Override
 	public long nextId(Class<?> entityClass) {
 		return nextIds.get(entityClass).getAndIncrement();
+	}
+
+	@Override
+	public void useId(Class<?> entityClass, long id) {
+		AtomicLong nextIdAtom = nextIds.get(entityClass);
+		while (true) {
+			long nextId = nextIdAtom.get();
+			if (id+1 > nextId) {
+				if (nextIdAtom.compareAndSet(nextId, id+1))
+					break;
+			} else {
+				break;
+			}
+		}
 	}
 
 }

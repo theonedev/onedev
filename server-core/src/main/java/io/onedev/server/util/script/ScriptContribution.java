@@ -29,8 +29,6 @@ public abstract class ScriptContribution {
 			User user = OneDev.getInstance(UserManager.class).find(commit.getCommitterIdent());
 			if (user != null)
 				return user.getName();
-			else if (build.getProject().getOwner() != null)
-				return build.getProject().getOwner().getName();
 			else
 				return null;
 		} else {

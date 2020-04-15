@@ -147,10 +147,6 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_DESCRIPTION = "description";
 	
-	public static final String FIELD_OWNER = "Owner";
-	
-	public static final String PROP_OWNER = "owner";
-	
 	public static final String PROP_ID = "id";
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
@@ -160,7 +156,6 @@ public class Project extends AbstractEntity {
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_NAME, PROP_NAME, 
-			FIELD_OWNER, PROP_OWNER, 
 			FIELD_UPDATE_DATE, PROP_UPDATE_DATE);
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
@@ -413,14 +408,6 @@ public class Project extends AbstractEntity {
 
 	public void setForkedFrom(Project forkedFrom) {
 		this.forkedFrom = forkedFrom;
-	}
-
-	public User getOwner() {
-		return owner;
-	}
-
-	public void setOwner(User owner) {
-		this.owner = owner;
 	}
 
 	public Collection<Project> getForks() {
@@ -1201,12 +1188,6 @@ public class Project extends AbstractEntity {
 		this.webHooks = webHooks;
 	}
 
-	public List<WebHook> getHierarchyWebHooks() {
-		List<WebHook> hierarchyWebHooks = new ArrayList<>(getWebHooks());
-		hierarchyWebHooks.addAll(getOwner().getWebHooks());
-		return hierarchyWebHooks;
-	}
-	
 	public TagProtection getTagProtection(String tagName, User user) {
 		boolean noCreation = false;
 		boolean noDeletion = false;

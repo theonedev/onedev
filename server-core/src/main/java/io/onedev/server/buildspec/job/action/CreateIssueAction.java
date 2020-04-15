@@ -20,7 +20,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldsupply.FieldSupply;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.SecurityUtils;
@@ -83,7 +82,7 @@ public class CreateIssueAction extends PostBuildAction {
 	}
 	
 	private static Collection<String> getFieldNames() {
-		return Project.get().getIssueSetting().getPromptFieldsUponIssueOpen(true);
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getPromptFieldsUponIssueOpen();
 	}
 	
 	@Override

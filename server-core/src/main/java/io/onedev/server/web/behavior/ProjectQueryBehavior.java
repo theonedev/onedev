@@ -66,8 +66,6 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestProjects(matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(Project.FIELD_OWNER)) { 
-										return SuggestionUtils.suggestUsers(matchWith);
 									} else {
 										return null;
 									}

@@ -1,35 +1,30 @@
 package io.onedev.server.web.page.admin.issuesetting;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
-import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -51,7 +46,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		FieldBean bean = new FieldBean();
 		if (fieldIndex != -1) {
 			bean.setField(SerializationUtils.clone(getSetting().getFieldSpecs().get(fieldIndex)));
-			bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(bean.getField().getName()));
+			bean.setPromptUponIssueOpen(getSetting().getPromptFieldsUponIssueOpen().contains(bean.getField().getName()));
 		}
 
 		Form<?> form = new Form<Void>("form") {
@@ -100,63 +95,31 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				}
 
 				if (editor.isValid()) {
-					boolean displayInList;
 					if (fieldIndex != -1) {
 						FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
 						if (!field.getName().equals(oldField.getName())) {
-							getSetting().onRenameField(oldField.getName(), field.getName());
-							OneDev.getInstance(RoleManager.class).onRenameIssueField(oldField.getName(), field.getName());
 							getSetting().setReconciled(false);
-						}
-						getSetting().getFieldSpecs().set(fieldIndex, field);
-						getSetting().getDefaultPromptFieldsUponIssueOpen().remove(oldField.getName());
-						displayInList = getSetting().getListFields().remove(oldField.getName());
-						if (oldField instanceof ChoiceField && field instanceof ChoiceField) {
+						} else if (oldField instanceof ChoiceField && field instanceof ChoiceField) {
 							ChoiceField oldChoiceInput = (ChoiceField) oldField;
 							ChoiceField choiceInput = (ChoiceField) field;
 							if (oldChoiceInput.getChoiceProvider() instanceof SpecifiedChoices 
 									&& choiceInput.getChoiceProvider() instanceof SpecifiedChoices) {
 								SpecifiedChoices oldChoices = (SpecifiedChoices) oldChoiceInput.getChoiceProvider();
 								SpecifiedChoices choices = (SpecifiedChoices) choiceInput.getChoiceProvider();
-								Map<String, String> valueRenames = new HashMap<>();
-								Set<String> valueDeletions = new HashSet<>();
-								Map<String, String> uuid2value = new HashMap<>();
-								Map<String, Integer> uuid2order = new HashMap<>();
-								for (int i=0; i<choices.getChoices().size(); i++) {
-									Choice choice = choices.getChoices().get(i);
-									uuid2value.put(choice.getUuid(), choice.getValue());
-									uuid2order.put(choice.getUuid(), i);
-								}
-								for (int i=0; i<oldChoices.getChoices().size(); i++) {
-									Choice oldChoice = oldChoices.getChoices().get(i);
-									String newValue = uuid2value.get(oldChoice.getUuid());
-									if (newValue != null) {
-										if (!newValue.equals(oldChoice.getValue())) {
-											valueRenames.put(oldChoice.getValue(), newValue);
-											getSetting().setReconciled(false);
-										}
-									} else {
-										valueDeletions.add(oldChoice.getValue());
-										getSetting().setReconciled(false);
-									}
-									Integer newOrder = uuid2order.get(oldChoice.getUuid());
-									if (newOrder == null || newOrder != i)
-										getSetting().setReconciled(false);
-								}
-								if (!valueRenames.isEmpty() || !valueDeletions.isEmpty()) {
-									getSetting().onEditFieldValues(null, field.getName(), 
-											new ValueSetEdit(valueRenames, valueDeletions));
-								}
+								if (!choices.getChoiceValues().containsAll(oldChoices.getChoiceValues()))
+									getSetting().setReconciled(false);
 							}
 						}
+						getSetting().getFieldSpecs().set(fieldIndex, field);
+						getSetting().getPromptFieldsUponIssueOpen().remove(oldField.getName());
+						
+						if (!getSetting().isReconciled())
+							send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 					} else {
 						getSetting().getFieldSpecs().add(field);
-						displayInList = true;
 					}
 					if (bean.isPromptUponIssueOpen())
-						getSetting().getDefaultPromptFieldsUponIssueOpen().add(field.getName());
-					if (displayInList)
-						getSetting().getListFields().add(field.getName());					
+						getSetting().getPromptFieldsUponIssueOpen().add(field.getName());
 					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 					onSave(target);
 				} else {

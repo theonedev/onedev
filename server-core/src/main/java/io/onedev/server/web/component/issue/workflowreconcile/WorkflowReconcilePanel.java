@@ -26,7 +26,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.ajaxlistener.SelfDisableListener;
@@ -303,7 +302,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
 
-							Map<String, ValueSetEdit> edits = new HashMap<>();
+							Map<String, UndefinedFieldValuesResolution> edits = new HashMap<>();
 							Collection<String> fieldNames = new HashSet<>();
 							for (UndefinedFieldValue key: resolutions.keySet())
 								fieldNames.add(key.getFieldName());
@@ -318,7 +317,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 											deletions.add(entry.getKey().getFieldValue());
 									}
 								}
-								edits.put(fieldName, new ValueSetEdit(renames, deletions));
+								edits.put(fieldName, new UndefinedFieldValuesResolution(renames, deletions));
 							}
 							
 							getIssueManager().fixUndefinedFieldValues(edits);

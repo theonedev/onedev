@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
@@ -84,7 +85,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
-		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
+		List<TransitionSpec> transitions = OneDev.getInstance(SettingManager.class).getIssueSetting().getTransitionSpecs();
 		
 		AtomicReference<Component> activeTransitionLinkRef = new AtomicReference<>(null);  
 		for (TransitionSpec transition: transitions) {
