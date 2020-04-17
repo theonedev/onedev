@@ -17,3 +17,8 @@
 	position: absolute;
 	left: 24px;
 }
+
+.project-selector .no-projects {
+	margin-top: 12px;
+	font-style: italic;
+}
