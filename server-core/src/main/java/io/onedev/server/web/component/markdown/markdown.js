@@ -495,7 +495,7 @@ onedev.server.markdown = {
 		if (!canMentionUser)
 			$head.find(".do-mention").remove();
 		if (!canReferenceEntity)
-			$head.find(".do-reference").remove();
+			$head.find(".do-reference, .reference.dropdown").remove();
 			
 		$head.find(".do-mention, .do-reference").click(function() {
 			if (!$edit.is(":visible")) 

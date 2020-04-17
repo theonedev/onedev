@@ -41,7 +41,7 @@ body.fullscreen {
 	border-radius: 4px 4px 0 0;
 	padding: 4px;
 }
-.markdown-editor>.head>.actions>div>a {
+.markdown-editor>.head>.actions>div>a, .markdown-editor>.head>.actions>div>.dropdown>a {
 	color: #777;
 	padding: 2px;
 	border: 1px solid white;
@@ -51,6 +51,7 @@ body.fullscreen {
 	text-align: center;
 	margin-right: 4px;
 }
+
 .markdown-editor>.head>.actions .separator {
 	display: block;
 	border-left: 1px solid #E0E0E0;
