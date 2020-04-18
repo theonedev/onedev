@@ -1,10 +1,12 @@
 package io.onedev.server.security;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -27,6 +29,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -36,12 +40,14 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
@@ -266,6 +272,14 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     						}
 	    				}
 	    			}
+	    			
+			    	if (authenticated.getSSHPublicKeys() != null) {
+			    		try {
+			    			setUserSSHPublicKeys(user, authenticated.getSSHPublicKeys());			    			
+			    		} catch (Exception err) {
+			    			logger.warn("Error setting user SSH public keys provided by authentication", err);
+			    		}
+			    	}
 		    	}
 		    	
 		    	return user;		
@@ -273,5 +287,35 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			
 		});
 	}
-	
+
+	private void setUserSSHPublicKeys(User user, Collection<SshKey> authKeys) {
+		SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
+		List<SshKey> currentKeys = sshKeyManager.loadUserKeys(user);
+
+		Map<String, SshKey> currentKeysMap = sshPublicKeysToMap(currentKeys);
+		Map<String, SshKey> authKeysMap = sshPublicKeysToMap(authKeys);
+		MapDifference<String, SshKey> diff = Maps.difference(currentKeysMap, authKeysMap);
+		
+		// remove keys not delivered by authentication
+		diff.entriesOnlyOnLeft().values().forEach((key) -> sshKeyManager.delete(key));
+		
+		// add keys from authorization
+		diff.entriesOnlyOnRight().values().forEach((key) -> {
+			
+			if (!sshKeyManager.isKeyAlreadyInUse(key.getDigest())) {
+				key.setTimestamp(LocalDateTime.now());
+				key.setOwner(user);
+				sshKeyManager.save(key);	
+			} else {
+				logger.warn("SSH public key provided by auth is already in use", key.getDigest());
+			}
+			
+		});
+	}
+
+	private Map<String, SshKey> sshPublicKeysToMap(Collection<SshKey> keys) {
+		Map<String, SshKey> keysMap = new HashMap<String, SshKey>();
+		keys.forEach((key) -> keysMap.put(key.getDigest(), key));
+		return keysMap;
+	}
 }

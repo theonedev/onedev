@@ -1,5 +1,8 @@
 package io.onedev.server.model.support.administration.authenticator.ldap;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,11 +28,14 @@ import javax.validation.constraints.NotNull;
 import org.apache.shiro.authc.AccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.git.ssh.SshKeyUtils;
+import io.onedev.server.model.SshKey;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -188,7 +194,14 @@ public class LdapAuthenticator extends Authenticator {
         List<String> attributeNames = new ArrayList<String>();
         if (getUserFullNameAttribute() != null)
             attributeNames.add(getUserFullNameAttribute());
+        
+        String userSSHPublicKey = getUserSSHPublicKey();
+        
+        if (userSSHPublicKey != null)
+        	attributeNames.add(userSSHPublicKey);
+        
         attributeNames.add(getUserEmailAttribute());
+        
         if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) {
         	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute)getGroupRetrieval();
             attributeNames.add(groupRetrieval.getUserGroupsAttribute());
@@ -312,6 +325,20 @@ public class LdapAuthenticator extends Authenticator {
                     }
                 }
             }
+            
+            Collection<SshKey> sshKeys;
+
+            if (userSSHPublicKey != null) {
+            	try {
+            		sshKeys = retrieveSSHPublicKeys(searchResultAttributes);
+            	} catch (Exception err) {
+            		logger.warn("Error retrieving SSH public keys", err);
+            		sshKeys = null;
+				}
+            	
+            } else {
+            	sshKeys = null;
+            }
 
             if (getGroupRetrieval() instanceof SearchGroupsUsingFilter) {
             	SearchGroupsUsingFilter groupRetrieval = (SearchGroupsUsingFilter) getGroupRetrieval();
@@ -350,7 +377,7 @@ public class LdapAuthenticator extends Authenticator {
             if (StringUtils.isBlank(email))
             	throw new AccountException("Email is required but not available in ldap directory");
             else
-            	return new Authenticated(email, fullName, groupNames);
+            	return new Authenticated(email, fullName, groupNames, sshKeys);
         } catch (NamingException e) {
         	throw new RuntimeException(e);
         } finally {
@@ -369,4 +396,49 @@ public class LdapAuthenticator extends Authenticator {
         }
 	}
 
+	private Collection<SshKey> retrieveSSHPublicKeys(Attributes searchResultAttributes) throws NamingException, IOException, GeneralSecurityException {
+		Collection<SshKey> sshKeys = new ArrayList<SshKey>();
+		
+		Attribute attributeValue = searchResultAttributes.get(getUserSSHPublicKey());
+		NamingEnumeration<?> ldapValues = attributeValue.getAll();
+		
+		while (ldapValues.hasMore()) {
+			Object value = ldapValues.next();
+			
+			if (value instanceof String) {
+				String content = (String) value;
+				
+				try {
+					SshKey sshKey = parseSSHPublicKey(content);
+					sshKeys.add(sshKey);
+				} catch (Exception err) {
+					logger.warn("Error parsing SSH public key", err);
+				}
+	            
+			} else {
+				logger.warn("SSH public key from ldap not a String");
+			}
+		}
+
+		return sshKeys;
+	}
+
+	private SshKey parseSSHPublicKey(String content) throws IOException, GeneralSecurityException {
+		PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
+        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
+		
+        SshKey sshKey = new SshKey();
+        sshKey.setDigest(fingerPrint);
+        sshKey.setContent(content);
+
+        String[] parts = content.split(" ");
+        if (parts.length > 2) {
+        	sshKey.setName(parts[2]);
+        } else {
+        	sshKey.setName(fingerPrint);	
+        }
+
+        return sshKey;
+	}
+	
 }
