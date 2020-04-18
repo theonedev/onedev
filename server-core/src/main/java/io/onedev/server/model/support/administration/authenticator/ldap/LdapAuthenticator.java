@@ -56,6 +56,8 @@ public class LdapAuthenticator extends Authenticator {
     
     private String userEmailAttribute = "mail";
     
+    private String userSSHPublicKey;
+    
     private GroupRetrieval groupRetrieval = new DoNotRetrieveGroups();
     
     @Editable(order=100, name="LDAP URL", description=
@@ -139,6 +141,17 @@ public class LdapAuthenticator extends Authenticator {
 
 	public void setUserEmailAttribute(String userEmailAttribute) {
 		this.userEmailAttribute = userEmailAttribute;
+	}
+
+	@Editable(order=850, description=""
+			+ "Specifies name of the attributes inside the user LDAP entry whose values will be taken as user "
+			+ "SSH public keys. If this field is set SSH public keys are managed by LDAP only")
+	public String getUserSSHPublicKey() {
+		return userSSHPublicKey;
+	}
+
+	public void setUserSSHPublicKey(String userSSHPublicKey) {
+		this.userSSHPublicKey = userSSHPublicKey;
 	}
 
 	@Editable(order=900, description="Specify the strategy to retrieve group membership information. "
