@@ -7,9 +7,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.authenticator.ldap.LdapAuthenticator;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.my.MyPage;
@@ -54,9 +57,29 @@ public class MySshKeysPage extends MyPage {
                         target.add(keyList);
                     }};
             }
+            
+            @Override
+            public boolean isVisible() {
+            	if (!user.isExternalManaged()) {
+            		return true;
+            	}
+            	
+            	Authenticator auth = OneDev.getInstance(SettingManager.class).getAuthenticator();
+        		
+            	if (auth == null || !(auth instanceof LdapAuthenticator)) {
+            		return true;
+            	}
+            	
+            	if (((LdapAuthenticator) auth).getUserSSHPublicKey() != null) {
+            		return false;
+            	}
+            	
+            	return true;
+            }
         });
 		
 		add(keyList.setOutputMarkupId(true));
+		
 	}
 	
 }

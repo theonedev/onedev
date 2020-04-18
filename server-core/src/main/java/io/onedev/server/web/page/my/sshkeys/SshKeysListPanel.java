@@ -12,7 +12,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.ResourceModel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.SshKey;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.authenticator.ldap.LdapAuthenticator;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 
@@ -56,8 +59,26 @@ public class SshKeysListPanel extends Panel {
                             protected String getConfirmMessage() {
                                 return "Are you sure you want to delete key '" + sshKey.getName() + "'?";
                             }
-                            
                         };
+                    }
+                    
+                    @Override
+                    public boolean isVisible() {
+                    	if (!item.getModelObject().getOwner().isExternalManaged()) {
+                    		return true;
+                    	}
+                    	
+                    	Authenticator auth = OneDev.getInstance(SettingManager.class).getAuthenticator();
+                		
+                    	if (auth == null || !(auth instanceof LdapAuthenticator)) {
+                    		return true;
+                    	}
+                    	
+                    	if (((LdapAuthenticator) auth).getUserSSHPublicKey() != null) {
+                    		return false;
+                    	}
+                    	
+                    	return true;
                     }
                 });
             }
