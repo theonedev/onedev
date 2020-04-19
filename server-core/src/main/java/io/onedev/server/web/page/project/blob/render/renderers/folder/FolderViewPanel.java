@@ -99,8 +99,14 @@ public class FolderViewPanel extends Panel {
 				
 				Collections.sort(children);
 				
+				BlobIdent oldBuildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+						".onedev-buildspec", FileMode.REGULAR_FILE.getBits());
 				BlobIdent buildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
 						BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
+				if (children.contains(oldBuildSpecIdent)) {
+					children.remove(oldBuildSpecIdent);
+					children.add(0, oldBuildSpecIdent);
+				}
 				if (children.contains(buildSpecIdent)) {
 					children.remove(buildSpecIdent);
 					children.add(0, buildSpecIdent);
@@ -210,7 +216,7 @@ public class FolderViewPanel extends Panel {
 					iconClass = "fa fa-ext fa-folder-submodule-o";
 				else if (blobIdent.isSymbolLink()) 
 					iconClass = "fa fa-ext fa-folder-symbol-link-o";
-				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH))
+				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH) || blobIdent.path.equals(".onedev-buildspec"))
 					iconClass = "fa fa-cog";
 				else  
 					iconClass = "fa fa-file-text-o";
@@ -220,7 +226,7 @@ public class FolderViewPanel extends Panel {
 				
 				if (context.getBlobIdent().path != null) 
 					pathLink.add(new Label("label", blobIdent.path.substring(context.getBlobIdent().path.length()+1)));
-				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH))
+				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH) || blobIdent.path.equals(".onedev-buildspec"))
 					pathLink.add(new Label("label", "<b>" + HtmlEscape.escapeHtml5(blobIdent.path) + "</b>").setEscapeModelStrings(false));
 				else
 					pathLink.add(new Label("label", blobIdent.path));

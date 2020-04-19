@@ -12,7 +12,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.util.WicketUtils;
 
-@Editable(order=130, name="All users in system")
+@Editable(order=130, name="All users")
 public class AllUsers implements ChoiceProvider {
 
 	private static final long serialVersionUID = 1L;

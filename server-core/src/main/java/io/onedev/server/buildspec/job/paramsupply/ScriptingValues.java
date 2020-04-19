@@ -15,7 +15,7 @@ import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ScriptChoice;
 
-@Editable
+@Editable(name="Evaluate script to get values or secrets")
 public class ScriptingValues implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;

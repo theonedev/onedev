@@ -49,6 +49,7 @@ public class ParamSupply implements Serializable {
 	
 	private ValuesProvider valuesProvider = new SpecifiedValues();
 
+	@Editable
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -58,6 +59,7 @@ public class ParamSupply implements Serializable {
 		this.name = name;
 	}
 
+	@Editable
 	@NotNull
 	@Valid
 	public ValuesProvider getValuesProvider() {
@@ -68,6 +70,7 @@ public class ParamSupply implements Serializable {
 		this.valuesProvider = valuesProvider;
 	}
 
+	@Editable
 	public boolean isSecret() {
 		return secret;
 	}

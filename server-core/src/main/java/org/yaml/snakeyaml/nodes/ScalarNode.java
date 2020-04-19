@@ -16,6 +16,7 @@
 package org.yaml.snakeyaml.nodes;
 
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.error.Mark;
 
 /**
@@ -28,6 +29,10 @@ public class ScalarNode extends Node {
     private DumperOptions.ScalarStyle style;
     private String value;
 
+    public ScalarNode(Tag tag, String value) {
+        this(tag, value, null, null, ScalarStyle.PLAIN);
+    }
+    
     public ScalarNode(Tag tag, String value, Mark startMark, Mark endMark, DumperOptions.ScalarStyle style) {
         this(tag, true, value, startMark, endMark, style);
     }

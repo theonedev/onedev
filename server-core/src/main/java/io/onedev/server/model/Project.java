@@ -695,10 +695,15 @@ public class Project extends AbstractEntity {
 		Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
 		if (buildSpec == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
-			if (blob != null)  
+			if (blob != null) {  
 				buildSpec = Optional.fromNullable(BuildSpec.parse(blob.getBytes()));
-			else 
-				buildSpec = Optional.absent();
+			} else { 
+				Blob oldBlob = getBlob(new BlobIdent(commitId.name(), ".onedev-buildspec", FileMode.TYPE_FILE), false);
+				if (oldBlob != null)
+					buildSpec = Optional.fromNullable(BuildSpec.parse(oldBlob.getBytes()));
+				else
+					buildSpec = Optional.absent();
+			}
 			buildSpecCache.put(commitId, buildSpec);
 		}
 		return buildSpec.orNull();

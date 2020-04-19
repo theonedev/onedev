@@ -33,6 +33,5 @@ public class TestPage extends BasePage {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new TestResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.test.onDomReady();"));
-	}
-	
+	}		
 }

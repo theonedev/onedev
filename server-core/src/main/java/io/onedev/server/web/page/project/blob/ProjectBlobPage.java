@@ -784,8 +784,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			protected void onConfigure() {
 				super.onConfigure();
 				if (resolvedRevision != null && isOnBranch() && state.blobIdent.path == null && state.mode == Mode.VIEW) {
+					BlobIdent oldBlobIdent = new BlobIdent(resolvedRevision.name(), ".onedev-buildspec", FileMode.TYPE_FILE);
 					BlobIdent blobIdent = new BlobIdent(resolvedRevision.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE);
-					setVisible(getProject().getBlob(blobIdent, false) == null);
+					setVisible(getProject().getBlob(blobIdent, false) == null && getProject().getBlob(oldBlobIdent, false) == null);
 				} else {
 					setVisible(false);
 				}

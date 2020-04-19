@@ -15,7 +15,7 @@ import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 
-@Editable(order=100, name="Specified default value")
+@Editable(order=100, name="Use specified default value")
 public class SpecifiedDefaultMultiValue implements DefaultMultiValueProvider {
 
 	private static final long serialVersionUID = 1L;

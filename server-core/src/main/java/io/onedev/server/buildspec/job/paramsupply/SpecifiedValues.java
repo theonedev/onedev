@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable
+@Editable(name="Use specified values or job secrets")
 public class SpecifiedValues implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;
@@ -19,6 +19,7 @@ public class SpecifiedValues implements ValuesProvider {
 
 	private List<List<String>> values = new ArrayList<>();
 	
+	@Editable
 	@Override
 	public List<List<String>> getValues() {
 		return values;

@@ -24,6 +24,7 @@ import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedYamlDoc;
+import io.onedev.server.migration.XmlBuildSpecMigrator;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -206,6 +207,8 @@ public class BuildSpec implements Serializable, Validatable {
 	public static BuildSpec parse(byte[] bytes) {
 		String buildSpecString = new String(bytes, StandardCharsets.UTF_8); 
 		if (StringUtils.isNotBlank(buildSpecString)) {
+			if (buildSpecString.trim().startsWith("<?xml"))
+				buildSpecString = XmlBuildSpecMigrator.migrate(buildSpecString);
 			try {
 				return VersionedYamlDoc.fromYaml(buildSpecString).toBean(BuildSpec.class);
 			} catch (Exception e) {

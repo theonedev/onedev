@@ -39,6 +39,7 @@ import org.eclipse.jgit.lib.FileMode;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
@@ -254,6 +255,8 @@ public class BlobNavigator extends Panel {
 				name = context.getInitialNewPath();
 			else if (file.path.contains("/"))
 				name = StringUtils.substringAfterLast(file.path, "/");
+			else if (file.path.equals(".onedev-buildspec"))
+				name = BuildSpec.BLOB_PATH;
 			else
 				name = file.path;
 			

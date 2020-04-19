@@ -20,7 +20,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 	private static final String POSITION_PREFIX = "buildspec-";
 	
 	private boolean isBuildSpec(@Nullable String blobPath) {
-		return BuildSpec.BLOB_PATH.equals(blobPath);
+		return BuildSpec.BLOB_PATH.equals(blobPath) || ".onedev-buildspec".equals(blobPath);
 	}
 	
 	@Nullable

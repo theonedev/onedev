@@ -6,11 +6,10 @@ onedev.server.plainEdit = {
 		var cm = CodeMirror($source[0], {
 			value: $plainEdit.children(".input").val(),
 			theme: "eclipse",
-			indentWithTabs: true,
+			indentWithTabs: false,
 			indentUnit: 4,
 			lineNumbers: true,
 			lineWrapping: true,
-			tabSize: 4,
 			styleActiveLine: true,
 			styleSelectedText: true,
 			foldGutter: true,

@@ -452,7 +452,8 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	 * to reflect current migration result.
 	 * @return
 	 */
-	public Object toBean(Class<?> beanClass) {	
+	@SuppressWarnings("unchecked")
+	public <T> T toBean(@Nullable Class<T> beanClass) {	
 		XStream xstream = AppLoader.getInstance(XStream.class);
 		Dom4JReader domReader = new Dom4JReader(this);
 		Class<?> origBeanClass;
@@ -468,10 +469,10 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 		if (origBeanClass == null)
 			return null;
 		else if (origBeanClass == Null.class)
-			return ObjectUtils.NULL;
+			return (T) ObjectUtils.NULL;
 		
 		if (beanClass == null)
-			beanClass = origBeanClass;
+			beanClass = (Class<T>) origBeanClass;
 		else 
 			getRootElement().setName(xstream.getMapper().serializedClass(beanClass));
 		if (getVersion() != null) {
@@ -480,15 +481,15 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 				if (MigrationHelper.migrate(getVersion(), migrator, this)) {
 					setVersion(MigrationHelper.getVersion(migrator.getClass()));
 					Object bean = xstream.unmarshal(domReader);
-					return bean;
+					return (T) bean;
 				} else {
-					return xstream.unmarshal(domReader);
+					return (T) xstream.unmarshal(domReader);
 				}
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			return xstream.unmarshal(domReader);
+			return (T) xstream.unmarshal(domReader);
 		}
 	}
 	
