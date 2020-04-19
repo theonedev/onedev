@@ -15,6 +15,9 @@
 .code-comments tr.comment.new td.new-indicator {
 	background: #4667EE;
 }
+.code-comments td.last-update {
+	color: #888;
+}
 
 .code-comment>.outdated-context {
 	color: #8a6d3b;

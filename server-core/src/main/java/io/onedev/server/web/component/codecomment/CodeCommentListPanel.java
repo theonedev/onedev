@@ -27,6 +27,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -43,6 +44,8 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
@@ -56,6 +59,8 @@ import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
@@ -65,8 +70,6 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
-	private static final int MAX_COMMENT_LEN = 75;
-	
 	private String query;
 	
 	private IModel<CodeCommentQuery> parsedQueryModel = new LoadableDetachableModel<CodeCommentQuery>() {
@@ -295,27 +298,30 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
-		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Comment Content")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
-				CodeComment comment = rowModel.getObject();
-				cellItem.add(new Label(componentId, StringUtils.abbreviate(comment.getContent(), MAX_COMMENT_LEN)));
-			}
-
-		});
-		
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Last Update")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(comment.getLastUpdate().getDate())));
+				
+				Fragment fragment = new Fragment(componentId, "lastUpdateFrag", CodeCommentListPanel.this);
+				
+				LastUpdate lastUpdate = comment.getLastUpdate();
+				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
+					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
+					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
+				} else {
+					fragment.add(new WebMarkupContainer("user").setVisible(false));
+				}
+				fragment.add(new Label("activity", lastUpdate.getActivity()));
+				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate())));
+				
+				cellItem.add(fragment);
 			}
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "last-update expanded";
 			}
 
 		});
