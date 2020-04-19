@@ -401,6 +401,7 @@ public class LdapAuthenticator extends Authenticator {
 		
 		Attribute attributeValue = searchResultAttributes.get(getUserSSHPublicKey());
 		NamingEnumeration<?> ldapValues = attributeValue.getAll();
+		int keyIndex = 1;
 		
 		while (ldapValues.hasMore()) {
 			Object value = ldapValues.next();
@@ -409,7 +410,7 @@ public class LdapAuthenticator extends Authenticator {
 				String content = (String) value;
 				
 				try {
-					SshKey sshKey = parseSSHPublicKey(content);
+					SshKey sshKey = parseSSHPublicKey(keyIndex, content);
 					sshKeys.add(sshKey);
 				} catch (Exception err) {
 					logger.warn("Error parsing SSH public key", err);
@@ -418,12 +419,14 @@ public class LdapAuthenticator extends Authenticator {
 			} else {
 				logger.warn("SSH public key from ldap not a String");
 			}
+			
+			keyIndex++;
 		}
 
 		return sshKeys;
 	}
 
-	private SshKey parseSSHPublicKey(String content) throws IOException, GeneralSecurityException {
+	private SshKey parseSSHPublicKey(int keyIndex, String content) throws IOException, GeneralSecurityException {
 		PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
         String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
 		
@@ -435,7 +438,7 @@ public class LdapAuthenticator extends Authenticator {
         if (parts.length > 2) {
         	sshKey.setName(parts[2]);
         } else {
-        	sshKey.setName(fingerPrint);	
+        	sshKey.setName("ldap." + keyIndex);	
         }
 
         return sshKey;
