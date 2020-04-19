@@ -204,7 +204,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 					@Override
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
-						String script = String.format("onedev.server.commitdetail.initRefs('%s');", getMarkupId());
+						String script = String.format("onedev.server.commitDetail.initRefs('%s');", getMarkupId());
 						response.render(OnDomReadyHeaderItem.forScript(script));
 					}
 					
@@ -559,6 +559,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CommitDetailResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.commitDetail.onDomReady();"));
 	}
 
 	public static PageParameters paramsOf(Project project, State state) {

@@ -1,53 +1,55 @@
 <wicket:extend>
-	<div class="page-title">Revision Compare</div>
-	<div id="revision-compare">
-		<table class="revision-compare">
-			<tr>
-				<td class="left revision">
-					<div class="title clearfix">
-						<label class="pull-left">Base</label>
-						<wicket:enclosure child="compareWithMergeBase">
-						<div class="pull-left checkbox">
-							<label>
-								<input wicket:id="compareWithMergeBase" type="checkbox">
-								common ancestor
-								<span wicket:id="mergeBaseTooltip"><i class="fa fa-question-circle"></i></span>
-							</label>
+	<div id="revision-compare" class="resize-aware">
+		<div class="page-title">Revision Compare</div>
+		<div class="page-content">
+			<table class="revision-compare">
+				<tr>
+					<td class="left revision">
+						<div class="title clearfix">
+							<label class="pull-left">Base</label>
+							<wicket:enclosure child="compareWithMergeBase">
+							<div class="pull-left checkbox">
+								<label>
+									<input wicket:id="compareWithMergeBase" type="checkbox">
+									common ancestor
+									<span wicket:id="mergeBaseTooltip"><i class="fa fa-question-circle"></i></span>
+								</label>
+							</div>
+							</wicket:enclosure>
 						</div>
-						</wicket:enclosure>
-					</div>
-					<div wicket:id="leftRevSelector" class="selector"></div>
-					<div class="message">
-						<a wicket:id="leftCommitLink"><span wicket:id="message"></span></a>
-					</div>
-				</td>
-				<td class="action">
-					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-exchange"></i></a>
-				</td>
-				<td class="right revision">
-					<div class="title">
-						<label>Compare</label>
-					</div>
-					<div wicket:id="rightRevSelector" class="selector"></div>
-					<div class="message">
-						<a wicket:id="rightCommitLink"><span wicket:id="message"></span></a>
-					</div>
-				</td>
-			</tr>
-		</table>
-		<div wicket:id="effectiveRequest" class="alert alert-info">
-			<span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
+						<div wicket:id="leftRevSelector" class="selector"></div>
+						<div class="message">
+							<a wicket:id="leftCommitLink"><span wicket:id="message"></span></a>
+						</div>
+					</td>
+					<td class="action">
+						<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-exchange"></i></a>
+					</td>
+					<td class="right revision">
+						<div class="title">
+							<label>Compare</label>
+						</div>
+						<div wicket:id="rightRevSelector" class="selector"></div>
+						<div class="message">
+							<a wicket:id="rightCommitLink"><span wicket:id="message"></span></a>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<div wicket:id="effectiveRequest" class="alert alert-info">
+				<span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
+			</div>
+			<div>
+				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
+			</div>
+			<div wicket:id="revisionNotSpecified" class="alert alert-warning">
+				<span>Please select revisions to compare</span>
+			</div>
+			<div wicket:id="unrelatedHistory" class="alert alert-warning">
+				<span>History of comparing revisions is unrelated</span>
+			</div>
+			<ul wicket:id="tabs" class="nav nav-tabs"></ul>
+			<div wicket:id="tabPanel" class="tab-panel"></div>
 		</div>
-		<div>
-			<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
-		</div>
-		<div wicket:id="revisionNotSpecified" class="alert alert-warning">
-			<span>Please select revisions to compare</span>
-		</div>
-		<div wicket:id="unrelatedHistory" class="alert alert-warning">
-			<span>History of comparing revisions is unrelated</span>
-		</div>
-		<ul wicket:id="tabs" class="nav nav-tabs"></ul>
-		<div wicket:id="tabPanel" class="tab-panel"></div>
 	</div>
 </wicket:extend>

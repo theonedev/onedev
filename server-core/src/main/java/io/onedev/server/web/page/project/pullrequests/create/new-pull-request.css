@@ -1,89 +1,96 @@
 @media(min-width: 360px) {
-    #new-request>ul.nav-tabs>li.collapsed {
+    #new-pull-request>.page-content>ul.nav-tabs>li.collapsed {
         display: none;
     }
-    #new-request>ul.nav-tabs>li.expanded {
+    #new-pull-request>ul.nav-tabs>li.expanded {
         display: block;
     }
 }
-
-#new-request>* {
+body.NewPullRequestPage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#new-pull-request {
+	position: relative;
+	overflow: auto;
+	padding: 20px;
+}
+#new-pull-request>.page-content>* {
 	margin-bottom: 20px;
 }
-#new-request>:last-child {
+#new-pull-request>.page-content>:last-child {
 	margin-bottom: 0;
 }
-#new-request>.status .summary {
+#new-pull-request>.page-content>.status .summary {
 	font-size: 16px; 
 	padding: 0; 
 	margin-bottom: 8px;
 }
 
-#new-request>.status>.can-send form>table>tbody>tr>td {
+#new-pull-request>.page-content>.status>.can-send form>table>tbody>tr>td {
 	padding: 16px 0; 
 	border-top: 1px dashed #BBB; 
 	border-bottom: 1px dashed #BBB;
 }
-#new-request>.status>.can-send form>table>tbody>tr>td.name {
+#new-pull-request>.page-content>.status>.can-send form>table>tbody>tr>td.name {
 	width: 200px; 
 	font-size: 18px; 
 	padding-right: 8px;
 }
-#new-request>.status>.can-send form>table>tbody>tr>td.value {
+#new-pull-request>.page-content>.status>.can-send form>table>tbody>tr>td.value {
 	padding-left: 8px;
 }
-#new-request>.status>.can-send form>table {
+#new-pull-request>.page-content>.status>.can-send form>table {
 	margin-bottom: 16px;
 }
-#new-request>.status>.can-send form>table>tbody>tr>td.name .required:BEFORE {
+#new-pull-request>.page-content>.status>.can-send form>table>tbody>tr>td.name .required:BEFORE {
 	content: "*"; 
 	color: red;
 }
-#new-request table.reviewers {
+#new-pull-request>.page-content table.reviewers {
 	width: auto;
 }
-#new-request>.status>.can-send form .alert-danger {
+#new-pull-request>.page-content>.status>.can-send form .alert-danger {
 	margin-bottom: 0; 
 	margin-top: 16px;
 }
-#new-request>.status>.can-send form .help-block {
+#new-pull-request>.page-content>.status>.can-send form .help-block {
 	margin-bottom: 0;
 }
-#new-request>.status>.can-send form select {
+#new-pull-request>.page-content>.status>.can-send form select {
 	width: auto;
 }
-#new-request>.status>.can-send table.reviews td.result {
+#new-pull-request>.page-content>.status>.can-send table.reviews td.result {
 	display: none;
 }
-#new-request>.nav-tabs {
+#new-pull-request>.page-content>.nav-tabs {
 	margin-bottom: 20px;
 }
-#new-request>.tab-panel>.diff-option {
+#new-pull-request>.page-content>.tab-panel>.diff-option {
 	padding: 8px;
 	background: #F2F2F2;
 	border: 1px solid #DDD;
 	z-index: 200;
 	margin-bottom: 16px;
 }
-#new-request>.status>.can-send .merge-strategy .status {
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status {
 	margin-top: 10px;
 	font-size: 16px;
 	font-weight: bold;
 }
-#new-request>.status>.can-send .merge-strategy .status .no-conflict {
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status .no-conflict {
 	color: #399529;
 } 
-#new-request>.status>.can-send .merge-strategy .status .conflict {
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status .conflict {
 	color: #DD4B4B;
 } 
-#new-request>.status>.can-send .merge-strategy .status .calculating {
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status .calculating {
 	color: #BC7E12;
 }
-#new-request>.status>.can-send .merge-strategy .status .calculating img {
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status .calculating img {
 	width: 24px;
 	height: 24px;
 }
-#new-request>.status>.can-send .merge-strategy .merge-without-review {
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .merge-without-review {
 	margin-top: 20px;
 	margin-bottom: 0;
 }

@@ -37,9 +37,11 @@ onedev.server.revisionDiff = {
 		if (window.location.hash) {
 			var $anchor = $(window.location.hash);
 			if ($anchor.length != 0) {
-				var detailOffset = $(".revision-diff>.body>.detail").offset().top;
-				if ($(window).scrollTop() <= detailOffset)
-					$(window).scrollTop(detailOffset);
+				var $detail = $(".revision-diff>.body>.detail");
+				var $scrollParent = $detail.scrollParent();
+				var detailOffset = $detail.offset().top - $scrollParent.offset().top;
+				if ($scrollParent.scrollTop() < detailOffset)
+					$scrollParent.scrollTop(detailOffset);
 				$anchor[0].scrollIntoView();
 			}
 		} 
@@ -69,43 +71,32 @@ onedev.server.revisionDiff = {
 		var $detail = $(".revision-diff>.body>.detail");
 		var $comment = $detail.children(".comment");
 		var $diffs = $detail.children(".diffs");
-		var windowHeight;
 		if ($comment.is(":visible")) {
-			windowHeight = $(window).height();
+			var $scrollParent = $detail.scrollParent();
+			var scrollParentHeight = $scrollParent[0].clientHeight;
+			var scrollParentTop = $scrollParent.offset().top;
 			$detail.css("padding-left", $comment.outerWidth(true));
-			var scrollLeft = $(window).scrollLeft();
-			var scrollTop = $(window).scrollTop();
-			$comment.css("left", $detail.offset().left - scrollLeft);
-			var topOffset = $diffs.offset().top - scrollTop;
-			var headHeight = $("#layout>.navbar").outerHeight();
-			if (topOffset <= headHeight) {
-				$comment.css("top", headHeight);
-			} else {
-				$comment.css("top", topOffset);
-			}
+			$comment.css("left", $detail.offset().left);
+			var diffsTop = $diffs.offset().top;
+			var commentTop;
+			if (diffsTop <= scrollParentTop) 
+				commentTop = scrollParentTop;
+			else 
+				commentTop = diffsTop;
+			$comment.css("top", commentTop);
 			var $lastDiff = $diffs.children().last();
-			var commentHeight;
-			if ($lastDiff.length != 0) {
-				commentHeight = $lastDiff.offset().top + $lastDiff.height() - scrollTop - headHeight;
-			} else {
-				commentHeight = $diffs.offset().top + $diffs.height() - scrollTop - headHeight;
-			}
-			var maxCommentHeight = windowHeight - headHeight;
-			var minCommentHeight = maxCommentHeight - 20;
-			if (commentHeight < minCommentHeight)
-				commentHeight = minCommentHeight;
-			else if (commentHeight > maxCommentHeight)
-				commentHeight = maxCommentHeight;
+			var commentHeight = scrollParentTop + scrollParentHeight - commentTop;
 			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 			$commentResizeHandle.outerHeight(commentHeight - 2);
 			var $commentHead = $comment.find(">.content>.head");
 			$comment.find(">.content>.body").outerHeight(commentHeight-2-$commentHead.outerHeight());
+			var diffsHeight = $diffs.outerHeight();
+			var windowHeight = $(window).height();
+			$detail.height(windowHeight>diffsHeight?windowHeight:diffsHeight);
 		} else {
-			windowHeight = 0;
 			$detail.css("padding-left", "0");
+			$detail.height($diffs.outerHeight());
 		}
-		var diffsHeight = $diffs.outerHeight();
-		$detail.height(windowHeight>diffsHeight?windowHeight:diffsHeight);
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");

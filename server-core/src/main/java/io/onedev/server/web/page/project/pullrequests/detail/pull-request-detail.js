@@ -6,7 +6,7 @@ onedev.server.pullRequestDetail = {
 			$main.outerHeight($(window).height() - $main.offset().top);
 		}
 		adjustHeight();
-		$main.addClass("resize-aware").on("resized", adjustHeight);
+		$main.on("resized", adjustHeight);
 		$main.scroll(function() {
 			$main.find(".scroll-aware").addBack(".scroll-aware").trigger("scrolled");
 		});

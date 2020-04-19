@@ -122,10 +122,6 @@
 .revision-diff>.body>.detail>.comment>.content>.head .locate {
 	font-size: 20px;
 }
-.revision-diff>.body>.detail>.comment>.content>.head .permanent {
-	margin-top: 2px;
-	font-size: 18px;
-}
 .revision-diff>.body>.detail>.comment>.content>.head .context {
 	margin-top: -2px;
 }

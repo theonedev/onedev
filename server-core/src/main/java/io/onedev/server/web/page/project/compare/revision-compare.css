@@ -1,6 +1,14 @@
-#revision-compare>* {
+body.RevisionComparePage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#revision-compare {
+	position: relative;
+	overflow: auto;
+	padding: 20px;
+}
+#revision-compare>.page-content>* {
 	margin-bottom: 20px;
 }
-#revision-compare>:LAST-CHILD {
+#revision-compare>.page-content>:LAST-CHILD {
 	margin-bottom: 0;
 }
