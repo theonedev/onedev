@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
 import java.util.List;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
@@ -13,4 +14,5 @@ public interface SshKeyManager extends EntityManager<SshKey> {
 
     boolean isKeyAlreadyInUse(String keyDigest);
 
+    void syncUserKeys(User user, Collection<SshKey> keys);
 }
