@@ -59,7 +59,12 @@ public class MySshKeysPage extends MyPage {
             }
             
             @Override
-            public boolean isVisible() {
+            protected void onConfigure() {
+            	super.onConfigure();
+            	setVisible(determineSSHKeyVisibility());
+            }
+            
+            public boolean determineSSHKeyVisibility() {
             	if (!user.isExternalManaged()) {
             		return true;
             	}

@@ -63,7 +63,12 @@ public class SshKeysListPanel extends Panel {
                     }
                     
                     @Override
-                    public boolean isVisible() {
+                    protected void onConfigure() {
+                    	super.onConfigure();
+                    	setVisible(determineDeleteSSHKeyVisibility());
+                    }
+                    
+                    public boolean determineDeleteSSHKeyVisibility() {
                     	if (!item.getModelObject().getOwner().isExternalManaged()) {
                     		return true;
                     	}
