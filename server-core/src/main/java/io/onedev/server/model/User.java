@@ -377,7 +377,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     	this.password = password;
     }
 
-    public Boolean isExternalManaged() {
+    public boolean isExternalManaged() {
     	return this.getPassword().equals(EXTERNAL_MANAGED);
     }
     
