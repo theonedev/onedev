@@ -731,8 +731,11 @@ onedev.server = {
 		
 		if (location.hash && !onedev.server.viewState.getFromHistory()) {
 			// Scroll anchors into view (for instance the markdown headline)
-			var element = document.getElementsByName(decodeURIComponent(location.hash.slice(1)))[0];
-			if (element)
+			var nameOrId = decodeURIComponent(location.hash.slice(1));
+			var element = document.getElementById(nameOrId);
+			if (!element)
+				element = document.getElementsByName(nameOrId)[0];
+			if (element) 
 				element.scrollIntoView();
 		}
 	}
