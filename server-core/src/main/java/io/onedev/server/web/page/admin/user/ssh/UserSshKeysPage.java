@@ -3,6 +3,7 @@ package io.onedev.server.web.page.admin.user.ssh;
 import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
@@ -65,27 +66,40 @@ public class UserSshKeysPage extends UserPage {
             	super.onConfigure();
             	setVisible(determineNewSSHKeyVisibility());
             }
-
-            private boolean determineNewSSHKeyVisibility() {
-            	if (!user.isExternalManaged()) {
-            		return true;
-            	}
-            	
-            	Authenticator auth = OneDev.getInstance(SettingManager.class).getAuthenticator();
-        		
-            	if (auth == null || !(auth instanceof LdapAuthenticator)) {
-            		return true;
-            	}
-            	
-            	if (((LdapAuthenticator) auth).getUserSSHPublicKey() != null) {
-            		return false;
-            	}
-            	
-            	return true;
-            }
+            
 
         });
         
+        add(new WebMarkupContainer("sshKeyNote") {
+        	@Override
+        	protected void onConfigure() {
+        		super.onConfigure();
+        		setVisible(determineSSHKeyNoteVisibility());
+        	}
+        });
+        
         add(keyList.setOutputMarkupId(true));
+    }
+    
+    private boolean determineSSHKeyNoteVisibility() {
+    	return !determineNewSSHKeyVisibility();
+    }
+    
+    private boolean determineNewSSHKeyVisibility() {
+    	if (!getUser().isExternalManaged()) {
+    		return true;
+    	}
+    	
+    	Authenticator auth = OneDev.getInstance(SettingManager.class).getAuthenticator();
+		
+    	if (auth == null || !(auth instanceof LdapAuthenticator)) {
+    		return true;
+    	}
+    	
+    	if (((LdapAuthenticator) auth).getUserSSHPublicKey() != null) {
+    		return false;
+    	}
+    	
+    	return true;
     }
 }
