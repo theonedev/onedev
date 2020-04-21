@@ -13,7 +13,7 @@ public class SuccessfulCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return ActionCondition.getRuleName(ActionConditionLexer.Successful);
 	}
 	

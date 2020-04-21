@@ -44,7 +44,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(CodeComment.FIELD_CREATE_DATE) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
 				+ quote(rawValue);

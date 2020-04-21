@@ -31,7 +31,7 @@ public class TitleCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(Issue.FIELD_TITLE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
 				+ quote(value);

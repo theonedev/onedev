@@ -170,7 +170,7 @@ public class JobMatch extends Criteria<Build> {
 	}
 	
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return criteria.toString();
 	}
 

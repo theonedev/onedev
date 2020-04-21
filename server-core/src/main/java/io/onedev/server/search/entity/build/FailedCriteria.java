@@ -25,7 +25,7 @@ public class FailedCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return BuildQuery.getRuleName(BuildQueryLexer.Failed);
 	}
 

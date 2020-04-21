@@ -25,7 +25,7 @@ public class ParamCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(name) + " " 
 				+ RetryCondition.getRuleName(RetryConditionLexer.Is) + " "
 				+ quote(value);

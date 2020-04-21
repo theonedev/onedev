@@ -45,7 +45,7 @@ public class SubmitDateCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(Build.FIELD_SUBMIT_DATE) + " " 
 				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);

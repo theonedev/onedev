@@ -8,15 +8,22 @@ import javax.validation.Valid;
 
 import org.apache.wicket.Component;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.StringMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -24,7 +31,28 @@ public abstract class JobTrigger implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private String projects;
+	
 	private List<ParamSupply> params = new ArrayList<>();
+
+	@Editable(name="Applicable Projects", order=900, description="Optionally specify space-separated projects "
+			+ "applicable for this trigger. This is useful for instance when you want to prevent "
+			+ "the job from being triggered in forked projects. Use * or ? for wildcard match. "
+			+ "Leave empty to match all projects")
+	@Patterns(suggester="suggestProjects")
+	@NameOfEmptyValue("Any project")
+	public String getProjects() {
+		return projects;
+	}
+
+	public void setProjects(String projects) {
+		this.projects = projects;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestProjects(String matchWith) {
+		return SuggestionUtils.suggestProjects(matchWith);
+	}
 
 	@Editable(name="Job Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
@@ -50,8 +78,21 @@ public abstract class JobTrigger implements Serializable {
 		return new ArrayList<>();
 	}
 	
-	public abstract boolean matches(ProjectEvent event, Job job);
+	public boolean matches(ProjectEvent event, Job job) {
+		String projectName = event.getProject().getName();
+		Matcher matcher = new StringMatcher();
+		return (projects == null || PatternSet.parse(projects).matches(matcher, projectName))
+				&& matchesWithoutProject(event, job);
+	}
 	
-	public abstract String getDescription();
+	public String getDescription() {
+		String description = getDescriptionWithoutProject();
+		if (projects != null)
+			description += " in projects '" + projects + "'";
+		return description;
+	}
 
+	public abstract boolean matchesWithoutProject(ProjectEvent event, Job job);
+	
+	public abstract String getDescriptionWithoutProject();
 }

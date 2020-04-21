@@ -58,7 +58,7 @@ public class NumberCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(Build.FIELD_NUMBER) + " " 
 				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);

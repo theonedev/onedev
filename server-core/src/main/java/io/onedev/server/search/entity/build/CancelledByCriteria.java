@@ -37,7 +37,7 @@ public class CancelledByCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return BuildQuery.getRuleName(BuildQueryLexer.CancelledBy) + " " + quote(value);
 	}
 

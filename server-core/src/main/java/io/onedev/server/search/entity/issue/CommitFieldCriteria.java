@@ -42,7 +42,7 @@ public class CommitFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(getFieldName()) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 				+ quote(value);

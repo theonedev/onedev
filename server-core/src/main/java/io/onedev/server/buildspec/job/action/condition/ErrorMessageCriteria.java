@@ -21,7 +21,7 @@ public class ErrorMessageCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(Build.FIELD_ERROR_MESSAGE) + " " 
 				+ ActionCondition.getRuleName(ActionConditionLexer.Contains) + " "
 				+ quote(value);

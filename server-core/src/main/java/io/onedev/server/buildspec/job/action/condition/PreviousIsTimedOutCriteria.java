@@ -14,7 +14,7 @@ public class PreviousIsTimedOutCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return ActionCondition.getRuleName(ActionConditionLexer.PreviousIsTimedOut);
 	}
 	

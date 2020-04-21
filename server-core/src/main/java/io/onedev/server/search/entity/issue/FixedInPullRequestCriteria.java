@@ -49,7 +49,7 @@ public class FixedInPullRequestCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return IssueQuery.getRuleName(IssueQueryLexer.FixedInPullRequest) + " " + quote(value);
 	}
 

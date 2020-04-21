@@ -40,7 +40,7 @@ public class ParamIsEmptyCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(name) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
 	}
 	

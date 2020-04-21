@@ -25,7 +25,7 @@ public class WaitingCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return BuildQuery.getRuleName(BuildQueryLexer.Waiting);
 	}
 

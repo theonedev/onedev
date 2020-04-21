@@ -45,11 +45,11 @@ public abstract class Criteria<T> implements Serializable {
 	@Override
 	public String toString() {
 		if (withParens)
-			return "(" + asString() + ")";
+			return "(" + toStringWithoutParens() + ")";
 		else
-			return asString();
+			return toStringWithoutParens();
 	}
 	
-	public abstract String asString();
+	public abstract String toStringWithoutParens();
 	
 }

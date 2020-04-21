@@ -58,7 +58,7 @@ public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.IncludesIssue) + " " + quote(value);
 	}
 

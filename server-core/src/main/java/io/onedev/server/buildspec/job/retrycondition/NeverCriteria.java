@@ -13,7 +13,7 @@ public class NeverCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return RetryCondition.getRuleName(RetryConditionLexer.Never);
 	}
 

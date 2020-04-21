@@ -46,7 +46,7 @@ public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(PullRequest.FIELD_UPDATE_DATE) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value);

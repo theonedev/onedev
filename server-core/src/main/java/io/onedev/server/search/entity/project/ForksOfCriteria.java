@@ -42,7 +42,7 @@ public class ForksOfCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " + Criteria.quote(projectName);
 	}
 

@@ -40,8 +40,8 @@ public class OrIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
-		return new OrEntityCriteria<Issue>(criterias).asString();
+	public String toStringWithoutParens() {
+		return new OrEntityCriteria<Issue>(criterias).toStringWithoutParens();
 	}
 	
 	@Override

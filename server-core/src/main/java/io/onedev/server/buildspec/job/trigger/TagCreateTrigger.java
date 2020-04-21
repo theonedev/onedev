@@ -24,10 +24,11 @@ public class TagCreateTrigger extends JobTrigger {
 
 	private String tags;
 	
-	@Editable(name="Tags", order=100, 
-			description="Optionally specify space-separated tags to check. Use * or ? for wildcard match. "
-					+ "Leave empty to match all tags")
-	@Patterns(suggester = "suggestTags")
+	private String branches;
+	
+	@Editable(name="Tags", order=100, description="Optionally specify space-separated tags to check. "
+			+ "Use * or ? for wildcard match. Leave empty to match all tags")
+	@Patterns(suggester="suggestTags")
 	@NameOfEmptyValue("Any tag")
 	public String getTags() {
 		return tags;
@@ -42,13 +43,35 @@ public class TagCreateTrigger extends JobTrigger {
 		return SuggestionUtils.suggestTags(Project.get(), matchWith);
 	}
 
+	@Editable(name="On Branches", order=200, description="This trigger will only be applicable "
+			+ "if tagged commit is on branches specified here. Multiple branches should be "
+			+ "separated with spaces. Use * or ? for wildcard match. Leave empty to match all "
+			+ "branches")
+	@Patterns(suggester="suggestBranches")
+	@NameOfEmptyValue("Any branch")
+	public String getBranches() {
+		return branches;
+	}
+
+	public void setBranches(String branches) {
+		this.branches = branches;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestBranches(String matchWith) {
+		return SuggestionUtils.suggestBranches(Project.get(), matchWith);
+	}
+	
 	@Override
-	public boolean matches(ProjectEvent event, Job job) {
+	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
-			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());
-			if (pushedTag != null && !refUpdated.getNewCommitId().equals(ObjectId.zeroId()) 
-					&& (getTags() == null || PatternSet.parse(getTags()).matches(new PathMatcher(), pushedTag))) {
+			String updatedTag = GitUtils.ref2tag(refUpdated.getRefName());
+			ObjectId commitId = refUpdated.getNewCommitId();
+			Project project = event.getProject();
+			if (updatedTag != null && !commitId.equals(ObjectId.zeroId()) 
+					&& (tags == null || PatternSet.parse(tags).matches(new PathMatcher(), updatedTag))
+					&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
 				return true;
 			}
 		}
@@ -56,11 +79,13 @@ public class TagCreateTrigger extends JobTrigger {
 	}
 
 	@Override
-	public String getDescription() {
-		if (getTags() != null)
-			return String.format("When create tags '%s'", getTags());
-		else
-			return "When create tags";
+	public String getDescriptionWithoutProject() {
+		String description = "When create tags";
+		if (tags != null)
+			description += " '" + tags + "'";
+		if (branches != null)
+			description += " on branches '" + branches + "'";
+		return description;
 	}
 
 }

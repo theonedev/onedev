@@ -24,7 +24,7 @@ public class ImageCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(FIELD_IMAGE) + " " + getRuleName(Is) + " " + quote(image);
 	}
 	

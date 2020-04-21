@@ -59,8 +59,8 @@ public class AndEntityCriteria<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public String asString() {
-		return new AndCriteria<T>(criterias).asString();
+	public String toStringWithoutParens() {
+		return new AndCriteria<T>(criterias).toStringWithoutParens();
 	}
 
 	@Override

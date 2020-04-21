@@ -46,7 +46,7 @@ public class DateFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(getFieldName()) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);

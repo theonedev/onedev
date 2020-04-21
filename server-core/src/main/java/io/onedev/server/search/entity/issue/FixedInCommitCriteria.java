@@ -46,7 +46,7 @@ public class FixedInCommitCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return IssueQuery.getRuleName(IssueQueryLexer.FixedInCommit) + " " + quote(value);
 	}
 

@@ -60,7 +60,7 @@ public class NumberCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(PullRequest.FIELD_NUMBER) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value);

@@ -29,9 +29,9 @@ public class PullRequestTrigger extends JobTrigger {
 	
 	private String paths;
 	
-	@Editable(name="Target Branches", order=100, 
-			description="Optionally specify space-separated target branches of the pull requests to check. "
-					+ "Use * or ? for wildcard match. Leave empty to match all branches")
+	@Editable(name="Target Branches", order=100, description="Optionally specify space-separated "
+			+ "target branches of the pull requests to check. Use * or ? for wildcard match. "
+			+ "Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches")
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
@@ -82,22 +82,22 @@ public class PullRequestTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public boolean matches(ProjectEvent event, Job job) {
+	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof PullRequestMergePreviewCalculated) {
-			PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
-			String branch = pullRequestMergePreviewCalculated.getRequest().getTargetBranch();
-			if (branch != null) {
-				if ((getBranches() == null || PatternSet.parse(getBranches()).matches(new PathMatcher(), branch)) 
-						&& touchedFile(pullRequestMergePreviewCalculated.getRequest())) {
-					return true;
-				}
+			PullRequestMergePreviewCalculated mergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
+			PullRequest request = mergePreviewCalculated.getRequest();
+			String targetBranch = request.getTargetBranch();
+			Matcher matcher = new PathMatcher();
+			if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
+					&& touchedFile(request)) {
+				return true;
 			}
 		}
 		return false;
 	}
 
 	@Override
-	public String getDescription() {
+	public String getDescriptionWithoutProject() {
 		String description;
 		if (getBranches() != null && getPaths() != null)
 			description = String.format("When open/update pull requests targeting branches '%s' and touching files '%s'", getBranches(), getPaths());

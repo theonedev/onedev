@@ -46,7 +46,7 @@ public class NotCriteria<T> extends Criteria<T> {
 	}
 	
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return "not(" + criteria.toString() + ")";
 	}
 	

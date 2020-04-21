@@ -189,8 +189,8 @@ public class ActionCondition extends Criteria<Build> {
 	}
 	
 	@Override
-	public String asString() {
-		return criteria.asString();
+	public String toStringWithoutParens() {
+		return criteria.toStringWithoutParens();
 	}
 	
 }

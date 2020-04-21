@@ -49,7 +49,7 @@ public class AndCriteria<T> extends Criteria<T> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return criterias.stream().map(it->it.toString()).collect(Collectors.joining(" and "));
 	}
 

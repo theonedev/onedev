@@ -35,8 +35,8 @@ public class NotIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
-		return new NotEntityCriteria<Issue>(criteria).asString();
+	public String toStringWithoutParens() {
+		return new NotEntityCriteria<Issue>(criteria).toStringWithoutParens();
 	}
 	
 	@Override

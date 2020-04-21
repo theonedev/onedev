@@ -64,8 +64,8 @@ public class OrEntityCriteria<T extends AbstractEntity> extends EntityCriteria<T
 	}
 
 	@Override
-	public String asString() {
-		return new OrCriteria<T>(criterias).asString();
+	public String toStringWithoutParens() {
+		return new OrCriteria<T>(criterias).toStringWithoutParens();
 	}
 	
 }

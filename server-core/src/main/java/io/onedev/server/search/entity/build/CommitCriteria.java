@@ -39,7 +39,7 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(Build.FIELD_COMMIT) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ quote(commitId.name());

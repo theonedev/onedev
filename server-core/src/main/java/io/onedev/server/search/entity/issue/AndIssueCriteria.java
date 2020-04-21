@@ -40,8 +40,8 @@ public class AndIssueCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
-		return new AndEntityCriteria<Issue>(criterias).asString();
+	public String toStringWithoutParens() {
+		return new AndEntityCriteria<Issue>(criterias).toStringWithoutParens();
 	}
 
 	@Override

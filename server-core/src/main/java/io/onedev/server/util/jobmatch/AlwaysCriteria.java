@@ -16,7 +16,7 @@ public class AlwaysCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return getRuleName(All);
 	}
 

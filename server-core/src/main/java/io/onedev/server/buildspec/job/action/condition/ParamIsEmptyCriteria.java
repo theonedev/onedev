@@ -22,7 +22,7 @@ public class ParamIsEmptyCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(name) + " " + ActionCondition.getRuleName(ActionConditionLexer.IsEmpty);
 	}
 	

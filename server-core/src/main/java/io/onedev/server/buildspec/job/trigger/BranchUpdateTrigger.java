@@ -28,9 +28,8 @@ public class BranchUpdateTrigger extends JobTrigger {
 	
 	private String paths;
 	
-	@Editable(name="Branches", order=100, 
-			description="Optionally specify space-separated branches to check. Use * or ? for wildcard match. "
-					+ "Leave empty to match all branches")
+	@Editable(name="Branches", order=100, description="Optionally specify space-separated branches "
+			+ "to check. Use * or ? for wildcard match. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches")
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
@@ -87,22 +86,20 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public boolean matches(ProjectEvent event, Job job) {
+	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
-			String branch = GitUtils.ref2branch(refUpdated.getRefName());
-			if (branch != null) {
-				if ((getBranches() == null || PatternSet.parse(getBranches()).matches(new PathMatcher(), branch)) 
-						&& touchedFile(refUpdated)) {
-					return true;
-				}
-			}
+			String updatedBranch = GitUtils.ref2branch(refUpdated.getRefName());
+			Matcher matcher = new PathMatcher();
+			return updatedBranch != null 
+					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
+					&& touchedFile(refUpdated);
 		}
 		return false;
 	}
 
 	@Override
-	public String getDescription() {
+	public String getDescriptionWithoutProject() {
 		String description;
 		if (getBranches() != null && getPaths() != null)
 			description = String.format("When update branches '%s' and touch files '%s'", getBranches(), getPaths());

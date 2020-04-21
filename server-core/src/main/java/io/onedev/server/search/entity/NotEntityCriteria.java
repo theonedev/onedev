@@ -58,8 +58,8 @@ public class NotEntityCriteria<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public String asString() {
-		return new NotCriteria<T>(criteria).asString();
+	public String toStringWithoutParens() {
+		return new NotCriteria<T>(criteria).toStringWithoutParens();
 	}
 	
 }

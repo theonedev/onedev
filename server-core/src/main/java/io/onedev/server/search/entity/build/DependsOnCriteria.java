@@ -43,7 +43,7 @@ public class DependsOnCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return BuildQuery.getRuleName(BuildQueryLexer.DependsOn) + " " + quote(value);
 	}
 

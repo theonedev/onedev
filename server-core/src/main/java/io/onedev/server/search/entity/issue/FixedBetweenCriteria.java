@@ -136,7 +136,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return getRuleName(IssueQueryLexer.FixedBetween) + " " 
 				+ getRuleName(firstType) + " " + quote(firstValue) + " " 
 				+ getRuleName(IssueQueryLexer.And) + " " 

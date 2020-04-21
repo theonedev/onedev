@@ -17,7 +17,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean matches(ProjectEvent event, Job job) {
+	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof BuildFinished) {
 			BuildFinished buildFinished = (BuildFinished) event;
 			Build build = buildFinished.getBuild();
@@ -39,7 +39,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 	}
 
 	@Override
-	public String getDescription() {
+	public String getDescriptionWithoutProject() {
 		return "When dependency jobs finished";
 	}
 

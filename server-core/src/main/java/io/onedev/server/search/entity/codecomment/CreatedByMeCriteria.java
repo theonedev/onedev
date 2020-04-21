@@ -33,7 +33,7 @@ public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.CreatedByMe);
 	}
 

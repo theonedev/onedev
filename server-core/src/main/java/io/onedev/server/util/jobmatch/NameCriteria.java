@@ -25,7 +25,7 @@ public class NameCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
 	}
 	

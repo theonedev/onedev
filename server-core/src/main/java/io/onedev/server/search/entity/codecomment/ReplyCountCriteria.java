@@ -43,7 +43,7 @@ public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(CodeComment.FIELD_REPLY_COUNT) + " " 
 				+ CodeCommentQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));

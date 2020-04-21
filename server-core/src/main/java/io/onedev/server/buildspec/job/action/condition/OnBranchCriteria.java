@@ -19,7 +19,7 @@ public class OnBranchCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return ActionCondition.getRuleName(ActionConditionLexer.OnBranch) + " "
 				+ quote(branch);
 	}

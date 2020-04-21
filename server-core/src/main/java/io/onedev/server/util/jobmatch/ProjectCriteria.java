@@ -35,7 +35,7 @@ public class ProjectCriteria extends Criteria<Build> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(FIELD_PROJECT) + " " + getRuleName(Is) + " " + quote(projectName);
 	}
 	

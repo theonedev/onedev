@@ -42,7 +42,7 @@ public class CommentCountCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return quote(Issue.FIELD_COMMENT_COUNT) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));

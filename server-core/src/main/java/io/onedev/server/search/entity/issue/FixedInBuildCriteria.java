@@ -50,7 +50,7 @@ public class FixedInBuildCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return IssueQuery.getRuleName(IssueQueryLexer.FixedInBuild) + " " + quote(value);
 	}
 

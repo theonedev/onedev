@@ -37,7 +37,7 @@ public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + " " + quote(value);
 	}
 

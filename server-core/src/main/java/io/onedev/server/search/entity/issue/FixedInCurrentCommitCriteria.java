@@ -29,7 +29,7 @@ public class FixedInCurrentCommitCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return IssueQuery.getRuleName(IssueQueryLexer.FixedInCurrentCommit);
 	}
 

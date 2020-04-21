@@ -34,7 +34,7 @@ public class NameCriteria extends EntityCriteria<Project> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return Criteria.quote(Project.FIELD_NAME) + " " 
 				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
 				+ Criteria.quote(value);

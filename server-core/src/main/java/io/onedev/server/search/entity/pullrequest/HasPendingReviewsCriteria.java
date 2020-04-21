@@ -40,7 +40,7 @@ public class HasPendingReviewsCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public String asString() {
+	public String toStringWithoutParens() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.HasPendingReviews);
 	}
 
