@@ -1,6 +1,6 @@
 #project-tags .tag {
 	border-top: 1px solid #DDD;
-	padding: 8px 0;
+	padding: 8px;
 }
 #project-tags .tag:hover {
 	background: #F5F5F5;
