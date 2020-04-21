@@ -400,6 +400,12 @@ public class LdapAuthenticator extends Authenticator {
 		Collection<SshKey> sshKeys = new ArrayList<SshKey>();
 		
 		Attribute attributeValue = searchResultAttributes.get(getUserSSHPublicKey());
+		
+		if (attributeValue == null) {
+			// no values for the user stored in LDAP
+			return sshKeys;
+		}
+
 		NamingEnumeration<?> ldapValues = attributeValue.getAll();
 		int keyIndex = 1;
 		
