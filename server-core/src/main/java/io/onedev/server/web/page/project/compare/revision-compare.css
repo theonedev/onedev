@@ -9,6 +9,3 @@ body.RevisionComparePage #layout>.body {
 #revision-compare>.page-content>* {
 	margin-bottom: 20px;
 }
-#revision-compare>.page-content>:LAST-CHILD {
-	margin-bottom: 0;
-}

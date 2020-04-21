@@ -19,9 +19,6 @@ body.PullRequestDetailPage #layout>.body {
 #request-detail>.main>div {
 	margin-bottom: 20px;
 }
-#request-detail>.main>div:last-child {
-	margin-bottom: 0;
-}
 #request-detail>.main>.title {
 	font-size: 20px;
 	font-weight: bold;

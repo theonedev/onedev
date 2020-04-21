@@ -17,9 +17,6 @@ body.NewPullRequestPage #layout>.body {
 #new-pull-request>.page-content>* {
 	margin-bottom: 20px;
 }
-#new-pull-request>.page-content>:last-child {
-	margin-bottom: 0;
-}
 #new-pull-request>.page-content>.status .summary {
 	font-size: 16px; 
 	padding: 0; 

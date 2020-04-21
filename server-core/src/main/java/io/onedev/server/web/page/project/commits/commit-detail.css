@@ -9,9 +9,6 @@ body.CommitDetailPage #layout>.body {
 #commit-detail>div {
 	margin-bottom: 20px;
 }
-#commit-detail>div:LAST-CHILD {
-	margin-bottom: 0;
-}
 #commit-detail>.info {
 	border: 4px solid #EEE;
 	border-radius: 4px;
