@@ -10,8 +10,9 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -525,8 +526,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference()));
-		response.render(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new RevisionCompareResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionCompare.onDomReady();"));
 	}
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {

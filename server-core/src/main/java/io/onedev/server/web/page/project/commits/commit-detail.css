@@ -1,3 +1,11 @@
+body.CommitDetailPage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#commit-detail {
+	position: relative;
+	overflow: auto;
+	padding: 20px;
+}
 #commit-detail>div {
 	margin-bottom: 20px;
 }

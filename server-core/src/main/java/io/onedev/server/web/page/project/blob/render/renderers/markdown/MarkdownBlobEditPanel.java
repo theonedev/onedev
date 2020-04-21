@@ -17,7 +17,7 @@ public class MarkdownBlobEditPanel extends BlobEditPanel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MarkdownBlobResourceReference()));
+		response.render(CssHeaderItem.forReference(new MarkdownBlobCssResourceReference()));
 	}
 
 	@Override

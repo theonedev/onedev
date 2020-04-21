@@ -17,15 +17,7 @@ onedev.server.codemirror = {
 	},
 	scrollTo: function(cm, mark) {
 		var top = cm.charCoords({line: mark.fromRow, ch: 0}, "local").top;
-		var bottom = cm.charCoords({line: mark.toRow, ch: 0}, "local").bottom;
-		
-		var markHeight = bottom - top;
-		var clientHeight = cm.getScrollInfo().clientHeight;
-		if (clientHeight <= markHeight) {
-			cm.scrollTo(null, top - 50); 			
-		} else {
-			cm.scrollTo(null, (top+bottom-clientHeight)/2); 			
-		}
+		cm.scrollTo(null, top - 50); 			
 	},
 	setModeByName: function(cm, modeName) {
 	    var modeInfo = CodeMirror.findModeByName(modeName);
