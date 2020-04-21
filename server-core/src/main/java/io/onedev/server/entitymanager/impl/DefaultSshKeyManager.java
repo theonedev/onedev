@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -65,25 +65,25 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
         return keys.size() > 0;
     }
     
+    @Transactional
     @Override
     public void syncUserKeys(User user, Collection<SshKey> keys) {
-    	SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-		List<SshKey> currentKeys = sshKeyManager.loadUserKeys(user);
+		List<SshKey> currentKeys = loadUserKeys(user);
 
 		Map<String, SshKey> currentKeysMap = sshPublicKeysToMap(currentKeys);
 		Map<String, SshKey> authKeysMap = sshPublicKeysToMap(keys);
 		MapDifference<String, SshKey> diff = Maps.difference(currentKeysMap, authKeysMap);
 		
 		// remove keys not delivered by authentication
-		diff.entriesOnlyOnLeft().values().forEach((key) -> sshKeyManager.delete(key));
+		diff.entriesOnlyOnLeft().values().forEach((key) -> delete(key));
 		
 		// add keys from authorization
 		diff.entriesOnlyOnRight().values().forEach((key) -> {
 			
-			if (!sshKeyManager.isKeyAlreadyInUse(key.getDigest())) {
+			if (!isKeyAlreadyInUse(key.getDigest())) {
 				key.setTimestamp(LocalDateTime.now());
 				key.setOwner(user);
-				sshKeyManager.save(key);	
+				save(key);	
 			} else {
 				logger.warn("SSH public key provided by auth is already in use", key.getDigest());
 			}
