@@ -19,6 +19,9 @@ onedev.server.codemirror = {
 		var top = cm.charCoords({line: mark.fromRow, ch: 0}, "local").top;
 		cm.scrollTo(null, top - 50); 			
 	},
+	scrollIntoView: function(cm, mark) {
+		cm.scrollIntoView({line: mark.fromRow, ch: 0}, 8);
+	},
 	setModeByName: function(cm, modeName) {
 	    var modeInfo = CodeMirror.findModeByName(modeName);
         if (modeInfo) 

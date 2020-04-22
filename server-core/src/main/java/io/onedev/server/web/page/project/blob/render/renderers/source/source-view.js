@@ -442,8 +442,7 @@ onedev.server.sourceView = {
 		onedev.server.codemirror.clearSelection(cm);
 		$(window).resize();
 
-		// Mark again to make sure marked text still exists in viewport after layout change
-		onedev.server.sourceView.mark(mark);
+		onedev.server.codemirror.scrollIntoView(cm, mark);
 		
 		onedev.server.sourceView.highlightCommentTrigger();		
 		var $textarea = $sourceView.find(".comment textarea");
@@ -456,9 +455,9 @@ onedev.server.sourceView = {
 		$sourceView.data("mark", comment.mark);
 		onedev.server.sourceView.highlightCommentTrigger();
 		$(window).resize();
-		
-		// Mark again to make sure marked text still exists in viewport after layout change
-		onedev.server.sourceView.mark(comment.mark);
+
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		onedev.server.codemirror.scrollIntoView(cm, comment.mark);
 	},
 	onCloseComment: function() {
 		var $sourceView = $(".source-view");
@@ -521,6 +520,9 @@ onedev.server.sourceView = {
 			onedev.server.codemirror.scrollTo(cm, mark);
 			cm.setCursor({line: mark.fromRow, ch: mark.fromColumn});
 		} else {
+			mark = $(".source-view").data("mark");
+			if (mark) 
+				onedev.server.codemirror.scrollIntoView(cm, mark);
 			$(".source-view").removeData("mark");
 			onedev.server.codemirror.clearMark(cm);			
 		}

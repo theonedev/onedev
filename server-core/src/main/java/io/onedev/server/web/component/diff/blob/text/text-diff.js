@@ -613,6 +613,13 @@ onedev.server.textDiff = {
 			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-50);
 		}
 	},
+	scrollIntoView: function($container, mark) {
+		var markInfo = onedev.server.textDiff.getMarkInfo($container, mark);
+		var $startTd = markInfo.startTd;
+		var $endTd = markInfo.endTd;
+		if ($startTd && $endTd)
+			$startTd.scrollParent().jumpIntoView($startTd);
+	},
 	mark: function($container, mark) {
 		onedev.server.textDiff.clearMark($container);
 		
@@ -892,16 +899,22 @@ onedev.server.textDiff = {
 			onedev.server.textDiff.addCommentIndicator($container, leftSide, line, comments);
 		}
 		onedev.server.textDiff.highlightCommentTrigger($container);				
+		var mark = $container.data("mark");
+		if (mark)
+			onedev.server.textDiff.scrollIntoView($container, mark);
 	},
 	onOpenComment: function($container, comment) {
 		$container.data("openComment", comment);
 		$container.data("mark", comment.mark);
 		onedev.server.textDiff.highlightCommentTrigger($container);
 		onedev.server.textDiff.mark($container, comment.mark);
-		onedev.server.textDiff.scrollTo($container, comment.mark);
+		onedev.server.textDiff.scrollIntoView($container, comment.mark);
 	},
 	onCloseComment: function($container) {
 		$container.removeData("openComment");
+		var mark = $container.data("mark");
+		if (mark)
+			onedev.server.textDiff.scrollIntoView($container, mark);
 		onedev.server.textDiff.highlightCommentTrigger($container);
 	},
 	onAddComment: function($container, mark) {
@@ -916,7 +929,7 @@ onedev.server.textDiff = {
 		setTimeout(function() {
 			onedev.server.textDiff.highlightCommentTrigger($container);
 			onedev.server.textDiff.mark($container, mark);
-			onedev.server.textDiff.scrollTo($container, mark);
+			onedev.server.textDiff.scrollIntoView($container, mark);
 		}, 100);
 	}
 };

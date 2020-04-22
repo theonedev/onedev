@@ -10,6 +10,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
+import io.onedev.server.web.asset.jumpintoview.JumpIntoViewResourceReference;
 import io.onedev.server.web.asset.selectionpopover.SelectionPopoverResourceReference;
 import io.onedev.server.web.component.diff.table.DiffTableResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
@@ -28,6 +29,7 @@ public class TextDiffResourceReference extends BaseDependentResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new SelectionPopoverResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JumpIntoViewResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
 		dependencies.add(CssHeaderItem.forReference(new DiffTableResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(TextDiffPanel.class, "text-diff.css")));
