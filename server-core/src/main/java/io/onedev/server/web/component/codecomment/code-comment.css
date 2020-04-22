@@ -108,12 +108,6 @@
 	line-height: inherit;
 }
 
-.invalid-code-comment>.head {
-	font-size: 18px;
-	font-weight: bold;
-	margin-bottom: 20px;
-}
-
 @media(max-width: 991px) {
 	.code-comments th.expanded, .code-comments td.expanded {
 		display: none;		

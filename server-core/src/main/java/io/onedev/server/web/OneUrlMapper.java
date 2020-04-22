@@ -22,9 +22,9 @@ import io.onedev.server.web.page.admin.group.create.NewGroupPage;
 import io.onedev.server.web.page.admin.group.membership.GroupMembershipsPage;
 import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultBoardListPage;
-import io.onedev.server.web.page.admin.issuesetting.StateTransitionsPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
+import io.onedev.server.web.page.admin.issuesetting.StateTransitionsPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
@@ -58,6 +58,7 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -192,7 +193,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 
 		add(new OnePageMapper("projects/${project}/branches", ProjectBranchesPage.class));
 		add(new OnePageMapper("projects/${project}/tags", ProjectTagsPage.class));
-		add(new OnePageMapper("projects/${project}/codecomments", ProjectCodeCommentsPage.class));
+		add(new OnePageMapper("projects/${project}/code-comments", ProjectCodeCommentsPage.class));
+		add(new OnePageMapper("projects/${project}/code-comments/${code-comment}/invalid", InvalidCodeCommentPage.class));
 
 		add(new OnePageMapper("projects/${project}/pulls", ProjectPullRequestsPage.class));
 		add(new OnePageMapper("projects/${project}/pulls/new", NewPullRequestPage.class));

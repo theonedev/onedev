@@ -26,7 +26,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -62,6 +62,7 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -253,47 +254,34 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("File")) {
 
-			private void openComment(CodeComment comment) {
+			@Override
+			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
+				Fragment fragment = new Fragment(componentId, "fileFrag", CodeCommentListPanel.this);
+				CodeComment comment = rowModel.getObject();
+				BookmarkablePageLink<Void> link;
 				if (!comment.isValid()) {
-					CodeCommentListPanel.this.replaceWith(new InvalidCodeCommentPanel(CodeCommentListPanel.this, 
-							comment.getId()));
+					link = new BookmarkablePageLink<Void>("link", InvalidCodeCommentPage.class, 
+							InvalidCodeCommentPage.paramsOf(comment));
 				} else {
 					PullRequest request = getPullRequest();
 					if (request != null) {
-						setResponsePage(PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(request, comment));
+						link = new BookmarkablePageLink<Void>("link", PullRequestChangesPage.class, 
+								PullRequestChangesPage.paramsOf(request, comment));
 					} else {
 						String compareCommit = comment.getCompareContext().getCompareCommit();
 						if (!compareCommit.equals(comment.getMarkPos().getCommit())
 								&& getProject().getRepository().hasObject(ObjectId.fromString(compareCommit))) {
-							setResponsePage(RevisionComparePage.class, RevisionComparePage.paramsOf(comment));
+							link = new BookmarkablePageLink<Void>("link", RevisionComparePage.class, 
+									RevisionComparePage.paramsOf(comment));
 						} else {
-							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(comment));
+							link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
+									ProjectBlobPage.paramsOf(comment));
 						}
 					}				
 				}
-			}
-			
-			@Override
-			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
-				cellItem.add(new Link<Void>(componentId) {
-
-					@Override
-					public void onClick() {
-						openComment(rowModel.getObject());
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("a");
-					}
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of(rowModel.getObject().getMarkPos().getPath());
-					}
-					
-				});
+				link.add(new Label("label", comment.getMarkPos().getPath()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 
 		});

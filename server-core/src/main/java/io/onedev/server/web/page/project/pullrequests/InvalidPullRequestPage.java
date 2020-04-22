@@ -83,7 +83,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new InvalidPullRequestResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectPullRequestsCssResourceReference()));
 	}
 
 }
