@@ -161,17 +161,6 @@ public abstract class BuildListPanel extends Panel {
 		return null;
 	}
 
-	@Nullable
-	private Cursor getCursor(Item<ICellPopulator<Build>> cellItem) {
-		if (getProject() != null) {
-			OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-			return new Cursor(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
-					(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-		} else {
-			return null;
-		}
-	}
-	
 	private GlobalBuildSetting getGlobalBuildSetting() {
 		return OneDev.getInstance(SettingManager.class).getBuildSetting();
 	}
@@ -433,7 +422,10 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
-						WebSession.get().setBuildCursor(rowModel.getObject().getProject(), getCursor(cellItem));								
+						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+						Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
+								(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
+						WebSession.get().setBuildCursor(cursor);								
 					}
 					
 				};

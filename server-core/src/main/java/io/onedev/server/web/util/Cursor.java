@@ -16,10 +16,13 @@ public class Cursor implements Serializable {
 	
 	private final int offset;
 	
-	public Cursor(String query, int count, int offset) {
+	private final boolean inProject;
+	
+	public Cursor(String query, int count, int offset, boolean inProject) {
 		this.query = query;
 		this.count = count;
 		this.offset = offset;
+		this.inProject = inProject;
 	}
 	
 	public String getQuery() {
@@ -32,6 +35,10 @@ public class Cursor implements Serializable {
 
 	public int getCount() {
 		return count;
+	}
+
+	public boolean isInProject() {
+		return inProject;
 	}
 
 	@Nullable

@@ -92,8 +92,8 @@ public abstract class IssueSidePanel extends Panel {
 		addOrReplace(new EntityNavPanel<Issue>("issueNav") {
 
 			@Override
-			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
+			protected EntityQuery<Issue> parse(String queryString, boolean inProject) {
+				return IssueQuery.parse(inProject?getProject():null, queryString, true, true, false, false, false);
 			}
 
 			@Override
@@ -102,8 +102,8 @@ public abstract class IssueSidePanel extends Panel {
 			}
 
 			@Override
-			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count) {
-				return getIssueManager().query(getProject(), query, offset, count);
+			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
+				return getIssueManager().query(inProject?getProject():null, query, offset, count);
 			}
 
 			@Override

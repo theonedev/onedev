@@ -293,14 +293,9 @@ public abstract class PullRequestListPanel extends Panel {
 				PullRequest request = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "contentFrag", PullRequestListPanel.this);
 				
-				Cursor cursor;
-				if (getProject() != null) {
-					Item<?> row = cellItem.findParent(Item.class);
-					cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
-							(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-				} else {
-					cursor = null;
-				}
+				Item<?> row = cellItem.findParent(Item.class);
+				Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
 
 				String label;
 				if (getProject() == null)
@@ -319,7 +314,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
-						WebSession.get().setPullRequestCursor(rowModel.getObject().getTargetProject(), cursor);
+						WebSession.get().setPullRequestCursor(cursor);
 					}
 					
 				});

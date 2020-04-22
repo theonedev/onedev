@@ -199,7 +199,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected void doBeforeNav(AjaxRequestTarget target) {
-				WebSession.get().setIssueCursor(getIssue().getProject(), getCursor());
+				WebSession.get().setIssueCursor(getCursor());
 			}
 			
 		});

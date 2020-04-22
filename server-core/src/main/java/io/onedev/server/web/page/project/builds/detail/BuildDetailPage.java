@@ -384,12 +384,12 @@ public abstract class BuildDetailPage extends ProjectPage
 
 							@Override
 							public Cursor getCursor() {
-								return WebSession.get().getBuildCursor(getProject());
+								return WebSession.get().getBuildCursor();
 							}
 
 							@Override
 							public void navTo(AjaxRequestTarget target, Build entity, Cursor cursor) {
-								WebSession.get().setBuildCursor(getProject(), cursor);
+								WebSession.get().setBuildCursor(cursor);
 								PageParameters params = getPageParameters();
 								params.set(PARAM_BUILD, entity.getNumber());
 								setResponsePage(getPageClass(), params);
@@ -405,7 +405,7 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
-								Cursor cursor = WebSession.get().getBuildCursor(getProject());
+								Cursor cursor = WebSession.get().getBuildCursor();
 								PageParameters params = ProjectBuildsPage.paramsOf(
 										getProject(), Cursor.getQuery(cursor), 
 										Cursor.getPage(cursor) + 1); 

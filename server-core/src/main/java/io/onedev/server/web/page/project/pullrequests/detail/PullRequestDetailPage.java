@@ -466,8 +466,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				fragment.add(new EntityNavPanel<PullRequest>("requestNav") {
 
 					@Override
-					protected EntityQuery<PullRequest> parse(String queryString) {
-						return PullRequestQuery.parse(getProject(), queryString);
+					protected EntityQuery<PullRequest> parse(String queryString, boolean inProject) {
+						return PullRequestQuery.parse(inProject?getProject():null, queryString);
 					}
 
 					@Override
@@ -476,8 +476,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 					@Override
-					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count) {
-						return getPullRequestManager().query(getProject(), query, offset, count);
+					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, boolean inProject) {
+						return getPullRequestManager().query(inProject?getProject():null, query, offset, count);
 					}
 
 					@Override
@@ -486,12 +486,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 							@Override
 							public Cursor getCursor() {
-								return WebSession.get().getPullRequestCursor(getProject());
+								return WebSession.get().getPullRequestCursor();
 							}
 
 							@Override
 							public void navTo(AjaxRequestTarget target, PullRequest entity, Cursor cursor) {
-								WebSession.get().setPullRequestCursor(getProject(), cursor);
+								WebSession.get().setPullRequestCursor(cursor);
 								setResponsePage(getPageClass(), paramsOf(entity));
 							}
 							
@@ -677,7 +677,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				getPullRequestManager().delete(request);
 				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
-				Cursor cursor = WebSession.get().getPullRequestCursor(getProject());
+				Cursor cursor = WebSession.get().getPullRequestCursor();
 				PageParameters params = ProjectPullRequestsPage.paramsOf(
 						getProject(), 
 						Cursor.getQuery(cursor), 

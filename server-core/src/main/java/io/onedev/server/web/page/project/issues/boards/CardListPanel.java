@@ -61,7 +61,7 @@ abstract class CardListPanel extends Panel {
 					protected Cursor getCursor() {
 						IssueQuery query = getQuery();
 						if (query != null)
-							return new Cursor(query.toString(), getCardCount(), cardOffset);
+							return new Cursor(query.toString(), getCardCount(), cardOffset, true);
 						else
 							return null;
 					}
@@ -102,7 +102,7 @@ abstract class CardListPanel extends Panel {
 						protected Cursor getCursor() {
 							IssueQuery query = getQuery();
 							if (query != null)
-								return new Cursor(query.toString(), getCardCount(), cardOffset);
+								return new Cursor(query.toString(), getCardCount(), cardOffset, true);
 							else
 								return null;
 						}

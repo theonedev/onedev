@@ -65,8 +65,8 @@ public abstract class BuildSidePanel extends Panel {
 		add(new EntityNavPanel<Build>("buildNav") {
 
 			@Override
-			protected EntityQuery<Build> parse(String queryString) {
-				return BuildQuery.parse(getProject(), queryString, true, true);
+			protected EntityQuery<Build> parse(String queryString, boolean inProject) {
+				return BuildQuery.parse(inProject?getProject():null, queryString, true, true);
 			}
 
 			@Override
@@ -75,8 +75,8 @@ public abstract class BuildSidePanel extends Panel {
 			}
 
 			@Override
-			protected List<Build> query(EntityQuery<Build> query, int offset, int count) {
-				return getBuildManager().query(getProject(), query, offset, count);
+			protected List<Build> query(EntityQuery<Build> query, int offset, int count, boolean inProject) {
+				return getBuildManager().query(inProject?getProject():null, query, offset, count);
 			}
 
 			@Override

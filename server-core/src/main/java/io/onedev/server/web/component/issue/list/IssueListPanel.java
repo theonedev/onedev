@@ -142,7 +142,6 @@ public abstract class IssueListPanel extends Panel {
 		super.onDetach();
 	}
 	
-	@Nullable
 	protected abstract Project getProject();
 
 	protected IssueQuery getBaseQuery() {
@@ -578,13 +577,9 @@ public abstract class IssueListPanel extends Panel {
 				Issue issue = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
-				Cursor cursor;
-				if (getProject() != null) {
-					cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
-						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-				} else {
-					cursor = null;
-				}
+				
+				Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
 				
 				String label;
 				if (getProject() == null)
@@ -603,7 +598,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
-						WebSession.get().setIssueCursor(rowModel.getObject().getProject(), cursor);
+						WebSession.get().setIssueCursor(cursor);
 					}
 					
 				});

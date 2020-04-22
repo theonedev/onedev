@@ -1,8 +1,5 @@
 package io.onedev.server.web;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
 
@@ -13,18 +10,17 @@ import org.apache.wicket.protocol.http.WicketServlet;
 import org.apache.wicket.request.Request;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.model.Project;
 import io.onedev.server.web.util.Cursor;
 
 public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 
 	private static final long serialVersionUID = 1L;	
 	
-	private final Map<Long, Cursor> issueCursors = new ConcurrentHashMap<>(); 
+	private volatile Cursor issueCursor; 
 
-	private final Map<Long, Cursor> buildCursors = new ConcurrentHashMap<>(); 
+	private volatile Cursor buildCursor; 
 	
-	private final Map<Long, Cursor> pullRequestCursors = new ConcurrentHashMap<>(); 
+	private volatile Cursor pullRequestCursor; 
 	
 	public WebSession(Request request) {
 		super(request);
@@ -56,39 +52,30 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	}
 	
 	@Nullable
-	public Cursor getIssueCursor(Project project) {
-		return issueCursors.get(project.getId());
+	public Cursor getIssueCursor() {
+		return issueCursor;
 	}
 
 	@Nullable
-	public Cursor getBuildCursor(Project project) {
-		return buildCursors.get(project.getId());
+	public Cursor getBuildCursor() {
+		return buildCursor;
 	}
 	
 	@Nullable
-	public Cursor getPullRequestCursor(Project project) {
-		return pullRequestCursors.get(project.getId());
+	public Cursor getPullRequestCursor() {
+		return pullRequestCursor;
 	}
 	
-	public void setIssueCursor(Project project, @Nullable Cursor cursor) {
-		if (cursor != null)
-			issueCursors.put(project.getId(), cursor);
-		else
-			issueCursors.remove(project.getId());
+	public void setIssueCursor(@Nullable Cursor issueCursor) {
+		this.issueCursor = issueCursor;
 	}
 
-	public void setBuildCursor(Project project, @Nullable Cursor cursor) {
-		if (cursor != null)
-			buildCursors.put(project.getId(), cursor);
-		else
-			buildCursors.remove(project.getId());
+	public void setBuildCursor(@Nullable Cursor buildCursor) {
+		this.buildCursor = buildCursor;
 	}
 	
-	public void setPullRequestCursor(Project project, @Nullable Cursor cursor) {
-		if (cursor != null)
-			pullRequestCursors.put(project.getId(), cursor);
-		else
-			pullRequestCursors.remove(project.getId());
+	public void setPullRequestCursor(@Nullable Cursor pullRequestCursor) {
+		this.pullRequestCursor = pullRequestCursor;
 	}
 	
 	public static WebSession from(HttpSession session) {

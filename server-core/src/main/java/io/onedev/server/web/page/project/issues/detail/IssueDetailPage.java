@@ -157,12 +157,12 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 							@Override
 							public Cursor getCursor() {
-								return WebSession.get().getIssueCursor(getProject());
+								return WebSession.get().getIssueCursor();
 							}
 
 							@Override
 							public void navTo(AjaxRequestTarget target, Issue entity, Cursor cursor) {
-								WebSession.get().setIssueCursor(getProject(), cursor);
+								WebSession.get().setIssueCursor(cursor);
 								setResponsePage(getPageClass(), paramsOf(entity));
 							}
 							
@@ -176,7 +176,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							@Override
 							public void onClick() {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
-								Cursor cursor = WebSession.get().getIssueCursor(getProject());
+								Cursor cursor = WebSession.get().getIssueCursor();
 								PageParameters params = ProjectIssueListPage.paramsOf(
 										getProject(), 
 										Cursor.getQuery(cursor), 
