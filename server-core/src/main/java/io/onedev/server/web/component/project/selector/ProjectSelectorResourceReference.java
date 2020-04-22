@@ -8,7 +8,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
-import io.onedev.server.web.asset.jumpintoview.JumpIntoViewResourceReference;
+import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class ProjectSelectorResourceReference extends BaseDependentResourceReference {
@@ -23,7 +23,7 @@ public class ProjectSelectorResourceReference extends BaseDependentResourceRefer
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new JumpIntoViewResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(ProjectSelectorResourceReference.class, "project-selector.css")));
 		return dependencies;
 	}

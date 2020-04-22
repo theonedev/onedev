@@ -618,7 +618,7 @@ onedev.server.textDiff = {
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd)
-			$startTd.scrollParent().jumpIntoView($startTd);
+			$startTd.scrollIntoView();
 	},
 	mark: function($container, mark) {
 		onedev.server.textDiff.clearMark($container);

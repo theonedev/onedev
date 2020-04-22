@@ -4,8 +4,8 @@
 .project-selector .btn {
 	margin-bottom: 12px;
 }
-.project-selector ul, .project-selector .alert {
-	margin: 12px 0 0 0;
+.project-selector ul {
+	margin-top: 12px;
 }
 .project-selector ul a {
 	padding: 5px 20px !important;

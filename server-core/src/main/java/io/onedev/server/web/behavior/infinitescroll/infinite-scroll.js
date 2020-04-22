@@ -57,7 +57,7 @@ onedev.server.infiniteScroll = {
 					} else {
 						$lastItem.after("<div class='loading-indicator' style='text-align:center;'><img src='/img/ajax-indicator.gif'></img></div>");
 					}		
-					$container.jumpIntoView(".loading-indicator");					
+					$container.find(".loading-indicator").scrollIntoView();					
 				} else if (scrollTop) {
 					if (scrollTop > $container.scrollTop()) 
 						$container.scrollTop(scrollTop);

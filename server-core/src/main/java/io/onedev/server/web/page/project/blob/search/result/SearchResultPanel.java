@@ -134,7 +134,7 @@ public abstract class SearchResultPanel extends Panel {
 		String script = String.format(""
 				+ "$('#%s').find('.selectable').removeClass('active');"
 				+ "$('#%s').addClass('active');"
-				+ "$('#%s>.search-result>.body').jumpIntoView('a.selectable.active', 25, 25);", 
+				+ "$('#%s>.search-result>.body a.selectable.active').scrollIntoView(25);", 
 				getMarkupId(), activeLinkId, getMarkupId());
 		target.appendJavaScript(script);
 		

@@ -22,7 +22,7 @@ onedev.server.branchSelector = {
 				$prev.addClass("active");
 				callback("up");
 			}
-			$container.find("ul.branches").jumpIntoView("li.active", 8, 8);
+			$container.find("ul.branches li.active").scrollIntoView();
 		});
 		$input.bind("keydown", "down", function(e) {
 			e.preventDefault();
@@ -33,7 +33,7 @@ onedev.server.branchSelector = {
 				$next.addClass("active");
 				callback("down");
 			}
-			$container.find("ul.branches").jumpIntoView("li.active", 8, 8);
+			$container.find("ul.branches li.active").scrollIntoView();
 		});
 	}
 };
