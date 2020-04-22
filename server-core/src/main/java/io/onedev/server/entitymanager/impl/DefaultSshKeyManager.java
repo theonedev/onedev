@@ -29,7 +29,7 @@ import io.onedev.server.security.OneAuthorizingRealm;
 @Singleton
 public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implements SshKeyManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(OneAuthorizingRealm.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultSshKeyManager.class);
 	
     @Inject
     public DefaultSshKeyManager(Dao dao) {
