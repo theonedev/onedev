@@ -376,6 +376,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public void setPassword(String password) {
     	this.password = password;
     }
+
+    public boolean isExternalManaged() {
+    	return this.getPassword().equals(EXTERNAL_MANAGED);
+    }
     
 	@Editable(order=200)
 	public String getFullName() {

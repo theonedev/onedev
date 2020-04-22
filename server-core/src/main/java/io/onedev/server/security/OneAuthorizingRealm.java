@@ -36,6 +36,7 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Group;
@@ -266,6 +267,15 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     						}
 	    				}
 	    			}
+	    			
+			    	if (authenticated.getSSHPublicKeys() != null) {
+			    		SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
+			    		try {
+			    			sshKeyManager.syncUserKeys(user, authenticated.getSSHPublicKeys());
+			    		} catch (Exception err) {
+			    			logger.warn("Error setting user SSH public keys provided by authentication", err);
+			    		}
+			    	}
 		    	}
 		    	
 		    	return user;		
@@ -273,5 +283,4 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			
 		});
 	}
-	
 }
