@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -39,12 +38,11 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
@@ -93,14 +91,15 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
 	
-	private String query;
+	private final IModel<String> queryModel;
 	
 	private final int expectedCount;
 	
-	private IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
+	private final IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
 
 		@Override
 		protected BuildQuery load() {
+			String query = queryModel.getObject();
 			try {
 				return BuildQuery.merge(getBaseQuery(), BuildQuery.parse(getProject(), query, true, true));
 			} catch (OneException e) {
@@ -125,9 +124,9 @@ public abstract class BuildListPanel extends Panel {
 	
 	private DataTable<Build, Void> buildsTable;
 	
-	public BuildListPanel(String id, @Nullable String query, int expectedCount) {
+	public BuildListPanel(String id, IModel<String> queryModel, int expectedCount) {
 		super(id);
-		this.query = query;
+		this.queryModel = queryModel;
 		this.expectedCount = expectedCount;
 	}
 	
@@ -137,6 +136,7 @@ public abstract class BuildListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
+		queryModel.detach();
 		parsedQueryModel.detach();
 		super.onDetach();
 	}
@@ -151,9 +151,6 @@ public abstract class BuildListPanel extends Panel {
 	@Nullable
 	protected PagingHistorySupport getPagingHistorySupport() {
 		return null;
-	}
-	
-	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
 	}
 	
 	@Nullable
@@ -202,7 +199,7 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(query));
+				setEnabled(parsedQueryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -210,15 +207,13 @@ public abstract class BuildListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				configure();
-				if (!isEnabled()) {
+				if (!isEnabled()) 
 					tag.put("disabled", "disabled");
-					tag.put("title", "Input query to save");
-				}
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, query);
+				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
@@ -322,7 +317,7 @@ public abstract class BuildListPanel extends Panel {
 			
 		});		
 		
-		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
+		TextField<String> input = new TextField<String>("input", queryModel);
 		input.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -332,16 +327,6 @@ public abstract class BuildListPanel extends Panel {
 			
 		}, true, true, true));
 		
-		input.add(new AjaxFormComponentUpdatingBehavior("input"){
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
-			}
-			
-		});
-		
 		Form<?> form = new Form<Void>("query");
 		form.add(input);
 		form.add(new AjaxButton("submit") {
@@ -349,8 +334,10 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				buildsTable.setCurrentPage(0);
 				target.add(body);
-				onQueryUpdated(target, query);
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -426,6 +413,10 @@ public abstract class BuildListPanel extends Panel {
 						Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
 								(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
 						WebSession.get().setBuildCursor(cursor);								
+
+						String directUrlAfterDelete = RequestCycle.get().urlFor(
+								getPage().getClass(), getPage().getPageParameters()).toString();
+						WebSession.get().setRedirectUrlAfterDelete(Build.class, directUrlAfterDelete);
 					}
 					
 				};

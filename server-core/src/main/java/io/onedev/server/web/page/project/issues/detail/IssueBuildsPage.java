@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -25,6 +26,8 @@ public class IssueBuildsPage extends IssueDetailPage {
 
 	private String query;
 	
+	private BuildListPanel buildList;
+	
 	public IssueBuildsPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
@@ -33,11 +36,29 @@ public class IssueBuildsPage extends IssueDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(newBuildList());
-	}
-	
-	private BuildListPanel newBuildList() {
-		return new BuildListPanel("builds", query, 0) {
+		
+		add(buildList = new BuildListPanel("builds", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(IssueBuildsPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}, 0) {
 
 			@Override
 			protected BuildQuery getBaseQuery() {
@@ -64,26 +85,18 @@ public class IssueBuildsPage extends IssueDetailPage {
 			}
 
 			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(IssueBuildsPage.class, paramsOf(getIssue(), query));
-				IssueBuildsPage.this.query = query;
-				pushState(target, url.toString(), query);
-			}
-
-			@Override
 			protected Project getProject() {
 				return getIssue().getProject();
 			}
 
-		};
+		});
 	}
-
+	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		query = (String) data;
-		BuildListPanel listPanel = newBuildList();
-		replace(listPanel);
-		target.add(listPanel);
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(buildList);
 	}
 	
 	public static PageParameters paramsOf(Issue issue, @Nullable String query) {

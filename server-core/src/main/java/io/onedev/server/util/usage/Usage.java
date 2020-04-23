@@ -1,12 +1,10 @@
-package io.onedev.server.util;
+package io.onedev.server.util.usage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-
-import io.onedev.server.OneException;
 
 public class Usage implements Serializable {
 
@@ -50,7 +48,7 @@ public class Usage implements Serializable {
 	public void checkInUse(String thing) {
 		String inUseMessage = getInUseMessage(thing);
 		if (inUseMessage != null)
-			throw new OneException(inUseMessage);
+			throw new InUseException(inUseMessage);
 	}
 	
 }

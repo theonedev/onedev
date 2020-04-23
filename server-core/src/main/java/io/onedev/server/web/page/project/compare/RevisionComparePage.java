@@ -57,7 +57,6 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.EditParamsAware;
-import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class RevisionComparePage extends ProjectPage implements CommentSupport, EditParamsAware {
@@ -608,13 +607,24 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			break;
 		default:
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, state.commitQuery) {
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, new IModel<String>() {
 
 				@Override
-				protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-					state.commitQuery = query;
-					pushState(target);
+				public void detach() {
 				}
+
+				@Override
+				public String getObject() {
+					return state.commitQuery;
+				}
+
+				@Override
+				public void setObject(String object) {
+					state.commitQuery = object;
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class));
+				}
+				
+			}) {
 
 				@Override
 				protected CommitQuery getBaseQuery() {
@@ -664,8 +674,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		super.onPopState(target, data);
 		
 		state = (State) data;
-		OneDev.getInstance(WebSocketManager.class).observe(this);
-		
 		newTabPanel(target);
 		target.add(tabbable);
 	}

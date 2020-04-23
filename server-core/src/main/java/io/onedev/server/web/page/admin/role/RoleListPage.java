@@ -1,20 +1,24 @@
 package io.onedev.server.web.page.admin.role;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -22,22 +26,24 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
@@ -48,6 +54,10 @@ public class RoleListPage extends AdministrationPage {
 	private static final String PARAM_QUERY = "query";
 	
 	private DataTable<Role, Void> rolesTable;
+	
+	private TextField<String> searchField;
+	
+	private boolean typing;
 	
 	private String query;
 
@@ -66,19 +76,61 @@ public class RoleListPage extends AdministrationPage {
 	}
 	
 	@Override
+	protected void onBeforeRender() {
+		typing = false;
+		super.onBeforeRender();
+	}
+
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(searchField);
+		target.add(rolesTable);
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		TextField<String> searchField;
-		add(searchField = new TextField<String>("filterRoles", Model.of(query)));
+		add(searchField = new TextField<String>("filterRoles", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				
+				String url = RequestCycle.get().urlFor(RoleListPage.class, params).toString();
+
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (typing)
+					replaceState(target, url, query);
+				else
+					pushState(target, url, query);
+				
+				rolesTable.setCurrentPage(0);
+				target.add(rolesTable);
+				
+				typing = true;
+			}
+			
+		}));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				query = searchField.getInput();
-				if (StringUtils.isBlank(query))
-					query = null;
-				target.add(rolesTable);
 			}
 
 		});
@@ -98,8 +150,6 @@ public class RoleListPage extends AdministrationPage {
 			
 		});
 		
-		add(new FencedFeedbackPanel("feedback", this).setEscapeModelStrings(false));
-		
 		List<IColumn<Role, Void>> columns = new ArrayList<>();
 		
 		columns.add(new AbstractColumn<Role, Void>(Model.of("Name")) {
@@ -107,19 +157,23 @@ public class RoleListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
 				Fragment fragment = new Fragment(componentId, "nameFrag", RoleListPage.this);
-				fragment.add(new Link<Void>("name") {
+				
+				Role role = rowModel.getObject();
+				
+				WebMarkupContainer link = new ActionablePageLink<Void>("link", 
+						RoleDetailPage.class, RoleDetailPage.paramsOf(role)) {
 
 					@Override
-					public IModel<?> getBody() {
-						return Model.of(rowModel.getObject().getName());
-					}
-
-					@Override
-					public void onClick() {
-						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(rowModel.getObject()));
+					public void doBeforeNav(AjaxRequestTarget target) {
+						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+								RoleListPage.class, getPageParameters()).toString();
+						WebSession.get().setRedirectUrlAfterDelete(Role.class, redirectUrlAfterDelete);
 					}
 					
-				});
+				};
+				link.add(new Label("label", role.getName()));
+				fragment.add(link);
+				
 				cellItem.add(fragment);
 			}
 		});
@@ -130,18 +184,21 @@ public class RoleListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", RoleListPage.this);
 				
-				Role role = rowModel.getObject();
-				
-				fragment.add(new Link<Void>("delete") {
+				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
-					public void onClick() {
-						try {
-							OneDev.getInstance(RoleManager.class).delete(rowModel.getObject());
-							setResponsePage(RoleListPage.class);
-						} catch (OneException e) {
-							getPage().error(e.getMessage());
-						}
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						String message = "Do you really want to delete role '" + rowModel.getObject().getName() + "'?";						
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						Role role = rowModel.getObject();
+						OneDev.getInstance(RoleManager.class).delete(role);
+						Session.get().success("Role '" + role.getName() + "' deleted");
+						target.add(rolesTable);
 					}
 
 					@Override
@@ -159,7 +216,7 @@ public class RoleListPage extends AdministrationPage {
 						setEnabled(!rowModel.getObject().isManager());
 					}
 					
-				}.add(new ConfirmOnClick("Do you really want to delete role '" + role.getName() + "'?")));
+				});
 				
 				cellItem.add(fragment);
 			}

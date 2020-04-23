@@ -22,7 +22,7 @@ import io.onedev.server.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.Usage;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;

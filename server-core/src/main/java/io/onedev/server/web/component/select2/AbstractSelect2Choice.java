@@ -188,7 +188,7 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 		AjaxSettings ajax = settings.getAjax(true);
 
 		ajax.setData(String.format(
-				"function(term, page) { return { term: term, page:page, '%s':true, '%s':[window.location.protocol, '//', window.location.host, window.location.pathname].join('')}; }",
+				"function(term, page) { return { select2_term: term, select2_page:page, '%s':true, '%s':[window.location.protocol, '//', window.location.host, window.location.pathname].join('')}; }",
 				WebRequest.PARAM_AJAX, WebRequest.PARAM_AJAX_BASE_URL));
 
 		ajax.setResults("function(data, page) { return data; }");
@@ -242,9 +242,10 @@ abstract class AbstractSelect2Choice<T, M> extends HiddenField<M> implements IRe
 
 		// retrieve choices matching the search term
 
-		String term = params.getParameterValue("term").toOptionalString();
+		String term = params.getParameterValue("select2_term").toOptionalString();
 
-		int page = params.getParameterValue("page").toInt(1);
+		int page = params.getParameterValue("select2_page").toInt(1);
+		
 		// select2 uses 1-based paging, but in wicket world we are used to
 		// 0-based
 		page -= 1;

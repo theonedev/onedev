@@ -11,6 +11,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -46,6 +47,8 @@ public class ProjectPullRequestsPage extends ProjectPage {
 	private String query;			
 	
 	private SavedQueriesPanel<NamedPullRequestQuery> savedQueries;
+	
+	private PullRequestListPanel requestList;
 	
 	public ProjectPullRequestsPage(PageParameters params) {
 		super(params);
@@ -105,19 +108,28 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 		});
 		
-		add(newPullRequestList());
-	}
-	
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		query = (String) data;
-		PullRequestListPanel listPanel = newPullRequestList();
-		replace(listPanel);
-		target.add(listPanel);
-	}
-	
-	private PullRequestListPanel newPullRequestList() {
-		return new PullRequestListPanel("main", query) {
+		add(requestList = new PullRequestListPanel("main", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(ProjectPullRequestsPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -136,13 +148,6 @@ public class ProjectPullRequestsPage extends ProjectPage {
 					}
 					
 				};
-			}
-
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(ProjectPullRequestsPage.class, paramsOf(getProject(), query, 0));
-				ProjectPullRequestsPage.this.query = query;
-				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -214,7 +219,14 @@ public class ProjectPullRequestsPage extends ProjectPage {
 				return ProjectPullRequestsPage.this.getProject();
 			}
 			
-		};
+		});
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(requestList);
 	}
 	
 	@Override

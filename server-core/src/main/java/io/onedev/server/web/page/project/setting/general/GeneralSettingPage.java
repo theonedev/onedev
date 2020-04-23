@@ -9,6 +9,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
@@ -18,6 +19,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -98,7 +100,11 @@ public class GeneralSettingPage extends ProjectSettingPage {
 					
 					@Override
 					protected void onDeleted(AjaxRequestTarget target) {
-						setResponsePage(ProjectListPage.class);						
+						String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Project.class);
+						if (redirectUrlAfterDelete != null)
+							throw new RedirectToUrlException(redirectUrlAfterDelete);
+						else
+							setResponsePage(ProjectListPage.class);
 					}
 					
 					@Override

@@ -16,19 +16,19 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.IAjaxIndicatorAware;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -39,9 +39,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -60,7 +60,6 @@ import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -79,7 +78,8 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -91,7 +91,6 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
@@ -107,19 +106,17 @@ public class ProjectBranchesPage extends ProjectPage {
 	
 	private String baseBranch;
 	
-	private IModel<List<RefInfo>> branchesModel = new LoadableDetachableModel<List<RefInfo>>() {
+	private IModel<Map<String, RefInfo>> branchesModel = new LoadableDetachableModel<Map<String, RefInfo>>() {
 
 		@Override
-		protected List<RefInfo> load() {
-			List<RefInfo> refs = getProject().getBranchRefInfos();
-			if (query != null) {
-				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
-					String branch = GitUtils.ref2branch(it.next().getRef().getName());
-					if (!branch.toLowerCase().contains(query.trim().toLowerCase()))
-						it.remove();
-				}
+		protected Map<String, RefInfo> load() {
+			Map<String, RefInfo> refInfos = new LinkedHashMap<>();
+			for (RefInfo refInfo: getProject().getBranchRefInfos()) {
+				String branch = GitUtils.ref2branch(refInfo.getRef().getName());
+				if (query == null || branch.toLowerCase().contains(query.trim().toLowerCase()))
+					refInfos.put(branch, refInfo);
 			}
-			return refs;
+			return refInfos;
 		}
 		
 	};
@@ -132,10 +129,13 @@ public class ProjectBranchesPage extends ProjectPage {
 			ProjectAndBranch target = new ProjectAndBranch(getProject(), baseBranch);
 			
 			Collection<ProjectAndBranch> sources = new ArrayList<>();
-			for (long i=branchesView.getFirstItemOffset(); i<branchesModel.getObject().size(); i++) {
-				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
+			
+			List<RefInfo> branches = new ArrayList<>(branchesModel.getObject().values());
+			long firstItemOffset = branchesTable.getCurrentPage() * branchesTable.getItemsPerPage();
+			for (long i=firstItemOffset; i<branches.size(); i++) {
+				if (i-firstItemOffset >= branchesTable.getItemsPerPage())
 					break;
-				RefInfo refInfo = branchesModel.getObject().get((int)i);
+				RefInfo refInfo = branches.get((int)i);
 				String branchName = GitUtils.ref2branch(refInfo.getRef().getName());
 				sources.add(new ProjectAndBranch(getProject(), branchName)); 
 			}
@@ -146,12 +146,14 @@ public class ProjectBranchesPage extends ProjectPage {
 	};
 	
 	private BranchSingleChoice baseChoice;
+
+	private TextField<String> searchField;
 	
-	private PageableListView<RefInfo> branchesView;
-	
-	private WebMarkupContainer branchesContainer; 
+	private DataTable<RefInfo, Void> branchesTable;
 	
 	private String query;
+	
+	private boolean typing;
 	
 	private final IModel<Map<ObjectId, AheadBehind>> aheadBehindsModel = 
 			new LoadableDetachableModel<Map<ObjectId, AheadBehind>>() {
@@ -307,6 +309,21 @@ public class ProjectBranchesPage extends ProjectPage {
 	}
 	
 	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(searchField);
+		target.add(branchesTable);
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		typing = false;
+		super.onBeforeRender();
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
@@ -346,15 +363,45 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				target.add(branchesContainer);
-				newPagingNavigation(target);
-				
-				pushState(target);
+				setResponsePage(ProjectBranchesPage.class, paramsOf(getProject(), baseBranch, query));
 			}
 			
 		});
 		
-		add(new TextField<String>("searchBranches", Model.of(query)).add(new OnSearchingBehavior()));
+		add(searchField = new TextField<String>("filterBranches", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				
+				String url = RequestCycle.get().urlFor(ProjectBranchesPage.class, params).toString();
+
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (typing)
+					replaceState(target, url, query);
+				else
+					pushState(target, url, query);
+				
+				branchesTable.setCurrentPage(0);
+				target.add(branchesTable);
+				
+				typing = true;
+			}
+			
+		}));
+		searchField.add(new OnSearchingBehavior());
 
 		add(new ModalLink("createBranch") {
 
@@ -446,26 +493,9 @@ public class ProjectBranchesPage extends ProjectPage {
 							} else {
 								project.createBranch(branchName, branchRevision);
 								modal.close();
-								target.add(branchesContainer);
-								newPagingNavigation(target);
+								target.add(branchesTable);
 								
-								target.addListener(new AjaxRequestTarget.IListener() {
-
-									@Override
-									public void onBeforeRespond(Map<String, Component> map, AjaxRequestTarget target) {
-									}
-
-									@Override
-									public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
-										OneDev.getInstance(WebSocketManager.class).observe(ProjectBranchesPage.this);
-									}
-
-									@Override
-									public void updateAjaxAttributes(AbstractDefaultAjaxBehavior behavior,
-											AjaxRequestAttributes attributes) {
-									}
-									
-								});
+								getSession().success("Branch '" + branchName + "' created");
 							}
 						}
 					}
@@ -485,29 +515,16 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 		});
 		
-		add(branchesContainer = new WebMarkupContainer("branches") {
-
-			@Override
-			protected void onBeforeRender() {
-				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), getCommitIdsToDisplay()));
-				super.onBeforeRender();
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!branchesModel.getObject().isEmpty());
-			}
-			
-		});
-		branchesContainer.setOutputMarkupPlaceholderTag(true);
+		List<IColumn<RefInfo, Void>> columns = new ArrayList<>();
 		
-		branchesContainer.add(branchesView = new PageableListView<RefInfo>("branches", branchesModel, PAGE_SIZE) {
+		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
 
 			@Override
-			protected void populateItem(ListItem<RefInfo> item) {
-				RefInfo ref = item.getModelObject();
+			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
+					IModel<RefInfo> rowModel) {
+				Fragment fragment = new Fragment(componentId, "branchFrag", ProjectBranchesPage.this);
+				fragment.setRenderBodyOnly(true);
+				RefInfo ref = rowModel.getObject();
 				String branch = GitUtils.ref2branch(ref.getRef().getName());
 				
 				BlobIdent blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
@@ -515,9 +532,9 @@ public class ProjectBranchesPage extends ProjectPage {
 				AbstractLink link = new ViewStateAwarePageLink<Void>("branchLink", 
 						ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state));
 				link.add(new Label("name", branch));
-				item.add(link);
+				fragment.add(link);
 				
-				item.add(new CommitStatusPanel("buildStatus", ref.getRef().getObjectId()) {
+				fragment.add(new CommitStatusPanel("buildStatus", ref.getRef().getObjectId()) {
 
 					@Override
 					protected Project getProject() {
@@ -526,12 +543,12 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				item.add(new AjaxLink<Void>("makeDefault") {
+				fragment.add(new AjaxLink<Void>("makeDefault") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						getProject().setDefaultBranch(branch);
-						target.add(branchesContainer);
+						target.add(branchesTable);
 					}
 
 					@Override
@@ -543,7 +560,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				item.add(new WebMarkupContainer("default") {
+				fragment.add(new WebMarkupContainer("default") {
 
 					@Override
 					protected void onConfigure() {
@@ -554,109 +571,20 @@ public class ProjectBranchesPage extends ProjectPage {
 				});
 				
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
-				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent()));
+				fragment.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent()));
 				
 				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", lastCommit.getShortMessage()));
-				item.add(link);
-				
-				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
-				
-				item.add(new Link<Void>("behindLink") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setEnabled(ab.getBehind() != 0);
-					}
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(new Label("count", ab.getBehind()));
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						
-						tag.put("title", "" + ab.getBehind() + " commits ahead of base branch");
-						if (ab.getBehind() == 0)
-							tag.setName("span");
-					}
-
-					@Override
-					public void onClick() {
-						RevisionComparePage.State state = new RevisionComparePage.State();
-						state.leftSide = new ProjectAndBranch(getProject(), branch);
-						state.rightSide = new ProjectAndBranch(getProject(), baseBranch);
-						PageParameters params = RevisionComparePage.paramsOf(getProject(), state); 
-						setResponsePage(RevisionComparePage.class, params);
-					}
-					
-				});
-				item.add(new Label("behindBar") {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						
-						tag.put("style", "width: " + aheadBehindWidthModel.getObject().get(ab.getBehind()));
-					}
-					
-				});
-				
-				item.add(new Link<Void>("aheadLink") {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setEnabled(ab.getAhead() != 0);
-					}
-
-					@Override
-					protected void onInitialize() {
-						super.onInitialize();
-						add(new Label("count", ab.getAhead()));
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						
-						tag.put("title", "" + ab.getAhead() + " commits ahead of base branch");
-						if (ab.getAhead() == 0)
-							tag.setName("span");
-					}
-
-					@Override
-					public void onClick() {
-						RevisionComparePage.State state = new RevisionComparePage.State();
-						state.leftSide = new ProjectAndBranch(getProject(), baseBranch);
-						state.rightSide = new ProjectAndBranch(getProject(), branch);
-						PageParameters params = RevisionComparePage.paramsOf(getProject(), state);
-						setResponsePage(RevisionComparePage.class, params);
-					}
-					
-				});
-				item.add(new Label("aheadBar") {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						
-						tag.put("style", "width: " + aheadBehindWidthModel.getObject().get(ab.getAhead()));
-					}
-					
-				});
+				fragment.add(link);
 				
 				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
-				item.add(actionsContainer.setOutputMarkupId(true));
+				fragment.add(actionsContainer.setOutputMarkupId(true));
 
 				ProjectAndBranch source = new ProjectAndBranch(getProject(), branch);
 				PullRequest effectiveRequest = effectiveRequestsModel.getObject().get(source);
 				WebMarkupContainer requestLink;
+				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
 				if (effectiveRequest != null && ab.getAhead() != 0) {
 					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
 							PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(effectiveRequest)); 
@@ -691,7 +619,6 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", ProjectBranchesPage.this);
-						fragment.add(new FencedFeedbackPanel("feedback", fragment).setEscapeModelStrings(false));
 						PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
 						if (!pullRequestManager.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
@@ -710,19 +637,14 @@ public class ProjectBranchesPage extends ProjectPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								try {
-									OneDev.getInstance(ProjectManager.class).deleteBranch(getProject(), branch);
-									if (branch.equals(baseBranch)) {
-										baseBranch = getProject().getDefaultBranch();
-										target.add(baseChoice);
-									}
-									target.add(branchesContainer);
-									newPagingNavigation(target);
-									modal.close();
-								} catch (OneException e) {
-									error(e.getMessage());
-									target.add(fragment);
+								OneDev.getInstance(ProjectManager.class).deleteBranch(getProject(), branch);
+								getSession().success("Branch '" + branch + "' deleted");
+								if (branch.equals(baseBranch)) {
+									baseBranch = getProject().getDefaultBranch();
+									target.add(baseChoice);
 								}
+								target.add(branchesTable);
+								modal.close();
 							}
 							
 						});
@@ -764,44 +686,164 @@ public class ProjectBranchesPage extends ProjectPage {
 
 				});
 								
+				cellItem.add(fragment);
+			}
+
+			@Override
+			public String getCssClass() {
+				return "branch";
 			}
 			
 		});
+		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
 
-		branchesView.setCurrentPage(pagingHistorySupport.getCurrentPage());
+			@Override
+			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
+					IModel<RefInfo> rowModel) {
+				RefInfo ref = rowModel.getObject();
+				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
+				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
+				cellItem.add(newAheadBehindFrag(componentId, ref, ab.getBehind(), false));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "behind behind-ahead";
+			}
+			
+		});
+		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
+					IModel<RefInfo> rowModel) {
+				RefInfo ref = rowModel.getObject();
+				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
+				AheadBehind ab = Preconditions.checkNotNull(aheadBehindsModel.getObject().get(lastCommit));
+				cellItem.add(newAheadBehindFrag(componentId, ref, ab.getAhead(), true));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "ahead behind-ahead";
+			}
+			
+		});
 		
-		newPagingNavigation(null);
+		SortableDataProvider<RefInfo, Void> dataProvider = new LoadableDetachableDataProvider<RefInfo, Void>() {
+
+			@Override
+			public Iterator<? extends RefInfo> iterator(long first, long count) {
+				List<RefInfo> branches = new ArrayList<>(branchesModel.getObject().values());
+				if (first + count > branches.size())
+					return branches.subList((int)first, branches.size()).iterator();
+				else
+					return branches.subList((int)first, (int)(first+count)).iterator();
+			}
+
+			@Override
+			public long calcSize() {
+				return branchesModel.getObject().size();
+			}
+
+			@Override
+			public IModel<RefInfo> model(RefInfo object) {
+				String branch = GitUtils.ref2branch(object.getRef().getName());
+				return new AbstractReadOnlyModel<RefInfo>() {
+
+					@Override
+					public RefInfo getObject() {
+						return branchesModel.getObject().get(branch);
+					}
+					
+				};
+			}
+		};		
+		
+		add(branchesTable = new DefaultDataTable<RefInfo, Void>("branches", columns, dataProvider, 
+				PAGE_SIZE, pagingHistorySupport) {
+			
+			@Override
+			protected void onBeforeRender() {
+				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), getCommitIdsToDisplay()));
+				super.onBeforeRender();
+			}
+			
+		});
+		
+	}
+	
+	private Fragment newAheadBehindFrag(String componentId, RefInfo ref, int count, boolean ahead) {
+		Fragment fragment = new Fragment(componentId, "aheadBehindFrag", ProjectBranchesPage.this);
+		String branch = GitUtils.ref2branch(ref.getRef().getName());
+		fragment.add(new Link<Void>("link") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(count != 0);
+			}
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new Label("count", count));
+				add(new Label("label", ahead?"ahead":"behind"));
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (ahead)
+					tag.put("title", "" + count + " commits ahead of base branch");
+				else
+					tag.put("title", "" + count + " commits behind of base branch");
+					
+				if (count == 0)
+					tag.setName("span");
+			}
+
+			@Override
+			public void onClick() {
+				RevisionComparePage.State state = new RevisionComparePage.State();
+				if (ahead) {
+					state.leftSide = new ProjectAndBranch(getProject(), baseBranch);
+					state.rightSide = new ProjectAndBranch(getProject(), branch);
+				} else {
+					state.leftSide = new ProjectAndBranch(getProject(), branch);
+					state.rightSide = new ProjectAndBranch(getProject(), baseBranch);
+				}
+				PageParameters params = RevisionComparePage.paramsOf(getProject(), state);
+				setResponsePage(RevisionComparePage.class, params);
+			}
+			
+		});
+		fragment.add(new Label("bar") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				tag.put("style", "width: " + aheadBehindWidthModel.getObject().get(count));
+			}
+			
+		});	
+		return fragment;
 	}
 	
 	private List<ObjectId> getCommitIdsToDisplay() {
+		List<RefInfo> branches = new ArrayList<>(branchesModel.getObject().values());
+		long firstItemOffset = branchesTable.getCurrentPage() * branchesTable.getItemsPerPage();
 		List<ObjectId> commitIdsToDisplay = new ArrayList<>();
-		for (long i=branchesView.getFirstItemOffset(); i<branchesModel.getObject().size(); i++) {
-			if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
+		for (long i=firstItemOffset; i<branches.size(); i++) {
+			if (i-firstItemOffset >= branchesTable.getItemsPerPage())
 				break;
-			RefInfo ref = branchesModel.getObject().get((int)i); 
+			RefInfo ref = branches.get((int)i); 
 			commitIdsToDisplay.add(ref.getRef().getObjectId());
 		}
 		return commitIdsToDisplay;
-	}
-	
-	private void newPagingNavigation(@Nullable AjaxRequestTarget target) {
-		Component pagingNavigator = new HistoryAwarePagingNavigator("branchesPageNav", branchesView, pagingHistorySupport);
-		pagingNavigator.setVisible(branchesView.getPageCount() > 1);
-		pagingNavigator.setOutputMarkupPlaceholderTag(true);
-		
-		Component noBranchesContainer = new WebMarkupContainer("noBranches");
-		noBranchesContainer.setVisible(branchesModel.getObject().isEmpty());
-		noBranchesContainer.setOutputMarkupPlaceholderTag(true);
-		
-		if (target != null) {
-			replace(pagingNavigator);
-			replace(noBranchesContainer);
-			target.add(pagingNavigator);
-			target.add(noBranchesContainer);
-		} else {
-			add(pagingNavigator);
-			add(noBranchesContainer);
-		}
 	}
 	
 	@Override
@@ -828,14 +870,6 @@ public class ProjectBranchesPage extends ProjectPage {
 
 		@Override
 		protected void onTypingDone(AjaxRequestTarget target) {
-			@SuppressWarnings("unchecked")
-			TextField<String> searchField = (TextField<String>) getComponent();
-			query = searchField.getInput();
-			if (StringUtils.isBlank(query))
-				query = null;
-			
-			target.add(branchesContainer);
-			newPagingNavigation(target);
 		}
 
 		@Override
@@ -845,34 +879,9 @@ public class ProjectBranchesPage extends ProjectPage {
 		
 	}
 
-	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getProject(), baseBranch, query);
-		CharSequence url = RequestCycle.get().urlFor(ProjectBranchesPage.class, params);
-		State state = new State();
-		state.baseBranch = baseBranch;
-		state.query = query;
-		pushState(target, url.toString(), state);
-	}
-	
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		super.onPopState(target, data);
-		State state = (State) data;
-		baseBranch = state.baseBranch;
-		query = state.query;
-		target.add(baseChoice);
-		target.add(branchesContainer);
-		newPagingNavigation(target);
-	}
-
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject());
 	}
 
-	private static class State implements Serializable {
-		String baseBranch;
-		
-		String query;
-	}
 }

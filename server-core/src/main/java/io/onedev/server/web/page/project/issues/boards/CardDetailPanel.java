@@ -10,6 +10,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestHandler;
@@ -28,8 +29,8 @@ import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
@@ -132,8 +133,14 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID, CardDetailPanel.this.getModel());
-							content.setOutputMarkupId(true);
+							Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID, new AbstractReadOnlyModel<Issue>() {
+
+								@Override
+								public Issue getObject() {
+									return getIssue();
+								}
+								
+							});
 							CardDetailPanel.this.replace(content);
 							target.add(content);
 						}
@@ -146,7 +153,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-					Component content = new BuildListPanel(TAB_CONTENT_ID, null, 0) {
+					Component content = new BuildListPanel(TAB_CONTENT_ID, Model.of((String)null), 0) {
 
 						@Override
 						protected BuildQuery getBaseQuery() {
@@ -192,7 +199,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this issue?"));
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this issue?"));
 							}
 
 							@Override

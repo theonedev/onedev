@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -21,6 +22,7 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -48,7 +50,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 
@@ -176,16 +178,17 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							@Override
 							public void onClick() {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
-								Cursor cursor = WebSession.get().getIssueCursor();
-								PageParameters params = ProjectIssueListPage.paramsOf(
-										getProject(), 
-										Cursor.getQuery(cursor), 
-										Cursor.getPage(cursor) + 1); 
-								setResponsePage(ProjectIssueListPage.class, params);
+								Session.get().success("Issue #" + getIssue().getNumber() + " deleted");
+								
+								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);
+								if (redirectUrlAfterDelete != null)
+									throw new RedirectToUrlException(redirectUrlAfterDelete);
+								else
+									setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
 							}
 							
 						};
-						deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
+						deleteLink.add(new ConfirmClickModifier("Do you really want to delete this issue?"));
 						deleteLink.setVisible(SecurityUtils.canManageIssues(getIssue().getProject()));
 						return deleteLink;
 					}

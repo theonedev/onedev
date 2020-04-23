@@ -126,11 +126,16 @@
 			</div>
 		</div>
 		<div wicket:id="watches" class="watches"></div>
-		<div wicket:id="manage" class="manage">
-			<a wicket:id="synchronize" class="check btn btn-default">Synchronize</a>
-			<p class="help-block">In case the pull request status is out of sync with underlying 
-			repository, you may synchronize them manually here</p>
-			<a wicket:id="delete" class="delete btn btn-danger">Delete</a>
+		<div wicket:id="manage" class="manage clearfix">
+			<a wicket:id="delete" class="delete btn btn-danger pull-left">Delete</a>
+			<wicket:enclosure child="synchronize">
+			<div class="pull-right synchronize">
+				<a wicket:id="synchronize" class="btn btn-default">Synchronize</a>
+				<a href="javascript:void(0)" class="help" title="In case the pull request status is out of sync with underlying repository, you may synchronize them manually here">
+					<i class="fa fa-question-circle"></i>
+				</a>
+			</div>
+			</wicket:enclosure>
 		</div>
     </wicket:fragment>
 </wicket:extend>

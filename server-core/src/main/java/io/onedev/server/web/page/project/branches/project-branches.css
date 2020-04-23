@@ -6,17 +6,21 @@
 #project-branches>.list>.head>.base {
 	width: 240px;
 }
-#project-branches>.list>table td.detail>div {
+#project-branches>.list>.body>table>thead {
+	display: none;
+}
+
+#project-branches>.list>.body>table td.branch>div {
 	margin: 8px 0;
 }
 
-#project-branches>.list>table .detail .make-default {
+#project-branches>.list>.body>table .branch .make-default {
 	display: none;
 }
-#project-branches>.list>table>tbody>tr:hover .detail .make-default {
+#project-branches>.list>.body>table>tbody>tr:hover .branch .make-default {
 	display: inline;
 }
-#project-branches>.list>table td.detail>.title>.name {
+#project-branches>.list>.body>table td.branch>.title>.name {
 	font-weight: bold;
 	font-size: 15px;
 }
@@ -24,40 +28,40 @@
 	color: #444;
 }
 
-#project-branches>.list>table td.detail>.title>.label, 
-#project-branches>.list>table td.detail>.title>.btn {
+#project-branches>.list>.body>table td.branch>.title>.label, 
+#project-branches>.list>.body>table td.branch>.title>.btn {
 	margin-left: 8px;
 }
 
-#project-branches>.list>table td.behind {
+#project-branches>.list>.body>table td.behind {
 	padding-right: 0;
 }
-#project-branches>.list>table td.ahead {
+#project-branches>.list>.body>table td.ahead {
 	padding-left: 0;
 }
-#project-branches>.list>table td.behind>div {
+#project-branches>.list>.body>table td.behind>div {
 	border-right: 2px solid #BBB;
 }
-#project-branches>.list>table td.behind-ahead div.text {
+#project-branches>.list>.body>table td.behind-ahead div.text {
 	margin: 0 8px;
 }
-#project-branches>.list>table td.behind-ahead {
+#project-branches>.list>.body>table td.behind-ahead {
 	font-size: 13px;
 	padding-top: 12px;
 	width: 20%;
 }
-#project-branches>.list>table td.behind-ahead.behind>div {
+#project-branches>.list>.body>table td.behind-ahead.behind>div {
 	text-align: right;
 }
-#project-branches>.list>table .bar {
+#project-branches>.list>.body>table .bar {
 	height: 6px;
 	display: inline-block;
 }
-#project-branches>.list>table .ahead .bar {
+#project-branches>.list>.body>table .ahead .bar {
 	background: #ccc;
 	border-radius: 0 2px 2px 0;
 }
-#project-branches>.list>table .behind .bar {
+#project-branches>.list>.body>table .behind .bar {
 	background: #ccc;
 	border-radius: 2px 0 0 2px;
 }

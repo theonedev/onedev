@@ -24,7 +24,7 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 
 @SuppressWarnings("serial")
-public class ErrorPage extends BasePage {
+public class GeneralErrorPage extends BasePage {
 	
 	private static final int MAX_TITLE_LEN = 240;
 	
@@ -32,7 +32,7 @@ public class ErrorPage extends BasePage {
 	
 	private String detailMessage;
 	
-	public ErrorPage(Exception exception) {
+	public GeneralErrorPage(Exception exception) {
 		super(new PageParameters());
 		
 		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
@@ -65,7 +65,7 @@ public class ErrorPage extends BasePage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("detail", "detailFrag", ErrorPage.this);
+				Fragment fragment = new Fragment("detail", "detailFrag", GeneralErrorPage.this);
 				fragment.add(new MultilineLabel("body", detailMessage));				
 				container.replace(fragment);
 				target.add(container);

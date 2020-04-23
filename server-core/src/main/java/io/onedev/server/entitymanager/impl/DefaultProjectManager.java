@@ -87,10 +87,10 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
 
 @Singleton
@@ -399,8 +399,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 	@Transactional
 	@Override
 	public void onDeleteBranch(Project project, String branchName) {
-		Usage usage = new Usage();
-
 		for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
 			BranchProtection protection = it.next();
 			PatternSet patternSet = PatternSet.parse(protection.getBranches());
@@ -410,8 +408,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 			if (protection.getBranches().length() == 0)
 				it.remove();
 		}
-		
-		usage.prefix("project setting").checkInUse("Branch '" + branchName + "'");
 	}
 	
 	@Transactional
@@ -450,7 +446,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 	@Transactional
 	@Override
 	public void onDeleteTag(Project project, String tagName) {
-		Usage usage = new Usage();
 		for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) { 
 			TagProtection protection = it.next();
 			PatternSet patternSet = PatternSet.parse(protection.getTags());
@@ -460,8 +455,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 			if (protection.getTags().length() == 0)
 				it.remove();
 		}
-		
-		usage.prefix("project setting").checkInUse("Tag '" + tagName + "'");
 	}
 	
 	@Transactional

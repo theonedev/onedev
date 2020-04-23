@@ -11,7 +11,7 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 
 @SuppressWarnings("serial")
 abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
@@ -39,6 +39,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 				getMilestoneManager().save(getMilestone());
 				target.add(MilestoneActionsPanel.this);
 				onUpdated(target);
+				getSession().success("Milestone '" + getMilestone().getName() + "' reopened");
 			}
 
 			@Override
@@ -63,6 +64,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 				getMilestoneManager().save(getMilestone());
 				target.add(MilestoneActionsPanel.this);
 				onUpdated(target);
+				getSession().success("Milestone '" + getMilestone().getName() + "' closed");
 			}
 
 		});
@@ -75,7 +77,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmListener(
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(
 						"Do you really want to delete milestone '" + getMilestone().getName() + "'?"));
 			}
 			
@@ -84,6 +86,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 				getMilestoneManager().delete(getMilestone());
 				target.add(MilestoneActionsPanel.this);
 				onDeleted(target);
+				getSession().success("Milestone '" + getMilestone().getName() + "' deleted");
 			}
 
 		});		

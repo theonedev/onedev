@@ -53,7 +53,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -226,7 +226,7 @@ public abstract class CodeCommentPanel extends Panel {
 					confirmMessage = "Deleting this comment will also delete all replies, do you really "
 							+ "want to continue?";
 				}
-				attributes.getAjaxCallListeners().add(new ConfirmListener(confirmMessage));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener(confirmMessage));
 			}
 
 			@Override
@@ -368,7 +368,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this reply?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this reply?"));
 			}
 
 			@Override

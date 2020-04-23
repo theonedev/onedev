@@ -29,12 +29,12 @@ import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.Usage;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
@@ -159,19 +159,6 @@ public class GlobalIssueSetting implements Serializable {
 		showCondition.setValueMatcher(valueIsOneOf);
 		failedBuild.setShowCondition(showCondition);
 		
-		BuildChoiceField affectedBuilds = new BuildChoiceField();
-		affectedBuilds.setName("Seen Builds");
-		affectedBuilds.setAllowMultiple(true);
-		
-		showCondition = new ShowCondition();
-		showCondition.setInputName("Type");
-		valueIsOneOf = new ValueIsOneOf();
-		valueIsOneOf.setValues(Lists.newArrayList("Bug"));
-		showCondition.setValueMatcher(valueIsOneOf);
-		affectedBuilds.setShowCondition(showCondition);
-		
-		fieldSpecs.add(affectedBuilds);
-		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
 		open.setColor("#f0ad4e");
@@ -258,7 +245,6 @@ public class GlobalIssueSetting implements Serializable {
 		promptFieldsUponIssueOpen.add("Priority");
 		promptFieldsUponIssueOpen.add("Assignees");
 		promptFieldsUponIssueOpen.add("Failed Build");
-		promptFieldsUponIssueOpen.add("Seen Builds");
 		
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.FIELD_STATE);

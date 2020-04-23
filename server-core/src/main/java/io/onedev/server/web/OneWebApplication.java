@@ -55,9 +55,12 @@ import org.apache.wicket.util.time.Duration;
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.util.usage.InUseException;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.error.ErrorPage;
+import io.onedev.server.web.page.error.GeneralErrorPage;
+import io.onedev.server.web.page.error.InUseErrorPage;
 import io.onedev.server.web.page.layout.UICustomization;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
@@ -231,10 +234,15 @@ public class OneWebApplication extends WebApplication {
 							return new ResourceErrorRequestHandler(e);
 						
 						HttpServletResponse response = (HttpServletResponse) requestCycle.getResponse().getContainerResponse();
-						if (!response.isCommitted())
-							return createPageRequestHandler(new PageProvider(new ErrorPage(e)));
-						
-						return super.mapExpectedExceptions(e, application);
+						if (!response.isCommitted()) {
+							InUseException inUseException = ExceptionUtils.find(e, InUseException.class);
+							if (inUseException != null)
+								return createPageRequestHandler(new PageProvider(new InUseErrorPage(inUseException)));
+							else
+								return createPageRequestHandler(new PageProvider(new GeneralErrorPage(e)));
+						} else {
+							return super.mapExpectedExceptions(e, application);
+						}
 					}
 					
 				};
@@ -272,7 +280,7 @@ public class OneWebApplication extends WebApplication {
 					 *  user can know which page is actually causing the error. This behavior is common
 					 *  for main stream applications.   
 					 */
-					if (requestHandler.getPage() instanceof ErrorPage) 
+					if (requestHandler.getPage() instanceof GeneralErrorPage) 
 						return true;
 				}
 				return super.shouldPreserveClientUrl();

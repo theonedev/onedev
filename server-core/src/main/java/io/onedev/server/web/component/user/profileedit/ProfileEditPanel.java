@@ -8,6 +8,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 
 import com.google.common.collect.Sets;
 
@@ -17,10 +18,11 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.user.UserListPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class ProfileEditPanel extends GenericPanel<User> {
@@ -96,7 +98,13 @@ public class ProfileEditPanel extends GenericPanel<User> {
 			@Override
 			public void onClick() {
 				OneDev.getInstance(UserManager.class).delete(getUser());
-				setResponsePage(UserListPage.class);
+				Session.get().success("User '" + getUser().getDisplayName() + "' deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(User.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
+					setResponsePage(UserListPage.class);
 			}
 
 			@Override
@@ -107,7 +115,7 @@ public class ProfileEditPanel extends GenericPanel<User> {
 						&& !getUser().equals(SecurityUtils.getUser()));
 			}
 
-		}.add(new ConfirmOnClick("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));
 
 		add(form);
 	}

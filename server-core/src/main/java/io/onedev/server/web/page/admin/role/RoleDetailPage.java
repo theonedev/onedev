@@ -13,21 +13,22 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class RoleDetailPage extends AdministrationPage {
@@ -112,12 +113,14 @@ public class RoleDetailPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				try {
-					OneDev.getInstance(RoleManager.class).delete(getRole());
+				OneDev.getInstance(RoleManager.class).delete(getRole());
+				Session.get().success("Role '" + getRole().getName() + "' deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Role.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
 					setResponsePage(RoleListPage.class);
-				} catch (OneException e) {
-					error(e.getMessage());
-				}
 			}
 
 			@Override
@@ -126,7 +129,7 @@ public class RoleDetailPage extends AdministrationPage {
 				setVisible(!getRole().isManager());
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to delete role '" + getRole().getName() + "'?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete role '" + getRole().getName() + "'?")));
 		
 		add(form);
 	}

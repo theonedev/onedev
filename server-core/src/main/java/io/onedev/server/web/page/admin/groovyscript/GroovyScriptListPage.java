@@ -34,7 +34,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -257,7 +257,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 								@Override
 								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this script?"));
+									attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this script?"));
 								}
 
 								@Override

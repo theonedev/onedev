@@ -9,13 +9,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.Usage;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.SiteAdministrator;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;

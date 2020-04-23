@@ -35,14 +35,14 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.issue.TransitionSpec;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public abstract class StateTransitionListPanel extends Panel {
@@ -95,7 +95,7 @@ public abstract class StateTransitionListPanel extends Panel {
 				setVisible(getUseDefaultListener() != null);
 			}
 			
-		}.add(new ConfirmOnClick(message)));
+		}.add(new ConfirmClickModifier(message)));
 		
 		List<IColumn<TransitionSpec, Void>> columns = new ArrayList<>();
 		
@@ -310,7 +310,7 @@ public abstract class StateTransitionListPanel extends Panel {
 								@Override
 								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this state?"));
+									attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this state?"));
 								}
 
 								@Override

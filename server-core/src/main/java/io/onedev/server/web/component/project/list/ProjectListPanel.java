@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -16,6 +15,7 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -27,16 +27,14 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -48,10 +46,11 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -63,14 +62,15 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 	
-	private String query;
+	private final IModel<String> queryModel;
 	
 	private final int expectedCount;
 	
-	private IModel<ProjectQuery> parsedQueryModel = new LoadableDetachableModel<ProjectQuery>() {
+	private final IModel<ProjectQuery> parsedQueryModel = new LoadableDetachableModel<ProjectQuery>() {
 
 		@Override
 		protected ProjectQuery load() {
+			String query = queryModel.getObject();
 			try {
 				return ProjectQuery.parse(query);
 			} catch (OneException e) {
@@ -86,9 +86,11 @@ public class ProjectListPanel extends Panel {
 		
 	};
 	
-	public ProjectListPanel(String id, @Nullable String query, int expectedCount) {
+	private DataTable<Project, Void> dataTable;	
+	
+	public ProjectListPanel(String id, IModel<String> queryModel, int expectedCount) {
 		super(id);
-		this.query = query;
+		this.queryModel = queryModel;
 		this.expectedCount = expectedCount;
 	}
 	
@@ -98,6 +100,7 @@ public class ProjectListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
+		queryModel.detach();
 		parsedQueryModel.detach();
 		super.onDetach();
 	}
@@ -105,9 +108,6 @@ public class ProjectListPanel extends Panel {
 	@Nullable
 	protected PagingHistorySupport getPagingHistorySupport() {
 		return null;
-	}
-	
-	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
 	}
 	
 	@Nullable
@@ -153,7 +153,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(query));
+				setEnabled(parsedQueryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -161,31 +161,19 @@ public class ProjectListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				configure();
-				if (!isEnabled()) {
+				if (!isEnabled()) 
 					tag.put("disabled", "disabled");
-					tag.put("title", "Input query to save");
-				}
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, query);
+				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
 			}		
 			
-		}.setOutputMarkupId(true));
-		
-		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
-		input.add(new ProjectQueryBehavior());
-		
-		input.add(new AjaxFormComponentUpdatingBehavior("input"){
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
-			}
-			
 		});
+		
+		TextField<String> input = new TextField<String>("input", queryModel);
+		input.add(new ProjectQueryBehavior());
 		
 		WebMarkupContainer body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
@@ -197,8 +185,10 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				dataTable.setCurrentPage(0);
 				target.add(body);
-				onQueryUpdated(target, query);
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -264,8 +254,19 @@ public class ProjectListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, IModel<Project> rowModel) {
 				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				Project project = rowModel.getObject();
-				Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectDashboardPage.class, 
-						ProjectDashboardPage.paramsOf(project));
+				
+				ActionablePageLink<Void> link = new ActionablePageLink<Void>("link", 
+						ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(project)) {
+
+					@Override
+					protected void doBeforeNav(AjaxRequestTarget target) {
+						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+								getPage().getClass(), getPage().getPageParameters()).toString();
+						WebSession.get().setRedirectUrlAfterDelete(Project.class, redirectUrlAfterDelete);
+					}
+					
+				};
+				
 				link.add(new ProjectAvatar("avatar", project));
 				link.add(new Label("name", project.getName()));
 				fragment.add(link);
@@ -289,7 +290,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(new DefaultDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(dataTable = new DefaultDataTable<Project, Void>("projects", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

@@ -26,9 +26,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
+import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.ident.Mode;
-import io.onedev.server.web.component.user.ident.PersonIdentPanel;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
@@ -56,22 +56,31 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 			protected void populateItem(ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
 				
-				item.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
+				item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-				item.add(new CommitMessagePanel("message", item.getModel()) {
+				item.add(new CommitMessagePanel("message", new LoadableDetachableModel<RevCommit>() {
+
+					@Override
+					protected RevCommit load() {
+						return item.getModelObject();
+					}
+					
+				}) {
 
 					@Override
 					protected Project getProject() {
-						return getIssue().getProject(); 
+						return getIssue().getProject();
 					}
 					
 				});
+
+				item.add(new ContributorPanel("contribution", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
 				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {
 					
 					@Override
 					protected String getCssClasses() {
-						return "btn btn-default btn-xs";
+						return "btn btn-default";
 					}
 
 					@Override

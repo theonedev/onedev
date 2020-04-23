@@ -25,7 +25,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.Usage;
+import io.onedev.server.util.usage.Usage;
 
 @Singleton
 public class DefaultGroupManager extends AbstractEntityManager<Group> implements GroupManager {
@@ -76,11 +76,13 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	public void delete(Group group) {
     	Usage usage = new Usage();
 		for (Project project: projectManager.query()) {
+			Usage usedInProject = new Usage();
 			for (BranchProtection protection: project.getBranchProtections()) 
-				usage.add(protection.onDeleteGroup(group.getName()));
+				usedInProject.add(protection.onDeleteGroup(group.getName()));
 			for (TagProtection protection: project.getTagProtections()) 
-				usage.add(protection.onDeleteGroup(group.getName()));
-			usage.prefix("project '" + project.getName() + "': setting");
+				usedInProject.add(protection.onDeleteGroup(group.getName()));
+			usedInProject.prefix("project '" + project.getName() + "': setting");
+			usage.add(usedInProject);
 		}
 
 		usage.add(settingManager.getIssueSetting().onDeleteGroup(group.getName()).prefix("administration"));

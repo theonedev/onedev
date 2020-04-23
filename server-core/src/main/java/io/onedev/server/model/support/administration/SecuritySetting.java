@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.Usage;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.editable.annotation.ShowCondition;

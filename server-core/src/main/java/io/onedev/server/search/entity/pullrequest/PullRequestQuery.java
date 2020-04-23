@@ -317,4 +317,16 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		return sorts;
 	}
 	
+	public static PullRequestQuery merge(PullRequestQuery query1, PullRequestQuery query2) {
+		List<EntityCriteria<PullRequest>> criterias = new ArrayList<>();
+		if (query1.getCriteria() != null)
+			criterias.add(query1.getCriteria());
+		if (query2.getCriteria() != null)
+			criterias.add(query2.getCriteria());
+		List<EntitySort> sorts = new ArrayList<>();
+		sorts.addAll(query1.getSorts());
+		sorts.addAll(query2.getSorts());
+		return new PullRequestQuery(EntityCriteria.andCriterias(criterias), sorts);
+	}
+	
 }

@@ -28,7 +28,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.Usage;
+import io.onedev.server.util.usage.Usage;
 
 @Singleton
 public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {
@@ -103,12 +103,14 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 	public void delete(User user) {
     	Usage usage = new Usage();
 		for (Project project: projectManager.query()) {
+			Usage usedInProject = new Usage();
 			for (BranchProtection protection: project.getBranchProtections()) 
-				usage.add(protection.onDeleteUser(user.getName()));
+				usedInProject.add(protection.onDeleteUser(user.getName()));
 			for (TagProtection protection: project.getTagProtections()) 
-				usage.add(protection.onDeleteUser(user.getName()));
-			usage.add(project.getIssueSetting().onDeleteUser(user.getName()));
-			usage.prefix("project '" + project.getName() + "': setting");
+				usedInProject.add(protection.onDeleteUser(user.getName()));
+			usedInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
+			usedInProject.prefix("project '" + project.getName() + "': setting");
+			usage.add(usedInProject);
 		}
 		
     	int index = 0;

@@ -39,7 +39,7 @@ import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.subscriptionstatus.SubscriptionStatusLink;
@@ -512,7 +512,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
 					String message = "This will discard all project specific queries, do you want to continue?";
-					attributes.getAjaxCallListeners().add(new ConfirmListener(message));
+					attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 				}
 
 				@Override

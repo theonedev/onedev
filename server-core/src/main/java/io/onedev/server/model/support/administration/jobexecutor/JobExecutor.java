@@ -13,7 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.Usage;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.JobMatch;

@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -26,6 +27,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -68,7 +70,7 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.util.BuildAware;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 
@@ -262,7 +264,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to cancel this build?")));
+		}.add(new ConfirmClickModifier("Do you really want to cancel this build?")));
 		
 		summary.add(new SideInfoLink("moreInfo"));
 		
@@ -405,15 +407,18 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
-								Cursor cursor = WebSession.get().getBuildCursor();
-								PageParameters params = ProjectBuildsPage.paramsOf(
-										getProject(), Cursor.getQuery(cursor), 
-										Cursor.getPage(cursor) + 1); 
-								setResponsePage(ProjectBuildsPage.class, params);
+								
+								Session.get().success("Build #" + getBuild().getNumber() + " deleted");
+								
+								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
+								if (redirectUrlAfterDelete != null)
+									throw new RedirectToUrlException(redirectUrlAfterDelete);
+								else
+									setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject()));
 							}
 							
 						};
-						deleteLink.add(new ConfirmOnClick("Do you really want to delete this build?"));
+						deleteLink.add(new ConfirmClickModifier("Do you really want to delete this build?"));
 						deleteLink.setVisible(SecurityUtils.canManage(getBuild()));
 						return deleteLink;
 					}

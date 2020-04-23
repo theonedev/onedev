@@ -2,11 +2,13 @@ package io.onedev.server.web.page.project.builds.detail;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -15,9 +17,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class InvalidBuildPage extends ProjectPage {
@@ -52,7 +55,14 @@ public class InvalidBuildPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				OneDev.getInstance(BuildManager.class).delete(getBuild());
-				setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject()));
+				
+				Session.get().success("Build #" + getBuild().getNumber() + " deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
+					setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject()));
 			}
 
 			@Override
@@ -61,7 +71,7 @@ public class InvalidBuildPage extends ProjectPage {
 				setVisible(SecurityUtils.canManage(getBuild()));
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to delete build #" + getBuild().getNumber() + "?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete build #" + getBuild().getNumber() + "?")));
 	}
 
 	public static PageParameters paramsOf(Build build) {

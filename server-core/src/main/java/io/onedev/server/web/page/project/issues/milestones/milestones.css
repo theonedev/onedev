@@ -4,9 +4,6 @@
 #milestone-list>.head>.pull-left {
 	margin-right: 20px;
 }
-#milestone-list table {
-	table-layout: fixed;
-}
 #milestone-list>.body tbody td.issue-stats {
 	padding-right: 20px;
 }

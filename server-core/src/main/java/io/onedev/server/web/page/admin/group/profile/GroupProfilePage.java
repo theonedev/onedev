@@ -7,19 +7,20 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class GroupProfilePage extends GroupPage {
@@ -84,15 +85,17 @@ public class GroupProfilePage extends GroupPage {
 
 			@Override
 			public void onClick() {
-				try {
-					OneDev.getInstance(GroupManager.class).delete(getGroup());
+				OneDev.getInstance(GroupManager.class).delete(getGroup());
+				Session.get().success("Group '" + getGroup().getName() + "' deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Group.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
 					setResponsePage(GroupListPage.class);
-				} catch (OneException e) {
-					error(e.getMessage());
-				}
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to delete group '" + getGroup().getName() + "'?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete group '" + getGroup().getName() + "'?")));
 		
 		add(form);
 	}

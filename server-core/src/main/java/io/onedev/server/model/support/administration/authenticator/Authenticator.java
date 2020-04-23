@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
-import io.onedev.server.util.Usage;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;

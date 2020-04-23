@@ -11,6 +11,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -44,6 +45,8 @@ public class PullRequestListPage extends LayoutPage {
 	private String query;
 	
 	private SavedQueriesPanel<NamedPullRequestQuery> savedQueries;
+	
+	private PullRequestListPanel requestList;
 	
 	public PullRequestListPage(PageParameters params) {
 		super(params);
@@ -97,19 +100,28 @@ public class PullRequestListPage extends LayoutPage {
 
 		});
 		
-		add(newPullRequestList());
-	}
+		add(requestList = new PullRequestListPanel("main", new IModel<String>() {
 
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		query = (String) data;
-		PullRequestListPanel listPanel = newPullRequestList();
-		replace(listPanel);
-		target.add(listPanel);
-	}
-	
-	private PullRequestListPanel newPullRequestList() {
-		return new PullRequestListPanel("main", query) {
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(PullRequestListPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -128,13 +140,6 @@ public class PullRequestListPage extends LayoutPage {
 					}
 					
 				};
-			}
-
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(PullRequestListPage.class, paramsOf(query, 0));
-				PullRequestListPage.this.query = query;
-				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -204,7 +209,14 @@ public class PullRequestListPage extends LayoutPage {
 				return null;
 			}
 			
-		};
+		});
+	}
+
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(requestList);
 	}
 	
 	@Override

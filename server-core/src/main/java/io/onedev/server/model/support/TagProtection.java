@@ -8,8 +8,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.usermatch.Anyone;
 import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.editable.annotation.Editable;

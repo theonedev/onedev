@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -26,6 +27,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
@@ -47,6 +49,8 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 	private final IModel<Milestone> milestoneModel;
 	
 	private String query;
+	
+	private IssueListPanel issueList;
 	
 	public MilestoneDetailPage(PageParameters params) {
 		super(params);
@@ -86,7 +90,11 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 
 			@Override
 			protected void onDeleted(AjaxRequestTarget target) {
-				setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone(), query));
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Milestone.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
+					setResponsePage(MilestoneListPage.class, MilestoneListPage.paramsOf(getProject()));
 			}
 
 			@Override
@@ -130,57 +138,66 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 			
 		});
 		
-		add(newIssueList());
-	}
-	
-	private IssueListPanel newIssueList() {
-		return new IssueListPanel("issues", query) {
+		add(issueList = new IssueListPanel("issues", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(MilestoneDetailPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}) {
+			
+		@Override
+		protected IssueQuery getBaseQuery() {
+			return new IssueQuery(new MilestoneCriteria(getMilestone().getName()), new ArrayList<>());
+		}
+
+		@Override
+		protected PagingHistorySupport getPagingHistorySupport() {
+			return new PagingHistorySupport() {
 				
-			@Override
-			protected IssueQuery getBaseQuery() {
-				return new IssueQuery(new MilestoneCriteria(getMilestone().getName()), new ArrayList<>());
-			}
+				@Override
+				public PageParameters newPageParameters(int currentPage) {
+					PageParameters params = paramsOf(getMilestone(), query);
+					params.add(PARAM_PAGE, currentPage+1);
+					return params;
+				}
+				
+				@Override
+				public int getCurrentPage() {
+					return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+				}
+				
+			};
+		}
 
-			@Override
-			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
-					
-					@Override
-					public PageParameters newPageParameters(int currentPage) {
-						PageParameters params = paramsOf(getMilestone(), query);
-						params.add(PARAM_PAGE, currentPage+1);
-						return params;
-					}
-					
-					@Override
-					public int getCurrentPage() {
-						return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-					}
-					
-				};
-			}
+		@Override
+		protected Project getProject() {
+			return MilestoneDetailPage.this.getProject();
+		}
 
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(MilestoneDetailPage.class, paramsOf(getMilestone(), query));
-				MilestoneDetailPage.this.query = query;
-				pushState(target, url.toString(), query);
-			}
-
-			@Override
-			protected Project getProject() {
-				return MilestoneDetailPage.this.getProject();
-			}
-
-		};
+	});
 	}
 	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		query = (String) data;
-		IssueListPanel listPanel = newIssueList();
-		replace(listPanel);
-		target.add(listPanel);
+		getPageParameters().set(PARAM_QUERY, query);
+		add(issueList);
 	}
 	
 	@Override

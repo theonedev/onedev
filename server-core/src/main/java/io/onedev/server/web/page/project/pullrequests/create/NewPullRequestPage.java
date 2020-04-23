@@ -385,7 +385,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, null) {
+		return new CommitListPanel(TAB_PANEL_ID, Model.of((String)null)) {
 
 			@Override
 			protected void onConfigure() {

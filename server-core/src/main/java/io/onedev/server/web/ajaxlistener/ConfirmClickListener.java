@@ -4,11 +4,11 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 
-public class ConfirmListener implements IAjaxCallListener {
+public class ConfirmClickListener implements IAjaxCallListener {
 
 	private final String message;
 	
-	public ConfirmListener(String message) {
+	public ConfirmClickListener(String message) {
 		this.message = message;
 	}
 	

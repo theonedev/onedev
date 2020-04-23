@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -32,20 +33,22 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class ProjectCommitsPage extends ProjectPage {
 
-	private static final String PARAM_COMPARE_WITH = "compareWith";
+	private static final String PARAM_COMPARE = "compare";
 	
-	private static final String PARAM_COMMIT_QUERY = "commitQuery";
+	private static final String PARAM_QUERY = "query";
 	
-	private String compareWith;
+	private String compare;
 	
 	private String query;
 	
 	private SavedQueriesPanel<NamedCommitQuery> savedQueries;
 	
+	private CommitListPanel commitList;
+	
 	public ProjectCommitsPage(PageParameters params) {
 		super(params);
-		query = getPageParameters().get(PARAM_COMMIT_QUERY).toString();
-		compareWith = params.get(PARAM_COMPARE_WITH).toString();
+		query = getPageParameters().get(PARAM_QUERY).toString();
+		compare = params.get(PARAM_COMPARE).toString();
 	}
 
 	private CommitQuerySettingManager getCommitQuerySettingManager() {
@@ -55,9 +58,8 @@ public class ProjectCommitsPage extends ProjectPage {
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		query = (String) data;
-		CommitListPanel listPanel = newCommitList();
-		replace(listPanel);
-		target.add(listPanel);
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(commitList);
 	}
 	
 	@Override
@@ -74,7 +76,7 @@ public class ProjectCommitsPage extends ProjectPage {
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedCommitQuery namedQuery) {
 				return new BookmarkablePageLink<Void>(componentId, ProjectCommitsPage.class, 
-						ProjectCommitsPage.paramsOf(getProject(), namedQuery.getQuery(), compareWith));
+						ProjectCommitsPage.paramsOf(getProject(), namedQuery.getQuery(), compare));
 			}
 
 			@Override
@@ -100,18 +102,27 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(newCommitList());
-	}
-	
-	private CommitListPanel newCommitList() {
-		return new CommitListPanel("main", query) {
+		add(commitList = new CommitListPanel("main", new IModel<String>() {
 
 			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(ProjectCommitsPage.class, paramsOf(getProject(), query, compareWith));
-				ProjectCommitsPage.this.query = query;
-				pushState(target, url.toString(), query);
+			public void detach() {
 			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				CharSequence url = RequestCycle.get().urlFor(ProjectCommitsPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}) {
 
 			@Override
 			protected QuerySaveSupport getQuerySaveSupport() {
@@ -176,7 +187,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 			@Override
 			protected String getCompareWith() {
-				return compareWith;
+				return compare;
 			}
 
 			@Override
@@ -184,15 +195,15 @@ public class ProjectCommitsPage extends ProjectPage {
 				return ProjectCommitsPage.this.getProject();
 			}
 
-		};
+		});
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query, @Nullable String compareWith) {
 		PageParameters params = paramsOf(project);
 		if (compareWith != null)
-			params.set(PARAM_COMPARE_WITH, compareWith);
+			params.set(PARAM_COMPARE, compareWith);
 		if (query != null)
-			params.set(PARAM_COMMIT_QUERY, query);
+			params.set(PARAM_QUERY, query);
 		return params;
 	}
 	

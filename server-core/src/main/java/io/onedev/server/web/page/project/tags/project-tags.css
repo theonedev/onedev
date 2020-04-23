@@ -1,11 +1,10 @@
+#project-tags>.list>.body>table>thead {
+	display: none;
+}
 #project-tags .tag {
-	border-top: 1px solid #DDD;
 	padding: 8px;
 }
-#project-tags .tag:hover {
-	background: #F5F5F5;
-}
-#project-tags .tag>.title>a.name {
+#project-tags .tag .title>a.name {
 	font-weight: bold;
 	font-size: 15px;
 }
@@ -25,6 +24,10 @@
 	border: none;
 	font-size: 12px;
 	background: none;
+}
+#project-tags .annotated>pre {
+	margin-bottom: 0;
+	padding-bottom: 0
 }
 
 #project-tags .tag>div {

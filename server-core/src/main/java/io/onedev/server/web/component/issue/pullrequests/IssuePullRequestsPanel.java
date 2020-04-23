@@ -1,22 +1,16 @@
 package io.onedev.server.web.component.issue.pullrequests;
 
-import java.util.List;
-
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.pullrequest.IncludesIssueCriteria;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 
 @SuppressWarnings("serial")
 public class IssuePullRequestsPanel extends GenericPanel<Issue> {
@@ -29,27 +23,21 @@ public class IssuePullRequestsPanel extends GenericPanel<Issue> {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PullRequest>("pullRequests", new AbstractReadOnlyModel<List<PullRequest>>() {
+		add(new PullRequestListPanel("pullRequests", Model.of((String)null)) {
 
 			@Override
-			public List<PullRequest> getObject() {
-				return getIssue().getPullRequests();
+			protected Project getProject() {
+				return getIssue().getProject();
+			}
+
+			@Override
+			protected PullRequestQuery getBaseQuery() {
+				String value = String.valueOf(getIssue().getNumber());
+				return new PullRequestQuery(new IncludesIssueCriteria(getProject(), value));
 			}
 			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<PullRequest> item) {
-				PullRequest request = item.getModelObject();
-
-				Link<Void> link = new BookmarkablePageLink<Void>("title", PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(request));
-				link.add(new Label("label",  "#" + request.getNumber() + " - " + request.getTitle()));
-				item.add(link);
-				item.add(new RequestStatusLabel("status", item.getModel()));
-			}}
+		});
 		
-		);
 	}
 
 	private Issue getIssue() {

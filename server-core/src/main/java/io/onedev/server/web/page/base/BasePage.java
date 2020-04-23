@@ -208,6 +208,12 @@ public abstract class BasePage extends WebPage {
 		partialPageRequestHandler.prependJavaScript(script);
 	}
 	
+	public void replaceState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
+		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
+		String script = String.format("onedev.server.history.replaceState('%s', '%s');", url, encodedData);
+		partialPageRequestHandler.prependJavaScript(script);
+	}
+	
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 	}
 	

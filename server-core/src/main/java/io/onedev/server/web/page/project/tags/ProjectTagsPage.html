@@ -5,36 +5,34 @@
 		<div class="list">
 			<div class="head clearfix">
 				<div class="pull-left clearable-wrapper">
-					<input wicket:id="searchTags" class="form-control search" placeholder="Search tags">
+					<input wicket:id="filterTags" class="form-control search" placeholder="Filter tags">
 				</div>
 				<div class="pull-left">
 					<a wicket:id="createTag" class="btn btn-success"><i class="fa fa-plus"></i> New</a>
 				</div>
             </div>
-			<div wicket:id="tagsContainer">
-                <div wicket:id="feedback"></div>
-				<div wicket:id="tags" class="tag">
-					<div class="title">
-						<a wicket:id="tagLink" class="name"><span wicket:id="name"></span></a>
-						<span wicket:id="buildStatus" class="build-status"></span>
-						<span wicket:id="annotated" class="annotated"></span>
-					</div>
-					<div class="commit-message">
-						<a wicket:id="messageLink"><span wicket:id="message"></span></a>
-					</div>
-					<div class="commit-contributor">
-						<span wicket:id="contributor" class="contributor"></span>
-					</div>
-					<div class="actions">
-						<a wicket:id="download" title="Download tag archive"><i class="fa fa-download"></i> Download</a>
-						<a wicket:id="delete" title="Delete this tag"><i class="fa fa-trash"></i> Delete</a>
-					</div>
-				</div>
-			</div>
-			<div class="center"><ul wicket:id="tagsPageNav"></ul></div>
-			<div wicket:id="noTags" class="alert alert-warning">No tags found</div>
+            <div class="body">
+            	<table wicket:id="tags" class="table table-hover tags"></table>
+            </div>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="tagFrag">
+		<div class="title">
+			<a wicket:id="tagLink" class="name"><span wicket:id="name"></span></a>
+			<span wicket:id="buildStatus" class="build-status"></span>
+			<span wicket:id="annotated" class="annotated"></span>
+		</div>
+		<div class="commit-message">
+			<a wicket:id="messageLink"><span wicket:id="message"></span></a>
+		</div>
+		<div class="commit-contributor">
+			<span wicket:id="contributor" class="contributor"></span>
+		</div>
+		<div class="actions">
+			<a wicket:id="download" title="Download tag archive"><i class="fa fa-download"></i> Download</a>
+			<a wicket:id="delete" title="Delete this tag"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="annotatedFrag">
 		<wicket:enclosure child="author">
 		By <a wicket:id="author"></a> 

@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -43,10 +42,8 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.IssueManager;
@@ -96,12 +93,13 @@ import io.onedev.server.web.util.ReferenceTransformer;
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
-	private String query;
+	private final IModel<String> queryModel;
 	
-	private IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
 
 		@Override
 		protected IssueQuery load() {
+			String query = queryModel.getObject();
 			try {
 				return IssueQuery.merge(getBaseQuery(), IssueQuery.parse(getProject(), query, true, true, false, false, false));
 			} catch (OneException e) {
@@ -127,9 +125,9 @@ public abstract class IssueListPanel extends Panel {
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
-	public IssueListPanel(String id, @Nullable String query) {
+	public IssueListPanel(String id, IModel<String> queryModel) {
 		super(id);
-		this.query = query;
+		this.queryModel = queryModel;
 	}
 	
 	private IssueManager getIssueManager() {
@@ -138,6 +136,7 @@ public abstract class IssueListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
+		queryModel.detach();
 		parsedQueryModel.detach();
 		super.onDetach();
 	}
@@ -151,9 +150,6 @@ public abstract class IssueListPanel extends Panel {
 	@Nullable
 	protected PagingHistorySupport getPagingHistorySupport() {
 		return null;
-	}
-	
-	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
 	}
 	
 	@Nullable
@@ -199,7 +195,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(query));
+				setEnabled(parsedQueryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -207,20 +203,18 @@ public abstract class IssueListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				configure();
-				if (!isEnabled()) {
+				if (!isEnabled()) 
 					tag.put("disabled", "disabled");
-					tag.put("title", "Input query to save");
-				}
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, query);
+				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
 		
-		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
+		TextField<String> input = new TextField<String>("input", queryModel);
 		input.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -229,16 +223,6 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		}, true, true, false, false, false));
-		
-		input.add(new AjaxFormComponentUpdatingBehavior("input"){
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
-			}
-			
-		});
 		
 		WebMarkupContainer body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
@@ -250,8 +234,10 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				issuesTable.setCurrentPage(0);
 				target.add(body);
-				onQueryUpdated(target, query);
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -599,6 +585,9 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
 						WebSession.get().setIssueCursor(cursor);
+						String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+								getPage().getClass(), getPage().getPageParameters()).toString();
+						WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
 					}
 					
 				});

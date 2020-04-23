@@ -52,7 +52,7 @@ import io.onedev.server.search.entity.issue.NumberCriteria;
 import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -64,7 +64,7 @@ import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {
@@ -261,7 +261,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									&& getProject().getIssueSetting().getBoardSpecs(false) != null);
 						}
 						
-					}.add(new ConfirmOnClick("This will discard all project specific boards, do you want to continue?")));
+					}.add(new ConfirmClickModifier("This will discard all project specific boards, do you want to continue?")));
 					
 					menuFragment.add(new ListView<BoardSpec>("boards", boards) {
 
@@ -315,7 +315,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									setResponsePage(IssueBoardsPage.class, params);
 								}
 
-							}.add(new ConfirmOnClick("Do you really want to delete board '" + item.getModelObject().getName() + "'?") ));
+							}.add(new ConfirmClickModifier("Do you really want to delete board '" + item.getModelObject().getName() + "'?") ));
 						}
 						
 					});
@@ -504,7 +504,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									@Override
 									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmListener(
+										attributes.getAjaxCallListeners().add(new ConfirmClickListener(
 												"Do you really want to delete milestone '" + item.getModelObject().getName() + "'?"));
 									}
 									
@@ -519,7 +519,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										} else {
 											getMilestoneManager().delete(milestone);
 										}
-										Session.get().success("Milestone '" + milestone.getName() + "' is deleted");
+										Session.get().success("Milestone '" + milestone.getName() + "' deleted");
 									}
 
 								});
@@ -623,10 +623,13 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					super.onSubmit(target, form);
 					
-					if (backlog) 
+					if (backlog) {
 						backlogQuery = input.getModelObject();
-					else 
+						getPageParameters().set(PARAM_BACKLOG_QUERY, backlogQuery);
+					} else { 
 						query = input.getModelObject();
+						getPageParameters().set(PARAM_QUERY, query);
+					}
 
 					PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
 							getMilestone(), backlog, query, backlogQuery);
@@ -732,10 +735,14 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		if (backlog)
+		if (backlog) {
 			backlogQuery = (String) data; 
-		else
+			getPageParameters().set(PARAM_BACKLOG_QUERY, backlogQuery);
+		} else {
 			query = (String) data;
+			getPageParameters().set(PARAM_QUERY, query);
+		}
+		
 		target.add(contentFrag);
 		target.appendJavaScript("$(window).resize();");
 	}

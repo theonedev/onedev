@@ -3,19 +3,18 @@
 	<div class="group list">
 		<div class="head clearfix">
 			<div class="pull-left clearable-wrapper">
-				<input wicket:id="filterGroups" class="form-control search" placeholder="Filter by name">
+				<input wicket:id="filterGroups" class="form-control search" placeholder="Filter groups">
 			</div>
 			<div class="pull-left">
 				<a wicket:id="addNew" class="btn btn-success"><i class="fa fa-plus"></i> Add New Group</a>
 			</div>
         </div>        
 		<div class="body">
-            <div wicket:id="feedback"></div>
 			<table wicket:id="groups" class="groups table table-hover"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
-		<a wicket:id="name"></a>
+		<a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
 		<a wicket:id="delete" title="Delete this group"><i class="fa fa-trash"></i></a>

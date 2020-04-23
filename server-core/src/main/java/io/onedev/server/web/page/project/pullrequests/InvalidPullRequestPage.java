@@ -2,11 +2,13 @@ package io.onedev.server.web.page.project.pullrequests;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -15,8 +17,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class InvalidPullRequestPage extends ProjectPage {
@@ -50,8 +53,16 @@ public class InvalidPullRequestPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(PullRequestManager.class).delete(requestModel.getObject());
-				setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
+				PullRequest request = requestModel.getObject();
+				OneDev.getInstance(PullRequestManager.class).delete(request);
+				
+				Session.get().success("Pull request #" + request.getNumber() + " deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
+					setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
 			}
 
 			@Override
@@ -60,7 +71,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 				setVisible(SecurityUtils.canManage(requestModel.getObject().getTargetProject()));
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to delete pull request #" + requestModel.getObject().getNumber() + "?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete pull request #" + requestModel.getObject().getNumber() + "?")));
 	}
 
 	public static PageParameters paramsOf(PullRequest request) {

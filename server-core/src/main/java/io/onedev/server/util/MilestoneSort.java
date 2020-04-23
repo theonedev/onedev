@@ -22,38 +22,6 @@ public enum MilestoneSort {
 		}
 		
 	},
-	MOST_ISSUES_TODO {
-
-		@Override
-		public Order getOrder(boolean closed) {
-			return Order.desc("numOfIssuesTodo");
-		}
-		
-	}, 
-	LEAST_ISSUES_TODO {
-
-		@Override
-		public Order getOrder(boolean closed) {
-			return Order.asc("numOfIssuesTodo");
-		}
-		
-	},
-	MOST_ISSUES_DONE {
-
-		@Override
-		public Order getOrder(boolean closed) {
-			return Order.desc("numOfIssuesDone");
-		}
-		
-	},
-	LEAST_ISSUES_DONE {
-
-		@Override
-		public Order getOrder(boolean closed) {
-			return Order.asc("numOfIssuesDone");
-		}
-		
-	},
 	NAME {
 
 		@Override

@@ -30,7 +30,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
@@ -169,7 +169,7 @@ public abstract class ProjectCommentPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this comment?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this comment?"));
 			}
 
 			@Override

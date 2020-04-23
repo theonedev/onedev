@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -16,6 +15,7 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
@@ -34,10 +34,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -54,9 +53,11 @@ import io.onedev.server.search.entity.codecomment.PathCriteria;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -71,12 +72,13 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
-	private String query;
+	private final IModel<String> queryModel;
 	
-	private IModel<CodeCommentQuery> parsedQueryModel = new LoadableDetachableModel<CodeCommentQuery>() {
+	private final IModel<CodeCommentQuery> parsedQueryModel = new LoadableDetachableModel<CodeCommentQuery>() {
 
 		@Override
 		protected CodeCommentQuery load() {
+			String query = queryModel.getObject();
 			try {
 				return CodeCommentQuery.parse(getProject(), query);
 			} catch (OneException e) {
@@ -93,9 +95,11 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 	};
 	
-	public CodeCommentListPanel(String id, String query) {
+	private DataTable<CodeComment, Void> commentsTable;
+	
+	public CodeCommentListPanel(String id, IModel<String> queryModel) {
 		super(id);
-		this.query = query;
+		this.queryModel = queryModel;
 	}
 
 	private CodeCommentManager getCodeCommentManager() {
@@ -136,7 +140,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(query));
+				setEnabled(parsedQueryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -144,20 +148,18 @@ public abstract class CodeCommentListPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				configure();
-				if (!isEnabled()) {
+				if (!isEnabled()) 
 					tag.put("disabled", "disabled");
-					tag.put("title", "Input query to save");
-				}
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, query);
+				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
 		
-		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
+		TextField<String> input = new TextField<String>("input", queryModel);
 		input.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -166,15 +168,6 @@ public abstract class CodeCommentListPanel extends Panel {
 			}
 			
 		}));
-		input.add(new AjaxFormComponentUpdatingBehavior("input"){
-			
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
-			}
-			
-		});
 		
 		WebMarkupContainer body = new WebMarkupContainer("body");
 		add(body.setOutputMarkupId(true));
@@ -186,8 +179,10 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				commentsTable.setCurrentPage(0);
 				target.add(body);
-				onQueryUpdated(target, query);
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+					target.add(saveQueryLink);
 			}
 			
 		});
@@ -258,10 +253,19 @@ public abstract class CodeCommentListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
 				Fragment fragment = new Fragment(componentId, "fileFrag", CodeCommentListPanel.this);
 				CodeComment comment = rowModel.getObject();
-				BookmarkablePageLink<Void> link;
+				WebMarkupContainer link;
 				if (!comment.isValid()) {
-					link = new BookmarkablePageLink<Void>("link", InvalidCodeCommentPage.class, 
-							InvalidCodeCommentPage.paramsOf(comment));
+					link = new ActionablePageLink<Void>("link", InvalidCodeCommentPage.class, 
+							InvalidCodeCommentPage.paramsOf(comment)) {
+
+						@Override
+						protected void doBeforeNav(AjaxRequestTarget target) {
+							String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+									getPage().getClass(), getPage().getPageParameters()).toString();
+							WebSession.get().setRedirectUrlAfterDelete(CodeComment.class, redirectUrlAfterDelete);
+						}
+						
+					};
 				} else {
 					PullRequest request = getPullRequest();
 					if (request != null) {
@@ -314,7 +318,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
-		body.add(new DefaultDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		body.add(commentsTable = new DefaultDataTable<CodeComment, Void>("comments", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override
@@ -338,6 +342,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
+		queryModel.detach();
 		parsedQueryModel.detach();
 		super.onDetach();
 	}
@@ -347,9 +352,6 @@ public abstract class CodeCommentListPanel extends Panel {
 	@Nullable
 	protected PagingHistorySupport getPagingHistorySupport() {
 		return null;
-	}
-
-	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
 	}
 
 	@Nullable

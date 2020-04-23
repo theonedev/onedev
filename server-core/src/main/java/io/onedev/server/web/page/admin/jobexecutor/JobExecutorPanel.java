@@ -14,7 +14,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 
@@ -86,7 +86,7 @@ abstract class JobExecutorPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this executor?"));
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this executor?"));
 			}
 
 			@Override

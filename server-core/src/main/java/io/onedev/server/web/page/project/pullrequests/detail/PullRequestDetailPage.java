@@ -67,6 +67,7 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
@@ -135,7 +136,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequ
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -676,16 +677,16 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			public void onClick() {
 				PullRequest request = getPullRequest();
 				getPullRequestManager().delete(request);
-				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
-				Cursor cursor = WebSession.get().getPullRequestCursor();
-				PageParameters params = ProjectPullRequestsPage.paramsOf(
-						getProject(), 
-						Cursor.getQuery(cursor), 
-						Cursor.getPage(cursor) + 1);
-				setResponsePage(ProjectPullRequestsPage.class, params);
+				Session.get().success("Pull request #" + request.getNumber() + " deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
+					setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to delete this pull request?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete this pull request?")));
 		return container;
 	}
 	

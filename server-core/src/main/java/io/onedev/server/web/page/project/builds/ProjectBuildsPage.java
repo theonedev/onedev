@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -43,6 +44,8 @@ public class ProjectBuildsPage extends ProjectPage {
 	private String query;
 	
 	private SavedQueriesPanel<NamedBuildQuery> savedQueries;
+	
+	private BuildListPanel buildList;
 	
 	public ProjectBuildsPage(PageParameters params) {
 		super(params);
@@ -102,19 +105,28 @@ public class ProjectBuildsPage extends ProjectPage {
 
 		});
 		
-		add(newBuildList());
-	}
-	
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		query = (String) data;
-		BuildListPanel listPanel = newBuildList();
-		replace(listPanel);
-		target.add(listPanel);
-	}
-	
-	private BuildListPanel newBuildList() {
-		return new BuildListPanel("main", query, 0) {
+		add(buildList = new BuildListPanel("main", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(ProjectBuildsPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}, 0) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -131,13 +143,6 @@ public class ProjectBuildsPage extends ProjectPage {
 					}
 					
 				};
-			}
-
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(ProjectBuildsPage.class, paramsOf(getProject(), query, 0));
-				ProjectBuildsPage.this.query = query;
-				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -209,7 +214,14 @@ public class ProjectBuildsPage extends ProjectPage {
 				return ProjectBuildsPage.this.getProject();
 			}
 
-		};
+		});
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(buildList);
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {

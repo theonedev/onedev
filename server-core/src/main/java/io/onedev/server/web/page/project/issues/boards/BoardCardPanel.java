@@ -200,6 +200,10 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected void doBeforeNav(AjaxRequestTarget target) {
 				WebSession.get().setIssueCursor(getCursor());
+				
+				String redirectUrlAfterDelete = RequestCycle.get().urlFor(
+						getPage().getClass(), getPage().getPageParameters()).toString();
+				WebSession.get().setRedirectUrlAfterDelete(Issue.class, redirectUrlAfterDelete);
 			}
 			
 		});

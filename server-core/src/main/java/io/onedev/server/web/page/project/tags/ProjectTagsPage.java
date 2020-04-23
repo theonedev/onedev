@@ -1,21 +1,23 @@
 package io.onedev.server.web.page.project.tags;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.AjaxRequestTarget.IJavaScriptResponse;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -25,12 +27,14 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.protocol.http.WebSession;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
@@ -42,7 +46,6 @@ import org.eclipse.jgit.revwalk.RevTag;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
@@ -51,11 +54,13 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmListener;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -67,7 +72,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class ProjectTagsPage extends ProjectPage {
@@ -76,30 +80,30 @@ public class ProjectTagsPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private WebMarkupContainer tagsContainer;
-	
-	private PageableListView<RefInfo> tagsView;
-	
 	private final PagingHistorySupport pagingHistorySupport;	
+	
+	private TextField<String> searchField;
+	
+	private DataTable<RefInfo, Void> tagsTable;
 	
 	private String query;
 	
-	private final IModel<List<RefInfo>> tagsModel = new LoadableDetachableModel<List<RefInfo>>() {
+	private boolean typing;
+	
+	private IModel<Map<String, RefInfo>> tagsModel = new LoadableDetachableModel<Map<String, RefInfo>>() {
 
 		@Override
-		protected List<RefInfo> load() {
-			List<RefInfo> refs = getProject().getTagRefInfos();
-			if (query != null) {
-				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
-					String tag = GitUtils.ref2tag(it.next().getRef().getName());
-					if (!tag.toLowerCase().contains(query.trim().toLowerCase()))
-						it.remove();
-				}
+		protected Map<String, RefInfo> load() {
+			Map<String, RefInfo> refInfos = new LinkedHashMap<>();
+			for (RefInfo refInfo: getProject().getTagRefInfos()) {
+				String tag = GitUtils.ref2tag(refInfo.getRef().getName());
+				if (query == null || tag.toLowerCase().contains(query.trim().toLowerCase()))
+					refInfos.put(tag, refInfo);
 			}
-			return refs;
+			return refInfos;
 		}
 		
-	}; 
+	};
 	
 	public ProjectTagsPage(PageParameters params) {
 		super(params);
@@ -127,20 +131,62 @@ public class ProjectTagsPage extends ProjectPage {
 	}
 	
 	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(searchField);
+		target.add(tagsTable);
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		typing = false;
+		super.onBeforeRender();
+	}
+	
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		TextField<String> searchField;
-		add(searchField = new TextField<String>("searchTags", Model.of(query)));
+		add(searchField = new TextField<String>("filterTags", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				
+				String url = RequestCycle.get().urlFor(ProjectTagsPage.class, params).toString();
+
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (typing)
+					replaceState(target, url, query);
+				else
+					pushState(target, url, query);
+				
+				tagsTable.setCurrentPage(0);
+				target.add(tagsTable);
+				
+				typing = true;
+			}
+			
+		}));
+		
 		searchField.add(new OnTypingDoneBehavior(200) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				query = searchField.getInput();
-				if (StringUtils.isBlank(query))
-					query = null;
-				target.add(tagsContainer);
-				newPagingNavigation(target);
 			}
 			
 		});
@@ -252,25 +298,9 @@ public class ProjectTagsPage extends ProjectPage {
 							} else {
 								getProject().createTag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
 								modal.close();
-								target.add(tagsContainer);
-								newPagingNavigation(target);
-								target.addListener(new AjaxRequestTarget.IListener() {
-
-									@Override
-									public void onBeforeRespond(Map<String, Component> map, AjaxRequestTarget target) {
-									}
-
-									@Override
-									public void onAfterRespond(Map<String, Component> map, IJavaScriptResponse response) {
-										OneDev.getInstance(WebSocketManager.class).observe(ProjectTagsPage.this);
-									}
-
-									@Override
-									public void updateAjaxAttributes(AbstractDefaultAjaxBehavior behavior,
-											AjaxRequestAttributes attributes) {
-									}
-									
-								});
+								target.add(tagsTable);
+								
+								getSession().success("Tag '" + tagName + "' created");
 							}
 						}
 					}
@@ -290,41 +320,22 @@ public class ProjectTagsPage extends ProjectPage {
 			
 		});
 		
-		add(tagsContainer = new WebMarkupContainer("tagsContainer") {
+		List<IColumn<RefInfo, Void>> columns = new ArrayList<>();
+		
+		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!tagsModel.getObject().isEmpty());
+			public String getCssClass() {
+				return "tag";
 			}
 
 			@Override
-			protected void onBeforeRender() {
-				List<ObjectId> commitIdsToDisplay = new ArrayList<>();
-				for (long i=tagsView.getFirstItemOffset(); i<tagsModel.getObject().size(); i++) {
-					if (i-tagsView.getFirstItemOffset() >= tagsView.getItemsPerPage())
-						break;
-					RefInfo ref = tagsModel.getObject().get((int)i); 
-					commitIdsToDisplay.add(ref.getPeeledObj().copy());
-				}
+			public void populateItem(Item<ICellPopulator<RefInfo>> cellItem, String componentId,
+					IModel<RefInfo> rowModel) {
+				Fragment fragment = new Fragment(componentId, "tagFrag", ProjectTagsPage.this);
+				fragment.setRenderBodyOnly(true);
 				
-				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), commitIdsToDisplay));
-				super.onBeforeRender();
-			}
-			
-		});
-		
-		tagsContainer.setOutputMarkupPlaceholderTag(true);
-		
-		tagsContainer.add(new FencedFeedbackPanel("feedback", tagsContainer).setEscapeModelStrings(false));
-		
-		tagsContainer.add(tagsView = new PageableListView<RefInfo>("tags", tagsModel, 
-				io.onedev.server.web.WebConstants.PAGE_SIZE) {
-
-			@Override
-			protected void populateItem(ListItem<RefInfo> item) {
-				RefInfo ref = item.getModelObject();
+				RefInfo ref = rowModel.getObject();
 				String tagName = GitUtils.ref2tag(ref.getRef().getName());
 				
 				BlobIdent blobIdent = new BlobIdent(tagName, null, FileMode.TREE.getBits());
@@ -332,9 +343,9 @@ public class ProjectTagsPage extends ProjectPage {
 				AbstractLink link = new ViewStateAwarePageLink<Void>("tagLink", 
 						ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject(), state));
 				link.add(new Label("name", tagName));
-				item.add(link);
+				fragment.add(link);
 				
-				item.add(new CommitStatusPanel("buildStatus", ref.getPeeledObj().copy()) {
+				fragment.add(new CommitStatusPanel("buildStatus", ref.getPeeledObj().copy()) {
 
 					@Override
 					protected Project getProject() {
@@ -345,22 +356,23 @@ public class ProjectTagsPage extends ProjectPage {
 
 				if (ref.getObj() instanceof RevTag) {
 					RevTag revTag = (RevTag) ref.getObj();
-					Fragment fragment = new Fragment("annotated", "annotatedFrag", ProjectTagsPage.this);
+					Fragment annotatedFragment = new Fragment("annotated", "annotatedFrag", ProjectTagsPage.this);
 					if (revTag.getTaggerIdent() != null) 
-						fragment.add(new PersonIdentPanel("author", revTag.getTaggerIdent(), "Tagger", Mode.NAME));
+						annotatedFragment.add(new PersonIdentPanel("author", revTag.getTaggerIdent(), "Tagger", Mode.NAME));
 					else 
-						fragment.add(new WebMarkupContainer("author").setVisible(false));
+						annotatedFragment.add(new WebMarkupContainer("author").setVisible(false));
 					Label message = new Label("message", revTag.getFullMessage());
 					message.setOutputMarkupId(true);
-					fragment.add(message);
+					annotatedFragment.add(message);
 					String toggleScript = String.format("$('#%s').toggle();", message.getMarkupId());
 					WebMarkupContainer messageToggle = new WebMarkupContainer("messageToggle"); 
 					messageToggle.add(AttributeAppender.append("onclick", toggleScript));
 					messageToggle.setVisible(StringUtils.isNotBlank(revTag.getFullMessage()));
-					fragment.add(messageToggle);
-					item.add(fragment);
+					annotatedFragment.add(messageToggle);
+					
+					fragment.add(annotatedFragment);
 				} else {
-					item.add(new WebMarkupContainer("annotated").setVisible(false));
+					fragment.add(new WebMarkupContainer("annotated").setVisible(false));
 				}
 
 				RevCommit commit = (RevCommit) ref.getPeeledObj();
@@ -368,11 +380,11 @@ public class ProjectTagsPage extends ProjectPage {
 				
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
 				link.add(new Label("message", commit.getShortMessage()));
-				item.add(link);
+				fragment.add(link);
 				
-				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent()));
+				fragment.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent()));
 				
-				item.add(new ArchiveMenuLink("download", projectModel) {
+				fragment.add(new ArchiveMenuLink("download", projectModel) {
 
 					@Override
 					protected String getRevision() {
@@ -381,30 +393,26 @@ public class ProjectTagsPage extends ProjectPage {
 					
 				});
 				
-				item.add(new AjaxLink<Void>("delete") {
+				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete tag " + tagName + "?"));
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete tag " + tagName + "?"));
 					}
 
 					@Override
 					protected void disableLink(ComponentTag tag) {
 						super.disableLink(tag);
 						tag.append("class", "disabled", " ");
-						tag.put("title", "Deletion not allowed due to branch protection rule");
+						tag.put("title", "Deletion not allowed due to tag protection rule");
 					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						try {
-							OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
-							newPagingNavigation(target);
-						} catch (OneException e) {
-							tagsContainer.error(e.getMessage());
-						}
-						target.add(tagsContainer);
+						OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
+						WebSession.get().success("Tag '" + tagName + "' deleted");
+						target.add(tagsTable);
 					}
 
 					@Override
@@ -418,34 +426,70 @@ public class ProjectTagsPage extends ProjectPage {
 							setVisible(false);
 					}
 					
-				});
+				});		
+				
+				cellItem.add(fragment);
 			}
 			
 		});
+		
+		SortableDataProvider<RefInfo, Void> dataProvider = new LoadableDetachableDataProvider<RefInfo, Void>() {
 
-		tagsView.setCurrentPage(pagingHistorySupport.getCurrentPage());
+			@Override
+			public Iterator<? extends RefInfo> iterator(long first, long count) {
+				List<RefInfo> tags = new ArrayList<>(tagsModel.getObject().values());
+				if (first + count > tags.size())
+					return tags.subList((int)first, tags.size()).iterator();
+				else
+					return tags.subList((int)first, (int)(first+count)).iterator();
+			}
 
-		newPagingNavigation(null);
+			@Override
+			public long calcSize() {
+				return tagsModel.getObject().size();
+			}
+
+			@Override
+			public IModel<RefInfo> model(RefInfo object) {
+				String tag = GitUtils.ref2tag(object.getRef().getName());
+				return new AbstractReadOnlyModel<RefInfo>() {
+
+					@Override
+					public RefInfo getObject() {
+						return tagsModel.getObject().get(tag);
+					}
+					
+				};
+			}
+		};		
+		
+		add(tagsTable = new DefaultDataTable<RefInfo, Void>("tags", columns, dataProvider, 
+				WebConstants.PAGE_SIZE, pagingHistorySupport) {
+			
+			@Override
+			protected void onBeforeRender() {
+				List<RefInfo> tags = new ArrayList<>(tagsModel.getObject().values());
+				long firstItemOffset = tagsTable.getCurrentPage() * tagsTable.getItemsPerPage();
+				List<ObjectId> commitIdsToDisplay = new ArrayList<>();
+				for (long i=firstItemOffset; i<tags.size(); i++) {
+					if (i-firstItemOffset >= tagsTable.getItemsPerPage())
+						break;
+					RefInfo ref = tags.get((int)i); 
+					commitIdsToDisplay.add(ref.getRef().getObjectId());
+				}
+				
+				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), commitIdsToDisplay));
+				super.onBeforeRender();
+			}
+			
+		});		
 	}
 	
-	private void newPagingNavigation(@Nullable AjaxRequestTarget target) {
-		Component pagingNavigator = new HistoryAwarePagingNavigator("tagsPageNav", tagsView, pagingHistorySupport);
-		pagingNavigator.setVisible(tagsView.getPageCount() > 1);
-		pagingNavigator.setOutputMarkupPlaceholderTag(true);
-		
-		Component noTagsContainer = new WebMarkupContainer("noTags");
-		noTagsContainer.setVisible(tagsModel.getObject().isEmpty());
-		noTagsContainer.setOutputMarkupPlaceholderTag(true);
-		
-		if (target != null) {
-			replace(pagingNavigator);
-			replace(noTagsContainer);
-			target.add(pagingNavigator);
-			target.add(noTagsContainer);
-		} else {
-			add(pagingNavigator);
-			add(noTagsContainer);
-		}
+	@Override
+	public void onDetach() {
+		tagsModel.detach();
+		super.onDetach();
 	}
 	
 	@Override

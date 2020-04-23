@@ -29,8 +29,8 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.ProjectScopedRevision;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.ProjectScopedRevision;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 

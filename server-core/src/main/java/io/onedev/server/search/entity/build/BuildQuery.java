@@ -329,13 +329,7 @@ public class BuildQuery extends EntityQuery<Build> {
 		List<EntitySort> sorts = new ArrayList<>();
 		sorts.addAll(query1.getSorts());
 		sorts.addAll(query2.getSorts());
-
-		if (criterias.size() > 1)
-			return new BuildQuery(new AndEntityCriteria<Build>(criterias), sorts);
-		else if (criterias.size() == 1)
-			return new BuildQuery(criterias.iterator().next(), sorts);
-		else
-			return new BuildQuery(null, sorts);
+		return new BuildQuery(EntityCriteria.andCriterias(criterias), sorts);
 	}
 	
 }

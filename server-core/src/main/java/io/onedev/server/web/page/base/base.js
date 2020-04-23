@@ -532,6 +532,16 @@ onedev.server = {
 				onedev.server.history.setVisited();
 			}, 100);
 		},
+		replaceState: function(url, data) {
+			var state = {data: data};
+			onedev.server.history.current = {state: state, url: url};
+			history.replaceState(state, '', url);
+			
+			// Let others have a chance to do something before marking the page as visited
+			setTimeout(function() {
+				onedev.server.history.setVisited();
+			}, 100);
+		},
 		
 		/*
 		 * visited flag is used to determine whether or not a page is newly visited 

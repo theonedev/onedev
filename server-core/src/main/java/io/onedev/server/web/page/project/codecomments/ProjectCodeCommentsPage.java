@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -41,6 +42,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	
 	private SavedQueriesPanel<NamedCodeCommentQuery> savedQueries;
 	
+	private CodeCommentListPanel commentList;
+	
 	public ProjectCodeCommentsPage(PageParameters params) {
 		super(params);
 		query = getPageParameters().get(PARAM_QUERY).toString();
@@ -53,9 +56,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		query = (String) data;
-		CodeCommentListPanel listPanel = newCodeCommentList();
-		replace(listPanel);
-		target.add(listPanel);
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(commentList);
 	}
 	
 	@Override
@@ -98,11 +100,28 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 		});
 		
-		add(newCodeCommentList());
-	}
-	
-	private CodeCommentListPanel newCodeCommentList() {
-		return new CodeCommentListPanel("main", query) {
+		add(commentList = new CodeCommentListPanel("main", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(ProjectCodeCommentsPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}) {
 
 			@Override
 			protected Project getProject() {
@@ -124,13 +143,6 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 					}
 					
 				};
-			}
-
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(ProjectCodeCommentsPage.class, paramsOf(getProject(), query, 0));
-				ProjectCodeCommentsPage.this.query = query;
-				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -194,9 +206,9 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 				};
 			}
 			
-		};
+		});
 	}
-
+	
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject());

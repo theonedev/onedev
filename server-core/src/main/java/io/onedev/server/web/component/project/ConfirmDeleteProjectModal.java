@@ -19,7 +19,7 @@ public abstract class ConfirmDeleteProjectModal extends ConfirmModal {
 		Project project = getProject();
 		
 		OneDev.getInstance(ProjectManager.class).delete(project);
-		getSession().success("Project has been deleted");
+		getSession().success("Project '" + project.getName() + "' deleted");
 		
 		onDeleted(target);
 	}

@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -43,6 +44,8 @@ public class IssueListPage extends LayoutPage {
 	private String query;
 	
 	private SavedQueriesPanel<NamedIssueQuery> savedQueries;
+	
+	private IssueListPanel issueList;
 	
 	public IssueListPage(PageParameters params) {
 		super(params);
@@ -105,19 +108,28 @@ public class IssueListPage extends LayoutPage {
 			
 		});
 		
-		add(newIssueList());
-	}
+		add(issueList = new IssueListPanel("main", new IModel<String>() {
 
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		query = (String) data;
-		IssueListPanel listPanel = newIssueList();
-		replace(listPanel);
-		target.add(listPanel);
-	}
-	
-	private IssueListPanel newIssueList() {
-		return new IssueListPanel("main", query) {
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(IssueListPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -136,13 +148,6 @@ public class IssueListPage extends LayoutPage {
 					}
 					
 				};
-			}
-
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(IssueListPage.class, paramsOf(query, 0));
-				IssueListPage.this.query = query;
-				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -212,7 +217,14 @@ public class IssueListPage extends LayoutPage {
 				return null;
 			}
 
-		};				
+		});
+	}
+
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(issueList);
 	}
 	
 	public static PageParameters paramsOf(@Nullable String query, int page) {

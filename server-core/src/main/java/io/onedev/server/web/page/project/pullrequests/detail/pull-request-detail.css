@@ -177,6 +177,10 @@ ul>li>a.code-comments.new .fa-circle {
 #request-detail>.side-info>.content>.jobs>.body {
 	margin-bottom: -8px;
 }
+#request-detail>.side-info>.content .manage .synchronize>.help {
+	margin-left: 4px;
+	font-size: 16px;
+}
 
 .floating>.content>.instruction {
 	padding: 20px 20px 20px 32px; 

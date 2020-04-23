@@ -1,10 +1,12 @@
 package io.onedev.server.web.page.project.codecomments;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
@@ -13,8 +15,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class InvalidCodeCommentPage extends ProjectPage {
@@ -51,7 +54,15 @@ public class InvalidCodeCommentPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				OneDev.getInstance(CodeCommentManager.class).delete(getCodeComment());
-				setResponsePage(ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject()));
+				
+				Session.get().success("Code comment #" + getCodeComment().getId() + " deleted");
+				
+				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(CodeComment.class);
+				if (redirectUrlAfterDelete != null)
+					throw new RedirectToUrlException(redirectUrlAfterDelete);
+				else
+					setResponsePage(ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject()));
+				
 			}
 
 			@Override
@@ -60,7 +71,7 @@ public class InvalidCodeCommentPage extends ProjectPage {
 				setVisible(SecurityUtils.canManageCodeComments(getCodeComment().getProject()));
 			}
 			
-		}.add(new ConfirmOnClick("Really want to delete this code comment?")));
+		}.add(new ConfirmClickModifier("Really want to delete this code comment?")));
 	}
 	
 	public static PageParameters paramsOf(CodeComment codeComment) {

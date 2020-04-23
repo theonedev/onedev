@@ -1,5 +1,8 @@
 package io.onedev.server.web;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
 
@@ -21,6 +24,8 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 	private volatile Cursor buildCursor; 
 	
 	private volatile Cursor pullRequestCursor; 
+	
+	private Map<Class<?>, String> redirectUrlsAfterDelete = new ConcurrentHashMap<>(); 
 	
 	public WebSession(Request request) {
 		super(request);
@@ -78,6 +83,15 @@ public class WebSession extends org.apache.wicket.protocol.http.WebSession {
 		this.pullRequestCursor = pullRequestCursor;
 	}
 	
+	@Nullable
+	public String getRedirectUrlAfterDelete(Class<?> clazz) {
+		return redirectUrlsAfterDelete.get(clazz);
+	}
+
+	public void setRedirectUrlAfterDelete(Class<?> clazz, String redirectUrlAfterDelete) {
+		redirectUrlsAfterDelete.put(clazz, redirectUrlAfterDelete);
+	}
+
 	public static WebSession from(HttpSession session) {
 		String attributeName = "wicket:" + OneDev.getInstance(WicketServlet.class).getServletName() + ":session";
 		return (WebSession) session.getAttribute(attributeName);		

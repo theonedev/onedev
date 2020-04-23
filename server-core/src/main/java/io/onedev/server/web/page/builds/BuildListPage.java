@@ -9,6 +9,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -46,6 +47,8 @@ public class BuildListPage extends LayoutPage {
 	private final int expectedCount;
 	
 	private SavedQueriesPanel<NamedBuildQuery> savedQueries;
+	
+	private BuildListPanel buildList;
 	
 	public BuildListPage(PageParameters params) {
 		super(params);
@@ -100,19 +103,28 @@ public class BuildListPage extends LayoutPage {
 
 		});
 		
-		add(newBuildList());
-	}
-	
-	@Override
-	protected void onPopState(AjaxRequestTarget target, Serializable data) {
-		query = (String) data;
-		BuildListPanel listPanel = newBuildList();
-		replace(listPanel);
-		target.add(listPanel);
-	}
-	
-	private BuildListPanel newBuildList() {
-		return new BuildListPanel("main", query, expectedCount) {
+		add(buildList = new BuildListPanel("main", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return query;
+			}
+
+			@Override
+			public void setObject(String object) {
+				query = object;
+				PageParameters params = getPageParameters();
+				params.set(PARAM_QUERY, query);
+				params.remove(PARAM_PAGE);
+				CharSequence url = RequestCycle.get().urlFor(BuildListPage.class, params);
+				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+			}
+			
+		}, expectedCount) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -129,13 +141,6 @@ public class BuildListPage extends LayoutPage {
 					}
 					
 				};
-			}
-
-			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				CharSequence url = RequestCycle.get().urlFor(BuildListPage.class, paramsOf(query, 0, 0));
-				BuildListPage.this.query = query;
-				pushState(target, url.toString(), query);
 			}
 
 			@Override
@@ -205,7 +210,14 @@ public class BuildListPage extends LayoutPage {
 				return null;
 			}
 
-		};
+		});
+	}
+	
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		query = (String) data;
+		getPageParameters().set(PARAM_QUERY, query);
+		target.add(buildList);
 	}
 	
 	public static PageParameters paramsOf(@Nullable String query, int page, int expectedCount) {
