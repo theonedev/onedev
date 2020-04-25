@@ -19,7 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.git.ssh.SshKeyUtils;
+import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -114,7 +114,7 @@ public class SshKey extends AbstractEntity implements Validatable {
             PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
             String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
             
-            boolean alreadyInUse = sshKeyManager.isKeyAlreadyInUse(fingerPrint);
+            boolean alreadyInUse = sshKeyManager.findByDigest(fingerPrint) != null;
             
             if (alreadyInUse) {
                 errorMessage = "The provided key is already in use. Please use another one.";

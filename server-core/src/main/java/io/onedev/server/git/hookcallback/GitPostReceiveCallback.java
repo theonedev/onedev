@@ -1,4 +1,4 @@
-package io.onedev.server.git;
+package io.onedev.server.git.hookcallback;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -24,6 +24,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.SecurityUtils;

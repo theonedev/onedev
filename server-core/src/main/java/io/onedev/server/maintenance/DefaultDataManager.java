@@ -32,7 +32,6 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.crypto.ServerKeyPairPopulator;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -48,13 +47,14 @@ import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.SshSettings;
+import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.init.Skippable;
@@ -84,14 +84,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 
     private ServerConfig serverConfig;
     
-    private ServerKeyPairPopulator keyPairPopulator;
-    
 	@Inject
 	public DefaultDataManager(UserManager userManager, 
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService, RoleManager roleManager,
-			ServerConfig serverConfig, ServerKeyPairPopulator keyPairPopulator) {
+			ServerConfig serverConfig) {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.validator = validator;
@@ -101,7 +99,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
         this.serverConfig = serverConfig;
-        this.keyPairPopulator = keyPairPopulator;
 	}
 	
 	@SuppressWarnings("serial")
@@ -145,7 +142,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 		Url serverUrl = OneDev.getInstance().guessServerUrl();
 		
 		if (setting == null || setting.getValue() == null) {
-		    
 		    systemSetting = new SystemSetting();
 			systemSetting.setServerUrl(serverUrl.toString(StringMode.FULL));
 		} else if (!validator.validate(setting.getValue()).isEmpty()) {
@@ -172,27 +168,25 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
-		
+
 		setting = settingManager.getSetting(Key.SSH);
-		SshSettings sshSettings = null;
-		
-		if (setting == null || setting.getValue() == null) {
-            
-		    sshSettings = new SshSettings();
-            String sshUrl = serverUrl.getHost();
-            int sshPort = serverConfig.getSshPort();
-            
-            if (sshPort != 22) {
-                sshUrl +=  ":" + sshPort;
-            }
-            
-            sshSettings.setServerSshUrl("ssh://git@" + sshUrl);
-            keyPairPopulator.populateSettings(sshSettings);
-            //save default values
-            settingManager.saveSshSetting(sshSettings);
-        } else if (!validator.validate(setting.getValue()).isEmpty()) {
-            sshSettings = (SshSettings) setting.getValue();
-        }
+		if (serverConfig.getSshPort() != 0) {
+			if (setting == null || setting.getValue() == null) {
+				SshSetting sshSetting = new SshSetting();
+	            String sshUrl = serverUrl.getHost();
+	            int sshPort = serverConfig.getSshPort();
+	            
+	            if (sshPort != 22) 
+	                sshUrl +=  ":" + sshPort;
+	            
+	            sshSetting.setServerUrl("ssh://" + sshUrl);
+	            sshSetting.setPrivateKey(SshKeyUtils.generatePEMPrivateKey());
+	            
+	            settingManager.saveSshSetting(sshSetting);
+	        }
+		} else if (setting == null || setting.getValue() != null) {
+			settingManager.saveSshSetting(null);
+		}
 		
 		setting = settingManager.getSetting(Key.SECURITY);
 		if (setting == null) {

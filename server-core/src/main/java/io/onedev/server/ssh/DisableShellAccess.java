@@ -1,4 +1,4 @@
-package io.onedev.server.git.ssh;
+package io.onedev.server.ssh;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +11,7 @@ import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.session.ServerSession;
 import org.eclipse.jgit.lib.Constants;
 
-public class WelcomeGitShell implements Factory<Command> {
+public class DisableShellAccess implements Factory<Command> {
 
     @Override
     public Command create() {
@@ -70,5 +70,6 @@ public class WelcomeGitShell implements Factory<Command> {
         @Override
         public void setSession(ServerSession session) {
         }
+        
     }
 }

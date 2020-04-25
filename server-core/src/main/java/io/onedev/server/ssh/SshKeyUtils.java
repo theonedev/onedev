@@ -1,9 +1,11 @@
-package io.onedev.server.git.ssh;
+package io.onedev.server.ssh;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -17,6 +19,7 @@ import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.bouncycastle.util.io.pem.PemWriter;
 
 public class SshKeyUtils {
     public static final BaseDigest MD5_DIGESTER = new BaseDigest("MD5", 512);
@@ -50,4 +53,17 @@ public class SshKeyUtils {
         }
     }
     
+    public static String generatePEMPrivateKey() {
+        try (StringWriter privateWriter = new StringWriter();
+                PemWriter privatePemWriter = new PemWriter(privateWriter)) {
+           KeyPair keyPair = KeyUtils.generateKeyPair("ssh-rsa", 4096);
+           
+           privatePemWriter.writeObject(new PemObject("RSA PRIVATE KEY", keyPair.getPrivate().getEncoded()));
+           privatePemWriter.flush();
+           
+           return privateWriter.toString();
+       } catch (GeneralSecurityException | IOException e) {
+           throw new RuntimeException(e);
+       }
+    }
 }

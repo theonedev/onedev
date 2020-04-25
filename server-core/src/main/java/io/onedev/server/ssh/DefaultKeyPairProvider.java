@@ -1,19 +1,19 @@
-package io.onedev.server.crypto;
+package io.onedev.server.ssh;
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
+
+import com.google.common.collect.Lists;
+
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.git.ssh.SshKeyUtils;
-import io.onedev.server.model.Setting;
-import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.administration.SshSettings;
+import io.onedev.server.model.support.administration.SshSetting;
 
 @Singleton
 public class DefaultKeyPairProvider implements KeyPairProvider {
@@ -27,18 +27,12 @@ public class DefaultKeyPairProvider implements KeyPairProvider {
     
     @Override
     public Iterable<KeyPair> loadKeys() {
-        Setting setting = settingManager.getSetting(Key.SSH);
-        SshSettings sshSettings = (SshSettings) setting.getValue();
+        SshSetting sshSetting = settingManager.getSshSetting();
         
         try {
-            PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(sshSettings.getPrivateKey());
+            PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(sshSetting.getPrivateKey());
             PublicKey publicKey = KeyUtils.recoverPublicKey(privateKey);
-            
-            List<KeyPair> keys = new ArrayList<>();
-            
-            keys.add(new KeyPair(publicKey, privateKey));
-            
-            return keys;
+            return Lists.newArrayList(new KeyPair(publicKey, privateKey));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

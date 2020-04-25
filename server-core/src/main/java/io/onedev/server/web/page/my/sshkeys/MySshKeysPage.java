@@ -1,15 +1,17 @@
 package io.onedev.server.web.page.my.sshkeys;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -34,13 +36,11 @@ public class MySshKeysPage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		User user = getLoginUser();
-		
 		LoadableDetachableModel<List<SshKey>> detachableModel = new LoadableDetachableModel<List<SshKey>>() {
+			
 		    @Override
 		    protected List<SshKey> load() {
-		        SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-		        return sshKeyManager.loadUserKeys(user);
+		        return new ArrayList<>(getLoginUser().getSshKeys());
 		    }
 		    
 		};
@@ -51,12 +51,18 @@ public class MySshKeysPage extends MyPage {
             
             @Override
             protected Component newContent(String id, ModalPanel modal) {
-                return new InsertSshKeyPanel(id, modal, user) {
+                return new InsertSshKeyPanel(id, modal) {
 
                     @Override
                     protected void onSave(AjaxRequestTarget target) {
                         target.add(keyList);
-                    }};
+                    }
+
+					@Override
+					protected User getUser() {
+						return getLoginUser();
+					}
+				};
             }
             
             @Override

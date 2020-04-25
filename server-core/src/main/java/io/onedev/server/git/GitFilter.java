@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,13 +31,15 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ErrorCollector;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
-import io.onedev.server.git.command.ReceiveCommand;
-import io.onedev.server.git.command.UploadCommand;
+import io.onedev.server.git.command.ReceivePackCommand;
+import io.onedev.server.git.command.UploadPackCommand;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
@@ -65,7 +69,7 @@ public class GitFilter implements Filter {
 	
 	private final ServerConfig serverConfig;
 	
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
 	
 	private final SessionManager sessionManager;
 	
@@ -73,14 +77,14 @@ public class GitFilter implements Filter {
 	
 	@Inject
 	public GitFilter(OneDev oneDev, StorageManager storageManager, ProjectManager projectManager, 
-			WorkExecutor workManager, ServerConfig serverConfig, SettingManager configManager,
+			WorkExecutor workExecutor, ServerConfig serverConfig, SettingManager settingManager,
 			SessionManager sessionManager, Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.oneDev = oneDev;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;
-		this.workExecutor = workManager;
+		this.workExecutor = workExecutor;
 		this.serverConfig = serverConfig;
-		this.configManager = configManager;
+		this.settingManager = settingManager;
 		this.sessionManager = sessionManager;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
 	}
@@ -141,13 +145,13 @@ public class GitFilter implements Filter {
 	        else 
 	            serverUrl = "https://localhost:" + serverConfig.getHttpsPort();
 
-	        environments.put("ONEDEV_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
+	        environments.put("ONEDEV_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
 			environments.put("ONEDEV_URL", serverUrl);
 			environments.put("ONEDEV_USER_ID", SecurityUtils.getUserId().toString());
 			environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
 			
 			// to be compatible with old repository
-	        environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
+	        environments.put("GITPLEX_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
 			environments.put("GITPLEX_URL", serverUrl);
 			environments.put("GITPLEX_USER_ID", SecurityUtils.getUserId().toString());
 			environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
@@ -172,9 +176,32 @@ public class GitFilter implements Filter {
 				@Override
 				public void run() {
 					try {
-						InputStream is = ServletUtils.getInputStream(request);
-						OutputStream os = response.getOutputStream();
-						new UploadCommand(gitDir, environments).input(is).output(os).call();
+						InputStream stdin = ServletUtils.getInputStream(request);
+						OutputStream stdout = response.getOutputStream();
+						
+						AtomicBoolean toleratedErrors = new AtomicBoolean(false);
+						ErrorCollector stderr = new ErrorCollector(StandardCharsets.UTF_8.name()) {
+
+							@Override
+							public void consume(String line) {
+								super.consume(line);
+								// This error may happen during a normal shallow fetch/clone 
+								if (line.contains("remote end hung up unexpectedly")) {
+									toleratedErrors.set(true);
+									logger.debug(line);
+								} else {
+									logger.error(line);
+								}
+							}
+							
+						};
+						UploadPackCommand upload = new UploadPackCommand(gitDir, environments);
+						upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
+						ExecuteResult result = upload.call();
+						result.setErrorMessage(stderr.getMessage());
+						
+						if (result.getReturnCode() != 0 && !toleratedErrors.get())
+							throw result.buildException();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -187,9 +214,23 @@ public class GitFilter implements Filter {
 				@Override
 				public void run() {
 					try {
-						InputStream is = ServletUtils.getInputStream(request);
-						OutputStream os = response.getOutputStream();
-						new ReceiveCommand(gitDir, environments).input(is).output(os).call();
+						InputStream stdin = ServletUtils.getInputStream(request);
+						OutputStream stdout = response.getOutputStream();
+						
+						ErrorCollector stderr = new ErrorCollector(StandardCharsets.UTF_8.name()) {
+
+							@Override
+							public void consume(String line) {
+								super.consume(line);
+								logger.error(line);
+							}
+							
+						};
+						ReceivePackCommand receive = new ReceivePackCommand(gitDir, environments);
+						receive.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
+						ExecuteResult result = receive.call();
+						result.setErrorMessage(stderr.getMessage());
+						result.checkReturnCode();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

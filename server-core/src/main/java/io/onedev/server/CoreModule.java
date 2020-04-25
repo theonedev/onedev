@@ -18,6 +18,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,6 +30,7 @@ import javax.validation.Configuration;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.guice.aop.ShiroAopModule;
@@ -60,6 +62,7 @@ import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.Type;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -75,6 +78,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider;
 import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
@@ -86,9 +90,6 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
-import io.onedev.server.crypto.DefaultKeyPairProvider;
-import io.onedev.server.crypto.DefaultServerKeyPairPopulator;
-import io.onedev.server.crypto.ServerKeyPairPopulator;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -159,10 +160,10 @@ import io.onedev.server.entitymanager.impl.DefaultSshKeyManager;
 import io.onedev.server.entitymanager.impl.DefaultUserAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
 import io.onedev.server.git.GitFilter;
-import io.onedev.server.git.GitPostReceiveCallback;
-import io.onedev.server.git.GitPreReceiveCallback;
+import io.onedev.server.git.GitSshCommandCreator;
 import io.onedev.server.git.config.GitConfig;
-import io.onedev.server.git.ssh.SimpleGitSshServer;
+import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
+import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
 import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.DefaultCodeCommentRelationInfoManager;
@@ -225,6 +226,11 @@ import io.onedev.server.security.OneFilterChainResolver;
 import io.onedev.server.security.OnePasswordService;
 import io.onedev.server.security.OneRememberMeManager;
 import io.onedev.server.security.OneWebSecurityManager;
+import io.onedev.server.ssh.DefaultKeyPairProvider;
+import io.onedev.server.ssh.DefaultSshAuthenticator;
+import io.onedev.server.ssh.SshAuthenticator;
+import io.onedev.server.ssh.SshCommandCreator;
+import io.onedev.server.ssh.SshServerLauncher;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.DefaultAttachmentStorageManager;
 import io.onedev.server.storage.DefaultStorageManager;
@@ -324,20 +330,19 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(Validator.class).toProvider(ValidatorProvider.class).in(Singleton.class);
 
-		// configure markdown
-		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
-		
 		configurePersistence();
+		configureSecurity();
 		configureRestServices();
 		configureWeb();
+		configureSsh();
+		configureGit();
 		configureBuild();
 		
-		bind(GitConfig.class).toProvider(GitConfigProvider.class);
-
 		/*
 		 * Declare bindings explicitly instead of using ImplementedBy annotation as
 		 * HK2 to guice bridge can only search in explicit bindings in Guice   
 		 */
+		bind(MarkdownManager.class).to(DefaultMarkdownManager.class);		
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(SettingManager.class).to(DefaultSettingManager.class);
 		bind(DataManager.class).to(DefaultDataManager.class);
@@ -396,33 +401,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
 		bind(WebHookManager.class);
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
-		bind(KeyPairProvider.class).to(DefaultKeyPairProvider.class);
-		bind(ServerKeyPairPopulator.class).to(DefaultServerKeyPairPopulator.class);
 		
-		bind(SimpleGitSshServer.class);
-		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
-	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
-	    
-		bind(Realm.class).to(OneAuthorizingRealm.class);
-		bind(RememberMeManager.class).to(OneRememberMeManager.class);
-		bind(WebSecurityManager.class).to(OneWebSecurityManager.class);
-		bind(FilterChainResolver.class).to(OneFilterChainResolver.class);
-		bind(BasicAuthenticationFilter.class);
-		bind(PasswordService.class).to(OnePasswordService.class);
-		bind(ShiroFilter.class);
-		install(new ShiroAopModule());
-        contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
-
-            @Override
-            public void configure(FilterChainManager filterChainManager) {
-                filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic");
-                filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic");
-                filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic");
-            }
-            
-        });
-        contributeFromPackage(Authenticator.class, Authenticator.class);
-        
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
 
 			@Override
@@ -443,10 +422,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SearchManager.class).to(DefaultSearchManager.class);
 		
 		bind(EntityValidator.class).to(DefaultEntityValidator.class);
-		
-		bind(GitFilter.class);
-		bind(GitPreReceiveCallback.class);
-		bind(GitPostReceiveCallback.class);
 		
 	    bind(ExecutorService.class).toProvider(new Provider<ExecutorService>() {
 
@@ -516,6 +491,43 @@ public class CoreModule extends AbstractPluginModule {
 			}
 
 	    });
+	}
+	
+	private void configureSsh() {
+		bind(KeyPairProvider.class).to(DefaultKeyPairProvider.class);
+		bind(SshAuthenticator.class).to(DefaultSshAuthenticator.class);
+		bind(SshServerLauncher.class);
+	}
+	
+	private void configureSecurity() {
+		bind(Realm.class).to(OneAuthorizingRealm.class);
+		bind(RememberMeManager.class).to(OneRememberMeManager.class);
+		bind(WebSecurityManager.class).to(OneWebSecurityManager.class);
+		bind(FilterChainResolver.class).to(OneFilterChainResolver.class);
+		bind(BasicAuthenticationFilter.class);
+		bind(PasswordService.class).to(OnePasswordService.class);
+		bind(ShiroFilter.class);
+		install(new ShiroAopModule());
+        contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
+
+            @Override
+            public void configure(FilterChainManager filterChainManager) {
+                filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic");
+                filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic");
+                filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic");
+            }
+            
+        });
+        contributeFromPackage(Authenticator.class, Authenticator.class);
+	}
+	
+	private void configureGit() {
+		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
+		bind(GitConfig.class).toProvider(GitConfigProvider.class);
+		bind(GitFilter.class);
+		bind(GitPreReceiveCallback.class);
+		bind(GitPostReceiveCallback.class);
+		contribute(SshCommandCreator.class, GitSshCommandCreator.class);
 	}
 	
 	private void configureRestServices() {
@@ -649,6 +661,8 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configurePersistence() {
+	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
+	    
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin
 		bind(Interceptor.class).to(HibernateInterceptor.class);

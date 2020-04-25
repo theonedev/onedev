@@ -3,7 +3,6 @@ package io.onedev.server.entitymanager.impl;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -38,37 +37,17 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
     
     @Sessional
     @Override
-    public List<SshKey> loadUserKeys(User user) {
-        SimpleExpression eq = Restrictions.eq("owner", user);
-        EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
-        
-        return query(entityCriteria);
-    }
-    
-    @Sessional
-    @Override
-    public SshKey loadKeyByDigest(String digest) {
+    public SshKey findByDigest(String digest) {
         SimpleExpression eq = Restrictions.eq("digest", digest);
         EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
-        
+        entityCriteria.setCacheable(true);
         return find(entityCriteria);
-    }
-    
-    @Sessional
-    @Override
-    public boolean isKeyAlreadyInUse(String keyDigest) {
-        SimpleExpression eq = Restrictions.eq("digest", keyDigest);
-        EntityCriteria<SshKey> entityCriteria = EntityCriteria.of(SshKey.class).add(eq);
-        
-        List<SshKey> keys = query(entityCriteria);
-        
-        return keys.size() > 0;
     }
     
     @Transactional
     @Override
     public void syncUserKeys(User user, Collection<SshKey> keys) {
-		List<SshKey> currentKeys = loadUserKeys(user);
+		Collection<SshKey> currentKeys = user.getSshKeys();
 
 		Map<String, SshKey> currentKeysMap = sshPublicKeysToMap(currentKeys);
 		Map<String, SshKey> authKeysMap = sshPublicKeysToMap(keys);
@@ -80,7 +59,7 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
 		// add keys from authorization
 		diff.entriesOnlyOnRight().values().forEach((key) -> {
 			
-			if (!isKeyAlreadyInUse(key.getDigest())) {
+			if (findByDigest(key.getDigest()) != null) {
 				key.setTimestamp(LocalDateTime.now());
 				key.setOwner(user);
 				save(key);	

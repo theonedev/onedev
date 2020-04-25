@@ -22,7 +22,7 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.SshSettings;
+import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -368,7 +368,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	
 	@Sessional
     @Override
-    public SshSettings getSshSettings() {
+    public SshSetting getSshSetting() {
         Setting setting;
         if (sshSettingId == null) {
             setting = getSetting(Key.SSH);
@@ -377,18 +377,18 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
         } else {
             setting = load(sshSettingId);
         }
-        return (SshSettings)setting.getValue();
+        return (SshSetting)setting.getValue();
     }
 
     @Transactional
     @Override
-    public void saveSshSetting(SshSettings sshSettings) {
+    public void saveSshSetting(SshSetting sshSetting) {
         Setting setting = getSetting(Key.SSH);
         if (setting == null) {
             setting = new Setting();
             setting.setKey(Key.SSH);
         }
-        setting.setValue(sshSettings);
+        setting.setValue(sshSetting);
         dao.persist(setting);
     }
 

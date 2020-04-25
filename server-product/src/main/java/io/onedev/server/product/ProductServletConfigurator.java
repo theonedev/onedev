@@ -18,8 +18,8 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.server.git.GitFilter;
-import io.onedev.server.git.GitPostReceiveCallback;
-import io.onedev.server.git.GitPreReceiveCallback;
+import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
+import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
 import io.onedev.server.security.OneWebEnvironment;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.jetty.ClasspathAssetServlet;

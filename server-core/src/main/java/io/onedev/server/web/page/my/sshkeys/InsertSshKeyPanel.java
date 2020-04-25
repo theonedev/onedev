@@ -14,9 +14,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
-import io.onedev.server.git.ssh.SshKeyUtils;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
+import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -25,12 +25,10 @@ import io.onedev.server.web.editable.BeanEditor;
 public abstract class InsertSshKeyPanel extends Panel {
 
     private ModalPanel modal;
-    private User user;
-
-    public InsertSshKeyPanel(String id, ModalPanel modal, User user) {
+    
+    public InsertSshKeyPanel(String id, ModalPanel modal) {
         super(id);
         this.modal = modal;
-        this.user = user;
     }
 
     @Override
@@ -64,7 +62,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                     throw new RuntimeException(e);
                 }
                 
-                sshKey.setOwner(user);
+                sshKey.setOwner(getUser());
                 sshKey.setTimestamp(LocalDateTime.now());
                 
                 sshKeyManager.save(sshKey);
@@ -89,6 +87,8 @@ public abstract class InsertSshKeyPanel extends Panel {
         
         add(form.setOutputMarkupId(true));
     }
+    
+    protected abstract User getUser();
     
     protected abstract void onSave(AjaxRequestTarget target);
 }

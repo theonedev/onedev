@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -624,13 +623,4 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		return SimpleScheduleBuilder.repeatMinutelyForever();
 	}
 	
-	@Sessional
-    @Override
-    public boolean isUserAuthorized(Project project, Long userId, Permission permission) {
-        Collection<User> allowedUsers = SecurityUtils.getAuthorizedUsers(project, permission);
-        Optional<User> userOpt = allowedUsers.stream()
-                .filter(user -> user.getId().equals(userId)).findAny();
-        return userOpt.isPresent();
-    }
-
 }

@@ -69,7 +69,6 @@ public class DefaultServerConfig implements ServerConfig {
             sshPortStr = props.getProperty(PROP_SSHPORT);
         if (StringUtils.isNotBlank(sshPortStr))
             sshPort = Integer.parseInt(sshPortStr.trim());
-        
 		
 		String keystore = System.getenv(PROP_KEYSTORE); 
 		if (StringUtils.isBlank(keystore))

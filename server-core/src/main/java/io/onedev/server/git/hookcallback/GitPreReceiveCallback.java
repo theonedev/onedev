@@ -1,4 +1,4 @@
-package io.onedev.server.git;
+package io.onedev.server.git.hookcallback;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;

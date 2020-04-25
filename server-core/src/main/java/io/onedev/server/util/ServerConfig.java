@@ -41,7 +41,7 @@ public interface ServerConfig {
      * Get ssh port configured for the server.
      * <p> 
      * @return
-     *          ssh port of the server, or <i>0</i> if ssh port is not defined
+     *          ssh port of the server, or <i>0</i> if ssh service is disabled
      */
     int getSshPort();
 	

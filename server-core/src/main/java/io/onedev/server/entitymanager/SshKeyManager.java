@@ -1,18 +1,17 @@
 package io.onedev.server.entitymanager;
 
 import java.util.Collection;
-import java.util.List;
+
+import javax.annotation.Nullable;
+
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface SshKeyManager extends EntityManager<SshKey> {
 
-    List<SshKey> loadUserKeys(User user);
-
-    SshKey loadKeyByDigest(String digest);
-
-    boolean isKeyAlreadyInUse(String keyDigest);
+    @Nullable
+    SshKey findByDigest(String digest);
 
     void syncUserKeys(User user, Collection<SshKey> keys);
 }

@@ -111,6 +111,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings = new ArrayList<>();
     
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<SshKey> sshKeys = new ArrayList<>();
     
 	@Lob

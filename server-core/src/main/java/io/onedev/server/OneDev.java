@@ -1,6 +1,5 @@
 package io.onedev.server;
 
-import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.net.DatagramSocket;
@@ -36,7 +35,6 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.git.ssh.SimpleGitSshServer;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.PersistManager;
@@ -76,13 +74,11 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 
-    private SimpleGitSshServer simpleGitSshServer;
-	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
 			SettingManager configManager, ExecutorService executorService, 
-			ListenerRegistry listenerRegistry, SimpleGitSshServer simpleGitSshServer) {
+			ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -92,7 +88,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.serverConfig = serverConfig;
 		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
-        this.simpleGitSshServer = simpleGitSshServer;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -104,9 +99,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		System.setProperty("hsqldb.reconfig_logging", "false");
 		jettyRunner.start();
 		
-		if (Bootstrap.command == null) {
+		if (Bootstrap.command == null) 
 			taskScheduler.start();
-		}
 		
 		persistManager.start();
 		
@@ -118,10 +112,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			
 			initStage.waitForFinish();
 		}
-		
-		if (serverConfig.getSshPort() != 0) {            
-		    simpleGitSshServer.start();
-        }
 		
 		sessionManager.openSession();
 		try {
@@ -305,13 +295,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		taskScheduler.stop();
 		jettyRunner.stop();
 		executorService.shutdown();
-		
-		try {
-            simpleGitSshServer.stop();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 	}
 		
 	public Object writeReplace() throws ObjectStreamException {

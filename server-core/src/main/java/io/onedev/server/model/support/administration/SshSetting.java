@@ -1,9 +1,13 @@
 package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
+
 import javax.validation.ConstraintValidatorContext;
+
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.NotEmpty;
-import io.onedev.server.git.ssh.SshKeyUtils;
+
+import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -11,27 +15,27 @@ import io.onedev.server.web.editable.annotation.Multiline;
 
 @Editable
 @ClassValidating
-public class SshSettings implements Serializable, Validatable {
+public class SshSetting implements Serializable, Validatable {
 
-    private static final long serialVersionUID = 774556852129893390L;
+	private static final long serialVersionUID = 1L;
 
-    private String serverSshUrl;
+    private String serverUrl;
 
     private String privateKey;
-
-    @Editable(name = "Ssh URL", order = 90,
-            description = "Specify the URL to use with Git to access repositories via SSH")
-    @NotEmpty
-    public String getServerSshUrl() {
-        return serverSshUrl;
+    
+	@Editable(name="SSH Server URL", order=90, description="This property will be used as base to construct "
+			+ "urls of various ssh services such as git over ssh")
+	@NotEmpty
+    public String getServerUrl() {
+        return serverUrl;
     }
 
-    public void setServerSshUrl(String serverSshUrl) {
-        this.serverSshUrl = serverSshUrl;
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
     }
 
-    @Editable(name = "Server private Key", order = 90,
-            description = "Specify the private key (in PEM format) used by SSH server to establish connections")
+    @Editable(name="Server Private Key", order=100, description="Specify the private key (in PEM format) used "
+    		+ "by ssh server to establish connections with ssh client")
     @Multiline
     @NotEmpty
     public String getPrivateKey() {
@@ -41,15 +45,18 @@ public class SshSettings implements Serializable, Validatable {
     public void setPrivateKey(String privateKey) {
         this.privateKey = privateKey;
     }
-
+    
     @Override
     public boolean isValid(ConstraintValidatorContext context) {
+		if (serverUrl != null)
+			serverUrl = StringUtils.stripEnd(serverUrl, "/\\");
+    	
         boolean hasErrors = false;
         String propertyNode = "privateKey";
         try {
             SshKeyUtils.decodePEMPrivateKey(privateKey);
         } catch (Exception e) {
-            context.buildConstraintViolationWithTemplate("The provided key is not valid. Please check it and try again.")
+            context.buildConstraintViolationWithTemplate("The provided key is not valid. Please check and try again")
                     .addPropertyNode(propertyNode).addConstraintViolation()
                     .disableDefaultConstraintViolation();
             hasErrors = true;

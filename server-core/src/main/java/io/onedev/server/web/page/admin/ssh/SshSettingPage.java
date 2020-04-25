@@ -7,7 +7,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.SshSettings;
+import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
@@ -31,7 +31,7 @@ public class SshSettingPage extends AdministrationPage {
     protected void onInitialize() {
         super.onInitialize();
         
-        SshSettings sshSetting = OneDev.getInstance(SettingManager.class).getSshSettings();
+        SshSetting sshSetting = OneDev.getInstance(SettingManager.class).getSshSetting();
 
         Form<?> form = new Form<Void>("form") {
 

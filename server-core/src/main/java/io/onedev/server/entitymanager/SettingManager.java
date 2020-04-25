@@ -13,7 +13,7 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.SshSettings;
+import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -126,8 +126,8 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveProjectSetting(GlobalProjectSetting projectSetting);
 
-    SshSettings getSshSettings();
+    SshSetting getSshSetting();
 
-    void saveSshSetting(SshSettings sshSettings);
+    void saveSshSetting(SshSetting sshSetting);
 	
 }
