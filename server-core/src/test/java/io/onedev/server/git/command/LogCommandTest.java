@@ -11,8 +11,6 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.git.AbstractGitTest;
-import io.onedev.server.git.command.GitCommit;
-import io.onedev.server.git.command.LogCommand;
 
 public class LogCommandTest extends AbstractGitTest {
 

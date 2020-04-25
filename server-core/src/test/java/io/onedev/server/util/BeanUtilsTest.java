@@ -8,8 +8,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import io.onedev.server.util.BeanUtils;
-
 public class BeanUtilsTest {
 
 	@Test

@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import io.onedev.server.git.GitVersion;
-
 public class GitVersionTest {
 
 	@Test

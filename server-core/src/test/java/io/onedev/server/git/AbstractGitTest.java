@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.AppLoaderMocker;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.GitCommand;
 import io.onedev.server.git.config.GitConfig;
 

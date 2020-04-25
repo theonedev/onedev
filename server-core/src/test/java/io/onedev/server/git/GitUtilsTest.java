@@ -14,8 +14,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.git.GitUtils;
-
 public class GitUtilsTest extends AbstractGitTest {
 
 	@Test

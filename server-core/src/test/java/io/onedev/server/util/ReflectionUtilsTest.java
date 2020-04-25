@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import com.google.common.base.Optional;
 
-import io.onedev.server.util.ReflectionUtils;
-
 public class ReflectionUtilsTest {
 
 	private static class SuperClass<T1, T2> {}

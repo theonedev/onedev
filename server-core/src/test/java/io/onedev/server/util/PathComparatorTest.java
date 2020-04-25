@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import io.onedev.server.util.PathComparator;
-
 public class PathComparatorTest {
 
 	@Test

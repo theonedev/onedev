@@ -16,6 +16,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
@@ -167,7 +169,12 @@ public class PropertyDescriptor implements Serializable {
 	}
 	
 	public String getDescription() {
-		return EditableUtils.getDescription(getPropertyGetter());
+		String description = EditableUtils.getDescription(getPropertyGetter());
+		if (description != null) {
+			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
+		} else {
+			return null;
+		}
 	}
 
 }

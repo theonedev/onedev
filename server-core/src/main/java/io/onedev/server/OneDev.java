@@ -13,14 +13,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -41,6 +44,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.Version;
 import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.jetty.JettyRunner;
@@ -315,7 +319,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}	
 	
 	public String getDocRoot() {
-		return "https://code.onedev.io/projects/onedev-manual/blob/master";
+		Version version = new Version(AppLoader.getProduct().getVersion());
+		return "https://code.onedev.io/projects/onedev-manual/blob/" + version.getMajor() + "." + version.getMinor();
 	}
 	
 }

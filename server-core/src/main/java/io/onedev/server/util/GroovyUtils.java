@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +29,12 @@ public class GroovyUtils {
     public static Class<?> compile(String script) {
 		Class<?> scriptClass = scriptClassCache.get(script);
 		if (scriptClass == null) {
-			scriptClass = new GroovyClassLoader(GroovyUtils.class.getClassLoader()).parseClass(script);
-			scriptClassCache.put(script, scriptClass);
+			try (GroovyClassLoader classLoader = new GroovyClassLoader(GroovyUtils.class.getClassLoader())) {
+				scriptClass = classLoader.parseClass(script);
+				scriptClassCache.put(script, scriptClass);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		} 
 		return scriptClass;
     }
