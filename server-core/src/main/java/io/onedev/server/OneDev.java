@@ -305,8 +305,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		try {
             simpleGitSshServer.stop();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("An error occured while stopping Git server.", e);
         }
 	}
 		
