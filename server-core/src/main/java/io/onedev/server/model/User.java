@@ -42,9 +42,11 @@ import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
+import static io.onedev.server.model.User.*;
 
 @Entity
-@Table(indexes={@Index(columnList="email"), @Index(columnList="fullName")})
+@Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_EMAIL), 
+		@Index(columnList=PROP_FULL_NAME)})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
@@ -56,6 +58,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public static final Long ROOT_ID = 1L;
 	
 	public static final String EXTERNAL_MANAGED = "external_managed";
+	
+	public static final String PROP_NAME = "name";
+	
+	public static final String PROP_EMAIL = "email";
+	
+	public static final String PROP_FULL_NAME = "fullName";
 	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
