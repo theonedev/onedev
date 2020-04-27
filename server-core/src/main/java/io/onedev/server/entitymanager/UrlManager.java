@@ -37,6 +37,8 @@ public interface UrlManager {
 
 	String urlFor(CodeCommentReply reply, @Nullable PullRequest request);
 
-    String sshUrlFor(Project project);
+    String sshCloneUrlFor(Project project);
 	
+    String httpCloneUrlFor(Project project);
+    
 }

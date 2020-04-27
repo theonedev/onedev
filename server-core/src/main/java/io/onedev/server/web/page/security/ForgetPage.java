@@ -51,8 +51,8 @@ public class ForgetPage extends BasePage {
 				if (user == null) {
 					throw new OneException("No user found with name or email: " + bean.getUserNameOrEmailAddress());
 				} else {
-					SettingManager configManager = OneDev.getInstance(SettingManager.class);
-					if (configManager.getMailSetting() != null) {
+					SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+					if (settingManager.getMailSetting() != null) {
 						String password = RandomStringUtils.random(10, true, true);								
 						user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 						userManager.save(user);
@@ -67,7 +67,7 @@ public class ForgetPage extends BasePage {
 							+ "-- Sent by OneDev", 
 							user.getDisplayName(), user.getName(), password);
 
-						mailManager.sendMail(configManager.getMailSetting(), Arrays.asList(user.getEmail()), 
+						mailManager.sendMail(settingManager.getMailSetting(), Arrays.asList(user.getEmail()), 
 								"Your OneDev password has been reset", mailBody);
 						return "Please check your email " + user.getEmail() + " for the reset password";
 					} else {

@@ -31,8 +31,8 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.ErrorCollector;
+import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -96,15 +96,9 @@ public class GitFilter implements Filter {
 	
 	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
-		projectInfo = StringUtils.stripStart(StringUtils.stripEnd(projectInfo, "/"), "/");
-
-		if (StringUtils.isBlank(projectInfo) || !projectInfo.startsWith("projects/")) {
-			String url = request.getRequestURL().toString();
-			String urlRoot = url.substring(0, url.length()-getPathInfo(request).length());
-			throw new GitException(String.format("Expecting url of format %sprojects/<project name>", urlRoot));
-		} 
-		
-		String projectName = StringUtils.substringAfter(projectInfo, "/");
+		String projectName = StringUtils.strip(projectInfo, "/");
+		if (projectName.contains("/"))
+			projectName = StringUtils.substringAfterLast(projectName, "/");
 		
 		Project project = projectManager.find(projectName);
 		if (project == null) 

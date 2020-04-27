@@ -60,7 +60,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private final SessionManager sessionManager;
 	
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
 	
 	private final DataManager dataManager;
 			
@@ -77,13 +77,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
-			SettingManager configManager, ExecutorService executorService, 
+			SettingManager settingManager, ExecutorService executorService, 
 			ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
-		this.configManager = configManager;
+		this.settingManager = settingManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
 		this.executorService = executorService;
@@ -127,7 +127,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		SecurityUtils.bindAsSystem();
 		
 		listenerRegistry.post(new SystemStarted());
-		SystemSetting systemSetting = configManager.getSystemSetting();
+		SystemSetting systemSetting = settingManager.getSystemSetting();
         logger.info("Server is ready at " + systemSetting.getServerUrl() + ".");
 		initStage = null;
 	}

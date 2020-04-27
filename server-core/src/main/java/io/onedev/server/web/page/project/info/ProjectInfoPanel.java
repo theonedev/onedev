@@ -73,7 +73,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canCreateProjects() &&  canReadCode));
+		}.setVisible(SecurityUtils.canCreateProjects() && canReadCode));
 		
 		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
 				+ Criteria.quote(getProject().getName());
@@ -112,7 +112,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
 		
-		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getProject()));
+		Model<String> cloneUrlModel = Model.of(urlManager.httpCloneUrlFor(getProject()));
 		add(new TextField<String>("cloneUrl", cloneUrlModel)
 				.setVisible(canReadCode));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
@@ -121,7 +121,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		boolean userHasNoKeys = loggedInUser.getSshKeys().isEmpty();
 		boolean isSshEnabled = ((BasePage)getPage()).isSshEnabled();
 		
-		Model<String> cloneSshUrlModel = Model.of(urlManager.sshUrlFor(getProject()));
+		Model<String> cloneSshUrlModel = Model.of(urlManager.sshCloneUrlFor(getProject()));
 		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
 		        .setVisible(isSshEnabled && canReadCode));
 		add(new WebMarkupContainer("copySshUrl").add(new CopyClipboardBehavior(cloneSshUrlModel)));

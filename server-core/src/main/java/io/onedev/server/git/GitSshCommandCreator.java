@@ -167,7 +167,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
     			String projectName = StringUtils.stripEnd(StringUtils.substringAfterLast(command, "/"), "'");   
                 Project project = projectManager.find(projectName);
                 if (project == null) {
-                    onExit(-1, "Project '" + projectName + "' not found!");
+                    onExit(-1, "Unable to find project " + projectName);
                     return;
                 } 
                 

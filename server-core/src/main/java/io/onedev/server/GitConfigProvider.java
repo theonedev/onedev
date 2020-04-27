@@ -10,16 +10,16 @@ import io.onedev.server.git.config.GitConfig;
 @Singleton
 public class GitConfigProvider implements Provider<GitConfig> {
 
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
 	
 	@Inject
-	public GitConfigProvider(SettingManager configManager) {
-		this.configManager = configManager;
+	public GitConfigProvider(SettingManager settingManager) {
+		this.settingManager = settingManager;
 	}
 	
 	@Override
 	public GitConfig get() {
-		return configManager.getSystemSetting().getGitConfig();
+		return settingManager.getSystemSetting().getGitConfig();
 	}
 
 }

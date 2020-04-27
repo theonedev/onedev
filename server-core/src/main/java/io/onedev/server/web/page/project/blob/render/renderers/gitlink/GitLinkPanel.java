@@ -29,8 +29,8 @@ public class GitLinkPanel extends BlobViewPanel {
 		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		Submodule submodule = Submodule.fromString(blob.getText().getContent()); 
 		WebMarkupContainer link;
-		SettingManager configManager = OneDev.getInstance(SettingManager.class);
-		if (submodule.getUrl().startsWith(configManager.getSystemSetting().getServerUrl() + "/")) {
+		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+		if (submodule.getUrl().startsWith(settingManager.getSystemSetting().getServerUrl() + "/")) {
 			link = new WebMarkupContainer("link");
 			link.add(AttributeModifier.replace("href", submodule.getUrl() + "/blob/" + submodule.getCommitId()));
 		} else {

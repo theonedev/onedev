@@ -31,21 +31,26 @@ import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequest
 @Singleton
 public class DefaultUrlManager implements UrlManager {
 
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
 	
 	@Inject
-	public DefaultUrlManager(SettingManager configManager) {
-		this.configManager = configManager;
+	public DefaultUrlManager(SettingManager settingManager) {
+		this.settingManager = settingManager;
 	}
 	
 	@Override
 	public String urlFor(Project project) {
-		return configManager.getSystemSetting().getServerUrl() + "/projects/" + project.getName();
+		return settingManager.getSystemSetting().getServerUrl() + "/projects/" + project.getName();
 	}
 
 	@Override
-	public String sshUrlFor(Project project) {
-	    return configManager.getSshSetting().getServerUrl() + "/" + project.getName();
+	public String sshCloneUrlFor(Project project) {
+	    return settingManager.getSshSetting().getServerUrl() + "/" + project.getName();
+	}
+	
+	@Override
+	public String httpCloneUrlFor(Project project) {
+		return settingManager.getSystemSetting().getServerUrl() + "/" + project.getName();
 	}
 	
 	@Override
