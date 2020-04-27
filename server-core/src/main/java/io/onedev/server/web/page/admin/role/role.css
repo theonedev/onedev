@@ -1,6 +1,6 @@
-.role>form>.manager-note, .role>form.manager .help-block {
+#role>form>.manager-note, #role>form.manager .help-block {
 	display: none;
 }
-.role>form.manager>.manager-note {
+#role>form.manager>.manager-note {
 	display: block;
 }

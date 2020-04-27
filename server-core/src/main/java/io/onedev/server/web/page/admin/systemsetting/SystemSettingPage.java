@@ -33,7 +33,7 @@ public class SystemSettingPage extends AdministrationPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				OneDev.getInstance(SettingManager.class).saveSystemSetting(systemSetting);
-				getSession().success("System setting has been updated");
+				getSession().success("System setting has been saved");
 				
 				setResponsePage(SystemSettingPage.class);
 			}

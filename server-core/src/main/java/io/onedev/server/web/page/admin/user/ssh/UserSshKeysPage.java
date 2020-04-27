@@ -18,9 +18,9 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.authenticator.ldap.LdapAuthenticator;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.sshkey.InsertSshKeyPanel;
+import io.onedev.server.web.component.user.sshkey.SshKeyListPanel;
 import io.onedev.server.web.page.admin.user.UserPage;
-import io.onedev.server.web.page.my.sshkeys.InsertSshKeyPanel;
-import io.onedev.server.web.page.my.sshkeys.SshKeysListPanel;
 
 @SuppressWarnings("serial")
 public class UserSshKeysPage extends UserPage {
@@ -47,23 +47,30 @@ public class UserSshKeysPage extends UserPage {
             
         };
 
-        SshKeysListPanel keyList = new SshKeysListPanel("keyList", detachableModel);
+        SshKeyListPanel keyList = new SshKeyListPanel("keyList", detachableModel);
         
         add(new ModalLink("newKey") {
             
             @Override
             protected Component newContent(String id, ModalPanel modal) {
-                return new InsertSshKeyPanel(id, modal) {
-
-                    @Override
-                    protected void onSave(AjaxRequestTarget target) {
-                        target.add(keyList);
-                    }
+                return new InsertSshKeyPanel(id) {
 
 					@Override
 					protected User getUser() {
 						return UserSshKeysPage.this.getUser();
 					}
+
+                    @Override
+                    protected void onSave(AjaxRequestTarget target) {
+                        target.add(keyList);
+                        modal.close();
+                    }
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
 				};
             }
             
@@ -102,7 +109,7 @@ public class UserSshKeysPage extends UserPage {
     		return true;
     	}
     	
-    	if (((LdapAuthenticator) auth).getUserSSHPublicKey() != null) {
+    	if (((LdapAuthenticator) auth).getUserSshKeyAttribute() != null) {
     		return false;
     	}
     	

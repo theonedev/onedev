@@ -35,7 +35,7 @@ public class SshSetting implements Serializable, Validatable {
     }
 
     @Editable(name="Server Private Key", order=100, description="Specify the private key (in PEM format) used "
-    		+ "by ssh server to establish connections with ssh client")
+    		+ "by ssh server to establish connections with client")
     @Multiline
     @NotEmpty
     public String getPrivateKey() {

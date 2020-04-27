@@ -62,7 +62,7 @@ public class LdapAuthenticator extends Authenticator {
     
     private String userEmailAttribute = "mail";
     
-    private String userSSHPublicKey;
+    private String userSshKeyAttribute;
     
     private GroupRetrieval groupRetrieval = new DoNotRetrieveGroups();
     
@@ -152,12 +152,12 @@ public class LdapAuthenticator extends Authenticator {
 	@Editable(order=850, description=""
 			+ "Specifies name of the attributes inside the user LDAP entry whose values will be taken as user "
 			+ "SSH public keys. If this field is set SSH public keys are managed by LDAP only")
-	public String getUserSSHPublicKey() {
-		return userSSHPublicKey;
+	public String getUserSshKeyAttribute() {
+		return userSshKeyAttribute;
 	}
 
-	public void setUserSSHPublicKey(String userSSHPublicKey) {
-		this.userSSHPublicKey = userSSHPublicKey;
+	public void setUserSshKeyAttribute(String userSshKeyAttribute) {
+		this.userSshKeyAttribute = userSshKeyAttribute;
 	}
 
 	@Editable(order=900, description="Specify the strategy to retrieve group membership information. "
@@ -195,7 +195,7 @@ public class LdapAuthenticator extends Authenticator {
         if (getUserFullNameAttribute() != null)
             attributeNames.add(getUserFullNameAttribute());
         
-        String userSSHPublicKey = getUserSSHPublicKey();
+        String userSSHPublicKey = getUserSshKeyAttribute();
         
         if (userSSHPublicKey != null)
         	attributeNames.add(userSSHPublicKey);
@@ -399,7 +399,7 @@ public class LdapAuthenticator extends Authenticator {
 	private Collection<SshKey> retrieveSSHPublicKeys(Attributes searchResultAttributes) throws NamingException, IOException, GeneralSecurityException {
 		Collection<SshKey> sshKeys = new ArrayList<SshKey>();
 		
-		Attribute attributeValue = searchResultAttributes.get(getUserSSHPublicKey());
+		Attribute attributeValue = searchResultAttributes.get(getUserSshKeyAttribute());
 		
 		if (attributeValue == null) {
 			// no values for the user stored in LDAP
@@ -416,7 +416,7 @@ public class LdapAuthenticator extends Authenticator {
 				String content = (String) value;
 				
 				try {
-					SshKey sshKey = parseSSHPublicKey(keyIndex, content);
+					SshKey sshKey = parseSshPublicKey(keyIndex, content);
 					sshKeys.add(sshKey);
 				} catch (Exception err) {
 					logger.warn("Error parsing SSH public key", err);
@@ -432,7 +432,7 @@ public class LdapAuthenticator extends Authenticator {
 		return sshKeys;
 	}
 
-	private SshKey parseSSHPublicKey(int keyIndex, String content) throws IOException, GeneralSecurityException {
+	private SshKey parseSshPublicKey(int keyIndex, String content) throws IOException, GeneralSecurityException {
 		PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
         String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
 		
@@ -448,6 +448,16 @@ public class LdapAuthenticator extends Authenticator {
         }
 
         return sshKey;
+	}
+
+	@Override
+	public boolean isManagingMemberships() {
+		return !(groupRetrieval instanceof DoNotRetrieveGroups);
+	}
+
+	@Override
+	public boolean isManagingSshKeys() {
+		return userSshKeyAttribute != null;
 	}
 	
 }

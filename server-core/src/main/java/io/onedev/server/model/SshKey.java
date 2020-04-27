@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
-import java.security.PublicKey;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,11 +13,8 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.sshd.common.config.keys.KeyUtils;
-import org.apache.wicket.util.string.Strings;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -26,7 +22,6 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 
 @Editable
-@ClassValidating
 @Entity
 @Table(
 		indexes={@Index(columnList="o_owner_id"), @Index(columnList="name"), @Index(columnList="digest")},
@@ -34,6 +29,7 @@ import io.onedev.server.web.editable.annotation.Multiline;
 				@UniqueConstraint(columnNames={"o_owner_id", "name"}), 
 				@UniqueConstraint(columnNames={"digest"})}
 )
+@ClassValidating
 public class SshKey extends AbstractEntity implements Validatable {
     
     private static final long serialVersionUID = 1L;
@@ -48,13 +44,13 @@ public class SshKey extends AbstractEntity implements Validatable {
     private String digest;
     
     @Column(nullable=false)
-    private LocalDateTime timestamp;
+    private Date createdAt;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(nullable=false)
     private User owner;
 
-    @Editable(name = "Name")
+    @Editable(description="Specify a name to identify the key")
     @NotEmpty
     public String getName() {
         return name;
@@ -64,7 +60,8 @@ public class SshKey extends AbstractEntity implements Validatable {
         this.name = name;
     }
 
-    @Editable(name = "Key Value")
+    @Editable(name = "Key", description="Provide a SSH public key. Begins with 'ssh-rsa', 'ssh-ed25519', "
+    		+ "'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', or 'ecdsa-sha2-nistp521'")
     @NotEmpty
     @Multiline
     public String getContent() {
@@ -91,47 +88,29 @@ public class SshKey extends AbstractEntity implements Validatable {
         this.owner = owner;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setDate(Date createdAt) {
+        this.createdAt = createdAt;
     }
+    
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (content == null) {
+			return true;
+		} else {
+	        try {
+	            KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, SshKeyUtils.decodeSshPublicKey(content));
+	            return true;
+	        } catch (Exception exception) {
+				context.disableDefaultConstraintViolation();
+				context.buildConstraintViolationWithTemplate("Invalid SSH public key")
+						.addPropertyNode("content").addConstraintViolation();
+				return false;
+	        } 
+		}
+	}
 
-    @Override
-    public boolean isValid(ConstraintValidatorContext context) {
-        String propertyNode = "content";
-        boolean hasErrors = false;
-        String errorMessage = "";
-        
-        if (Strings.isEmpty(content)) {
-            return false;
-        }
-        
-        try {
-            SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-            PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-            String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
-            
-            boolean alreadyInUse = sshKeyManager.findByDigest(fingerPrint) != null;
-            
-            if (alreadyInUse) {
-                errorMessage = "The provided key is already in use. Please use another one.";
-                hasErrors  = true;
-            } 
-            
-        } catch (Exception exception) {
-            errorMessage = "The value provided as key is invalid. Please checkit and try again.";
-            hasErrors = true;
-        } 
-        
-        if (hasErrors) {            
-            context.buildConstraintViolationWithTemplate(errorMessage)
-                .addPropertyNode(propertyNode).addConstraintViolation()
-                .disableDefaultConstraintViolation();
-            return false;
-        }
-        return true;
-    }
 }

@@ -1,14 +1,16 @@
-package io.onedev.server.web.page.my.sshkeys;
+package io.onedev.server.web.component.user.sshkey;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
@@ -17,18 +19,17 @@ import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.ssh.SshKeyUtils;
-import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
 public abstract class InsertSshKeyPanel extends Panel {
 
-    private ModalPanel modal;
-    
-    public InsertSshKeyPanel(String id, ModalPanel modal) {
+    public InsertSshKeyPanel(String id) {
         super(id);
-        this.modal = modal;
     }
 
     @Override
@@ -39,18 +40,22 @@ public abstract class InsertSshKeyPanel extends Panel {
 
             @Override
             public void onClick(AjaxRequestTarget target) {
-              modal.close();
+            	onCancel(target);
             }
+            
         });
         
         Form<?> form = new Form<Void>("form");
         
         BeanEditor editor = BeanContext.edit("editor", new SshKey());
         form.add(editor);
-        form.add(new AjaxSubmitLink("add") {
+        
+        form.add(new AjaxButton("add") {
+        	
             @Override
             protected void onSubmit(AjaxRequestTarget target, Form<?> myform) {
                 super.onSubmit(target, myform);
+                
                 SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
                 SshKey sshKey = (SshKey) editor.getModelObject();
                 
@@ -62,13 +67,24 @@ public abstract class InsertSshKeyPanel extends Panel {
                     throw new RuntimeException(e);
                 }
                 
-                sshKey.setOwner(getUser());
-                sshKey.setTimestamp(LocalDateTime.now());
-                
-                sshKeyManager.save(sshKey);
-                
-                modal.close();
-                onSave(target);
+                if (getUser().getSshKeys().stream().anyMatch(it->it.getName().equals(sshKey.getName()))) {
+                	String message;
+                	if (SecurityUtils.getUser().equals(getUser()))
+                		message = "You have another key with the same name";
+                	else
+                		message = "This name is already used by another key of user '" + getUser().getDisplayName() + "'";
+					editor.error(new Path(new PathNode.Named("name")), message);
+					target.add(form);
+                } else if (sshKeyManager.findByDigest(sshKey.getDigest()) != null) {
+					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");
+					target.add(form);
+                } else {
+                    sshKey.setOwner(getUser());
+                    sshKey.setDate(new Date());
+                    sshKeyManager.save(sshKey);
+                    getUser().getSshKeys().add(sshKey);
+                    onSave(target);
+                }
             }
             
             @Override
@@ -76,13 +92,16 @@ public abstract class InsertSshKeyPanel extends Panel {
                 super.onError(target, form);
                 target.add(form);
             }
+            
         });
         
         form.add(new AjaxLink<Void>("cancel") {
-            @Override
+            
+        	@Override
             public void onClick(AjaxRequestTarget target) {
-                modal.close();
+        		onCancel(target);
             }
+            
         });
         
         add(form.setOutputMarkupId(true));
@@ -91,4 +110,13 @@ public abstract class InsertSshKeyPanel extends Panel {
     protected abstract User getUser();
     
     protected abstract void onSave(AjaxRequestTarget target);
+    
+    protected abstract void onCancel(AjaxRequestTarget target);
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new SshKeyCssResourceReference()));
+	}
+    
 }

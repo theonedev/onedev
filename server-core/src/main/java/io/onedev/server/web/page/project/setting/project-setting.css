@@ -43,19 +43,7 @@ body.BranchProtectionsPage, body.TagProtectionsPage, body.WebHooksPage {
 	margin-right: 0;
 }
 
-#project-setting .commit-message-transform>label {
-	float: left;
-	margin-right: 4px;
-}
-#project-setting .commit-message-transform>.help-block {
-	margin-top: 20px;
-}
-#project-setting .authorization.list a.other-sources {
-	margin-left: 4px;
-	color: #DCB508;
-	vertical-align: middle;
-}
-#project-setting .authorization.list .head .select2-container {
+#project-setting .authorization-list .head .select2-container {
 	width: 240px;
 } 
 #project-setting .avatar-edit .title {
@@ -79,18 +67,18 @@ body.BranchProtectionsPage, body.TagProtectionsPage, body.WebHooksPage {
 #project-setting .avatar-edit form>button {
 	margin-top: 20px;
 }
-#project-setting .authorization.list .select2-container,
-#project-setting .authorization.list .property-roleName .select2-container {
+#project-setting .authorization-list .select2-container,
+#project-setting .authorization-list .property-roleName .select2-container {
 	width: 360px;
 } 
 
-#project-setting .web-hooks table thead th {
+#project-setting .web-hook-list table thead th {
 	font-weight: bold !important;
 }
-#project-setting .web-hooks table thead th.property-eventTypes {
+#project-setting .web-hook-list table thead th.property-eventTypes {
 	width: 25%;
 }
-#project-setting .web-hooks table .select2-container {
+#project-setting .web-hook-list table .select2-container {
     width: 100%;
 }
 

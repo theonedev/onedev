@@ -19,7 +19,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.administration.SecuritySetting;
-import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -58,12 +57,6 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 					protection.onRenameGroup(oldName, group.getName());
 			}
 			
-			Authenticator authenticator = settingManager.getAuthenticator();
-			if (authenticator != null) {
-				authenticator.onRenameGroup(oldName, group.getName());
-				settingManager.saveAuthenticator(authenticator);
-			}
-			
 			issueFieldManager.onRenameGroup(oldName, group.getName());
 			settingManager.getIssueSetting().onRenameGroup(oldName, group.getName());
 			settingManager.getSecuritySetting().onRenameGroup(oldName, group.getName());
@@ -87,10 +80,6 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 
 		usage.add(settingManager.getIssueSetting().onDeleteGroup(group.getName()).prefix("administration"));
 
-		Authenticator authenticator = settingManager.getAuthenticator();
-		if (authenticator != null)
-			usage.add(authenticator.onDeleteGroup(group.getName()).prefix("administration"));
-		
 		usage.add(settingManager.getSecuritySetting().onDeleteGroup(group.getName()).prefix("administration"));
 		
 		usage.checkInUse("Group '" + group.getName() + "'");

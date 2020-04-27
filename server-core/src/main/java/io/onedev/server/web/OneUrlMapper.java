@@ -33,6 +33,7 @@ import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
+import io.onedev.server.web.page.admin.ssh.SshSettingPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
@@ -41,12 +42,14 @@ import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
+import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -120,6 +123,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("my/profile", MyProfilePage.class));
 		add(new OnePageMapper("my/avatar", MyAvatarPage.class));
 		add(new OnePageMapper("my/password", MyPasswordPage.class));
+		add(new OnePageMapper("my/ssh-keys", MySshKeysPage.class));
 	}
 
 	private void addResources() {
@@ -149,6 +153,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/users/${user}/authorizations", UserAuthorizationsPage.class));
 		add(new OnePageMapper("administration/users/${user}/avatar", UserAvatarPage.class));
 		add(new OnePageMapper("administration/users/${user}/password", UserPasswordPage.class));
+		add(new OnePageMapper("administration/users/${user}/ssh-keys", UserSshKeysPage.class));
 		
 		add(new OnePageMapper("administration/roles", RoleListPage.class));
 		add(new OnePageMapper("administration/roles/new", NewRolePage.class));
@@ -167,6 +172,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/backup", DatabaseBackupPage.class));
 		add(new OnePageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
+		add(new OnePageMapper("administration/settings/ssh", SshSettingPage.class));
 
 		add(new OnePageMapper("administration/settings/job-executors", JobExecutorsPage.class));
 		add(new OnePageMapper("administration/settings/groovy-scripts", GroovyScriptListPage.class));

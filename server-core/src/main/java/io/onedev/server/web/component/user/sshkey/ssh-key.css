@@ -1,0 +1,10 @@
+@media(max-width: 767px) {
+	.ssh-key-list .expanded {
+		display: none;
+	}
+}
+
+.insert-ssh-key textarea {
+	font-family: monospace;
+	height: 200px !important;
+}

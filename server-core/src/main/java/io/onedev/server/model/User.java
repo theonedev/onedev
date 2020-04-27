@@ -29,8 +29,11 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -511,5 +514,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public void setSshKeys(Collection<SshKey> sshKeys) {
         this.sshKeys = sshKeys;
     }
-	
+
+    public boolean isSshKeyExternalManaged() {
+    	if (isExternalManaged()) {
+    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
+    		return authenticator != null && authenticator.isManagingSshKeys();
+    	} else {
+    		return false;
+    	}
+    }
 }

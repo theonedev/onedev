@@ -1,18 +1,16 @@
 <wicket:panel>
-	<div class="confirm">
+	<div class="insert-ssh-key">
 		<div class="modal-header">
 			<button wicket:id="close" type="button" class="close">&times;</button>
-			<h4 class="modal-title">Add a ssh key</h4>
+			<h4 class="modal-title">Add a SSH key</h4>
 		</div>
 		<form wicket:id="form">
 			<div class="modal-body">
 				<div wicket:id="editor"></div>
 			</div>
 			<div class="modal-footer">
-				<input wicket:id="add" type="submit" class="btn btn-primary"
-					value="Add">
-				<button wicket:id="cancel" type="button" class="btn btn-default"
-					data-dismiss="modal">Cancel</button>
+				<input wicket:id="add" type="submit" class="btn btn-primary dirty-aware" value="Add">
+				<button wicket:id="cancel" type="button" class="btn btn-default">Cancel</button>
 			</div>
 		</form>
 	</div>

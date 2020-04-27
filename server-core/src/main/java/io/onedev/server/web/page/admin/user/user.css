@@ -5,7 +5,7 @@
 	#user>.sidebar+.content {
 		padding-left: 0;
 	}	
-	.user.list .expanded {
+	.user-list.list .expanded {
 		display: none;
 	}
 }
@@ -47,15 +47,15 @@
 	left: 44px;
 }
 
-#user .membership.list .head .select2-container,
-#user .authorization.list .select2-container {
+#user .membership-list .head .select2-container,
+#user .authorization-list .select2-container {
 	width: 240px;
 } 
-#user .authorization.list .property-roleNames .select2-container {
+#user .authorization-list .property-roleNames .select2-container {
 	width: 360px;
 } 
 
-.user.list .checkbox {
+.user-list.list .checkbox {
 	margin: 0;
 }
 .new-user .actions .btn {

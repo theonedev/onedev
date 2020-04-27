@@ -1,7 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
 		diff.entriesOnlyOnRight().values().forEach((key) -> {
 			
 			if (findByDigest(key.getDigest()) != null) {
-				key.setTimestamp(LocalDateTime.now());
+				key.setDate(new Date());
 				key.setOwner(user);
 				save(key);	
 			} else {

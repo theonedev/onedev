@@ -218,7 +218,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	    				Collection<String> existingGroupNames = new HashSet<>();
 	    				for (Membership membership: user.getMemberships()) 
 	    					existingGroupNames.add(membership.getGroup().getName());
-	    				if (!authenticated.getGroupNames().isEmpty()) {
+	    				if (authenticated.getGroupNames() != null) {
 	    					Collection<String> retrievedGroupNames = new HashSet<>();
 	    					for (String groupName: authenticated.getGroupNames()) {
 	    						Group group = groupManager.find(groupName);
@@ -253,19 +253,6 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	    				if (authenticated.getFullName() != null)
 	    					user.setFullName(authenticated.getFullName());
 	    				userManager.save(user);
-	    				if (authenticated.getGroupNames().isEmpty() && authenticator.getDefaultGroup() != null) {
-    						Group group = groupManager.find(authenticator.getDefaultGroup());
-    						if (group != null) {
-    							Membership membership = new Membership();
-    							membership.setGroup(group);
-    							membership.setUser(user);
-    							user.getMemberships().add(membership);
-    							membershipManager.save(membership);
-    						} else {
-    							logger.error("Default group '{}' of external authenticator is not defined", 
-    									authenticator.getDefaultGroup());
-    						}
-	    				}
 	    			}
 	    			
 			    	if (authenticated.getSSHPublicKeys() != null) {

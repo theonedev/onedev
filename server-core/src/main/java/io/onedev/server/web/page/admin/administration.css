@@ -48,3 +48,7 @@
 	margin-right: 8px;
 }
 
+#ssh-setting textarea {
+	height: 300px;
+	font-family: monospace;
+}
