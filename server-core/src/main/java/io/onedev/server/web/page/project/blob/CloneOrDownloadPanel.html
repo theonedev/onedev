@@ -1,0 +1,28 @@
+<wicket:panel>
+	<div class="clone-or-download">
+		<div class="clone">
+			<div class="protocol clearfix">
+				<div wicket:id="currentCloneProtocol" class="pull-left"></div>
+				<a wicket:id="switchCloneProtocol" class="switch pull-right"><span wicket:id="label"></span></a>
+			</div>
+			<div wicket:id="noSshKeysWarning" class="no-ssh-keys alert alert-warning">
+				No SSH keys specified in your account. You may <a wicket:id="sshKeys">add a key</a> or 
+				clone the project via <a wicket:id="useHttp">HTTP(S)</a>
+			</div>
+			<div class="url">
+				<div class="input-group">
+					<input wicket:id="cloneUrl" readonly="readonly" class="form-control"> 
+					<a wicket:id="copyCloneUrl" class="input-group-addon"><i class="fa fa-clipboard"></i></a>
+				</div>
+			</div>
+		</div>
+		<div class="download">
+			<div>
+				<a wicket:id="downloadAsZip" class="btn btn-block btn-primary">Download zip</a>
+			</div>
+			<div>
+				<a wicket:id="downloadAsTgz" class="btn btn-block btn-primary">Download tar.gz</a>
+			</div>
+		</div>
+	</div>
+</wicket:panel>

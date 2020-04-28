@@ -69,7 +69,6 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -77,6 +76,7 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
@@ -499,7 +499,7 @@ public abstract class BuildListPanel extends Panel {
 					Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 					fragment.add(hashLink);
 					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(build.getCommitHash())));
-					fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(build.getCommitHash()))));
+					fragment.add(new CopyToClipboardLink("copyHash", Model.of(build.getCommitHash())));
 					cellItem.add(fragment);
 				} else {
 					cellItem.add(new Label(componentId, GitUtils.abbreviateSHA(build.getCommitHash())));

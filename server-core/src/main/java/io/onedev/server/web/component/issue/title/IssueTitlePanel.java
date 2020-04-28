@@ -41,7 +41,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.util.ReferenceTransformer;
 
@@ -144,7 +144,7 @@ public abstract class IssueTitlePanel extends Panel {
 			
 		});
 		String copyContent = "#" + getIssue().getNumber() + ": " + getIssue().getTitle();
-		titleViewer.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of(copyContent))));
+		titleViewer.add(new CopyToClipboardLink("copy", Model.of(copyContent)));
 		
 		if (withIssueCreation) {
 			titleViewer.add(new BookmarkablePageLink<Void>("create", NewIssuePage.class) {

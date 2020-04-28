@@ -3,11 +3,14 @@ package io.onedev.server.product;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.internal.guava.Preconditions;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneException;
@@ -62,13 +65,15 @@ public class DefaultServerConfig implements ServerConfig {
 			httpsPort = Integer.parseInt(httpsPortStr.trim());
 		
 		if (httpPort == 0 && httpsPort == 0)
-			throw new RuntimeException("Either " + PROP_HTTPPORT + " or " + PROP_HTTPSPORT + " or both should be enabled");
+			throw new OneException("Either " + PROP_HTTPPORT + " or " + PROP_HTTPSPORT + " or both should be enabled");
 		
 		String sshPortStr = System.getenv(PROP_SSHPORT);
         if (StringUtils.isBlank(sshPortStr))
             sshPortStr = props.getProperty(PROP_SSHPORT);
         if (StringUtils.isNotBlank(sshPortStr))
             sshPort = Integer.parseInt(sshPortStr.trim());
+        else
+        	throw new OneException(PROP_SSHPORT + " should be specified");
 		
 		String keystore = System.getenv(PROP_KEYSTORE); 
 		if (StringUtils.isBlank(keystore))
@@ -122,7 +127,7 @@ public class DefaultServerConfig implements ServerConfig {
 		if (StringUtils.isNotBlank(sessionTimeoutStr))
 			sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
 		else
-			throw new RuntimeException(PROP_SESSION_TIMEOUT + " should be specified");
+			throw new OneException(PROP_SESSION_TIMEOUT + " should be specified");
 	}
 	
 	@Override

@@ -1,59 +1,15 @@
 <wicket:panel>
 	<div class="project-info" id="project-info">
-		<div class="head clearfix">
-			<div wicket:id="name" class="name pull-left"></div>
-			<div class="pull-right">
-				<a wicket:id="forks" class="forks"><span wicket:id="label"></span></a>
-				<a wicket:id="forkNow" class="fork-now">fork now</a>
-			</div>
-		</div>
-
+		<div wicket:id="name" class="name"></div>
 		<wicket:enclosure child="forkedFrom">
 			<div class="forked-from">
 				forked from <a wicket:id="forkedFrom"><span wicket:id="label"></span></a>
 			</div>
 		</wicket:enclosure>
-
+		<div class="forks">
+			<a wicket:id="forks" class="forks"><span wicket:id="label"></span></a>
+			<a wicket:id="forkNow" class="fork-now">fork now</a>
+		</div>
 		<div wicket:id="description" class="description"></div>
-
-		<wicket:enclosure child="cloneUrl">
-			<div class="clone form-inline">
-				<div class="input-group">
-					<div class="input-group-addon">
-						<b>Clone</b>
-					</div>
-					<input wicket:id="cloneUrl" readonly="readonly"
-						class="form-control" /> <a wicket:id="copyUrl"
-						class="input-group-addon"><i class="fa fa-clipboard"></i></a>
-				</div>
-			</div>
-		</wicket:enclosure>
-		<wicket:enclosure child="cloneSshUrl">
-			<div class="clone form-inline hidden">
-				<div class="input-group">
-					<div class="input-group-addon">
-						<b>Clone</b>
-					</div>
-					<input wicket:id="cloneSshUrl" readonly="readonly"
-						class="form-control" /> <a wicket:id="copySshUrl"
-						class="input-group-addon"><i class="fa fa-clipboard"></i></a>
-				</div>
-				<br />
-			</div>
-			<div class="clearfix">
-				<div class="pull-left">
-					<a href="#" id="sshHttpsSwitch">Use SSH</a> 
-				</div>
-				<div class="pull-right hidden" id="noKeyWarning" wicket:id="noKeyWarning">
-					<a href="#" class="text-warning" target="_blank" wicket:id="registerKey" 
-					title="To use SSH, you need to register a public key clicking here.">
-						<i class="fa fa-shield" aria-hidden="true"></i> 
-						 No SSH key found! Register it here.
-				    </a>
-					
-				</div>
-			</div>
-
-		</wicket:enclosure>
 	</div>
 </wicket:panel>

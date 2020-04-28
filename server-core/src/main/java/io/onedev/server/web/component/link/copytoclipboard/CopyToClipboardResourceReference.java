@@ -1,4 +1,4 @@
-package io.onedev.server.web.behavior.clipboard;
+package io.onedev.server.web.component.link.copytoclipboard;
 
 import java.util.List;
 
@@ -10,12 +10,12 @@ import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class CopyClipboardResourceReference extends BaseDependentResourceReference {
+public class CopyToClipboardResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public CopyClipboardResourceReference() {
-		super(CopyClipboardResourceReference.class, "copy-clipboard.js");
+	public CopyToClipboardResourceReference() {
+		super(CopyToClipboardResourceReference.class, "copy-to-clipboard.js");
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class CopyClipboardResourceReference extends BaseDependentResourceReferen
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new ClipboardResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
-				CopyClipboardResourceReference.class, "copy-clipboard.css")));
+				CopyToClipboardResourceReference.class, "copy-to-clipboard.css")));
 		return dependencies;
 	}
 

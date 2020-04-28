@@ -5,11 +5,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -17,21 +14,15 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -110,27 +101,6 @@ public abstract class ProjectInfoPanel extends Panel {
 			add(forkedFromLink);
 		}
 		
-		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
-		
-		Model<String> cloneUrlModel = Model.of(urlManager.httpCloneUrlFor(getProject()));
-		add(new TextField<String>("cloneUrl", cloneUrlModel)
-				.setVisible(canReadCode));
-		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
-
-		User loggedInUser = SecurityUtils.getUser();
-		boolean userHasNoKeys = loggedInUser.getSshKeys().isEmpty();
-		boolean isSshEnabled = ((BasePage)getPage()).isSshEnabled();
-		
-		Model<String> cloneSshUrlModel = Model.of(urlManager.sshCloneUrlFor(getProject()));
-		add(new TextField<String>("cloneSshUrl", cloneSshUrlModel)
-		        .setVisible(isSshEnabled && canReadCode));
-		add(new WebMarkupContainer("copySshUrl").add(new CopyClipboardBehavior(cloneSshUrlModel)));
-		
-		WebMarkupContainer noKeyWarning = new WebMarkupContainer("noKeyWarning");
-		BookmarkablePageLink<Void> registerKey = new BookmarkablePageLink<Void>("registerKey", MySshKeysPage.class);
-		noKeyWarning.add(registerKey);
-		
-		add(noKeyWarning.setVisible(userHasNoKeys));
 	}
 	
 	private Project getProject() {
@@ -146,10 +116,7 @@ public abstract class ProjectInfoPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectInfoResourceReference()));
-		
-		response.render(JavaScriptHeaderItem.forReference(new ProjectInfoJsResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.projectInfo.onDomReady('sshHttpsSwitch');"));
+		response.render(CssHeaderItem.forReference(new ProjectInfoCssResourceReference()));
 	}
 
 	protected abstract void onPromptForkOption(AjaxRequestTarget target);

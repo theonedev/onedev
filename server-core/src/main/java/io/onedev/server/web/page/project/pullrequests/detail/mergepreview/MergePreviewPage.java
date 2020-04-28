@@ -29,10 +29,10 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
@@ -102,7 +102,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			Link<Void> hashLink = new ViewStateAwarePageLink<Void>("targetHead", CommitDetailPage.class, params);
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getTargetHead())));
-			fragment.add(new WebMarkupContainer("copyTargetHead").add(new CopyClipboardBehavior(Model.of(preview.getTargetHead()))));
+			fragment.add(new CopyToClipboardLink("copyTargetHead", Model.of(preview.getTargetHead())));
 			
 			commitState = new CommitDetailPage.State();
 			commitState.revision = preview.getMerged();
@@ -110,7 +110,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			hashLink = new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params);
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
-			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
+			fragment.add(new CopyToClipboardLink("copyMergedCommit", Model.of(preview.getMerged())));
 			fragment.add(new CommitStatusPanel("buildStatus", ObjectId.fromString(preview.getMerged())) {
 
 				@Override

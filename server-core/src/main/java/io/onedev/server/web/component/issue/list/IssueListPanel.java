@@ -66,7 +66,6 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
@@ -75,6 +74,7 @@ import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
@@ -612,8 +612,7 @@ public abstract class IssueListPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 				
-				fragment.add(new WebMarkupContainer("copy").add(
-						new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));
+				fragment.add(new CopyToClipboardLink("copy", Model.of("#" + issue.getNumber() + ": " + issue.getTitle())));
 				
 				fragment.add(new Label("votes", issue.getVoteCount()));
 				fragment.add(new Label("comments", issue.getCommentCount()));

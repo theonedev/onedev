@@ -96,10 +96,7 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", UserPasswordPage.class));
 		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
-		
-		if (isSshEnabled()) {            
-		    tabs.add(new UserTab("SSH Keys", "fa fa-fw fa-shield", UserSshKeysPage.class));
-        }
+		tabs.add(new UserTab("SSH Keys", "fa fa-fw fa-shield", UserSshKeysPage.class));
 		
 		return tabs;
 	}

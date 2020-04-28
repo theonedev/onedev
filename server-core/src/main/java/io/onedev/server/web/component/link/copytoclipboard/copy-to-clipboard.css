@@ -1,0 +1,19 @@
+.copy-to-clipboard:not(.btn):not(.input-group-addon) {
+    color: #666;
+    position: relative;
+}
+.copy-to-clipboard:hover:not(.btn):not(.input-group-addon), 
+.copy-to-clipboard:active:not(.btn):not(.input-group-addon) {
+    color: black;
+}
+.copy-to-clipboard:active:not(.btn):not(.input-group-addon) {
+    left: 1px;
+    top: 1px;
+}
+.copy-to-clipboard.input-group-addon>*, .copy-to-clipboard.btn>* {
+    position: relative;
+}
+.copy-to-clipboard.input-group-addon:active>*, .copy-to-clipboard.btn:active>* {
+    left: 1px;
+    top: 1px;
+}

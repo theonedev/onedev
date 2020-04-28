@@ -41,31 +41,29 @@ public class SshServerLauncher {
     
     @Listen
     public void on(SystemStarted event) {
-    	if (serverConfig.getSshPort() != 0) {
-            server = SshServer.setUpDefaultServer();
+        server = SshServer.setUpDefaultServer();
 
-            server.setPort(serverConfig.getSshPort());
-            server.setKeyPairProvider(keyPairProvider);
-            server.setShellFactory(new DisableShellAccess());
-            
-            server.setPublickeyAuthenticator(new CachingPublicKeyAuthenticator(authenticator));
-            server.setKeyboardInteractiveAuthenticator(null);
-            
-            server.setCommandFactory(command -> {
-            	for (SshCommandCreator creator: commandCreators) {
-            		Command sshCommand = creator.createCommand(command);
-            		if (sshCommand != null)
-            			return sshCommand;
-            	}
-                return new UnknownCommand(command);
-            });
+        server.setPort(serverConfig.getSshPort());
+        server.setKeyPairProvider(keyPairProvider);
+        server.setShellFactory(new DisableShellAccess());
+        
+        server.setPublickeyAuthenticator(new CachingPublicKeyAuthenticator(authenticator));
+        server.setKeyboardInteractiveAuthenticator(null);
+        
+        server.setCommandFactory(command -> {
+        	for (SshCommandCreator creator: commandCreators) {
+        		Command sshCommand = creator.createCommand(command);
+        		if (sshCommand != null)
+        			return sshCommand;
+        	}
+            return new UnknownCommand(command);
+        });
 
-            try {
-				server.start();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-    	}
+        try {
+			server.start();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
     }
 
     @Listen

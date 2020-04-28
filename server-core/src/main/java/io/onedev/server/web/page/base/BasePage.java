@@ -47,7 +47,6 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.ServerConfig;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.page.init.ServerInitPage;
@@ -264,10 +263,6 @@ public abstract class BasePage extends WebPage {
 	@Nullable
 	protected final User getLoginUser() {
 		return SecurityUtils.getUser();
-	}
-	
-	public boolean isSshEnabled() {
-		return OneDev.getInstance(ServerConfig.class).getSshPort() != 0;
 	}
 	
 	public void unauthorized() {

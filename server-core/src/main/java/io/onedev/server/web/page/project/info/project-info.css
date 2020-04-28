@@ -1,43 +1,23 @@
 .project-info {
-	padding: 20px;
+	padding: 12px;
+	width: 360px;
 }
 .project-info>div {
-	margin-bottom: 20px;
+	margin-bottom: 12px;
 }
 .project-info>div:last-child {
 	margin-bottom: 0; 
 }
-
-.project-info>.head {
-	font-size: 16px;
+.project-info>.name {
 	font-weight: bold;
+	font-size: 16px;
 }
-.project-info>.head>.name {
-	margin-right: 4px;
-}
-.project-info>.head>.owner {
-	margin-right: 20px;
-}
-
-.project-info>.head .forks {
+.project-info>.forks>.forks {
 	margin-right: 8px;
 }
-
-.project-info>.forked-from {
-	margin-top: -20px;
-	font-size: 13px;
-	color: #666;
-}
-
 .project-info>.description {
 	border: 1px dashed #BBB;
 	padding: 20px 20px 10px 20px;
 	border-radius: 4px;
 	background: #F5F5F5;
-}
-.project-info>.clone>.input-group {
-	width: 100%;
-}
-.project-info>.clone input {
-	background: white;
 }

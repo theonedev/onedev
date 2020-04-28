@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.pullrequests.detail.activities.activit
 import java.util.List;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -22,10 +21,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -103,7 +102,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 				item.add(hashLink);
 				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
-				item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+				item.add(new CopyToClipboardLink("copyHash", Model.of(commit.name())));
 
 				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
 				ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);

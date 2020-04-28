@@ -48,7 +48,7 @@ public class SshKey extends AbstractEntity implements Validatable {
     @JoinColumn(nullable=false)
     private User owner;
 
-    @Editable(name = "Key", description="Provide a OpenSSH public key. Normally begins with 'ssh-rsa'")
+    @Editable(name = "OpenSSH Public Key", description="Provide a OpenSSH public key. Normally begins with 'ssh-rsa'")
     @NotEmpty
     @Multiline
     @OmitName
@@ -103,7 +103,7 @@ public class SshKey extends AbstractEntity implements Validatable {
 	            return true;
 	        } catch (Exception exception) {
 				context.disableDefaultConstraintViolation();
-				context.buildConstraintViolationWithTemplate("A valid OpenSSH public key is expected")
+				context.buildConstraintViolationWithTemplate("Invalid OpenSSH public key")
 						.addPropertyNode("content").addConstraintViolation();
 				return false;
 	        } 

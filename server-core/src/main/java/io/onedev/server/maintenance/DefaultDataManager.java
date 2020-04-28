@@ -170,23 +170,19 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 
 		setting = settingManager.getSetting(Key.SSH);
-		if (serverConfig.getSshPort() != 0) {
-			if (setting == null || setting.getValue() == null) {
-				SshSetting sshSetting = new SshSetting();
-	            String sshUrl = serverUrl.getHost();
-	            int sshPort = serverConfig.getSshPort();
-	            
-	            if (sshPort != 22) 
-	                sshUrl +=  ":" + sshPort;
-	            
-	            sshSetting.setServerUrl("ssh://" + sshUrl);
-	            sshSetting.setPrivateKey(SshKeyUtils.generatePEMPrivateKey());
-	            
-	            settingManager.saveSshSetting(sshSetting);
-	        }
-		} else if (setting == null || setting.getValue() != null) {
-			settingManager.saveSshSetting(null);
-		}
+		if (setting == null || setting.getValue() == null) {
+			SshSetting sshSetting = new SshSetting();
+            String sshUrl = serverUrl.getHost();
+            int sshPort = serverConfig.getSshPort();
+            
+            if (sshPort != 22) 
+                sshUrl +=  ":" + sshPort;
+            
+            sshSetting.setServerUrl("ssh://" + sshUrl);
+            sshSetting.setPrivateKey(SshKeyUtils.generatePEMPrivateKey());
+            
+            settingManager.saveSshSetting(sshSetting);
+        }
 		
 		setting = settingManager.getSetting(Key.SECURITY);
 		if (setting == null) {

@@ -69,11 +69,11 @@ import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
@@ -583,7 +583,7 @@ public abstract class CommitListPanel extends Panel {
 			Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 			item.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
-			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
+			item.add(new CopyToClipboardLink("copyHash", Model.of(commit.name())));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
 			CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {

@@ -41,8 +41,8 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.editable.EditableUtils;
@@ -132,12 +132,12 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 								Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 								fragment.add(hashLink);
 								hashLink.add(new Label("hash", GitUtils.abbreviateSHA(value)));
-								fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(value))));
+								fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
 								item.add(fragment);
 							} else {
 								Fragment fragment = new Fragment("value", "notAccessibleCommitFrag", FieldValuesPanel.this);
 								fragment.add(new Label("hash", GitUtils.abbreviateSHA(value)));
-								fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(value))));
+								fragment.add(new CopyToClipboardLink("copyHash", Model.of(value)));
 								item.add(fragment);
 							}
 						} else {

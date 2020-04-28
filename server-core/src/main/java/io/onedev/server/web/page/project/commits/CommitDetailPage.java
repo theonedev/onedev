@@ -63,7 +63,6 @@ import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -75,6 +74,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -259,7 +259,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
 		add(new Label("hash", GitUtils.abbreviateSHA(getCommit().name())));
-		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(getCommit().name()))));
+		add(new CopyToClipboardLink("copyHash", Model.of(getCommit().name())));
 		
 		newParentsContainer(null);
 

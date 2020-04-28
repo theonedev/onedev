@@ -116,7 +116,6 @@ public abstract class LayoutPage extends BasePage {
 	    item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
 	    if (getPage() instanceof SshSettingPage)
 	        item.add(AttributeAppender.append("class", "active"));
-		item.setVisible(isSshEnabled());
 	    
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorsPage.class));
@@ -212,7 +211,6 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
-		item.setVisible(isSshEnabled());
 		
 		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();
 		if (prevPrincipals != null && !prevPrincipals.getPrimaryPrincipal().equals(0L)) {

@@ -9,7 +9,6 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.ssh.SshKeyUtils;
@@ -21,11 +20,6 @@ public class SshSettingPage extends AdministrationPage {
 
     public SshSettingPage(PageParameters params) {
         super(params);
-        
-        if (!isSshEnabled()) {            
-            throw new OneException("This page requires SSH support to be enabled. "
-                    + " You need to specify ssh_port parameter in server.properties");
-        }
     }
 
     @Override

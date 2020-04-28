@@ -95,7 +95,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ArchiveMenuLink;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -596,17 +596,29 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class, 
 				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)));
 		
-		blobOperations.add(new ArchiveMenuLink("download", projectModel) {
-
-			@Override
-			protected String getRevision() {
-				return state.blobIdent.revision;
-			}
+		blobOperations.add(new DropdownLink("cloneOrDownload") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(state.blobIdent.revision != null && state.blobIdent.path == null);
+			}
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new CloneOrDownloadPanel(id, this) {
+					
+					@Override
+					protected Project getProject() {
+						return ProjectBlobPage.this.getProject();
+					}
+
+					@Override
+					protected String getRevision() {
+						return state.blobIdent.revision;
+					}
+					
+				};
 			}
 
 		});
