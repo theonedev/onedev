@@ -14,20 +14,14 @@ public class Authenticated {
 	
 	private final Collection<String> groupNames;
 	
-	private final Collection<SshKey> sshPublicKeys;
+	private final Collection<SshKey> sshKeys;
 	
-	public Authenticated(String email, @Nullable String fullName, Collection<String> groupNames) {
-		this(email, fullName, groupNames, null);
-	}
-
-	public Authenticated(
-			String email, @Nullable String fullName,
-			Collection<String> groupNames, @Nullable Collection<SshKey> sshPublicKeys
-	) {
+	public Authenticated(String email, @Nullable String fullName,
+			@Nullable Collection<String> groupNames, @Nullable Collection<SshKey> sshKeys) {
 		this.email = email;
 		this.fullName = fullName;
 		this.groupNames = groupNames;
-		this.sshPublicKeys = sshPublicKeys;
+		this.sshKeys = sshKeys;
 	}
 	
 	@Nullable
@@ -39,13 +33,14 @@ public class Authenticated {
 		return email;
 	}
 
+	@Nullable
 	public Collection<String> getGroupNames() {
 		return groupNames;
 	}
 
 	@Nullable
-	public Collection<SshKey> getSSHPublicKeys() {
-		return sshPublicKeys;
+	public Collection<SshKey> getSshKeys() {
+		return sshKeys;
 	}
 
 }

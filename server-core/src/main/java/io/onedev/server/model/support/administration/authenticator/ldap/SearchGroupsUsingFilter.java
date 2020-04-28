@@ -16,7 +16,7 @@ public class SearchGroupsUsingFilter implements GroupRetrieval {
 	private String groupNameAttribute = "cn";
 	
 	@Editable(order=100, description=
-		"In case user group relationship maintained at group side, this property specifies " +
+		"In case user group membership maintained at group side, this property specifies " +
 		"base node for group search. For example: <i>ou=groups, dc=example, dc=com</i>")
 	@NotEmpty
 	public String getGroupSearchBase() {

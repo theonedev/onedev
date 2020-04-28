@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.naming.AuthenticationException;
 import javax.naming.CompositeName;
 import javax.naming.Context;
@@ -38,6 +39,7 @@ import io.onedev.server.model.SshKey;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -149,9 +151,9 @@ public class LdapAuthenticator extends Authenticator {
 		this.userEmailAttribute = userEmailAttribute;
 	}
 
-	@Editable(order=850, description=""
-			+ "Specifies name of the attributes inside the user LDAP entry whose values will be taken as user "
-			+ "SSH public keys. If this field is set SSH public keys are managed by LDAP only")
+	@Editable(name="User SSH Key Attribute", order=850, description=""
+			+ "Optionally specify name of the attribute inside the user LDAP entry whose values will be taken as user "
+			+ "SSH keys. SSH keys will be managed by LDAP only if this field is set")
 	public String getUserSshKeyAttribute() {
 		return userSshKeyAttribute;
 	}
@@ -161,9 +163,9 @@ public class LdapAuthenticator extends Authenticator {
 	}
 
 	@Editable(order=900, description="Specify the strategy to retrieve group membership information. "
-			+ "To give appropriate permissions to a LDAP group, a OneDev group with same name "
-			+ "should be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage "
-			+ "group memberships at OneDev side")
+			+ "To give appropriate permissions to a LDAP group, a OneDev group with same name should "
+			+ "be defined. Use strategy <tt>Do Not Retrieve Groups</tt> if you want to manage group "
+			+ "memberships at OneDev side")
 	@NotNull(message="may not be empty")
 	public GroupRetrieval getGroupRetrieval() {
 		return groupRetrieval;
@@ -177,7 +179,8 @@ public class LdapAuthenticator extends Authenticator {
 	public Authenticated authenticate(UsernamePasswordToken token) {
 		String fullName = null;
 		String email = null;
-		Collection<String> groupNames = new HashSet<>();
+		Collection<String> groupNames = null;
+        Collection<SshKey> sshKeys = null;
 
         Name userSearchBase;
 		try {
@@ -195,10 +198,8 @@ public class LdapAuthenticator extends Authenticator {
         if (getUserFullNameAttribute() != null)
             attributeNames.add(getUserFullNameAttribute());
         
-        String userSSHPublicKey = getUserSshKeyAttribute();
-        
-        if (userSSHPublicKey != null)
-        	attributeNames.add(userSSHPublicKey);
+        if (getUserSshKeyAttribute() != null)
+        	attributeNames.add(getUserSshKeyAttribute());
         
         attributeNames.add(getUserEmailAttribute());
         
@@ -269,111 +270,28 @@ public class LdapAuthenticator extends Authenticator {
             }
 
             Attributes searchResultAttributes = searchResult.getAttributes();
+            
             if (searchResultAttributes != null) {
                 if (getUserFullNameAttribute() != null) {
                     Attribute attribute = searchResultAttributes.get(getUserFullNameAttribute());
                     if (attribute != null && attribute.get() != null)
                         fullName = (String) attribute.get();
                 }
+                
                 Attribute attribute = searchResultAttributes.get(getUserEmailAttribute());
                 if (attribute != null && attribute.get() != null)
                     email = (String) attribute.get();
-                if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) {
-                	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute) getGroupRetrieval();
-                    attribute = searchResultAttributes.get(
-                    		groupRetrieval.getUserGroupsAttribute());
-                    if (attribute != null) {
-                        for (NamingEnumeration<?> e = attribute.getAll(); e.hasMore();) {
-
-                        	// use composite name instead of DN according to
-                            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4307193
-                            Name groupDN = new CompositeName().add((String) e.next());
-                            logger.debug("Looking up group entry '" + groupDN + "'...");
-                            
-                            DirContext groupCtx = null;
-                            try {
-                                if (referralCtx != null)
-                                    groupCtx = (DirContext) referralCtx.lookup(groupDN);
-                                else
-                                    groupCtx = (DirContext) ctx.lookup(groupDN);
-
-                                if (groupCtx == null) {
-                                    throw new RuntimeException("Can not find group entry " +
-                                    		"identified by '" + groupDN + "'.");
-                                }
-                                String groupNameAttribute = groupRetrieval.getGroupNameAttribute();
-                                Attributes groupAttributes = groupCtx.getAttributes("", 
-                                		new String[]{groupNameAttribute});
-                                if (groupAttributes == null 
-                                		|| groupAttributes.get(groupNameAttribute) == null
-                                        || groupAttributes.get(groupNameAttribute).get() == null) {
-                                    throw new RuntimeException("Can not find attribute '" 
-                                    		+ groupNameAttribute + "' in returned group entry.");
-                                }
-                                groupNames.add((String) groupAttributes.get(groupNameAttribute).get());
-                            } finally {
-                                if (groupCtx != null)
-                                    try {
-                                        groupCtx.close();
-                                    } catch (NamingException ne) {
-                                    }
-                            }
-                        }
-                    } else {
-                        logger.warn("No attribute identified by '" + groupRetrieval.getUserGroupsAttribute() 
-                        		+ "' inside fetched user LDAP entry.");
-                    }
-                }
+                
+                if (getGroupRetrieval() instanceof GetGroupsUsingAttribute) 
+                	groupNames = retrieveGroupsByAttribute(ctx, referralCtx, searchResultAttributes);
+                
+                if (getUserSshKeyAttribute() != null) 
+                	sshKeys = retrieveSshKeys(searchResultAttributes);
             }
             
-            Collection<SshKey> sshKeys;
-
-            if (userSSHPublicKey != null) {
-            	try {
-            		sshKeys = retrieveSSHPublicKeys(searchResultAttributes);
-            	} catch (Exception err) {
-            		logger.warn("Error retrieving SSH public keys", err);
-            		sshKeys = null;
-				}
-            	
-            } else {
-            	sshKeys = null;
-            }
-
-            if (getGroupRetrieval() instanceof SearchGroupsUsingFilter) {
-            	SearchGroupsUsingFilter groupRetrieval = (SearchGroupsUsingFilter) getGroupRetrieval();
-            	String groupNameAttribute = groupRetrieval.getGroupNameAttribute();
-                Name groupSearchBase = new CompositeName().add(groupRetrieval.getGroupSearchBase());
-                String groupSearchFilter = StringUtils.replace(groupRetrieval.getGroupSearchFilter(), "{0}", userDN);
-                groupSearchFilter = StringUtils.replace(groupSearchFilter, "\\", "\\\\");
-
-                logger.debug("Evaluated group search filter: " + groupSearchFilter);
-                searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-                searchControls.setReturningAttributes(new String[]{groupNameAttribute});
-
-                try {
-                    if (referralCtx != null)
-                        results = referralCtx.search(groupSearchBase, groupSearchFilter, searchControls);
-                    else
-                        results = ctx.search(groupSearchBase, groupSearchFilter, searchControls);
-                    if (results != null) {
-                        while (results.hasMore()) {
-                            searchResult = (SearchResult) results.next();
-                            searchResultAttributes = searchResult.getAttributes();
-                            if (searchResultAttributes == null 
-                            		|| searchResultAttributes.get(groupNameAttribute) == null
-                                    || searchResultAttributes.get(groupNameAttribute).get() == null) {
-                                throw new RuntimeException("Can not find attribute '" 
-                                		+ groupNameAttribute + "' in the returned group object.");
-                            }
-                            groupNames.add((String) searchResultAttributes.get(groupNameAttribute).get());
-                        }
-                    }
-                } catch (PartialResultException pre) {
-                    logger.warn("Partial exception detected. You may try to set property " +
-                    		"'follow referrals' to true to avoid this exception.", pre);
-                }
-            }
+            if (getGroupRetrieval() instanceof SearchGroupsUsingFilter) 
+            	groupNames = retrieveGroupsByFilter(ctx, referralCtx, userDN);
+            
             if (StringUtils.isBlank(email))
             	throw new AccountException("Email is required but not available in ldap directory");
             else
@@ -395,69 +313,157 @@ public class LdapAuthenticator extends Authenticator {
             }
         }
 	}
+	
+	private Collection<String> retrieveGroupsByAttribute(DirContext ctx, DirContext referralCtx, 
+			Attributes searchResultAttributes) {
+		Collection<String> groupNames = new HashSet<>();
+		try {
+        	GetGroupsUsingAttribute groupRetrieval = (GetGroupsUsingAttribute) getGroupRetrieval();
+            Attribute attribute = searchResultAttributes.get(groupRetrieval.getUserGroupsAttribute());
+            if (attribute != null) {
+                for (NamingEnumeration<?> e = attribute.getAll(); e.hasMore();) {
 
-	private Collection<SshKey> retrieveSSHPublicKeys(Attributes searchResultAttributes) throws NamingException, IOException, GeneralSecurityException {
-		Collection<SshKey> sshKeys = new ArrayList<SshKey>();
-		
-		Attribute attributeValue = searchResultAttributes.get(getUserSshKeyAttribute());
-		
-		if (attributeValue == null) {
-			// no values for the user stored in LDAP
-			return sshKeys;
+                	// use composite name instead of DN according to
+                    // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4307193
+                    Name groupDN = new CompositeName().add((String) e.next());
+                    logger.debug("Looking up group entry '" + groupDN + "'...");
+                    
+                    DirContext groupCtx = null;
+                    try {
+                        if (referralCtx != null)
+                            groupCtx = (DirContext) referralCtx.lookup(groupDN);
+                        else
+                            groupCtx = (DirContext) ctx.lookup(groupDN);
+
+                        if (groupCtx == null) {
+                            throw new RuntimeException("Can not find group entry " +
+                            		"identified by '" + groupDN + "'.");
+                        }
+                        String groupNameAttribute = groupRetrieval.getGroupNameAttribute();
+                        Attributes groupAttributes = groupCtx.getAttributes("", 
+                        		new String[]{groupNameAttribute});
+                        if (groupAttributes == null 
+                        		|| groupAttributes.get(groupNameAttribute) == null
+                                || groupAttributes.get(groupNameAttribute).get() == null) {
+                            throw new RuntimeException("Can not find attribute '" 
+                            		+ groupNameAttribute + "' in returned group entry.");
+                        }
+                        groupNames.add((String) groupAttributes.get(groupNameAttribute).get());
+                    } finally {
+                        if (groupCtx != null) {
+                            try {
+                                groupCtx.close();
+                            } catch (NamingException ne) {
+                            }
+                        }
+                    }
+                }
+            } else {
+                logger.warn("No attribute identified by '" + groupRetrieval.getUserGroupsAttribute() 
+                		+ "' inside fetched user LDAP entry.");
+            }
+		} catch (NamingException e) {
+			logger.error("Error retrieving groups by attribute");
 		}
-
-		NamingEnumeration<?> ldapValues = attributeValue.getAll();
-		int keyIndex = 1;
-		
-		while (ldapValues.hasMore()) {
-			Object value = ldapValues.next();
-			
-			if (value instanceof String) {
-				String content = (String) value;
-				
-				try {
-					SshKey sshKey = parseSshPublicKey(keyIndex, content);
-					sshKeys.add(sshKey);
-				} catch (Exception err) {
-					logger.warn("Error parsing SSH public key", err);
-				}
-	            
-			} else {
-				logger.warn("SSH public key from ldap not a String");
-			}
-			
-			keyIndex++;
+		return groupNames;
+	}
+	
+	private Collection<String> retrieveGroupsByFilter(DirContext ctx, DirContext referralCtx, String userDN) {
+		Collection<String> groupNames = new HashSet<>();
+		try {
+	    	SearchGroupsUsingFilter groupRetrieval = (SearchGroupsUsingFilter) getGroupRetrieval();
+	    	String groupNameAttribute = groupRetrieval.getGroupNameAttribute();
+	        Name groupSearchBase = new CompositeName().add(groupRetrieval.getGroupSearchBase());
+	        String groupSearchFilter = StringUtils.replace(groupRetrieval.getGroupSearchFilter(), "{0}", userDN);
+	        groupSearchFilter = StringUtils.replace(groupSearchFilter, "\\", "\\\\");
+	
+	        logger.debug("Evaluated group search filter: " + groupSearchFilter);
+	        SearchControls searchControls = new SearchControls();
+	        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+	        searchControls.setReturningAttributes(new String[]{groupNameAttribute});
+	        searchControls.setReturningObjFlag(true);
+	
+	    	NamingEnumeration<SearchResult> results;
+	        if (referralCtx != null)
+	            results = referralCtx.search(groupSearchBase, groupSearchFilter, searchControls);
+	        else
+	            results = ctx.search(groupSearchBase, groupSearchFilter, searchControls);
+	        if (results != null) {
+	            while (results.hasMore()) {
+	            	SearchResult searchResult = (SearchResult) results.next();
+	                Attributes searchResultAttributes = searchResult.getAttributes();
+	                if (searchResultAttributes == null 
+	                		|| searchResultAttributes.get(groupNameAttribute) == null
+	                        || searchResultAttributes.get(groupNameAttribute).get() == null) {
+	                    throw new RuntimeException("Can not find attribute '" 
+	                    		+ groupNameAttribute + "' in the returned group object.");
+	                }
+	                groupNames.add((String) searchResultAttributes.get(groupNameAttribute).get());
+	            }
+	        }
+        } catch (PartialResultException pre) {
+            logger.warn("Partial exception detected. You may try to set property " +
+            		"'follow referrals' to true to avoid this exception.", pre);
+		} catch (NamingException e) {
+			logger.error("Error retrieving groups by filter", e);
 		}
-
-		return sshKeys;
+		return groupNames;
 	}
 
-	private SshKey parseSshPublicKey(int keyIndex, String content) throws IOException, GeneralSecurityException {
-		PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
-		
-        SshKey sshKey = new SshKey();
-        sshKey.setDigest(fingerPrint);
-        sshKey.setContent(content);
+	@Nullable
+	private Collection<SshKey> retrieveSshKeys(Attributes searchResultAttributes) {
+		Attribute attribute = searchResultAttributes.get(getUserSshKeyAttribute());
+		if (attribute != null) {
+			Collection<SshKey> sshKeys = new ArrayList<SshKey>();
+			try {
+				NamingEnumeration<?> ldapValues = attribute.getAll();
+				int keyIndex = 1;
+				
+				while (ldapValues.hasMore()) {
+					Object value = ldapValues.next();
+					
+					if (value instanceof String) 
+						CollectionUtils.addIgnoreNull(sshKeys, parseSshKey(keyIndex, (String) value));
+					else 
+						logger.error("SSH key from ldap is not a String");
+					
+					keyIndex++;
+				}
 
-        String[] parts = content.split(" ");
-        if (parts.length > 2) {
-        	sshKey.setName(parts[2]);
-        } else {
-        	sshKey.setName("ldap." + keyIndex);	
-        }
+			} catch (NamingException e) {
+				logger.error("Error retrieving SSH keys", e);
+			}
+			return sshKeys;
+		} else {
+			return null;
+		}
+	}
 
-        return sshKey;
+	@Nullable
+	private SshKey parseSshKey(int keyIndex, String content) {
+		try {
+			PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
+	        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
+			
+	        SshKey sshKey = new SshKey();
+	        sshKey.setDigest(fingerPrint);
+	        sshKey.setContent(content);
+	        
+	        return sshKey;
+		} catch (IOException | GeneralSecurityException e) {
+			logger.error("Error parsing SSH key", e);
+			return null;
+		}
 	}
 
 	@Override
 	public boolean isManagingMemberships() {
-		return !(groupRetrieval instanceof DoNotRetrieveGroups);
+		return !(getGroupRetrieval() instanceof DoNotRetrieveGroups);
 	}
 
 	@Override
 	public boolean isManagingSshKeys() {
-		return userSshKeyAttribute != null;
+		return getUserSshKeyAttribute() != null;
 	}
 	
 }

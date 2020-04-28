@@ -523,4 +523,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     		return false;
     	}
     }
+    
+    public boolean isMembershipExternalManaged() {
+    	if (isExternalManaged()) {
+    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
+    		return authenticator != null && authenticator.isManagingMemberships();
+    	} else {
+    		return false;
+    	}
+    }
+    
 }

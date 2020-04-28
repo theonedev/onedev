@@ -89,5 +89,5 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 			return new DoNotRetrieveGroups();
 		}
 	}
-	
+
 }

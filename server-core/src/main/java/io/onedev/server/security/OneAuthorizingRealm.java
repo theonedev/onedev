@@ -253,15 +253,24 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	    				if (authenticated.getFullName() != null)
 	    					user.setFullName(authenticated.getFullName());
 	    				userManager.save(user);
+	    				
+	    				if (authenticated.getGroupNames() == null && authenticator.getDefaultGroup() != null) {
+    						Group group = groupManager.find(authenticator.getDefaultGroup());
+    						if (group != null) {
+    							Membership membership = new Membership();
+    							membership.setGroup(group);
+    							membership.setUser(user);
+    							user.getMemberships().add(membership);
+    							membershipManager.save(membership);
+    						} else {
+    							logger.error("Group not found: " + authenticator.getDefaultGroup());
+    						}
+	    				}
 	    			}
 	    			
-			    	if (authenticated.getSSHPublicKeys() != null) {
+			    	if (authenticated.getSshKeys() != null) {
 			    		SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-			    		try {
-			    			sshKeyManager.syncUserKeys(user, authenticated.getSSHPublicKeys());
-			    		} catch (Exception err) {
-			    			logger.warn("Error setting user SSH public keys provided by authentication", err);
-			    		}
+			    		sshKeyManager.syncUserKeys(user, authenticated.getSshKeys());
 			    	}
 		    	}
 		    	

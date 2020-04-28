@@ -18,6 +18,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -85,6 +86,8 @@ public class UserMembershipsPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new WebMarkupContainer("externalManagedNote").setVisible(getUser().isMembershipExternalManaged()));
+		
 		TextField<String> searchField;
 		
 		add(searchField = new TextField<String>("filterGroups", Model.of(query)));
@@ -150,7 +153,7 @@ public class UserMembershipsPage extends UserPage {
 				response.render(JavaScriptHeaderItem.forReference(new GroupChoiceResourceReference()));
 			}
 			
-		});			
+		}.setVisible(!getUser().isMembershipExternalManaged()));			
 		
 		AjaxLink<Void> deleteSelected = new AjaxLink<Void>("deleteSelected") {
 
@@ -169,7 +172,7 @@ public class UserMembershipsPage extends UserPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!selectionColumn.getSelections().isEmpty());
+				setVisible(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
 			}
 			
 		};
@@ -178,15 +181,17 @@ public class UserMembershipsPage extends UserPage {
 
 		List<IColumn<Membership, Void>> columns = new ArrayList<>();
 		
-		selectionColumn = new SelectionColumn<Membership, Void>() {
-			
-			@Override
-			protected void onSelectionChange(AjaxRequestTarget target) {
-				target.add(deleteSelected);
-			}
-			
-		};
-		columns.add(selectionColumn);
+		if (!getUser().isMembershipExternalManaged()) {
+			selectionColumn = new SelectionColumn<Membership, Void>() {
+				
+				@Override
+				protected void onSelectionChange(AjaxRequestTarget target) {
+					target.add(deleteSelected);
+				}
+				
+			};
+			columns.add(selectionColumn);
+		}
 		
 		columns.add(new AbstractColumn<Membership, Void>(Model.of("Name")) {
 

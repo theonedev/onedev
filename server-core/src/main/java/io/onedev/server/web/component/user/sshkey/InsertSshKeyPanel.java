@@ -21,7 +21,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -67,15 +66,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                     throw new RuntimeException(e);
                 }
                 
-                if (getUser().getSshKeys().stream().anyMatch(it->it.getName().equals(sshKey.getName()))) {
-                	String message;
-                	if (SecurityUtils.getUser().equals(getUser()))
-                		message = "You have another key with the same name";
-                	else
-                		message = "This name is already used by another key of user '" + getUser().getDisplayName() + "'";
-					editor.error(new Path(new PathNode.Named("name")), message);
-					target.add(form);
-                } else if (sshKeyManager.findByDigest(sshKey.getDigest()) != null) {
+                if (sshKeyManager.findByDigest(sshKey.getDigest()) != null) {
 					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");
 					target.add(form);
                 } else {

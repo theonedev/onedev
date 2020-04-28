@@ -50,22 +50,26 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
         
 		List<IColumn<SshKey, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<SshKey, Void>(Model.of("Name")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
-					IModel<SshKey> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
-			}
-			
-		});
-		
 		columns.add(new AbstractColumn<SshKey, Void>(Model.of("Digest")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
 					IModel<SshKey> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getDigest()));
+			}
+			
+		});
+		
+		columns.add(new AbstractColumn<SshKey, Void>(Model.of("Comment")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<SshKey>> cellItem, String componentId,
+					IModel<SshKey> rowModel) {
+				String comment = rowModel.getObject().getComment();
+				if (comment != null)
+					cellItem.add(new Label(componentId, comment));
+				else
+					cellItem.add(new Label(componentId, "<i>No comment</i>").setEscapeModelStrings(false));
 			}
 			
 		});
@@ -98,15 +102,14 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 					public void onClick(AjaxRequestTarget target) {
 						SshKey sshKey = rowModel.getObject();
 						OneDev.getInstance(SshKeyManager.class).delete(sshKey);
-						Session.get().success("SSH key '" + sshKey.getName() + "' deleted");
+						Session.get().success("SSH key deleted");
 						target.add(sshKeysTable);
 					}
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
-						
-						String message = "Do you really want to delete SSH key '" + rowModel.getObject().getName() + "'?";
+						String message = "Do you really want to delete this SSH key?";
 						attributes.getAjaxCallListeners().add(new ConfirmClickListener(message));
 					}
 

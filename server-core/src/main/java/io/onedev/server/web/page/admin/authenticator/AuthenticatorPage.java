@@ -140,7 +140,7 @@ public class AuthenticatorPage extends AdministrationPage {
 						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 				StringBuilder retrievedInfoBuilder = new StringBuilder();
 				if (authenticated.getFullName() != null) {
-					retrievedInfoBuilder.append("Full name: ")
+					retrievedInfoBuilder.append("Full Name: ")
 							.append(authenticated.getFullName())
 							.append("\n");
 				}
@@ -152,6 +152,10 @@ public class AuthenticatorPage extends AdministrationPage {
 				if (authenticated.getGroupNames() != null) {
 					retrievedInfoBuilder.append("Groups: ")
 							.append(Joiner.on(", ").join(authenticated.getGroupNames()))
+							.append("\n");
+				}
+				if (authenticated.getSshKeys() != null) {
+					retrievedInfoBuilder.append("Number of SSH Keys: ").append(authenticated.getSshKeys().size())
 							.append("\n");
 				}
 				StringBuilder messageBuilder = 

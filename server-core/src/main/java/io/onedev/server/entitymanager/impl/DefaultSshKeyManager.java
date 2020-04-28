@@ -49,30 +49,29 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
     public void syncUserKeys(User user, Collection<SshKey> keys) {
 		Collection<SshKey> currentKeys = user.getSshKeys();
 
-		Map<String, SshKey> currentKeysMap = sshPublicKeysToMap(currentKeys);
-		Map<String, SshKey> authKeysMap = sshPublicKeysToMap(keys);
-		MapDifference<String, SshKey> diff = Maps.difference(currentKeysMap, authKeysMap);
+		Map<String, SshKey> currentKeysMap = keysToMap(currentKeys);
+		Map<String, SshKey> keysMap = keysToMap(keys);
+		MapDifference<String, SshKey> diff = Maps.difference(currentKeysMap, keysMap);
 		
-		// remove keys not delivered by authentication
 		diff.entriesOnlyOnLeft().values().forEach((key) -> delete(key));
 		
-		// add keys from authorization
 		diff.entriesOnlyOnRight().values().forEach((key) -> {
-			
-			if (findByDigest(key.getDigest()) != null) {
+			if (findByDigest(key.getDigest()) == null) {
 				key.setDate(new Date());
 				key.setOwner(user);
 				save(key);	
 			} else {
-				logger.warn("SSH public key provided by auth is already in use", key.getDigest());
+				logger.warn("SSH key is already in use (digest: {})", key.getDigest());
 			}
-			
 		});
+		
     }
 
-	private Map<String, SshKey> sshPublicKeysToMap(Collection<SshKey> keys) {
+	private Map<String, SshKey> keysToMap(Collection<SshKey> sshKeys) {
 		Map<String, SshKey> keysMap = new HashMap<String, SshKey>();
-		keys.forEach((key) -> keysMap.put(key.getDigest(), key));
+		// use content as map key as we want to update key if key comment is changed
+		sshKeys.forEach((key) -> keysMap.put(key.getContent(), key));
 		return keysMap;
 	}
+	
 }

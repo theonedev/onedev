@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,27 +16,24 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 @Entity
 @Table(
-		indexes={@Index(columnList="o_owner_id"), @Index(columnList="name"), @Index(columnList="digest")},
-		uniqueConstraints={
-				@UniqueConstraint(columnNames={"o_owner_id", "name"}), 
-				@UniqueConstraint(columnNames={"digest"})}
+		indexes={@Index(columnList="o_owner_id"), @Index(columnList="digest")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"digest"})}
 )
 @ClassValidating
 public class SshKey extends AbstractEntity implements Validatable {
     
     private static final long serialVersionUID = 1L;
-
-    @Column(nullable=false)
-    private String name;
 
     @Column(nullable=false, length = 5000)
     private String content;
@@ -50,20 +48,10 @@ public class SshKey extends AbstractEntity implements Validatable {
     @JoinColumn(nullable=false)
     private User owner;
 
-    @Editable(description="Specify a name to identify the key")
-    @NotEmpty
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Editable(name = "Key", description="Provide a SSH public key. Begins with 'ssh-rsa', 'ssh-ed25519', "
-    		+ "'ecdsa-sha2-nistp256', 'ecdsa-sha2-nistp384', or 'ecdsa-sha2-nistp521'")
+    @Editable(name = "Key", description="Provide a OpenSSH public key. Normally begins with 'ssh-rsa'")
     @NotEmpty
     @Multiline
+    @OmitName
     public String getContent() {
         return content;
     }
@@ -96,6 +84,15 @@ public class SshKey extends AbstractEntity implements Validatable {
         this.createdAt = createdAt;
     }
     
+    @Nullable
+    public String getComment() {
+    	String tempStr = StringUtils.substringAfter(content, " ");
+    	if (tempStr.indexOf(' ') != -1)
+    		return StringUtils.substringAfter(tempStr, " ");
+    	else
+    		return null;
+    }
+    
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		if (content == null) {
@@ -106,7 +103,7 @@ public class SshKey extends AbstractEntity implements Validatable {
 	            return true;
 	        } catch (Exception exception) {
 				context.disableDefaultConstraintViolation();
-				context.buildConstraintViolationWithTemplate("Invalid SSH public key")
+				context.buildConstraintViolationWithTemplate("A valid OpenSSH public key is expected")
 						.addPropertyNode("content").addConstraintViolation();
 				return false;
 	        } 
