@@ -69,14 +69,14 @@ public abstract class LogCommand extends GitCommand<Void> {
         }
         if (fields.contains(Field.AUTHOR)) {
         	format += ""
-        			+ "author:%aN %n"
-                    + "authorEmail:%aE %n"
+        			+ "author:%an %n"
+                    + "authorEmail:%ae %n"
         			+ "authorDate:%ad %n";
         }
         if (fields.contains(Field.COMMITTER)) {
         	format += ""
-                    + "committer:%cN %n"
-                    + "committerEmail:%cE %n"
+                    + "committer:%cn %n"
+                    + "committerEmail:%ce %n"
         			+ "committerDate:%cd %n";
         }
         if (fields.contains(Field.COMMIT_DATE)) 

@@ -25,6 +25,10 @@
 	margin-bottom: 8px;
 }
 .push-instructions .note {
+}
+.push-instructions .finger-print {
+	word-break: break-all;
 	font-size: 12px;
+	margin-top: 4px;
 	color: #666;
 }

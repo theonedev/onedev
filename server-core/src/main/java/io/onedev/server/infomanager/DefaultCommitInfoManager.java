@@ -19,9 +19,9 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -86,7 +86,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 8;
+	private static final int INFO_VERSION = 9;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
@@ -112,7 +112,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private static final String INDEX_TO_PATH_STORE = "indexToPath";
 	
-	private static final String EMAIL_TO_INDEX_STORE = "emailToIndex";
+	private static final String USER_TO_INDEX_STORE = "userToIndex";
 	
 	private static final String INDEX_TO_USER_STORE = "indexToUser";
 	
@@ -124,7 +124,9 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private static final ByteIterable LAST_COMMIT_KEY = new StringByteIterable("lastCommit");
 	
-	private static final ByteIterable LAST_COMMIT_OF_DEFAULT_BRANCH_KEY = new StringByteIterable("lastCommitOfDefaultBranch");
+	private static final ByteIterable LAST_COMMIT_OF_LINE_STATS_KEY = new StringByteIterable("lastCommitOfLineStats");
+	
+	private static final ByteIterable LAST_COMMIT_OF_CONTRIBS_KEY = new StringByteIterable("lastCommitOfContribs");
 	
 	private static final ByteIterable LINE_STATS_KEY = new StringByteIterable("lineStats");
 	
@@ -302,7 +304,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 	
 	private void doCollect(Project project, ObjectId commitId, String refName) {
-		logger.debug("Collecting commit information (project: {}, ref: {})...", refName, project.getName());
+		logger.debug("Collecting commit information (project: {}, ref: {})...", project.getName(), refName);
 		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -311,10 +313,9 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		Store historyPathsStore = getStore(env, HISTORY_PATHS_STORE);
 		Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
 		Store indexToPathStore = getStore(env, INDEX_TO_PATH_STORE);
-		Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
+		Store userToIndexStore = getStore(env, USER_TO_INDEX_STORE);
 		Store indexToUserStore = getStore(env, INDEX_TO_USER_STORE);
 		Store fixCommitsStore = getStore(env, FIX_COMMITS_STORE);
-		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);	
 		
 		Repository repository = project.getRepository();
 
@@ -340,180 +341,133 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		});
 		
 		if (!isCommitCollected(result.getFirst())) {
-			AtomicReference<ObjectId> lastCommitIdRef = new AtomicReference<>(result.getSecond());
-			RevListCommand revList = new RevListCommand(project.getGitDir());
-			List<String> revisions = new ArrayList<>();
-			revisions.add(commitId.name());
-			if (lastCommitIdRef.get() != null) 
-				revisions.add("^" + lastCommitIdRef.get().name());
-			revList.revisions(revisions).order(Order.TOPO);
-			
-			List<ObjectId> historyIds = new ArrayList<>();
-			for (String commitHash: revList.call()) 
-				historyIds.add(ObjectId.fromString(commitHash));
-			
-			revList = new RevListCommand(project.getGitDir());
-			revList.revisions(revisions).order(null).firstParent(true);
-			
-			Set<ObjectId> firstParentIds = new HashSet<>();
-			for (String commitHash: revList.call()) 
-				firstParentIds.add(ObjectId.fromString(commitHash));
+			processCommitRange(project, commitId, result.getSecond(), new CommitRangeProcessor() {
 
-			/*
-			 * Instead of collecting information of master branch all at once, we identify some  
-			 * intermediate commits and collect the information using these intermediate commits 
-			 * multiple times for two reasons:
-			 * 1. Use less memory
-			 * 2. Commit Exodus transaction sooner so user can use auto-completion when search 
-			 * commits even if collection is not done yet
-			 */
-			List<ObjectId> intermediateCommitIds = new ArrayList<>();
-			int count = 0;
-			for (ObjectId historyId: historyIds) {
-				count++;
-				/*
-				 * Only use intermediate commits that are part of first parent chain. This 
-				 * makes sure that subsequent intermediate commits are always ancestor of 
-				 * current intermediate commit (after reverse done below), to avoid 
-				 * collecting some commits multiple times
-				 */
-				if (count > COLLECT_BATCH_SIZE && firstParentIds.contains(historyId)) {
-					intermediateCommitIds.add(historyId);
-					count = 0;
-				}
-			}
-
-			Collections.reverse(intermediateCommitIds);
-			intermediateCommitIds.add(commitId);
-			
-			for(ObjectId intermediateCommitId: intermediateCommitIds) {
-				env.executeInTransaction(new TransactionalExecutable() {
-					
-					@SuppressWarnings("unchecked")
-					@Override
-					public void execute(Transaction txn) {
-						AtomicInteger totalCommitCount = new AtomicInteger(readInt(defaultStore, txn, COMMIT_COUNT_KEY, 0));
+				@Override
+				public void process(ObjectId untilCommitId, ObjectId sinceCommitId) {
+					env.executeInTransaction(new TransactionalExecutable() {
 						
-						NextIndex nextIndex = new NextIndex();
-						nextIndex.user = readInt(defaultStore, txn, NEXT_USER_INDEX_KEY, 0);
-						nextIndex.path = readInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, 0);
-						
-						Map<Long, Integer> commitCountCache = new HashMap<>();
-						
-						Set<NameAndEmail> users;
-						byte[] userBytes = readBytes(defaultStore, txn, USERS_KEY);
-						if (userBytes != null)
-							users = (Set<NameAndEmail>) SerializationUtils.deserialize(userBytes);
-						else
-							users = new HashSet<>();
+						@SuppressWarnings("unchecked")
+						@Override
+						public void execute(Transaction txn) {
+							AtomicInteger totalCommitCount = new AtomicInteger(readInt(defaultStore, txn, COMMIT_COUNT_KEY, 0));
+							
+							NextIndex nextIndex = new NextIndex();
+							nextIndex.user = readInt(defaultStore, txn, NEXT_USER_INDEX_KEY, 0);
+							nextIndex.path = readInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, 0);
+							
+							Map<Long, Integer> commitCountCache = new HashMap<>();
+							
+							Set<NameAndEmail> users;
+							byte[] userBytes = readBytes(defaultStore, txn, USERS_KEY);
+							if (userBytes != null)
+								users = (Set<NameAndEmail>) SerializationUtils.deserialize(userBytes);
+							else
+								users = new HashSet<>();
 
-						Map<String, Long> files;
-						byte[] fileBytes = readBytes(defaultStore, txn, FILES_KEY);
-						if (fileBytes != null)
-							files = (Map<String, Long>) SerializationUtils.deserialize(fileBytes);
-						else
-							files = new HashMap<>();
+							Map<String, Long> files;
+							byte[] fileBytes = readBytes(defaultStore, txn, FILES_KEY);
+							if (fileBytes != null)
+								files = (Map<String, Long>) SerializationUtils.deserialize(fileBytes);
+							else
+								files = new HashMap<>();
 
-						new ElementPumper<GitCommit>() {
+							new ElementPumper<GitCommit>() {
 
-							@Override
-							public void generate(Consumer<GitCommit> consumer) {
-								List<String> revisions = new ArrayList<>();
-								revisions.add(intermediateCommitId.name());
+								@Override
+								public void generate(Consumer<GitCommit> consumer) {
+									List<String> revisions = new ArrayList<>();
+									revisions.add(untilCommitId.name());
 
-								if (lastCommitIdRef.get() != null)
-									revisions.add("^" + lastCommitIdRef.get().name());
+									if (sinceCommitId != null)
+										revisions.add("^" + sinceCommitId.name());
 
-								EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
-								fields.remove(LogCommand.Field.LINE_CHANGES);
-								new LogCommand(project.getGitDir()) {
+									EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
+									fields.remove(LogCommand.Field.LINE_CHANGES);
+									new LogCommand(project.getGitDir()) {
 
-									@Override
-									protected void consume(GitCommit commit) {
-										consumer.accept(commit);
-									}
+										@Override
+										protected void consume(GitCommit commit) {
+											consumer.accept(commit);
+										}
+										
+									}.revisions(revisions).fields(fields).call();
+								}
+
+								@Override
+								public void process(GitCommit currentCommit) {
+									ObjectId currentCommitId = ObjectId.fromString(currentCommit.getHash());
+									ByteIterable currentCommitKey = new CommitByteIterable(currentCommitId);
+									byte[] currentCommitBytes = readBytes(commitsStore, txn, currentCommitKey);
 									
-								}.revisions(revisions).fields(fields).call();
-							}
-
-							@Override
-							public void process(GitCommit currentCommit) {
-								ObjectId currentCommitId = ObjectId.fromString(currentCommit.getHash());
-								ByteIterable currentCommitKey = new CommitByteIterable(currentCommitId);
-								byte[] currentCommitBytes = readBytes(commitsStore, txn, currentCommitKey);
-								
-								if (!isCommitCollected(currentCommitBytes)) {
-									totalCommitCount.incrementAndGet();
-									
-									byte[] newCurrentCommitBytes;
-									if (currentCommitBytes == null) {
-										newCurrentCommitBytes = new byte[1];
-									} else {
-										newCurrentCommitBytes = new byte[1+currentCommitBytes.length];
-										System.arraycopy(currentCommitBytes, 0, newCurrentCommitBytes, 1, currentCommitBytes.length);
-									}
-									
-									commitsStore.put(txn, currentCommitKey, new ArrayByteIterable(newCurrentCommitBytes));
-									
-									for (String parentCommitHash: currentCommit.getParentHashes()) {
-										ByteIterable parentCommitKey = new CommitByteIterable(ObjectId.fromString(parentCommitHash));
-										byte[] parentCommitBytes = readBytes(commitsStore, txn, parentCommitKey);
-										byte[] newParentCommitBytes;
-										if (parentCommitBytes != null) {
-											newParentCommitBytes = new byte[parentCommitBytes.length+20];
-											System.arraycopy(parentCommitBytes, 0, newParentCommitBytes, 0, parentCommitBytes.length);
+									if (!isCommitCollected(currentCommitBytes)) {
+										totalCommitCount.incrementAndGet();
+										
+										byte[] newCurrentCommitBytes;
+										if (currentCommitBytes == null) {
+											newCurrentCommitBytes = new byte[1];
 										} else {
-											newParentCommitBytes = new byte[20];
+											newCurrentCommitBytes = new byte[1+currentCommitBytes.length];
+											System.arraycopy(currentCommitBytes, 0, newCurrentCommitBytes, 1, currentCommitBytes.length);
 										}
-										currentCommitId.copyRawTo(newParentCommitBytes, newParentCommitBytes.length-20);
-										commitsStore.put(txn, parentCommitKey, new ArrayByteIterable(newParentCommitBytes));
-									}
-									
-									String commitMessage = currentCommit.getSubject();
-									if (currentCommit.getBody() != null)
-										commitMessage += "\n\n" + currentCommit.getBody();
-									
-									for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(commitMessage)) {
-										ByteIterable issueKey = new LongByteIterable(issueNumber);
-										Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
 										
-										boolean addNextCommit = true;
-										for (Iterator<ObjectId> it = fixingCommits.iterator(); it.hasNext();) {
-											ObjectId fixCommit = it.next();
-											if (GitUtils.isMergedInto(project.getRepository(), null, fixCommit, currentCommitId)) { 
-												it.remove();
-											} else if (GitUtils.isMergedInto(project.getRepository(), null, currentCommitId, fixCommit)) {
-												addNextCommit = false;
-												break;
+										commitsStore.put(txn, currentCommitKey, new ArrayByteIterable(newCurrentCommitBytes));
+										
+										for (String parentCommitHash: currentCommit.getParentHashes()) {
+											ByteIterable parentCommitKey = new CommitByteIterable(ObjectId.fromString(parentCommitHash));
+											byte[] parentCommitBytes = readBytes(commitsStore, txn, parentCommitKey);
+											byte[] newParentCommitBytes;
+											if (parentCommitBytes != null) {
+												newParentCommitBytes = new byte[parentCommitBytes.length+20];
+												System.arraycopy(parentCommitBytes, 0, newParentCommitBytes, 0, parentCommitBytes.length);
+											} else {
+												newParentCommitBytes = new byte[20];
 											}
+											currentCommitId.copyRawTo(newParentCommitBytes, newParentCommitBytes.length-20);
+											commitsStore.put(txn, parentCommitKey, new ArrayByteIterable(newParentCommitBytes));
 										}
-										if (addNextCommit)
-											fixingCommits.add(currentCommitId);
-										writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
-									}
-									
-									if (currentCommit.getCommitDate() != null) {
-										for (String file: currentCommit.getChangedFiles())
-											files.put(file, currentCommit.getCommitDate().getTime());
-									}
-									
-									if (currentCommit.getCommitter() != null)
-										users.add(new NameAndEmail(currentCommit.getCommitter()));
-
-									if (currentCommit.getAuthor() != null) {
-										NameAndEmail nameAndEmail = new NameAndEmail(currentCommit.getAuthor());
-										users.add(nameAndEmail);
 										
-										String emailAddress = currentCommit.getAuthor().getEmailAddress();
-										if (StringUtils.isNotBlank(emailAddress)) {
-											ByteIterable emailKey = new StringByteIterable(emailAddress);
-											int userIndex = readInt(emailToIndexStore, txn, emailKey, -1);
+										String commitMessage = currentCommit.getSubject();
+										if (currentCommit.getBody() != null)
+											commitMessage += "\n\n" + currentCommit.getBody();
+										
+										for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(commitMessage)) {
+											ByteIterable issueKey = new LongByteIterable(issueNumber);
+											Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
+											
+											boolean addNextCommit = true;
+											for (Iterator<ObjectId> it = fixingCommits.iterator(); it.hasNext();) {
+												ObjectId fixCommit = it.next();
+												if (GitUtils.isMergedInto(project.getRepository(), null, fixCommit, currentCommitId)) { 
+													it.remove();
+												} else if (GitUtils.isMergedInto(project.getRepository(), null, currentCommitId, fixCommit)) {
+													addNextCommit = false;
+													break;
+												}
+											}
+											if (addNextCommit)
+												fixingCommits.add(currentCommitId);
+											writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
+										}
+										
+										if (currentCommit.getCommitDate() != null) {
+											for (String file: currentCommit.getChangedFiles())
+												files.put(file, currentCommit.getCommitDate().getTime());
+										}
+										
+										if (currentCommit.getCommitter() != null)
+											users.add(new NameAndEmail(currentCommit.getCommitter()));
+
+										if (currentCommit.getAuthor() != null) {
+											NameAndEmail nameAndEmail = new NameAndEmail(currentCommit.getAuthor());
+											users.add(nameAndEmail);
+											
+											ByteIterable authorKey = new ArrayByteIterable(SerializationUtils.serialize(nameAndEmail));											
+											int userIndex = readInt(userToIndexStore, txn, authorKey, -1);
 											if (userIndex == -1) {
 												userIndex = nextIndex.user++;
-												writeInt(emailToIndexStore, txn, emailKey, userIndex);
-												indexToUserStore.put(txn, 
-														new IntByteIterable(userIndex), 
-														new ArrayByteIterable(SerializationUtils.serialize(nameAndEmail)));
+												writeInt(userToIndexStore, txn, authorKey, userIndex);
+												indexToUserStore.put(txn, new IntByteIterable(userIndex), authorKey);
 											}
 											
 											for (FileChange change: currentCommit.getFileChanges()) {
@@ -533,118 +487,141 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 												}
 											}
 										}
+										
+										for (FileChange change: currentCommit.getFileChanges()) {
+											if (change.getOldPath() != null && change.getNewPath() != null 
+													&& !change.getOldPath().equals(change.getNewPath())) {
+												int pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
+														nextIndex, change.getNewPath());
+												ByteIterable pathKey = new IntByteIterable(pathIndex);
+												Set<Integer> historyPathIndexes = new HashSet<>();
+												byte[] bytesOfHistoryPaths = readBytes(historyPathsStore, txn, pathKey);
+												if (bytesOfHistoryPaths == null) {
+													bytesOfHistoryPaths = new byte[0];
+													int pos = 0;
+													for (int i=0; i<bytesOfHistoryPaths.length/Integer.SIZE; i++) {
+														historyPathIndexes.add(ByteBuffer.wrap(bytesOfHistoryPaths, pos, Integer.SIZE).getInt());
+														pos += Integer.SIZE;
+													}
+												} else {
+													historyPathIndexes = new HashSet<>();
+												}
+												if (historyPathIndexes.size() < MAX_HISTORY_PATHS) {
+													int oldPathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
+															nextIndex, change.getOldPath());
+													if (!historyPathIndexes.contains(oldPathIndex)) {
+														historyPathIndexes.add(oldPathIndex);
+														byte[] newBytesOfHistoryPaths = 
+																new byte[bytesOfHistoryPaths.length+Integer.SIZE];
+														System.arraycopy(bytesOfHistoryPaths, 0, 
+																newBytesOfHistoryPaths, 0, bytesOfHistoryPaths.length);
+														ByteBuffer buffer = ByteBuffer.wrap(newBytesOfHistoryPaths, 
+																bytesOfHistoryPaths.length, Integer.BYTES);
+														buffer.putInt(oldPathIndex);
+														historyPathsStore.put(txn, pathKey, 
+																new ArrayByteIterable(newBytesOfHistoryPaths));
+													}
+												}
+											}
+										}											
 									}
-									
-									for (FileChange change: currentCommit.getFileChanges()) {
-										if (change.getOldPath() != null && change.getNewPath() != null 
-												&& !change.getOldPath().equals(change.getNewPath())) {
-											int pathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
-													nextIndex, change.getNewPath());
-											ByteIterable pathKey = new IntByteIterable(pathIndex);
-											Set<Integer> historyPathIndexes = new HashSet<>();
-											byte[] bytesOfHistoryPaths = readBytes(historyPathsStore, txn, pathKey);
-											if (bytesOfHistoryPaths == null) {
-												bytesOfHistoryPaths = new byte[0];
-												int pos = 0;
-												for (int i=0; i<bytesOfHistoryPaths.length/Integer.SIZE; i++) {
-													historyPathIndexes.add(ByteBuffer.wrap(bytesOfHistoryPaths, pos, Integer.SIZE).getInt());
-													pos += Integer.SIZE;
-												}
-											} else {
-												historyPathIndexes = new HashSet<>();
-											}
-											if (historyPathIndexes.size() < MAX_HISTORY_PATHS) {
-												int oldPathIndex = getPathIndex(pathToIndexStore, indexToPathStore, txn, 
-														nextIndex, change.getOldPath());
-												if (!historyPathIndexes.contains(oldPathIndex)) {
-													historyPathIndexes.add(oldPathIndex);
-													byte[] newBytesOfHistoryPaths = 
-															new byte[bytesOfHistoryPaths.length+Integer.SIZE];
-													System.arraycopy(bytesOfHistoryPaths, 0, 
-															newBytesOfHistoryPaths, 0, bytesOfHistoryPaths.length);
-													ByteBuffer buffer = ByteBuffer.wrap(newBytesOfHistoryPaths, 
-															bytesOfHistoryPaths.length, Integer.BYTES);
-													buffer.putInt(oldPathIndex);
-													historyPathsStore.put(txn, pathKey, 
-															new ArrayByteIterable(newBytesOfHistoryPaths));
-												}
-											}
-										}
-									}											
 								}
+
+							}.pump();
+
+							writeInt(defaultStore, txn, COMMIT_COUNT_KEY, totalCommitCount.get());
+							totalCommitCountCache.remove(project.getId());
+							
+							writeInt(defaultStore, txn, NEXT_USER_INDEX_KEY, nextIndex.user);
+							writeInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, nextIndex.path);
+							
+							userBytes = SerializationUtils.serialize((Serializable) users);
+							defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(userBytes));
+							usersCache.remove(project.getId());
+							
+							if (files.size() > MAX_COLLECTING_FILES) {
+								List<String> fileList = new ArrayList<>(files.keySet());
+								fileList.sort((file1, file2)->files.get(file1).compareTo(files.get(file2)));
+								for (int i=0; i<fileList.size() - MAX_COLLECTING_FILES; i++)
+									files.remove(fileList.get(i));
 							}
-
-						}.pump();
-
-						writeInt(defaultStore, txn, COMMIT_COUNT_KEY, totalCommitCount.get());
-						totalCommitCountCache.remove(project.getId());
-						
-						writeInt(defaultStore, txn, NEXT_USER_INDEX_KEY, nextIndex.user);
-						writeInt(defaultStore, txn, NEXT_PATH_INDEX_KEY, nextIndex.path);
-						
-						userBytes = SerializationUtils.serialize((Serializable) users);
-						defaultStore.put(txn, USERS_KEY, new ArrayByteIterable(userBytes));
-						usersCache.remove(project.getId());
-						
-						if (files.size() > MAX_COLLECTING_FILES) {
-							List<String> fileList = new ArrayList<>(files.keySet());
-							fileList.sort((file1, file2)->files.get(file1).compareTo(files.get(file2)));
-							for (int i=0; i<fileList.size() - MAX_COLLECTING_FILES; i++)
-								files.remove(fileList.get(i));
+							fileBytes = SerializationUtils.serialize((Serializable) files);
+							defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(fileBytes));
+							filesCache.remove(project.getId());
+							
+							for (Map.Entry<Long, Integer> entry: commitCountCache.entrySet()) 
+								writeInt(commitCountsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
+							
+							defaultStore.put(txn, LAST_COMMIT_KEY, new CommitByteIterable(untilCommitId));
 						}
-						fileBytes = SerializationUtils.serialize((Serializable) files);
-						defaultStore.put(txn, FILES_KEY, new ArrayByteIterable(fileBytes));
-						filesCache.remove(project.getId());
-						
-						for (Map.Entry<Long, Integer> entry: commitCountCache.entrySet()) 
-							writeInt(commitCountsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
-						
-						lastCommitIdRef.set(intermediateCommitId);
-						defaultStore.put(txn, LAST_COMMIT_KEY, new CommitByteIterable(lastCommitIdRef.get()));
-					}
-				});
-			}		
-		}
-		
-		if (GitUtils.branch2ref(project.getDefaultBranch()).equals(refName)) {
-			ObjectId lastCommitId = env.computeInTransaction(new TransactionalComputable<ObjectId>() {
-				
-				@Override
-				public ObjectId compute(Transaction txn) {
-					byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_DEFAULT_BRANCH_KEY);
-					if (lastCommitBytes != null) {
-						ObjectId lastCommitId = ObjectId.fromRaw(lastCommitBytes);
-						if (repository.hasObject(lastCommitId) 
-								&& GitUtils.isMergedInto(repository, null, lastCommitId, commitId)) {
-							return lastCommitId;
-						} 
-					} 
-					return null;
+					});
 				}
 				
 			});
+		}
+		
+		if (GitUtils.branch2ref(project.getDefaultBranch()).equals(refName)) {
+			collectLineStats(project, commitId);
+			collectContribs(project, commitId);
+		}		
+		
+		logger.debug("Collected commit information (project: {}, ref: {})", project.getName(), refName);
+	}
+
+	private void collectContribs(Project project, ObjectId commitId) {
+		Environment env = getEnv(project.getId().toString());
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+		Store userToIndexStore = getStore(env, USER_TO_INDEX_STORE);
+		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);	
+		
+		Repository repository = project.getRepository();
+		
+		ObjectId lastCommitId = env.computeInTransaction(new TransactionalComputable<ObjectId>() {
 			
-			if (lastCommitId == null) {
-				Map<Integer, Map<String, Integer>> lineStats = new HashMap<>();
-				Map<Integer, Map<Integer, Contribution>> dailyContributionsCache = new HashMap<>();
-				Map<Integer, Contribution> overallContributions = new HashMap<>();
-				
+			@Override
+			public ObjectId compute(Transaction txn) {
+				ObjectId lastCommitId;
+				byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_CONTRIBS_KEY);
+				if (lastCommitBytes != null) {
+					lastCommitId = ObjectId.fromRaw(lastCommitBytes);
+					if (!repository.hasObject(lastCommitId))
+						lastCommitId = null;
+				} else {
+					lastCommitId = null;
+				}
+				return lastCommitId;
+			}
+		});
+	
+		processCommitRange(project, commitId, lastCommitId, new CommitRangeProcessor() {
+
+			@Override
+			public void process(ObjectId untilCommitId, ObjectId sinceCommitId) {
 				env.executeInTransaction(new TransactionalExecutable() {
 					
 					@Override
 					public void execute(Transaction txn) {
+						Map<Integer, Contribution> overallContributions = 
+								deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
+						
+						Map<Integer, Map<Integer, Contribution>> dailyContributionsCache = new HashMap<>();
+						
 						new ElementPumper<GitCommit>() {
 
 							@Override
 							public void generate(Consumer<GitCommit> consumer) {
 								List<String> revisions = new ArrayList<>();
-								revisions.add(commitId.name());
+								revisions.add(untilCommitId.name());
 
-								EnumSet<LogCommand.Field> fields = EnumSet.allOf(LogCommand.Field.class);
-								fields.remove(LogCommand.Field.SUBJECT);
-								fields.remove(LogCommand.Field.BODY);
-								fields.remove(LogCommand.Field.COMMITTER);
-								fields.remove(LogCommand.Field.PARENTS);
+								if (sinceCommitId != null)
+									revisions.add("^" + sinceCommitId.name());
+
+								EnumSet<LogCommand.Field> fields = EnumSet.of(
+										LogCommand.Field.AUTHOR, 
+										LogCommand.Field.COMMIT_DATE,
+										LogCommand.Field.PARENTS,
+										LogCommand.Field.LINE_CHANGES);
+								
 								new LogCommand(project.getGitDir()) {
 
 									@Override
@@ -652,26 +629,34 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 										consumer.accept(commit);
 									}
 									
-								}.firstParent(true).revisions(revisions).fields(fields).call();
+								}.revisions(revisions).fields(fields).call();
 							}
 
 							@Override
 							public void process(GitCommit currentCommit) {
-								updateOverallContributionsAndLineStats(txn, emailToIndexStore, 
-										currentCommit, lineStats, overallContributions);
-								int dayValue = new Day(currentCommit.getCommitDate()).getValue();
-								Map<Integer, Contribution> contributionsOnDay = dailyContributionsCache.get(dayValue);
-								if (contributionsOnDay == null) {
-									contributionsOnDay = new HashMap<>();
-									dailyContributionsCache.put(dayValue, contributionsOnDay);
+								if (currentCommit.getCommitDate() != null && currentCommit.getParentHashes().size() <= 1) {
+									int dayValue = new Day(currentCommit.getCommitDate()).getValue();
+									updateContribution(overallContributions, dayValue, currentCommit);
+
+									if (currentCommit.getAuthor() != null) {
+										NameAndEmail author = new NameAndEmail(currentCommit.getAuthor());
+										ByteIterable authorKey = new ArrayByteIterable(SerializationUtils.serialize(author));											
+										int userIndex = readInt(userToIndexStore, txn, authorKey, -1);
+										Preconditions.checkState(userIndex != -1);
+
+										Map<Integer, Contribution> contributionsOnDay = dailyContributionsCache.get(dayValue);
+										if (contributionsOnDay == null) {
+											contributionsOnDay = deserializeContributions(readBytes(
+													dailyContributionsStore, txn, new IntByteIterable(dayValue)));
+											dailyContributionsCache.put(dayValue, contributionsOnDay);
+										}
+										updateContribution(contributionsOnDay, userIndex, currentCommit);
+									}
 								}
-								updateContribution(txn, emailToIndexStore, currentCommit, contributionsOnDay);
 							}
-							
+
 						}.pump();
 						
-						for (int dayValue: deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY)).keySet()) 
-							dailyContributionsStore.delete(txn, new IntByteIterable(dayValue));
 						for (Map.Entry<Integer, Map<Integer, Contribution>> entry: dailyContributionsCache.entrySet()) {
 							byte[] bytesOfContributionsOnDay = serializeContributions(entry.getValue());
 							dailyContributionsStore.put(txn, new IntByteIterable(entry.getKey()), 
@@ -680,80 +665,169 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						defaultStore.put(txn, OVERALL_CONTRIBUTIONS_KEY, 
 								new ArrayByteIterable(serializeContributions(overallContributions)));
 						
-						byte[] bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
-						defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
-						
-						defaultStore.put(txn, LAST_COMMIT_OF_DEFAULT_BRANCH_KEY, new CommitByteIterable(commitId));
+						defaultStore.put(txn, LAST_COMMIT_OF_CONTRIBS_KEY, new CommitByteIterable(untilCommitId));
 					}
 					
 				});
-			} else {
-				env.executeInTransaction(new TransactionalExecutable() {
+			}
+			
+		});
+	}
+	
+	private void collectLineStats(Project project, ObjectId commitId) {
+		Environment env = getEnv(project.getId().toString());
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+		
+		Repository repository = project.getRepository();
+		
+		ObjectId lastCommitId = env.computeInTransaction(new TransactionalComputable<ObjectId>() {
+			
+			@Override
+			public ObjectId compute(Transaction txn) {
+				byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_LINE_STATS_KEY);
+				if (lastCommitBytes != null) {
+					ObjectId lastCommitId = ObjectId.fromRaw(lastCommitBytes);
+					if (repository.hasObject(lastCommitId) 
+							&& GitUtils.isMergedInto(repository, null, lastCommitId, commitId)) {
+						return lastCommitId;
+					} 
+				} 
+				return null;
+			}
+			
+		});
+
+		if (lastCommitId == null) {
+			env.executeInTransaction(new TransactionalExecutable() {
+				
+				@Override
+				public void execute(Transaction txn) {
+					Map<Integer, Map<String, Integer>> lineStats = new HashMap<>();
 					
-					@SuppressWarnings("unchecked")
-					@Override
-					public void execute(Transaction txn) {
-						Map<Integer, Map<String, Integer>> lineStats;
-						byte[] bytesOfLineStats = readBytes(defaultStore, txn, LINE_STATS_KEY);
-						if (bytesOfLineStats != null) {
-							lineStats = (Map<Integer, Map<String, Integer>>) SerializationUtils.deserialize(
-									bytesOfLineStats);
-						} else {
-							lineStats = new HashMap<>();
+					new ElementPumper<GitCommit>() {
+
+						@Override
+						public void generate(Consumer<GitCommit> consumer) {
+							List<String> revisions = new ArrayList<>();
+							revisions.add(commitId.name());
+
+							EnumSet<LogCommand.Field> fields = EnumSet.of(
+									LogCommand.Field.COMMIT_DATE, 
+									LogCommand.Field.LINE_CHANGES);
+							
+							new LogCommand(project.getGitDir()) {
+
+								@Override
+								protected void consume(GitCommit commit) {
+									consumer.accept(commit);
+								}
+								
+							}.firstParent(true).revisions(revisions).fields(fields).call();
+						}
+
+						@Override
+						public void process(GitCommit currentCommit) {
+							updateLineStats(txn, currentCommit, lineStats);
 						}
 						
-						ListNumStatsCommand command = new ListNumStatsCommand(project.getGitDir());
-						List<FileChange> fileChanges = command.fromRev(lastCommitId.name()).toRev(commitId.name()).call();
-						RevCommit revCommit = project.getRevCommit(commitId, true);
-						GitCommit gitCommit = new GitCommit(revCommit.name(), null, null, revCommit.getAuthorIdent(), 
-								revCommit.getCommitterIdent().getWhen(), null, null, fileChanges);
-						
-						int dayValue = new Day(revCommit.getCommitterIdent().getWhen()).getValue();
-						Map<Integer, Contribution> contributionsOnDay = deserializeContributions(
-								readBytes(dailyContributionsStore, txn, new IntByteIterable(dayValue)));	
-						Map<Integer, Contribution> overallContributions = 
-								deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
-						
-						updateOverallContributionsAndLineStats(txn, emailToIndexStore, gitCommit, lineStats, overallContributions);
-						updateContribution(txn, emailToIndexStore, gitCommit, contributionsOnDay);
-
-						byte[] bytesOfContributionsOnDay = serializeContributions(contributionsOnDay);
-						dailyContributionsStore.put(txn, new IntByteIterable(dayValue), 
-								new ArrayByteIterable(bytesOfContributionsOnDay));
-						defaultStore.put(txn, OVERALL_CONTRIBUTIONS_KEY, 
-								new ArrayByteIterable(serializeContributions(overallContributions)));
-						
-						bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
-						defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
-						
-						defaultStore.put(txn, LAST_COMMIT_OF_DEFAULT_BRANCH_KEY, new CommitByteIterable(commitId));
+					}.pump();
+					
+					byte[] bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
+					defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
+					
+					defaultStore.put(txn, LAST_COMMIT_OF_LINE_STATS_KEY, new CommitByteIterable(commitId));
+				}
+				
+			});
+		} else {
+			env.executeInTransaction(new TransactionalExecutable() {
+				
+				@SuppressWarnings("unchecked")
+				@Override
+				public void execute(Transaction txn) {
+					Map<Integer, Map<String, Integer>> lineStats;
+					byte[] bytesOfLineStats = readBytes(defaultStore, txn, LINE_STATS_KEY);
+					if (bytesOfLineStats != null) {
+						lineStats = (Map<Integer, Map<String, Integer>>) SerializationUtils.deserialize(
+								bytesOfLineStats);
+					} else {
+						lineStats = new HashMap<>();
 					}
 					
-				});
+					ListNumStatsCommand command = new ListNumStatsCommand(project.getGitDir());
+					List<FileChange> fileChanges = command.fromRev(lastCommitId.name()).toRev(commitId.name()).call();
+					RevCommit revCommit = project.getRevCommit(commitId, true);
+					GitCommit gitCommit = new GitCommit(revCommit.name(), null, null, revCommit.getAuthorIdent(), 
+							revCommit.getCommitterIdent().getWhen(), null, null, fileChanges);
+					
+					updateLineStats(txn, gitCommit, lineStats);
+
+					bytesOfLineStats = SerializationUtils.serialize((Serializable) lineStats);
+					defaultStore.put(txn, LINE_STATS_KEY, new ArrayByteIterable(bytesOfLineStats));
+					
+					defaultStore.put(txn, LAST_COMMIT_OF_LINE_STATS_KEY, new CommitByteIterable(commitId));
+				}
 				
-			}		
+			});
+			
 		}		
+	}
+	
+	private void processCommitRange(Project project, ObjectId untilCommitId, 
+			@Nullable ObjectId sinceCommitId, CommitRangeProcessor commitRangeProcessor) {
+		RevListCommand revList = new RevListCommand(project.getGitDir());
+		List<String> revisions = new ArrayList<>();
+		revisions.add(untilCommitId.name());
+		if (sinceCommitId != null) 
+			revisions.add("^" + sinceCommitId.name());
+		revList.revisions(revisions).order(Order.TOPO);
 		
-		logger.debug("Collected commit information (project: {}, ref: {})", project.getName(), refName);
-	}
-	
-	private void updateContribution(Transaction txn, Store emailToIndexStore, 
-			GitCommit currentCommit, Map<Integer, Contribution> contributionsOnDay) {
-		if (currentCommit.getAuthor() != null 
-				&& StringUtils.isNotBlank(currentCommit.getAuthor().getEmailAddress())) {
-			String emailAddress = currentCommit.getAuthor().getEmailAddress();
-			ByteIterable emailKey = new StringByteIterable(emailAddress);
-			int userIndex = readInt(emailToIndexStore, txn, emailKey, -1);
-			Preconditions.checkState(userIndex != -1);
-			updateContribution(contributionsOnDay, userIndex, currentCommit);
+		List<ObjectId> historyIds = new ArrayList<>();
+		for (String commitHash: revList.call()) 
+			historyIds.add(ObjectId.fromString(commitHash));
+		
+		revList = new RevListCommand(project.getGitDir());
+		revList.revisions(revisions).order(null).firstParent(true);
+		
+		Set<ObjectId> firstParentIds = new HashSet<>();
+		for (String commitHash: revList.call()) 
+			firstParentIds.add(ObjectId.fromString(commitHash));
+
+		/*
+		 * Instead of collecting information of master branch all at once, we identify some  
+		 * intermediate commits and collect the information using these intermediate commits 
+		 * multiple times for two reasons:
+		 * 1. Use less memory
+		 * 2. Commit Exodus transaction sooner so user can use auto-completion when search 
+		 * commits even if collection is not done yet
+		 */
+		List<ObjectId> intermediateCommitIds = new ArrayList<>();
+		int count = 0;
+		for (ObjectId historyId: historyIds) {
+			count++;
+			/*
+			 * Only use intermediate commits that are part of first parent chain. This 
+			 * makes sure that subsequent intermediate commits are always ancestor of 
+			 * current intermediate commit (after reverse done below), to avoid 
+			 * collecting some commits multiple times
+			 */
+			if (count > COLLECT_BATCH_SIZE && firstParentIds.contains(historyId)) {
+				intermediateCommitIds.add(historyId);
+				count = 0;
+			}
 		}
+
+		Collections.reverse(intermediateCommitIds);
+		intermediateCommitIds.add(untilCommitId);
+		
+		for(ObjectId intermediateCommitId: intermediateCommitIds) {
+			commitRangeProcessor.process(intermediateCommitId, sinceCommitId);
+			sinceCommitId = intermediateCommitId;
+		}		
 	}
-	
-	private void updateOverallContributionsAndLineStats(Transaction txn, Store emailToIndexStore, 
-			GitCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats, 
-			Map<Integer, Contribution> overallContributions) {		
+		
+	private void updateLineStats(Transaction txn, GitCommit currentCommit, Map<Integer, Map<String, Integer>> lineStats) {		
 		int dayValue = new Day(currentCommit.getCommitDate()).getValue();
-		updateContribution(overallContributions, dayValue, currentCommit);
 		
 		Map<String, Integer> lineStatsOnDay = lineStats.get(dayValue);
 		if (lineStatsOnDay == null) {
@@ -920,7 +994,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	public int getCommitCount(Project project, User user, String path) {
 		if (user.getEmail() != null) {
 			Environment env = getEnv(project.getId().toString());
-			Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
+			Store emailToIndexStore = getStore(env, USER_TO_INDEX_STORE);
 			Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
 			Store commitCountStore = getStore(env, COMMIT_COUNTS_STORE);
 			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
@@ -1399,4 +1473,9 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		int path;
 	}
 
+	private static interface CommitRangeProcessor {
+		
+		void process(ObjectId untilCommitId, @Nullable ObjectId sinceCommitId);
+		
+	}
 }
