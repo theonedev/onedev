@@ -13,6 +13,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -128,8 +130,9 @@ public class NoCommitsPanel extends Panel {
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				Fragment fragment = new Fragment(id, "pushInstructionsFrag", NoCommitsPanel.this);
-				fragment.add(new Label("url1", context.getProject().getUrl()));
-				fragment.add(new Label("url2", context.getProject().getUrl()));
+				UrlManager urlManager = OneDev.getInstance(UrlManager.class);
+				fragment.add(new Label("httpUrl", urlManager.httpCloneUrlFor(context.getProject())));
+				fragment.add(new Label("sshUrl", urlManager.sshCloneUrlFor(context.getProject())));
 				return fragment;
 			}
 			

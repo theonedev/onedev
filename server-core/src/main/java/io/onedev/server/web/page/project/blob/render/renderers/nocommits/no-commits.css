@@ -12,13 +12,19 @@
 }
 .push-instructions .title {
 	font-weight: bold;
+	font-size: 16px;
 	margin-bottom: 12px;
 }
 .push-instructions .content {
+	border: 1px dashed #BBB;
+	background: #F5F5F5;
+	border-radius: 4px;
+	padding: 8px;
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	font-size: 13px;
 	margin-bottom: 8px;
 }
-.push-instructions .help-block {
-	margin-bottom: 0;
+.push-instructions .note {
+	font-size: 12px;
+	color: #666;
 }

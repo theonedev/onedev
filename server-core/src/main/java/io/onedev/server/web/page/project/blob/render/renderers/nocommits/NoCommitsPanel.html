@@ -8,10 +8,10 @@
 		<div class="push-instructions">
 			<div class="title">Run below commands from within your git repository:</div>
 			<div class="content">
-				<div>git remote add origin <span wicket:id="url1"></span></div>
+				<div>git remote add origin <span wicket:id="httpUrl"></span></div>
 				<div>git push -u origin master</div>
 			</div>
-			<div class="help-block"><i class="fa fa-info-circle"></i> In case remote <em>origin</em> already exists, use another name other than <em>origin</em>, or run command <em>git remote set-url origin <span wicket:id="url2"></span></em> instead</div>		
+			<div class="note"><i class="fa fa-info-circle"></i> Use url <b wicket:id="sshUrl"></b> if you want to push via SSH</div>
 		</div>
 	</wicket:fragment>
 </wicket:panel>
