@@ -443,10 +443,10 @@ public class LdapAuthenticator extends Authenticator {
 	private SshKey parseSshKey(int keyIndex, String content) {
 		try {
 			PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-	        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
+	        String digest = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, pubEntry);
 			
 	        SshKey sshKey = new SshKey();
-	        sshKey.setDigest(fingerPrint);
+	        sshKey.setDigest(digest);
 	        sshKey.setContent(content);
 	        
 	        return sshKey;

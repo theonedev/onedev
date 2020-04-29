@@ -15,15 +15,13 @@ import java.util.List;
 import org.apache.sshd.common.config.keys.AuthorizedKeyEntry;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.config.keys.PublicKeyEntryResolver;
-import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 public class SshKeyUtils {
-    public static final BaseDigest MD5_DIGESTER = new BaseDigest("MD5", 512);
-    
+	
     public static PublicKey decodeSshPublicKey(String publicKey) throws IOException, GeneralSecurityException {
         StringReader stringReader = new StringReader(publicKey);
         List<AuthorizedKeyEntry> entries = AuthorizedKeyEntry.readAuthorizedKeys(stringReader, true);

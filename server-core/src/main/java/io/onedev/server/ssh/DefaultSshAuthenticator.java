@@ -29,8 +29,8 @@ public class DefaultSshAuthenticator implements SshAuthenticator {
 	@Sessional
 	@Override
 	public boolean authenticate(String username, PublicKey key, ServerSession session) throws AsyncAuthException {
-        String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, key);  
-        SshKey sshKey = sshKeyManager.findByDigest(fingerPrint);
+        String digest = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, key);  
+        SshKey sshKey = sshKeyManager.findByDigest(digest);
         if (sshKey != null) {
             session.setAttribute(ATTR_PUBLIC_KEY_OWNER_ID, sshKey.getOwner().getId());
             return true;

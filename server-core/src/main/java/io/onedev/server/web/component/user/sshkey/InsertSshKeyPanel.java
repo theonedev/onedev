@@ -60,7 +60,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 try {
                     PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(sshKey.getContent());
-                    String fingerPrint = KeyUtils.getFingerPrint(SshKeyUtils.MD5_DIGESTER, pubEntry);
+                    String fingerPrint = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, pubEntry);
                     sshKey.setDigest(fingerPrint);
                 } catch (IOException | GeneralSecurityException e) {
                     throw new RuntimeException(e);

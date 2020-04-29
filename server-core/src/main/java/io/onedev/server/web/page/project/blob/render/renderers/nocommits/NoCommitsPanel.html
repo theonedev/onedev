@@ -11,7 +11,10 @@
 				<div>git remote add origin <span wicket:id="httpUrl"></span></div>
 				<div>git push -u origin master</div>
 			</div>
-			<div class="note"><i class="fa fa-info-circle"></i> Use url <b wicket:id="sshUrl"></b> if you want to push via SSH</div>
+			<div class="note">
+				<div>Use url <b wicket:id="sshUrl"></b> if you want to push via SSH</div> 
+				<div>(server fingerprint: <span wicket:id="fingerPrint"></span>)</div>
+			</div>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

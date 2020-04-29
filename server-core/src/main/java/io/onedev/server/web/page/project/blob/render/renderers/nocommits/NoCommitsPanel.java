@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.util.SecurityUtils;
@@ -133,6 +134,8 @@ public class NoCommitsPanel extends Panel {
 				UrlManager urlManager = OneDev.getInstance(UrlManager.class);
 				fragment.add(new Label("httpUrl", urlManager.httpCloneUrlFor(context.getProject())));
 				fragment.add(new Label("sshUrl", urlManager.sshCloneUrlFor(context.getProject())));
+				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+				fragment.add(new Label("fingerPrint", settingManager.getSshSetting().getFingerPrint()));
 				return fragment;
 			}
 			

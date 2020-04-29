@@ -183,3 +183,12 @@ body.ProjectBlobPage.additionalWidth3 {
 .clone-or-download>.download>:last-child {
 	padding-left: 10px;
 }
+.clone-or-download .finger-print {
+	font-size: 13px;
+}
+.clone-or-download .finger-print .name {
+	font-weight: bold;
+}
+.clone-or-download .finger-print .value {
+	word-break: break-all;
+}

@@ -17,6 +17,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
@@ -120,6 +121,16 @@ public abstract class CloneOrDownloadPanel extends Panel {
 		};
 		add(new TextField<String>("cloneUrl", cloneUrlModel));
 		add(new CopyToClipboardLink("copyCloneUrl", cloneUrlModel));
+
+		add(new Label("fingerPrint", OneDev.getInstance(SettingManager.class).getSshSetting().getFingerPrint()) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(cloneViaSSH);
+			}
+			
+		});
 		
 		add(new ResourceLink<Void>("downloadAsZip", new ArchiveDownloadResourceReference(), 
 				ArchiveDownloadResource.paramsOf(getProject(), getRevision(), ArchiveDownloadResource.FORMAT_ZIP)) {
