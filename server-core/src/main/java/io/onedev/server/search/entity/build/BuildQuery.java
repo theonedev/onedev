@@ -142,9 +142,9 @@ public class BuildQuery extends EntityQuery<Build> {
 					public EntityCriteria<Build> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.SubmittedBy() != null) 
-							return new SubmittedByCriteria(value);
+							return new SubmittedByCriteria(getUser(value));
 						else if (ctx.CancelledBy() != null) 
-							return new CancelledByCriteria(value);
+							return new CancelledByCriteria(getUser(value));
 						else if (ctx.FixedIssue() != null) 
 							return new FixedIssueCriteria(project, value);
 						else if (ctx.DependsOn() != null) 

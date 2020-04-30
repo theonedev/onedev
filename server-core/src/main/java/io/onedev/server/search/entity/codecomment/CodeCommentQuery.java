@@ -101,7 +101,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						int operator = ctx.operator.getType();
 						String value = getValue(ctx.Quoted().getText());
 						if (operator == CodeCommentQueryLexer.CreatedBy) {
-							return new CreatedByCriteria(value);
+							return new CreatedByCriteria(getUser(value));
 						} else {
 							ProjectScopedCommit commitId = getCommitId(project, value); 
 							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());

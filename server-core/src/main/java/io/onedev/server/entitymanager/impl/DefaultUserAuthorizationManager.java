@@ -26,8 +26,8 @@ public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserA
 	
 	@Transactional
 	@Override
-	public void authorize(User user, Collection<UserAuthorization> authorizations) {
-		for (Iterator<UserAuthorization> it = user.getProjectAuthorizations().iterator(); it.hasNext();) {
+	public void syncAuthorizations(User user, Collection<UserAuthorization> authorizations) {
+		for (Iterator<UserAuthorization> it = user.getAuthorizations().iterator(); it.hasNext();) {
 			UserAuthorization authorization = it.next();
 			boolean found = false;
 			for (UserAuthorization newAuthorization: authorizations) {
@@ -45,14 +45,14 @@ public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserA
 
 		for (UserAuthorization newAuthorization: authorizations) {
 			boolean found = false;
-			for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+			for (UserAuthorization authorization: user.getAuthorizations()) {
 				if (authorization.getProject().equals(newAuthorization.getProject())) {
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				user.getProjectAuthorizations().add(newAuthorization);
+				user.getAuthorizations().add(newAuthorization);
 				save(newAuthorization);
 			}
 		}
@@ -70,7 +70,7 @@ public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserA
 	
 	@Transactional
 	@Override
-	public void authorize(Project project, Collection<UserAuthorization> authorizations) {
+	public void syncAuthorizations(Project project, Collection<UserAuthorization> authorizations) {
 		for (Iterator<UserAuthorization> it = project.getUserAuthorizations().iterator(); it.hasNext();) {
 			UserAuthorization authorization = it.next();
 			boolean found = false;

@@ -213,7 +213,7 @@ public class RoleListPage extends AdministrationPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setEnabled(!rowModel.getObject().isManager());
+						setEnabled(!rowModel.getObject().isOwner());
 					}
 					
 				});

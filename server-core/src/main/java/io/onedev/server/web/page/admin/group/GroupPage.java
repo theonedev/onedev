@@ -83,8 +83,7 @@ public abstract class GroupPage extends AdministrationPage {
 		
 		tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
 		tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
-		if (SecurityUtils.isAdministrator() && !getGroup().isAdministrator())
-			tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
+		tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
 		return tabs;
 	}
 

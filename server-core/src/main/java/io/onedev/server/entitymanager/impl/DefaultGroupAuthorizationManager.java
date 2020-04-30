@@ -25,8 +25,8 @@ public class DefaultGroupAuthorizationManager extends AbstractEntityManager<Grou
 
 	@Transactional
 	@Override
-	public void authorize(Group group, Collection<GroupAuthorization> authorizations) {
-		for (Iterator<GroupAuthorization> it = group.getProjectAuthorizations().iterator(); it.hasNext();) {
+	public void syncAuthorizations(Group group, Collection<GroupAuthorization> authorizations) {
+		for (Iterator<GroupAuthorization> it = group.getAuthorizations().iterator(); it.hasNext();) {
 			GroupAuthorization authorization = it.next();
 			boolean found = false;
 			for (GroupAuthorization newAuthorization: authorizations) {
@@ -44,14 +44,14 @@ public class DefaultGroupAuthorizationManager extends AbstractEntityManager<Grou
 
 		for (GroupAuthorization newAuthorization: authorizations) {
 			boolean found = false;
-			for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
+			for (GroupAuthorization authorization: group.getAuthorizations()) {
 				if (authorization.getProject().equals(newAuthorization.getProject())) {
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				group.getProjectAuthorizations().add(newAuthorization);
+				group.getAuthorizations().add(newAuthorization);
 				save(newAuthorization);
 			}
 		}

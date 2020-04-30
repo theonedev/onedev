@@ -16,7 +16,7 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.issue.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
 
 @SuppressWarnings("serial")
 public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {

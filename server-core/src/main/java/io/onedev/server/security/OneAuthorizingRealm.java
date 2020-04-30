@@ -38,7 +38,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
@@ -47,6 +46,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.permission.AccessBuildLog;
@@ -115,7 +115,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		}
 		if (user != null && group.isCreateProjects())
 			permissions.add(new CreateProjects());
-		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
+		for (GroupAuthorization authorization: group.getAuthorizations()) 
 			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 		return permissions;
 	}
@@ -135,7 +135,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		        	permissions.add(new UserAdministration(user));
 		           	for (Group group: user.getGroups())
 		           		permissions.addAll(getGroupPermissions(group, user));
-		        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
+		        	for (UserAuthorization authorization: user.getAuthorizations()) 
     					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 		        } 
 	        	Group group = groupManager.findAnonymous();
@@ -270,7 +270,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	    			
 			    	if (authenticated.getSshKeys() != null) {
 			    		SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-			    		sshKeyManager.syncUserKeys(user, authenticated.getSshKeys());
+			    		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
 			    	}
 		    	}
 		    	

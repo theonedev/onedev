@@ -21,21 +21,21 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.issue.fieldspec.BooleanField;
-import io.onedev.server.issue.fieldspec.BuildChoiceField;
-import io.onedev.server.issue.fieldspec.ChoiceField;
-import io.onedev.server.issue.fieldspec.CommitField;
-import io.onedev.server.issue.fieldspec.DateField;
-import io.onedev.server.issue.fieldspec.FieldSpec;
-import io.onedev.server.issue.fieldspec.GroupChoiceField;
-import io.onedev.server.issue.fieldspec.IssueChoiceField;
-import io.onedev.server.issue.fieldspec.NumberField;
-import io.onedev.server.issue.fieldspec.PullRequestChoiceField;
-import io.onedev.server.issue.fieldspec.TextField;
-import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.BooleanField;
+import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.CommitField;
+import io.onedev.server.model.support.issue.fieldspec.DateField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.GroupChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.IssueChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.NumberField;
+import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.TextField;
+import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -167,7 +167,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.SubmittedBy() != null) 
-							return new SubmittedByCriteria(value);
+							return new SubmittedByCriteria(getUser(value));
 						else if (ctx.FixedInBuild() != null) 
 							return new FixedInBuildCriteria(project, value);
 						else if (ctx.FixedInPullRequest() != null) 

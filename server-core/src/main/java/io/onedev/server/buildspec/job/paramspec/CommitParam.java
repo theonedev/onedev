@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.job.paramspec;
 import java.util.List;
 import java.util.Map;
 
-import io.onedev.server.util.inputspec.CommitInput;
+import io.onedev.server.model.support.inputspec.CommitInput;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=1400, name=ParamSpec.COMMIT)

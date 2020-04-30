@@ -20,11 +20,8 @@ public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
 
 	private final User user;
 	
-	private final String value;
-	
-	public ToBeReviewedByCriteria(String value) {
-		user = EntityQuery.getUser(value);
-		this.value = value;
+	public ToBeReviewedByCriteria(User user) {
+		this.user = user;
 	}
 	
 	@Override
@@ -48,7 +45,7 @@ public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) + " " + quote(value);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) + " " + quote(user.getName());
 	}
 
 }

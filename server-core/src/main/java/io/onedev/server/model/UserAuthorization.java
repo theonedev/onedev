@@ -20,6 +20,12 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class UserAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static String PROP_POJRECT = "project";
+	
+	public static String PROP_USER = "user";
+	
+	public static String PROP_ROLE = "role";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

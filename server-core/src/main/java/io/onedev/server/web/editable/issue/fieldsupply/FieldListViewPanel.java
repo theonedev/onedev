@@ -11,9 +11,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import io.onedev.server.issue.fieldsupply.FieldSupply;
-import io.onedev.server.issue.fieldsupply.ScriptingValue;
-import io.onedev.server.issue.fieldsupply.SpecifiedValue;
+import io.onedev.server.model.support.issue.fieldsupply.FieldSupply;
+import io.onedev.server.model.support.issue.fieldsupply.ScriptingValue;
+import io.onedev.server.model.support.issue.fieldsupply.SpecifiedValue;
 import io.onedev.server.web.editable.PropertyContext;
 
 @SuppressWarnings("serial")

@@ -136,8 +136,8 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 
     @Sessional
     @Override
-    public Role getManager() {
-    	return load(Role.MANAGER_ID);
+    public Role getOwner() {
+    	return load(Role.OWNER_ID);
     }
 
 	@Override

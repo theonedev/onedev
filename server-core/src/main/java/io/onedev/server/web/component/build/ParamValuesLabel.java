@@ -5,8 +5,8 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.inputspec.SecretInput;
 
 @SuppressWarnings("serial")
 public class ParamValuesLabel extends Label {

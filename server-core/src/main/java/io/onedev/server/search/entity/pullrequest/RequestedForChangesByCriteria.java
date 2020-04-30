@@ -20,11 +20,8 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 
 	private final User user;
 	
-	private final String value;
-	
-	public RequestedForChangesByCriteria(String value) {
-		user = EntityQuery.getUser(value);
-		this.value = value;
+	public RequestedForChangesByCriteria(User user) {
+		this.user = user;
 	}
 	
 	@Override
@@ -34,7 +31,7 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.PROP_EXCLUDE_DATE);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
 		join.on(builder.and(
-				builder.equal(userPath, this.user), 
+				builder.equal(userPath, user), 
 				builder.isNull(excludeDatePath), 
 				builder.equal(approvedPath, false)));
 		return join.isNotNull();
@@ -49,7 +46,7 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.RequestedForChangesBy) + " " + quote(value);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.RequestedForChangesBy) + " " + quote(user.getName());
 	}
 
 }

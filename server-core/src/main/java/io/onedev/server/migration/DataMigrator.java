@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1791,6 +1790,201 @@ public class DataMigrator {
 	
 	// from 3.0.11 to 3.0.12
 	private void migrate39(File dataDir, Stack<Integer> versions) {
+	}
+
+	// from 3.0.x to 3.1.x
+	private void migrate40(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().contains(".xml")) {
+				try {
+					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					content = StringUtils.replace(content, "io.onedev.server.issue.", 
+							"io.onedev.server.model.support.issue.");
+					content = StringUtils.replace(content, "io.onedev.server.util.inputspec.", 
+							"io.onedev.server.model.support.inputspec.");
+					FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		
+		long maxRoleId = 0;
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					long roleId = Long.parseLong(element.elementTextTrim("id"));
+					if (roleId > maxRoleId) 
+						maxRoleId = roleId;
+				}
+			}
+		}
+		
+		boolean hasOwnerRole = false;
+		String idOfRolePreviouslyUsingOwnerId = null;
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element idElement = element.element("id");
+					if (idElement.getText().trim().equals("1")) {
+						if (element.elementText("manageProject").equals("true")) {
+							element.element("name").setText("Owner");
+							hasOwnerRole = true;
+						} else {
+							idOfRolePreviouslyUsingOwnerId = String.valueOf(maxRoleId+1);
+							idElement.setText(idOfRolePreviouslyUsingOwnerId);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		if (!hasOwnerRole) {
+			File dataFile = new File(dataDir, "Roles.xml");
+			VersionedXmlDoc dom = VersionedXmlDoc.fromFile(dataFile);
+			Element ownerRoleElement = dom.getRootElement().addElement("io.onedev.server.model.Role");
+			ownerRoleElement.addAttribute("revision", "0.0");
+			ownerRoleElement.addElement("id").setText("1");
+			ownerRoleElement.addElement("name").setText("Owner");
+			ownerRoleElement.addElement("manageProject").setText("true");
+			ownerRoleElement.addElement("managePullRequests").setText("false");
+			ownerRoleElement.addElement("manageCodeComments").setText("false");
+			ownerRoleElement.addElement("codePrivilege").setText("NONE");
+			ownerRoleElement.addElement("manageIssues").setText("false");
+			ownerRoleElement.addElement("scheduleIssues").setText("false");
+			ownerRoleElement.addElement("editableIssueFields").addAttribute("class", 
+					"io.onedev.server.model.support.role.AllIssueFields");
+			ownerRoleElement.addElement("manageBuilds").setText("false");
+			ownerRoleElement.addElement("jobPrivileges");
+			dom.writeToFile(dataFile, false);
+		}
+		
+		if (idOfRolePreviouslyUsingOwnerId != null) {
+			for (File file: dataDir.listFiles()) {
+				if (file.getName().startsWith("UserAuthorizations.xml") 
+						|| file.getName().startsWith("GroupAuthorizations.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) {
+						Element roleElement = element.element("role");
+						if (roleElement.getText().trim().equals("1"))
+							roleElement.setText(idOfRolePreviouslyUsingOwnerId);
+					}
+					dom.writeToFile(file, false);
+				}
+			}
+		}
+		
+		Map<String, Element> userBuildSettingElements = new HashMap<>();
+		Map<String, Element> userWebHooksElements = new HashMap<>();
+		Map<String, String> projectOwners = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.element("defaultTransitionSpecs").setName("transitionSpecs");
+							valueElement.element("defaultPromptFieldsUponIssueOpen").setName("promptFieldsUponIssueOpen");
+							valueElement.element("defaultBoardSpecs").setName("boardSpecs");
+							for (Node node: valueElement.selectNodes("//uuid"))
+								node.detach();
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					projectOwners.put(element.elementText("id").trim(), element.elementText("owner").trim());
+					
+					Element transitionSpecsElement = element.element("transitionSpecs");
+					if (transitionSpecsElement != null)
+						transitionSpecsElement.detach();
+					Element promptFieldsUponIssueOpenElement = element.element("promptFieldsUponIssueOpen");
+					if (promptFieldsUponIssueOpenElement != null)
+						promptFieldsUponIssueOpenElement.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementText("id").trim();
+					Element buildSettingElement = element.element("buildSetting");
+					buildSettingElement.detach();
+					userBuildSettingElements.put(id, buildSettingElement);
+					Element webHooksElement = element.element("webHooks");
+					webHooksElement.detach();
+					userWebHooksElements.put(id, webHooksElement);
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		
+		long maxUserAuthorizationId = 0;
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element ownerElement = element.element("owner");
+					ownerElement.detach();
+					
+					String ownerId = ownerElement.getText().trim();
+					
+					for (Element webHookElement: userWebHooksElements.get(ownerId).elements())
+						element.element("webHooks").add(webHookElement.createCopy());
+					
+					Element buildSettingElement = element.element("buildSetting");
+					Element userBuildSettingElement = userBuildSettingElements.get(ownerId);
+					
+					for (Element buildPreservationElement: userBuildSettingElement.element("buildPreservations").elements()) 
+						buildSettingElement.element("buildPreservations").add(buildPreservationElement.createCopy());
+					
+					for (Element actionAuthorizationElement: userBuildSettingElement.element("actionAuthorizations").elements()) 
+						buildSettingElement.element("actionAuthorizations").add(actionAuthorizationElement.createCopy());
+					
+					Element jobSecretsElement = buildSettingElement.element("jobSecrets");
+					Set<String> existingJobSecretNames = new HashSet<>();
+					for (Element jobSecretElement: jobSecretsElement.elements()) 
+						existingJobSecretNames.add(jobSecretElement.elementText("name").trim());
+					
+					for (Element jobSecretElement: userBuildSettingElement.element("jobSecrets").elements()) {
+						if (!existingJobSecretNames.contains(jobSecretElement.elementText("name").trim())) 
+							jobSecretsElement.add(jobSecretElement.createCopy());
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("UserAuthorizations.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					long userAuthorizationId = Long.parseLong(element.elementText("id").trim());
+					if (userAuthorizationId > maxUserAuthorizationId)
+						maxUserAuthorizationId = userAuthorizationId;
+					String projectId = element.elementText("project").trim();
+					String userId = element.elementText("user").trim();
+					Element roleElement = element.element("role");
+					if (userId.equals(projectOwners.get(projectId))) {
+						roleElement.setText("1");
+						projectOwners.remove(projectId);
+					}
+				}				
+				dom.writeToFile(file, false);
+			}
+		}
+		
+		File dataFile = new File(dataDir, "UserAuthorizations.xml");
+		VersionedXmlDoc dom = VersionedXmlDoc.fromFile(dataFile);
+		for (Map.Entry<String, String> entry: projectOwners.entrySet()) {
+			Element userAuthorizationElement = dom.getRootElement().addElement("io.onedev.server.model.UserAuthorization");
+			userAuthorizationElement.addAttribute("revision", "0.0");
+			userAuthorizationElement.addElement("id").setText(String.valueOf(++maxUserAuthorizationId));
+			userAuthorizationElement.addElement("project").setText(entry.getKey());
+			userAuthorizationElement.addElement("user").setText(entry.getValue());
+			userAuthorizationElement.addElement("role").setText("1");
+		}
+		dom.writeToFile(dataFile, false);
 	}
 	
 }

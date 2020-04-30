@@ -1,8 +1,11 @@
 <wicket:extend>
 	<div class="page-title">Role Detail</div>
-	<div id="role">
+	<div wicket:id="content" id="role"></div>
+	<wicket:fragment wicket:id="ownerFrag">
+		<div class="alert alert-info"><b>Owner</b> is a built-in role with full permission over projects</div>	
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nonOwnerFrag">
 		<form wicket:id="form" class="leave-confirm">
-			<div class="alert alert-info manager-note">This built-in role has full permissions over a project</div>
 			<div wicket:id="editor"></div>
 			<div wicket:id="feedback"></div>
 			<div class="actions clearfix">
@@ -10,5 +13,5 @@
 				<a wicket:id="delete" class="btn btn-danger pull-right">Delete</a>
 			</div>
 		</form>
-	</div>
+	</wicket:fragment>
 </wicket:extend>

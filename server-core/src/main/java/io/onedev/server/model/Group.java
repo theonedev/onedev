@@ -35,7 +35,7 @@ public class Group extends AbstractEntity {
 
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-	private Collection<GroupAuthorization> projectAuthorizations = new ArrayList<>();
+	private Collection<GroupAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -86,12 +86,12 @@ public class Group extends AbstractEntity {
 		this.createProjects = createProjects;
 	}
 
-	public Collection<GroupAuthorization> getProjectAuthorizations() {
-		return projectAuthorizations;
+	public Collection<GroupAuthorization> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setProjectAuthorizations(Collection<GroupAuthorization> projectAuthorizations) {
-		this.projectAuthorizations = projectAuthorizations;
+	public void setAuthorizations(Collection<GroupAuthorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	public Collection<Membership> getMemberships() {

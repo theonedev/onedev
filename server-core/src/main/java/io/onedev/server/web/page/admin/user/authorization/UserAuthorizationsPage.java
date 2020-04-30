@@ -32,7 +32,7 @@ public class UserAuthorizationsPage extends UserPage {
 		super.onInitialize();
 		
 		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
-		for (UserAuthorization authorization: getUser().getProjectAuthorizations()) {
+		for (UserAuthorization authorization: getUser().getAuthorizations()) {
 			AuthorizationBean authorizationBean = new AuthorizationBean();
 			authorizationBean.setProjectName(authorization.getProject().getName());
 			authorizationBean.setRoleName(authorization.getRole().getName());
@@ -61,7 +61,7 @@ public class UserAuthorizationsPage extends UserPage {
 					}
 				}
 				
-				OneDev.getInstance(UserAuthorizationManager.class).authorize(getUser(), authorizations);
+				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getUser(), authorizations);
 				Session.get().success("Project authorizations updated");
 			}
 			

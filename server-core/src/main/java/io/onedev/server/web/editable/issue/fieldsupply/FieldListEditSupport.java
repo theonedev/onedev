@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.issue.fieldsupply.FieldSupply;
+import io.onedev.server.model.support.issue.fieldsupply.FieldSupply;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.PropertyContext;

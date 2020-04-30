@@ -7,12 +7,12 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import io.onedev.server.model.support.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.model.support.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
+import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.util.inputspec.choiceinput.defaultmultivalueprovider.DefaultMultiValueProvider;
-import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;

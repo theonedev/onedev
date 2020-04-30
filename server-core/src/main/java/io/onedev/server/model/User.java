@@ -1,5 +1,9 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.User.PROP_EMAIL;
+import static io.onedev.server.model.User.PROP_FULL_NAME;
+import static io.onedev.server.model.User.PROP_NAME;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -45,7 +49,6 @@ import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
-import static io.onedev.server.model.User.*;
 
 @Entity
 @Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_EMAIL), 
@@ -91,7 +94,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-	private Collection<UserAuthorization> projectAuthorizations = new ArrayList<>();
+	private Collection<UserAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -417,7 +420,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return memberships;
 	}
 
-	public void setGroups(Collection<Membership> memberships) {
+	public void setMemberships(Collection<Membership> memberships) {
 		this.memberships = memberships;
 	}
 
@@ -450,12 +453,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return SYSTEM_ID.equals(getId());
 	}
 	
-	public Collection<UserAuthorization> getProjectAuthorizations() {
-		return projectAuthorizations;
+	public Collection<UserAuthorization> getAuthorizations() {
+		return authorizations;
 	}
 
-	public void setProjectAuthorizations(Collection<UserAuthorization> projectAuthorizations) {
-		this.projectAuthorizations = projectAuthorizations;
+	public void setAuthorizations(Collection<UserAuthorization> authorizations) {
+		this.authorizations = authorizations;
 	}
 
 	@Override

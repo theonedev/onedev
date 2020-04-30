@@ -8,6 +8,6 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface GroupAuthorizationManager extends EntityManager<GroupAuthorization> {
 
-	void authorize(Group group, Collection<GroupAuthorization> authorizations);
+	void syncAuthorizations(Group group, Collection<GroupAuthorization> authorizations);
 	
 }

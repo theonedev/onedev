@@ -3,7 +3,7 @@ package io.onedev.server.buildspec.job.paramspec;
 import java.util.List;
 import java.util.Map;
 
-import io.onedev.server.util.inputspec.BuildChoiceInput;
+import io.onedev.server.model.support.inputspec.BuildChoiceInput;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=1200, name=ParamSpec.BUILD)

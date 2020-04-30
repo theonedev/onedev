@@ -6,8 +6,8 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.ColorUtils;
 
 @SuppressWarnings("serial")

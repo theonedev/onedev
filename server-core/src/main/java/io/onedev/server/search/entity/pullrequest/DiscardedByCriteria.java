@@ -11,7 +11,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.EntityQuery;
 
 public class DiscardedByCriteria extends EntityCriteria<PullRequest> {
 
@@ -19,11 +18,8 @@ public class DiscardedByCriteria extends EntityCriteria<PullRequest> {
 
 	private final User user;
 	
-	private final String value;
-	
-	public DiscardedByCriteria(String value) {
-		user = EntityQuery.getUser(value);
-		this.value = value;
+	public DiscardedByCriteria(User user) {
+		this.user = user;
 	}
 
 	@Override
@@ -39,7 +35,7 @@ public class DiscardedByCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.DiscardedBy) + " " + quote(value);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.DiscardedBy) + " " + quote(user.getName());
 	}
 
 }

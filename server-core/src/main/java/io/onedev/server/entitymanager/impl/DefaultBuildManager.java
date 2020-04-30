@@ -821,14 +821,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 					accessibleJobNames.put(projectManager.load(entry.getKey()), new HashSet<>(entry.getValue()));
 			} else {
 				if (user != null) {
-					for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+					for (UserAuthorization authorization: user.getAuthorizations()) {
 						if (project == null || project.equals(authorization.getProject())) {
 							populateAccessibleJobNames(accessibleJobNames, jobNames, 
 									authorization.getProject(), authorization.getRole());
 						}
 					}
 					for (Group group: user.getGroups()) {
-						for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
+						for (GroupAuthorization authorization: group.getAuthorizations()) {
 							if (project == null || project.equals(authorization.getProject())) {
 								populateAccessibleJobNames(accessibleJobNames, jobNames, 
 										authorization.getProject(), authorization.getRole());
@@ -838,7 +838,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 				}
 				Group group = groupManager.findAnonymous();
 				if (group != null) {
-					for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
+					for (GroupAuthorization authorization: group.getAuthorizations()) {
 						if (project == null || project.equals(authorization.getProject())) {
 							populateAccessibleJobNames(accessibleJobNames, jobNames, 
 									authorization.getProject(), authorization.getRole());

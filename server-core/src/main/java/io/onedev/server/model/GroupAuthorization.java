@@ -20,6 +20,10 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 public class GroupAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_GROUP = "group";
+	
+	public static final String PROP_ROLE = "role";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

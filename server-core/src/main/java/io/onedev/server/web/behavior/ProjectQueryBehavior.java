@@ -50,10 +50,14 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = ProjectQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == ProjectQueryLexer.ForksOf)
-									return SuggestionUtils.suggestProjects(matchWith);
-								else
+								if (operator == ProjectQueryLexer.ForksOf) {
+									if (!matchWith.contains("*"))
+										return SuggestionUtils.suggestProjects(matchWith);
+									else
+										return null;
+								} else {
 									return SuggestionUtils.suggestUsers(matchWith);
+								}
 							} else {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
@@ -119,7 +123,9 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 						hints.add("Use '\\' to escape quotes");
 					}
 				} else {
-					hints.add("Use * for wildcard match");
+					Element operatorElement = terminalExpect.getState().findMatchedElementsByLabel("operator", true).iterator().next();
+					if (operatorElement.getMatchedTokens().iterator().next().getType() == ProjectQueryLexer.ForksOf)
+						hints.add("Use * for wildcard match");
 					hints.add("Use '\\' to escape quotes");
 				}
 			}

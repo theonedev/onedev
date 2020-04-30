@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

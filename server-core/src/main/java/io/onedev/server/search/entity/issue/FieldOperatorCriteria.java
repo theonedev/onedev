@@ -13,14 +13,14 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneException;
-import io.onedev.server.issue.fieldspec.BuildChoiceField;
-import io.onedev.server.issue.fieldspec.CommitField;
-import io.onedev.server.issue.fieldspec.PullRequestChoiceField;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.CommitField;
+import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.ProjectScopedCommit;
 import io.onedev.server.util.SecurityUtils;

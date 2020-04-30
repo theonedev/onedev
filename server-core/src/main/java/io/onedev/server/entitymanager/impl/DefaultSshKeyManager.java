@@ -46,11 +46,11 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
     
     @Transactional
     @Override
-    public void syncUserKeys(User user, Collection<SshKey> keys) {
-		Collection<SshKey> currentKeys = user.getSshKeys();
+    public void syncSshKeys(User user, Collection<SshKey> sshKeys) {
+		Collection<SshKey> currentSshKeys = user.getSshKeys();
 
-		Map<String, SshKey> currentKeysMap = keysToMap(currentKeys);
-		Map<String, SshKey> keysMap = keysToMap(keys);
+		Map<String, SshKey> currentKeysMap = keysToMap(currentSshKeys);
+		Map<String, SshKey> keysMap = keysToMap(sshKeys);
 		MapDifference<String, SshKey> diff = Maps.difference(currentKeysMap, keysMap);
 		
 		diff.entriesOnlyOnLeft().values().forEach((key) -> delete(key));

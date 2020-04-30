@@ -10,7 +10,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.EntityQuery;
 
 public class SubmittedByCriteria extends EntityCriteria<Build> {
 
@@ -18,27 +17,24 @@ public class SubmittedByCriteria extends EntityCriteria<Build> {
 
 	private final User user;
 	
-	private final String value;
-	
-	public SubmittedByCriteria(String value) {
-		user = EntityQuery.getUser(value);
-		this.value = value;
+	public SubmittedByCriteria(User user) {
+		this.user = user;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(Build.PROP_SUBMITTER);
-		return builder.equal(attribute, this.user);
+		return builder.equal(attribute, user);
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return Objects.equals(build.getSubmitter(), this.user);
+		return Objects.equals(build.getSubmitter(), user);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return BuildQuery.getRuleName(BuildQueryLexer.SubmittedBy) + " " + quote(value);
+		return BuildQuery.getRuleName(BuildQueryLexer.SubmittedBy) + " " + quote(user.getName());
 	}
 
 }

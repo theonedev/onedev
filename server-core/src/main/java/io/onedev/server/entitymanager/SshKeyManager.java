@@ -13,5 +13,5 @@ public interface SshKeyManager extends EntityManager<SshKey> {
     @Nullable
     SshKey findByDigest(String digest);
     
-    void syncUserKeys(User user, Collection<SshKey> keys);
+    void syncSshKeys(User user, Collection<SshKey> sshKeys);
 }

@@ -120,15 +120,15 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						String value = getValue(ctx.Quoted().getText());
 						switch (ctx.operator.getType()) {
 						case PullRequestQueryLexer.ToBeReviewedBy:
-							return new ToBeReviewedByCriteria(value);
+							return new ToBeReviewedByCriteria(getUser(value));
 						case PullRequestQueryLexer.ApprovedBy:
-							return new ApprovedByCriteria(value);
+							return new ApprovedByCriteria(getUser(value));
 						case PullRequestQueryLexer.RequestedForChangesBy:
-							return new RequestedForChangesByCriteria(value);
+							return new RequestedForChangesByCriteria(getUser(value));
 						case PullRequestQueryLexer.SubmittedBy:
-							return new SubmittedByCriteria(value);
+							return new SubmittedByCriteria(getUser(value));
 						case PullRequestQueryLexer.DiscardedBy:
-							return new DiscardedByCriteria(value);
+							return new DiscardedByCriteria(getUser(value));
 						case PullRequestQueryLexer.IncludesCommit:
 							return new IncludesCommitCriteria(project, value);
 						case PullRequestQueryLexer.IncludesIssue:

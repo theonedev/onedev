@@ -29,7 +29,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramspec.SecretParam;
-import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;

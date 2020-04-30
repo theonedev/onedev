@@ -5,18 +5,16 @@ import java.io.Serializable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
@@ -62,76 +60,79 @@ public class RoleDetailPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
+		if (getRole().isOwner()) {
+			add(new Fragment("content", "ownerFrag", this));
+		} else {
+			Fragment fragment = new Fragment("content", "nonOwnerFrag", this);
+			editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Serializable getObject() {
-				return getRole();
-			}
-
-			@Override
-			public void setObject(Serializable object) {
-				oldName = getRole().getName();
-				editor.getDescriptor().copyProperties(object, getRole());
-			}
-			
-		}, getRole().isManager()?Sets.newHashSet("name"):Sets.newHashSet(), !getRole().isManager());
-		
-		Form<?> form = new Form<Void>("form") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
-				Role role = getRole();
-				RoleManager roleManager = OneDev.getInstance(RoleManager.class);
-				Role roleWithSameName = roleManager.find(role.getName());
-				if (roleWithSameName != null && !roleWithSameName.equals(role)) {
-					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another role.");
-				} 
-				if (editor.isValid()) {
-					roleManager.save(role, oldName);
-					setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
-					Session.get().success("Role updated");
+				@Override
+				public void detach() {
 				}
-			}
-			
-		};	
-		
-		if (getRole().isManager())
-			form.add(AttributeAppender.append("class", "manager"));
-		
-		form.add(editor);
-		form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
-		
-		form.add(new Link<Void>("delete") {
 
-			@Override
-			public void onClick() {
-				OneDev.getInstance(RoleManager.class).delete(getRole());
-				Session.get().success("Role '" + getRole().getName() + "' deleted");
+				@Override
+				public Serializable getObject() {
+					return getRole();
+				}
+
+				@Override
+				public void setObject(Serializable object) {
+					oldName = getRole().getName();
+					editor.getDescriptor().copyProperties(object, getRole());
+				}
 				
-				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Role.class);
-				if (redirectUrlAfterDelete != null)
-					throw new RedirectToUrlException(redirectUrlAfterDelete);
-				else
-					setResponsePage(RoleListPage.class);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getRole().isManager());
-			}
+			});
 			
-		}.add(new ConfirmClickModifier("Do you really want to delete role '" + getRole().getName() + "'?")));
-		
-		add(form);
+			Form<?> form = new Form<Void>("form") {
+
+				@Override
+				protected void onSubmit() {
+					super.onSubmit();
+					
+					Role role = getRole();
+					RoleManager roleManager = OneDev.getInstance(RoleManager.class);
+					Role roleWithSameName = roleManager.find(role.getName());
+					if (roleWithSameName != null && !roleWithSameName.equals(role)) {
+						editor.error(new Path(new PathNode.Named("name")),
+								"This name has already been used by another role.");
+					} 
+					if (editor.isValid()) {
+						roleManager.save(role, oldName);
+						setResponsePage(RoleDetailPage.class, RoleDetailPage.paramsOf(role));
+						Session.get().success("Role updated");
+					}
+				}
+				
+			};	
+			
+			form.add(editor);
+			form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
+			
+			form.add(new Link<Void>("delete") {
+
+				@Override
+				public void onClick() {
+					OneDev.getInstance(RoleManager.class).delete(getRole());
+					Session.get().success("Role '" + getRole().getName() + "' deleted");
+					
+					String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Role.class);
+					if (redirectUrlAfterDelete != null)
+						throw new RedirectToUrlException(redirectUrlAfterDelete);
+					else
+						setResponsePage(RoleListPage.class);
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!getRole().isOwner());
+				}
+				
+			}.add(new ConfirmClickModifier("Do you really want to delete role '" + getRole().getName() + "'?")));
+			
+			fragment.add(form);
+			add(fragment);
+		}
 	}
 	
 	@Override

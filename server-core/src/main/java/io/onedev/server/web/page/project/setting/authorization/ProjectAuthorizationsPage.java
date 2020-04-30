@@ -58,7 +58,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 						if (membership.getGroup().isAdministrator()) {
 							canManageProject = true;
 						} else {
-							for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations()) {
+							for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
 								if (authorization.getProject().equals(project) && authorization.getRole().isManageProject()) {
 									canManageProject = true;
 									break;
@@ -98,7 +98,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 					}
 				}
 				
-				OneDev.getInstance(UserAuthorizationManager.class).authorize(getProject(), authorizations);
+				OneDev.getInstance(UserAuthorizationManager.class).syncAuthorizations(getProject(), authorizations);
 				Session.get().success("User authorizations updated");
 			}
 			

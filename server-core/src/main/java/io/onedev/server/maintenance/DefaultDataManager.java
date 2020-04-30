@@ -258,12 +258,12 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		if (roleManager.get(Role.MANAGER_ID) == null) {
-			Role manager = new Role();
-			manager.setName("Manager");
-			manager.setId(Role.MANAGER_ID);
-			manager.setManageProject(true);
-			roleManager.replicate(manager);
+		if (roleManager.get(Role.OWNER_ID) == null) {
+			Role owner = new Role();
+			owner.setName("Owner");
+			owner.setId(Role.OWNER_ID);
+			owner.setManageProject(true);
+			roleManager.replicate(owner);
 			roleManager.setupDefaults();
 		}
 		

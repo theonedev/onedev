@@ -98,6 +98,24 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
+		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Privilege")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
+				JobPrivilege privilege = rowModel.getObject();
+				if (privilege.isManageJob())
+					cellItem.add(new Label(componentId, "Manage Job"));
+				else if (privilege.isRunJob())
+					cellItem.add(new Label(componentId, "Run Job"));
+				else if (privilege.isAccessLog())
+					cellItem.add(new Label(componentId, "Access Log"));
+				else if (privilege.getAccessibleReports() != null)
+					cellItem.add(new Label(componentId, "Access Reports: " + privilege.getAccessibleReports()));
+				else
+					cellItem.add(new Label(componentId, "Access Artifacts"));
+			}
+		});		
+		
 		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
 
 			@Override

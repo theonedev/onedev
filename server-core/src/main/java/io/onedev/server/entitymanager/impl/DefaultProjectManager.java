@@ -203,7 +203,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(project);
        	authorization.setUser(SecurityUtils.getUser());
-       	authorization.setRole(roleManager.getManager());
+       	authorization.setRole(roleManager.getOwner());
        	userAuthorizationManager.save(authorization);
        	listenerRegistry.post(new ProjectCreated(project));
     }
@@ -287,7 +287,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(to);
        	authorization.setUser(SecurityUtils.getUser());
-       	authorization.setRole(roleManager.getManager());
+       	authorization.setRole(roleManager.getOwner());
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(to.getGitDir());
@@ -509,19 +509,19 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 			User user = SecurityUtils.getUser();
 			if (user != null) {
 				for (Membership membership: user.getMemberships()) {
-					for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations()) {
+					for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
 						if (authorization.getRole().implies(permission))
 							projects.add(authorization.getProject());
 					}
 				}
-				for (UserAuthorization authorization: user.getProjectAuthorizations()) { 
+				for (UserAuthorization authorization: user.getAuthorizations()) { 
 					if (authorization.getRole().implies(permission))
 						projects.add(authorization.getProject());
 				}
 			}
 			Group group = groupManager.findAnonymous();
 			if (group != null) {
-				for (GroupAuthorization authorization: group.getProjectAuthorizations()) { 
+				for (GroupAuthorization authorization: group.getAuthorizations()) { 
 					if (authorization.getRole().implies(permission))
 						projects.add(authorization.getProject());
 				}

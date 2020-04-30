@@ -20,11 +20,8 @@ public class ApprovedByCriteria extends EntityCriteria<PullRequest> {
 
 	private final User user;
 	
-	private final String value;
-	
-	public ApprovedByCriteria(String value) {
-		user = EntityQuery.getUser(value);
-		this.value = value;
+	public ApprovedByCriteria(User user) {
+		this.user = user;
 	}
 	
 	@Override
@@ -50,7 +47,7 @@ public class ApprovedByCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public String toStringWithoutParens() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ApprovedBy) + " " 
-				+ quote(value);
+				+ quote(user.getName());
 	}
 
 }

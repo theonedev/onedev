@@ -9,8 +9,8 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface UserAuthorizationManager extends EntityManager<UserAuthorization> {
 
-	void authorize(User user, Collection<UserAuthorization> authorizations);
+	void syncAuthorizations(User user, Collection<UserAuthorization> authorizations);
 	
-	void authorize(Project project, Collection<UserAuthorization> authorizations);
+	void syncAuthorizations(Project project, Collection<UserAuthorization> authorizations);
 	
 }

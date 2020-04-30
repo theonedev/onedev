@@ -151,6 +151,10 @@ public class Project extends AbstractEntity {
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
+	public static final String PROP_USER_AUTHORIZATIONS = "userAuthorizations";
+	
+	public static final String PROP_GROUP_AUTHORIZATIONS = "groupAuthorizations";
+	
 	public static final List<String> QUERY_FIELDS = 
 			Lists.newArrayList(FIELD_NAME, FIELD_DESCRIPTION, FIELD_UPDATE_DATE);
 

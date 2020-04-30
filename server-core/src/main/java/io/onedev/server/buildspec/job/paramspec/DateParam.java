@@ -5,9 +5,9 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import io.onedev.server.model.support.inputspec.dateinput.DateInput;
+import io.onedev.server.model.support.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.Constants;
-import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.util.inputspec.dateinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
