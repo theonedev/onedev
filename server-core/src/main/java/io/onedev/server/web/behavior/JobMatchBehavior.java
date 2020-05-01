@@ -43,7 +43,6 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = Lists.newArrayList(
 									Build.FIELD_PROJECT, 
-									Build.FIELD_PROJECT_OWNER, 
 									Build.FIELD_JOB, 
 									Build.FIELD_IMAGE);
 							return SuggestionUtils.suggest(fields, matchWith);
@@ -56,10 +55,12 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
-								if (fieldName.equals(Build.FIELD_PROJECT))
-									return SuggestionUtils.suggestProjects(matchWith);
-								else if (fieldName.equals(Build.FIELD_PROJECT_OWNER))
-									return SuggestionUtils.suggestUsers(matchWith);
+								if (fieldName.equals(Build.FIELD_PROJECT)) {
+									if (!matchWith.contains("*"))
+										return SuggestionUtils.suggestProjects(matchWith);
+									else
+										return null;
+								}
 							}
 						} 
 						return null;

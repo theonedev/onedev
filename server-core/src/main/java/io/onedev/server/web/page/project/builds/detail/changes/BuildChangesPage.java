@@ -7,6 +7,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -85,6 +87,16 @@ public class BuildChangesPage extends BuildDetailPage {
 			@Override
 			protected Project getProject() {
 				return BuildChangesPage.this.getProject();
+			}
+			
+		});
+		
+		add(new WebMarkupContainer("buildStreamHelpUrl") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("href", OneDev.getInstance().getDocRoot() + "/pages/concepts.md#build-stream");
 			}
 			
 		});

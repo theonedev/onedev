@@ -112,8 +112,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_PROJECT = "project";
 	
-	public static final String FIELD_PROJECT_OWNER = "Project Owner";
-	
 	public static final String FIELD_JOB = "Job";
 	
 	public static final String PROP_JOB = "jobName";
@@ -176,7 +174,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			FIELD_PROJECT, FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
 			FIELD_SUBMIT_DATE, FIELD_PENDING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 
 			FIELD_COMMIT, FIELD_VERSION, FIELD_DEPENDENCIES, FIELD_DEPENDENTS, FIELD_ERROR_MESSAGE, 
-			FIELD_LOG, FIELD_PROJECT_OWNER, FIELD_IMAGE);
+			FIELD_LOG, FIELD_IMAGE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			FIELD_PROJECT, FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 

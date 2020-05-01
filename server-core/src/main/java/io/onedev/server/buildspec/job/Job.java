@@ -124,7 +124,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=110, description="Specify docker image of the job. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -162,9 +162,9 @@ public class Job implements Serializable, Validatable {
 	}
 	
 	@Editable(order=120, name="Commands", description="Specify content of Linux shell script or Windows command batch to execute in above image. "
-			+ "It will be executed under <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, which may contain files of your repository and "
+			+ "It will be executed under <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, which may contain files of your repository and "
 			+ "dependency artifacts based on your configuration below. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative
 	@Code(language = Code.SHELL, variableProvider="getVariables")
 	@Size(min=1, message="may not be empty")
@@ -210,7 +210,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9000, group="Source Retrieval", description="Whether or not to retrieve files under the repository "
-			+ "into <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
+			+ "into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
@@ -280,8 +280,8 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
-			+ "Artifact files are relative to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, and may use * or ? for pattern match. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "Artifact files are relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, and may use * or ? for pattern match. "
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(interpolative = true)
 	@NameOfEmptyValue("No artifacts")
@@ -338,7 +338,7 @@ public class Job implements Serializable, Validatable {
 	
 	@Editable(order=9200, name="CPU Requirement", group="Resource Requirements", description="Specify CPU requirement of the job. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getCpuRequirement() {
@@ -351,7 +351,7 @@ public class Job implements Serializable, Validatable {
 
 	@Editable(order=9300, group="Resource Requirements", description="Specify memory requirement of the job. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getMemoryRequirement() {

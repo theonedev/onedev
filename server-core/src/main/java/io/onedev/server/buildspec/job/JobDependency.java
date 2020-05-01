@@ -69,8 +69,8 @@ public class JobDependency implements Serializable {
 	}
 	
 	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
-			+ "from the dependency into <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. Leave empty to do not retrieve any artifacts. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "from the dependency into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. Leave empty to do not retrieve any artifacts. "
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(interpolative = true)
 	@NameOfEmptyValue("Do not retrieve")

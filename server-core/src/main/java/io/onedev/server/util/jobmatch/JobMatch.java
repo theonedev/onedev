@@ -125,7 +125,6 @@ public class JobMatch extends Criteria<Build> {
 	
 	public static void checkField(String fieldName, int operator) {
 		if (fieldName.equals(Build.FIELD_PROJECT) 
-				|| fieldName.equals(Build.FIELD_PROJECT_OWNER)
 				|| fieldName.equals(Build.FIELD_JOB)
 				|| fieldName.equals(Build.FIELD_IMAGE)) {
 			if (operator != JobMatchLexer.Is)
