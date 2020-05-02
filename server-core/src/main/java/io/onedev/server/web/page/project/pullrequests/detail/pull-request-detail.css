@@ -182,22 +182,30 @@ ul>li>a.code-comments.new .fa-circle {
 	font-size: 16px;
 }
 
-.floating>.content>.instruction {
-	padding: 20px 20px 20px 32px; 
-	width: 500px;
+.conflict-resolve-instruction {
+	padding: 12px;
+}
+.conflict-resolve-instruction .title {
+	font-weight: bold;
+	font-size: 16px;
+	text-align: center;
+	margin-bottom: 8px;
+}
+.conflict-resolve-instruction .body>ul {
+	padding-left: 20px;
 	margin-bottom: 0;
 }
-.floating>.content>.instruction>li {
+.conflict-resolve-instruction .body>ul>li {
 	list-style: decimal;
 	margin-bottom: 12px;
 }
-.floating>.content>.instruction>li:last-child {
+.conflict-resolve-instruction .body>ul>li:last-child {
 	margin-bottom: 0;
 }
 
-.floating>.content>.instruction>li>.code {
+.conflict-resolve-instruction .body>ul>li>.code {
 	margin-top: 8px;
-	font-family: monospace;
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	font-size: 13px;
 	background: #F5F5F5;
 	border: 1px dashed #BBB;

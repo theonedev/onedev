@@ -1,8 +1,9 @@
 <wicket:panel>
-	<wicket:container wicket:id="content"></wicket:container>
+	<div class="title">Conflict Resolve Instruction</div>
+	<div wicket:id="body" class="body"></div>		
 	
 	<wicket:fragment wicket:id="mergeFrag">
-		<ul class="conflict-resolve instruction">
+		<ul>
 			<li>
 				<div class="text">From working directory of project <em wicket:id="srcRepoName"></em>,
 				check out source branch and merge with target branch</div>
@@ -25,9 +26,8 @@
 			</li>
 		</ul>
 	</wicket:fragment>
-	
 	<wicket:fragment wicket:id="rebaseFrag">
-		<ul class="conflict-resolve instruction">
+		<ul>
 			<li>
 				<div class="text">From working directory of project <em wicket:id="srcRepoName"></em>, 
 				check out source branch and rebase to destination branch</div>

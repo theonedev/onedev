@@ -7,15 +7,14 @@
 	margin-bottom: 20px;
 }
 .push-instructions {
-	padding: 20px;
-	width: 600px;
+	padding: 12px;
 }
 .push-instructions .title {
 	font-weight: bold;
 	font-size: 16px;
 	margin-bottom: 12px;
 }
-.push-instructions .content {
+.push-instructions .code {
 	border: 1px dashed #BBB;
 	background: #F5F5F5;
 	border-radius: 4px;
@@ -23,12 +22,4 @@
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	font-size: 13px;
 	margin-bottom: 8px;
-}
-.push-instructions .note {
-}
-.push-instructions .finger-print {
-	word-break: break-all;
-	font-size: 12px;
-	margin-top: 4px;
-	color: #666;
 }

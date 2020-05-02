@@ -5,16 +5,10 @@
 		or <a wicket:id="pushInstructions">pushing an existing repository</a></div>
 	</div>
 	<wicket:fragment wicket:id="pushInstructionsFrag">
-		<div class="push-instructions">
-			<div class="title">Run below commands from within your git repository:</div>
-			<div class="content">
-				<div>git remote add origin <span wicket:id="httpUrl"></span></div>
-				<div>git push -u origin master</div>
-			</div>
-			<div class="note">
-				<div>Use url <code wicket:id="sshUrl"></code> if you want to push via SSH</div> 
-				<div class="finger-print">(server fingerprint: <span wicket:id="fingerPrint"></span>)</div>
-			</div>
+		<div class="title">Run below commands from within your git repository:</div>
+		<div class="code">
+			<div>git remote add origin <span wicket:id="url"></span></div>
+			<div>git push -u origin master</div>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

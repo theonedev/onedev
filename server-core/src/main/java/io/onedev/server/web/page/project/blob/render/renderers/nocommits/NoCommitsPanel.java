@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -12,11 +13,10 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -25,6 +25,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 import io.onedev.server.web.page.project.blob.BlobUploadPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -129,14 +130,35 @@ public class NoCommitsPanel extends Panel {
 		add(new DropdownLink("pushInstructions") {
 
 			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", "push-instructions"));
+			}
+
+			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "pushInstructionsFrag", NoCommitsPanel.this);
-				UrlManager urlManager = OneDev.getInstance(UrlManager.class);
-				fragment.add(new Label("httpUrl", urlManager.httpCloneUrlFor(context.getProject())));
-				fragment.add(new Label("sshUrl", urlManager.sshCloneUrlFor(context.getProject())));
-				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-				fragment.add(new Label("fingerPrint", settingManager.getSshSetting().getFingerPrint()));
-				return fragment;
+				return new GitProtocolPanel(id) {
+					
+					@Override
+					protected Component newContent(String componentId) {
+						Fragment fragment = new Fragment(id, "pushInstructionsFrag", NoCommitsPanel.this);
+						fragment.add(new Label("url", new LoadableDetachableModel<String>() {
+
+							@Override
+							protected String load() {
+								return getProtocolUrl();
+							}
+							
+						}));
+						return fragment;
+					}
+					
+					@Override
+					protected Project getProject() {
+						return context.getProject();
+					}
+					
+				};
 			}
 			
 		});

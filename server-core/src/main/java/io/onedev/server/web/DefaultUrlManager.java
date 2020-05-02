@@ -44,13 +44,11 @@ public class DefaultUrlManager implements UrlManager {
 	}
 
 	@Override
-	public String sshCloneUrlFor(Project project) {
-	    return settingManager.getSshSetting().getServerUrl() + "/" + project.getName();
-	}
-	
-	@Override
-	public String httpCloneUrlFor(Project project) {
-		return settingManager.getSystemSetting().getServerUrl() + "/" + project.getName();
+	public String cloneUrlFor(Project project, boolean ssh) {
+		if (ssh)
+			return settingManager.getSshSetting().getServerUrl() + "/" + project.getName();
+		else
+			return settingManager.getSystemSetting().getServerUrl() + "/" + project.getName();
 	}
 	
 	@Override

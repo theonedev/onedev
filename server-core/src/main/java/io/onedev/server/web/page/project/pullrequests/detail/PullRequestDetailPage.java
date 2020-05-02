@@ -118,6 +118,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 import io.onedev.server.web.component.review.ReviewListPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -870,6 +871,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				add(new DropdownLink("resolveInstructions") {
 
 					@Override
+					protected void onInitialize(FloatingPanel dropdown) {
+						dropdown.add(AttributeAppender.append("class", "conflict-resolve-instruction"));
+					}
+					
+					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(getPullRequest().getSource() != null);
@@ -877,14 +883,37 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new ConflictResolveInstructionPanel(id) {
+						if (getPullRequest().getTargetProject().equals(getPullRequest().getSourceProject())) {
+							return new ConflictResolveInstructionPanel(id) {
 
-							@Override
-							protected PullRequest getPullRequest() {
-								return PullRequestDetailPage.this.getPullRequest();
-							}
-							
-						};
+								@Override
+								protected PullRequest getPullRequest() {
+									return PullRequestDetailPage.this.getPullRequest();
+								}
+
+							};
+						} else {
+							return new GitProtocolPanel(id) {
+								
+								@Override
+								protected Component newContent(String componentId) {
+									return new ConflictResolveInstructionPanel(componentId) {
+
+										@Override
+										protected PullRequest getPullRequest() {
+											return PullRequestDetailPage.this.getPullRequest();
+										}
+
+									};
+								}
+								
+								@Override
+								protected Project getProject() {
+									return getPullRequest().getTargetProject();
+								}
+
+							};
+						}
 					}
 					
 				});

@@ -8,6 +8,5 @@ onedev.server.copyToClipboard = {
 		});
 		$button.attr("title", "Copy to clipboard");
 		$button.addClass("copy-to-clipboard");
-		console.log("shit");
 	}
 };
