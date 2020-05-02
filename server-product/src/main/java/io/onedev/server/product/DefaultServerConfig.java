@@ -48,7 +48,6 @@ public class DefaultServerConfig implements ServerConfig {
 	private File keystoreFile;
 	
 	private String keystorePassword;
-
 	
 	@Inject
 	public DefaultServerConfig(ServerProperties props) {

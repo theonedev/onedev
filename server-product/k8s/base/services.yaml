@@ -11,6 +11,10 @@ spec:
     port: 80
     targetPort: 6610
     protocol: TCP
+  - name: ssh
+    port: 22
+    targetPort: 6611
+    protocol: TCP
   selector:
     tier: server
 ---

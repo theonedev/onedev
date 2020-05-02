@@ -1843,7 +1843,14 @@ public class DataMigrator {
 		}
 		if (!hasOwnerRole) {
 			File dataFile = new File(dataDir, "Roles.xml");
-			VersionedXmlDoc dom = VersionedXmlDoc.fromFile(dataFile);
+			VersionedXmlDoc dom;
+			if (dataFile.exists()) { 
+				dom = VersionedXmlDoc.fromFile(dataFile);
+			} else {
+				dom = new VersionedXmlDoc();
+				dom.addElement("list");
+			}
+			
 			Element ownerRoleElement = dom.getRootElement().addElement("io.onedev.server.model.Role");
 			ownerRoleElement.addAttribute("revision", "0.0");
 			ownerRoleElement.addElement("id").setText("1");
@@ -1975,7 +1982,13 @@ public class DataMigrator {
 		}
 		
 		File dataFile = new File(dataDir, "UserAuthorizations.xml");
-		VersionedXmlDoc dom = VersionedXmlDoc.fromFile(dataFile);
+		VersionedXmlDoc dom;
+		if (dataFile.exists()) { 
+			dom = VersionedXmlDoc.fromFile(dataFile);
+		} else {
+			dom = new VersionedXmlDoc();
+			dom.addElement("list");
+		}
 		for (Map.Entry<String, String> entry: projectOwners.entrySet()) {
 			Element userAuthorizationElement = dom.getRootElement().addElement("io.onedev.server.model.UserAuthorization");
 			userAuthorizationElement.addAttribute("revision", "0.0");

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.PluginManager;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -47,7 +46,7 @@ public class Upgrade extends DefaultPersistManager {
 	@Inject
 	public Upgrade(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
-			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager, 
+			IdManager idManager, Dao dao, EntityValidator validator, 
 			TransactionManager transactionManager) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator, transactionManager);
 	}
@@ -490,6 +489,11 @@ public class Upgrade extends DefaultPersistManager {
 			String serverProps = FileUtils.readFileToString(serverPropsFile, StandardCharsets.UTF_8);
 			if (serverProps.contains("sessionTimeout")) 
 				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "server.properties"), serverPropsFile);
+			serverProps = FileUtils.readFileToString(serverPropsFile, StandardCharsets.UTF_8);
+			if (!serverProps.contains("ssh_port")) {
+				serverProps += String.format("%n%nssh_port: 6611%n");
+				FileUtils.writeStringToFile(serverPropsFile, serverProps, StandardCharsets.UTF_8);
+			}
 
 			File logbackPropsFile = new File(upgradeDir, "conf/logback.xml");
 			String logbackProps = FileUtils.readFileToString(logbackPropsFile, StandardCharsets.UTF_8);

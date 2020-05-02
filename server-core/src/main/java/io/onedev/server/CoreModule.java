@@ -240,8 +240,8 @@ import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
-import io.onedev.server.util.jetty.DefaultJettyRunner;
-import io.onedev.server.util.jetty.JettyRunner;
+import io.onedev.server.util.jetty.DefaultJettyLauncher;
+import io.onedev.server.util.jetty.JettyLauncher;
 import io.onedev.server.util.markdown.DefaultMarkdownManager;
 import io.onedev.server.util.markdown.EntityReferenceManager;
 import io.onedev.server.util.markdown.MarkdownManager;
@@ -310,8 +310,8 @@ public class CoreModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		bind(JettyRunner.class).to(DefaultJettyRunner.class);
-		bind(ServletContextHandler.class).toProvider(DefaultJettyRunner.class);
+		bind(JettyLauncher.class).to(DefaultJettyLauncher.class);
+		bind(ServletContextHandler.class).toProvider(DefaultJettyLauncher.class);
 		
 		bind(ObjectMapper.class).toProvider(ObjectMapperProvider.class).in(Singleton.class);
 		

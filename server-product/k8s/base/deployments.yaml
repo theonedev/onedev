@@ -24,6 +24,7 @@ spec:
           name: onedev
         ports:
         - containerPort: 6610
+        - containerPort: 6611
         env:
         - name: hibernate_dialect
           value: org.hibernate.dialect.MySQL5InnoDBDialect
