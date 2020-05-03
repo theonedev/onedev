@@ -86,6 +86,18 @@ public class PullRequestNotificationManager {
 		PullRequest request = event.getRequest();
 		User user = event.getUser();
 		
+		String url;
+		if (event instanceof PullRequestCommentCreated)
+			url = urlManager.urlFor(((PullRequestCommentCreated)event).getComment());
+		else if (event instanceof PullRequestChangeEvent) 
+			url = urlManager.urlFor(((PullRequestChangeEvent)event).getChange());
+		else if (event instanceof PullRequestCodeCommentCreated)
+			url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), request);
+		else if (event instanceof PullRequestCodeCommentReplied)
+			url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply(), request);
+		else 
+			url = urlManager.urlFor(request);
+		
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<PullRequest>() {
 
 			@Override
@@ -181,7 +193,6 @@ public class PullRequestNotificationManager {
 			else if (changeData instanceof PullRequestDiscardData) 
 				subject = String.format(user.getDisplayName() + " discarded pull request %s", request.describe());
 			if (subject != null) { 
-				String url = urlManager.urlFor(request);
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), subject, body);
 				notifiedUsers.add(request.getSubmitter());
@@ -198,17 +209,6 @@ public class PullRequestNotificationManager {
 					User mentionedUser = userManager.findByName(userName);
 					if (mentionedUser != null) { 
 						pullRequestWatchManager.watch(request, mentionedUser, true);
-						String url;
-						if (event instanceof PullRequestCommentCreated)
-							url = urlManager.urlFor(((PullRequestCommentCreated)event).getComment());
-						else if (event instanceof PullRequestChangeEvent) 
-							url = urlManager.urlFor(((PullRequestChangeEvent)event).getChange());
-						else if (event instanceof PullRequestCodeCommentCreated)
-							url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), request);
-						else if (event instanceof PullRequestCodeCommentReplied)
-							url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply(), request);
-						else 
-							url = urlManager.urlFor(request);
 						
 						String subject = String.format("You are mentioned in pull request %s", request.describe());
 						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
@@ -249,7 +249,6 @@ public class PullRequestNotificationManager {
 			}
 
 			if (!usersToNotify.isEmpty()) {
-				String url = urlManager.urlFor(request);
 				String subject;
 				if (user != null) 
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));

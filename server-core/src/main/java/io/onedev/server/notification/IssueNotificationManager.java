@@ -21,7 +21,6 @@ import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
-import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
@@ -76,6 +75,14 @@ public class IssueNotificationManager {
 		Issue issue = event.getIssue();
 		User user = event.getUser();
 
+		String url;
+		if (event instanceof IssueCommented) 
+			url = urlManager.urlFor(((IssueCommented)event).getComment());
+		else if (event instanceof IssueChangeEvent)
+			url = urlManager.urlFor(((IssueChangeEvent)event).getChange());
+		else 
+			url = urlManager.urlFor(issue);
+		
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
 
 			@Override
@@ -138,7 +145,6 @@ public class IssueNotificationManager {
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
-		String url = urlManager.urlFor(issue);
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
 			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.describe());
 			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
@@ -178,15 +184,6 @@ public class IssueNotificationManager {
 				for (String userName: new MentionParser().parseMentions(rendered)) {
 					User mentionedUser = userManager.findByName(userName);
 					if (mentionedUser != null) {
-						if (event instanceof IssueOpened)
-							url = urlManager.urlFor(((IssueOpened)event).getIssue());
-						else if (event instanceof IssueCommented) 
-							url = urlManager.urlFor(((IssueCommented)event).getComment());
-						else if (event instanceof IssueChangeEvent)
-							url = urlManager.urlFor(((IssueChangeEvent)event).getChange());
-						else 
-							url = urlManager.urlFor(event.getIssue());
-						
 						String subject = String.format("You are mentioned in issue %s", issue.describe());
 						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 						
