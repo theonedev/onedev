@@ -63,14 +63,12 @@
                 <string>curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"</string>
                 <string></string>
                 <string>cd $projectDir/server-product/docker</string>
-                <string>ls</string>
                 <string>./build.sh</string>
                 <string>docker push 1dev/server:${buildVersion}</string>
                 <string>docker tag 1dev/server:${buildVersion} 1dev/server:latest</string>
                 <string>docker push 1dev/server:latest</string>
                 <string></string>
                 <string>cd $projectDir/server-product/k8s</string>
-                <string>ls</string>
                 <string>./build.sh</string>
                 <string></string>
                 <string>cd $projectDir</string>
