@@ -184,7 +184,6 @@ public class PullRequestNotificationManager {
 				String url = urlManager.urlFor(request);
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), subject, body);
-				userInfoManager.setPullRequestNotified(request.getSubmitter(), request, true);
 				notifiedUsers.add(request.getSubmitter());
 			}
 		}
@@ -215,7 +214,6 @@ public class PullRequestNotificationManager {
 						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 						
 						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), subject, body);
-						userInfoManager.setPullRequestNotified(mentionedUser, request, true);
 						
 						notifiedUsers.add(mentionedUser);
 					}
@@ -243,12 +241,10 @@ public class PullRequestNotificationManager {
 			for (PullRequestWatch watch: request.getWatches()) {
 				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
 				if (watch.isWatching() 
-						&& !userInfoManager.isNotified(watch.getUser(), watch.getRequest()) 
 						&& (visitDate == null || visitDate.before(event.getDate())) 
 						&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
 						&& !notifiedUsers.contains(watch.getUser())) {
 					usersToNotify.add(watch.getUser());
-					userInfoManager.setPullRequestNotified(watch.getUser(), watch.getRequest(), true);
 				}
 			}
 
@@ -273,7 +269,6 @@ public class PullRequestNotificationManager {
 		String subject = String.format("You are invited to review pull request %s", request.describe());
 		String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 		mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), subject, body);
-		userInfoManager.setPullRequestNotified(review.getUser(), review.getRequest(), true);
 	}
 
 	@Transactional

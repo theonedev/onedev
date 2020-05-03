@@ -19,14 +19,6 @@ public interface UserInfoManager {
 	
 	void visitCodeComment(User user, CodeComment comment);
 	
-	boolean isNotified(User user, PullRequest request);
-	
-	boolean isNotified(User user, Issue issue);
-	
-	void setPullRequestNotified(User user, PullRequest request, boolean notified);
-	
-	void setIssueNotified(User user, Issue issue, boolean notified);
-	
 	@Nullable
 	Date getIssueVisitDate(User user, Issue issue);
 	

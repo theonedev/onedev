@@ -149,10 +149,9 @@ public class IssueNotificationManager {
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, subject, body.toString());
 			
-			for (User member: entry.getValue().getMembers()) {
-				userInfoManager.setIssueNotified(member, issue, true);
+			for (User member: entry.getValue().getMembers())
 				issueWatchManager.watch(issue, member, true);
-			}
+			
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
@@ -165,10 +164,8 @@ public class IssueNotificationManager {
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, subject, body.toString());
 			
-			for (User each: entry.getValue()) {
+			for (User each: entry.getValue())
 				issueWatchManager.watch(issue, each, true);
-				userInfoManager.setIssueNotified(each, issue, true);
-			}
 			notifiedUsers.addAll(entry.getValue());
 		}
 		
@@ -196,7 +193,6 @@ public class IssueNotificationManager {
 						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), subject, body);
 						
 						issueWatchManager.watch(issue, mentionedUser, true);
-						userInfoManager.setIssueNotified(mentionedUser, issue, true);
 						notifiedUsers.add(mentionedUser);
 					}
 				}
@@ -221,11 +217,9 @@ public class IssueNotificationManager {
 			for (IssueWatch watch: issue.getWatches()) {
 				Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
 				if (watch.isWatching() 
-						&& !userInfoManager.isNotified(watch.getUser(), watch.getIssue()) 
 						&& (visitDate == null || visitDate.before(event.getDate())) 
 						&& !notifiedUsers.contains(watch.getUser())) {
 					usersToNotify.add(watch.getUser());
-					userInfoManager.setIssueNotified(watch.getUser(), watch.getIssue(), true);
 				}
 			}
 

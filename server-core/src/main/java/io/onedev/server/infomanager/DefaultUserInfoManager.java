@@ -38,19 +38,15 @@ import jetbrains.exodus.env.TransactionalExecutable;
 @Singleton
 public class DefaultUserInfoManager extends AbstractEnvironmentManager implements UserInfoManager {
 
-	private static final int INFO_VERSION = 5;
+	private static final int INFO_VERSION = 6;
 	
 	private static final String PULL_REQUEST_VISIT_STORE = "pullRequestVisit";
-	
-	private static final String PULL_REQUEST_NOTIFICATION_STORE = "pullRequestNotification";
 	
 	private static final String PULL_REQUEST_CODE_COMMENTS_VISIT_STORE = "pullRequestCodeCommentsVisit";
 	
 	private static final String CODE_COMMENT_VISIT_STORE = "codeCommentVisit";
 
 	private static final String ISSUE_VISIT_STORE = "issueVisit";
-	
-	private static final String ISSUE_NOTIFICATION_STORE = "issueNotification";
 	
 	private final StorageManager storageManager;
 	
@@ -89,8 +85,6 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			}
 			
 		});
-		
-		setIssueNotified(user, issue, false);
 	}
 
 	@Override
@@ -106,8 +100,6 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			}
 			
 		});
-		
-		setPullRequestNotified(user, request, false);
 	}
 	
 	@Override
@@ -234,64 +226,6 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 				visitPullRequestCodeComments(event.getUser(), event.getRequest());
 			}
 		}
-	}
-
-	@Override
-	public boolean isNotified(User user, PullRequest request) {
-		Environment env = getEnv(request.getTargetProject().getId().toString());
-		Store store = getStore(env, PULL_REQUEST_NOTIFICATION_STORE);
-		return env.computeInTransaction(new TransactionalComputable<Boolean>() {
-			
-			@Override
-			public Boolean compute(Transaction txn) {
-				return readBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), false);
-			}
-			
-		});
-	}
-
-	@Override
-	public boolean isNotified(User user, Issue issue) {
-		Environment env = getEnv(issue.getProject().getId().toString());
-		Store store = getStore(env, ISSUE_NOTIFICATION_STORE);
-		return env.computeInTransaction(new TransactionalComputable<Boolean>() {
-			
-			@Override
-			public Boolean compute(Transaction txn) {
-				return readBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), issue.getId())), false);
-			}
-			
-		});
-	}
-
-	@Override
-	public void setPullRequestNotified(User user, PullRequest request, boolean notified) {
-		Environment env = getEnv(request.getTargetProject().getId().toString());
-		
-		Store store = getStore(env, PULL_REQUEST_NOTIFICATION_STORE);
-		env.executeInTransaction(new TransactionalExecutable() {
-			
-			@Override
-			public void execute(Transaction txn) {
-				writeBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), notified);
-			}
-			
-		});
-	}
-
-	@Override
-	public void setIssueNotified(User user, Issue issue, boolean notified) {
-		Environment env = getEnv(issue.getProject().getId().toString());
-		
-		Store store = getStore(env, ISSUE_NOTIFICATION_STORE);
-		env.executeInTransaction(new TransactionalExecutable() {
-			
-			@Override
-			public void execute(Transaction txn) {
-				writeBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), issue.getId())), notified);
-			}
-			
-		});
 	}
 
 }
