@@ -14,3 +14,12 @@
 	padding-bottom: 8px;
 	display: none;
 }
+.source-edit>.code {
+	background: none;
+	border: none;
+	border-radius: none;
+	padding: 0;
+	margin: 0;
+	font-family: inherit;
+	font-size: inherit;
+}

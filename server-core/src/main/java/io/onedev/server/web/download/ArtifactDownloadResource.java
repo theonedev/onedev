@@ -107,6 +107,9 @@ public class ArtifactDownloadResource extends AbstractResource {
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
+		
+		response.setContentLength(artifactFile.length());
+		
 		response.setWriteCallback(new WriteCallback() {
 
 			@Override

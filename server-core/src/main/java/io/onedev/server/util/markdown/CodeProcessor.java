@@ -13,6 +13,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Splitter;
 
@@ -57,7 +58,7 @@ public class CodeProcessor implements MarkdownProcessor {
 		}).traverse(rendered);
 		
 		for (Element codeElement: codeElements) {
-			String code = codeElement.html();
+			String code = HtmlEscape.unescapeHtml(codeElement.html());
 			
 			String language = null;
 			String cssClasses = codeElement.attr("class");

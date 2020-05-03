@@ -58,7 +58,8 @@ body.fullscreen {
 	margin-right: 4px;
 	height: 24px;
 }
-.markdown-editor>.head>.actions>div>a:hover, .markdown-editor>.head>.actions>div>a.active {
+.markdown-editor>.head>.actions>div>a:hover, .markdown-editor>.head>.actions>div>a.active, 
+.markdown-editor>.head>.actions>div>.dropdown>a:hover, .markdown-editor>.head>.actions>div>.dropdown>a.active {
 	background: #EEE;
 	border: 1px solid #E0E0E0;
 }

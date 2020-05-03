@@ -205,12 +205,6 @@ ul>li>a.code-comments.new .fa-circle {
 
 .conflict-resolve-instruction .body>ul>li>.code {
 	margin-top: 8px;
-	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-	font-size: 13px;
-	background: #F5F5F5;
-	border: 1px dashed #BBB;
-	border-radius: 4px;
-	padding: 8px;
 }
 
 @media(min-width: 1150px) {

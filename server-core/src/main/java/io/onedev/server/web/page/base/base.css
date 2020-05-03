@@ -672,3 +672,12 @@ td.ellipsis {
 	vertical-align: middle !important;
 }
 
+.code {
+	border: 1px dashed #BBB;
+	background: #F5F5F5;
+	border-radius: 4px;
+	padding: 8px;
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-size: 13px;
+	margin-bottom: 8px;
+}

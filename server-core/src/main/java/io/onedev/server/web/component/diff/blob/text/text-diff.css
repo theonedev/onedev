@@ -22,6 +22,15 @@
 .text-diff>.head>div:last-child {
 	margin-right: 0;
 }
+.text-diff>.body>tbody>tr.code {
+	background: inherit;
+	border: inherit;
+	border-radius: inherit;
+	padding: inherit;
+	margin: inherit;
+	font-family: inherit;
+	font-size: inherit;
+}
 .text-diff>.body>tbody>tr>td.content>span.content-mark {
 	background: #CCCCFF;
 }

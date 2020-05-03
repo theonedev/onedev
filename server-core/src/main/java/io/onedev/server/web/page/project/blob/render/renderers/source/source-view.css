@@ -1,6 +1,15 @@
 .source-view {
 	position: relative;
 }
+.source-view>.code {
+	background: none;
+	border: none;
+	border-radius: none;
+	padding: 0;
+	margin: 0;
+	font-family: inherit;
+	font-size: inherit;
+}
 .source-view>.comment {
 	background: white; 
 	position: absolute;
