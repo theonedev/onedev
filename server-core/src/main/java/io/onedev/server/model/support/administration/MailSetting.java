@@ -16,7 +16,7 @@ public class MailSetting implements Serializable {
 	
 	private int smtpPort = 587;
 	
-	private boolean enableStartTLS;
+	private boolean enableStartTLS = true;
 	
 	private String smtpUser;
 	
