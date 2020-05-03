@@ -26,7 +26,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -676,20 +675,16 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		
 		Collection<Long> prevBuildNumbers = new HashSet<>();
 		try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
-			RevCommit current = revWalk.lookupCommit(build.getCommitId());
-			revWalk.parseHeaders(current);
-			while (current.getParentCount() != 0) {
-				RevCommit firstParent = current.getParent(0);
-				Long buildNumber = buildNumbers.get(firstParent);
+			revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
+			RevCommit nextCommit;
+			while ((nextCommit = revWalk.next()) != null) {
+				Long buildNumber = buildNumbers.get(nextCommit);
 				if (buildNumber != null) {
 					prevBuildNumbers.add(buildNumber);
 					if (prevBuildNumbers.size() >= limit)
 						break;
 				}
-				current = firstParent;
-				revWalk.parseHeaders(current);
-			} 
-		} catch (MissingObjectException e) {
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -706,17 +701,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 		
 		try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
-			RevCommit current = revWalk.lookupCommit(build.getCommitId());
-			revWalk.parseHeaders(current);
-			while (current.getParentCount() != 0) {
-				RevCommit firstParent = current.getParent(0);
-				Long buildId = buildIds.get(firstParent);
+			revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
+			RevCommit nextCommit;
+			while ((nextCommit = revWalk.next()) != null) {
+				Long buildId = buildIds.get(nextCommit);
 				if (buildId != null)
 					return load(buildId);
-				current = firstParent;
-				revWalk.parseHeaders(current);
-			} 
-		} catch (MissingObjectException e) {
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
