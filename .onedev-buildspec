@@ -49,6 +49,8 @@
             <image>1dev/build-environment:1.1</image>
             <commands>
                 <string>set -e</string>
+                <string></string>
+                <string>projectDir=`pwd`</string>
                 <string>docker login -u robinshen -p @secrets:dockerhub-password@</string>
                 <string></string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
@@ -60,20 +62,19 @@
                 <string></string>
                 <string>curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"</string>
                 <string></string>
-                <string>cp -r server-product/docker docker</string>
-                <string>cp server-product/target/onedev-${buildVersion}.zip .</string>
-                <string>unzip onedev-${buildVersion}.zip -d docker</string>
-                <string>mv docker/onedev-${buildVersion} docker/app</string>
-                <string>cp server-product/target/sandbox/site/lib/mysql* server-product/target/sandbox/site/lib/postgresql* docker/app/site/lib</string>
-                <string></string>
-                <string>docker build -t 1dev/server:${buildVersion} docker</string>
+                <string>cd $projectDir/server-product/docker</string>
+                <string>./build.sh</string>
                 <string>docker push 1dev/server:${buildVersion}</string>
                 <string>docker tag 1dev/server:${buildVersion} 1dev/server:latest</string>
                 <string>docker push 1dev/server:latest</string>
                 <string></string>
-                <string>cp -r server-product/k8s k8s-resources</string>
-                <string>find k8s-resources -name "*.yaml" | xargs sed -i -e "s/\\${buildVersion}/${buildVersion}/g"</string>
-                <string>zip -r k8s-resources.zip k8s-resources</string>
+                <string>cd $projectDir/server-product/k8s</string>
+                <string>./build.sh</string>
+                <string></string>
+                <string>cd $projectDir</string>
+                <string></string>
+                <string>cp server-product/target/k8s-resources.zip .</string>
+                <string>cp server-product/target/onedev-${buildVersion}.zip .</string>
                 <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
                 <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(pwd)/onedev:/opt/onedev -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}</string>
