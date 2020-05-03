@@ -1,0 +1,123 @@
+version: 0
+jobs:
+- name: CI
+  image: 1dev/build-environment:1.1
+  commands:
+  - set -e
+  - echo "Detecting project version (may require some time while downloading maven
+    dependencies)..."
+  - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version
+    -q -DforceStdout)
+  - echo "##onedev[SetBuildVersion '$buildVersion']"
+  - mvn test
+  triggers:
+  - !BranchUpdateTrigger
+    branches: master
+  - !PullRequestTrigger {}
+  retrieveSource: true
+  cloneDepth: 1
+  cpuRequirement: 250m
+  memoryRequirement: 128m
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  caches:
+  - key: maven-cache
+    path: /root/.m2/repository
+  timeout: 3600
+- name: Release
+  image: 1dev/build-environment:1.1
+  commands:
+  - set -e
+  - ''
+  - projectDir=`pwd`
+  - docker login -u robinshen -p @secrets:dockerhub-password@
+  - ''
+  - echo "Detecting project version (may require some time while downloading maven
+    dependencies)..."
+  - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version
+    -q -DforceStdout)
+  - echo "##onedev[SetBuildVersion '$buildVersion']"
+  - ''
+  - '# Skip test as we''ve already tested in CI build'
+  - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
+    deploy
+  - ''
+  - curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml
+    -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"
+  - ''
+  - cd $projectDir/server-product/docker
+  - ./build.sh
+  - docker push 1dev/server:${buildVersion}
+  - docker tag 1dev/server:${buildVersion} 1dev/server:latest
+  - docker push 1dev/server:latest
+  - ''
+  - cd $projectDir/server-product/k8s
+  - ./build.sh
+  - ''
+  - cd $projectDir
+  - ''
+  - cp server-product/target/k8s-resources.zip .
+  - cp server-product/target/onedev-${buildVersion}.zip .
+  - ''
+  - cat << EOF > run-as-docker.sh
+  - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(pwd)/onedev:/opt/onedev
+    -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
+  - EOF
+  retrieveSource: true
+  cloneDepth: 1
+  jobDependencies:
+  - jobName: CI
+    requireSuccessful: true
+  artifacts: '*.zip *.sh'
+  cpuRequirement: 250m
+  memoryRequirement: 128m
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  caches:
+  - key: maven-cache
+    path: /root/.m2/repository
+  timeout: 3600
+  postBuildActions:
+  - !CreateTagAction
+    condition: successful
+    tagName: v@build_version@
+  - !CloseMilestoneAction
+    condition: successful
+    milestoneName: '@build_version@'
+  defaultFixedIssuesFilter: '"State" is "Closed" order by "Type" asc and "Priority"
+    desc'
+- name: Sync Master (GitHub)
+  image: alpine/git:1.0.7
+  commands:
+  - git push -f https://robinshine:@secrets:github-password@\@github.com/theonedev/server
+    HEAD:master
+  triggers:
+  - !BranchUpdateTrigger
+    branches: master
+  retrieveSource: true
+  cpuRequirement: 250m
+  memoryRequirement: 128m
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 3600
+- name: Sync Tags (GitHub)
+  image: alpine/git:1.0.7
+  commands:
+  - set -e
+  - git fetch --tags https://robin:@secrets:onedev-password@\@code.onedev.io/projects/onedev-server
+  - git push -f --tags https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev
+  triggers:
+  - !TagCreateTrigger {}
+  retrieveSource: true
+  cpuRequirement: 250m
+  memoryRequirement: 128m
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  caches:
+  - key: maven-cache
+    path: /root/.m2/repository
+  timeout: 3600
