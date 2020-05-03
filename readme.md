@@ -19,7 +19,7 @@ Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. N
 
 ### Create Build Spec in a Breeze
 
-No YAML files to write. No complex grammars to remember. Create build spec for your projects instantly without learning.
+No complex yaml grammars to remember. Create build spec for your projects with GUI and auto-completion instantly without learning.
 
 ![Cispec](features/cispec.gif)
 
@@ -41,9 +41,9 @@ Define issue boards to show issues in columns based on values of specified field
 
 ![Issue Boards](features/issue-boards.gif)
 
-### Symbol Search and Navigation
+### Code Intelligence
 
-Language aware symbol search. Symbol navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
+Symbol search and navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 
 ![Symbol Search](features/symbol-search.gif)
 
