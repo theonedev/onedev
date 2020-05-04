@@ -674,19 +674,21 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 		
 		Collection<Long> prevBuildNumbers = new HashSet<>();
-		try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
-			revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
-			RevCommit nextCommit;
-			while ((nextCommit = revWalk.next()) != null) {
-				Long buildNumber = buildNumbers.get(nextCommit);
-				if (buildNumber != null) {
-					prevBuildNumbers.add(buildNumber);
-					if (prevBuildNumbers.size() >= limit)
-						break;
+		if (!buildNumbers.isEmpty()) {
+			try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
+				revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
+				RevCommit nextCommit;
+				while ((nextCommit = revWalk.next()) != null) {
+					Long buildNumber = buildNumbers.remove(nextCommit);
+					if (buildNumber != null) {
+						prevBuildNumbers.add(buildNumber);
+						if (prevBuildNumbers.size() >= limit || buildNumbers.isEmpty())
+							break;
+					}
 				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 		return prevBuildNumbers;
 	}
@@ -700,16 +702,18 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		
-		try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
-			revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
-			RevCommit nextCommit;
-			while ((nextCommit = revWalk.next()) != null) {
-				Long buildId = buildIds.get(nextCommit);
-				if (buildId != null)
-					return load(buildId);
+		if (!buildIds.isEmpty()) {
+			try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
+				revWalk.markStart(revWalk.lookupCommit(build.getCommitId()));
+				RevCommit nextCommit;
+				while ((nextCommit = revWalk.next()) != null) {
+					Long buildId = buildIds.get(nextCommit);
+					if (buildId != null)
+						return load(buildId);
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 		return null;
 	}
