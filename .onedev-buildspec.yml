@@ -96,6 +96,7 @@ jobs:
   triggers:
   - !BranchUpdateTrigger
     branches: master
+    projects: onedev-server
   retrieveSource: true
   cpuRequirement: 250m
   memoryRequirement: 128m
@@ -110,7 +111,8 @@ jobs:
   - git fetch --tags https://robin:@secrets:onedev-password@\@code.onedev.io/projects/onedev-server
   - git push -f --tags https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev
   triggers:
-  - !TagCreateTrigger {}
+  - !TagCreateTrigger
+    projects: onedev-server
   retrieveSource: true
   cpuRequirement: 250m
   memoryRequirement: 128m
