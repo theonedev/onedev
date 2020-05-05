@@ -427,6 +427,9 @@ input.search {
 .list>.head {
 	margin-bottom: 8px;
 }
+.list>.foot {
+	margin-top: 8px;
+}
 .list>.head>.pull-left {
 	margin-right: 20px;
 	margin-bottom: 8px;

@@ -77,29 +77,6 @@
     margin-top: -7px;
     padding: 8px 0 0 8px;
 }
-.property-editor>.polymorphic-list>table>tbody>tr>td {
-    border-top: 2px solid #BBB;
-    padding-top: 20px;
-}
-.property-editor>.polymorphic-list>table>tbody>tr>td>.head {
-	margin-bottom: 20px;
-}
-.property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions {
-    font-size: 18px;
-    margin-left: 20px;
-}
-.property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions a {
-    color: #666;
-}
-
-.property-viewer>.polymorphic-list>tbody>tr>td {
-    border-top: 2px solid #BBB;
-    padding-top: 12px;
-    padding-bottom: 12px;
-}
-.property-viewer>.polymorphic-list>tbody>tr>td>.type-selector {
-    margin-bottom: 12px;
-}
 .property-viewer>.bean-list>tfoot>tr>td.no-elements>div {
     border-top: 2px solid #DDD;
     margin-top: -7px;

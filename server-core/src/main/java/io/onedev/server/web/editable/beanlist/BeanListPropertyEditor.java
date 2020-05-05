@@ -145,22 +145,19 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				super.onSubmit(target, form);
 				markFormDirty(target);
 				
-				Component firstRow;
+				Component lastRow;
 				if (rows.size() != 0)
-					firstRow = rows.get(0);
+					lastRow = rows.get(rows.size() - 1);
 				else 
-					firstRow = null;
+					lastRow = null;
 				
 				Component newRow = addRow(newElement());
-				for (int i=0; i<rows.size()-1; i++) 
-					rows.swap(rows.size()-i-1, rows.size()-i-2);
-				
 				String script = String.format("$('<tr id=\"%s\"></tr>')", newRow.getMarkupId());
-				if (firstRow != null)
-					script += ".insertBefore('#" + firstRow.getMarkupId() + "');";
+				if (lastRow != null)
+					script += ".insertAfter('#" + lastRow.getMarkupId() + "');";
 				else
 					script += ".appendTo('#" + BeanListPropertyEditor.this.getMarkupId() + ">div>table>tbody');";
-
+				
 				target.prependJavaScript(script);
 				target.add(newRow);
 				target.add(noElements);
