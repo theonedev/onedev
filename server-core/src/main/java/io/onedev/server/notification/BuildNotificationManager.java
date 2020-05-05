@@ -69,8 +69,9 @@ public class BuildNotificationManager {
 					build.getNumber(), build.getStatus().getDisplayName().toLowerCase());
 		}
 		String url = urlManager.urlFor(build);
-		String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-		mailManager.sendMailAsync(emails, subject, body.toString());
+		String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+		String textBody = String.format("Visit %s for details", url);
+		mailManager.sendMailAsync(emails, subject, htmlBody, textBody);
 	}
 	
 	@Sessional

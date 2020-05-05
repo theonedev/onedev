@@ -304,7 +304,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	protected void notifyBackupError(Throwable e) {
 		User root = userManager.getRoot();
 		String url = settingManager.getSystemSetting().getServerUrl();
-		String body = String.format(""
+		String htmlBody = String.format(""
 				+ "OneDev url: <a href='%s'>%s</a>"
 				+ "<p style='margin: 16px 0;'>"
 				+ "<b>Error detail:</b>"
@@ -312,7 +312,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 				+ "<p style='margin: 16px 0;'>"
 				+ "-- Sent by OneDev", 
 				url, url, Throwables.getStackTraceAsString(e));
-		mailManager.sendMail(Lists.newArrayList(root.getEmail()), "OneDev database auto-backup failed", body);
+		String textBody = String.format(""
+				+ "OneDev url: %s\n\n"
+				+ "Error detail:\n"
+				+ "%s",
+				url, Throwables.getStackTraceAsString(e));
+		mailManager.sendMail(Lists.newArrayList(root.getEmail()), 
+				"OneDev database auto-backup failed", htmlBody, textBody);
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

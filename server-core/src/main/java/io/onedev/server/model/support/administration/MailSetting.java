@@ -18,6 +18,8 @@ public class MailSetting implements Serializable {
 	
 	private boolean enableStartTLS = true;
 	
+	private boolean sendAsHtml = true;
+	
 	private String smtpUser;
 	
 	private String smtpPassword;
@@ -54,6 +56,15 @@ public class MailSetting implements Serializable {
 
 	public void setEnableStartTLS(boolean enableStartTLS) {
 		this.enableStartTLS = enableStartTLS;
+	}
+
+	@Editable(order=260, description="If checked, mail will be sent in html format. Otherwise in plain text format")
+	public boolean isSendAsHtml() {
+		return sendAsHtml;
+	}
+
+	public void setSendAsHtml(boolean sendAsHtml) {
+		this.sendAsHtml = sendAsHtml;
 	}
 
 	@Editable(order=300, name="SMTP User", description=

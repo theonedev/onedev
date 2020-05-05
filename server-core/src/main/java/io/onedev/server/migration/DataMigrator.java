@@ -2000,4 +2000,20 @@ public class DataMigrator {
 		dom.writeToFile(dataFile, false);
 	}
 	
+	private void migrate41(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.addElement("sendAsHtml").setText("true");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}	
+	}
+	
 }

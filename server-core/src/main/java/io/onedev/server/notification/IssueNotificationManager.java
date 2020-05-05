@@ -147,13 +147,14 @@ public class IssueNotificationManager {
 		
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
 			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.describe());
-			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+			String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+			String textBody = String.format("Visit %s for details", url);
 			Set<String> emails = entry.getValue().getMembers()
 					.stream()
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, subject, body.toString());
+			mailManager.sendMailAsync(emails, subject, htmlBody, textBody);
 			
 			for (User member: entry.getValue().getMembers())
 				issueWatchManager.watch(issue, member, true);
@@ -162,13 +163,14 @@ public class IssueNotificationManager {
 		}
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
 			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.describe());
-			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+			String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+			String textBody = String.format("Visit %s for details", url);
 			Set<String> emails = entry.getValue()
 					.stream()
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, subject, body.toString());
+			mailManager.sendMailAsync(emails, subject, htmlBody, textBody);
 			
 			for (User each: entry.getValue())
 				issueWatchManager.watch(issue, each, true);
@@ -185,9 +187,11 @@ public class IssueNotificationManager {
 					User mentionedUser = userManager.findByName(userName);
 					if (mentionedUser != null) {
 						String subject = String.format("You are mentioned in issue %s", issue.describe());
-						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						String textBody = String.format("Visit %s for details", url);
 						
-						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), subject, body);
+						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), 
+								subject, htmlBody, textBody);
 						
 						issueWatchManager.watch(issue, mentionedUser, true);
 						notifiedUsers.add(mentionedUser);
@@ -226,8 +230,11 @@ public class IssueNotificationManager {
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
 				else 
 					subject = event.getActivity(true);
-				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);
+				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				String textBody = String.format("Visit %s for details", url);
+				
+				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), 
+						subject, htmlBody, textBody);
 			}			
 		}
 	}

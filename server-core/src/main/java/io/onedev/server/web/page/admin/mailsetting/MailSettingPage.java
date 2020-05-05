@@ -67,9 +67,10 @@ public class MailSettingPage extends AdministrationPage {
 			@Override
 			protected String runTask(JobLogger logger) {
 				User user = SecurityUtils.getUser();
+				
+				String body = "Great, your mail setting is working!";
 				OneDev.getInstance(MailManager.class).sendMail(mailSettingHolder.getMailSetting(), 
-						Sets.newHashSet(user.getEmail()), 
-						"Test email from OneDev", "Great, your mail setting is working!");
+						Sets.newHashSet(user.getEmail()), "Test email from OneDev", body, body);
 				return "Test mail has been sent to " + user.getEmail() + ", please check your mail box";
 			}
 

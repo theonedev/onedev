@@ -88,8 +88,9 @@ public class CommitNotificationManager {
 			if (commit != null) {
 				String subject = String.format("Subscribed commit at ref '%s': %s", event.getRefName(), commit.getShortMessage());
 				String url = urlManager.urlFor(project, commit);
-				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				mailManager.sendMailAsync(notifyEmails, subject, body.toString());
+				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				String textBody = String.format("Visit %s for details", url);
+				mailManager.sendMailAsync(notifyEmails, subject, htmlBody, textBody);
 			}
 		}
 	}

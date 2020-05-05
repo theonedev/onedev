@@ -193,8 +193,9 @@ public class PullRequestNotificationManager {
 			else if (changeData instanceof PullRequestDiscardData) 
 				subject = String.format(user.getDisplayName() + " discarded pull request %s", request.describe());
 			if (subject != null) { 
-				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), subject, body);
+				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				String textBody = String.format("Visit %s for details", url);
+				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), subject, htmlBody, textBody);
 				notifiedUsers.add(request.getSubmitter());
 			}
 		}
@@ -211,9 +212,10 @@ public class PullRequestNotificationManager {
 						pullRequestWatchManager.watch(request, mentionedUser, true);
 						
 						String subject = String.format("You are mentioned in pull request %s", request.describe());
-						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						String textBody = String.format("Visit %s for details", url);
 						
-						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), subject, body);
+						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), subject, htmlBody, textBody);
 						
 						notifiedUsers.add(mentionedUser);
 					}
@@ -256,8 +258,10 @@ public class PullRequestNotificationManager {
 					subject = String.format("%s added commits to pull request %s", committer.getDisplayName(), request.describe());
 				else
 					subject = event.getActivity(true);
-				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);
+				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				String textBody = String.format("Visit %s for details", url);
+				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), 
+						subject, htmlBody, textBody);
 			}
 		}				
 	}
@@ -266,8 +270,9 @@ public class PullRequestNotificationManager {
 		PullRequest request = review.getRequest();
 		String url = urlManager.urlFor(request);
 		String subject = String.format("You are invited to review pull request %s", request.describe());
-		String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-		mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), subject, body);
+		String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+		String textBody = String.format("Visit %s for details", url, url);
+		mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), subject, htmlBody, textBody);
 	}
 
 	@Transactional

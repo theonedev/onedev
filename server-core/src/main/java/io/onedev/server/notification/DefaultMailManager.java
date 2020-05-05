@@ -9,8 +9,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.apache.commons.mail.SimpleEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,7 @@ public class DefaultMailManager implements MailManager {
 
 	@Sessional
 	@Override
-	public void sendMailAsync(Collection<String> toList, String subject, String body) {
+	public void sendMailAsync(Collection<String> toList, String subject, String htmlBody, String textBody) {
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
@@ -51,7 +53,7 @@ public class DefaultMailManager implements MailManager {
 					@Override
 					public void run() {
 						try {
-							sendMail(toList, subject, body);
+							sendMail(toList, subject, htmlBody, textBody);
 						} catch (Exception e) {
 							logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
 						}		
@@ -64,7 +66,8 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Override
-	public void sendMail(MailSetting mailSetting, Collection<String> toList, String subject, String body) {
+	public void sendMail(MailSetting mailSetting, Collection<String> toList, String subject, 
+			String htmlBody, String textBody) {
 		if (toList.isEmpty())
 			return;
 
@@ -72,7 +75,17 @@ public class DefaultMailManager implements MailManager {
 			mailSetting = settingManager.getMailSetting();
 		
 		if (mailSetting != null) {
-			HtmlEmail email = new HtmlEmail();
+			Email email;
+			
+			try {
+				if (mailSetting.isSendAsHtml())
+					email = new HtmlEmail().setHtmlMsg(htmlBody);
+				else
+					email = new SimpleEmail().setMsg(textBody);
+			} catch (EmailException e) {
+				throw new RuntimeException(e);
+			}
+			
 	        email.setSocketConnectionTimeout(Bootstrap.SOCKET_CONNECT_TIMEOUT);
 
 	        if (mailSetting.getTimeout() != 0)
@@ -106,7 +119,6 @@ public class DefaultMailManager implements MailManager {
 				email.setCharset(CharEncoding.UTF_8);
 				
 				email.setSubject(subject);
-				email.setHtmlMsg(body);
 				
 				logger.debug("Sending email (to: {}, subject: {})... ", toList, subject);
 				email.send();
@@ -119,8 +131,8 @@ public class DefaultMailManager implements MailManager {
 	}
 
 	@Override
-	public void sendMail(Collection<String> toList, String subject, String body) {
-		sendMail(settingManager.getMailSetting(), toList, subject, body);
+	public void sendMail(Collection<String> toList, String subject, String htmlBody, String textBody) {
+		sendMail(settingManager.getMailSetting(), toList, subject, htmlBody, textBody);
 	}
 
 }

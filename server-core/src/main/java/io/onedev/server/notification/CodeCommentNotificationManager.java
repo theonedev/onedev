@@ -59,9 +59,10 @@ public class CodeCommentNotificationManager {
 					if (url != null) {
 						String subject = String.format("You are mentioned in a code comment on file '%s'", 
 								event.getComment().getMarkPos().getPath());
-						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						String textBody = String.format("Visit %s for details", url);
 						
-						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, body);
+						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, htmlBody, textBody);
 					}
 				}
 			}

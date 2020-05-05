@@ -58,17 +58,24 @@ public class ForgetPage extends BasePage {
 						userManager.save(user);
 						
 						MailManager mailManager = OneDev.getInstance(MailManager.class);
-						String mailBody = String.format("Dear %s, "
+						
+						String serverUrl = settingManager.getSystemSetting().getServerUrl();
+						
+						String htmlBody = String.format("Dear %s, "
 							+ "<p style='margin: 16px 0;'>"
-							+ "Per your request, password of your user \"%s\" has been reset to:<br>"
+							+ "Per your request, password of your login \"%s\" at <a href=\"%s\">%s</a> has been reset to:<br>"
 							+ "%s<br><br>"
-							+ "Please login and change the password in your earliest convenience."
-							+ "<p style='margin: 16px 0;'>"
-							+ "-- Sent by OneDev", 
-							user.getDisplayName(), user.getName(), password);
+							+ "Please login and change the password in your earliest convenience.",
+							user.getDisplayName(), user.getName(), serverUrl, serverUrl, password);
 
+						String textBody = String.format("Dear %s,\n\n"
+								+ "Per your request, password of your login \"%s\" at %s has been reset to:\n"
+								+ "%s\n\n"
+								+ "Please login and change the password in your earliest convenience.",
+								user.getDisplayName(), user.getName(), serverUrl, password);
+						
 						mailManager.sendMail(settingManager.getMailSetting(), Arrays.asList(user.getEmail()), 
-								"Your OneDev password has been reset", mailBody);
+								"Your OneDev password has been reset", htmlBody, textBody);
 						return "Please check your email " + user.getEmail() + " for the reset password";
 					} else {
 						throw new OneException("Unable to send password reset email as smtp setting is not defined");
