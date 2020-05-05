@@ -86,7 +86,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
-	private static final int INFO_VERSION = 9;
+	private static final int INFO_VERSION = 10;
 	
 	private static final long LOG_FILE_SIZE = 256*1024;
 	
@@ -1302,7 +1302,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	@Sessional
 	@Override
 	public List<Contributor> getTopContributors(Project project, int top, Contribution.Type type, 
-			Day fromDay, Day toDay) {
+			int fromDay, int toDay) {
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store indexToUserStore = getStore(env, INDEX_TO_USER_STORE);
@@ -1316,7 +1316,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
 				Map<Integer, Contribution> totalContributions = new HashMap<>();
 				for (int dayValue: overallContributions.keySet()) {
-					if (dayValue >= fromDay.getValue() && dayValue <= toDay.getValue()) {
+					if (dayValue >= fromDay && dayValue <= toDay) {
 						ByteIterable dayKey = new IntByteIterable(dayValue);
 						Map<Integer, Contribution> contributionsOnDay = 
 								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
@@ -1359,7 +1359,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				Map<Integer, Map<Day, Integer>> userContributions = new HashMap<>();
 				
 				for (int dayValue: overallContributions.keySet()) {
-					if (dayValue >= fromDay.getValue() && dayValue <= toDay.getValue()) {
+					if (dayValue >= fromDay && dayValue <= toDay) {
 						ByteIterable dayKey = new IntByteIterable(dayValue);
 						Map<Integer, Contribution> contributionsOnDay = 
 								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));

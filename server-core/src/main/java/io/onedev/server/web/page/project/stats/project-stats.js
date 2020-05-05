@@ -9,9 +9,7 @@ onedev.server.stats = {
 			value: useKilo? (value/1000).toFixed(1) + " k": value
 		}
 	},
-	formatDate: function(date) {
-		return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
-	},
+	
 	contribs: {
 		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback) {
 			var $contribs = $("#project-contribs");
@@ -22,11 +20,12 @@ onedev.server.stats = {
 			}
 			
 			var contribDays = [];
-			for (var dayMillis in overallContributions) {
-				contribDays.push(new Date(parseInt(dayMillis)));
-			}
-			contribDays.sort(function(a, b) {
-				return a - b;
+
+			for (var day in overallContributions) 
+				contribDays.push(day);
+			
+			contribDays.sort(function(day1, day2) {
+				return day1 - day2;
 			});
 			
 			var days = [];
@@ -35,15 +34,18 @@ onedev.server.stats = {
 			var currentDay = contribDays[0];
 			while (currentDay <= lastDay) {
 				days.push(currentDay);
-				currentDay = new Date(currentDay.getTime());
-				currentDay.setDate(currentDay.getDate()+1);
+				var currentDayObj = onedev.server.day.fromValue(currentDay);
+				currentDay = onedev.server.day.toValue(onedev.server.day.plus(currentDayObj, 1));
 			}
 			
 			var fromDay = days[0];
 			var toDay = days[days.length-1];
 			
 			function updateDateRange() {
-				$contribs.find(".date-range").text(onedev.server.stats.formatDate(fromDay) + " ~ " + onedev.server.stats.formatDate(toDay));
+				$contribs.find(".date-range").text(
+						onedev.server.day.format(onedev.server.day.fromValue(fromDay)) 
+						+ " ~ " 
+						+ onedev.server.day.format(onedev.server.day.fromValue(toDay)));
 			}
 
 			var $contribType = $contribs.find(".contrib-type");
@@ -54,18 +56,17 @@ onedev.server.stats = {
 			
 			var overallXAxisData = [];
 			for (var i=0; i<days.length; i++) {
-				overallXAxisData.push(onedev.server.stats.formatDate(days[i]));
+				overallXAxisData.push(onedev.server.day.format(onedev.server.day.fromValue(days[i])));
 			}
 			
 			function getOverallSeriesData() {
 				var data = [];
 				for (var i=0; i<days.length; i++) {
-					var contribution = overallContributions[days[i].getTime()];
-					if (contribution) {
+					var contribution = overallContributions[days[i]];
+					if (contribution) 
 						data.push(contribution[1][$contribType[0].selectedIndex]);
-					} else {
+					else 
 						data.push(0);
-					}
 				}
 				return data;
 			}
@@ -155,7 +156,7 @@ onedev.server.stats = {
 				$topContributors.empty().append("<div class='loading'><img src='/img/ajax-indicator-big.gif'></img></div>");
 				setTimeout(function() {
 					$.ajax({
-						url: topContributorsDataUrl + "&type=" + $contribType.val().toUpperCase() + "&from=" + fromDay.getTime() + "&to=" + toDay.getTime(),
+						url: topContributorsDataUrl + "&type=" + $contribType.val().toUpperCase() + "&from=" + fromDay + "&to=" + toDay,
 						cache: false, 
 						beforeSend: function(xhr) {
 							xhr.setRequestHeader('Wicket-Ajax', 'true');
@@ -164,14 +165,14 @@ onedev.server.stats = {
 						success: function(topContributors) {
 							var xAxisData = [];
 							for (var i=0; i<days.length; i++) {
-								if (days[i] >= fromDay && days[i] <= toDay)
-									xAxisData.push(onedev.server.stats.formatDate(days[i]));
+								if (days[i] >= fromDay && days[i] <= toDay) 
+									xAxisData.push(onedev.server.day.format(onedev.server.day.fromValue(days[i])));
 							}
 							
 							var maxValue = 0;
 							for (var i=0; i<topContributors.length; i++) {
-								for (var dayMillis in topContributors[i].dailyContributions) {
-									var value = topContributors[i].dailyContributions[dayMillis];
+								for (var day in topContributors[i].dailyContributions) {
+									var value = topContributors[i].dailyContributions[day];
 									if (maxValue < value)
 										maxValue = value;
 								}
@@ -216,7 +217,7 @@ onedev.server.stats = {
 								var maxValueOfContributor = 0;
 								for (var i=0; i<days.length; i++) {
 									if (days[i] >= fromDay && days[i] <= toDay) {
-										var contribution = contributor.dailyContributions[days[i].getTime()];
+										var contribution = contributor.dailyContributions[days[i]];
 										if (contribution) {
 											seriesData.push(contribution);
 											if (maxValueOfContributor < contribution)
@@ -308,6 +309,7 @@ onedev.server.stats = {
 			$userCard.align({placement: $userCard.data("alignment"), target: {element: $userCard.data("trigger")}});
 		}
 	},
+	
 	sourceLines: {
 		onDomReady: function(lineIncrements, defaultBranch) {
 			var numOfTopLanguages = 10;
@@ -320,10 +322,10 @@ onedev.server.stats = {
 			
 			var languageLines = {};
 			var incrementDays = [];
-			for (var dayMillis in lineIncrements) {
-				delete lineIncrements[dayMillis]["@class"];
-				incrementDays.push(new Date(parseInt(dayMillis)));
-				var incrementsOnDay = lineIncrements[dayMillis];
+			for (var day in lineIncrements) {
+				delete lineIncrements[day]["@class"];
+				incrementDays.push(day);
+				var incrementsOnDay = lineIncrements[day];
 				for (var language in incrementsOnDay) {
 					var increment = incrementsOnDay[language];
 					var dailyLinesByLanguages = languageLines[language];
@@ -334,8 +336,8 @@ onedev.server.stats = {
 					languageLines[language] = dailyLinesByLanguages;
 				}
 			}
-			incrementDays.sort(function(a, b) {
-				return a - b;
+			incrementDays.sort(function(day1, day2) {
+				return day1 - day2;
 			});
 			
 			var languages = Object.keys(languageLines);
@@ -352,7 +354,7 @@ onedev.server.stats = {
 				dailyLinesByLanguages[topLanguages[i]] = [];
 			var xAxisData = [];
 			while (currentDay <= lastDay) {
-				var incrementsOnCurrentDay = lineIncrements[currentDay.getTime()];
+				var incrementsOnCurrentDay = lineIncrements[currentDay];
 				for (var language in dailyLinesByLanguages) {
 					var dailyLines = dailyLinesByLanguages[language];
 					var increments;
@@ -366,9 +368,9 @@ onedev.server.stats = {
 					else
 						dailyLines.push(increments);
 				}
-				xAxisData.push(onedev.server.stats.formatDate(currentDay));
-				currentDay = new Date(currentDay.getTime());
-				currentDay.setDate(currentDay.getDate()+1);
+				var currentDayObj = onedev.server.day.fromValue(currentDay);
+				xAxisData.push(onedev.server.day.format(currentDayObj));
+				currentDay = onedev.server.day.toValue(onedev.server.day.plus(currentDayObj, 1));
 			}
 			
 			var chart = echarts.init($chart[0]);

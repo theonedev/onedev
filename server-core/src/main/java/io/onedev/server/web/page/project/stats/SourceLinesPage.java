@@ -26,10 +26,9 @@ public class SourceLinesPage extends ProjectStatsPage {
 		super.renderHead(response);
 		
 		Map<Day, Map<String, Integer>> lineIncrements = OneDev.getInstance(CommitInfoManager.class).getLineIncrements(getProject());
-		Map<Long, Map<String, Integer>> data = new HashMap<>();
-		for (Map.Entry<Day, Map<String, Integer>> entry: lineIncrements.entrySet()) {
-			data.put(entry.getKey().getDate().getTime(), entry.getValue());
-		}
+		Map<Integer, Map<String, Integer>> data = new HashMap<>();
+		for (Map.Entry<Day, Map<String, Integer>> entry: lineIncrements.entrySet()) 
+			data.put(entry.getKey().getValue(), entry.getValue());
 		try {
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			String jsonOfData = mapper.writeValueAsString(data);

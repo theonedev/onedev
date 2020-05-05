@@ -11,45 +11,71 @@ public class Day implements Serializable, Comparable<Day> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final DateTime dateTime;
+	private final int year; 
+	
+	private final int monthOfYear;
+	
+	private final int dayOfMonth;
 	
 	public Day(Date date) {
 		this(new DateTime(date));
 	}
 	
 	public Day(DateTime dateTime) {
-		this.dateTime = new DateTime(dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), 
-				0, 0, 0, 0);
+		this(dateTime.getYear(), dateTime.getMonthOfYear()-1, dateTime.getDayOfMonth());
 	}
 	
 	public Day(int year, int monthOfYear, int dayOfMonth) {
-		dateTime = new DateTime(year, monthOfYear, dayOfMonth, 0, 0, 0, 0);
+		this.year = year;
+		this.monthOfYear = monthOfYear;
+		this.dayOfMonth = dayOfMonth;
 	}
 	
 	public Day(int value) {
 		this(value>>>16, (value&0x0000ffff)>>>8, value&0x000000ff);
 	}
 
-	public Date getDate() {
-		return dateTime.toDate();
-	}
-	
 	public int getValue() {
-		return (dateTime.getYear()<<16) | (dateTime.getMonthOfYear()<<8) | (dateTime.getDayOfMonth());
+		return (year<<16) | (monthOfYear<<8) | dayOfMonth;
 	}
 
 	@Override
-	public int compareTo(Day o) {
-		return dateTime.compareTo(o.dateTime);
+	public int compareTo(Day day) {
+		if (year < day.year) 
+			return -1;
+		else if (year > day.year) 
+			return 1;
+		else if (monthOfYear < day.monthOfYear)
+			return -1;
+		else if (monthOfYear > day.monthOfYear)
+			return 1;
+		else 
+			return dayOfMonth - day.dayOfMonth;
 	}
 	
+	public int getYear() {
+		return year;
+	}
+
+	public int getMonthOfYear() {
+		return monthOfYear;
+	}
+
+	public int getDayOfMonth() {
+		return dayOfMonth;
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		} else if (other instanceof Day) {
 			Day otherDay = (Day) other;
-			return new EqualsBuilder().append(dateTime, otherDay.dateTime).isEquals();
+			return new EqualsBuilder()
+					.append(year, otherDay.year)
+					.append(monthOfYear, otherDay.monthOfYear)
+					.append(dayOfMonth, otherDay.dayOfMonth)
+					.isEquals();
 		} else {
 			return false;
 		}
@@ -57,7 +83,11 @@ public class Day implements Serializable, Comparable<Day> {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(dateTime).toHashCode();
+		return new HashCodeBuilder(17, 37)
+				.append(year)
+				.append(monthOfYear)
+				.append(dayOfMonth)
+				.toHashCode();
 	}
 	
 }
