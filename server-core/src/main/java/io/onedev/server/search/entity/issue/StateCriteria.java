@@ -37,11 +37,6 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public void fill(Issue issue) {
-		issue.setState(value);
-	}
-
-	@Override
 	public String toStringWithoutParens() {
 		return quote(Issue.FIELD_STATE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
