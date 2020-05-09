@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -68,6 +69,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		User loginUser = getLoginUser();
 		
+		add(new BookmarkablePageLink<Void>("brandLink", ProjectListPage.class));
 		add(newNavContext("navContext"));
 		
 		UICustomization customization = OneDev.getInstance(UICustomization.class);
@@ -86,7 +88,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		WebMarkupContainer administrationContainer = new WebMarkupContainer("navAdministration");
 		WebMarkupContainer item;
-
+		
 		administrationContainer.add(item = new WebMarkupContainer("userManagement"));
 		item.add(new ViewStateAwarePageLink<Void>("link", UserListPage.class));
 		if (getPage() instanceof UserListPage || getPage() instanceof NewUserPage || getPage() instanceof UserPage)
@@ -176,7 +178,7 @@ public abstract class LayoutPage extends BasePage {
 			
 		});
 		
-		boolean enableSelfRegister = OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister();
+		boolean enableSelfRegister =  OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister();
 		notSignedInContainer.add(new ViewStateAwarePageLink<Void>("signUp", RegisterPage.class).setVisible(enableSelfRegister));
 		notSignedInContainer.setVisible(loginUser == null);
 		add(notSignedInContainer);
