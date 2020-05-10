@@ -55,6 +55,7 @@
 }
 
 @media (max-width: 767px) {
+	.navbar .github .icon, 
 	.navbar .help .icon, 
 	.navbar .signed-in .avatar, 
 	.navbar .signed-in .dropdown-header, 
@@ -63,6 +64,7 @@
 	}
 }
 @media (min-width: 768px) {
+	.navbar .github .name,
 	.navbar .help .name,
 	.navbar .signed-in .name {
 		display: none;
