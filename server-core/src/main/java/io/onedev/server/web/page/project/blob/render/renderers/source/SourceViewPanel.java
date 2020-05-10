@@ -474,7 +474,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							clearComment(target);
-							target.appendJavaScript("onedev.server.sourceView.mark(undefined);");
+							target.appendJavaScript("onedev.server.sourceView.clearMark();");
 							target.appendJavaScript("$(window).resize();");
 							context.onPosition(target, null);
 						}
@@ -958,11 +958,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	public void position(AjaxRequestTarget target, String position) {
 		String script;
 		PlanarRange mark = SourceRendererProvider.getRange(position);
-		if (mark != null) {
-			script = String.format("onedev.server.sourceView.mark(%s);", getJson(mark));
-		} else {
-			script = String.format("onedev.server.sourceView.mark(undefined);");
-		}
+		if (mark != null) 
+			script = String.format("onedev.server.sourceView.mark(%s, true);", getJson(mark));
+		else 
+			script = String.format("onedev.server.sourceView.clearMark();");
 		target.appendJavaScript(script);
 	}
 

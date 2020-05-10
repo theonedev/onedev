@@ -28,11 +28,8 @@ onedev.server.sourceView = {
 		$sourceView.data("callback", callback);
 		$sourceView.data("blameMessageCallback", blameMessageCallback);
 		
-	    if (mark) {
-	    	onedev.server.codemirror.mark(cm, mark);
-			$sourceView.data("mark", mark);
-			cm.setCursor({line: mark.fromRow, ch: 0});
-	    }
+	    if (mark)
+	    	onedev.server.sourceView.mark(mark, false);
 
 	    if (openComment)
 			$sourceView.data("openComment", openComment);
@@ -262,11 +259,10 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var mark = $sourceView.data("mark");
-		if (mark) {
+		if (mark) 
 			onedev.server.codemirror.mark(cm, mark);
-		} else {
+		else 
 			onedev.server.codemirror.clearMark(cm);
-		}
 	},
 	addCommentGutter: function(line, comments) {
 		$(".comment-popover[data-line='" + line + "']").remove();
@@ -429,7 +425,7 @@ onedev.server.sourceView = {
 		onedev.server.sourceView.highlightCommentTrigger();				
 		$(window).resize();
 		
-		onedev.server.sourceView.mark(undefined);
+		onedev.server.sourceView.clearMark();
 	},
 	onAddComment: function(mark) {
 		onedev.server.sourceView.exitFullScreen();
@@ -442,6 +438,7 @@ onedev.server.sourceView = {
 		onedev.server.codemirror.clearSelection(cm);
 		$(window).resize();
 
+		onedev.server.sourceView.mark(mark, false);
 		onedev.server.codemirror.scrollIntoView(cm, mark);
 		
 		onedev.server.sourceView.highlightCommentTrigger();		
@@ -464,7 +461,7 @@ onedev.server.sourceView = {
 		$sourceView.removeData("openComment");
 		onedev.server.sourceView.highlightCommentTrigger();
 		$(window).resize();
-		onedev.server.sourceView.mark(undefined);
+		onedev.server.sourceView.clearMark();
 	},
 	onToggleOutline: function() {
 		onedev.server.sourceView.exitFullScreen();
@@ -512,20 +509,21 @@ onedev.server.sourceView = {
 			}
 		}
 	},
-	mark: function(mark) {
+	mark: function(mark, scroll) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		if (mark) {
-			$(".source-view").data("mark", mark);
-			onedev.server.codemirror.mark(cm, mark);
+		$(".source-view").data("mark", mark);
+		onedev.server.codemirror.mark(cm, mark);
+		if (scroll)
 			onedev.server.codemirror.scrollTo(cm, mark);
-			cm.setCursor({line: mark.fromRow, ch: mark.fromColumn});
-		} else {
-			mark = $(".source-view").data("mark");
-			if (mark) 
-				onedev.server.codemirror.scrollIntoView(cm, mark);
-			$(".source-view").removeData("mark");
-			onedev.server.codemirror.clearMark(cm);			
-		}
+		cm.setCursor({line: mark.fromRow, ch: mark.fromColumn});
+	},
+	clearMark: function() {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var mark = $(".source-view").data("mark");
+		if (mark) 
+			onedev.server.codemirror.scrollIntoView(cm, mark);
+		$(".source-view").removeData("mark");
+		onedev.server.codemirror.clearMark(cm);			
 	},
 	blame: function(blameInfos) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
