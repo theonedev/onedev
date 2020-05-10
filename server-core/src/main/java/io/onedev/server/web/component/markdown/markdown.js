@@ -963,7 +963,18 @@ onedev.server.markdown = {
 			}
 		}, alignment);
 		
-		onedev.server.markdown.initRendered($container.find(".markdown-rendered"));
+		var $rendered = $container.find(".markdown-rendered");
+		onedev.server.markdown.initRendered($rendered);
+		
+		var $img = $rendered.find("img");
+		$img.each(function() {
+			var $this = $(this);
+			var src = $this.attr("src");
+			$this.removeAttr("src");
+			$this.attr("data-src", src);
+		});
+		
+		lozad("#" + containerId + " .markdown-rendered img").observe();
 	},
 	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
 		var $tooltip = $("#reference-tooltip");

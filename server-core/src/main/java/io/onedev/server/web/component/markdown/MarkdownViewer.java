@@ -37,6 +37,7 @@ import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
+import io.onedev.server.web.asset.lozad.LozadResourceReference;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -215,6 +216,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		
+		response.render(JavaScriptHeaderItem.forReference(new LozadResourceReference()));
 		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 		
 		CharSequence taskCallback = taskBehavior.getCallbackFunction(

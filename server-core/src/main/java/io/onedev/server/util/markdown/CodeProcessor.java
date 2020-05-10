@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -21,19 +19,10 @@ import io.onedev.commons.jsyntax.TokenUtils;
 import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.jsyntax.Tokenizer;
 import io.onedev.commons.jsyntax.TokenizerRegistry;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 public class CodeProcessor implements MarkdownProcessor {
 	
-	protected String toHtml(Project project, ObjectId commitId) {
-		CharSequence url = RequestCycle.get().urlFor(
-				CommitDetailPage.class, CommitDetailPage.paramsOf(project, commitId.name())); 
-		return String.format("<a href='%s' class='commit reference' data-reference='%s'>%s</a>", url, commitId.name(), 
-				GitUtils.abbreviateSHA(commitId.name()));
-	}
-
 	@Override
 	public void process(@Nullable Project project, Document rendered, Object context) {
 		Collection<Element> codeElements = new ArrayList<>();
