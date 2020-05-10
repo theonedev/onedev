@@ -69,10 +69,10 @@ public abstract class LayoutPage extends BasePage {
 		
 		User loginUser = getLoginUser();
 		
-		add(new BookmarkablePageLink<Void>("brandLink", ProjectListPage.class));
-		add(newNavContext("navContext"));
-		
 		UICustomization customization = OneDev.getInstance(UICustomization.class);
+		
+		add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()));
+		add(newNavContext("navContext"));
 		
 		RepeatingView tabsView = new RepeatingView("navTabs");		
 		for (MainTab tab: customization.getMainTabs()) {

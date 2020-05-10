@@ -58,7 +58,8 @@ public class MailSetting implements Serializable {
 		this.enableStartTLS = enableStartTLS;
 	}
 
-	@Editable(order=260, description="If checked, mail will be sent in html format. Otherwise in plain text format")
+	@Editable(order=260, name="Send as Html", description=
+			"If checked, mail will be sent in html format. Otherwise in plain text format")
 	public boolean isSendAsHtml() {
 		return sendAsHtml;
 	}
