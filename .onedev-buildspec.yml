@@ -86,7 +86,7 @@ jobs:
   - !CloseMilestoneAction
     condition: successful
     milestoneName: '@build_version@'
-  defaultFixedIssuesFilter: '"State" is "Closed" order by "Type" asc and "Priority"
+  defaultFixedIssuesFilter: '"State" is "Released" order by "Type" asc and "Priority"
     desc'
 - name: Sync Master (GitHub)
   image: alpine/git:1.0.7
