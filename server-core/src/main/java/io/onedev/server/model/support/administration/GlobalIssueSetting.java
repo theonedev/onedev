@@ -191,8 +191,9 @@ public class GlobalIssueSetting implements Serializable {
 		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
 		transition.setToState("Closed");
-		BranchUpdateTrigger branchUpdateTrigger = new BranchUpdateTrigger();
-		transition.setTrigger(branchUpdateTrigger);
+		BranchUpdateTrigger branchUpdate = new BranchUpdateTrigger();
+		branchUpdate.setBranches("master");
+		transition.setTrigger(branchUpdate);
 		
 		transitionSpecs.add(transition);
 		
@@ -211,6 +212,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Released");
 		buildSuccessful = new BuildSuccessfulTrigger();
 		buildSuccessful.setBranches("master");
+		buildSuccessful.setJobNames("Release");
 		buildSuccessful.setIssueQuery("fixed in current build");
 		transition.setTrigger(buildSuccessful);
 
