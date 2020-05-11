@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -128,7 +129,7 @@ public class ProjectIssueSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {
 			for (String fieldName: listFields) {
-				if (getGlobalSetting().getFieldSpec(fieldName) == null)
+				if (!fieldName.equals(Issue.FIELD_STATE) && getGlobalSetting().getFieldSpec(fieldName) == null)
 					undefinedFields.add(fieldName);
 			}
 		}

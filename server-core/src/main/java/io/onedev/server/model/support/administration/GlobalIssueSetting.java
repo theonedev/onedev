@@ -35,6 +35,7 @@ import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTri
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
@@ -359,6 +360,15 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
+		for (String fieldName: listFields) {
+			if (!fieldName.equals(Issue.FIELD_STATE) && getFieldSpec(fieldName) == null)
+				undefinedFields.add(fieldName);
+		}
+		for (String fieldName: promptFieldsUponIssueOpen) {
+			if (getFieldSpec(fieldName) == null)
+				undefinedFields.add(fieldName);
+		}
+		
 		for (TransitionSpec transition: getTransitionSpecs())
 			undefinedFields.addAll(transition.getUndefinedFields());
 		for (FieldSpec field: getFieldSpecs())
@@ -416,6 +426,17 @@ public class GlobalIssueSetting implements Serializable {
 	}
 
 	public Collection<String> fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) { 
+				ReconcileUtils.renameItem(listFields, entry.getKey(), entry.getValue().getNewField());
+				if (promptFieldsUponIssueOpen.remove(entry.getKey()))
+					promptFieldsUponIssueOpen.add(entry.getValue().getNewField());
+			} else { 
+				listFields.remove(entry.getKey());
+				promptFieldsUponIssueOpen.remove(entry.getKey());
+			}
+		}
+		
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
 			if (it.next().fixUndefinedFields(resolutions))
 				it.remove();

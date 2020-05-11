@@ -329,13 +329,7 @@ public class BoardSpec implements Serializable {
 			if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
 				if (getIdentifyField().equals(entry.getKey()))
 					setIdentifyField(resolution.getNewField());
-				int index = getDisplayFields().indexOf(entry.getKey());
-				if (index != -1) {
-					if (getDisplayFields().contains(resolution.getNewField()))
-						getDisplayFields().remove(index);
-					else
-						getDisplayFields().set(index, resolution.getNewField());
-				}
+				ReconcileUtils.renameItem(getDisplayFields(), entry.getKey(), entry.getValue().getNewField());
 			} else {
 				getDisplayFields().remove(entry.getKey());
 				if (getIdentifyField().equals(entry.getKey())) 
