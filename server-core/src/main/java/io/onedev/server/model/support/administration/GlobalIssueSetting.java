@@ -165,34 +165,20 @@ public class GlobalIssueSetting implements Serializable {
 		
 		stateSpecs.add(open);
 		
-		StateSpec committed = new StateSpec();
-		committed.setColor("#b4a7d6");
-		committed.setName("Committed");
-		
-		stateSpecs.add(committed);
-		
-		StateSpec invalid = new StateSpec();
-		invalid.setColor("#999999");
-		invalid.setName("Invalid");
-		
-		stateSpecs.add(invalid);
-		
 		StateSpec closed = new StateSpec();
-		closed.setColor("#5cb85c");
+		closed.setColor("#674EA7");
 		closed.setName("Closed");
 		
 		stateSpecs.add(closed);
 		
+		StateSpec released = new StateSpec();
+		released.setColor("#3EB650");
+		released.setName("Released");
+		
+		stateSpecs.add(released);
+		
 		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Committed");
-		BranchUpdateTrigger branchUpdateTrigger = new BranchUpdateTrigger();
-		transition.setTrigger(branchUpdateTrigger);
-		
-		transitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open", "Committed"));
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
@@ -202,12 +188,10 @@ public class GlobalIssueSetting implements Serializable {
 		transitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open", "Committed"));
-		transition.setToState("Invalid");
-		pressButton = new PressButtonTrigger();
-		pressButton.setButtonLabel("Invalid");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
-		transition.setTrigger(pressButton);
+		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setToState("Closed");
+		BranchUpdateTrigger branchUpdateTrigger = new BranchUpdateTrigger();
+		transition.setTrigger(branchUpdateTrigger);
 		
 		transitionSpecs.add(transition);
 		
@@ -222,17 +206,17 @@ public class GlobalIssueSetting implements Serializable {
 		transitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open", "Committed"));
-		transition.setToState("Closed");
+		transition.setFromStates(Lists.newArrayList("Open", "Closed"));
+		transition.setToState("Released");
 		buildSuccessful = new BuildSuccessfulTrigger();
 		buildSuccessful.setBranches("master");
 		buildSuccessful.setIssueQuery("fixed in current build");
 		transition.setTrigger(buildSuccessful);
 
 		transitionSpecs.add(transition);
-		
+ 		
 		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Committed", "Invalid", "Closed"));
+		transition.setFromStates(Lists.newArrayList("Closed", "Released"));
 		transition.setToState("Open");
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
@@ -249,7 +233,7 @@ public class GlobalIssueSetting implements Serializable {
 		BoardSpec board = new BoardSpec();
 		board.setName(Issue.FIELD_STATE);
 		board.setIdentifyField(Issue.FIELD_STATE);
-		board.setColumns(Lists.newArrayList("Open", "Committed", "Closed"));
+		board.setColumns(Lists.newArrayList("Open", "Closed", "Released"));
 		board.setDisplayFields(Lists.newArrayList(Issue.FIELD_STATE, "Type", "Priority", "Assignees"));
 		boardSpecs.add(board);
 		
@@ -267,9 +251,8 @@ public class GlobalIssueSetting implements Serializable {
 		namedQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
 		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignees\" is empty"));
-		namedQueries.add(new NamedIssueQuery("Committed", "\"State\" is \"Committed\""));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
-		namedQueries.add(new NamedIssueQuery("Invalid", "\"State\" is \"Invalid\""));
+		namedQueries.add(new NamedIssueQuery("Released", "\"State\" is \"Released\""));
 		namedQueries.add(new NamedIssueQuery("All", null));
 	}
 	

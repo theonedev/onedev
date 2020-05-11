@@ -1,6 +1,8 @@
 /* Make sure we have enough room for query input in mobile devices */
-#issue-boards>.head {
+.IssueBoardsPage {
 	min-width: 570px;
+}
+#issue-boards>.head {
 	margin-bottom: 20px;
 }
 #issue-boards .no-boards {
