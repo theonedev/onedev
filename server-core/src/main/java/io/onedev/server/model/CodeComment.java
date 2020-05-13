@@ -258,11 +258,12 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 		if (commit.name().equals(getMarkPos().getCommit())) {
 			return getMarkPos().getRange();
 		} else {
-			List<String> newLines = GitUtils.readLines(getProject().getRepository(), 
-					commit, blobIdent.path, WhitespaceOption.DEFAULT);
-			List<String> oldLines = GitUtils.readLines(getProject().getRepository(), 
-					project.getRevCommit(getMarkPos().getCommit(), true), getMarkPos().getPath(), 
-					WhitespaceOption.DEFAULT);
+			List<String> newLines = Preconditions.checkNotNull(
+					GitUtils.readLines(getProject().getRepository(), commit, blobIdent.path, WhitespaceOption.DEFAULT));
+			
+			RevCommit commitOfComment = project.getRevCommit(getMarkPos().getCommit(), true);
+			List<String> oldLines = Preconditions.checkNotNull(
+					GitUtils.readLines(getProject().getRepository(), commitOfComment, getMarkPos().getPath(), WhitespaceOption.DEFAULT));
 			return DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), getMarkPos().getRange());
 		}
 	}

@@ -52,6 +52,7 @@ import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -155,26 +156,26 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
 		Collection<String> possiblePaths = Sets.newHashSet(path);
 		possiblePaths.addAll(commitInfoManager.getHistoryPaths(project, path));
-		for (String possiblePath: possiblePaths) {
-			EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
-			criteria.add(Restrictions.eq("markPos.path", possiblePath));
-			for (CodeComment comment: query(criteria)) {
-				if (comment.getMarkPos().getCommit().equals(commitId.name()) && possiblePath.equals(path)) {
-					comments.put(comment, comment.getMarkPos().getRange());
-				} else {
-					Map<String, List<CodeComment>> commentsOnCommit = 
-							possibleComments.get(comment.getMarkPos().getCommit());
-					if (commentsOnCommit == null) {
-						commentsOnCommit = new HashMap<>();
-						possibleComments.put(comment.getMarkPos().getCommit(), commentsOnCommit);
-					}
-					List<CodeComment> commentsOnPath = commentsOnCommit.get(possiblePath);
-					if (commentsOnPath == null) {
-						commentsOnPath = new ArrayList<>();
-						commentsOnCommit.put(possiblePath, commentsOnPath);
-					}
-					commentsOnPath.add(comment);
+		
+		EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
+		criteria.add(Restrictions.in(CodeComment.PROP_MARK_POS + "." + MarkPos.PROP_PATH, possiblePaths));
+		for (CodeComment comment: query(criteria)) {
+			String possiblePath = comment.getMarkPos().getPath();
+			if (comment.getMarkPos().getCommit().equals(commitId.name()) && possiblePath.equals(path)) {
+				comments.put(comment, comment.getMarkPos().getRange());
+			} else {
+				Map<String, List<CodeComment>> commentsOnCommit = 
+						possibleComments.get(comment.getMarkPos().getCommit());
+				if (commentsOnCommit == null) {
+					commentsOnCommit = new HashMap<>();
+					possibleComments.put(comment.getMarkPos().getCommit(), commentsOnCommit);
 				}
+				List<CodeComment> commentsOnPath = commentsOnCommit.get(possiblePath);
+				if (commentsOnPath == null) {
+					commentsOnPath = new ArrayList<>();
+					commentsOnCommit.put(possiblePath, commentsOnPath);
+				}
+				commentsOnPath.add(comment);
 			}
 		}
 
@@ -202,8 +203,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 				Set<String> revisions = new HashSet<>(command.call());
 				
 				RevCommit commit = revWalk.parseCommit(commitId);
-				List<String> newLines = GitUtils.readLines(project.getRepository(), commit, path, 
-						WhitespaceOption.DEFAULT);
+				List<String> newLines = Preconditions.checkNotNull(
+						GitUtils.readLines(project.getRepository(), commit, path, WhitespaceOption.DEFAULT));
 
 				Collections.sort(historyCommits, new Comparator<RevCommit>() {
 
@@ -221,14 +222,16 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 						for (Map.Entry<String, List<CodeComment>> pathEntry: commentsOnCommit.entrySet()) {
 							List<String> oldLines = GitUtils.readLines(project.getRepository(), historyCommit, 
 									pathEntry.getKey(), WhitespaceOption.DEFAULT);
-							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-							for (CodeComment comment: pathEntry.getValue()) {
-								PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMarkPos().getRange());
-								if (newRange != null) 
-									comments.put(comment, newRange);
-							}
-							if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK) {
-								return comments;
+							if (oldLines != null) {
+								Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
+								for (CodeComment comment: pathEntry.getValue()) {
+									PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMarkPos().getRange());
+									if (newRange != null) 
+										comments.put(comment, newRange);
+								}
+								if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK) {
+									return comments;
+								}
 							}
 						}
 					}
