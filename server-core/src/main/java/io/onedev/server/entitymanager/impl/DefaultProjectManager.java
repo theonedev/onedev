@@ -521,9 +521,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 			}
 			Group group = groupManager.findAnonymous();
 			if (group != null) {
-				for (GroupAuthorization authorization: group.getAuthorizations()) { 
-					if (authorization.getRole().implies(permission))
-						projects.add(authorization.getProject());
+				if (group.isAdministrator()) {
+					projects.addAll(query());
+				} else {
+					for (GroupAuthorization authorization: group.getAuthorizations()) { 
+						if (authorization.getRole().implies(permission))
+							projects.add(authorization.getProject());
+					}
 				}
 			}
 		}

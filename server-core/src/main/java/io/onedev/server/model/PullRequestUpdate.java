@@ -221,7 +221,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			try (RevWalk revWalk = new RevWalk(getRequest().getWorkProject().getRepository())) {
 				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
-				
+				 
 				/*
 				 * Instead of excluding commits reachable from target branch, we exclude commits reachable
 				 * from the merge commit to achieve two purposes:
