@@ -47,7 +47,7 @@ public class PendingDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.FIELD_PENDING_DATE) + " " 
+		return quote(Build.NAME_PENDING_DATE) + " " 
 				+ BuildQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

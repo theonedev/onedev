@@ -135,15 +135,15 @@ public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String FIELD_NAME = "Name";
+	public static final String NAME_NAME = "Name";
 	
 	public static final String PROP_NAME = "name";
 	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
+	public static final String NAME_UPDATE_DATE = "Update Date";
 	
 	public static final String PROP_UPDATE_DATE = "updateDate";
 	
-	public static final String FIELD_DESCRIPTION = "Description";
+	public static final String NAME_DESCRIPTION = "Description";
 	
 	public static final String PROP_DESCRIPTION = "description";
 	
@@ -156,11 +156,11 @@ public class Project extends AbstractEntity {
 	public static final String PROP_GROUP_AUTHORIZATIONS = "groupAuthorizations";
 	
 	public static final List<String> QUERY_FIELDS = 
-			Lists.newArrayList(FIELD_NAME, FIELD_DESCRIPTION, FIELD_UPDATE_DATE);
+			Lists.newArrayList(NAME_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			FIELD_NAME, PROP_NAME, 
-			FIELD_UPDATE_DATE, PROP_UPDATE_DATE);
+			NAME_NAME, PROP_NAME, 
+			NAME_UPDATE_DATE, PROP_UPDATE_DATE);
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	

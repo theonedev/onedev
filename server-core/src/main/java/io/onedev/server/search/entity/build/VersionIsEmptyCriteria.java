@@ -23,7 +23,7 @@ public class VersionIsEmptyCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.FIELD_VERSION) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
+		return quote(Build.NAME_VERSION) + " " + BuildQuery.getRuleName(BuildQueryLexer.IsEmpty);
 	}
 
 }

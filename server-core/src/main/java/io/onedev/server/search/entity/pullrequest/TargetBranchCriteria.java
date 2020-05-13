@@ -33,7 +33,7 @@ public class TargetBranchCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.FIELD_TARGET_BRANCH) + " " 
+		return quote(PullRequest.NAME_TARGET_BRANCH) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
 				+ quote(branch);
 	}

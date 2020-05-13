@@ -185,16 +185,16 @@ public class ProjectQuery extends EntityQuery<Project> {
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case ProjectQueryLexer.Contains:
-			if (!fieldName.equals(Project.FIELD_DESCRIPTION))
+			if (!fieldName.equals(Project.NAME_DESCRIPTION))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.Is:
-			if (!fieldName.equals(Project.FIELD_NAME)) 
+			if (!fieldName.equals(Project.NAME_NAME)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.IsBefore:
 		case ProjectQueryLexer.IsAfter:
-			if (!fieldName.equals(Project.FIELD_UPDATE_DATE)) 
+			if (!fieldName.equals(Project.NAME_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
-import static io.onedev.server.model.Build.FIELD_JOB;
+import static io.onedev.server.model.Build.NAME_JOB;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
@@ -567,7 +567,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 										String query = "" 
 												+ getRuleName(AssociatedWithPullRequest) + " " + quote("#" + getPullRequest().getNumber()) 
 												+ " " + getRuleName(And) + " "
-												+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
+												+ quote(NAME_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
 										return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
 												ProjectBuildsPage.paramsOf(getPullRequest().getTargetProject(), query, 0));
 									}

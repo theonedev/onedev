@@ -153,7 +153,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							checkField(fieldName, operator, withCurrentUserCriteria, withCurrentBuildCriteria, 
 									withCurrentPullRequestCriteria, withCurrentCommitCriteria);
 						}
-						if (fieldName.equals(Issue.FIELD_MILESTONE)) {
+						if (fieldName.equals(Issue.NAME_MILESTONE)) {
 							return new MilestoneIsEmptyCriteria();
 						} else {
 							FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -209,32 +209,32 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
 						case IssueQueryLexer.IsAfter:
-							if (fieldName.equals(Issue.FIELD_SUBMIT_DATE)) 
+							if (fieldName.equals(Issue.NAME_SUBMIT_DATE)) 
 								return new SubmitDateCriteria(value, operator);
-							else if (fieldName.equals(Issue.FIELD_UPDATE_DATE))
+							else if (fieldName.equals(Issue.NAME_UPDATE_DATE))
 								return new UpdateDateCriteria(value, operator);
 							else 
 								return new DateFieldCriteria(fieldName, value, operator);
 						case IssueQueryLexer.Contains:
-							if (fieldName.equals(Issue.FIELD_TITLE)) {
+							if (fieldName.equals(Issue.NAME_TITLE)) {
 								return new TitleCriteria(value);
-							} else if (fieldName.equals(Issue.FIELD_DESCRIPTION)) {
+							} else if (fieldName.equals(Issue.NAME_DESCRIPTION)) {
 								return new DescriptionCriteria(value);
 							} else {
 								return new CommentCriteria(value);
 							}
 						case IssueQueryLexer.Is:
-							if (fieldName.equals(Issue.FIELD_PROJECT)) {
+							if (fieldName.equals(Issue.NAME_PROJECT)) {
 								return new ProjectCriteria(value);
-							} else if (fieldName.equals(Issue.FIELD_MILESTONE)) {
+							} else if (fieldName.equals(Issue.NAME_MILESTONE)) {
 								return new MilestoneCriteria(value);
-							} else if (fieldName.equals(Issue.FIELD_STATE)) {
+							} else if (fieldName.equals(Issue.NAME_STATE)) {
 								return new StateCriteria(value);
-							} else if (fieldName.equals(Issue.FIELD_VOTE_COUNT)) {
+							} else if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(Issue.FIELD_COMMENT_COUNT)) {
+							} else if (fieldName.equals(Issue.NAME_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(Issue.FIELD_NUMBER)) {
+							} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -262,11 +262,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 							}
 						case IssueQueryLexer.IsLessThan:
 						case IssueQueryLexer.IsGreaterThan:
-							if (fieldName.equals(Issue.FIELD_VOTE_COUNT)) {
+							if (fieldName.equals(Issue.NAME_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(Issue.FIELD_COMMENT_COUNT)) {
+							} else if (fieldName.equals(Issue.NAME_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(Issue.FIELD_NUMBER)) {
+							} else if (fieldName.equals(Issue.NAME_NUMBER)) {
 								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -358,7 +358,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
 			if (Issue.QUERY_FIELDS.contains(fieldName) 
-					&& !fieldName.equals(Issue.FIELD_MILESTONE)) { 
+					&& !fieldName.equals(Issue.NAME_MILESTONE)) { 
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -378,27 +378,27 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
-			if (!fieldName.equals(Issue.FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(Issue.FIELD_UPDATE_DATE) 
+			if (!fieldName.equals(Issue.NAME_SUBMIT_DATE) 
+					&& !fieldName.equals(Issue.NAME_UPDATE_DATE) 
 					&& !(fieldSpec instanceof DateField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case IssueQueryLexer.Contains:
-			if (!fieldName.equals(Issue.FIELD_TITLE) 
-					&& !fieldName.equals(Issue.FIELD_DESCRIPTION)
-					&& !fieldName.equals(Issue.FIELD_COMMENT)
+			if (!fieldName.equals(Issue.NAME_TITLE) 
+					&& !fieldName.equals(Issue.NAME_DESCRIPTION)
+					&& !fieldName.equals(Issue.NAME_COMMENT)
 					&& !(fieldSpec instanceof TextField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case IssueQueryLexer.Is:
-			if (!fieldName.equals(Issue.FIELD_PROJECT) 
-					&& !fieldName.equals(Issue.FIELD_STATE) 
-					&& !fieldName.equals(Issue.FIELD_VOTE_COUNT) 
-					&& !fieldName.equals(Issue.FIELD_COMMENT_COUNT) 
-					&& !fieldName.equals(Issue.FIELD_NUMBER)
-					&& !fieldName.equals(Issue.FIELD_MILESTONE)
+			if (!fieldName.equals(Issue.NAME_PROJECT) 
+					&& !fieldName.equals(Issue.NAME_STATE) 
+					&& !fieldName.equals(Issue.NAME_VOTE_COUNT) 
+					&& !fieldName.equals(Issue.NAME_COMMENT_COUNT) 
+					&& !fieldName.equals(Issue.NAME_NUMBER)
+					&& !fieldName.equals(Issue.NAME_MILESTONE)
 					&& !(fieldSpec instanceof IssueChoiceField)
 					&& !(fieldSpec instanceof PullRequestChoiceField)
 					&& !(fieldSpec instanceof BuildChoiceField)
@@ -414,9 +414,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsLessThan:
 		case IssueQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(Issue.FIELD_VOTE_COUNT)
-					&& !fieldName.equals(Issue.FIELD_COMMENT_COUNT)
-					&& !fieldName.equals(Issue.FIELD_NUMBER)
+			if (!fieldName.equals(Issue.NAME_VOTE_COUNT)
+					&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
+					&& !fieldName.equals(Issue.NAME_NUMBER)
 					&& !(fieldSpec instanceof NumberField) 
 					&& !(fieldSpec instanceof ChoiceField && !fieldSpec.isAllowMultiple()))
 				throw newOperatorException(fieldName, operator);

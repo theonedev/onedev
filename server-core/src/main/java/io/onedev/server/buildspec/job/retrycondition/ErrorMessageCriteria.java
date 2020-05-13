@@ -22,7 +22,7 @@ public class ErrorMessageCriteria extends Criteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.FIELD_ERROR_MESSAGE) + " " 
+		return quote(Build.NAME_ERROR_MESSAGE) + " " 
 				+ RetryCondition.getRuleName(RetryConditionLexer.Contains) + " "
 				+ quote(value);
 	}

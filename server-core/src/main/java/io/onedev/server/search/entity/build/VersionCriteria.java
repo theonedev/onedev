@@ -34,7 +34,7 @@ public class VersionCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Build.FIELD_VERSION) + " " 
+		return quote(Build.NAME_VERSION) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ quote(value);
 	}

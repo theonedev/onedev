@@ -46,7 +46,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Issue.FIELD_UPDATE_DATE) + " " 
+		return quote(Issue.NAME_UPDATE_DATE) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

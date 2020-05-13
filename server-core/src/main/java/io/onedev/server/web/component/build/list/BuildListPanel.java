@@ -450,7 +450,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.FIELD_JOB)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_JOB)) {
 
 			@Override
 			public String getCssClass() {
@@ -480,7 +480,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.FIELD_COMMIT)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(Build.NAME_COMMIT)) {
 
 			@Override
 			public String getCssClass() {

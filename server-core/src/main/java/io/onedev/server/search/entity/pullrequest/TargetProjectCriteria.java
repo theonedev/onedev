@@ -38,7 +38,7 @@ public class TargetProjectCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.FIELD_TARGET_PROJECT) + " " 
+		return quote(PullRequest.NAME_TARGET_PROJECT) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " 
 				+ quote(projectName);
 	}

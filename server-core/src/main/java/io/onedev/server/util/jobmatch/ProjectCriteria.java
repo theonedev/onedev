@@ -1,6 +1,6 @@
 package io.onedev.server.util.jobmatch;
 
-import static io.onedev.server.model.Build.FIELD_PROJECT;
+import static io.onedev.server.model.Build.NAME_PROJECT;
 import static io.onedev.server.util.jobmatch.JobMatch.getRuleName;
 import static io.onedev.server.util.jobmatch.JobMatchLexer.Is;
 
@@ -36,7 +36,7 @@ public class ProjectCriteria extends Criteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(FIELD_PROJECT) + " " + getRuleName(Is) + " " + quote(projectName);
+		return quote(NAME_PROJECT) + " " + getRuleName(Is) + " " + quote(projectName);
 	}
 	
 }

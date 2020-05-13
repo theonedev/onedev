@@ -234,13 +234,13 @@ public class GlobalIssueSetting implements Serializable {
 		promptFieldsUponIssueOpen.add("Failed Build");
 		
 		BoardSpec board = new BoardSpec();
-		board.setName(Issue.FIELD_STATE);
-		board.setIdentifyField(Issue.FIELD_STATE);
+		board.setName(Issue.NAME_STATE);
+		board.setIdentifyField(Issue.NAME_STATE);
 		board.setColumns(Lists.newArrayList("Open", "Closed", "Released"));
-		board.setDisplayFields(Lists.newArrayList(Issue.FIELD_STATE, "Type", "Priority", "Assignees"));
+		board.setDisplayFields(Lists.newArrayList(Issue.NAME_STATE, "Type", "Priority", "Assignees"));
 		boardSpecs.add(board);
 		
-		listFields.add(Issue.FIELD_STATE);
+		listFields.add(Issue.NAME_STATE);
 		listFields.add("Type");
 		listFields.add("Priority");
 		listFields.add("Assignees");
@@ -363,7 +363,7 @@ public class GlobalIssueSetting implements Serializable {
 	public Collection<String> getUndefinedFields() {
 		Collection<String> undefinedFields = new HashSet<>();
 		for (String fieldName: listFields) {
-			if (!fieldName.equals(Issue.FIELD_STATE) && getFieldSpec(fieldName) == null)
+			if (!fieldName.equals(Issue.NAME_STATE) && getFieldSpec(fieldName) == null)
 				undefinedFields.add(fieldName);
 		}
 		for (String fieldName: promptFieldsUponIssueOpen) {

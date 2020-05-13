@@ -129,7 +129,7 @@ public class ProjectIssueSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {
 			for (String fieldName: listFields) {
-				if (!fieldName.equals(Issue.FIELD_STATE) && getGlobalSetting().getFieldSpec(fieldName) == null)
+				if (!fieldName.equals(Issue.NAME_STATE) && getGlobalSetting().getFieldSpec(fieldName) == null)
 					undefinedFields.add(fieldName);
 			}
 		}

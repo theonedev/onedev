@@ -73,14 +73,14 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(displayFields.contains(Issue.FIELD_STATE));
+				setVisible(displayFields.contains(Issue.NAME_STATE));
 			}
 			
 		});
 		
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (String fieldName: displayFields) {
-			if (!fieldName.equals(Issue.FIELD_STATE)) {
+			if (!fieldName.equals(Issue.NAME_STATE)) {
 				Input field = getIssue().getFieldInputs().get(fieldName);
 				if (field != null && !field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR) {

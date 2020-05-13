@@ -1,14 +1,14 @@
 package io.onedev.server.search.entity.build;
 
-import static io.onedev.server.model.Build.FIELD_COMMIT;
-import static io.onedev.server.model.Build.FIELD_FINISH_DATE;
-import static io.onedev.server.model.Build.FIELD_JOB;
-import static io.onedev.server.model.Build.FIELD_NUMBER;
-import static io.onedev.server.model.Build.FIELD_PENDING_DATE;
-import static io.onedev.server.model.Build.FIELD_PROJECT;
-import static io.onedev.server.model.Build.FIELD_RUNNING_DATE;
-import static io.onedev.server.model.Build.FIELD_SUBMIT_DATE;
-import static io.onedev.server.model.Build.FIELD_VERSION;
+import static io.onedev.server.model.Build.NAME_COMMIT;
+import static io.onedev.server.model.Build.NAME_FINISH_DATE;
+import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.NAME_NUMBER;
+import static io.onedev.server.model.Build.NAME_PENDING_DATE;
+import static io.onedev.server.model.Build.NAME_PROJECT;
+import static io.onedev.server.model.Build.NAME_RUNNING_DATE;
+import static io.onedev.server.model.Build.NAME_SUBMIT_DATE;
+import static io.onedev.server.model.Build.NAME_VERSION;
 import static io.onedev.server.model.Build.ORDER_FIELDS;
 import static io.onedev.server.model.Build.QUERY_FIELDS;
 
@@ -169,7 +169,7 @@ public class BuildQuery extends EntityQuery<Build> {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
 						checkField(project, fieldName, operator);
-						if (fieldName.equals(FIELD_VERSION))
+						if (fieldName.equals(NAME_VERSION))
 							return new VersionIsEmptyCriteria();
 						else
 							return new ParamIsEmptyCriteria(fieldName);
@@ -185,28 +185,28 @@ public class BuildQuery extends EntityQuery<Build> {
 						switch (operator) {
 						case BuildQueryLexer.IsBefore:
 						case BuildQueryLexer.IsAfter:
-							if (fieldName.equals(FIELD_SUBMIT_DATE))
+							if (fieldName.equals(NAME_SUBMIT_DATE))
 								return new SubmitDateCriteria(value, operator);
-							else if (fieldName.equals(FIELD_PENDING_DATE))
+							else if (fieldName.equals(NAME_PENDING_DATE))
 								return new PendingDateCriteria(value, operator);
-							else if (fieldName.equals(FIELD_RUNNING_DATE))
+							else if (fieldName.equals(NAME_RUNNING_DATE))
 								return new RunningDateCriteria(value, operator);
-							else if (fieldName.equals(FIELD_FINISH_DATE))
+							else if (fieldName.equals(NAME_FINISH_DATE))
 								return new FinishDateCriteria(value, operator);
 							else
 								throw new IllegalStateException();
 						case BuildQueryLexer.Is:
 							switch (fieldName) {
-							case FIELD_PROJECT:
+							case NAME_PROJECT:
 								return new ProjectCriteria(value);
-							case FIELD_COMMIT:
+							case NAME_COMMIT:
 								ProjectScopedCommit commitId = getCommitId(project, value); 
 								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());
-							case FIELD_JOB:
+							case NAME_JOB:
 								return new JobCriteria(value);
-							case FIELD_NUMBER:
+							case NAME_NUMBER:
 								return new NumberCriteria(project, value, operator);
-							case FIELD_VERSION:
+							case NAME_VERSION:
 								return new VersionCriteria(value);
 							default: 
 								return new ParamCriteria(fieldName, value);
@@ -273,26 +273,26 @@ public class BuildQuery extends EntityQuery<Build> {
 		switch (operator) {
 		case BuildQueryLexer.IsBefore:
 		case BuildQueryLexer.IsAfter:
-			if (!fieldName.equals(FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(FIELD_PENDING_DATE)
-					&& !fieldName.equals(FIELD_RUNNING_DATE)
-					&& !fieldName.equals(FIELD_FINISH_DATE)) 
+			if (!fieldName.equals(NAME_SUBMIT_DATE) 
+					&& !fieldName.equals(NAME_PENDING_DATE)
+					&& !fieldName.equals(NAME_RUNNING_DATE)
+					&& !fieldName.equals(NAME_FINISH_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case BuildQueryLexer.Is:
-			if (!fieldName.equals(FIELD_PROJECT) && !fieldName.equals(FIELD_COMMIT) 
-					&& !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER) 
-					&& !fieldName.equals(FIELD_VERSION) && !paramNames.contains(fieldName)) {
+			if (!fieldName.equals(NAME_PROJECT) && !fieldName.equals(NAME_COMMIT) 
+					&& !fieldName.equals(NAME_JOB) && !fieldName.equals(NAME_NUMBER) 
+					&& !fieldName.equals(NAME_VERSION) && !paramNames.contains(fieldName)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case BuildQueryLexer.IsEmpty:
-			if (!fieldName.equals(FIELD_VERSION) && !paramNames.contains(fieldName))
+			if (!fieldName.equals(NAME_VERSION) && !paramNames.contains(fieldName))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case BuildQueryLexer.IsLessThan:
 		case BuildQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(FIELD_NUMBER))
+			if (!fieldName.equals(NAME_NUMBER))
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

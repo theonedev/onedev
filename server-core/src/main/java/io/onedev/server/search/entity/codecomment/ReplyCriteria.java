@@ -42,7 +42,7 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(CodeComment.FIELD_REPLY) + " " 
+		return quote(CodeComment.NAME_REPLY) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

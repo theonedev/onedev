@@ -94,51 +94,51 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
-	public static final String FIELD_NUMBER = "Number";
+	public static final String NAME_NUMBER = "Number";
 	
 	public static final String PROP_NUMBER = "number";
 	
-	public static final String FIELD_PROJECT = "Project";
+	public static final String NAME_PROJECT = "Project";
 	
 	public static final String PROP_PROJECT = "project";
 	
-	public static final String FIELD_STATE = "State";
+	public static final String NAME_STATE = "State";
 	
 	public static final String PROP_STATE = "state";
 	
-	public static final String FIELD_TITLE = "Title";
+	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";
 	
-	public static final String FIELD_DESCRIPTION = "Description";
+	public static final String NAME_DESCRIPTION = "Description";
 	
 	public static final String PROP_DESCRIPTION = "description";
 	
-	public static final String FIELD_COMMENT = "Comment";
+	public static final String NAME_COMMENT = "Comment";
 	
 	public static final String PROP_COMMENTS = "comments";
 	
-	public static final String FIELD_SUBMITTER = "Submitter";
+	public static final String NAME_SUBMITTER = "Submitter";
 	
 	public static final String PROP_SUBMITTER = "submitter";
 	
-	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	public static final String NAME_SUBMIT_DATE = "Submit Date";
 	
 	public static final String PROP_SUBMIT_DATE = "submitDate";
 	
-	public static final String FIELD_VOTE_COUNT = "Vote Count";
+	public static final String NAME_VOTE_COUNT = "Vote Count";
 	
 	public static final String PROP_VOTE_COUNT = "voteCount";
 	
-	public static final String FIELD_COMMENT_COUNT = "Comment Count";
+	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";
 	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
+	public static final String NAME_UPDATE_DATE = "Update Date";
 	
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
-	public static final String FIELD_MILESTONE = "Milestone";
+	public static final String NAME_MILESTONE = "Milestone";
 	
 	public static final String PROP_MILESTONE = "milestone";
 	
@@ -149,22 +149,22 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, 
-			FIELD_DESCRIPTION, FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
-			FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_SUBMITTER, 
+			NAME_DESCRIPTION, NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, 
+			NAME_VOTE_COUNT, NAME_COMMENT_COUNT, NAME_MILESTONE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, 
-			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
-			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+			NAME_PROJECT, NAME_NUMBER, NAME_STATE, NAME_TITLE, NAME_DESCRIPTION, 
+			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, NAME_VOTE_COUNT, 
+			NAME_COMMENT_COUNT, NAME_MILESTONE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			FIELD_VOTE_COUNT, PROP_VOTE_COUNT,
-			FIELD_COMMENT_COUNT, PROP_COMMENT_COUNT,
-			FIELD_NUMBER, PROP_NUMBER,
-			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			FIELD_PROJECT, PROP_PROJECT,
-			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
+			NAME_VOTE_COUNT, PROP_VOTE_COUNT,
+			NAME_COMMENT_COUNT, PROP_COMMENT_COUNT,
+			NAME_NUMBER, PROP_NUMBER,
+			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			NAME_PROJECT, PROP_PROJECT,
+			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);	
 	
 	@Column(nullable=false)
 	private String state;

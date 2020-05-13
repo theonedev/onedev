@@ -623,7 +623,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						if (!pullRequestManager.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
 							String query = String.format("\"%s\" %s \"%s\" %s %s", 
-									PullRequest.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
+									PullRequest.NAME_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
 									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
 									new OpenCriteria().toString());
 							PageParameters params = ProjectPullRequestsPage.paramsOf(getProject(), query, 0);

@@ -82,9 +82,9 @@ public class JobMatch extends Criteria<Build> {
 					checkField(fieldName, operator);
 					
 					switch (fieldName) {
-					case Build.FIELD_PROJECT:
+					case Build.NAME_PROJECT:
 						return new ProjectCriteria(fieldValue);
-					case Build.FIELD_JOB:
+					case Build.NAME_JOB:
 						return new NameCriteria(fieldValue);
 					default:
 						return new ImageCriteria(fieldValue);
@@ -124,9 +124,9 @@ public class JobMatch extends Criteria<Build> {
 	}
 	
 	public static void checkField(String fieldName, int operator) {
-		if (fieldName.equals(Build.FIELD_PROJECT) 
-				|| fieldName.equals(Build.FIELD_JOB)
-				|| fieldName.equals(Build.FIELD_IMAGE)) {
+		if (fieldName.equals(Build.NAME_PROJECT) 
+				|| fieldName.equals(Build.NAME_JOB)
+				|| fieldName.equals(Build.NAME_IMAGE)) {
 			if (operator != JobMatchLexer.Is)
 				throw newOperatorException(fieldName, operator);
 		} else {

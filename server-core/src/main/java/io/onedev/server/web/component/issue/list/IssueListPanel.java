@@ -273,7 +273,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected Map<String, String> load() {
 						Map<String, String> choices = new LinkedHashMap<>();
-						choices.put(Issue.FIELD_STATE, Issue.FIELD_STATE);
+						choices.put(Issue.NAME_STATE, Issue.NAME_STATE);
 						for (String fieldName: getGlobalIssueSetting().getFieldNames())
 							choices.put(fieldName, fieldName);
 						return choices;
@@ -619,7 +619,7 @@ public abstract class IssueListPanel extends Panel {
 				
 				RepeatingView fieldsView = new RepeatingView("fields");
 				for (String field: getListFields()) {
-					if (field.equals(Issue.FIELD_STATE)) {
+					if (field.equals(Issue.NAME_STATE)) {
 						Fragment stateFragment = new Fragment(fieldsView.newChildId(), 
 								"stateFrag", IssueListPanel.this);
 						stateFragment.add(new IssueStateLabel("state", rowModel));

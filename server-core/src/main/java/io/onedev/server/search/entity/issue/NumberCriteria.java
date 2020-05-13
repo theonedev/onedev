@@ -61,7 +61,7 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Issue.FIELD_NUMBER) + " " 
+		return quote(Issue.NAME_NUMBER) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

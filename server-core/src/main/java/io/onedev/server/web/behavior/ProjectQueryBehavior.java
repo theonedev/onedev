@@ -62,10 +62,10 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									ProjectQuery.checkField(fieldName, operator);
-									if (fieldName.equals(Project.FIELD_UPDATE_DATE)) {
+									if (fieldName.equals(Project.NAME_UPDATE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(Project.FIELD_NAME)) {
+									} else if (fieldName.equals(Project.NAME_NAME)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjects(matchWith);
 										else
@@ -117,8 +117,8 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Project.FIELD_NAME) 
-							|| fieldName.equals(Project.FIELD_DESCRIPTION)) {
+					if (fieldName.equals(Project.NAME_NAME) 
+							|| fieldName.equals(Project.NAME_DESCRIPTION)) {
 						hints.add("Use * for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

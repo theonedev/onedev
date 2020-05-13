@@ -23,7 +23,7 @@ public class MilestoneIsEmptyCriteria extends IssueCriteria {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Issue.FIELD_MILESTONE) + " " 
+		return quote(Issue.NAME_MILESTONE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 

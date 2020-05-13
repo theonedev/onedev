@@ -44,7 +44,7 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.FIELD_COMMENT_COUNT) + " " 
+		return quote(PullRequest.NAME_COMMENT_COUNT) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}

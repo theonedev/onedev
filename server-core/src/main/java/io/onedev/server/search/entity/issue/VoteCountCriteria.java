@@ -43,7 +43,7 @@ public class VoteCountCriteria extends IssueCriteria {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Issue.FIELD_VOTE_COUNT) + " " 
+		return quote(Issue.NAME_VOTE_COUNT) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
 				+ quote(String.valueOf(value));
 	}

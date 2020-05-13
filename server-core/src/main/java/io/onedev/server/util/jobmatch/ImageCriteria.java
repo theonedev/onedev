@@ -1,6 +1,6 @@
 package io.onedev.server.util.jobmatch;
 
-import static io.onedev.server.model.Build.FIELD_IMAGE;
+import static io.onedev.server.model.Build.NAME_IMAGE;
 import static io.onedev.server.util.jobmatch.JobMatch.getRuleName;
 import static io.onedev.server.util.jobmatch.JobMatchLexer.Is;
 
@@ -25,7 +25,7 @@ public class ImageCriteria extends Criteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(FIELD_IMAGE) + " " + getRuleName(Is) + " " + quote(image);
+		return quote(NAME_IMAGE) + " " + getRuleName(Is) + " " + quote(image);
 	}
 	
 }

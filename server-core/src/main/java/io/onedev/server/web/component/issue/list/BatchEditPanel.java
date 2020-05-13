@@ -108,15 +108,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(Issue.FIELD_STATE);
+				return selectedFields.contains(Issue.NAME_STATE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(Issue.FIELD_STATE);
+					selectedFields.add(Issue.NAME_STATE);
 				else
-					selectedFields.remove(Issue.FIELD_STATE);
+					selectedFields.remove(Issue.NAME_STATE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -129,15 +129,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(Issue.FIELD_MILESTONE);
+				return selectedFields.contains(Issue.NAME_MILESTONE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(Issue.FIELD_MILESTONE);
+					selectedFields.add(Issue.NAME_MILESTONE);
 				else
-					selectedFields.remove(Issue.FIELD_MILESTONE);
+					selectedFields.remove(Issue.NAME_MILESTONE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -195,9 +195,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
-		if (!selectedFields.contains(Issue.FIELD_STATE))
+		if (!selectedFields.contains(Issue.NAME_STATE))
 			excludedProperties.add(Issue.PROP_STATE);
-		if (!selectedFields.contains(Issue.FIELD_MILESTONE))
+		if (!selectedFields.contains(Issue.NAME_MILESTONE))
 			excludedProperties.add(Issue.PROP_MILESTONE);
 		
 		builtInFieldsEditor = BeanContext.edit("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
@@ -245,13 +245,13 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						String state;
-						if (selectedFields.contains(Issue.FIELD_STATE))
+						if (selectedFields.contains(Issue.NAME_STATE))
 							state = builtInFieldsBean.getState();
 						else
 							state = null;
 						
 						Optional<Milestone> milestone;
-						if (selectedFields.contains(Issue.FIELD_MILESTONE))
+						if (selectedFields.contains(Issue.NAME_MILESTONE))
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;

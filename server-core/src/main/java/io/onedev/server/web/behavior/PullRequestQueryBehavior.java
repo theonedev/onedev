@@ -1,6 +1,6 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.model.Issue.FIELD_NUMBER;
+import static io.onedev.server.model.Issue.NAME_NUMBER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +64,12 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(PullRequest.QUERY_FIELDS);
 							if (getProject() != null)
-								candidates.remove(PullRequest.FIELD_TARGET_PROJECT);
+								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(PullRequest.ORDER_FIELDS.keySet());
 							if (getProject() != null)
-								candidates.remove(PullRequest.FIELD_TARGET_PROJECT);
+								candidates.remove(PullRequest.NAME_TARGET_PROJECT);
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
@@ -88,34 +88,34 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = PullRequestQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									PullRequestQuery.checkField(fieldName, operator);
-									if (fieldName.equals(PullRequest.FIELD_SUBMIT_DATE) 
-											|| fieldName.equals(PullRequest.FIELD_UPDATE_DATE)
-											|| fieldName.equals(PullRequest.FIELD_CLOSE_DATE)) {
+									if (fieldName.equals(PullRequest.NAME_SUBMIT_DATE) 
+											|| fieldName.equals(PullRequest.NAME_UPDATE_DATE)
+											|| fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(PullRequest.FIELD_TARGET_PROJECT)
-											|| fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT)) {
+									} else if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
+											|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjects(matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(PullRequest.FIELD_TARGET_BRANCH) 
-											|| fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH)) {
+									} else if (fieldName.equals(PullRequest.NAME_TARGET_BRANCH) 
+											|| fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)) {
 										if (project != null && !matchWith.contains("*"))
 											return SuggestionUtils.suggestBranches(project, matchWith);
 										else
 											return null;
-									} else if (fieldName.equals(FIELD_NUMBER)) {
+									} else if (fieldName.equals(NAME_NUMBER)) {
 										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(PullRequest.FIELD_MERGE_STRATEGY)) {
+									} else if (fieldName.equals(PullRequest.NAME_MERGE_STRATEGY)) {
 										List<String> candidates = new ArrayList<>();
 										for (MergeStrategy strategy: MergeStrategy.values())
 											candidates.add(strategy.toString());
 										return SuggestionUtils.suggest(candidates, matchWith);
-									} else if (fieldName.equals(PullRequest.FIELD_TITLE) 
-											|| fieldName.equals(PullRequest.FIELD_DESCRIPTION) 
-											|| fieldName.equals(PullRequest.FIELD_COMMENT_COUNT)
-											|| fieldName.equals(PullRequest.FIELD_COMMENT)) {
+									} else if (fieldName.equals(PullRequest.NAME_TITLE) 
+											|| fieldName.equals(PullRequest.NAME_DESCRIPTION) 
+											|| fieldName.equals(PullRequest.NAME_COMMENT_COUNT)
+											|| fieldName.equals(PullRequest.NAME_COMMENT)) {
 										return null;
 									}
 								} catch (OneException ex) {
@@ -162,13 +162,13 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(PullRequest.FIELD_TARGET_PROJECT)
-							|| fieldName.equals(PullRequest.FIELD_TARGET_BRANCH) 
-							|| fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT) 
-							|| fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH) 
-							|| fieldName.equals(PullRequest.FIELD_TITLE) 
-							|| fieldName.equals(PullRequest.FIELD_DESCRIPTION)
-							|| fieldName.equals(PullRequest.FIELD_COMMENT)) {
+					if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
+							|| fieldName.equals(PullRequest.NAME_TARGET_BRANCH) 
+							|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT) 
+							|| fieldName.equals(PullRequest.NAME_SOURCE_BRANCH) 
+							|| fieldName.equals(PullRequest.NAME_TITLE) 
+							|| fieldName.equals(PullRequest.NAME_DESCRIPTION)
+							|| fieldName.equals(PullRequest.NAME_COMMENT)) {
 						hints.add("Use * for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

@@ -33,7 +33,7 @@ public class TitleCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.FIELD_TITLE) + " " 
+		return quote(PullRequest.NAME_TITLE) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

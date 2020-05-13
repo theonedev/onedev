@@ -154,41 +154,41 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.IsBefore:
 						case PullRequestQueryLexer.IsAfter:
 							switch (fieldName) {
-							case PullRequest.FIELD_SUBMIT_DATE:
+							case PullRequest.NAME_SUBMIT_DATE:
 								return new SubmitDateCriteria(value, operator);
-							case PullRequest.FIELD_UPDATE_DATE:
+							case PullRequest.NAME_UPDATE_DATE:
 								return new UpdateDateCriteria(value, operator);
-							case PullRequest.FIELD_CLOSE_DATE:
+							case PullRequest.NAME_CLOSE_DATE:
 								return new CloseDateCriteria(value, operator);
 							default:
 								throw new IllegalStateException();
 							}
 						case PullRequestQueryLexer.Contains:
 							switch (fieldName) {
-							case PullRequest.FIELD_TITLE:
+							case PullRequest.NAME_TITLE:
 								return new TitleCriteria(value);
-							case PullRequest.FIELD_DESCRIPTION:
+							case PullRequest.NAME_DESCRIPTION:
 								return new DescriptionCriteria(value);
-							case PullRequest.FIELD_COMMENT:
+							case PullRequest.NAME_COMMENT:
 								return new CommentCriteria(value);
 							default:
 								throw new IllegalStateException();
 							}
 						case PullRequestQueryLexer.Is:
 							switch (fieldName) {
-							case PullRequest.FIELD_NUMBER:
+							case PullRequest.NAME_NUMBER:
 								return new NumberCriteria(project, value, operator);
-							case PullRequest.FIELD_MERGE_STRATEGY:
+							case PullRequest.NAME_MERGE_STRATEGY:
 								return new MergeStrategyCriteria(MergeStrategy.fromString(value));
-							case PullRequest.FIELD_SOURCE_BRANCH:
+							case PullRequest.NAME_SOURCE_BRANCH:
 								return new SourceBranchCriteria(value);
-							case PullRequest.FIELD_SOURCE_PROJECT:
+							case PullRequest.NAME_SOURCE_PROJECT:
 								return new SourceProjectCriteria(value);
-							case PullRequest.FIELD_TARGET_BRANCH:
+							case PullRequest.NAME_TARGET_BRANCH:
 								return new TargetBranchCriteria(value);
-							case PullRequest.FIELD_TARGET_PROJECT:
+							case PullRequest.NAME_TARGET_PROJECT:
 								return new TargetProjectCriteria(value);
-							case PullRequest.FIELD_COMMENT_COUNT:
+							case PullRequest.NAME_COMMENT_COUNT:
 								return new CommentCountCriteria(getIntValue(value), operator);
 							default: 
 								throw new IllegalStateException();
@@ -196,9 +196,9 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.IsLessThan:
 						case PullRequestQueryLexer.IsGreaterThan:
 							switch (fieldName) {
-							case PullRequest.FIELD_NUMBER:
+							case PullRequest.NAME_NUMBER:
 								return new NumberCriteria(project, value, operator);
-							case PullRequest.FIELD_COMMENT_COUNT:
+							case PullRequest.NAME_COMMENT_COUNT:
 								return new CommentCountCriteria(getIntValue(value), operator);
 							default:
 								throw new IllegalStateException();
@@ -261,34 +261,34 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		switch (operator) {
 		case PullRequestQueryLexer.IsBefore:
 		case PullRequestQueryLexer.IsAfter:
-			if (!fieldName.equals(PullRequest.FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(PullRequest.FIELD_UPDATE_DATE) 
-					&& !fieldName.equals(PullRequest.FIELD_CLOSE_DATE)) {
+			if (!fieldName.equals(PullRequest.NAME_SUBMIT_DATE) 
+					&& !fieldName.equals(PullRequest.NAME_UPDATE_DATE) 
+					&& !fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case PullRequestQueryLexer.Contains:
-			if (!fieldName.equals(PullRequest.FIELD_TITLE) 
-					&& !fieldName.equals(PullRequest.FIELD_DESCRIPTION)
-					&& !fieldName.equals(PullRequest.FIELD_COMMENT)) {
+			if (!fieldName.equals(PullRequest.NAME_TITLE) 
+					&& !fieldName.equals(PullRequest.NAME_DESCRIPTION)
+					&& !fieldName.equals(PullRequest.NAME_COMMENT)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case PullRequestQueryLexer.Is:
-			if (!fieldName.equals(PullRequest.FIELD_NUMBER)
-					&& !fieldName.equals(PullRequest.FIELD_MERGE_STRATEGY)
-					&& !fieldName.equals(PullRequest.FIELD_TARGET_PROJECT)
-					&& !fieldName.equals(PullRequest.FIELD_TARGET_BRANCH)
-					&& !fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT)
-					&& !fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH)
-					&& !fieldName.equals(PullRequest.FIELD_COMMENT_COUNT)) {
+			if (!fieldName.equals(PullRequest.NAME_NUMBER)
+					&& !fieldName.equals(PullRequest.NAME_MERGE_STRATEGY)
+					&& !fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
+					&& !fieldName.equals(PullRequest.NAME_TARGET_BRANCH)
+					&& !fieldName.equals(PullRequest.NAME_SOURCE_PROJECT)
+					&& !fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)
+					&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case PullRequestQueryLexer.IsLessThan:
 		case PullRequestQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(PullRequest.FIELD_NUMBER) 
-					&& !fieldName.equals(PullRequest.FIELD_COMMENT_COUNT)) {
+			if (!fieldName.equals(PullRequest.NAME_NUMBER) 
+					&& !fieldName.equals(PullRequest.NAME_COMMENT_COUNT)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;

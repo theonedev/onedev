@@ -39,7 +39,7 @@ public class CommentCriteria extends IssueCriteria {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(Issue.FIELD_COMMENT) + " " 
+		return quote(Issue.NAME_COMMENT) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

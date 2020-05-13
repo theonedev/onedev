@@ -40,7 +40,7 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.FIELD_COMMENT) + " " 
+		return quote(PullRequest.NAME_COMMENT) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
 				+ quote(value);
 	}

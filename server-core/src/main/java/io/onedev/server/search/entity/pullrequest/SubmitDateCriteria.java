@@ -46,7 +46,7 @@ public class SubmitDateCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return quote(PullRequest.FIELD_SUBMIT_DATE) + " " 
+		return quote(PullRequest.NAME_SUBMIT_DATE) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ quote(value);
 	}

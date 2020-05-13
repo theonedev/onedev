@@ -97,61 +97,61 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
-	public static final String FIELD_NUMBER = "Number";
+	public static final String NAME_NUMBER = "Number";
 
 	public static final String PROP_NUMBER = "number";
 	
-	public static final String FIELD_STATUS = "Status";
+	public static final String NAME_STATUS = "Status";
 	
-	public static final String FIELD_TARGET_PROJECT = "Target Project";
+	public static final String NAME_TARGET_PROJECT = "Target Project";
 	
 	public static final String PROP_TARGET_PROJECT = "targetProject";
 	
-	public static final String FIELD_TARGET_BRANCH = "Target Branch";
+	public static final String NAME_TARGET_BRANCH = "Target Branch";
 	
 	public static final String PROP_TARGET_BRANCH = "targetBranch";
 	
-	public static final String FIELD_SOURCE_PROJECT = "Source Project";
+	public static final String NAME_SOURCE_PROJECT = "Source Project";
 	
 	public static final String PROP_SOURCE_PROJECT = "sourceProject";
 	
-	public static final String FIELD_SOURCE_BRANCH = "Source Branch";
+	public static final String NAME_SOURCE_BRANCH = "Source Branch";
 	
 	public static final String PROP_SOURCE_BRANCH = "sourceBranch";
 	
-	public static final String FIELD_TITLE = "Title";
+	public static final String NAME_TITLE = "Title";
 	
 	public static final String PROP_TITLE = "title";
 	
-	public static final String FIELD_DESCRIPTION = "Description";
+	public static final String NAME_DESCRIPTION = "Description";
 	
 	public static final String PROP_DESCRIPTION = "description";
 	
-	public static final String FIELD_COMMENT = "Comment";
+	public static final String NAME_COMMENT = "Comment";
 
 	public static final String PROP_COMMENTS = "comments";
 	
 	public static final String PROP_CODE_COMMENT_RELATIONS = "codeCommentRelations";
 	
-	public static final String FIELD_COMMENT_COUNT = "Comment Count";
+	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
 	public static final String PROP_COMMENT_COUNT = "commentCount";
 
-	public static final String FIELD_SUBMITTER = "Submitter";
+	public static final String NAME_SUBMITTER = "Submitter";
 	
 	public static final String PROP_SUBMITTER = "submitter";
 	
-	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	public static final String NAME_SUBMIT_DATE = "Submit Date";
 	
 	public static final String PROP_SUBMIT_DATE = "submitDate";
 	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
+	public static final String NAME_UPDATE_DATE = "Update Date";
 	
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
-	public static final String FIELD_CLOSE_DATE = "Close Date";
+	public static final String NAME_CLOSE_DATE = "Close Date";
 	
-	public static final String FIELD_MERGE_STRATEGY = "Merge Strategy";
+	public static final String NAME_MERGE_STRATEGY = "Merge Strategy";
 	
 	public static final String PROP_MERGE_STRATEGY = "mergeStrategy";
 	
@@ -180,22 +180,22 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_NUMBER, FIELD_TITLE, FIELD_TARGET_PROJECT, FIELD_TARGET_BRANCH, 
-			FIELD_SOURCE_PROJECT, FIELD_SOURCE_BRANCH, FIELD_DESCRIPTION, 
-			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
-			FIELD_CLOSE_DATE, FIELD_MERGE_STRATEGY, FIELD_COMMENT_COUNT);
+			NAME_NUMBER, NAME_TITLE, NAME_TARGET_PROJECT, NAME_TARGET_BRANCH, 
+			NAME_SOURCE_PROJECT, NAME_SOURCE_BRANCH, NAME_DESCRIPTION, 
+			NAME_COMMENT, NAME_SUBMIT_DATE, NAME_UPDATE_DATE, 
+			NAME_CLOSE_DATE, NAME_MERGE_STRATEGY, NAME_COMMENT_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
-			FIELD_CLOSE_DATE, PROP_CLOSE_INFO + "." + CloseInfo.PROP_DATE,
-			FIELD_NUMBER, PROP_NUMBER,
-			FIELD_STATUS, PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS,
-			FIELD_TARGET_PROJECT, PROP_TARGET_PROJECT,
-			FIELD_TARGET_BRANCH, PROP_TARGET_BRANCH,
-			FIELD_SOURCE_PROJECT, PROP_SOURCE_PROJECT,
-			FIELD_SOURCE_BRANCH, PROP_SOURCE_BRANCH,
-			FIELD_COMMENT_COUNT, PROP_COMMENT_COUNT);
+			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
+			NAME_CLOSE_DATE, PROP_CLOSE_INFO + "." + CloseInfo.PROP_DATE,
+			NAME_NUMBER, PROP_NUMBER,
+			NAME_STATUS, PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS,
+			NAME_TARGET_PROJECT, PROP_TARGET_PROJECT,
+			NAME_TARGET_BRANCH, PROP_TARGET_BRANCH,
+			NAME_SOURCE_PROJECT, PROP_SOURCE_PROJECT,
+			NAME_SOURCE_BRANCH, PROP_SOURCE_BRANCH,
+			NAME_COMMENT_COUNT, PROP_COMMENT_COUNT);
 	
 	private static ThreadLocal<Stack<PullRequest>> stack =  new ThreadLocal<Stack<PullRequest>>() {
 

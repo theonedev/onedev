@@ -58,25 +58,25 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	public static final String PROP_PROJECT = "project";
 	
-	public static final String FIELD_CONTENT = "Content";
+	public static final String NAME_CONTENT = "Content";
 	
 	public static final String PROP_CONTENT = "content";
 	
-	public static final String FIELD_REPLY = "Reply";
+	public static final String NAME_REPLY = "Reply";
 	
-	public static final String FIELD_PATH = "Path";
+	public static final String NAME_PATH = "Path";
 	
 	public static final String PROP_MARK_POS = "markPos";
 	
-	public static final String FIELD_REPLY_COUNT = "Reply Count";
+	public static final String NAME_REPLY_COUNT = "Reply Count";
 	
 	public static final String PROP_REPLY_COUNT = "replyCount";
 	
-	public static final String FIELD_CREATE_DATE = "Create Date";
+	public static final String NAME_CREATE_DATE = "Create Date";
 	
 	public static final String PROP_CREATE_DATE = "createDate";
 	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
+	public static final String NAME_UPDATE_DATE = "Update Date";
 	
 	public static final String PROP_LAST_UPDATE = "lastUpdate";
 	
@@ -89,12 +89,12 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	public static final String PROP_ID = "id";
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_CONTENT, FIELD_REPLY, FIELD_PATH, FIELD_CREATE_DATE, FIELD_UPDATE_DATE, FIELD_REPLY_COUNT);
+			NAME_CONTENT, NAME_REPLY, NAME_PATH, NAME_CREATE_DATE, NAME_UPDATE_DATE, NAME_REPLY_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			FIELD_CREATE_DATE, PROP_CREATE_DATE,
-			FIELD_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
-			FIELD_REPLY_COUNT, PROP_REPLY_COUNT);
+			NAME_CREATE_DATE, PROP_CREATE_DATE,
+			NAME_UPDATE_DATE, PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE,
+			NAME_REPLY_COUNT, PROP_REPLY_COUNT);
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

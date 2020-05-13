@@ -154,7 +154,7 @@ public abstract class IssueTitlePanel extends Panel {
 					GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 					List<String> criterias = new ArrayList<>();
 					if (getIssue().getMilestone() != null) {
-						criterias.add(Criteria.quote(Issue.FIELD_MILESTONE) + " " 
+						criterias.add(Criteria.quote(Issue.NAME_MILESTONE) + " " 
 								+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
 								+ Criteria.quote(getIssue().getMilestoneName()));
 					}

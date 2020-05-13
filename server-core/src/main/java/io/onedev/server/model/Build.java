@@ -100,96 +100,96 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
-	public static final String FIELD_NUMBER = "Number";
+	public static final String NAME_NUMBER = "Number";
 	
 	public static final String PROP_NUMBER = "number";
 	
-	public static final String FIELD_VERSION = "Version";
+	public static final String NAME_VERSION = "Version";
 	
 	public static final String PROP_VERSION = "version";
 	
-	public static final String FIELD_PROJECT = "Project";
+	public static final String NAME_PROJECT = "Project";
 	
 	public static final String PROP_PROJECT = "project";
 	
-	public static final String FIELD_JOB = "Job";
+	public static final String NAME_JOB = "Job";
 	
 	public static final String PROP_JOB = "jobName";
 	
-	public static final String FIELD_IMAGE = "Image";
+	public static final String NAME_IMAGE = "Image";
 	
-	public static final String FIELD_STATUS = "Status";
+	public static final String NAME_STATUS = "Status";
 	
 	public static final String PROP_STATUS = "status";
 	
-	public static final String FIELD_SUBMITTER = "Submitter";
+	public static final String NAME_SUBMITTER = "Submitter";
 	
 	public static final String PROP_SUBMITTER = "submitter";
 	
 	public static final String PROP_SUBMITTER_NAME = "submitterName";
 	
-	public static final String FIELD_CANCELLER = "Canceller";
+	public static final String NAME_CANCELLER = "Canceller";
 	
 	public static final String PROP_CANCELLER = "canceller";
 	
 	public static final String PROP_CANCELLER_NAME = "cancellerName";
 	
-	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	public static final String NAME_SUBMIT_DATE = "Submit Date";
 	
 	public static final String PROP_SUBMIT_DATE = "submitDate";
 	
-	public static final String FIELD_PENDING_DATE = "Pending Date";
+	public static final String NAME_PENDING_DATE = "Pending Date";
 	
 	public static final String PROP_PENDING_DATE = "pendingDate";
 	
-	public static final String FIELD_RUNNING_DATE = "Running Date";
+	public static final String NAME_RUNNING_DATE = "Running Date";
 	
 	public static final String PROP_RUNNING_DATE = "runningDate";
 	
-	public static final String FIELD_FINISH_DATE = "Finish Date";
+	public static final String NAME_FINISH_DATE = "Finish Date";
 	
 	public static final String PROP_FINISH_DATE = "finishDate";
 	
-	public static final String FIELD_COMMIT = "Commit";
+	public static final String NAME_COMMIT = "Commit";
 	
 	public static final String PROP_COMMIT = "commitHash";
 	
 	public static final String PROP_PARAMS = "params";
 	
-	public static final String FIELD_DEPENDENCIES = "Dependencies";
+	public static final String NAME_DEPENDENCIES = "Dependencies";
 	
 	public static final String PROP_DEPENDENCIES = "dependencies";
 	
-	public static final String FIELD_DEPENDENTS = "Dependents";
+	public static final String NAME_DEPENDENTS = "Dependents";
 	
 	public static final String PROP_DEPENDENTS = "dependents";
 	
 	public static final String PROP_PULL_REQUEST_BUILDS = "pullRequestBuilds";
 	
-	public static final String FIELD_ERROR_MESSAGE = "Error Message";
+	public static final String NAME_ERROR_MESSAGE = "Error Message";
 	
-	public static final String FIELD_LOG = "Log";
+	public static final String NAME_LOG = "Log";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			FIELD_PROJECT, FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
-			FIELD_SUBMIT_DATE, FIELD_PENDING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 
-			FIELD_COMMIT, FIELD_VERSION, FIELD_DEPENDENCIES, FIELD_DEPENDENTS, FIELD_ERROR_MESSAGE, 
-			FIELD_LOG, FIELD_IMAGE);
+			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
+			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE, 
+			NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, NAME_DEPENDENTS, NAME_ERROR_MESSAGE, 
+			NAME_LOG, NAME_IMAGE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_PROJECT, FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
-			FIELD_PENDING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE);
+			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_VERSION, NAME_COMMIT, NAME_SUBMIT_DATE, 
+			NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
-			FIELD_JOB, PROP_JOB,
-			FIELD_STATUS, PROP_STATUS,
-			FIELD_NUMBER, PROP_NUMBER,
-			FIELD_SUBMIT_DATE, PROP_SUBMIT_DATE,
-			FIELD_PENDING_DATE, PROP_PENDING_DATE,
-			FIELD_RUNNING_DATE, PROP_RUNNING_DATE,
-			FIELD_FINISH_DATE, PROP_FINISH_DATE,
-			FIELD_PROJECT, PROP_PROJECT,
-			FIELD_COMMIT, PROP_COMMIT);	
+			NAME_JOB, PROP_JOB,
+			NAME_STATUS, PROP_STATUS,
+			NAME_NUMBER, PROP_NUMBER,
+			NAME_SUBMIT_DATE, PROP_SUBMIT_DATE,
+			NAME_PENDING_DATE, PROP_PENDING_DATE,
+			NAME_RUNNING_DATE, PROP_RUNNING_DATE,
+			NAME_FINISH_DATE, PROP_FINISH_DATE,
+			NAME_PROJECT, PROP_PROJECT,
+			NAME_COMMIT, PROP_COMMIT);	
 	
 	private static ThreadLocal<Stack<Build>> stack =  new ThreadLocal<Stack<Build>>() {
 

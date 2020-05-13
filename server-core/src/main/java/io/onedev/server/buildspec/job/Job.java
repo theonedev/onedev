@@ -1,7 +1,7 @@
 package io.onedev.server.buildspec.job;
 
-import static io.onedev.server.model.Build.FIELD_COMMIT;
-import static io.onedev.server.model.Build.FIELD_JOB;
+import static io.onedev.server.model.Build.NAME_COMMIT;
+import static io.onedev.server.model.Build.NAME_JOB;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
@@ -490,9 +490,9 @@ public class Job implements Serializable, Validatable {
 	
 	public static String getBuildQuery(ObjectId commitId, String jobName) {
 		return "" 
-				+ Criteria.quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + Criteria.quote(commitId.name()) 
+				+ Criteria.quote(NAME_COMMIT) + " " + getRuleName(Is) + " " + Criteria.quote(commitId.name()) 
 				+ " " + getRuleName(And) + " "
-				+ Criteria.quote(FIELD_JOB) + " " + getRuleName(Is) + " " + Criteria.quote(jobName);
+				+ Criteria.quote(NAME_JOB) + " " + getRuleName(Is) + " " + Criteria.quote(jobName);
 	}
 	
 	public static List<String> getChoices() {
