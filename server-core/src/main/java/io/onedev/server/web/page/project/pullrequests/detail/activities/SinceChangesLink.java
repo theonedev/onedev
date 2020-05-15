@@ -31,7 +31,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 			String commit = request.getBaseCommitHash();
 			for (PullRequestUpdate update: request.getSortedUpdates()) {
 				if (update.getDate().before(sinceDate))
-					commit = update.getHeadCommitHash();
+					commit = update.getRequestHead();
 			}
 			return commit;
 		}

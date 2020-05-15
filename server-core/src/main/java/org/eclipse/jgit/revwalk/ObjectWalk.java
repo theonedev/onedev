@@ -1,48 +1,16 @@
 /*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * and other copyright owners as documented in the project's IP log.
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org> and others
  *
- * This program and the accompanying materials are made available
- * under the terms of the Eclipse Distribution License v1.0 which
- * accompanies this distribution, is reproduced below, and is
- * available at http://www.eclipse.org/org/documents/edl-v10.php
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Distribution License v. 1.0 which is available at
+ * https://www.eclipse.org/org/documents/edl-v10.php.
  *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or
- * without modification, are permitted provided that the following
- * conditions are met:
- *
- * - Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- *
- * - Redistributions in binary form must reproduce the above
- *   copyright notice, this list of conditions and the following
- *   disclaimer in the documentation and/or other materials provided
- *   with the distribution.
- *
- * - Neither the name of the Eclipse Foundation, Inc. nor the
- *   names of its contributors may be used to endorse or promote
- *   products derived from this software without specific prior
- *   written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 package org.eclipse.jgit.revwalk;
 
+import static java.util.Objects.requireNonNull;
 import static org.eclipse.jgit.lib.Constants.OBJ_BLOB;
 import static org.eclipse.jgit.lib.Constants.OBJ_COMMIT;
 import static org.eclipse.jgit.lib.Constants.OBJ_TREE;
@@ -97,6 +65,55 @@ public class ObjectWalk extends RevWalk {
 	 */
 	private static final int IN_PENDING = RevWalk.REWRITE;
 
+	/**
+	 * When walking over a tree and blob graph, objects are usually marked as
+	 * seen as they are visited and this "seen" status is checked upon the next
+	 * visit. If they are already "seen" then they are not processed (returned
+	 * by {@link ObjectWalk#nextObject()}) again. However, this behavior can be
+	 * overridden by supplying a different implementation of this class.
+	 *
+	 * @since 5.4
+	 */
+	public interface VisitationPolicy {
+		/**
+		 * Whenever the rev or object walk reaches a Git object, if that object
+		 * already exists as a RevObject, this method is called to determine if
+		 * that object should be visited.
+		 *
+		 * @param o
+		 *            the object to check if it should be visited
+		 * @return true if the object should be visited
+		 */
+		boolean shouldVisit(RevObject o);
+
+		/**
+		 * Called when an object is visited.
+		 *
+		 * @param o
+		 *            the object that was visited
+		 */
+		void visited(RevObject o);
+	}
+
+	/**
+	 * The default visitation policy: causes all objects to be visited exactly
+	 * once.
+	 *
+	 * @since 5.4
+	 */
+	public static final VisitationPolicy SIMPLE_VISITATION_POLICY =
+			new VisitationPolicy() {
+		@Override
+		public boolean shouldVisit(RevObject o) {
+			return (o.flags & SEEN) == 0;
+		}
+
+		@Override
+		public void visited(RevObject o) {
+			o.flags |= SEEN;
+		}
+	};
+
 	private List<RevObject> rootObjects;
 
 	private BlockObjQueue pendingObjects;
@@ -112,6 +129,8 @@ public class ObjectWalk extends RevWalk {
 	private int pathLen;
 
 	private boolean boundary;
+
+	private VisitationPolicy visitationPolicy = SIMPLE_VISITATION_POLICY;
 
 	/**
 	 * Create a new revision and object walker for a given repository.
@@ -299,6 +318,18 @@ public class ObjectWalk extends RevWalk {
 		objectFilter = newFilter != null ? newFilter : ObjectFilter.ALL;
 	}
 
+	/**
+	 * Sets the visitation policy to use during this walk.
+	 *
+	 * @param policy
+	 *            the {@code VisitationPolicy} to use
+	 * @since 5.4
+	 */
+	public void setVisitationPolicy(VisitationPolicy policy) {
+		assertNotStarted();
+		visitationPolicy = requireNonNull(policy);
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() throws MissingObjectException,
@@ -326,15 +357,28 @@ public class ObjectWalk extends RevWalk {
 	}
 
 	/**
+	 * Skips the current tree such that {@link #nextObject()} does not return
+	 * any objects inside it. This should be called right after
+	 * {@link #nextObject()} returns the tree.
+	 *
+	 * @since 5.4
+	 */
+	public void skipTree() {
+		if (currVisit != null) {
+			currVisit.ptr = currVisit.buf.length;
+		}
+	}
+
+	/**
 	 * Pop the next most recent object.
 	 *
 	 * @return next most recent object; null if traversal is over.
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
-	 *             one or or more of the next objects are not available from the
+	 *             one or more of the next objects are not available from the
 	 *             object database, but were thought to be candidates for
 	 *             traversal. This usually indicates a broken link.
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
-	 *             one or or more of the objects in a tree do not match the type
+	 *             one or more of the objects in a tree do not match the type
 	 *             indicated.
 	 * @throws java.io.IOException
 	 *             a pack file or loose object could not be read.
@@ -357,24 +401,23 @@ public class ObjectWalk extends RevWalk {
 				}
 
 				RevObject obj = objects.get(idBuffer);
-				if (obj != null && (obj.flags & SEEN) != 0)
+				if (obj != null && !visitationPolicy.shouldVisit(obj))
 					continue;
 
 				int mode = parseMode(buf, startPtr, ptr, tv);
-				int flags;
 				switch (mode >>> TYPE_SHIFT) {
 				case TYPE_FILE:
 				case TYPE_SYMLINK:
 					if (obj == null) {
 						obj = new RevBlob(idBuffer);
-						obj.flags = SEEN;
+						visitationPolicy.visited(obj);
 						objects.add(obj);
 						return obj;
 					}
 					if (!(obj instanceof RevBlob))
 						throw new IncorrectObjectTypeException(obj, OBJ_BLOB);
-					obj.flags = flags = obj.flags | SEEN;
-					if ((flags & UNINTERESTING) == 0)
+					visitationPolicy.visited(obj);
+					if ((obj.flags & UNINTERESTING) == 0)
 						return obj;
 					if (boundary)
 						return obj;
@@ -383,17 +426,17 @@ public class ObjectWalk extends RevWalk {
 				case TYPE_TREE:
 					if (obj == null) {
 						obj = new RevTree(idBuffer);
-						obj.flags = SEEN;
+						visitationPolicy.visited(obj);
 						objects.add(obj);
-						return enterTree(obj);
+						return pushTree(obj);
 					}
 					if (!(obj instanceof RevTree))
 						throw new IncorrectObjectTypeException(obj, OBJ_TREE);
-					obj.flags = flags = obj.flags | SEEN;
-					if ((flags & UNINTERESTING) == 0)
-						return enterTree(obj);
+					visitationPolicy.visited(obj);
+					if ((obj.flags & UNINTERESTING) == 0)
+						return pushTree(obj);
 					if (boundary)
-						return enterTree(obj);
+						return pushTree(obj);
 					continue;
 
 				case TYPE_GITLINK:
@@ -419,28 +462,21 @@ public class ObjectWalk extends RevWalk {
 			if (o == null) {
 				return null;
 			}
-			int flags = o.flags;
-			if ((flags & SEEN) != 0)
+			if (!visitationPolicy.shouldVisit(o)) {
 				continue;
-			flags |= SEEN;
-			o.flags = flags;
-			if ((flags & UNINTERESTING) == 0 | boundary) {
+			}
+			visitationPolicy.visited(o);
+			if ((o.flags & UNINTERESTING) == 0 || boundary) {
 				if (o instanceof RevTree) {
-					tv = newTreeVisit(o);
-					tv.parent = null;
-					currVisit = tv;
+					// The previous while loop should have exhausted the stack
+					// of trees.
+					assert currVisit == null;
+
+					pushTree(o);
 				}
 				return o;
 			}
 		}
-	}
-
-	private RevObject enterTree(RevObject obj) throws MissingObjectException,
-			IncorrectObjectTypeException, IOException {
-		TreeVisit tv = newTreeVisit(obj);
-		tv.parent = currVisit;
-		currVisit = tv;
-		return obj;
 	}
 
 	private static int findObjectId(byte[] buf, int ptr) {
@@ -534,11 +570,11 @@ public class ObjectWalk extends RevWalk {
 	 * provides some detail about the connectivity failure.
 	 *
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
-	 *             one or or more of the next objects are not available from the
+	 *             one or more of the next objects are not available from the
 	 *             object database, but were thought to be candidates for
 	 *             traversal. This usually indicates a broken link.
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
-	 *             one or or more of the objects in a tree do not match the type
+	 *             one or more of the objects in a tree do not match the type
 	 *             indicated.
 	 * @throws java.io.IOException
 	 *             a pack file or loose object could not be read.
@@ -579,6 +615,17 @@ public class ObjectWalk extends RevWalk {
 				return null;
 		}
 		return RawParseUtils.decode(pathBuf, 0, pathLen);
+	}
+
+	/**
+	 * @return the current traversal depth from the root tree object
+	 * @since 5.4
+	 */
+	public int getTreeDepth() {
+		if (currVisit == null) {
+			return 0;
+		}
+		return currVisit.depth;
 	}
 
 	/**
@@ -768,7 +815,7 @@ public class ObjectWalk extends RevWalk {
 		}
 	}
 
-	private TreeVisit newTreeVisit(RevObject obj) throws LargeObjectException,
+	private RevObject pushTree(RevObject obj) throws LargeObjectException,
 			MissingObjectException, IncorrectObjectTypeException, IOException {
 		TreeVisit tv = freeVisit;
 		if (tv != null) {
@@ -782,7 +829,15 @@ public class ObjectWalk extends RevWalk {
 		}
 		tv.obj = obj;
 		tv.buf = reader.open(obj, OBJ_TREE).getCachedBytes();
-		return tv;
+		tv.parent = currVisit;
+		currVisit = tv;
+		if (tv.parent == null) {
+			tv.depth = 1;
+		} else {
+			tv.depth = tv.parent.depth + 1;
+		}
+
+		return obj;
 	}
 
 	private void releaseTreeVisit(TreeVisit tv) {
@@ -812,5 +867,8 @@ public class ObjectWalk extends RevWalk {
 
 		/** Number of bytes in the path leading up to this tree. */
 		int pathLen;
+
+		/** Number of levels deep from the root tree. 0 for root tree. */
+		int depth;
 	}
 }

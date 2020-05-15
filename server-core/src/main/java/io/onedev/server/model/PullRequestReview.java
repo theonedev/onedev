@@ -90,7 +90,7 @@ public class PullRequestReview extends AbstractEntity {
 					update = request.getLatestUpdate();
 				} else {
 					for (PullRequestUpdate each: request.getUpdates()) {
-						if (each.getHeadCommitHash().equals(result.getCommit())) {
+						if (each.getRequestHead().equals(result.getCommit())) {
 							update = each;
 							break;
 						}

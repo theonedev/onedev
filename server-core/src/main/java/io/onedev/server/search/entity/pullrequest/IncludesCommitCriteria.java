@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -47,7 +47,7 @@ public class IncludesCommitCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	private Collection<Long> getPullRequestIds() {
-		return OneDev.getInstance(CodeCommentRelationInfoManager.class).getPullRequestIds(project, commitId);		
+		return OneDev.getInstance(PullRequestInfoManager.class).getPullRequestIds(project, commitId);		
 	}
 	
 	@Override

@@ -54,7 +54,7 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.EntityWatch;
@@ -621,7 +621,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		if (pullRequests == null) {
 			pullRequests = new ArrayList<>();
 
-			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
+			PullRequestInfoManager codeCommentRelationInfoManager = OneDev.getInstance(PullRequestInfoManager.class); 
 			Collection<Long> pullRequestIds = new HashSet<>();
 			for (ObjectId commit: getCommits()) 
 				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		

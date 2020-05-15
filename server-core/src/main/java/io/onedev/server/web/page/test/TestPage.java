@@ -28,7 +28,7 @@ public class TestPage extends BasePage {
 		});
 		
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

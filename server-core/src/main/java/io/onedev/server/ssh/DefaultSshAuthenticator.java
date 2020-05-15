@@ -5,7 +5,7 @@ import java.security.PublicKey;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.sshd.common.AttributeStore.AttributeKey;
+import org.apache.sshd.common.AttributeRepository.AttributeKey;
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.server.auth.AsyncAuthException;
 import org.apache.sshd.server.session.ServerSession;

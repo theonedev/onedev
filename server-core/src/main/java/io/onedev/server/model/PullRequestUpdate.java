@@ -51,7 +51,10 @@ public class PullRequestUpdate extends AbstractEntity {
 	private PullRequest request;
 	
 	@Column(nullable=false)
-	private String headCommitHash;
+	private String requestHead;
+	
+	@Column(nullable=false)
+	private String targetHead;
 	
 	@Column(nullable=false)
 	private String mergeBaseCommitHash;
@@ -71,14 +74,22 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.request = request;
 	}
 
-	public String getHeadCommitHash() {
-		return headCommitHash;
+	public String getRequestHead() {
+		return requestHead;
 	}
 	
-	public void setHeadCommitHash(String headCommitHash) {
-		this.headCommitHash = headCommitHash;
+	public void setRequestHead(String requestHead) {
+		this.requestHead = requestHead;
 	}
 	
+	public String getTargetHead() {
+		return targetHead;
+	}
+
+	public void setTargetHead(String targetHead) {
+		this.targetHead = targetHead;
+	}
+
 	public String getMergeBaseCommitHash() {
 		return mergeBaseCommitHash;
 	}
@@ -119,7 +130,7 @@ public class PullRequestUpdate extends AbstractEntity {
 					TreeWalk treeWalk = new TreeWalk(repository)) {
 				RevCommit mergeBaseCommit = revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash()));
 				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash()));
-				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
+				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getRequestHead()));
 				revWalk.markStart(mergeBaseCommit);
 				revWalk.markStart(baseCommit);
 				revWalk.setRevFilter(RevFilter.MERGE_BASE);
@@ -182,7 +193,7 @@ public class PullRequestUpdate extends AbstractEntity {
 
 		int index = request.getSortedUpdates().indexOf(this);
 		if (index > 0)
-			return request.getSortedUpdates().get(index-1).getHeadCommitHash();
+			return request.getSortedUpdates().get(index-1).getRequestHead();
 		else
 			return request.getBaseCommitHash();
 	}
@@ -219,7 +230,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			commits = new ArrayList<>();
 			
 			try (RevWalk revWalk = new RevWalk(getRequest().getWorkProject().getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getRequestHead())));
 				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
 				 
 				/*
@@ -241,11 +252,11 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public RevCommit getHeadCommit() {
-		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
+		return request.getWorkProject().getRevCommit(ObjectId.fromString(getRequestHead()), true);
 	}
 	
 	public void writeRef() {
-		ObjectId updateHeadId = ObjectId.fromString(getHeadCommitHash());
+		ObjectId updateHeadId = ObjectId.fromString(getRequestHead());
 		if (!request.getTargetProject().equals(request.getSourceProject())) {
 			try {
 				request.getTargetProject().git().fetch()

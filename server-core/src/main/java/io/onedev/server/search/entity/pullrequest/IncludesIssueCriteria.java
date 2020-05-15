@@ -11,7 +11,7 @@ import javax.persistence.criteria.Root;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -47,7 +47,7 @@ public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 	private Collection<Long> getPullRequestIds(Project project) {
 		Collection<Long> pullRequestIds = new HashSet<>();
 		for (ObjectId commit: OneDev.getInstance(CommitInfoManager.class).getFixCommits(project, issue.getNumber()))
-			pullRequestIds.addAll(OneDev.getInstance(CodeCommentRelationInfoManager.class).getPullRequestIds(project, commit));
+			pullRequestIds.addAll(OneDev.getInstance(PullRequestInfoManager.class).getPullRequestIds(project, commit));
 		return pullRequestIds;
 	}
 	

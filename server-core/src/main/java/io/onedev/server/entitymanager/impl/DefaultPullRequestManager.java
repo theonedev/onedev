@@ -1094,7 +1094,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestUpdate update = new PullRequestUpdate();
 			request.addUpdate(update);
 			update.setRequest(request);
-			update.setHeadCommitHash(request.getHeadCommitHash());
+			update.setRequestHead(request.getHeadCommitHash());
 			update.setMergeBaseCommitHash(request.getBaseCommitHash());
 			request.setMergeStrategy(mergeStrategy);
 			open(request);

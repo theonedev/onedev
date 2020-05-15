@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 
 import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.keyprovider.KeyPairProvider;
+import org.apache.sshd.common.session.SessionContext;
 
 import com.google.common.collect.Lists;
 
@@ -26,7 +27,7 @@ public class DefaultKeyPairProvider implements KeyPairProvider {
     }
     
     @Override
-    public Iterable<KeyPair> loadKeys() {
+    public Iterable<KeyPair> loadKeys(SessionContext session) {
         SshSetting sshSetting = settingManager.getSshSetting();
         
         try {
@@ -37,4 +38,5 @@ public class DefaultKeyPairProvider implements KeyPairProvider {
             throw new RuntimeException(e);
         }
     }
+
 }

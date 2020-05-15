@@ -159,7 +159,7 @@ public class DefaultIndexManager implements IndexManager {
 					if (lastCommitIndexVersion.equals(getIndexVersion())) {
 						String lastCommitHash = doc.get(LAST_COMMIT_HASH.name());
 						ObjectId lastCommitId = ObjectId.fromString(lastCommitHash);
-						if (repository.hasObject(lastCommitId)) { 
+						if (repository.getObjectDatabase().has(lastCommitId)) { 
 							treeWalk.addTree(revWalk.parseCommit(lastCommitId).getTree());
 							treeWalk.setFilter(TreeFilter.ANY_DIFF);
 						}

@@ -208,7 +208,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
 				request.addUpdate(update);
 				update.setRequest(request);
-				update.setHeadCommitHash(request.getHeadCommitHash());
+				update.setRequestHead(request.getHeadCommitHash());
 				update.setMergeBaseCommitHash(request.getBaseCommitHash());
 
 				OneDev.getInstance(PullRequestManager.class).checkQuality(request);

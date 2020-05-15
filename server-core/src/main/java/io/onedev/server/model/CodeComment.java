@@ -122,6 +122,10 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	@Embedded
 	private CompareContext compareContext;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
+	private PullRequest request;
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
@@ -142,6 +146,15 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 
 	public void setProject(Project project) {
 		this.project = project;
+	}
+
+	@Nullable
+	public PullRequest getRequest() {
+		return request;
+	}
+
+	public void setRequest(PullRequest request) {
+		this.request = request;
 	}
 
 	@Nullable
@@ -249,7 +262,11 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	}
 	
 	public boolean isValid() {
-		return project.getRepository().hasObject(ObjectId.fromString(markPos.getCommit()));
+		try {
+			return project.getRepository().getObjectDatabase().has(ObjectId.fromString(markPos.getCommit()));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Nullable

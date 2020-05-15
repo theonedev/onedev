@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.codecomment;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -272,14 +273,18 @@ public abstract class CodeCommentListPanel extends Panel {
 						link = new BookmarkablePageLink<Void>("link", PullRequestChangesPage.class, 
 								PullRequestChangesPage.paramsOf(request, comment));
 					} else {
-						String compareCommit = comment.getCompareContext().getCompareCommit();
-						if (!compareCommit.equals(comment.getMarkPos().getCommit())
-								&& getProject().getRepository().hasObject(ObjectId.fromString(compareCommit))) {
-							link = new BookmarkablePageLink<Void>("link", RevisionComparePage.class, 
-									RevisionComparePage.paramsOf(comment));
-						} else {
-							link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
-									ProjectBlobPage.paramsOf(comment));
+						try {
+							String compareCommit = comment.getCompareContext().getCompareCommit();
+							if (!compareCommit.equals(comment.getMarkPos().getCommit())
+									&& getProject().getRepository().getObjectDatabase().has(ObjectId.fromString(compareCommit))) {
+								link = new BookmarkablePageLink<Void>("link", RevisionComparePage.class, 
+										RevisionComparePage.paramsOf(comment));
+							} else {
+								link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
+										ProjectBlobPage.paramsOf(comment));
+							}
+						} catch (IOException e) {
+							throw new RuntimeException(e);
 						}
 					}				
 				}

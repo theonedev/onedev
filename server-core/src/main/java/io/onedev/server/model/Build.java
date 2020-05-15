@@ -913,7 +913,11 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public boolean isValid() {
-		return getProject().getRepository().hasObject(ObjectId.fromString(getCommitHash()));
+		try {
+			return getProject().getRepository().getObjectDatabase().has(ObjectId.fromString(getCommitHash()));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Nullable

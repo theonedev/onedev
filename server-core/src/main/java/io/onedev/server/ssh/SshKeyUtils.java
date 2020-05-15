@@ -27,8 +27,7 @@ public class SshKeyUtils {
         List<AuthorizedKeyEntry> entries = AuthorizedKeyEntry.readAuthorizedKeys(stringReader, true);
 
         AuthorizedKeyEntry entry = entries.get(0);
-        PublicKey pubEntry = entry.resolvePublicKey(PublicKeyEntryResolver.FAILING);
-        return pubEntry;
+        return entry.resolvePublicKey(null, PublicKeyEntryResolver.FAILING);
     }
     
     public static PublicKey decodePEMPublicKey(String publicKey) throws IOException, GeneralSecurityException {

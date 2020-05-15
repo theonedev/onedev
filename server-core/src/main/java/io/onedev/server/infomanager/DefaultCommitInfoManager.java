@@ -330,8 +330,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_KEY);
 				if (lastCommitBytes != null) {
 					lastCommitId = ObjectId.fromRaw(lastCommitBytes);
-					if (!repository.hasObject(lastCommitId))
-						lastCommitId = null;
+					try {
+						if (!repository.getObjectDatabase().has(lastCommitId))
+							lastCommitId = null;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 				} else {
 					lastCommitId = null;
 				}
@@ -584,8 +588,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_CONTRIBS_KEY);
 				if (lastCommitBytes != null) {
 					lastCommitId = ObjectId.fromRaw(lastCommitBytes);
-					if (!repository.hasObject(lastCommitId))
-						lastCommitId = null;
+					try {
+						if (!repository.getObjectDatabase().has(lastCommitId))
+							lastCommitId = null;
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 				} else {
 					lastCommitId = null;
 				}
@@ -686,10 +694,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			public ObjectId compute(Transaction txn) {
 				byte[] lastCommitBytes = readBytes(defaultStore, txn, LAST_COMMIT_OF_LINE_STATS_KEY);
 				if (lastCommitBytes != null) {
-					ObjectId lastCommitId = ObjectId.fromRaw(lastCommitBytes);
-					if (repository.hasObject(lastCommitId) 
-							&& GitUtils.isMergedInto(repository, null, lastCommitId, commitId)) {
-						return lastCommitId;
+					try {
+						ObjectId lastCommitId = ObjectId.fromRaw(lastCommitBytes);
+						if (repository.getObjectDatabase().has(lastCommitId) 
+								&& GitUtils.isMergedInto(repository, null, lastCommitId, commitId)) {
+							return lastCommitId;
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
 					} 
 				} 
 				return null;

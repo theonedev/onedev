@@ -1,46 +1,13 @@
 /*
  * Copyright (C) 2007, Robin Rosenberg <robin.rosenberg@dewire.com>
  * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * Copyright (C) 2014, Gustaf Lundh <gustaf.lundh@sonymobile.com>
- * and other copyright owners as documented in the project's IP log.
+ * Copyright (C) 2014, Gustaf Lundh <gustaf.lundh@sonymobile.com> and others
  *
- * This program and the accompanying materials are made available
- * under the terms of the Eclipse Distribution License v1.0 which
- * accompanies this distribution, is reproduced below, and is
- * available at http://www.eclipse.org/org/documents/edl-v10.php
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Distribution License v. 1.0 which is available at
+ * https://www.eclipse.org/org/documents/edl-v10.php.
  *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or
- * without modification, are permitted provided that the following
- * conditions are met:
- *
- * - Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- *
- * - Redistributions in binary form must reproduce the above
- *   copyright notice, this list of conditions and the following
- *   disclaimer in the documentation and/or other materials provided
- *   with the distribution.
- *
- * - Neither the name of the Eclipse Foundation, Inc. nor the
- *   names of its contributors may be used to endorse or promote
- *   products derived from this software without specific prior
- *   written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 package org.eclipse.jgit.revwalk;
@@ -72,6 +39,7 @@ import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
+import org.eclipse.jgit.util.References;
 
 /**
  * Walks a commit graph and produces the matching commits in order.
@@ -200,6 +168,8 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 
 	private boolean rewriteParents = true;
 
+	private boolean firstParent;
+
 	boolean shallowCommitsInitialized;
 
 	/**
@@ -232,7 +202,7 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 		idBuffer = new MutableObjectId();
 		objects = new ObjectIdOwnerMap<>();
 		roots = new ArrayList<>();
-		queue = new DateRevQueue();
+		queue = new DateRevQueue(false);
 		pending = new StartGenerator(this);
 		sorting = EnumSet.of(RevSort.NONE);
 		filter = RevFilter.ALL;
@@ -247,6 +217,23 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 */
 	public ObjectReader getObjectReader() {
 		return reader;
+	}
+
+	/**
+	 * Get a reachability checker for commits over this revwalk.
+	 *
+	 * @return the most efficient reachability checker for this repository.
+	 * @throws IOException
+	 *             if it cannot open any of the underlying indices.
+	 *
+	 * @since 5.4
+	 */
+	public ReachabilityChecker createReachabilityChecker() throws IOException {
+		if (reader.getBitmapIndex() != null) {
+			return new BitmappedReachabilityChecker(this);
+		}
+
+		return new PedestrianReachabilityChecker(true, this);
 	}
 
 	/**
@@ -394,11 +381,11 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 *         <code>base</code> (and thus <code>base</code> is fully merged
 	 *         into <code>tip</code>); false otherwise.
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
-	 *             one or or more of the next commit's parents are not available
+	 *             one or more of the next commit's parents are not available
 	 *             from the object database, but were thought to be candidates
 	 *             for traversal. This usually indicates a broken link.
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
-	 *             one or or more of the next commit's parents are not actually
+	 *             one or more of the next commit's parents are not actually
 	 *             commit objects.
 	 * @throws java.io.IOException
 	 *             a pack file or loose object could not be read.
@@ -416,9 +403,11 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 			markStart(tip);
 			markStart(base);
 			RevCommit mergeBase;
-			while ((mergeBase = next()) != null)
-				if (mergeBase == base)
+			while ((mergeBase = next()) != null) {
+				if (References.isSameObject(mergeBase, base)) {
 					return true;
+				}
+			}
 			return false;
 		} finally {
 			filter = oldRF;
@@ -431,11 +420,11 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 *
 	 * @return next most recent commit; null if traversal is over.
 	 * @throws org.eclipse.jgit.errors.MissingObjectException
-	 *             one or or more of the next commit's parents are not available
+	 *             one or more of the next commit's parents are not available
 	 *             from the object database, but were thought to be candidates
 	 *             for traversal. This usually indicates a broken link.
 	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
-	 *             one or or more of the next commit's parents are not actually
+	 *             one or more of the next commit's parents are not actually
 	 *             commit objects.
 	 * @throws java.io.IOException
 	 *             a pack file or loose object could not be read.
@@ -506,7 +495,7 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 
 		if (sorting.size() > 1)
 			sorting.remove(RevSort.NONE);
-		else if (sorting.size() == 0)
+		else if (sorting.isEmpty())
 			sorting.add(RevSort.NONE);
 	}
 
@@ -641,6 +630,35 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 */
 	public void setRetainBody(boolean retain) {
 		retainBody = retain;
+	}
+
+	/**
+	 * @return whether only first-parent links should be followed when walking.
+	 *
+	 * @since 5.5
+	 */
+	public boolean isFirstParent() {
+		return firstParent;
+	}
+
+	/**
+	 * Set whether or not only first parent links should be followed.
+	 * <p>
+	 * If set, second- and higher-parent links are not traversed at all.
+	 * <p>
+	 * This must be called prior to {@link #markStart(RevCommit)}.
+	 *
+	 * @param enable
+	 *            true to walk only first-parent links.
+	 *
+	 * @since 5.5
+	 */
+	public void setFirstParent(boolean enable) {
+		assertNotStarted();
+		assertNoCommitsMarkedStart();
+		firstParent = enable;
+		queue = new DateRevQueue(firstParent);
+		pending = new StartGenerator(this);
 	}
 
 	/**
@@ -1275,7 +1293,8 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 	 * <p>
 	 * Unlike {@link #dispose()} previously acquired RevObject (and RevCommit)
 	 * instances are not invalidated. RevFlag instances are not invalidated, but
-	 * are removed from all RevObjects.
+	 * are removed from all RevObjects. The value of {@code firstParent} is
+	 * retained.
 	 *
 	 * @param retainFlags
 	 *            application flags that should <b>not</b> be cleared from
@@ -1311,7 +1330,7 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 		}
 
 		roots.clear();
-		queue = new DateRevQueue();
+		queue = new DateRevQueue(firstParent);
 		pending = new StartGenerator(this);
 	}
 
@@ -1329,9 +1348,10 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 		delayFreeFlags = 0;
 		retainOnReset = 0;
 		carryFlags = UNINTERESTING;
+		firstParent = false;
 		objects.clear();
 		roots.clear();
-		queue = new DateRevQueue();
+		queue = new DateRevQueue(firstParent);
 		pending = new StartGenerator(this);
 		shallowCommitsInitialized = false;
 	}
@@ -1401,6 +1421,21 @@ public class RevWalk implements Iterable<RevCommit>, AutoCloseable {
 		if (isNotStarted())
 			return;
 		throw new IllegalStateException(JGitText.get().outputHasAlreadyBeenStarted);
+	}
+
+	/**
+	 * Throws an exception if any commits have been marked as start.
+	 * <p>
+	 * If {@link #markStart(RevCommit)} has already been called,
+	 * {@link #reset()} can be called to satisfy this condition.
+	 *
+	 * @since 5.5
+	 */
+	protected void assertNoCommitsMarkedStart() {
+		if (roots.isEmpty())
+			return;
+		throw new IllegalStateException(
+				JGitText.get().commitsHaveAlreadyBeenMarkedAsStart);
 	}
 
 	private boolean isNotStarted() {

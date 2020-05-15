@@ -292,12 +292,12 @@ public class GitUtils {
      * 			case, these two commits can not be merged
      */
     @Nullable
-    public static ObjectId getMergeBase(Repository repository, ObjectId commit1, ObjectId commit2) {
+    public static ObjectId getMergeBase(Repository repository, ObjectId commitId1, ObjectId commitId2) {
 		try (RevWalk revWalk = new RevWalk(repository)) {
 			revWalk.setRevFilter(RevFilter.MERGE_BASE);
 			
-			revWalk.markStart(revWalk.parseCommit(commit1));
-			revWalk.markStart(revWalk.parseCommit(commit2));
+			revWalk.markStart(revWalk.parseCommit(commitId1));
+			revWalk.markStart(revWalk.parseCommit(commitId2));
 			RevCommit mergeBase = revWalk.next();
 			return mergeBase!=null?mergeBase.copy():null;
 		} catch (IOException e) {
@@ -419,12 +419,15 @@ public class GitUtils {
     }
     
     @Nullable
-    public static ObjectId merge(Repository repository, ObjectId source, ObjectId target, 
-    		boolean squash, PersonIdent committer, PersonIdent author, String commitMessage) {
+    public static ObjectId merge(Repository repository, ObjectId targetCommitId, ObjectId sourceCommitId, 
+    		boolean squash, PersonIdent committer, PersonIdent author, String commitMessage, 
+    		boolean useOursOnConflict) {
+    	boolean prevUseOursOnConflict = UseOursOnConflict.get();
+    	UseOursOnConflict.set(useOursOnConflict);
     	try (	RevWalk revWalk = new RevWalk(repository);
     			ObjectInserter inserter = repository.newObjectInserter();) {
-    		RevCommit sourceCommit = revWalk.parseCommit(source);
-    		RevCommit targetCommit = revWalk.parseCommit(target);
+    		RevCommit sourceCommit = revWalk.parseCommit(sourceCommitId);
+    		RevCommit targetCommit = revWalk.parseCommit(targetCommitId);
     		Merger merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
     		if (merger.merge(targetCommit, sourceCommit)) {
 		        CommitBuilder mergedCommit = new CommitBuilder();
@@ -444,6 +447,8 @@ public class GitUtils {
     		}
     	} catch (IOException e) {
     		throw new RuntimeException(e);
+		} finally {
+			UseOursOnConflict.set(prevUseOursOnConflict);
 		}
     }
     

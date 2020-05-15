@@ -36,6 +36,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
@@ -290,6 +291,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<CodeComment> codeComments = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
 	
 	private transient Boolean mergedIntoTarget;
@@ -527,6 +531,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		}
 	}
 	
+	public Collection<CodeComment> getCodeComments() {
+		return codeComments;
+	}
+
+	public void setCodeComments(Collection<CodeComment> codeComments) {
+		this.codeComments = codeComments;
+	}
+
 	public Collection<CodeCommentRelation> getCodeCommentRelations() {
 		return codeCommentRelations;
 	}
@@ -941,19 +953,24 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public boolean isValid() {
 		if (valid == null) {
 			Repository repository = targetProject.getRepository();
-			if (!repository.hasObject(ObjectId.fromString(baseCommitHash))
-					|| !repository.hasObject(ObjectId.fromString(headCommitHash))) {
-				valid = false;
-			} else {
-				for (PullRequestUpdate update: updates) {
-					if (!repository.hasObject(ObjectId.fromString(update.getMergeBaseCommitHash()))
-							|| !repository.hasObject(ObjectId.fromString(update.getHeadCommitHash()))) {
-						valid = false;
-						break;
+			ObjectDatabase objDb = repository.getObjectDatabase();
+			try {
+				if (!objDb.has(ObjectId.fromString(baseCommitHash))
+						|| !objDb.has(ObjectId.fromString(headCommitHash))) {
+					valid = false;
+				} else {
+					for (PullRequestUpdate update: updates) {
+						if (!objDb.has(ObjectId.fromString(update.getMergeBaseCommitHash()))
+								|| !objDb.has(ObjectId.fromString(update.getRequestHead()))) {
+							valid = false;
+							break;
+						}
 					}
+					if (valid == null)
+						valid = true;
 				}
-				if (valid == null)
-					valid = true;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		} 
 		return valid;
@@ -1026,10 +1043,25 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		}
 
 	}
-
+	
 	@Override
 	public String getAttachmentStorageUUID() {
 		return uuid;
+	}
+	
+	public ObjectId getComparisonBase(ObjectId oldCommitId, ObjectId newCommitId) {
+		for (PullRequestUpdate update: getSortedUpdates()) {
+			if (update.getCommits().contains(newCommitId)) {
+				ObjectId targetHeadId = ObjectId.fromString(update.getTargetHead());
+				ObjectId mergeBaseId = GitUtils.getMergeBase(getTargetProject().getRepository(), targetHeadId, newCommitId);
+				if (mergeBaseId != null) {
+					
+				} else {
+					return oldCommitId;
+				}
+			}
+		}
+		throw new IllegalStateException();
 	}
 
 	@Override

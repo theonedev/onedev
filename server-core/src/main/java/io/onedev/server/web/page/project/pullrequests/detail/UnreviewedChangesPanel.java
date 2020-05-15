@@ -21,7 +21,7 @@ public class UnreviewedChangesPanel extends GenericPanel<PullRequestUpdate> {
 		PullRequestUpdate update = getModelObject();
 
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
-		state.oldCommit = update.getHeadCommitHash();
+		state.oldCommit = update.getRequestHead();
 		state.newCommit = update.getRequest().getHeadCommitHash();
 		
 		add(new ViewStateAwarePageLink<Void>("link", PullRequestChangesPage.class, 

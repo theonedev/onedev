@@ -1,44 +1,11 @@
 /*
- * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org>
- * and other copyright owners as documented in the project's IP log.
+ * Copyright (C) 2008, Shawn O. Pearce <spearce@spearce.org> and others
  *
- * This program and the accompanying materials are made available
- * under the terms of the Eclipse Distribution License v1.0 which
- * accompanies this distribution, is reproduced below, and is
- * available at http://www.eclipse.org/org/documents/edl-v10.php
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Distribution License v. 1.0 which is available at
+ * https://www.eclipse.org/org/documents/edl-v10.php.
  *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or
- * without modification, are permitted provided that the following
- * conditions are met:
- *
- * - Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- *
- * - Redistributions in binary form must reproduce the above
- *   copyright notice, this list of conditions and the following
- *   disclaimer in the documentation and/or other materials provided
- *   with the distribution.
- *
- * - Neither the name of the Eclipse Foundation, Inc. nor the
- *   names of its contributors may be used to endorse or promote
- *   products derived from this software without specific prior
- *   written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
- * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 package org.eclipse.jgit.revwalk;
@@ -116,8 +83,7 @@ public class TreeRevFilter extends RevFilter {
 	 * @param rewriteFlag
 	 *            flag to color commits to be removed from the simplified DAT.
 	 */
-	TreeRevFilter(final RevWalk walker, final TreeFilter t,
-			final int rewriteFlag) {
+	TreeRevFilter(RevWalk walker, TreeFilter t, int rewriteFlag) {
 		pathFilter = new TreeWalk(walker.reader);
 		pathFilter.setFilter(t);
 		pathFilter.setRecursive(t.shouldBeRecursive());
@@ -137,14 +103,15 @@ public class TreeRevFilter extends RevFilter {
 			IncorrectObjectTypeException, IOException {
 		// Reset the tree filter to scan this commit and parents.
 		//
-		final RevCommit[] pList = c.parents;
-		final int nParents = pList.length;
-		final TreeWalk tw = pathFilter;
-		final ObjectId[] trees = new ObjectId[nParents + 1];
+		RevCommit[] pList = c.parents;
+		int nParents = pList.length;
+		TreeWalk tw = pathFilter;
+		ObjectId[] trees = new ObjectId[nParents + 1];
 		for (int i = 0; i < nParents; i++) {
-			final RevCommit p = c.parents[i];
-			if ((p.flags & PARSED) == 0)
+			RevCommit p = c.parents[i];
+			if ((p.flags & PARSED) == 0) {
 				p.parseHeaders(walker);
+			}
 			trees[i] = p.getTree();
 		}
 		trees[nParents] = c.getTree();
@@ -156,10 +123,11 @@ public class TreeRevFilter extends RevFilter {
 			int chgs = 0, adds = 0;
 			while (tw.next()) {
 				chgs++;
-				if (tw.getRawMode(0) == 0 && tw.getRawMode(1) != 0)
+				if (tw.getRawMode(0) == 0 && tw.getRawMode(1) != 0) {
 					adds++;
-				else
+				} else {
 					break; // no point in looking at this further.
+				}
 			}
 
 			if (chgs == 0) {
@@ -168,25 +136,26 @@ public class TreeRevFilter extends RevFilter {
 				//
 				c.flags |= rewriteFlag;
 				return false;
-			} else {
-				// We have interesting items, but neither of the special
-				// cases denoted above.
-				//
-				if (adds > 0 && tw.getFilter() instanceof FollowFilter) {
-					// One of the paths we care about was added in this
-					// commit. We need to update our filter to its older
-					// name, if we can discover it. Find out what that is.
-					//
-					updateFollowFilter(trees, ((FollowFilter) tw.getFilter()).cfg);
-				}
-				return true;
 			}
+
+			// We have interesting items, but neither of the special
+			// cases denoted above.
+			//
+			if (adds > 0 && tw.getFilter() instanceof FollowFilter) {
+				// One of the paths we care about was added in this
+				// commit. We need to update our filter to its older
+				// name, if we can discover it. Find out what that is.
+				//
+				updateFollowFilter(trees, ((FollowFilter) tw.getFilter()).cfg);
+			}
+			return true;
 		} else if (nParents == 0) {
 			// We have no parents to compare against. Consider us to be
 			// REWRITE only if we have no paths matching our filter.
 			//
-			if (tw.next())
+			if (tw.next()) {
 				return true;
+			}
 			c.flags |= rewriteFlag;
 			return false;
 		}
@@ -196,18 +165,19 @@ public class TreeRevFilter extends RevFilter {
 		// it does not contribute changes to us. Such a parent may be an
 		// uninteresting side branch.
 		//
-		final int[] chgs = new int[nParents];
-		final int[] adds = new int[nParents];
+		int[] chgs = new int[nParents];
+		int[] adds = new int[nParents];
 		while (tw.next()) {
-			final int myMode = tw.getRawMode(nParents);
+			int myMode = tw.getRawMode(nParents);
 			for (int i = 0; i < nParents; i++) {
-				final int pMode = tw.getRawMode(i);
-				if (myMode == pMode && tw.idEqual(i, nParents))
+				int pMode = tw.getRawMode(i);
+				if (myMode == pMode && tw.idEqual(i, nParents)) {
 					continue;
-
+				}
 				chgs[i]++;
-				if (pMode == 0 && myMode != 0)
+				if (pMode == 0 && myMode != 0) {
 					adds[i]++;
+				}
 			}
 		}
 
@@ -220,7 +190,7 @@ public class TreeRevFilter extends RevFilter {
 				// parent commit.
 				//
 
-				final RevCommit p = pList[i];
+				RevCommit p = pList[i];
 				if ((p.flags & UNINTERESTING) != 0) {
 					// This parent was marked as not interesting by the
 					// application. We should look for another parent
@@ -246,7 +216,7 @@ public class TreeRevFilter extends RevFilter {
 				pList[i].parents = RevCommit.NO_PARENTS;
 			}
 			*/
-
+			
 			// We have an interesting difference relative to this parent.
 			//
 			diff = true;
