@@ -400,8 +400,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						
 						if (!found) { 
 							if (request.getMergePreview() != null 
-									&& request.getMergePreview().getMerged() != null 
-									&& request.getMergePreview().getMerged().equals(commitHash)) {
+									&& request.getMergePreview().getMergeCommitHash() != null 
+									&& request.getMergePreview().getMergeCommitHash().equals(commitHash)) {
 								unableCommentMessage = "Unable to comment on pull request merge preview";
 							} else {
 								unableCommentMessage = "Unable to comment on commits not belonging to pull request";

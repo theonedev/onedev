@@ -93,25 +93,25 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 	private void newContent(IPartialPageRequestHandler handler) {
 		Fragment fragment;
 		MergePreview preview = getPullRequest().getMergePreview();
-		if (getPullRequest().isOpen() && preview != null && preview.getMerged() != null) {
+		if (getPullRequest().isOpen() && preview != null && preview.getMergeCommitHash() != null) {
 			fragment = new Fragment("content", "availableFrag", this);
 
 			CommitDetailPage.State commitState = new CommitDetailPage.State();
-			commitState.revision = preview.getTargetHead();
+			commitState.revision = preview.getTargetHeadCommitHash();
 			PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 			Link<Void> hashLink = new ViewStateAwarePageLink<Void>("targetHead", CommitDetailPage.class, params);
 			fragment.add(hashLink);
-			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getTargetHead())));
-			fragment.add(new CopyToClipboardLink("copyTargetHead", Model.of(preview.getTargetHead())));
+			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getTargetHeadCommitHash())));
+			fragment.add(new CopyToClipboardLink("copyTargetHead", Model.of(preview.getTargetHeadCommitHash())));
 			
 			commitState = new CommitDetailPage.State();
-			commitState.revision = preview.getMerged();
+			commitState.revision = preview.getMergeCommitHash();
 			params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 			hashLink = new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params);
 			fragment.add(hashLink);
-			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
-			fragment.add(new CopyToClipboardLink("copyMergedCommit", Model.of(preview.getMerged())));
-			fragment.add(new CommitStatusPanel("buildStatus", ObjectId.fromString(preview.getMerged())) {
+			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMergeCommitHash())));
+			fragment.add(new CopyToClipboardLink("copyMergedCommit", Model.of(preview.getMergeCommitHash())));
+			fragment.add(new CommitStatusPanel("buildStatus", ObjectId.fromString(preview.getMergeCommitHash())) {
 
 				@Override
 				protected String getCssClasses() {
@@ -160,9 +160,9 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 					MergePreview latestPreview = getPullRequest().getMergePreview();
 					setVisible(!getPullRequest().isOpen() 
 							|| latestPreview == null 
-							|| latestPreview.getMerged() == null 
-							|| !latestPreview.getTargetHead().equals(preview.getTargetHead())
-							|| !latestPreview.getMerged().equals(preview.getMerged()));
+							|| latestPreview.getMergeCommitHash() == null 
+							|| !latestPreview.getTargetHeadCommitHash().equals(preview.getTargetHeadCommitHash())
+							|| !latestPreview.getMergeCommitHash().equals(preview.getMergeCommitHash()));
 				}
 
 			}.setOutputMarkupPlaceholderTag(true));
@@ -223,7 +223,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			};
 			
 			Component revisionDiff = new RevisionDiffPanel("revisionDiff", projectModel,  
-					requestModel, preview.getTargetHead(), preview.getMerged(), pathFilterModel, 
+					requestModel, preview.getTargetHeadCommitHash(), preview.getMergeCommitHash(), pathFilterModel, 
 					whitespaceOptionModel, blameModel, null);
 			revisionDiff.setOutputMarkupId(true);
 			fragment.add(revisionDiff);

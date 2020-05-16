@@ -429,7 +429,7 @@ public abstract class CodeCommentPanel extends Panel {
 						if (page.getState().newCommit.equals(comment.getMarkPos().getCommit())) {
 							setVisible(comment.isContextChanged(getPullRequest()));
 						} else {
-							setVisible(!getPullRequest().getHeadCommitHash().equals(page.getState().newCommit));
+							setVisible(!getPullRequest().getLatestUpdate().getHeadCommitHash().equals(page.getState().newCommit));
 						}
 					} else {
 						setVisible(false);

@@ -16,8 +16,8 @@ public class HasMergeConflictsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Path<?> requestHead = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_REQUEST_HEAD);
-		Path<?> merged = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED);
+		Path<?> requestHead = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_HEAD_COMMIT_HASH);
+		Path<?> merged = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_MERGE_PREVIEW + "." + MergePreview.PROP_MERGED_COMMIT_HASH);
 		return builder.and(
 				builder.isNotNull(requestHead), 
 				builder.isNull(merged));
@@ -26,7 +26,7 @@ public class HasMergeConflictsCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		MergePreview preview = request.getLastMergePreview();
-		return preview != null && preview.getMerged() == null;
+		return preview != null && preview.getMergeCommitHash() == null;
 	}
 
 	@Override

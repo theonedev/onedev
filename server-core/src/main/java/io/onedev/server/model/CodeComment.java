@@ -287,17 +287,17 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	public boolean isContextChanged(PullRequest request) {
 		if (contextChanged == null) {
-			if (request.getHeadCommitHash().equals(markPos.getCommit())) {
+			if (request.getLatestUpdate().getHeadCommit().equals(markPos.getCommit())) {
 				contextChanged = false;
 			} else {
 				Project project = request.getTargetProject();
 				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 					TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), markPos.getPath(), 
-							request.getHeadCommit().getTree());
+							request.getLatestUpdate().getHeadCommit().getTree());
 					if (treeWalk != null) {
 						ObjectId blobId = treeWalk.getObjectId(0);
 						if (treeWalk.getRawMode(0) == FileMode.REGULAR_FILE.getBits()) {
-							BlobIdent blobIdent = new BlobIdent(request.getHeadCommitHash(), markPos.getPath(), 
+							BlobIdent blobIdent = new BlobIdent(request.getLatestUpdate().getHeadCommitHash(), markPos.getPath(), 
 									treeWalk.getRawMode(0));
 							Blob newBlob = new Blob(blobIdent, blobId, treeWalk.getObjectReader()); 
 							Blob oldBlob = project.getBlob(new BlobIdent(markPos.getCommit(), 

@@ -52,7 +52,7 @@ public enum PullRequestOperation {
 			ReviewResult result = new ReviewResult();
 			result.setApproved(true);
 			result.setComment(comment);
-			result.setCommit(request.getHeadCommitHash());
+			result.setCommit(request.getLatestUpdate().getHeadCommitHash());
 			review.setResult(result);
 			OneDev.getInstance(PullRequestReviewManager.class).review(review);
 			Session.get().success("Approved");
@@ -80,7 +80,7 @@ public enum PullRequestOperation {
 			ReviewResult result = new ReviewResult();
 			result.setApproved(false);
 			result.setComment(comment);
-			result.setCommit(request.getHeadCommitHash());
+			result.setCommit(request.getLatestUpdate().getHeadCommitHash());
 			review.setResult(result);
 			OneDev.getInstance(PullRequestReviewManager.class).review(review);
 			Session.get().success("Requested for changes");
@@ -125,8 +125,8 @@ public enum PullRequestOperation {
 					&& request.getSource().getObjectName(false) != null
 					&& !request.getSource().isDefault()
 					&& preview != null
-					&& (request.getSource().getObjectName().equals(preview.getRequestHead()) 
-							|| request.getSource().getObjectName().equals(preview.getMerged()))
+					&& (request.getSource().getObjectName().equals(preview.getHeadCommitHash()) 
+							|| request.getSource().getObjectName().equals(preview.getMergeCommitHash()))
 					&& SecurityUtils.canModify(request)
 					&& SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch())
 					&& pullRequestManager.queryOpenTo(request.getSource()).isEmpty();

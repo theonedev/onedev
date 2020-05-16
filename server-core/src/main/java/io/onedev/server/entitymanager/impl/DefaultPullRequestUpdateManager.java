@@ -47,21 +47,19 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 	@Transactional
 	@Override
 	public void checkUpdate(PullRequest request) {
-		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
+		if (!request.getLatestUpdate().getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			ObjectId mergeBase = GitUtils.getMergeBase(
 					request.getTargetProject().getRepository(), request.getTarget().getObjectId(), 
 					request.getSourceProject().getRepository(), request.getSource().getObjectId());
 			if (mergeBase != null) {
-				request.setHeadCommitHash(request.getSource().getObjectName());
-				request.writeHeadRef();
-				
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setRequest(request);
-				update.setRequestHead(request.getHeadCommitHash());
-				update.setMergeBaseCommitHash(mergeBase.name());
+				update.setHeadCommitHash(request.getSource().getObjectName());
+				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 				request.addUpdate(update);
-				
 				save(update);
+
+				request.writeHeadRef();
 				
 				listenerRegistry.post(new PullRequestUpdated(update));
 			}

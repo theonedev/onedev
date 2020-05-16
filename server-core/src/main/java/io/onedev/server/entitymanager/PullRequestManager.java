@@ -10,7 +10,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergePreview;
-import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -60,9 +59,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     MergePreview previewMerge(PullRequest request);
     
     void open(PullRequest request);
-    
-    PullRequest open(ProjectAndBranch source, ProjectAndBranch target, 
-    		MergeStrategy mergeStrategy, User submitter, String title);
     
     void delete(PullRequest request);
     

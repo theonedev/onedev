@@ -19,7 +19,7 @@ public class UpdateChangesLink extends ViewStateAwarePageLink<Void> {
 
 	private static PageParameters paramsOf(PullRequestUpdate update) {
 		return PullRequestChangesPage.paramsOf(update.getRequest(), 
-				update.getBaseCommitHash(), update.getRequestHead());
+				update.getBase(), update.getHeadCommitHash());
 	}
 
 	public IModel<?> getBody() {

@@ -29,6 +29,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.collect.Sets;
@@ -106,7 +107,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			if (requestComparingInfo != null && state.oldCommit == null && state.newCommit == null) {
 				if (comment.isContextChanged(request)) {
 					state.oldCommit = comment.getMarkPos().getCommit();
-					state.newCommit = request.getHeadCommitHash();
+					state.newCommit = request.getLatestUpdate().getHeadCommitHash();
 				} else {
 					state.oldCommit = requestComparingInfo.getOldCommit();
 					state.newCommit = requestComparingInfo.getNewCommit();
@@ -116,7 +117,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		if (state.oldCommit == null) 
 			state.oldCommit = request.getBaseCommitHash();
 		if (state.newCommit == null)
-			state.newCommit = request.getHeadCommitHash();
+			state.newCommit = request.getLatestUpdate().getHeadCommitHash();
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -312,7 +313,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 					oldName = GitUtils.abbreviateSHA(state.oldCommit);
 
 				String newName;
-				if (state.newCommit.equals(getPullRequest().getHeadCommitHash())) {
+				if (state.newCommit.equals(getPullRequest().getLatestUpdate().getHeadCommitHash())) {
 					newName = "head";
 				} else {
 					newName = GitUtils.abbreviateSHA(state.newCommit);
@@ -330,7 +331,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				state.oldCommit = getPullRequest().getBaseCommitHash();
-				state.newCommit = getPullRequest().getHeadCommitHash();
+				state.newCommit = getPullRequest().getLatestUpdate().getHeadCommitHash();
 				target.add(head);
 				newRevisionDiff(target);
 				onRegionChange();
@@ -341,7 +342,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!state.oldCommit.equals(getPullRequest().getBaseCommitHash()) 
-						|| !state.newCommit.equals(getPullRequest().getHeadCommitHash()));
+						|| !state.newCommit.equals(getPullRequest().getLatestUpdate().getHeadCommitHash()));
 			}
 			
 		});
@@ -413,6 +414,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
 	
+	private ObjectId getComparisonBase() {
+		return getPullRequest().getComparisonBase(ObjectId.fromString(state.oldCommit), ObjectId.fromString(state.newCommit));
+	}
+	
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
 		IModel<String> blameModel = new IModel<String>() {
 
@@ -470,7 +475,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		};
 		
 		Component revisionDiff = new RevisionDiffPanel("revisionDiff", projectModel,  
-				requestModel, state.oldCommit, state.newCommit, pathFilterModel, 
+				requestModel, getComparisonBase().name(), state.newCommit, pathFilterModel, 
 				whitespaceOptionModel, blameModel, this);
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {

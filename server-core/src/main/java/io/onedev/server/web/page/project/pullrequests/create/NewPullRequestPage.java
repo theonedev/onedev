@@ -196,7 +196,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				request.setSubmitter(currentUser);
 				
 				request.setBaseCommitHash(baseCommitId.name());
-				request.setHeadCommitHash(source.getObjectName());
 				if (request.getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
 					closeInfo.setDate(new Date());
@@ -208,8 +207,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
 				request.addUpdate(update);
 				update.setRequest(request);
-				update.setRequestHead(request.getHeadCommitHash());
-				update.setMergeBaseCommitHash(request.getBaseCommitHash());
+				update.setHeadCommitHash(source.getObjectName());
+				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
 				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
 
@@ -398,7 +397,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				PullRequest request = getPullRequest();
 				List<Revision> revisions = new ArrayList<>();
 				revisions.add(new Revision(request.getBaseCommitHash(), Revision.Scope.SINCE));
-				revisions.add(new Revision(request.getHeadCommitHash(), Revision.Scope.UNTIL));
+				revisions.add(new Revision(request.getLatestUpdate().getHeadCommitHash(), Revision.Scope.UNTIL));
 				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
 			}
 
@@ -419,7 +418,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			protected Project load() {
 				Project project = source.getProject();
 				project.cacheObjectId(source.getRevision(), 
-						ObjectId.fromString(getPullRequest().getHeadCommitHash()));
+						ObjectId.fromString(getPullRequest().getLatestUpdate().getHeadCommitHash()));
 				return project;
 			}
 			
@@ -734,11 +733,11 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public Component getLazyLoadComponent(String componentId) {
 				PullRequest request = getPullRequest();
-				MergePreview mergePreview = new MergePreview(request.getTarget().getObjectName(), 
-						request.getHeadCommitHash(), request.getMergeStrategy(), null);
+				MergePreview mergePreview = new MergePreview(request.getLatestUpdate().getTargetHeadCommitHash(), 
+						request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
 				ObjectId merged = mergePreview.getMergeStrategy().merge(request);
 				if (merged != null)
-					mergePreview.setMerged(merged.name());
+					mergePreview.setMergeCommitHash(merged.name());
 				request.setLastMergePreview(mergePreview);
 				
 				if (merged != null) {
@@ -794,7 +793,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.mark = mark;
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getHeadCommitHash());
+		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = whitespaceOption;
@@ -842,7 +841,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		mark = comment.getMarkPos();
 		state.commentId = comment.getId();
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getHeadCommitHash());
+		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
 		state.pathFilter = pathFilter;
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = whitespaceOption;

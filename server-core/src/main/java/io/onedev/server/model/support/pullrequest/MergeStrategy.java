@@ -18,7 +18,7 @@ public enum MergeStrategy {
 		public ObjectId merge(PullRequest request) {
 			PersonIdent user = new PersonIdent(OneDev.NAME, "");
 			Repository repository = request.getTargetProject().getRepository();
-			ObjectId requestHead = request.getHeadCommit();
+			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			return GitUtils.merge(repository, targetHead, requestHead, false, user, user,
 						request.getCommitMessage(), false);
@@ -30,7 +30,7 @@ public enum MergeStrategy {
 		@Override
 		public ObjectId merge(PullRequest request) {
 			Repository repository = request.getTargetProject().getRepository();
-			ObjectId requestHead = request.getHeadCommit();
+			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			if (GitUtils.isMergedInto(repository, null, targetHead, requestHead)) {
 				return requestHead;
@@ -47,7 +47,7 @@ public enum MergeStrategy {
 		@Override
 		public ObjectId merge(PullRequest request) {
 			Repository repository = request.getTargetProject().getRepository();
-			ObjectId requestHead = request.getHeadCommit();
+			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			PersonIdent user = new PersonIdent(OneDev.NAME, "");
 			return GitUtils.merge(repository, targetHead, requestHead, true, user, user,
@@ -60,7 +60,7 @@ public enum MergeStrategy {
 		@Override
 		public ObjectId merge(PullRequest request) {
 			Repository repository = request.getTargetProject().getRepository();
-			ObjectId requestHead = request.getHeadCommit();
+			ObjectId requestHead = request.getLatestUpdate().getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			PersonIdent user = new PersonIdent(OneDev.NAME, "");
 			return GitUtils.rebase(repository, requestHead, targetHead, user);

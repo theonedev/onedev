@@ -31,7 +31,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 			String commit = request.getBaseCommitHash();
 			for (PullRequestUpdate update: request.getSortedUpdates()) {
 				if (update.getDate().before(sinceDate))
-					commit = update.getRequestHead();
+					commit = update.getHeadCommitHash();
 			}
 			return commit;
 		}
@@ -49,7 +49,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 		PullRequest request = getPullRequest();
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 		state.oldCommit = oldCommitModel.getObject();
-		state.newCommit = request.getHeadCommitHash();
+		state.newCommit = request.getLatestUpdate().getHeadCommitHash();
 		return PullRequestChangesPage.paramsOf(request, state);
 	}
 
@@ -81,7 +81,7 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!oldCommitModel.getObject().equals(getPullRequest().getHeadCommitHash()));
+		setVisible(!oldCommitModel.getObject().equals(getPullRequest().getLatestUpdate().getHeadCommitHash()));
 	}
 
 	@Override

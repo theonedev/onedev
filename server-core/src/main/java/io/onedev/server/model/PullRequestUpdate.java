@@ -16,14 +16,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
@@ -51,14 +48,11 @@ public class PullRequestUpdate extends AbstractEntity {
 	private PullRequest request;
 	
 	@Column(nullable=false)
-	private String requestHead;
+	private String headCommitHash;
 	
 	@Column(nullable=false)
-	private String targetHead;
+	private String targetHeadCommitHash;
 	
-	@Column(nullable=false)
-	private String mergeBaseCommitHash;
-
 	@Column(nullable=false)
 	private Date date = new Date();
 	
@@ -74,28 +68,20 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.request = request;
 	}
 
-	public String getRequestHead() {
-		return requestHead;
+	public String getHeadCommitHash() {
+		return headCommitHash;
 	}
 	
-	public void setRequestHead(String requestHead) {
-		this.requestHead = requestHead;
+	public void setHeadCommitHash(String headCommitHash) {
+		this.headCommitHash = headCommitHash;
 	}
 	
-	public String getTargetHead() {
-		return targetHead;
+	public String getTargetHeadCommitHash() {
+		return targetHeadCommitHash;
 	}
 
-	public void setTargetHead(String targetHead) {
-		this.targetHead = targetHead;
-	}
-
-	public String getMergeBaseCommitHash() {
-		return mergeBaseCommitHash;
-	}
-
-	public void setMergeBaseCommitHash(String mergeBaseCommitHash) {
-		this.mergeBaseCommitHash = mergeBaseCommitHash;
+	public void setTargetHeadCommitHash(String targetHeadCommitHash) {
+		this.targetHeadCommitHash = targetHeadCommitHash;
 	}
 
 	public Date getDate() {
@@ -116,11 +102,6 @@ public class PullRequestUpdate extends AbstractEntity {
 		GitUtils.deleteRef(GitUtils.getRefUpdate(getRequest().getTargetProject().getRepository(), getHeadRef()));
 	}	
 	
-	/**
-	 * Get changed files of this update since previous update. This calculation 
-	 * excludes changes introduced by commits from target branch (this will 
-	 * happen if some commits were merged from target branch to source branch)
-	 */
 	public Collection<String> getChangedFiles() {
 		if (changedFiles == null) {
 			changedFiles = new HashSet<>();
@@ -128,59 +109,14 @@ public class PullRequestUpdate extends AbstractEntity {
 			Repository repository = getRequest().getWorkProject().getRepository();
 			try (	RevWalk revWalk = new RevWalk(repository);
 					TreeWalk treeWalk = new TreeWalk(repository)) {
-				RevCommit mergeBaseCommit = revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash()));
-				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash()));
-				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getRequestHead()));
-				revWalk.markStart(mergeBaseCommit);
-				revWalk.markStart(baseCommit);
-				revWalk.setRevFilter(RevFilter.MERGE_BASE);
-				RevCommit nextMergeBase = Preconditions.checkNotNull(revWalk.next());
-				treeWalk.setRecursive(true);
-				if (nextMergeBase.equals(baseCommit)) {
-					treeWalk.addTree(mergeBaseCommit.getTree());
-					treeWalk.addTree(headCommit.getTree());
-					treeWalk.setFilter(TreeFilter.ANY_DIFF);
-					while (treeWalk.next())
-						changedFiles.add(treeWalk.getPathString());
-				} else if (nextMergeBase.equals(mergeBaseCommit)) {
-					treeWalk.addTree(baseCommit.getTree());
-					treeWalk.addTree(headCommit.getTree());
-					treeWalk.setFilter(TreeFilter.ANY_DIFF);
-					while (treeWalk.next())
-						changedFiles.add(treeWalk.getPathString());
-				} else {
-					treeWalk.addTree(headCommit.getTree());
-					treeWalk.addTree(baseCommit.getTree());
-					treeWalk.addTree(mergeBaseCommit.getTree());
-					treeWalk.setFilter(new TreeFilter() {
-
-						@Override
-						public boolean include(TreeWalk walker)
-								throws MissingObjectException, IncorrectObjectTypeException, IOException {
-							int m0 = walker.getRawMode(0);
-							
-							// only include the path if the file is modified in head commit 
-							// compared to base commit and that modification is not introduced
-							// by commit from target branch
-							return (walker.getRawMode(1) != m0 || !walker.idEqual(1, 0)) 
-									&& (walker.getRawMode(2) != m0 || !walker.idEqual(2, 0));
-						}
-
-						@Override
-						public boolean shouldBeRecursive() {
-							return false;
-						}
-
-						@Override
-						public TreeFilter clone() {
-							return this;
-						}
-						
-					});
-					while (treeWalk.next()) {
-						changedFiles.add(treeWalk.getPathString());
-					}
-				}
+				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBase()));
+				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
+				RevCommit comparisonBaseCommit = revWalk.parseCommit(getRequest().getComparisonBase(baseCommit, headCommit));
+				treeWalk.addTree(headCommit.getTree());
+				treeWalk.addTree(comparisonBaseCommit.getTree());
+				treeWalk.setFilter(TreeFilter.ANY_DIFF);
+				while (treeWalk.next())
+					changedFiles.add(treeWalk.getPathString());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -188,14 +124,18 @@ public class PullRequestUpdate extends AbstractEntity {
 		return changedFiles;
 	}
 	
-	public String getBaseCommitHash() {
+	public String getBase() {
 		PullRequest request = getRequest();
 
 		int index = request.getSortedUpdates().indexOf(this);
 		if (index > 0)
-			return request.getSortedUpdates().get(index-1).getRequestHead();
+			return request.getSortedUpdates().get(index-1).getHeadCommitHash();
 		else
 			return request.getBaseCommitHash();
+	}
+	
+	public RevCommit getHeadCommit() {
+		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
 	}
 	
 	/**
@@ -230,8 +170,8 @@ public class PullRequestUpdate extends AbstractEntity {
 			commits = new ArrayList<>();
 			
 			try (RevWalk revWalk = new RevWalk(getRequest().getWorkProject().getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getRequestHead())));
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
+				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBase())));
 				 
 				/*
 				 * Instead of excluding commits reachable from target branch, we exclude commits reachable
@@ -240,7 +180,7 @@ public class PullRequestUpdate extends AbstractEntity {
 				 * update
 				 * 2. commits of this update will remain unchanged even if tip of the target branch changes     
 				 */
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getMergeBaseCommitHash())));
+				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getTargetHeadCommitHash())));
 				
 				revWalk.forEach(c->commits.add(c));
 			} catch (IOException e) {
@@ -251,12 +191,8 @@ public class PullRequestUpdate extends AbstractEntity {
 		return commits;
 	}
 	
-	public RevCommit getHeadCommit() {
-		return request.getWorkProject().getRevCommit(ObjectId.fromString(getRequestHead()), true);
-	}
-	
 	public void writeRef() {
-		ObjectId updateHeadId = ObjectId.fromString(getRequestHead());
+		ObjectId updateHeadId = ObjectId.fromString(getHeadCommitHash());
 		if (!request.getTargetProject().equals(request.getSourceProject())) {
 			try {
 				request.getTargetProject().git().fetch()

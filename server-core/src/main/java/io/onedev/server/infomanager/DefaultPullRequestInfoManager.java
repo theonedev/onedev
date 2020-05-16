@@ -1,6 +1,7 @@
 package io.onedev.server.infomanager;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -43,7 +44,7 @@ import jetbrains.exodus.env.TransactionalExecutable;
 public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager 
 		implements PullRequestInfoManager {
 
-	private static final int INFO_VERSION = 6;
+	private static final int INFO_VERSION = 7;
 	
 	private static final int BATCH_SIZE = 5000;
 	
@@ -55,7 +56,7 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	
 	private static final String COMMIT_TO_IDS_STORE = "commitToIds";
 	
-	private static final String MERGE_COMMITS_STORE = "mergeCommits";
+	private static final String COMPARISON_BASES_STORE = "comparisonBases";
 	
 	private static final ByteIterable LAST_PULL_REQUEST_UPDATE_KEY = new StringByteIterable("lastPullRequestUpdate");
 
@@ -227,18 +228,15 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 	}
 
 	@Override
-	public ObjectId readMergeCommitId(Project project, ObjectId commitId1, ObjectId commitId2) {
-		Environment env = getEnv(project.getId().toString());
-		Store store = getStore(env, MERGE_COMMITS_STORE);
+	public ObjectId getComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2) {
+		Environment env = getEnv(request.getTargetProject().getId().toString());
+		Store store = getStore(env, COMPARISON_BASES_STORE);
 		
 		return env.computeInTransaction(new TransactionalComputable<ObjectId>() {
 			
 			@Override
 			public ObjectId compute(Transaction txn) {
-				byte[] keyBytes = new byte[40];
-				commitId1.copyRawTo(keyBytes, 0);
-				commitId2.copyRawTo(keyBytes, 20);
-				byte[] valueBytes = readBytes(store, txn, new ArrayByteIterable(keyBytes));
+				byte[] valueBytes = readBytes(store, txn, getComparisonBaseKey(request, commitId1, commitId2));
 				if (valueBytes != null)
 					return ObjectId.fromRaw(valueBytes);
 				else
@@ -247,20 +245,25 @@ public class DefaultPullRequestInfoManager extends AbstractEnvironmentManager
 			
 		});
 	}
+	
+	private ByteIterable getComparisonBaseKey(PullRequest request, ObjectId commitId1, ObjectId commitId2) {
+		byte[] keyBytes = new byte[40 + Long.BYTES];
+		ByteBuffer.wrap(keyBytes, 0, Long.BYTES).putLong(request.getId());
+		commitId1.copyRawTo(keyBytes, Long.BYTES);
+		commitId2.copyRawTo(keyBytes, Long.BYTES + 20);
+		return new ArrayByteIterable(keyBytes);
+	}
 
 	@Override
-	public void writeMergeCommitId(Project project, ObjectId commitId1, ObjectId commitId2, ObjectId mergeCommitId) {
-		Environment env = getEnv(project.getId().toString());
-		Store store = getStore(env, MERGE_COMMITS_STORE);
+	public void cacheComparisonBase(PullRequest request, ObjectId commitId1, ObjectId commitId2, ObjectId comparisonBase) {
+		Environment env = getEnv(request.getTargetProject().getId().toString());
+		Store store = getStore(env, COMPARISON_BASES_STORE);
 		
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@Override
 			public void execute(Transaction txn) {
-				byte[] keyBytes = new byte[40];
-				commitId1.copyRawTo(keyBytes, 0);
-				commitId2.copyRawTo(keyBytes, 20);
-				store.put(txn, new ArrayByteIterable(keyBytes), new CommitByteIterable(mergeCommitId));
+				store.put(txn, getComparisonBaseKey(request, commitId1, commitId2), new CommitByteIterable(comparisonBase));
 			}
 			
 		});

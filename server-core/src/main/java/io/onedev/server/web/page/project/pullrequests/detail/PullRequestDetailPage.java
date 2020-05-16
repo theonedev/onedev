@@ -923,7 +923,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				MergePreview preview = getPullRequest().getMergePreview();
-				setVisible(preview != null && preview.getMerged() == null);
+				setVisible(preview != null && preview.getMergeCommitHash() == null);
 			}
 
 		});
@@ -933,7 +933,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				MergePreview preview = getPullRequest().getMergePreview();
-				setVisible(preview != null && preview.getMerged() != null);
+				setVisible(preview != null && preview.getMergeCommitHash() != null);
 			}
 
 		});
@@ -1229,7 +1229,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				
 				PullRequest request = getPullRequest();
 				MergePreview preview = request.getLastMergePreview();
-				setVisible(preview != null && preview.getRequestHead().equals(preview.getMerged()));
+				setVisible(preview != null && preview.getHeadCommitHash().equals(preview.getMergeCommitHash()));
 			}
 			
 		});
@@ -1242,7 +1242,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				MergePreview preview = request.getLastMergePreview();
 				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getMerged())
+						&& !preview.getHeadCommitHash().equals(preview.getMergeCommitHash())
 						&& (preview.getMergeStrategy() == CREATE_MERGE_COMMIT || preview.getMergeStrategy() == CREATE_MERGE_COMMIT_IF_NECESSARY));
 			}
 			
@@ -1266,7 +1266,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				MergePreview preview = request.getLastMergePreview();
 				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getMerged())
+						&& !preview.getHeadCommitHash().equals(preview.getMergeCommitHash())
 						&& preview.getMergeStrategy() == SQUASH_SOURCE_BRANCH_COMMITS);
 			}
 			
@@ -1280,7 +1280,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				MergePreview preview = request.getMergePreview();
 				setVisible(preview != null 
-						&& !preview.getRequestHead().equals(preview.getMerged())
+						&& !preview.getHeadCommitHash().equals(preview.getMergeCommitHash())
 						&& preview.getMergeStrategy() == REBASE_SOURCE_BRANCH_COMMITS);
 			}
 			

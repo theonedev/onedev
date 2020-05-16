@@ -51,8 +51,9 @@ public class ProjectListPage extends LayoutPage {
 	
 	public ProjectListPage(PageParameters params) {
 		super(params);
-		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+		query = params.get(PARAM_QUERY).toOptionalString();
 		expectedCount = params.get(PARAM_EXPECTED_COUNT).toInt(0);
+		params.remove(PARAM_EXPECTED_COUNT);
 	}
 
 	private static GlobalProjectSetting getProjectSetting() {

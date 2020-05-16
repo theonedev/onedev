@@ -37,13 +37,13 @@
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 .commits-selector ul a:hover {
-	background: #FCEDAA;
+	background: #F2F2F2;
 }
 .commits-selector ul a.selected {
-	background: #FAE170;	
+	background: #FDF2C5;	
 }
 .commits-selector ul a.selected:hover {
-	background: #F7CD11;	
+	background: #FDF2C5;	
 }
 .commits-selector ul .hash, .commits-selector ul .icon {
 	color: #666;

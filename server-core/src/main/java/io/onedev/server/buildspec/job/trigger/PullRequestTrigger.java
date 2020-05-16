@@ -68,7 +68,7 @@ public class PullRequestTrigger extends JobTrigger {
 	private boolean touchedFile(PullRequest request) {
 		if (getPaths() != null) {
 			Collection<String> changedFiles = GitUtils.getChangedFiles(request.getTargetProject().getRepository(), 
-					request.getTarget().getObjectId(), ObjectId.fromString(request.getLastMergePreview().getMerged()));
+					request.getTarget().getObjectId(), ObjectId.fromString(request.getLastMergePreview().getMergeCommitHash()));
 			PatternSet patternSet = PatternSet.parse(getPaths());
 			Matcher matcher = new PathMatcher();
 			for (String changedFile: changedFiles) {

@@ -17,59 +17,60 @@ import io.onedev.server.model.PullRequest;
 @Embeddable
 public class MergePreview implements Serializable {
 	
-	public static final String COLUMN_TARGET_HEAD = "PREVIEW_TARGET_HEAD";
+	public static final String COLUMN_TARGET_HEAD_COMMIT_HASH = "PREVIEW_TARGET_HEAD";
 	
-	public static final String COLUMN_REQUEST_HEAD = "PREVIEW_REQUEST_HEAD";
+	public static final String COLUMN_HEAD_COMMIT_HASH = "PREVIEW_HEAD";
 	
 	public static final String COLUMN_MERGE_STRATEGY = "PREVIEW_MERGE_STRATEGY";
 	
-	public static final String COLUMN_MERGED = "PREVIEW_MERGED";
+	public static final String COLUMN_MERGE_COMMIT_HASH = "PREVIEW_MERGE_COMMIT";
 	
-	public static final String PROP_MERGED = "merged";
+	public static final String PROP_MERGED_COMMIT_HASH = "mergeCommitHash";
 	
-	public static final String PROP_REQUEST_HEAD = "requestHead";
+	public static final String PROP_HEAD_COMMIT_HASH = "headCommitHash";
 	
-	@Column(name=COLUMN_TARGET_HEAD)
-	private String targetHead;
+	@Column(name=COLUMN_TARGET_HEAD_COMMIT_HASH)
+	private String targetHeadCommitHash;
 	
-	@Column(name=COLUMN_REQUEST_HEAD)
-	private String requestHead;
+	@Column(name=COLUMN_HEAD_COMMIT_HASH)
+	private String headCommitHash;
 	
 	@Column(name=COLUMN_MERGE_STRATEGY)
 	private MergeStrategy mergeStrategy;
 	
-	@Column(name=COLUMN_MERGED)
-	private String merged;
+	@Column(name=COLUMN_MERGE_COMMIT_HASH)
+	private String mergeCommitHash;
 	
 	@SuppressWarnings("unused")
 	private MergePreview() {
 	}
 	
-	public MergePreview(String targetHead, String requestHead, MergeStrategy mergeStrategy, @Nullable String merged) {
-		this.targetHead = targetHead;
-		this.requestHead = requestHead;
+	public MergePreview(String targetHeadCommitHash, String headCommitHash, 
+			MergeStrategy mergeStrategy, @Nullable String mergeCommitHash) {
+		this.targetHeadCommitHash = targetHeadCommitHash;
+		this.headCommitHash = headCommitHash;
 		this.mergeStrategy = mergeStrategy;
-		this.merged = merged;
+		this.mergeCommitHash = mergeCommitHash;
 	}
 
-	public String getTargetHead() {
-		return targetHead;
+	public String getTargetHeadCommitHash() {
+		return targetHeadCommitHash;
 	}
 
-	public String getRequestHead() {
-		return requestHead;
+	public String getHeadCommitHash() {
+		return headCommitHash;
 	}
 
 	public MergeStrategy getMergeStrategy() {
 		return mergeStrategy;
 	}
 
-	public void setTargetHead(String targetHead) {
-		this.targetHead = targetHead;
+	public void setTargetHeadCommitHash(String targetHeadCommitHash) {
+		this.targetHeadCommitHash = targetHeadCommitHash;
 	}
 
-	public void setRequestHead(String requestHead) {
-		this.requestHead = requestHead;
+	public void setHeadCommitHash(String headCommitHash) {
+		this.headCommitHash = headCommitHash;
 	}
 
 	public void setIntegrationStrategy(MergeStrategy mergeStrategy) {
@@ -77,34 +78,34 @@ public class MergePreview implements Serializable {
 	}
 
 	/**
-	 * Integrated commit hash 
+	 * Merge commit hash 
 	 * 
 	 * @return
 	 * 			null if there are conflicts
 	 */
 	@Nullable
-	public String getMerged() {
-		return merged;
+	public String getMergeCommitHash() {
+		return mergeCommitHash;
 	}
 
-	public void setMerged(String merged) {
-		this.merged = merged;
+	public void setMergeCommitHash(String mergeCommitHash) {
+		this.mergeCommitHash = mergeCommitHash;
 	}
 
 	public boolean isUpToDate(PullRequest request) {
-		return getRequestHead().equals(request.getHeadCommitHash())
-				&& getTargetHead().equals(request.getTarget().getObjectName())
+		return getHeadCommitHash().equals(request.getLatestUpdate().getHeadCommitHash())
+				&& getTargetHeadCommitHash().equals(request.getLatestUpdate().getTargetHeadCommitHash())
 				&& getMergeStrategy() == request.getMergeStrategy();
 	}
 
 	public void syncRef(PullRequest request) {
 		Project project = request.getTargetProject();
-		ObjectId mergedId = getMerged()!=null? ObjectId.fromString(getMerged()): null;
+		ObjectId mergedId = getMergeCommitHash()!=null? ObjectId.fromString(getMergeCommitHash()): null;
 		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), request.getMergeRef());
 		if (mergedId != null && !mergedId.equals((project.getObjectId(request.getMergeRef(), false)))) {
 			refUpdate.setNewObjectId(mergedId);
 			GitUtils.updateRef(refUpdate);
-		} else if (merged == null && project.getObjectId(request.getMergeRef(), false) != null) {
+		} else if (mergeCommitHash == null && project.getObjectId(request.getMergeRef(), false) != null) {
 			GitUtils.deleteRef(refUpdate);
 		}		
 	}

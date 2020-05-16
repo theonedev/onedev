@@ -86,11 +86,11 @@ public class PullRequestReview extends AbstractEntity {
 			PullRequestUpdate update = null;
 			if (result != null) {
 				MergePreview preview = request.getMergePreview();
-				if (preview != null && result.getCommit().equals(preview.getMerged())) {
+				if (preview != null && result.getCommit().equals(preview.getMergeCommitHash())) {
 					update = request.getLatestUpdate();
 				} else {
 					for (PullRequestUpdate each: request.getUpdates()) {
-						if (each.getRequestHead().equals(result.getCommit())) {
+						if (each.getHeadCommitHash().equals(result.getCommit())) {
 							update = each;
 							break;
 						}

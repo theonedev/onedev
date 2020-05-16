@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.PullRequest.PROP_HEAD_COMMIT_HASH;
 import static io.onedev.server.model.PullRequest.PROP_NO_SPACE_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_NUMBER;
 import static io.onedev.server.model.PullRequest.PROP_SUBMIT_DATE;
@@ -9,6 +8,7 @@ import static io.onedev.server.model.PullRequest.PROP_UUID;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,10 +38,10 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -56,6 +56,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityWatch;
@@ -84,10 +85,10 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList=PROP_NO_SPACE_TITLE), @Index(columnList=PROP_NUMBER), 
 				@Index(columnList="o_targetProject_id"), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
-				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_HEAD_COMMIT_HASH), 
-				@Index(columnList=MergePreview.COLUMN_REQUEST_HEAD), @Index(columnList=CloseInfo.COLUMN_DATE), 
-				@Index(columnList=CloseInfo.COLUMN_STATUS), @Index(columnList=CloseInfo.COLUMN_USER), 
-				@Index(columnList=CloseInfo.COLUMN_USER_NAME), @Index(columnList="o_numberScope_id")},
+				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), 
+				@Index(columnList=CloseInfo.COLUMN_DATE), @Index(columnList=CloseInfo.COLUMN_STATUS), 
+				@Index(columnList=CloseInfo.COLUMN_USER), @Index(columnList=CloseInfo.COLUMN_USER_NAME), 
+				@Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
@@ -170,8 +171,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
 
-	public static final String PROP_HEAD_COMMIT_HASH = "headCommitHash";
-	
 	public static final String STATE_OPEN = "Open";
 
 	public static final String REFS_PREFIX = "refs/pull/";
@@ -242,9 +241,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Column(nullable=false)
 	private String baseCommitHash;
 	
-	@Column(nullable=false)
-	private String headCommitHash;
-	
 	@Column(nullable=true)
 	private Date lastCodeCommentActivityDate;
 
@@ -299,10 +295,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Boolean mergedIntoTarget;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
-	
-	private transient Collection<RevCommit> pendingCommits;
-	
-	private transient Collection<RevCommit> mergedCommits;
 	
 	private transient Optional<MergePreview> mergePreviewOpt;
 	
@@ -445,20 +437,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.baseCommitHash = baseCommitHash;
 	}
 	
-	public String getHeadCommitHash() {
-		return headCommitHash;
-	}
-
-	public void setHeadCommitHash(String headCommitHash) {
-		this.headCommitHash = headCommitHash;
-	}
-	
 	public RevCommit getBaseCommit() {
 		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()), true);
-	}
-	
-	public RevCommit getHeadCommit() {
-		return getTargetProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
 	}
 	
 	/**
@@ -658,13 +638,13 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public void writeHeadRef() {
 		RefUpdate refUpdate = GitUtils.getRefUpdate(getTargetProject().getRepository(), getHeadRef());
-		refUpdate.setNewObjectId(ObjectId.fromString(getHeadCommitHash()));
+		refUpdate.setNewObjectId(ObjectId.fromString(getLatestUpdate().getHeadCommitHash()));
 		GitUtils.updateRef(refUpdate);
 	}
 	
 	public void writeMergeRef() {
 		RefUpdate refUpdate = GitUtils.getRefUpdate(getTargetProject().getRepository(), getMergeRef());
-		refUpdate.setNewObjectId(ObjectId.fromString(getLastMergePreview().getMerged()));
+		refUpdate.setNewObjectId(ObjectId.fromString(getLastMergePreview().getMergeCommitHash()));
 		GitUtils.updateRef(refUpdate);
 	}
 	
@@ -711,48 +691,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.submitDate = submitDate;
 	}
 
-	/**
-	 * Get commits pending merge.
-	 * 
-	 * @return
-	 * 			commits pending merge
-	 */
-	public Collection<RevCommit> getPendingCommits() {
-		if (pendingCommits == null) {
-			pendingCommits = new HashSet<>();
-			Project project = getTargetProject();
-			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
-				revWalk.markUninteresting(revWalk.parseCommit(getTarget().getObjectId()));
-				revWalk.forEach(c->pendingCommits.add(c));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return pendingCommits;
-	}
-
-	/**
-	 * Merged commits represent commits already merged to target branch since base commit.
-	 * 
-	 * @return
-	 * 			commits already merged to target branch since base commit
-	 */
-	public Collection<RevCommit> getMergedCommits() {
-		if (mergedCommits == null) {
-			mergedCommits = new HashSet<>();
-			Project project = getTargetProject();
-			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(getTarget().getObjectId(false)));
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
-				revWalk.forEach(c->mergedCommits.add(c));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return mergedCommits;
-	}
-	
 	public Collection<PullRequestReview> getReviews() {
 		return reviews;
 	}
@@ -869,7 +807,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public boolean isMergeIntoTarget() {
 		if (mergedIntoTarget == null) { 
 			mergedIntoTarget = GitUtils.isMergedInto(getTargetProject().getRepository(), null, 
-					ObjectId.fromString(getHeadCommitHash()), getTarget().getObjectId());
+					ObjectId.fromString(getLatestUpdate().getHeadCommitHash()), getTarget().getObjectId());
 		}
 		return mergedIntoTarget;
 	}
@@ -955,13 +893,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			Repository repository = targetProject.getRepository();
 			ObjectDatabase objDb = repository.getObjectDatabase();
 			try {
-				if (!objDb.has(ObjectId.fromString(baseCommitHash))
-						|| !objDb.has(ObjectId.fromString(headCommitHash))) {
+				if (!objDb.has(ObjectId.fromString(baseCommitHash))) {
 					valid = false;
 				} else {
 					for (PullRequestUpdate update: updates) {
-						if (!objDb.has(ObjectId.fromString(update.getMergeBaseCommitHash()))
-								|| !objDb.has(ObjectId.fromString(update.getRequestHead()))) {
+						if (!objDb.has(ObjectId.fromString(update.getTargetHeadCommitHash()))
+								|| !objDb.has(ObjectId.fromString(update.getHeadCommitHash()))) {
 							valid = false;
 							break;
 						}
@@ -1050,18 +987,50 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public ObjectId getComparisonBase(ObjectId oldCommitId, ObjectId newCommitId) {
-		for (PullRequestUpdate update: getSortedUpdates()) {
-			if (update.getCommits().contains(newCommitId)) {
-				ObjectId targetHeadId = ObjectId.fromString(update.getTargetHead());
-				ObjectId mergeBaseId = GitUtils.getMergeBase(getTargetProject().getRepository(), targetHeadId, newCommitId);
-				if (mergeBaseId != null) {
-					
-				} else {
-					return oldCommitId;
-				}
+		if (oldCommitId.equals(newCommitId))
+			return newCommitId;
+		
+		PullRequestInfoManager infoManager = OneDev.getInstance(PullRequestInfoManager.class);
+		ObjectId comparisonBase = infoManager.getComparisonBase(this, oldCommitId, newCommitId);
+		if (comparisonBase != null) {
+			try {
+				if (!getTargetProject().getRepository().getObjectDatabase().has(comparisonBase))
+					comparisonBase = null;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
-		throw new IllegalStateException();
+		if (comparisonBase == null) {
+			for (PullRequestUpdate update: getSortedUpdates()) {
+				if (update.getCommits().contains(newCommitId)) {
+					ObjectId targetHead = ObjectId.fromString(update.getTargetHeadCommitHash());
+					Repository repo = getTargetProject().getRepository();
+					ObjectId mergeBase1 = GitUtils.getMergeBase(repo, targetHead, newCommitId);
+					if (mergeBase1 != null) {
+						ObjectId mergeBase2 = GitUtils.getMergeBase(repo, mergeBase1, oldCommitId);
+						if (mergeBase2.equals(mergeBase1)) {
+							comparisonBase = oldCommitId;
+							break;
+						} else if (mergeBase2.equals(oldCommitId)) {
+							comparisonBase = mergeBase1;
+							break;
+						} else {
+							PersonIdent person = new PersonIdent("OneDev", "");
+							comparisonBase = GitUtils.merge(repo, mergeBase1, oldCommitId, false, 
+									person, person, "helper commit", true);
+							break;
+						}
+					} else {
+						return oldCommitId;
+					}
+				}
+			}
+			if (comparisonBase != null)
+				infoManager.cacheComparisonBase(this, oldCommitId, newCommitId, comparisonBase);
+			else
+				throw new IllegalSelectorException();
+		}
+		return comparisonBase;
 	}
 
 	@Override
