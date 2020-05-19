@@ -9,7 +9,7 @@ import io.onedev.server.model.User;
 public class CodeCommentUpdated extends CodeCommentEvent implements MarkdownAware {
 
 	public CodeCommentUpdated(User user, CodeComment comment) {
-		super(user, new Date(), comment, null);
+		super(user, new Date(), comment);
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class CodeCommentUpdated extends CodeCommentEvent implements MarkdownAwar
 	public String getActivity(boolean withEntity) {
 		String activity = "updated comment";
 		if (withEntity)
-			activity += " on file " + getComment().getMarkPos().getPath();
+			activity += " on file " + getComment().getMark().getPath();
 		return activity;
 	}
 

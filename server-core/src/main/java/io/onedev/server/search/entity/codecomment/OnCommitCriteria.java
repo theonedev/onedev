@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.entity.EntityCriteria;
 
 public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
@@ -28,7 +28,7 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_PROJECT);
-		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_MARK_POS + "." + MarkPos.PROP_COMMIT);
+		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeComment.PROP_MARK + "." + Mark.PROP_COMMIT_HASH);
 		return builder.and(
 				builder.equal(projectAttribute, project),
 				builder.equal(commitAttribute, commitId.name()));
@@ -37,7 +37,7 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	@Override
 	public boolean matches(CodeComment comment) {
 		return comment.getProject().equals(project) 
-				&& comment.getMarkPos().getCommit().equals(commitId.name());
+				&& comment.getMark().getCommitHash().equals(commitId.name());
 	}
 
 	@Override

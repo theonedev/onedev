@@ -1,7 +1,7 @@
 onedev.server.textDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, callback, blameMessageCallback,
-			commentSupport, unableCommentMessage, mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
+			mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
 		var $container = $("#" + containerId);
 		$container.data("dirtyContainerId", dirtyContainerId);
 		$container.data("callback", callback);
@@ -326,15 +326,6 @@ onedev.server.textDiff = {
 			position.left += $(window).scrollLeft();
 			position.top += $(window).scrollTop();
 
-			if (!commentSupport) {
-				var $content = $("<div></div>");
-				$content.append("<span class='invalid'><i class='fa fa-warning'></i> " + unableCommentMessage + "</span>");
-				return {
-					position: position, 
-					content: $content
-				}
-			}
-			
 			function showInvalidSelection() {
 				var $content = $("<div></div>");
 				$content.append("<a class='invalid'><i class='fa fa-warning'></i> Invalid selection, click for details</a>");
@@ -478,30 +469,34 @@ onedev.server.textDiff = {
 	openSelectionPopover: function(containerId, position, mark, markUrl, markedText, loggedIn) {
 		var $container = $("#" + containerId);
 		
-		var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
-		$content.children("a.permanent").attr("href", markUrl);
-		$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
-		var clipboard = new Clipboard(".copy-marked", {
-		    text: function(trigger) {
-		        return markedText;
-		    }
-		});		
-		clipboard.on("success", function(e) {
-			clipboard.destroy();
-		});
-		if (loggedIn) {
-			$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
-			$content.children("a.comment").click(function() {
-				if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-						&& !confirm("There are unsaved changes, discard and continue?")) {
-					return;
-				}
-				$container.data("callback")("addComment", mark.leftSide, 
-						mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
-			});
+		if (!markUrl) {
+			$content = $("<div><span class='invalid'><i class='fa fa-warning'></i> Unable to comment here</a>");
 		} else {
-			$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
-		}			
+			var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
+			$content.children("a.permanent").attr("href", markUrl);
+			$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
+			var clipboard = new Clipboard(".copy-marked", {
+			    text: function(trigger) {
+			        return markedText;
+			    }
+			});		
+			clipboard.on("success", function(e) {
+				clipboard.destroy();
+			});
+			if (loggedIn) {
+				$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
+				$content.children("a.comment").click(function() {
+					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
+							&& !confirm("There are unsaved changes, discard and continue?")) {
+						return;
+					}
+					$container.data("callback")("addComment", mark.leftSide, 
+							mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
+				});
+			} else {
+				$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
+			}			
+		}		
 		
 		$container.selectionPopover("open", {
 			position: position,

@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.compare;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -29,13 +30,15 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -99,7 +102,19 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
 	
-	private IModel<PullRequest> requestModel;
+	private final IModel<PullRequest> requestModel;
+	
+	private final IModel<Collection<CodeComment>> commentsModel = 
+			new LoadableDetachableModel<Collection<CodeComment>>() {
+
+		@Override
+		protected Collection<CodeComment> load() {
+			CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+			return manager.query(projectModel.getObject(), 
+					state.compareWithMergeBase?mergeBase:leftCommitId, rightCommitId);
+		}
+		
+	};
 	
 	private ObjectId mergeBase;
 
@@ -114,16 +129,16 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	public static RevisionComparePage.State getState(CodeComment comment) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.commentId = comment.getId();
-		state.mark = comment.getMarkPos();
+		state.mark = comment.getMark();
 		state.compareWithMergeBase = false;
 		CompareContext compareContext = comment.getCompareContext();
-		String compareCommit = compareContext.getCompareCommit();
+		String compareCommit = compareContext.getCompareCommitHash();
 		Project project = comment.getProject();
 		if (compareContext.isLeftSide()) {
 			state.leftSide = new ProjectAndRevision(project, compareCommit);
-			state.rightSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
+			state.rightSide = new ProjectAndRevision(project, comment.getMark().getCommitHash());
 		} else {
-			state.leftSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
+			state.leftSide = new ProjectAndRevision(project, comment.getMark().getCommitHash());
 			state.rightSide = new ProjectAndRevision(project, compareCommit);
 		}
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
@@ -212,7 +227,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		state.commitQuery = params.get(PARAM_COMMIT_QUERY).toString();
 		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
+		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		
 		state.tabPanel = TabPanel.of(params.get(PARAM_TAB).toString());
 		
@@ -409,7 +424,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 				super.onConfigure();
 				
 				PullRequest request = requestModel.getObject();
-				setVisible(request != null && (request.isOpen() || !request.isMergeIntoTarget()));
+				setVisible(request != null && (request.isOpen() || !request.isMergedIntoTarget()));
 			}
 
 			@Override
@@ -682,6 +697,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	protected void onDetach() {
 		if (getProject().getDefaultBranch() != null)
 			requestModel.detach();
+		commentsModel.detach();
 		super.onDetach();
 	}
 
@@ -718,7 +734,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 		public Long commentId;
 		
 		@Nullable
-		public MarkPos mark;
+		public Mark mark;
 		
 		public State() {
 		}
@@ -738,23 +754,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	}
 
 	@Override
-	public MarkPos getMark() {
+	public Mark getMark() {
 		return state.mark;
-	}
-	
-	@Override
-	public String getCommentUrl(CodeComment comment) {
-		State commentState = new State();
-		commentState.leftSide = new ProjectAndRevision(state.rightSide.getProject(), 
-				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());
-		commentState.rightSide = new ProjectAndRevision(state.rightSide.getProject(), rightCommitId.name());
-		commentState.mark = comment.getMarkPos();
-		commentState.commentId = comment.getId();
-		commentState.tabPanel = TabPanel.FILE_CHANGES;
-		commentState.pathFilter = state.pathFilter;
-		commentState.whitespaceOption = state.whitespaceOption;
-		commentState.compareWithMergeBase = false;
-		return urlFor(RevisionComparePage.class, paramsOf(commentState.rightSide.getProject(), commentState)).toString();
 	}
 	
 	@Override
@@ -766,37 +767,60 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	}
 
 	@Override
+	public Collection<CodeComment> getComments() {
+		return commentsModel.getObject();
+	}
+	
+	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			state.mark = comment.getMarkPos();
-			state.commentId = comment.getId();
-		} else {
-			state.commentId = null;
-			state.mark = null;
-		}
+		state.mark = comment.getMark();
+		state.commentId = comment.getId();
 		pushState(target);
 	}
 
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		state.commentId = null;
+		state.mark = null;
+		pushState(target);
+	}
+	
 	@Override
 	protected String getRobotsMeta() {
 		return "noindex,nofollow";
 	}
 	
 	@Override
-	public void onMark(AjaxRequestTarget target, MarkPos mark) {
+	public void onMark(AjaxRequestTarget target, Mark mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
+	public void onUnmark(AjaxRequestTarget target) {
+		state.mark = null;
+		pushState(target);
+	}
+	
+	@Override
+	public void onAddComment(AjaxRequestTarget target, Mark mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public String getMarkUrl(MarkPos mark) {
+	public void onSaveComment(CodeComment comment) {
+		OneDev.getInstance(CodeCommentManager.class).save(comment);
+	}
+	
+	@Override
+	public void onSaveCommentReply(CodeCommentReply reply) {
+		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+	}
+
+	@Override
+	public String getMarkUrl(Mark mark) {
 		State markState = new State();
 		markState.leftSide = new ProjectAndRevision(state.rightSide.getProject(), 
 				state.compareWithMergeBase?mergeBase.name():leftCommitId.name());

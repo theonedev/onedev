@@ -621,10 +621,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		if (pullRequests == null) {
 			pullRequests = new ArrayList<>();
 
-			PullRequestInfoManager codeCommentRelationInfoManager = OneDev.getInstance(PullRequestInfoManager.class); 
+			PullRequestInfoManager infoManager = OneDev.getInstance(PullRequestInfoManager.class); 
 			Collection<Long> pullRequestIds = new HashSet<>();
 			for (ObjectId commit: getCommits()) 
-				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
+				pullRequestIds.addAll(infoManager.getPullRequestIds(getProject(), commit));		
 			
 			for (Long requestId: pullRequestIds) {
 				PullRequest request = OneDev.getInstance(PullRequestManager.class).get(requestId);

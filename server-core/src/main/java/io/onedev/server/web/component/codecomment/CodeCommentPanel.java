@@ -49,11 +49,10 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -125,7 +124,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void setObject(String object) {
 				CodeComment comment = getComment();
 				comment.setContent(object);
-				OneDev.getInstance(CodeCommentManager.class).update(SecurityUtils.getUser(), comment);				
+				OneDev.getInstance(CodeCommentManager.class).save(comment);				
 			}
 			
 		}, null));
@@ -197,7 +196,6 @@ public abstract class CodeCommentPanel extends Panel {
 
 						CodeComment comment = getComment();
 						comment.setContent(contentInput.getModelObject());
-						OneDev.getInstance(CodeCommentManager.class).update(SecurityUtils.getUser(), comment);
 						WebMarkupContainer commentContainer = newCommentContainer();
 						fragment.replaceWith(commentContainer);
 						target.add(commentContainer);
@@ -232,7 +230,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onDeleteComment(target, getComment());
-				OneDev.getInstance(CodeCommentManager.class).delete(SecurityUtils.getUser(), getComment());
+				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
 			}
 			
 		});
@@ -274,7 +272,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void setObject(String object) {
 				CodeCommentReply reply = getReply(replyId);
 				reply.setContent(object);
-				OneDev.getInstance(CodeCommentReplyManager.class).save(reply, getCompareContext(), getPullRequest());				
+				onSaveCommentReply(RequestCycle.get().find(AjaxRequestTarget.class), reply);
 			}
 			
 		}, null));			
@@ -345,10 +343,8 @@ public abstract class CodeCommentPanel extends Panel {
 						super.onSubmit(target, form);
 
 						CodeCommentReply reply = getReply(replyId);
-						
+						onSaveCommentReply(target, reply);
 						reply.setContent(contentInput.getModelObject());
-						OneDev.getInstance(CodeCommentReplyManager.class).save(reply, getCompareContext(), 
-								getPullRequest());				
 						WebMarkupContainer replyContainer = newReplyContainer(componentId, reply);
 						fragment.replaceWith(replyContainer);
 						target.add(replyContainer);
@@ -426,10 +422,11 @@ public abstract class CodeCommentPanel extends Panel {
 						setVisible(comment.isContextChanged(getPullRequest()));
 					} else if (getPage() instanceof PullRequestChangesPage) {
 						PullRequestChangesPage page = (PullRequestChangesPage) getPage();
-						if (page.getState().newCommit.equals(comment.getMarkPos().getCommit())) {
+						if (page.getState().newCommitHash.equals(comment.getMark().getCommitHash())) {
 							setVisible(comment.isContextChanged(getPullRequest()));
 						} else {
-							setVisible(!getPullRequest().getLatestUpdate().getHeadCommitHash().equals(page.getState().newCommit));
+							setVisible(!getPullRequest().getLatestUpdate().getHeadCommitHash()
+									.equals(page.getState().newCommitHash));
 						}
 					} else {
 						setVisible(false);
@@ -571,7 +568,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 		String initialContent = "";
 		
-		if (getComment().getRelations().isEmpty()) {
+		if (getComment().getRequest() == null) {
 			// automatically adds mentioning if the code comment is not associated with any pull requests, 
 			// as otherwise no one will be aware of our comment
 			List<CodeCommentReply> replies = new ArrayList<>(getComment().getReplies());
@@ -658,7 +655,8 @@ public abstract class CodeCommentPanel extends Panel {
 				reply.setDate(date);
 				reply.setUser(user);
 				reply.setContent(contentInput.getModelObject());
-				OneDev.getInstance(CodeCommentReplyManager.class).save(reply, getCompareContext(), getPullRequest());
+				
+				onSaveCommentReply(target, reply);
 				
 				WebMarkupContainer replyContainer = newReplyContainer(repliesView.newChildId(), reply);
 				repliesView.add(replyContainer);
@@ -691,10 +689,10 @@ public abstract class CodeCommentPanel extends Panel {
 	@Nullable
 	protected abstract PullRequest getPullRequest();
 	
-	protected abstract CompareContext getCompareContext();
-	
 	protected abstract void onDeleteComment(AjaxRequestTarget target, CodeComment comment);
 	
 	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
 
+	protected abstract void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply);
+	
 }

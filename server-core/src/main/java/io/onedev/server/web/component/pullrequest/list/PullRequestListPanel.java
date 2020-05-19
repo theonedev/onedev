@@ -340,10 +340,10 @@ public abstract class PullRequestListPanel extends Panel {
 				
 				fragment.add(new RequestStatusLabel("status", rowModel));
 				
-				fragment.add(new BranchLink("target", request.getTarget(), request));
+				fragment.add(new BranchLink("target", request.getTarget()));
 
 				if (request.getSource() != null) { 
-					fragment.add(new BranchLink("source", request.getSource(), request));
+					fragment.add(new BranchLink("source", request.getSource()));
 				} else { 
 					fragment.add(new Label("source", "<i>unknown</i>") {
 

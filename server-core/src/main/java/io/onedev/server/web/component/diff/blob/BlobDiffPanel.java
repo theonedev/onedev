@@ -20,7 +20,7 @@ import io.onedev.server.git.BlobChange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.diff.DiffRenderer;
@@ -183,11 +183,20 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	}
 
 	@Override
-	public void mark(AjaxRequestTarget target, MarkPos mark) {
+	public void mark(AjaxRequestTarget target, Mark mark) {
 		Component content = get(CONTENT_ID);
 		if (content instanceof SourceAware) {
 			SourceAware sourceAware = (SourceAware) content;
 			sourceAware.mark(target, mark);
+		}
+	}
+
+	@Override
+	public void unmark(AjaxRequestTarget target) {
+		Component content = get(CONTENT_ID);
+		if (content instanceof SourceAware) {
+			SourceAware sourceAware = (SourceAware) content;
+			sourceAware.unmark(target);
 		}
 	}
 

@@ -56,7 +56,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.RangeUtils;
@@ -100,7 +100,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	private final BlobCommentSupport commentSupport;
 	
-	private final List<MarkPos> initialMarks;
+	private final List<Mark> initialMarks;
 	
 	private Component symbolTooltip;
 	
@@ -130,18 +130,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		
 		initialMarks = new ArrayList<>();
 		if (commentSupport != null) {
-			MarkPos mark = commentSupport.getMark();
+			Mark mark = commentSupport.getMark();
 			if (mark != null) {
 				initialMarks.add(mark);
 			}
 			for (CodeComment comment: commentSupport.getComments()) {
-				mark = comment.getMarkPos();
+				mark = comment.getMark();
 				initialMarks.add(mark);
 			}
 		}
 	}
 
-	private String getJson(MarkPos mark) {
+	private String getJson(Mark mark) {
 		try {
 			MarkInfo markInfo = new MarkInfo(mark, getOldCommit().name());
 			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(markInfo);
@@ -288,9 +288,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		
 		add(callbackBehavior = new AbstractPostAjaxBehavior() {
 			
-			private String getMarkedText(MarkPos mark) {
+			private String getMarkedText(Mark mark) {
 				List<String> lines;
-				if (mark.getCommit().equals(getOldCommit().name()))
+				if (mark.getCommitHash().equals(getOldCommit().name()))
 					lines = change.getOldText().getLines();
 				else 
 					lines = change.getNewText().getLines();
@@ -358,9 +358,20 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					String jsonOfPosition = String.format("{left: %d, top: %d}", 
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
-					MarkPos mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
-					script = String.format("onedev.server.textDiff.openSelectionPopover('%s', %s, %s, '%s', '%s', %s);", 
-							getMarkupId(), jsonOfPosition, getJson(mark), commentSupport.getMarkUrl(mark), 
+					Mark mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
+					
+					String markUrl;
+					if (commentSupport != null) {
+						markUrl = commentSupport.getMarkUrl(mark);
+						if (markUrl != null) 
+							markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
+						else 
+							markUrl = "undefined";
+					} else {
+						markUrl = "undefined";
+					}
+					script = String.format("onedev.server.textDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
+							getMarkupId(), jsonOfPosition, getJson(mark), markUrl, 
 							JavaScriptEscape.escapeJavaScript(getMarkedText(mark)),
 							SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
@@ -426,7 +437,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		setOutputMarkupId(true);
 	}
 	
-	private MarkPos getMark(IRequestParameters params, String leftSideParam, 
+	private Mark getMark(IRequestParameters params, String leftSideParam, 
 			String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		boolean leftSide = params.getParameterValue(leftSideParam).toBoolean();
@@ -435,7 +446,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
 		String commit = leftSide?getOldCommit().name():getNewCommit().name();
-		return new MarkPos(commit, change.getPath(), new PlanarRange(beginLine, beginChar, endLine, endChar));
+		return new Mark(commit, change.getPath(), new PlanarRange(beginLine, beginChar, endLine, endChar));
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
@@ -511,8 +522,8 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			Map<Integer, List<CommentInfo>> oldCommentInfos = new HashMap<>(); 
 			Map<Integer, List<CommentInfo>> newCommentInfos = new HashMap<>(); 
 			for (CodeComment comment: commentSupport.getComments()) {
-				if (comment.getMarkPos().getRange() != null) {
-					int line = comment.getMarkPos().getRange().getFromRow();
+				if (comment.getMark().getRange() != null) {
+					int line = comment.getMark().getRange().getFromRow();
 					List<CommentInfo> commentInfosAtLine;
 					CommentInfo commentInfo = new CommentInfo();
 					commentInfo.id = comment.getId();
@@ -548,7 +559,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				throw new RuntimeException(e);
 			}
 			
-			MarkPos mark = commentSupport.getMark();
+			Mark mark = commentSupport.getMark();
 			if (mark != null) {
 				jsonOfMark = getJson(mark);
 			} else {
@@ -574,19 +585,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				explicit("param3"), explicit("param4"), explicit("param5"),
 				explicit("param6"), explicit("param7"), explicit("param8")); 
 		
-		String unableCommentMessage;
-		if (getPage() instanceof MergePreviewPage) {
-			unableCommentMessage = "Unable to comment on merge preview";
-		} else {
-			unableCommentMessage = "Unable to comment at this place";
-		}
-		String script = String.format("onedev.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s, '%s', %s,"
+		String script = String.format("onedev.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s,"
 				+ "%s, %s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				callback, blameMessageBehavior.getCallback(),
-				commentSupport!=null, unableCommentMessage, jsonOfMark, jsonOfCommentInfo, 
-				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId, 
-				OneDev.getInstance().getDocRoot());
+				jsonOfMark, jsonOfCommentInfo, jsonOfOldCommentInfos, jsonOfNewCommentInfos, 
+				dirtyContainerId, OneDev.getInstance().getDocRoot());
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 
@@ -1071,9 +1075,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			List<LinearRange> newRanges = new ArrayList<>();
 			if (commentSupport != null) {
 				String oldCommitHash = getOldCommit().name();
-				for (MarkPos each: initialMarks) {
+				for (Mark each: initialMarks) {
 					LinearRange range = new LinearRange(each.getRange().fromRow, each.getRange().toRow+1);
-					if (each.getCommit().equals(oldCommitHash)) {
+					if (each.getCommitHash().equals(oldCommitHash)) {
 						oldRanges.add(range);
 					} else {
 						newRanges.add(range);
@@ -1162,14 +1166,14 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		String script = String.format("onedev.server.textDiff.onCommentDeleted($('#%s'), %s);", 
 				getMarkupId(), getJsonOfComment(comment));
 		target.appendJavaScript(script);
-		mark(target, null);
+		unmark(target);
 	}
 
 	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
 		String script = String.format("onedev.server.textDiff.onCloseComment($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
-		mark(target, null);
+		unmark(target);
 	}
 
 	@Override
@@ -1180,22 +1184,23 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 
 	@Override
-	public void mark(AjaxRequestTarget target, MarkPos mark) {
-		String script;
-		if (mark != null) {
-			script = String.format(""
-				+ "var $container = $('#%s');"
-				+ "var mark = %s;"
-				+ "onedev.server.textDiff.scrollTo($container, mark);"
-				+ "onedev.server.textDiff.mark($container, mark);", 
-				getMarkupId(), getJson(mark));
-		} else {
-			script = String.format(""
-				+ "var $container = $('#%s');"
-				+ "onedev.server.textDiff.clearMark($container);"
-				+ "$container.removeData('mark');", 
-				getMarkupId());
-		}
+	public void mark(AjaxRequestTarget target, Mark mark) {
+		String script = String.format(""
+			+ "var $container = $('#%s');"
+			+ "var mark = %s;"
+			+ "onedev.server.textDiff.scrollTo($container, mark);"
+			+ "onedev.server.textDiff.mark($container, mark);", 
+			getMarkupId(), getJson(mark));
+		target.appendJavaScript(script);
+	}
+	
+	@Override
+	public void unmark(AjaxRequestTarget target) {
+		String script = String.format(""
+			+ "var $container = $('#%s');"
+			+ "onedev.server.textDiff.clearMark($container);"
+			+ "$container.removeData('mark');", 
+			getMarkupId());
 		target.appendJavaScript(script);
 	}
 	
@@ -1226,15 +1231,15 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		}
 		
 		public MarkInfo(CodeComment comment, String oldCommitHash) {
-			super(comment.getMarkPos().getRange());
-			path = comment.getMarkPos().getPath();
-			leftSide = comment.getMarkPos().getCommit().equals(oldCommitHash);
+			super(comment.getMark().getRange());
+			path = comment.getMark().getPath();
+			leftSide = comment.getMark().getCommitHash().equals(oldCommitHash);
 		}
 		
-		public MarkInfo(MarkPos mark, String oldCommitHash) {
+		public MarkInfo(Mark mark, String oldCommitHash) {
 			super(mark.getRange());
 			path = mark.getPath();
-			leftSide = mark.getCommit().equals(oldCommitHash);
+			leftSide = mark.getCommitHash().equals(oldCommitHash);
 		}
 		
 	}

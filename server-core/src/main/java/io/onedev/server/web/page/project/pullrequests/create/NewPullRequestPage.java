@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.create;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -41,16 +42,18 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -95,11 +98,23 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	
 	private ProjectAndBranch source;
 	
-	private IModel<PullRequest> requestModel;
+	private final IModel<PullRequest> requestModel;
+	
+	private final IModel<Collection<CodeComment>> commentsModel = 
+			new LoadableDetachableModel<Collection<CodeComment>>() {
+
+		@Override
+		protected Collection<CodeComment> load() {
+			CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+			return manager.query(projectModel.getObject(), 
+					getPullRequest().getBaseCommit(), source.getObjectId());
+		}
+		
+	};
 	
 	private Long commentId;
 	
-	private MarkPos mark;
+	private Mark mark;
 	
 	private String pathFilter;
 	
@@ -331,7 +346,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			fragment = newBranchNotSpecifiedFrag();
 		else if (request == null) 
 			fragment = newUnrelatedHistoryFrag();
-		else if (request.getId() != null && (request.isOpen() || !request.isMergeIntoTarget())) 
+		else if (request.getId() != null && (request.isOpen() || !request.isMergedIntoTarget())) 
 			fragment = newEffectiveFrag();
 		else if (request.getSource().equals(request.getTarget())) 
 			fragment = newSameBranchFrag();
@@ -359,7 +374,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-					Component panel = newRevDiffPanel();
+					Component panel = newRevisionDiffPanel();
 					getPage().replace(panel);
 					target.add(panel);
 				}
@@ -409,7 +424,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		}.setOutputMarkupId(true);
 	}
 	
-	private RevisionDiffPanel newRevDiffPanel() {
+	private RevisionDiffPanel newRevisionDiffPanel() {
 		PullRequest request = getPullRequest();
 		
 		IModel<Project> projectModel = new LoadableDetachableModel<Project>() {
@@ -552,8 +567,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	
 	private Fragment newAcceptedFrag() {
 		Fragment fragment = new Fragment("status", "mergedFrag", this);
-		fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource(), null));
-		fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget(), null));
+		fragment.add(new BranchLink("sourceBranch", getPullRequest().getSource()));
+		fragment.add(new BranchLink("targetBranch", getPullRequest().getTarget()));
 		fragment.add(new Link<Void>("swapBranches") {
 
 			@Override
@@ -733,7 +748,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public Component getLazyLoadComponent(String componentId) {
 				PullRequest request = getPullRequest();
-				MergePreview mergePreview = new MergePreview(request.getLatestUpdate().getTargetHeadCommitHash(), 
+				MergePreview mergePreview = new MergePreview(request.getTarget().getObjectName(), 
 						request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
 				ObjectId merged = mergePreview.getMergeStrategy().merge(request);
 				if (merged != null)
@@ -779,17 +794,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
+		commentsModel.detach();
 		
 		super.onDetach();
 	}
 
 	@Override
-	public MarkPos getMark() {
+	public Mark getMark() {
 		return mark;
 	}
 
 	@Override
-	public String getMarkUrl(MarkPos mark) {
+	public String getMarkUrl(Mark mark) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.mark = mark;
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
@@ -802,10 +818,15 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, MarkPos mark) {
+	public void onMark(AjaxRequestTarget target, Mark mark) {
 		this.mark = mark;
 	}
 
+	@Override
+	public void onUnmark(AjaxRequestTarget target) {
+		this.mark = null;
+	}
+	
 	@Override
 	public CodeComment getOpenComment() {
 		if (commentId != null)
@@ -815,38 +836,40 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
+	public Collection<CodeComment> getComments() {
+		return commentsModel.getObject();
+	}
+	
+	@Override
+	public void onAddComment(AjaxRequestTarget target, Mark mark) {
 		this.commentId = null;
 		this.mark = mark;
 	}
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			commentId = comment.getId();
-			mark = comment.getMarkPos();
-		} else {
-			commentId = null;
-		}
+		commentId = comment.getId();
+		mark = comment.getMark();
 	}
 
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		commentId = null;
+	}
+	
+	@Override
+	public void onSaveComment(CodeComment comment) {
+		OneDev.getInstance(CodeCommentManager.class).save(comment);
+	}
+	
+	@Override
+	public void onSaveCommentReply(CodeCommentReply reply) {
+		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+	}
+	
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject()) && SecurityUtils.canReadCode(source.getProject());
 	}
 	
-	@Override
-	public String getCommentUrl(CodeComment comment) {
-		RevisionComparePage.State state = new RevisionComparePage.State();
-		mark = comment.getMarkPos();
-		state.commentId = comment.getId();
-		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
-		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getLatestUpdate().getHeadCommitHash());
-		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
-		state.whitespaceOption = whitespaceOption;
-		state.compareWithMergeBase = false;
-		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();
-	}
-
 }

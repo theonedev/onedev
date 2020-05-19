@@ -206,6 +206,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		request.deleteRefs();
 		for (PullRequestUpdate update: request.getUpdates())
 			update.deleteRefs();
+		
+    	Query<?> query = getSession().createQuery("update CodeComment set request=null where request=:request");
+    	query.setParameter("request", request);
+    	query.executeUpdate();
+
 		dao.remove(request);
 	}
 
@@ -284,10 +289,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private void merge(PullRequest request) {
 		MergePreview preview = Preconditions.checkNotNull(request.getMergePreview());
-		String merged = Preconditions.checkNotNull(preview.getMergeCommitHash());
+		String mergedCommitHash = Preconditions.checkNotNull(preview.getMergeCommitHash());
 		
-		ObjectId mergedId = ObjectId.fromString(merged);
-		RevCommit mergedCommit = request.getTargetProject().getRevCommit(mergedId, true);
+		ObjectId mergedCommitId = ObjectId.fromString(mergedCommitHash);
+		RevCommit mergedCommit = request.getTargetProject().getRevCommit(mergedCommitId, true);
 		
         PersonIdent committer = new PersonIdent(OneDev.NAME, "");
         
@@ -304,14 +309,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		        newCommit.setMessage(request.getCommitMessage());
 		        newCommit.setTreeId(mergedCommit.getTree());
 		        newCommit.setParentIds(mergedCommit.getParents());
-		        mergedId = inserter.insert(newCommit);
-		        merged = mergedId.name();
+		        mergedCommitId = inserter.insert(newCommit);
+		        mergedCommitHash = mergedCommitId.name();
 		        inserter.flush();
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
 	        preview = new MergePreview(preview.getTargetHeadCommitHash(), preview.getHeadCommitHash(), 
-	        		preview.getMergeStrategy(), merged);
+	        		preview.getMergeStrategy(), mergedCommitHash);
 	        request.setLastMergePreview(preview);
 	        request.writeMergeRef();
 		}
@@ -324,13 +329,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		refUpdate.setRefLogIdent(committer);
 		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
 		refUpdate.setExpectedOldObjectId(targetHeadId);
-		refUpdate.setNewObjectId(mergedId);
+		refUpdate.setNewObjectId(mergedCommitId);
 		GitUtils.updateRef(refUpdate);
 		
-		request.getTargetProject().cacheObjectId(request.getTargetRef(), mergedId);
+		request.getTargetProject().cacheObjectId(request.getTargetRef(), mergedCommitId);
 		
 		Long requestId = request.getId();
-		ObjectId newTargetHeadId = mergedId;
+		ObjectId newTargetHeadId = mergedCommitId;
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
@@ -418,7 +423,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					discard(request, "Target branch no longer exists");
 				} else {
 					pullRequestUpdateManager.checkUpdate(request);
-					if (request.isMergeIntoTarget()) {
+					if (request.isMergedIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
 						checkQuality(request);
@@ -460,7 +465,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public MergePreview previewMerge(PullRequest request) {
 		if (!request.isNew()) {
 			MergePreview lastPreview = request.getLastMergePreview();
-			if (request.isOpen() && !request.isMergeIntoTarget()) {
+			if (request.isOpen() && !request.isMergedIntoTarget()) {
 				if (lastPreview == null || !lastPreview.isUpToDate(request)) {
 					int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
 					Long requestId = request.getId();
@@ -498,7 +503,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						PullRequest request = load(requestId);
 						Project targetProject = request.getTargetProject();
 						MergePreview mergePreview = request.getLastMergePreview();
-						if (request.isOpen() && !request.isMergeIntoTarget()) {
+						if (request.isOpen() && !request.isMergedIntoTarget()) {
 							if (mergePreview == null || !mergePreview.isUpToDate(request)) {
 								mergePreview = new MergePreview(request.getTarget().getObjectName(), 
 										request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);

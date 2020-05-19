@@ -1,28 +1,39 @@
 package io.onedev.server.web.component.diff.revision;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.support.Mark;
 
 public interface CommentSupport extends Serializable {
 	
-	@Nullable MarkPos getMark();
+	@Nullable Mark getMark();
 	
-	String getMarkUrl(MarkPos mark);
+	@Nullable
+	String getMarkUrl(Mark mark);
 	
-	void onMark(AjaxRequestTarget target, MarkPos mark);
+	void onMark(AjaxRequestTarget target, Mark mark);
 	
-	String getCommentUrl(CodeComment comment);
+	void onUnmark(AjaxRequestTarget target);
 	
 	@Nullable CodeComment getOpenComment();
 
-	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
+	void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
 	
-	void onAddComment(AjaxRequestTarget target, MarkPos markPos);
+	void onCommentClosed(AjaxRequestTarget target);
+	
+	void onAddComment(AjaxRequestTarget target, Mark mark);
 
+	Collection<CodeComment> getComments();
+	
+	void onSaveComment(CodeComment comment);
+	
+	void onSaveCommentReply(CodeCommentReply reply);
+	
 }

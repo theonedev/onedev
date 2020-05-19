@@ -31,7 +31,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.entitymanager.impl.DefaultCodeCommentRelationManager;
 import io.onedev.server.git.GitUtils;
 
 @Entity
@@ -109,7 +108,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			Repository repository = getRequest().getWorkProject().getRepository();
 			try (	RevWalk revWalk = new RevWalk(repository);
 					TreeWalk treeWalk = new TreeWalk(repository)) {
-				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBase()));
+				RevCommit baseCommit = revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash()));
 				RevCommit headCommit = revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash()));
 				RevCommit comparisonBaseCommit = revWalk.parseCommit(getRequest().getComparisonBase(baseCommit, headCommit));
 				treeWalk.addTree(headCommit.getTree());
@@ -124,7 +123,7 @@ public class PullRequestUpdate extends AbstractEntity {
 		return changedFiles;
 	}
 	
-	public String getBase() {
+	public String getBaseCommitHash() {
 		PullRequest request = getRequest();
 
 		int index = request.getSortedUpdates().indexOf(this);
@@ -156,22 +155,13 @@ public class PullRequestUpdate extends AbstractEntity {
 			return request.getBaseCommit();
 	}
 	
-	/**
-	 * Get commits belonging to this update, reversely ordered by commit traversing. The list of commit will remain 
-	 * unchanged even if tip of target branch changes. This assumption is key to our caching of code comment to
-	 * to pull request relations. Check {@link DefaultCodeCommentRelationManager#findCodeComments(PullRequest)} for
-	 * details
-	 * 
-	 * @return
-	 * 			commits belonging to this update ordered by commit id
-	 */
 	public List<RevCommit> getCommits() {
 		if (commits == null) {
 			commits = new ArrayList<>();
 			
 			try (RevWalk revWalk = new RevWalk(getRequest().getWorkProject().getRepository())) {
 				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getHeadCommitHash())));
-				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBase())));
+				revWalk.markUninteresting(revWalk.parseCommit(ObjectId.fromString(getBaseCommitHash())));
 				 
 				/*
 				 * Instead of excluding commits reachable from target branch, we exclude commits reachable
@@ -192,16 +182,16 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public void writeRef() {
-		ObjectId updateHeadId = ObjectId.fromString(getHeadCommitHash());
+		ObjectId headCommitId = ObjectId.fromString(getHeadCommitHash());
 		if (!request.getTargetProject().equals(request.getSourceProject())) {
 			try {
 				request.getTargetProject().git().fetch()
 						.setRemote(request.getSourceProject().getGitDir().getAbsolutePath())
 						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + getHeadRef()))
 						.call();
-				if (!request.getTargetProject().getObjectId(getHeadRef(), true).equals(updateHeadId)) {
+				if (!request.getTargetProject().getObjectId(getHeadRef(), true).equals(headCommitId)) {
 					RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), getHeadRef());
-					refUpdate.setNewObjectId(updateHeadId);
+					refUpdate.setNewObjectId(headCommitId);
 					GitUtils.updateRef(refUpdate);
 				}
 			} catch (Exception e) {
@@ -209,7 +199,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			}
 		} else {
 			RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), getHeadRef());
-			refUpdate.setNewObjectId(updateHeadId);
+			refUpdate.setNewObjectId(headCommitId);
 			GitUtils.updateRef(refUpdate);
 		}
 	}

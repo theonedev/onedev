@@ -16,7 +16,7 @@ public class CompareContext implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Column(nullable=false)
-	private String compareCommit;
+	private String compareCommitHash;
 
 	private boolean leftSide;
 	
@@ -25,12 +25,12 @@ public class CompareContext implements Serializable {
 	@Column(nullable=false)
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 
-	public String getCompareCommit() {
-		return compareCommit;
+	public String getCompareCommitHash() {
+		return compareCommitHash;
 	}
 
-	public void setCompareCommit(String compareCommit) {
-		this.compareCommit = compareCommit;
+	public void setCompareCommitHash(String compareCommitHash) {
+		this.compareCommitHash = compareCommitHash;
 	}
 
 	public boolean isLeftSide() {
@@ -65,7 +65,7 @@ public class CompareContext implements Serializable {
 			return true;
 		CompareContext otherContext = (CompareContext) other;
 		return new EqualsBuilder()
-				.append(compareCommit, otherContext.compareCommit)
+				.append(compareCommitHash, otherContext.compareCommitHash)
 				.append(leftSide, otherContext.leftSide)
 				.append(pathFilter, otherContext.pathFilter)
 				.append(whitespaceOption, otherContext.whitespaceOption)
@@ -75,7 +75,7 @@ public class CompareContext implements Serializable {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(compareCommit)
+				.append(compareCommitHash)
 				.append(leftSide)
 				.append(pathFilter)
 				.append(whitespaceOption)

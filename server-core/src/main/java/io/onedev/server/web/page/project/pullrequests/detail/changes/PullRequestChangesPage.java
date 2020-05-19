@@ -32,15 +32,19 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -86,14 +90,60 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		
 	};
 	
+	private final IModel<ObjectId> comparisonBaseModel = new LoadableDetachableModel<ObjectId>() {
+		
+		@Override
+		protected ObjectId load() {
+			ObjectId oldCommitId = ObjectId.fromString(state.oldCommitHash);
+			ObjectId newCommitId = ObjectId.fromString(state.newCommitHash);
+			return getPullRequest().getComparisonBase(oldCommitId, newCommitId);
+		}
+		
+	};
+	
+	private final IModel<Collection<CodeComment>> commentsModel = 
+			new LoadableDetachableModel<Collection<CodeComment>>() {
+
+		@Override
+		protected Collection<CodeComment> load() {
+			Collection<CodeComment> comments = new ArrayList<>();
+			for (CodeComment comment: getPullRequest().getCodeComments()) {
+				Mark diffMark = getDiffMark(comment.getMark());
+				if (diffMark != null) {
+					comment.setMark(diffMark);
+					comments.add(comment);
+				}
+			}
+			return comments;
+		}
+		
+	};
+	
+	private final IModel<CodeComment> openCommentModel = new LoadableDetachableModel<CodeComment>() {
+
+		@Override
+		protected CodeComment load() {
+			if (state.commentId != null) {
+				CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+				Mark diffMark = getDiffMark(comment.getMark());
+				if (diffMark != null) {
+					comment.setMark(diffMark);
+					return comment;
+				}
+			} 
+			return null;
+		}
+		
+	};
+	
 	public PullRequestChangesPage(PageParameters params) {
 		super(params);
 
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
+		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		
-		state.oldCommit = params.get(PARAM_OLD_COMMIT).toString();
-		state.newCommit = params.get(PARAM_NEW_COMMIT).toString();
+		state.oldCommitHash = params.get(PARAM_OLD_COMMIT).toString();
+		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
@@ -101,23 +151,25 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		PullRequest request = getPullRequest();
 		if (state.commentId != null) {
 			CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+			Preconditions.checkState(comment.getRequest().equals(request));
+			
 			CodeComment.ComparingInfo commentComparingInfo = comment.getComparingInfo();
 			PullRequest.ComparingInfo requestComparingInfo = 
 					getPullRequest().getRequestComparingInfo(commentComparingInfo);
-			if (requestComparingInfo != null && state.oldCommit == null && state.newCommit == null) {
+			if (requestComparingInfo != null && state.oldCommitHash == null && state.newCommitHash == null) {
 				if (comment.isContextChanged(request)) {
-					state.oldCommit = comment.getMarkPos().getCommit();
-					state.newCommit = request.getLatestUpdate().getHeadCommitHash();
+					state.oldCommitHash = comment.getMark().getCommitHash();
+					state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 				} else {
-					state.oldCommit = requestComparingInfo.getOldCommit();
-					state.newCommit = requestComparingInfo.getNewCommit();
+					state.oldCommitHash = requestComparingInfo.getOldCommitHash();
+					state.newCommitHash = requestComparingInfo.getNewCommitHash();
 				}
 			} 
 		} 
-		if (state.oldCommit == null) 
-			state.oldCommit = request.getBaseCommitHash();
-		if (state.newCommit == null)
-			state.newCommit = request.getLatestUpdate().getHeadCommitHash();
+		if (state.oldCommitHash == null) 
+			state.oldCommitHash = request.getBaseCommitHash();
+		if (state.newCommitHash == null)
+			state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -132,13 +184,34 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		return index;
 	}
 	
-	private void onRegionChange() {
-		OneDev.getInstance(WebSocketManager.class).observe(this);
-	}
-	
 	@Override
 	protected String getRobotsMeta() {
 		return "noindex,nofollow";
+	}
+	
+	@Nullable
+	private Mark getDiffMark(Mark mark) {
+		if (mark.getCommitHash().equals(state.oldCommitHash)) {
+			return mark.mapTo(getProject(), getComparisonBase());
+		} else if (mark.getCommitHash().equals(state.newCommitHash) 
+				|| mark.getCommitHash().equals(getComparisonBase().name())) {
+			return mark;
+		} else {
+			return null;
+		}
+	}
+	
+	@Nullable
+	private Mark getPermanentMark(Mark mark) {
+		ObjectId oldCommitId = ObjectId.fromString(state.oldCommitHash);
+		if (mark.getCommitHash().equals(getComparisonBase().name())) {
+			return mark.mapTo(getProject(), oldCommitId);
+		} else if (mark.getCommitHash().equals(state.oldCommitHash) 
+					|| mark.getCommitHash().equals(state.newCommitHash)) {
+			return mark;
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -176,22 +249,22 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(getCommitIndex(state.oldCommit) != -1 && getCommitIndex(state.newCommit) != -1);
+				setEnabled(getCommitIndex(state.oldCommitHash) != -1 && getCommitIndex(state.newCommitHash) != -1);
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				int index = getCommitIndex(state.oldCommit);
+				int index = getCommitIndex(state.oldCommitHash);
 				if (index != -1) {
-					state.newCommit = commitsModel.getObject().get(index).name();
+					state.newCommitHash = commitsModel.getObject().get(index).name();
 					index--;
 					if (index == -1) {
-						state.oldCommit = getPullRequest().getBaseCommitHash();
+						state.oldCommitHash = getPullRequest().getBaseCommitHash();
 					} else {
-						state.oldCommit = commitsModel.getObject().get(index).name();
+						state.oldCommitHash = commitsModel.getObject().get(index).name();
 					}
 					newRevisionDiff(target);
-					onRegionChange();
+					OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				}
 				target.add(head);
 				pushState(target);
@@ -204,9 +277,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			protected void onConfigure() {
 				super.onConfigure();
 
-				int oldIndex = getCommitIndex(state.oldCommit);
-				int newIndex = getCommitIndex(state.newCommit);
-				if (!state.oldCommit.equals(getPullRequest().getBaseCommitHash()) && oldIndex == -1 
+				int oldIndex = getCommitIndex(state.oldCommitHash);
+				int newIndex = getCommitIndex(state.newCommitHash);
+				if (!state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()) && oldIndex == -1 
 						|| newIndex == -1 || newIndex == commitsModel.getObject().size()-1) {
 					setEnabled(false);
 				} else {
@@ -227,18 +300,18 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				int index = getCommitIndex(state.newCommit);
+				int index = getCommitIndex(state.newCommitHash);
 				if (index != -1 && index != commitsModel.getObject().size()-1) {
 					CodeComment comment = getOpenComment();
 					
 					// we will not move old commit if an opened comment points to it
-					if (comment == null || comment.getMarkPos().getCommit().equals(state.newCommit)) {
-						state.oldCommit = state.newCommit;
+					if (comment == null || comment.getMark().getCommitHash().equals(state.newCommitHash)) {
+						state.oldCommitHash = state.newCommitHash;
 					}
 					index++;
-					state.newCommit = commitsModel.getObject().get(index).name();
+					state.newCommitHash = commitsModel.getObject().get(index).name();
 					newRevisionDiff(target);
-					onRegionChange();
+					OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				} 
 				target.add(head);
 				pushState(target);
@@ -255,11 +328,11 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 					@Override
 					protected void respond(AjaxRequestTarget target) {
 						IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-						state.oldCommit = params.getParameterValue("oldCommit").toString();
-						state.newCommit = params.getParameterValue("newCommit").toString();
+						state.oldCommitHash = params.getParameterValue("oldCommit").toString();
+						state.newCommitHash = params.getParameterValue("newCommit").toString();
 						target.add(head);
 						newRevisionDiff(target);
-						onRegionChange();
+						OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 						pushState(target);
 						dropdown.close();
 					}
@@ -273,9 +346,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 						
 						String callback = callbackBehavior.getCallbackFunction(explicit("oldCommit"), explicit("newCommit")).toString();
 						String script;
-						int oldIndex = getCommitIndex(state.oldCommit);
-						int newIndex = getCommitIndex(state.newCommit);
-						if ((state.oldCommit.equals(getPullRequest().getBaseCommitHash()) || oldIndex != -1) 
+						int oldIndex = getCommitIndex(state.oldCommitHash);
+						int newIndex = getCommitIndex(state.newCommitHash);
+						if ((state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()) || oldIndex != -1) 
 								&& newIndex != -1) {
 							script = String.format("onedev.server.requestChanges.initCommitSelector(%s, '%s', %d, %d);", 
 									callback, getPullRequest().getBaseCommitHash(), oldIndex+1, newIndex);
@@ -307,16 +380,16 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			@Override
 			public String getObject() {
 				String oldName;
-				if (state.oldCommit.equals(getPullRequest().getBaseCommitHash()))
+				if (state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()))
 					oldName = "base";
 				else
-					oldName = GitUtils.abbreviateSHA(state.oldCommit);
+					oldName = GitUtils.abbreviateSHA(state.oldCommitHash);
 
 				String newName;
-				if (state.newCommit.equals(getPullRequest().getLatestUpdate().getHeadCommitHash())) {
+				if (state.newCommitHash.equals(getPullRequest().getLatestUpdate().getHeadCommitHash())) {
 					newName = "head";
 				} else {
-					newName = GitUtils.abbreviateSHA(state.newCommit);
+					newName = GitUtils.abbreviateSHA(state.newCommitHash);
 				}
 				
 				return oldName + " ... " + newName;
@@ -330,19 +403,19 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				state.oldCommit = getPullRequest().getBaseCommitHash();
-				state.newCommit = getPullRequest().getLatestUpdate().getHeadCommitHash();
+				state.oldCommitHash = getPullRequest().getBaseCommitHash();
+				state.newCommitHash = getPullRequest().getLatestUpdate().getHeadCommitHash();
 				target.add(head);
 				newRevisionDiff(target);
-				onRegionChange();
+				OneDev.getInstance(WebSocketManager.class).observe(PullRequestChangesPage.this);
 				pushState(target);
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!state.oldCommit.equals(getPullRequest().getBaseCommitHash()) 
-						|| !state.newCommit.equals(getPullRequest().getLatestUpdate().getHeadCommitHash()));
+				setVisible(!state.oldCommitHash.equals(getPullRequest().getBaseCommitHash()) 
+						|| !state.newCommitHash.equals(getPullRequest().getLatestUpdate().getHeadCommitHash()));
 			}
 			
 		});
@@ -353,20 +426,23 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	@Override
 	public void onDetach() {
 		commitsModel.detach();
+		comparisonBaseModel.detach();
+		commentsModel.detach();
+		openCommentModel.detach();
 		super.onDetach();
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, String oldCommit, String newCommit) {
 		State state = new State();
-		state.oldCommit = oldCommit;
-		state.newCommit = newCommit;
+		state.oldCommitHash = oldCommit;
+		state.newCommitHash = newCommit;
 		return paramsOf(request, state);
 	}
 
 	public static State getState(CodeComment comment) {
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 		state.commentId = comment.getId();
-		state.mark = comment.getMarkPos();
+		state.mark = comment.getMark();
 		state.pathFilter = comment.getCompareContext().getPathFilter();
 		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
 		return state;
@@ -383,10 +459,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	}
 	
 	public static void fillParams(PageParameters params, State state) {
-		if (state.oldCommit != null)
-			params.add(PARAM_OLD_COMMIT, state.oldCommit);
-		if (state.newCommit != null)
-			params.add(PARAM_NEW_COMMIT, state.newCommit);
+		if (state.oldCommitHash != null)
+			params.add(PARAM_OLD_COMMIT, state.oldCommitHash);
+		if (state.newCommitHash != null)
+			params.add(PARAM_NEW_COMMIT, state.newCommitHash);
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
 		if (state.pathFilter != null)
@@ -405,7 +481,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 
 		state = (State) data;
 		newRevisionDiff(target);
-		onRegionChange();
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
@@ -413,11 +489,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		CharSequence url = RequestCycle.get().urlFor(PullRequestChangesPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
-	
-	private ObjectId getComparisonBase() {
-		return getPullRequest().getComparisonBase(ObjectId.fromString(state.oldCommit), ObjectId.fromString(state.newCommit));
-	}
-	
+		
 	private void newRevisionDiff(@Nullable AjaxRequestTarget target) {
 		IModel<String> blameModel = new IModel<String>() {
 
@@ -475,8 +547,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		};
 		
 		Component revisionDiff = new RevisionDiffPanel("revisionDiff", projectModel,  
-				requestModel, getComparisonBase().name(), state.newCommit, pathFilterModel, 
-				whitespaceOptionModel, blameModel, this);
+				requestModel, getComparisonBase().name(), state.newCommitHash, 
+				pathFilterModel, whitespaceOptionModel, blameModel, this);
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
 			replace(revisionDiff);
@@ -493,57 +565,67 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	}
 
 	@Override
-	public MarkPos getMark() {
-		return state.mark;
-	}
-
-	@Override
-	public String getMarkUrl(MarkPos mark) {
-		State markState = new State();
-		markState.mark = mark;
-		markState.oldCommit = state.oldCommit;
-		markState.newCommit = state.newCommit;
-		markState.pathFilter = state.pathFilter;
-		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
-	}
-
-	@Override
-	public String getCommentUrl(CodeComment comment) {
-		State commentState = new State();
-		commentState.mark = comment.getMarkPos();
-		commentState.commentId = comment.getId();
-		commentState.oldCommit = state.oldCommit;
-		commentState.newCommit = state.newCommit;
-		commentState.pathFilter = state.pathFilter;
-		commentState.whitespaceOption = state.whitespaceOption;
-		return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), commentState)).toString();
-	}
-	
-	@Override
-	public CodeComment getOpenComment() {
-		if (state.commentId != null)
-			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+	public Mark getMark() {
+		if (state.mark != null)
+			return getDiffMark(state.mark);
 		else
 			return null;
 	}
 
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			state.commentId = comment.getId();
-			state.mark = comment.getMarkPos();
+	public String getMarkUrl(Mark mark) {
+		State markState = new State();
+		markState.mark = getPermanentMark(mark);
+		if (markState.mark != null) {
+			markState.oldCommitHash = state.oldCommitHash;
+			markState.newCommitHash = state.newCommitHash;
+			markState.pathFilter = state.pathFilter;
+			markState.whitespaceOption = state.whitespaceOption;
+			return urlFor(PullRequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
 		} else {
-			state.commentId = null;
-			state.mark = null;
+			return null;
 		}
-		onRegionChange();
+	}
+
+	@Override
+	public CodeComment getOpenComment() {
+		return openCommentModel.getObject();
+	}
+
+	private ObjectId getComparisonBase() {
+		return comparisonBaseModel.getObject();
+	}
+	
+	@Override
+	public Collection<CodeComment> getComments() {
+		return commentsModel.getObject();
+	}
+	
+	@Override
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+		state.commentId = comment.getId();
+		state.mark = getPermanentMark(comment.getMark());
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 		pushState(target);
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, MarkPos mark) {
-		state.mark = mark;
+	public void onCommentClosed(AjaxRequestTarget target) {
+		state.commentId = null;
+		state.mark = null;
+		OneDev.getInstance(WebSocketManager.class).observe(this);
+		pushState(target);
+	}
+	
+	@Override
+	public void onMark(AjaxRequestTarget target, Mark mark) {
+		state.mark = getPermanentMark(mark);
+		pushState(target);
+	}
+	
+	@Override
+	public void onUnmark(AjaxRequestTarget target) {
+		state.mark = null;
 		pushState(target);
 	}
 	
@@ -552,13 +634,46 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
+	public void onAddComment(AjaxRequestTarget target, Mark mark) {
 		state.commentId = null;
-		state.mark = mark;
+		state.mark = getPermanentMark(mark);
 		pushState(target);
-		onRegionChange();
+		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
+	private void saveCommentOrReply(CodeComment comment, @Nullable CodeCommentReply reply) {
+		Mark prevMark = comment.getMark();
+		CompareContext prevCompareContext = comment.getCompareContext();
+		try {
+			comment.setMark(Preconditions.checkNotNull(getPermanentMark(prevMark)));
+			if (prevCompareContext.getCompareCommitHash().equals(getComparisonBase().name())) {
+				CompareContext compareContext = new CompareContext();
+				compareContext.setLeftSide(prevCompareContext.isLeftSide());
+				compareContext.setPathFilter(prevCompareContext.getPathFilter());
+				compareContext.setWhitespaceOption(prevCompareContext.getWhitespaceOption());
+				compareContext.setCompareCommitHash(state.oldCommitHash);
+				comment.setCompareContext(compareContext);
+			}
+			if (reply != null)
+				OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+			else
+				OneDev.getInstance(CodeCommentManager.class).save(comment);
+		} finally {
+			comment.setMark(prevMark);
+			comment.setCompareContext(prevCompareContext);
+		}
+	}
+	
+	@Override
+	public void onSaveComment(CodeComment comment) {
+		saveCommentOrReply(comment, null);
+	}
+	
+	@Override
+	public void onSaveCommentReply(CodeCommentReply reply) {
+		saveCommentOrReply(reply.getComment(), reply);
+	}
+	
 	@Override
 	public PageParameters getParamsBeforeEdit() {
 		return paramsOf(getPullRequest(), state);
@@ -569,7 +684,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		PageParameters params = getParamsBeforeEdit();
 		params.remove(PARAM_NEW_COMMIT);
 		if (getOpenComment() != null)
-			params.set(PARAM_OLD_COMMIT, getOpenComment().getMarkPos().getCommit());
+			params.set(PARAM_OLD_COMMIT, getOpenComment().getMark().getCommitHash());
 		else
 			params.remove(PARAM_OLD_COMMIT);
 		return params;
@@ -579,9 +694,9 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 
 		private static final long serialVersionUID = 1L;
 		
-		public String oldCommit;
+		public String oldCommitHash;
 		
-		public String newCommit;
+		public String newCommitHash;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 		
@@ -595,7 +710,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 		public Long commentId;
 		
 		@Nullable
-		public MarkPos mark;
+		public Mark mark;
 		
 	}
 

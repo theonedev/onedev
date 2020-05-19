@@ -1,11 +1,9 @@
 package io.onedev.server.web.component.diff.blob;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 
 public interface SourceAware {
 	
@@ -15,7 +13,9 @@ public interface SourceAware {
 
 	void onCommentAdded(AjaxRequestTarget target, CodeComment comment);
 	
-	void mark(AjaxRequestTarget target, @Nullable MarkPos mark);
+	void mark(AjaxRequestTarget target, Mark mark);
 
+	void unmark(AjaxRequestTarget target);
+	
 	void onUnblame(AjaxRequestTarget target);
 }

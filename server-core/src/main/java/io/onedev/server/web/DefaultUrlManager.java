@@ -60,7 +60,7 @@ public class DefaultUrlManager implements UrlManager {
 			return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
 		} else {
 			CompareContext compareContext = comment.getCompareContext();
-			if (!compareContext.getCompareCommit().equals(comment.getMarkPos().getCommit())) {
+			if (!compareContext.getCompareCommitHash().equals(comment.getMark().getCommitHash())) {
 				String url = urlFor(comment.getProject());
 				PageParameters params = new PageParameters();
 				RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment));
@@ -71,8 +71,8 @@ public class DefaultUrlManager implements UrlManager {
 				ProjectBlobPage.State state = ProjectBlobPage.getState(comment);
 				state.blobIdent.path = null;
 				state.blobIdent.revision = null;
-				params.set(0, comment.getMarkPos().getCommit());
-				List<String> pathSegments = Splitter.on("/").splitToList(comment.getMarkPos().getPath());
+				params.set(0, comment.getMark().getCommitHash());
+				List<String> pathSegments = Splitter.on("/").splitToList(comment.getMark().getPath());
 				for (int i=0; i<pathSegments.size(); i++) {
 					params.set(i+1, pathSegments.get(i));
 				}

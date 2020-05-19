@@ -6,7 +6,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.match.WildcardUtils;
 
@@ -22,7 +22,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
-		Path<String> attribute = CodeCommentQuery.getPath(root, CodeComment.PROP_MARK_POS + "." + MarkPos.PROP_PATH);
+		Path<String> attribute = CodeCommentQuery.getPath(root, CodeComment.PROP_MARK + "." + Mark.PROP_PATH);
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))
 			normalized += "%";
@@ -31,7 +31,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 	
 	@Override
 	public boolean matches(CodeComment comment) {
-		return WildcardUtils.matchPath(value.toLowerCase(), comment.getMarkPos().getPath().toLowerCase());
+		return WildcardUtils.matchPath(value.toLowerCase(), comment.getMark().getPath().toLowerCase());
 	}
 
 	@Override

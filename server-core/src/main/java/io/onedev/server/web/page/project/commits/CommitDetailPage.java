@@ -50,6 +50,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -57,9 +58,10 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.MarkPos;
+import io.onedev.server.model.support.Mark;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -110,6 +112,17 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	
 	private ObjectId resolvedCompareWith;
 	
+	private final IModel<Collection<CodeComment>> commentsModel = 
+			new LoadableDetachableModel<Collection<CodeComment>>() {
+
+		@Override
+		protected Collection<CodeComment> load() {
+			CodeCommentManager manager = OneDev.getInstance(CodeCommentManager.class);
+			return manager.query(projectModel.getObject(), getCompareWith(), resolvedRevision);
+		}
+		
+	};
+	
 	private WebMarkupContainer revisionDiff;
 	
 	public CommitDetailPage(PageParameters params) {
@@ -136,7 +149,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.mark = MarkPos.fromString(params.get(PARAM_MARK).toString());
+		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		
 		resolvedRevision = getProject().getRevCommit(state.revision, true).copy();
 		if (state.compareWith != null)
@@ -620,17 +633,17 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		public String blameFile;
 		
 		@Nullable
-		public MarkPos mark;
+		public Mark mark;
 		
 	}
 
 	@Override
-	public MarkPos getMark() {
+	public Mark getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public String getMarkUrl(MarkPos mark) {
+	public String getMarkUrl(Mark mark) {
 		State markState = new State();
 		markState.mark = mark;
 		markState.whitespaceOption = state.whitespaceOption;
@@ -641,19 +654,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
-	public String getCommentUrl(CodeComment comment) {
-		State commentState = new State();
-		String compareWith = getCompareWith().name();
-		commentState.mark = comment.getMarkPos();
-		commentState.commentId = comment.getId();
-		commentState.whitespaceOption = state.whitespaceOption;
-		commentState.compareWith = compareWith;
-		commentState.pathFilter = state.pathFilter;
-		commentState.revision = resolvedRevision.name();
-		return urlFor(CommitDetailPage.class, paramsOf(getProject(), commentState)).toString();
-	}
-	
-	@Override
 	public CodeComment getOpenComment() {
 		if (state.commentId != null)
 			return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
@@ -663,29 +663,48 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			state.commentId = comment.getId();
-			state.mark = comment.getMarkPos();
-		} else {
-			state.commentId = null;
-			state.mark = null;
-		}
+		state.commentId = comment.getId();
+		state.mark = comment.getMark();
 		pushState(target);
 	}
 	
 	@Override
-	public void onMark(AjaxRequestTarget target, MarkPos mark) {
+	public void onCommentClosed(AjaxRequestTarget target) {
+		state.commentId = null;
+		state.mark = null;
+		pushState(target);
+	}
+	
+	@Override
+	public void onMark(AjaxRequestTarget target, Mark mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, MarkPos mark) {
+	public void onUnmark(AjaxRequestTarget target) {
+		state.mark = null;
+		pushState(target);
+	}
+	
+	@Override
+	public void onAddComment(AjaxRequestTarget target, Mark mark) {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
 	}
 	
+	@Override
+	public Collection<CodeComment> getComments() {
+		return commentsModel.getObject();
+	}
+	
+	@Override
+	protected void onDetach() {
+		commentsModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected Map<String, ObjectId> getObjectIdCache() {
 		Map<String, ObjectId> objectIdCache = new HashMap<>();
@@ -698,6 +717,16 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject());
+	}
+
+	@Override
+	public void onSaveComment(CodeComment comment) {
+		OneDev.getInstance(CodeCommentManager.class).save(comment);
+	}
+	
+	@Override
+	public void onSaveCommentReply(CodeCommentReply reply) {
+		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
 	}
 	
 }

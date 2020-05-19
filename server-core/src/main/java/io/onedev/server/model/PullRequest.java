@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -132,8 +131,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public static final String NAME_COMMENT = "Comment";
 
 	public static final String PROP_COMMENTS = "comments";
-	
-	public static final String PROP_CODE_COMMENT_RELATIONS = "codeCommentRelations";
 	
 	public static final String NAME_COMMENT_COUNT = "Comment Count";
 	
@@ -286,11 +283,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	@OneToMany(mappedBy="request")
 	private Collection<CodeComment> codeComments = new ArrayList<>();
-	
-	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
 	
 	private transient Boolean mergedIntoTarget;
 
@@ -519,14 +513,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.codeComments = codeComments;
 	}
 
-	public Collection<CodeCommentRelation> getCodeCommentRelations() {
-		return codeCommentRelations;
-	}
-
-	public void setCodeCommentRelations(Collection<CodeCommentRelation> codeCommentRelations) {
-		this.codeCommentRelations = codeCommentRelations;
-	}
-	
 	@Nullable
 	public CloseInfo getCloseInfo() {
 		return closeInfo;
@@ -732,12 +718,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.lastUpdate = lastUpdate;
 	}
 
-	public List<RevCommit> getCommits() {
-		List<RevCommit> commits = new ArrayList<>();
-		getSortedUpdates().forEach(update->commits.addAll(update.getCommits()));
-		return commits;
-	}
-	
 	public String getCommitMessage() {
 		if (isNew()) {
 			return "Pull request merge preview";
@@ -804,7 +784,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return closeInfo != null && closeInfo.getStatus() == CloseInfo.Status.DISCARDED;
 	}
 	
-	public boolean isMergeIntoTarget() {
+	public boolean isMergedIntoTarget() {
 		if (mergedIntoTarget == null) { 
 			mergedIntoTarget = GitUtils.isMergedInto(getTargetProject().getRepository(), null, 
 					ObjectId.fromString(getLatestUpdate().getHeadCommitHash()), getTarget().getObjectId());
@@ -830,44 +810,47 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return null;
 	}
 	
+	public boolean canCommentOnCommit(String commitHash) {
+		if (commitHash.equals(baseCommitHash))
+			return true;
+		for (PullRequestUpdate update: getUpdates()) {
+			for (RevCommit commit: update.getCommits())
+				if (commit.name().equals(commitHash))
+					return true;
+		}
+		return false;
+	}
+	
 	@Nullable
 	public ComparingInfo getRequestComparingInfo(CodeComment.ComparingInfo commentComparingInfo) {
-		List<String> commits = new ArrayList<>();
-		commits.add(getBaseCommitHash());
+		List<String> commitHashes = new ArrayList<>();
+		commitHashes.add(getBaseCommitHash());
 		for (PullRequestUpdate update: getSortedUpdates()) {
-			commits.addAll(update.getCommits().stream().map(RevCommit::getName).collect(Collectors.toList()));
+			for (RevCommit commit: update.getCommits())
+				commitHashes.add(commit.name());
 		}
-		String commit = commentComparingInfo.getCommit();
+		String commitHash = commentComparingInfo.getCommitHash();
+		int commitIndex = commitHashes.indexOf(commitHash);
+		if (commitIndex == -1)
+			return null;
+		
 		CompareContext compareContext = commentComparingInfo.getCompareContext();
-		if (commit.equals(compareContext.getCompareCommit())) {
-			int index = commits.indexOf(commit);
-			if (index <= 0) {
-				return null;
+		int compareCommitIndex = commitHashes.indexOf(compareContext.getCompareCommitHash());
+		if (compareCommitIndex == -1 || compareCommitIndex == commitIndex) {
+			if (commitIndex == commitHashes.size()-1) {
+				return new ComparingInfo(commitHashes.get(0), commitHash, 
+						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
 			} else {
-				return new ComparingInfo(commits.get(index-1), commit, 
+				return new ComparingInfo(commitHash, commitHashes.get(commitHashes.size()-1),
 						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
 			}
+		} else if (compareCommitIndex < commitIndex) {		
+			return new ComparingInfo(compareContext.getCompareCommitHash(), commitHash, 
+					compareContext.getWhitespaceOption(), compareContext.getPathFilter());
 		} else {
-			int commitIndex = commits.indexOf(commit);
-			int compareCommitIndex = commits.indexOf(compareContext.getCompareCommit());
-			if (commitIndex == -1 || compareCommitIndex == -1) {
-				return null;
-			} else if (compareContext.isLeftSide()) {
-				if (compareCommitIndex < commitIndex) {
-					return new ComparingInfo(compareContext.getCompareCommit(), commit, 
-							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-				} else {
-					return null;
-				}
-			} else {
-				if (commitIndex < compareCommitIndex) {
-					return new ComparingInfo(commit, compareContext.getCompareCommit(), 
-							compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-				} else {
-					return null;
-				}
-			}
-		} 
+			return new ComparingInfo(commitHash, compareContext.getCompareCommitHash(), 
+					compareContext.getWhitespaceOption(), compareContext.getPathFilter());
+		}
 	}
 	
 	public Collection<User> getParticipants() {
@@ -920,8 +903,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public Collection<Long> getFixedIssueNumbers() {
 		if (fixedIssueNumbers == null) {
 			fixedIssueNumbers = new HashSet<>();
-			for (RevCommit commit: getCommits())
-				fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
+			for (PullRequestUpdate update: getUpdates()) {
+				for (RevCommit commit: update.getCommits())
+					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
+			}
 		}
 		return fixedIssueNumbers;
 	}
@@ -948,27 +933,28 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		
 		private static final long serialVersionUID = 1L;
 
-		private final String oldCommit; 
+		private final String oldCommitHash; 
 		
-		private final String newCommit;
+		private final String newCommitHash;
 		
 		private final String pathFilter;
 		
 		private final WhitespaceOption whitespaceOption;
 		
-		public ComparingInfo(String oldCommit, String newCommit, WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
-			this.oldCommit = oldCommit;
-			this.newCommit = newCommit;
+		public ComparingInfo(String oldCommitHash, String newCommitHash, 
+				WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
+			this.oldCommitHash = oldCommitHash;
+			this.newCommitHash = newCommitHash;
 			this.whitespaceOption = whitespaceOption;
 			this.pathFilter = pathFilter;
 		}
 
-		public String getOldCommit() {
-			return oldCommit;
+		public String getOldCommitHash() {
+			return oldCommitHash;
 		}
 
-		public String getNewCommit() {
-			return newCommit;
+		public String getNewCommitHash() {
+			return newCommitHash;
 		}
 
 		public String getPathFilter() {
@@ -984,6 +970,30 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Override
 	public String getAttachmentStorageUUID() {
 		return uuid;
+	}
+	
+	private boolean contains(ObjectId commitId) {
+		if (commitId.equals(getBaseCommit()))
+			return true;
+		for (PullRequestUpdate update: getUpdates()) {
+			for (RevCommit commit: update.getCommits()) {
+				if (commit.equals(commitId))
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	public ObjectId getComparisonOrigin(ObjectId comparisonBase) {
+		if (contains(comparisonBase))
+			return comparisonBase;
+		
+		RevCommit comparisonBaseCommit = getTargetProject().getRevCommit(comparisonBase, true);
+		for (RevCommit parentCommit: comparisonBaseCommit.getParents()) {
+			if (contains(parentCommit))
+				return parentCommit.copy();
+		}
+		throw new IllegalStateException();
 	}
 	
 	public ObjectId getComparisonBase(ObjectId oldCommitId, ObjectId newCommitId) {
@@ -1016,7 +1026,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 							break;
 						} else {
 							PersonIdent person = new PersonIdent("OneDev", "");
-							comparisonBase = GitUtils.merge(repo, mergeBase1, oldCommitId, false, 
+							comparisonBase = GitUtils.merge(repo, oldCommitId, mergeBase1, false, 
 									person, person, "helper commit", true);
 							break;
 						}

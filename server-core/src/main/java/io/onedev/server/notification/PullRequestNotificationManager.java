@@ -22,7 +22,6 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
 import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
@@ -200,7 +199,7 @@ public class PullRequestNotificationManager {
 			}
 		}
 		
-		if (event instanceof MarkdownAware && (!(event instanceof PullRequestCodeCommentEvent) || !((PullRequestCodeCommentEvent)event).isDerived())) {
+		if (event instanceof MarkdownAware) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {

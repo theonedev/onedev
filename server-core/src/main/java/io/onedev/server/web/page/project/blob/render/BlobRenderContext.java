@@ -86,8 +86,10 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position);
 	
-	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
+	void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
 
+	void onCommentClosed(AjaxRequestTarget target);
+	
 	void onAddComment(AjaxRequestTarget target, PlanarRange range);
 	
 	RefUpdated uploadFiles(Collection<FileUpload> uploads, @Nullable String directory, String commitMessage);

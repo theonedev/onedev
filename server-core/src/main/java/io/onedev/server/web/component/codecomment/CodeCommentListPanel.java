@@ -268,14 +268,13 @@ public abstract class CodeCommentListPanel extends Panel {
 						
 					};
 				} else {
-					PullRequest request = getPullRequest();
-					if (request != null) {
+					if (comment.getRequest() != null) {
 						link = new BookmarkablePageLink<Void>("link", PullRequestChangesPage.class, 
-								PullRequestChangesPage.paramsOf(request, comment));
+								PullRequestChangesPage.paramsOf(comment.getRequest(), comment));
 					} else {
 						try {
-							String compareCommit = comment.getCompareContext().getCompareCommit();
-							if (!compareCommit.equals(comment.getMarkPos().getCommit())
+							String compareCommit = comment.getCompareContext().getCompareCommitHash();
+							if (!compareCommit.equals(comment.getMark().getCommitHash())
 									&& getProject().getRepository().getObjectDatabase().has(ObjectId.fromString(compareCommit))) {
 								link = new BookmarkablePageLink<Void>("link", RevisionComparePage.class, 
 										RevisionComparePage.paramsOf(comment));
@@ -288,7 +287,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						}
 					}				
 				}
-				link.add(new Label("label", comment.getMarkPos().getPath()));
+				link.add(new Label("label", comment.getMark().getPath()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

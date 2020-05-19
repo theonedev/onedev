@@ -11,20 +11,13 @@ public abstract class PullRequestCodeCommentEvent extends PullRequestEvent imple
 
 	private final CodeComment comment;
 	
-	private final boolean derived;
-	
-	public PullRequestCodeCommentEvent(User user, Date date, PullRequest request, CodeComment comment, boolean derived) {
+	public PullRequestCodeCommentEvent(User user, Date date, PullRequest request, CodeComment comment) {
 		super(user, date, request);
 		this.comment = comment;
-		this.derived = derived;
 	}
 
 	public CodeComment getComment() {
 		return comment;
-	}
-
-	public boolean isDerived() {
-		return derived;
 	}
 
 }

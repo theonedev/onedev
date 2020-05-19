@@ -48,8 +48,8 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 	public PageParameters getPageParameters() {
 		PullRequest request = getPullRequest();
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
-		state.oldCommit = oldCommitModel.getObject();
-		state.newCommit = request.getLatestUpdate().getHeadCommitHash();
+		state.oldCommitHash = oldCommitModel.getObject();
+		state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
 		return PullRequestChangesPage.paramsOf(request, state);
 	}
 

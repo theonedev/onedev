@@ -219,9 +219,8 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 	@Listen
 	public void on(PullRequestEvent event) {
 		if (event.getUser() != null) {
-			if (!(event instanceof PullRequestCodeCommentEvent)) {			
-				visitPullRequest(event.getUser(), event.getRequest());
-			} else if (!((PullRequestCodeCommentEvent) event).isDerived()) {
+			visitPullRequest(event.getUser(), event.getRequest());
+			if (event instanceof PullRequestCodeCommentEvent) {			
 				visitPullRequest(event.getUser(), event.getRequest());
 				visitPullRequestCodeComments(event.getUser(), event.getRequest());
 			}

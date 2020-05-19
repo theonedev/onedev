@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.branch;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -9,7 +7,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -21,15 +18,14 @@ public class BranchLink extends ViewStateAwarePageLink<Void> {
 
 	private final ProjectAndBranch projectAndBranch;
 	
-	public BranchLink(String id, ProjectAndBranch projectAndBranch, @Nullable PullRequest request) {
-		super(id, ProjectBlobPage.class, paramsOf(projectAndBranch, request));
+	public BranchLink(String id, ProjectAndBranch projectAndBranch) {
+		super(id, ProjectBlobPage.class, paramsOf(projectAndBranch));
 		this.projectAndBranch = projectAndBranch;
 	}
 	
-	private static PageParameters paramsOf(ProjectAndBranch projectAndBranch, PullRequest request) {
+	private static PageParameters paramsOf(ProjectAndBranch projectAndBranch) {
 		BlobIdent blobIdent = new BlobIdent(projectAndBranch.getBranch(), null, FileMode.TREE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-		state.requestId = PullRequest.idOf(request);
 		return ProjectBlobPage.paramsOf(projectAndBranch.getProject(), state);
 	}
 

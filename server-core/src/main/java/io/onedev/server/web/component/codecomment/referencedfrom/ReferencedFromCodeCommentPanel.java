@@ -37,10 +37,10 @@ public class ReferencedFromCodeCommentPanel extends GenericPanel<CodeComment> {
 			PageParameters params = ProjectBlobPage.paramsOf(comment);
 			String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
 			String title = String.format("<a href='%s'>%s</a>", url, 
-					HtmlEscape.escapeHtml5(comment.getMarkPos().getPath()));
+					HtmlEscape.escapeHtml5(comment.getMark().getPath()));
 			add(new Label("title", title).setEscapeModelStrings(false));  
 		} else {
-			add(new Label("title", comment.getMarkPos().getPath()));  
+			add(new Label("title", comment.getMark().getPath()));  
 		}
 	}
 

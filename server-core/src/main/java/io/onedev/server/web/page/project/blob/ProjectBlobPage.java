@@ -907,11 +907,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	public static ProjectBlobPage.State getState(CodeComment comment) {
-		BlobIdent blobIdent = new BlobIdent(comment.getMarkPos().getCommit(), comment.getMarkPos().getPath(), 
+		BlobIdent blobIdent = new BlobIdent(comment.getMark().getCommitHash(), comment.getMark().getPath(), 
 				FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.commentId = comment.getId();
-		state.position = SourceRendererProvider.getPosition(comment.getMarkPos().getRange());
+		state.position = SourceRendererProvider.getPosition(comment.getMark().getRange());
 		return state;
 	}	
 	
@@ -1125,16 +1125,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
-		if (comment != null) {
-			state.commentId = comment.getId();
-			state.position = SourceRendererProvider.getPosition(Preconditions.checkNotNull(comment.mapRange(state.blobIdent)));
-		} else {
-			state.commentId = null;
-			state.position = null;
-		}
+		state.commentId = comment.getId();
+		state.position = SourceRendererProvider.getPosition(Preconditions.checkNotNull(comment.mapRange(state.blobIdent)));
 		pushState(target);
 	}
 
+	@Override
+	public void onCommentClosed(AjaxRequestTarget target) {
+		state.commentId = null;
+		state.position = null;
+		pushState(target);
+	}
+	
 	@Override
 	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;

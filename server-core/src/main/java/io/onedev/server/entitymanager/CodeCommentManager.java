@@ -12,7 +12,6 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -25,17 +24,10 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
 	Map<CodeComment, PlanarRange> findHistory(Project project, ObjectId commitId, String path);
 		
-	List<CodeComment> queryAfter(Project project, @Nullable Long afterCommentId, int count);
-	
-	void create(CodeComment comment, @Nullable PullRequest request);
-
 	List<CodeComment> query(Project project, @Nullable PullRequest request, 
 			EntityQuery<CodeComment> commentQuery, int firstResult, int maxResults);
 	
 	int count(Project project, @Nullable PullRequest request, 
 			EntityCriteria<CodeComment> commentCriteria);
-	
-	void delete(User user, CodeComment comment);
-	
-	void update(User user, CodeComment comment);
+
 }

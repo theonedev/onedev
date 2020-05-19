@@ -7,8 +7,8 @@ public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {
 
 	private final CodeCommentReply reply;
 	
-	public PullRequestCodeCommentReplied(PullRequest request, CodeCommentReply reply, boolean derived) {
-		super(reply.getUser(), reply.getDate(), request, reply.getComment(), derived);
+	public PullRequestCodeCommentReplied(PullRequest request, CodeCommentReply reply) {
+		super(reply.getUser(), reply.getDate(), request, reply.getComment());
 		this.reply = reply;
 	}
 
