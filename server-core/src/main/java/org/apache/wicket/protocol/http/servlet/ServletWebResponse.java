@@ -264,7 +264,7 @@ public class ServletWebResponse extends WebResponse
 		{
 			redirect = true;
 			url = encodeRedirectURL(url);
-
+			
 			// wicket redirects should never be cached
 			disableCaching();
 
@@ -295,8 +295,13 @@ public class ServletWebResponse extends WebResponse
 						+ "      key = key.substr(0, key.indexOf('#'));"
 						+ "    return key.substr(key.indexOf(':'), key.length);"
 						+ "  }"
-						+ "  if (location.hash) "
-						+ "    sessionStorage.setItem(getKey(location.href), location.hash);"
+						+ "  if (location.hash) {"
+						+ "    var url = location.pathname;"
+						+ "    if (location.search)"
+						+ "      url += location.search;"
+						+ "    url += location.hash;"
+						+ "    sessionStorage.setItem(getKey(url), location.hash);"
+						+ "  }"
 						+ "  var redirect = '%s';"
 						+ "  var key = getKey(redirect);"
 						+ "  if (redirect.indexOf('#') == -1) {"
