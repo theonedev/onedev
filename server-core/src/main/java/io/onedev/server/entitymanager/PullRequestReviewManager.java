@@ -1,5 +1,7 @@
 package io.onedev.server.entitymanager;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.PullRequest;
@@ -14,9 +16,9 @@ public interface PullRequestReviewManager extends EntityManager<PullRequestRevie
 	@Nullable
 	PullRequestReview find(PullRequest request, User user, String commit);
 	
-	boolean excludeReviewer(PullRequestReview review);
-	
 	void addReviewer(PullRequestReview review);
+	
+	boolean removeReviewer(PullRequestReview review, List<User> unpreferableReviewers);
 	
 	void saveReviews(PullRequest request);
 }

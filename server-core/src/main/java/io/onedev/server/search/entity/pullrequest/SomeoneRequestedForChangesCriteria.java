@@ -33,7 +33,7 @@ public class SomeoneRequestedForChangesCriteria extends EntityCriteria<PullReque
 	@Override
 	public boolean matches(PullRequest request) {
 		for (PullRequestReview review: request.getReviews()) {
-			if (review.getExcludeDate() == null && review.getResult() != null && !review.getResult().isApproved())
+			if (review.getResult() != null && !review.getResult().isApproved())
 				return true;
 		}
 		return false;

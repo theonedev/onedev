@@ -48,6 +48,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
     void check(PullRequest request);
     
+    void merge(PullRequest request, @Nullable String commitMessage);
+    
 	/**
      * Preview merge of this pull request.
      * 
@@ -68,7 +70,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	int countOpen(Project targetProject);
 
-	void checkQuality(PullRequest request);
+	void checkQuality(PullRequest request, List<User> unpreferableReviewers);
 	
 	List<PullRequest> query(@Nullable Project targetProject, 
 			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);

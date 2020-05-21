@@ -42,7 +42,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -51,7 +51,7 @@ import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModal;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
@@ -284,7 +284,7 @@ public class UserListPage extends AdministrationPage {
 									
 								};
 							} else {
-								new ConfirmModal(target) {
+								new ConfirmModalPanel(target) {
 									
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {

@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 

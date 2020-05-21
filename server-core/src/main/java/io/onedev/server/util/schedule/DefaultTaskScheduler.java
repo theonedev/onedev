@@ -23,7 +23,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class DefaultTaskScheduler implements TaskScheduler {

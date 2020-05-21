@@ -18,7 +18,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;

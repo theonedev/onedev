@@ -33,7 +33,7 @@ public class HasPendingReviewsCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		for (PullRequestReview review: request.getReviews()) {
-			if (review.getExcludeDate() == null && review.getResult() == null)
+			if (review.getResult() == null)
 				return true;
 		}
 		return false;

@@ -16,7 +16,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.project.ProjectPicker;
 
 @SuppressWarnings("serial")

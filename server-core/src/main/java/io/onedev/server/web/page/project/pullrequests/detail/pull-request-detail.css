@@ -82,43 +82,36 @@ body.PullRequestDetailPage #layout>.body {
 	transform: rotate(-90deg);
 }
 
-#request-detail>.main>.summary>div {
-	margin-bottom: 20px;
-}
-#request-detail>.main>.summary ul {
+#request-detail>.main>.summary .alert {
 	margin-bottom: 0;
+	border-radius: 0;
+	border-bottom: 1px dotted #888;
 }
-#request-detail>.main>.summary .calculating img {
+#request-detail>.main>.summary>.alert:first-child  {
+	border-radius: 4px 4px 0 0;
+}
+#request-detail>.main>.summary>.alert:last-child  {
+	border-radius: 0 0 4px 4px;
+	border-bottom: none;
+}
+#request-detail>.main>.summary>.alert:first-child:last-child  {
+	border-radius: 4px;
+}
+
+#request-detail>.main>.summary>.calculating-merge-preview img {
 	width: 24px;
 	height: 24px;
 }
+#request-detail>.main>.summary .more-info.not-link {
+	color: inherit;
+	cursor: inherit; 
+}
+#request-detail>.main>.summary .more-info.not-link:hover {
+	text-decoration: inherit;
+}
 
-#request-detail>.main>.summary .no-conflict>* {
-	margin-right: 4px;
-}
-#request-detail>.main>.summary>.operations>.confirm {
-	margin-top: 12px;
-}
-#request-detail>.main>.summary>.operations>.confirm>.hint {
-	margin-bottom: 12px;
-	font-size: 16px;
-} 
-#request-detail>.main>.summary>.operations>.confirm>.hint .warning {
-	color: #EC5544;
-} 
-#request-detail>.main>.summary>.operations>.buttons>a, 
-#request-detail>.main>.summary>.operations>.confirm>form>input {
+#request-detail>.main>.operations>a { 
 	margin-right: 8px;
-} 
-#request-detail>.main>.summary>.operations>.buttons>.btn-primary.active {
-	background-color: #204C72;
-} 
-#request-detail>.main>.summary>.operations>.buttons>.btn-danger.active {
-	background-color: #A62924;
-} 
-
-#request-detail>.main>.summary>.operations>.confirm>form .markdown-editor {
-	margin-bottom: 16px;
 } 
 
 ul>li>a.code-comments .fa-circle {

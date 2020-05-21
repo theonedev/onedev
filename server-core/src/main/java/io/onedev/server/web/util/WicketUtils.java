@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
@@ -95,22 +94,6 @@ public class WicketUtils {
 				|| userAgent.indexOf("iphone") != -1 
 				|| userAgent.indexOf("ipad") != -1 
 				|| userAgent.indexOf("windows phone") != -1; 
-	}
-	
-	public static void markLastVisibleChild(WebMarkupContainer container) {
-		Component lastVisible = null;
-		for (Component child: container) {
-			for (Behavior behavior: child.getBehaviors()) {
-				if (behavior instanceof LastVisibleAppender) {
-					child.remove(behavior);
-				}
-			}
-			child.configure();
-			if (child.isVisible())
-				lastVisible = child;
-		}
-		if (lastVisible != null)
-			lastVisible.add(new LastVisibleAppender("class", "last-visible").setSeparator(" "));
 	}
 	
 	public static int getChildIndex(WebMarkupContainer parent, Component child) {

@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.project.ProjectPage;

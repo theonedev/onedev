@@ -78,7 +78,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     private final TransactionManager transactionManager;
     
     @SuppressWarnings("serial")
-	private final MetaDataKey<Map<Long, AuthorizationInfo>> authorizationInfosKey = 
+	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = 
 			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
     
 	@Inject
@@ -172,10 +172,10 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		Long userId = (Long) principals.getPrimaryPrincipal();						
 		RequestCycle requestCycle = RequestCycle.get();
 		if (requestCycle != null) {
-			Map<Long, AuthorizationInfo> authorizationInfos = requestCycle.getMetaData(authorizationInfosKey);
+			Map<Long, AuthorizationInfo> authorizationInfos = requestCycle.getMetaData(AUTHORIZATION_INFOS);
 			if (authorizationInfos == null) {
 				authorizationInfos = new HashMap<>();
-				requestCycle.setMetaData(authorizationInfosKey, authorizationInfos);
+				requestCycle.setMetaData(AUTHORIZATION_INFOS, authorizationInfos);
 			}
 			AuthorizationInfo authorizationInfo = authorizationInfos.get(userId);
 			if (authorizationInfo == null) {

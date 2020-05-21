@@ -63,6 +63,7 @@ import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
@@ -70,7 +71,6 @@ import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
@@ -162,7 +162,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_REVIEWS = "reviews";
 	
-	public static final String PROP_PULL_REQUEST_BUILDS = "pullRequestBuilds";
+	public static final String PROP_VERIFICATIONS= "verifications";
 	
 	public static final String PROP_UUID = "uuid";
 	
@@ -272,7 +272,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestBuild> pullRequestBuilds = new ArrayList<>();
+	private Collection<PullRequestAssignment> assignments = new ArrayList<>();
+	
+	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
@@ -456,12 +459,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		sortedUpdates = null;
 	}
 
-	public Collection<PullRequestBuild> getPullRequestBuilds() {
-		return pullRequestBuilds;
+	public Collection<PullRequestVerification> getVerifications() {
+		return verifications;
 	}
 
-	public void setPullRequestBuilds(Collection<PullRequestBuild> pullRequestBuilds) {
-		this.pullRequestBuilds = pullRequestBuilds;
+	public void setVerifications(Collection<PullRequestVerification> verifications) {
+		this.verifications = verifications;
 	}
 
 	public Collection<PullRequestComment> getComments() {
@@ -685,6 +688,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.reviews = reviews;
 	}
 
+	public Collection<PullRequestAssignment> getAssignments() {
+		return assignments;
+	}
+
+	public void setAssignments(Collection<PullRequestAssignment> assignments) {
+		this.assignments = assignments;
+	}
+
 	public String getUUID() {
 		return uuid;
 	}
@@ -718,25 +729,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.lastUpdate = lastUpdate;
 	}
 
-	public String getCommitMessage() {
-		if (isNew()) {
-			return "Pull request merge preview";
-		} else {
-			if (mergeStrategy == MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS) {
-				String commitMessage = getTitle() + "\n\n";
-				if (getDescription() != null)
-					commitMessage += getDescription() + "\n\n";
-				commitMessage += String.format("Squash pull request #%d of project '%s'", 
-						getNumber(), getTargetProject().getName());
-				return commitMessage;
-			} else if (mergeStrategy == MergeStrategy.CREATE_MERGE_COMMIT || mergeStrategy == MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY) {
-				return String.format("Merge pull request #%d of project '%s'", getNumber(), getTargetProject().getName());
-			} else {
-				throw new IllegalStateException("Unexpected merge strategy: " + mergeStrategy);
-			}
-		}
-	}
-	
 	@Nullable
 	public String getCheckError() {
 		return checkError;
@@ -913,17 +905,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public boolean isAllReviewsApproved() {
 		for (PullRequestReview review: getReviews()) {
-			if (review.getExcludeDate() == null && 
-					(review.getResult() == null || !review.getResult().isApproved())) {
+			if (review.getResult() == null || !review.getResult().isApproved()) 
 				return false;
-			}
 		}
 		return true;
 	}
 	
 	public boolean isRequiredBuildsSuccessful() {
-		for (PullRequestBuild pullRequestBuild: getPullRequestBuilds()) {
-			if (pullRequestBuild.isRequired() && pullRequestBuild.getBuild().getStatus() != Build.Status.SUCCESSFUL)
+		for (PullRequestVerification verification: getVerifications()) {
+			if (verification.isRequired() && verification.getBuild().getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
 		return true;
@@ -997,8 +987,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public ObjectId getComparisonBase(ObjectId oldCommitId, ObjectId newCommitId) {
-		if (oldCommitId.equals(newCommitId))
-			return newCommitId;
+		if (isNew() || oldCommitId.equals(newCommitId))
+			return oldCommitId;
 		
 		PullRequestInfoManager infoManager = OneDev.getInstance(PullRequestInfoManager.class);
 		ObjectId comparisonBase = infoManager.getComparisonBase(this, oldCommitId, newCommitId);

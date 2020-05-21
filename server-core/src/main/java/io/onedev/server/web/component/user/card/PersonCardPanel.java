@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.user.card;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -45,16 +44,13 @@ public class PersonCardPanel extends Panel {
 			if (personIdent.getName().equals(OneDev.NAME))
 				builder.append("<i>System Account</i>");
 			else
-				builder.append("<i>No Email Address</i>");
+				builder.append("<i>No OneDev Account</i>");
 		} else {
 			User user = OneDev.getInstance(UserManager.class).findByEmail(personIdent.getEmailAddress());
 			if (user != null) 
-				builder.append("<div>" + HtmlEscape.escapeHtml5(user.getName()) + " <i>(Account in OneDev)</i>"); 
+				builder.append("<i>@" + HtmlEscape.escapeHtml5(user.getName()) + "</i>"); 
 			else 
 				builder.append("<i>No OneDev Account</i>");
-			builder.append("<div><a href='mailto:" + personIdent.getEmailAddress() + "'>" 
-					+ HtmlEscape.escapeHtml5(personIdent.getEmailAddress()) + "</a></div>");
-			container.add(AttributeAppender.append("class", "bigger"));
 		}
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}

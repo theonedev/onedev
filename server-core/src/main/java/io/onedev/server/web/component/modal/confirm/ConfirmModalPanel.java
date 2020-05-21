@@ -8,36 +8,36 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
-public abstract class ConfirmModal extends ModalPanel {
+public abstract class ConfirmModalPanel extends ModalPanel {
 
-	public ConfirmModal(AjaxRequestTarget target) {
+	public ConfirmModalPanel(AjaxRequestTarget target) {
 		super(target);
 	}
 
 	@Override
 	protected Component newContent(String id) {
-		return new ConfirmPanel(id) {
+		return new ContentPanel(id) {
 			
 			@Override
 			protected void onConfirm(AjaxRequestTarget target) {
-				ConfirmModal.this.onConfirm(target);
+				ConfirmModalPanel.this.onConfirm(target);
 				close();
 			}
 			
 			@Override
 			protected void onCancel(AjaxRequestTarget target) {
 				close();
-				ConfirmModal.this.onCancel(target);
+				ConfirmModalPanel.this.onCancel(target);
 			}
 
 			@Override
 			protected String getConfirmMessage() {
-				return ConfirmModal.this.getConfirmMessage();
+				return ConfirmModalPanel.this.getConfirmMessage();
 			}
 
 			@Override
 			protected String getConfirmInput() {
-				return ConfirmModal.this.getConfirmInput();
+				return ConfirmModalPanel.this.getConfirmInput();
 			}
 
 		};

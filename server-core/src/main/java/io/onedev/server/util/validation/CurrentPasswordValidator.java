@@ -6,7 +6,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.UsernamePasswordToken;
 
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.validation.annotation.CurrentPassword;
 
 public class CurrentPasswordValidator implements ConstraintValidator<CurrentPassword, String> {

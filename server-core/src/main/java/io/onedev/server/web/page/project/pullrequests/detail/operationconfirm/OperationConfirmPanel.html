@@ -1,0 +1,18 @@
+<wicket:panel>
+	<div class="pull-request-operation-confirm">
+		<form wicket:id="form" class="leave-confirm">
+			<div class="modal-header">
+				<button wicket:id="close" type="button" class="close">&times;</button>
+				<h4 wicket:id="title" id="modal-title" class="modal-title">Please Confirm</h4>
+			</div>
+			<div class="modal-body">
+				<div wicket:id="feedback"></div>
+				<wicket:child></wicket:child>
+			</div>
+			<div class="modal-footer">
+				<input wicket:id="ok" type="submit" class="btn btn-primary" value="Ok">
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</div>
+</wicket:panel>

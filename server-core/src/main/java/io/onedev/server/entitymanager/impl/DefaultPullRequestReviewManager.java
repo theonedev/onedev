@@ -2,7 +2,8 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,34 +14,42 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.entitymanager.PullRequestVerificationManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 @Singleton
-public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> implements PullRequestReviewManager {
+public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> 
+		implements PullRequestReviewManager {
 
 	private final PullRequestManager pullRequestManager;
 	
 	private final PullRequestChangeManager pullRequestChangeManager;
 	
+	private final PullRequestVerificationManager pullRequestVerificationManager;
+	
 	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, PullRequestManager pullRequestManager, PullRequestChangeManager pullRequestChangeManager) {
+	public DefaultPullRequestReviewManager(Dao dao, 
+			PullRequestManager pullRequestManager, 
+			PullRequestChangeManager pullRequestChangeManager, 
+			PullRequestVerificationManager pullRequestVerificationManager) {
 		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestChangeManager = pullRequestChangeManager;
+		this.pullRequestVerificationManager = pullRequestVerificationManager;
 	}
 
 	@Transactional
@@ -68,25 +77,31 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		return find(criteria);
 	}	
 	
-	@Transactional
+ 	@Transactional
 	@Override
-	public boolean excludeReviewer(PullRequestReview review) {
+	public boolean removeReviewer(PullRequestReview review, List<User> unpreferableReviewers) {
 		PullRequest request = review.getRequest();
-		
 		User reviewer = review.getUser();
-		pullRequestManager.checkQuality(request);
-		if (request.getReview(reviewer).getExcludeDate() == null) {
-			return false;
+		request.getReviews().remove(review);
+		
+		pullRequestManager.checkQuality(request, unpreferableReviewers);
+		
+		if (request.isNew()) {
+			return request.getReview(reviewer) == null;
 		} else {
-			save(review);
-			
-			PullRequestChange change = new PullRequestChange();
-			change.setDate(new Date());
-			change.setRequest(request);
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new PullRequestReviewerRemoveData(reviewer.getDisplayName()));
-			pullRequestChangeManager.save(change);
-			return true;
+			saveReviews(request);
+			pullRequestVerificationManager.saveVerifications(request);
+			if (request.getReview(reviewer) == null) {
+				PullRequestChange change = new PullRequestChange();
+				change.setDate(new Date());
+				change.setRequest(request);
+				change.setUser(SecurityUtils.getUser());
+				change.setData(new PullRequestReviewerRemoveData(reviewer.getDisplayName()));
+				pullRequestChangeManager.save(change);
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 
@@ -96,6 +111,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		save(review);
 		
 		PullRequest request = review.getRequest();
+		request.getReviews().add(review);
 		
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
@@ -108,20 +124,19 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	@Transactional
 	@Override
 	public void saveReviews(PullRequest request) {
-		Collection<Long> ids = new HashSet<>();
-		for (PullRequestReview review: request.getReviews()) {
-			save(review);
-			ids.add(review.getId());
-		}
-		if (!ids.isEmpty()) {
-			Query query = getSession().createQuery("delete from PullRequestReview where request=:request and id not in (:ids)");
+		Collection<User> reviewers = request.getReviews().stream()
+				.filter(it->!it.isNew()).map(it->it.getUser()).collect(Collectors.toList());
+		if (!reviewers.isEmpty()) {
+			Query query = getSession().createQuery("delete from PullRequestReview where request=:request and user not in (:reviewers)");
 			query.setParameter("request", request);
-			query.setParameter("ids", ids);
+			query.setParameter("reviewers", reviewers);
 			query.executeUpdate();
 		} else {
 			Query query = getSession().createQuery("delete from PullRequestReview where request=:request");
 			query.setParameter("request", request);
 			query.executeUpdate();
 		}
+		for (PullRequestReview review: request.getReviews())
+			save(review);
 	}
 }

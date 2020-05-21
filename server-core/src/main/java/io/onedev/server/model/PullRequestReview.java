@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import java.util.Date;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -13,7 +12,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 
 @Entity
@@ -38,8 +36,6 @@ public class PullRequestReview extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
-	
-	private Date excludeDate;
 	
 	@Embedded
 	private ReviewResult result;
@@ -71,29 +67,15 @@ public class PullRequestReview extends AbstractEntity {
 		this.result = result;
 	}
 
-	public Date getExcludeDate() {
-		return excludeDate;
-	}
-
-	public void setExcludeDate(Date excludeDate) {
-		this.excludeDate = excludeDate;
-		result = null;
-	}
-
 	@Nullable
 	public PullRequestUpdate getUpdate() {
 		if (updateOptional == null) {
 			PullRequestUpdate update = null;
 			if (result != null) {
-				MergePreview preview = request.getMergePreview();
-				if (preview != null && result.getCommit().equals(preview.getMergeCommitHash())) {
-					update = request.getLatestUpdate();
-				} else {
-					for (PullRequestUpdate each: request.getUpdates()) {
-						if (each.getHeadCommitHash().equals(result.getCommit())) {
-							update = each;
-							break;
-						}
+				for (PullRequestUpdate each: request.getUpdates()) {
+					if (each.getHeadCommitHash().equals(result.getCommit())) {
+						update = each;
+						break;
 					}
 				}
 			}

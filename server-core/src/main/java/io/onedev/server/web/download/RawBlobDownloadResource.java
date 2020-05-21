@@ -25,7 +25,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 public class RawBlobDownloadResource extends AbstractResource {
 

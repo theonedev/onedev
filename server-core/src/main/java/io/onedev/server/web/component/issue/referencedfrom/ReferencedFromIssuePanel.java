@@ -11,7 +11,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.titleandstatus.TitleAndStatusCssResourceReference;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.page.project.ProjectPage;

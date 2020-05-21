@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.review;
+package io.onedev.server.web.component.pullrequest.review;
 
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;

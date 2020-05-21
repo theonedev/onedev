@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
 

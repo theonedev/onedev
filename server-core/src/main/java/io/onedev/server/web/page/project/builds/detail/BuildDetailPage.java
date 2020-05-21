@@ -42,8 +42,8 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
@@ -53,7 +53,7 @@ import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModal;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTabLink;
@@ -220,7 +220,7 @@ public abstract class BuildDetailPage extends ProjectPage
 						
 					};
 				} else {
-					new ConfirmModal(target) {
+					new ConfirmModalPanel(target) {
 						
 						@Override
 						protected void onConfirm(AjaxRequestTarget target) {

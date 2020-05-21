@@ -42,7 +42,7 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.Version;
 import io.onedev.server.util.init.InitStage;

@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestBuild;
+import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 
@@ -29,17 +29,17 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(Build.PROP_PULL_REQUEST_BUILDS, JoinType.LEFT);
+		Join<?, ?> join = root.join(Build.PROP_VERIFICATIONS, JoinType.LEFT);
 		join.on(builder.and(
-				builder.equal(join.get(PullRequestBuild.PROP_REQUEST), request), 
-				builder.equal(join.get(PullRequestBuild.PROP_REQUIRED), true)));
+				builder.equal(join.get(PullRequestVerification.PROP_REQUEST), request), 
+				builder.equal(join.get(PullRequestVerification.PROP_REQUIRED), true)));
 		return builder.equal(root.get(Build.PROP_PROJECT), request.getTargetProject());
 	}
 
 	@Override
 	public boolean matches(Build build) {
 		return build.getProject().equals(request.getTargetProject()) 
-				&& build.getPullRequestBuilds().stream().anyMatch(it -> it.getRequest().equals(request) && it.isRequired());
+				&& build.getVerifications().stream().anyMatch(it -> it.getRequest().equals(request) && it.isRequired());
 	}
 
 	@Override

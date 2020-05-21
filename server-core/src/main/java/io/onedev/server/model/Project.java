@@ -35,7 +35,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.dom4j.Element;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -95,7 +94,6 @@ import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.migration.VersionedXmlDoc;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
@@ -108,10 +106,10 @@ import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -317,8 +315,6 @@ public class Project extends AbstractEntity {
     private transient Optional<RevCommit> lastCommitHolder;
     
 	private transient List<Milestone> sortedMilestones;
-	
-	private transient List<String> jobNames;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -714,22 +710,11 @@ public class Project extends AbstractEntity {
 	}
 	
 	public List<String> getJobNames() {
-		if (jobNames == null) {
-			Set<String> jobNameSet = new HashSet<>();
-			for (RefInfo refInfo: getBranchRefInfos()) {
-				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), 
-						BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
-				if (blob != null && blob.getText() != null) {
-					try {
-						VersionedXmlDoc dom = VersionedXmlDoc.fromXML(blob.getText().getContent());
-						for (Element jobElement: dom.getRootElement().element("jobs").elements())
-							jobNameSet.add(jobElement.elementTextTrim("name"));
-					} catch (Exception e) {
-					}
-				}
-			}
-			jobNames = new ArrayList<>(jobNameSet);
-			Collections.sort(jobNames);
+		List<String> jobNames = new ArrayList<>();
+		if (getDefaultBranch() != null) {
+			BuildSpec buildSpec = getBuildSpec(getObjectId(getDefaultBranch(), true));
+			if (buildSpec != null)
+				jobNames.addAll(buildSpec.getJobMap().keySet());
 		}
 		return jobNames;
 	}

@@ -46,10 +46,12 @@ import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
+import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
@@ -61,9 +63,10 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
@@ -75,7 +78,8 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.component.review.ReviewListPanel;
+import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
+import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -225,13 +229,24 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
-				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
+				OneDev.getInstance(PullRequestManager.class).checkQuality(request, Lists.newArrayList());
 
-				if (SecurityUtils.canWriteCode(getProject()) && request.getReviews().isEmpty()) {
-					PullRequestReview review = new PullRequestReview();
-					review.setRequest(request);
-					review.setUser(SecurityUtils.getUser());
-					request.getReviews().add(review);
+				if (SecurityUtils.canWriteCode(target.getProject())) {
+					PullRequestAssignment assignment = new PullRequestAssignment();
+					assignment.setRequest(request);
+					assignment.setUser(SecurityUtils.getUser());
+					request.getAssignments().add(assignment);
+				} else {
+					List<User> codeWriters = new ArrayList<>(
+							SecurityUtils.getAuthorizedUsers(target.getProject(), new WriteCode()));
+					OneDev.getInstance(CommitInfoManager.class).sortUsersByContribution(
+							codeWriters, target.getProject(), update.getChangedFiles());
+					if (!codeWriters.isEmpty()) {
+						PullRequestAssignment assignment = new PullRequestAssignment();
+						assignment.setRequest(request);
+						assignment.setUser(codeWriters.iterator().next());
+						request.getAssignments().add(assignment);
+					}
 				}
 				request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
 			}
@@ -691,8 +706,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		});
 
 		form.add(newMergeStrategyContainer());
-		
 		form.add(new ReviewListPanel("reviewers", requestModel));
+		form.add(new AssignmentListPanel("assignees", requestModel));
 		
 		return fragment;
 	}
@@ -750,7 +765,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				PullRequest request = getPullRequest();
 				MergePreview mergePreview = new MergePreview(request.getTarget().getObjectName(), 
 						request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
-				ObjectId merged = mergePreview.getMergeStrategy().merge(request);
+				ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Pull request merge preview");
 				if (merged != null)
 					mergePreview.setMergeCommitHash(merged.name());
 				request.setLastMergePreview(mergePreview);

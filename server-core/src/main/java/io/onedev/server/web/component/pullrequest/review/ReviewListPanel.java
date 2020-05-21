@@ -1,13 +1,13 @@
-package io.onedev.server.web.component.review;
+package io.onedev.server.web.component.pullrequest.review;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -27,13 +27,12 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -44,6 +43,8 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 @SuppressWarnings("serial")
 public class ReviewListPanel extends GenericPanel<PullRequest> {
 
+	private static final MetaDataKey<ArrayList<User>> UNPREFERABLE_REVIEWERS = new MetaDataKey<ArrayList<User>>() {};
+	
 	private final IModel<List<PullRequestReview>> reviewsModel;
 	
 	public ReviewListPanel(String id, IModel<PullRequest> model) {
@@ -54,11 +55,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected List<PullRequestReview> load() {
 				PullRequest request = getPullRequest();
-				List<PullRequestReview> reviews = new ArrayList<>();
-				for (PullRequestReview review: request.getReviews()) {
-					if (review.getExcludeDate() == null)
-						reviews.add(review);
-				}
+				List<PullRequestReview> reviews = new ArrayList<>(request.getReviews());
 				
 				Collections.sort(reviews, new Comparator<PullRequestReview>() {
 
@@ -112,7 +109,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				WebMarkupContainer result = new WebMarkupContainer("result");
 				if (review.getResult() != null) {
 					if (review.getResult().isApproved())
-						result.add(AttributeAppender.append("class", "approved fa fa-check"));
+						result.add(AttributeAppender.append("class", "approved fa fa-check-circle"));
 					else 
 						result.add(AttributeAppender.append("class", "request-for-changes fa fa-hand-stop-o"));
 				} else {
@@ -158,8 +155,8 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						if (!getPullRequest().isNew()) {
-							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to remove '" 
-										+ item.getModelObject().getUser().getDisplayName() + "' from reviewer list?"));
+							attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to "
+									+ "remove reviewer '" + item.getModelObject().getUser().getDisplayName() + "'?"));
 						}
 					}
 					
@@ -167,15 +164,16 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 					public void onClick(AjaxRequestTarget target) {
 						PullRequest request = getPullRequest();
 						PullRequestReview review = item.getModelObject();
-						boolean removed;
-						review.setExcludeDate(new Date());
-						if (request.isNew()) {
-							OneDev.getInstance(PullRequestManager.class).checkQuality(request);
-							removed = review.getExcludeDate() != null;		
-						} else {
-							removed = OneDev.getInstance(PullRequestReviewManager.class).excludeReviewer(review);
-						}
-						if (!removed) {
+						
+						ArrayList<User> unpreferableReviewers = getPage().getMetaData(UNPREFERABLE_REVIEWERS);
+						if (unpreferableReviewers == null)
+							unpreferableReviewers = new ArrayList<>();
+						unpreferableReviewers.remove(review.getUser());
+						unpreferableReviewers.add(review.getUser());
+						getPage().setMetaData(UNPREFERABLE_REVIEWERS, unpreferableReviewers);
+
+						PullRequestReviewManager manager = OneDev.getInstance(PullRequestReviewManager.class);
+						if (!manager.removeReviewer(review, unpreferableReviewers)) {
 							getSession().warn("Reviewer '" + review.getUser().getDisplayName() 
 									+ "' is required and can not be removed");
 						} else if (request.isNew()) {
@@ -201,7 +199,6 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-
 				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
 			}
 

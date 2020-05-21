@@ -1,7 +1,7 @@
 package io.onedev.server.event;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 public class ProjectCreated extends ProjectEvent {
 	

@@ -8,12 +8,12 @@ import static io.onedev.server.model.PullRequest.CriterionHelper.ofTarget;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofTargetProject;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,8 +32,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.Permission;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
@@ -42,6 +40,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
@@ -69,32 +68,33 @@ import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestTrigger;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestBuildManager;
+import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
-import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.PullRequestVerificationManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
+import io.onedev.server.event.pullrequest.PullRequestVerificationEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestBuild;
+import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
@@ -103,6 +103,8 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeAddData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeRemoveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
@@ -126,13 +128,11 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
@@ -146,8 +146,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
-	private static final int MAX_COMMIT_FILES = 100;
-	
 	private static final int UI_PREVIEW_PRIORITY = 10;
 	
 	private static final int BACKEND_PREVIEW_PRIORITY = 50;
@@ -156,19 +154,21 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final ProjectManager projectManager;
 	
-	private final UserManager userManager;
-	
 	private final SessionManager sessionManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final PullRequestReviewManager pullRequestReviewManager;
 	
-	private final PullRequestBuildManager pullRequestBuildManager;
+	private final PullRequestVerificationManager pullRequestVerificationManager;
+	
+	private final CommitInfoManager commitInfoManager;
 
 	private final BatchWorkManager batchWorkManager;
 	
 	private final PullRequestChangeManager pullRequestChangeManager;
+	
+	private final PullRequestAssignmentManager pullRequestAssignmentManager;
 	
 	private final TransactionManager transactionManager;
 	
@@ -178,26 +178,27 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
-			PullRequestReviewManager pullRequestReviewManager, UserManager userManager, 
-			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
-			ListenerRegistry listenerRegistry, SessionManager sessionManager,
-			PullRequestChangeManager pullRequestChangeManager, ExecutorService executorService,
-			PullRequestBuildManager pullRequestBuildManager, TransactionManager transactionManager, 
-			JobManager jobManager, ProjectManager projectManager) {
+			PullRequestReviewManager pullRequestReviewManager, MarkdownManager markdownManager, 
+			BatchWorkManager batchWorkManager, ListenerRegistry listenerRegistry, 
+			SessionManager sessionManager, PullRequestChangeManager pullRequestChangeManager, 
+			ExecutorService executorService, PullRequestVerificationManager pullRequestVerificationManager, 
+			TransactionManager transactionManager, JobManager jobManager, ProjectManager projectManager, 
+			CommitInfoManager commitInfoManager, PullRequestAssignmentManager pullRequestAssignmentManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.pullRequestReviewManager = pullRequestReviewManager;
 		this.transactionManager = transactionManager;
-		this.userManager = userManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
 		this.listenerRegistry = listenerRegistry;
 		this.pullRequestChangeManager = pullRequestChangeManager;
-		this.pullRequestBuildManager = pullRequestBuildManager;
+		this.pullRequestVerificationManager = pullRequestVerificationManager;
 		this.executorService = executorService;
 		this.jobManager = jobManager;
 		this.projectManager = projectManager;
+		this.commitInfoManager = commitInfoManager;
+		this.pullRequestAssignmentManager = pullRequestAssignmentManager;
 	}
 	
 	@Transactional
@@ -287,55 +288,90 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		pullRequestChangeManager.save(change);
 	}
 	
-	private void merge(PullRequest request) {
-		MergePreview preview = Preconditions.checkNotNull(request.getMergePreview());
-		String mergedCommitHash = Preconditions.checkNotNull(preview.getMergeCommitHash());
+	@Transactional
+	@Override
+	public void merge(PullRequest request, String commitMessage) {
+		MergePreview mergePreview = Preconditions.checkNotNull(request.getMergePreview());
+		ObjectId mergeCommitId = ObjectId.fromString(
+				Preconditions.checkNotNull(mergePreview.getMergeCommitHash()));
+        PersonIdent user = SecurityUtils.getUser().asPerson();
+		Project project = request.getTargetProject();
+		MergeStrategy mergeStrategy = mergePreview.getMergeStrategy();
 		
-		ObjectId mergedCommitId = ObjectId.fromString(mergedCommitHash);
-		RevCommit mergedCommit = request.getTargetProject().getRevCommit(mergedCommitId, true);
-		
-        PersonIdent committer = new PersonIdent(OneDev.NAME, "");
-        
-		Project targetProject = request.getTargetProject();
-		MergeStrategy strategy = request.getMergeStrategy();
-		if ((strategy == CREATE_MERGE_COMMIT || strategy == CREATE_MERGE_COMMIT_IF_NECESSARY || strategy == SQUASH_SOURCE_BRANCH_COMMITS) 
-				&& !preview.getMergeCommitHash().equals(preview.getHeadCommitHash()) 
-				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage())) {
-			try (	RevWalk revWalk = new RevWalk(targetProject.getRepository());
-					ObjectInserter inserter = targetProject.getRepository().newObjectInserter()) {
-		        CommitBuilder newCommit = new CommitBuilder();
-		        newCommit.setAuthor(mergedCommit.getAuthorIdent());
-		        newCommit.setCommitter(committer);
-		        newCommit.setMessage(request.getCommitMessage());
-		        newCommit.setTreeId(mergedCommit.getTree());
-		        newCommit.setParentIds(mergedCommit.getParents());
-		        mergedCommitId = inserter.insert(newCommit);
-		        mergedCommitHash = mergedCommitId.name();
+		if (mergeStrategy == CREATE_MERGE_COMMIT
+				|| mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS
+				|| mergeStrategy == CREATE_MERGE_COMMIT_IF_NECESSARY 
+						&& !mergeCommitId.name().equals(mergePreview.getHeadCommitHash())) {
+			try (	RevWalk revWalk = new RevWalk(project.getRepository());
+					ObjectInserter inserter = project.getRepository().newObjectInserter()) {
+				RevCommit mergeCommit = revWalk.parseCommit(mergeCommitId);
+		        CommitBuilder commitBuilder = new CommitBuilder();
+		        if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS)
+		        	commitBuilder.setAuthor(mergeCommit.getAuthorIdent());
+		        else
+		        	commitBuilder.setAuthor(user);
+		        commitBuilder.setCommitter(user);
+		        commitBuilder.setMessage(commitMessage);
+		        commitBuilder.setTreeId(mergeCommit.getTree());
+		        commitBuilder.setParentIds(mergeCommit.getParents());
+		        mergeCommitId = inserter.insert(commitBuilder);
 		        inserter.flush();
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
-	        preview = new MergePreview(preview.getTargetHeadCommitHash(), preview.getHeadCommitHash(), 
-	        		preview.getMergeStrategy(), mergedCommitHash);
-	        request.setLastMergePreview(preview);
+		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
+			try (	RevWalk revWalk = new RevWalk(project.getRepository());
+					ObjectInserter inserter = project.getRepository().newObjectInserter()) {
+				RevCommit mergeCommit = revWalk.parseCommit(mergeCommitId);
+				ObjectId targetHeadCommitId = ObjectId.fromString(mergePreview.getTargetHeadCommitHash());
+				RevCommit targetHeadCommit = revWalk.parseCommit(targetHeadCommitId);
+	    		List<RevCommit> commits = RevWalkUtils.find(revWalk, mergeCommit, targetHeadCommit);
+	    		Collections.reverse(commits);
+	    		mergeCommit = targetHeadCommit;
+	    		for (RevCommit commit: commits) {
+	    			PersonIdent committer = commit.getCommitterIdent();
+	    			if (committer.getName().equals(OneDev.NAME) && committer.getEmailAddress().length() == 0
+	    					|| !commit.getParent(0).equals(mergeCommit)) {
+				        CommitBuilder commitBuilder = new CommitBuilder();
+				        commitBuilder.setAuthor(commit.getAuthorIdent());
+				        commitBuilder.setCommitter(user);
+				        commitBuilder.setParentId(mergeCommit.copy());
+				        commitBuilder.setMessage(commit.getFullMessage());
+				        commitBuilder.setTreeId(commit.getTree().getId());
+				        mergeCommit = revWalk.parseCommit(inserter.insert(commitBuilder));
+	    			} else {
+	    				mergeCommit = commit;
+	    			}
+	    		}
+	    		mergeCommitId = mergeCommit.copy();
+		        inserter.flush();
+			} catch (Exception e) {
+				throw ExceptionUtils.unchecked(e);
+			}
+		}
+		
+		if (!mergeCommitId.name().equals(mergePreview.getMergeCommitHash())) {
+	        mergePreview = new MergePreview(mergePreview.getTargetHeadCommitHash(), 
+	        		mergePreview.getHeadCommitHash(), mergeStrategy, mergeCommitId.name());
+	        request.setLastMergePreview(mergePreview);
 	        request.writeMergeRef();
 		}
 		
 		closeAsMerged(request, false);
 		
 		String targetRef = request.getTargetRef();
-		ObjectId targetHeadId = ObjectId.fromString(preview.getTargetHeadCommitHash());
-		RefUpdate refUpdate = GitUtils.getRefUpdate(targetProject.getRepository(), targetRef);
-		refUpdate.setRefLogIdent(committer);
+		ObjectId targetHeadCommitId = ObjectId.fromString(mergePreview.getTargetHeadCommitHash());
+		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), targetRef);
+		refUpdate.setRefLogIdent(user);
 		refUpdate.setRefLogMessage("Pull request #" + request.getNumber(), true);
-		refUpdate.setExpectedOldObjectId(targetHeadId);
-		refUpdate.setNewObjectId(mergedCommitId);
+		refUpdate.setExpectedOldObjectId(targetHeadCommitId);
+		refUpdate.setNewObjectId(mergeCommitId);
 		GitUtils.updateRef(refUpdate);
 		
-		request.getTargetProject().cacheObjectId(request.getTargetRef(), mergedCommitId);
+		request.getTargetProject().cacheObjectId(request.getTargetRef(), mergeCommitId);
 		
 		Long requestId = request.getId();
-		ObjectId newTargetHeadId = mergedCommitId;
+		ObjectId newTargetHeadId = mergeCommitId;
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
@@ -347,7 +383,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						PullRequest request = load(requestId);
 						request.getTargetProject().cacheObjectId(request.getTargetRef(), newTargetHeadId);
 						listenerRegistry.post(new RefUpdated(request.getTargetProject(), targetRef, 
-									targetHeadId, newTargetHeadId));
+									targetHeadCommitId, newTargetHeadId));
 					}
 					
 				});
@@ -377,7 +413,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			pullRequestUpdateManager.save(update);
 		
 		pullRequestReviewManager.saveReviews(request);
-		pullRequestBuildManager.savePullRequestBuilds(request);
+		pullRequestVerificationManager.saveVerifications(request);
+		
+		for (PullRequestAssignment assignment: request.getAssignments())
+			pullRequestAssignmentManager.save(assignment);
 
 		checkAsync(Lists.newArrayList(request));
 		
@@ -402,7 +441,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			reason = null;
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setUser(userManager.getSystem());
+		change.setUser(SecurityUtils.getUser());
 		change.setDate(date);
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
@@ -426,24 +465,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					if (request.isMergedIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
-						checkQuality(request);
+						checkQuality(request, Lists.newArrayList());
 						
 						/*
 						 * If the check method runs concurrently, below statements may fail. It will 
 						 * not do any harm except that the transaction rolls back
 						 */
 						pullRequestReviewManager.saveReviews(request);
-						pullRequestBuildManager.savePullRequestBuilds(request);
-						
-						MergePreview preview = request.getMergePreview();
-						
-						if (request.isAllReviewsApproved() 
-								&& request.isRequiredBuildsSuccessful()
-								&& request.getCheckError() == null 
-								&& preview != null 
-								&& preview.getMergeCommitHash() != null) {
-							merge(request);
-						}
+						pullRequestVerificationManager.saveVerifications(request);
 					}
 				}
 			}
@@ -464,9 +493,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public MergePreview previewMerge(PullRequest request) {
 		if (!request.isNew()) {
-			MergePreview lastPreview = request.getLastMergePreview();
+			MergePreview lastMergePreview = request.getLastMergePreview();
 			if (request.isOpen() && !request.isMergedIntoTarget()) {
-				if (lastPreview == null || !lastPreview.isUpToDate(request)) {
+				if (lastMergePreview == null || !lastMergePreview.isUpToDate(request)) {
 					int priority = RequestCycle.get() != null?UI_PREVIEW_PRIORITY:BACKEND_PREVIEW_PRIORITY;			
 					Long requestId = request.getId();
 					transactionManager.runAfterCommit(new Runnable() {
@@ -479,11 +508,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					});
 					return null;
 				} else {
-					lastPreview.syncRef(request);
-					return lastPreview;
+					lastMergePreview.syncRef(request);
+					return lastMergePreview;
 				}
 			} else {
-				return lastPreview;
+				return lastMergePreview;
 			}
 		} else {
 			return null;
@@ -509,7 +538,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 										request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
 								logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
 										request.getNumber(), targetProject.getName());
-								ObjectId merged = mergePreview.getMergeStrategy().merge(request);
+								ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Merge preview of pull request #" + request.getNumber());
 								if (merged != null)
 									mergePreview.setMergeCommitHash(merged.name());
 								mergePreview.syncRef(request);
@@ -634,7 +663,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void on(PullRequestChangeEvent event) {
 		PullRequestChangeData data = event.getChange().getData();
 		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
-				|| data instanceof PullRequestReviewerRemoveData || data instanceof PullRequestReviewerAddData 
 				|| data instanceof PullRequestMergeStrategyChangeData) {
 			checkAsync(Lists.newArrayList(event.getRequest()));
 		}
@@ -663,6 +691,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				PullRequestChangeData changeData = ((PullRequestChangeEvent)event).getChange().getData();
 				if (changeData instanceof PullRequestReviewerAddData 
 						|| changeData instanceof PullRequestReviewerRemoveData
+						|| changeData instanceof PullRequestAssigneeAddData
+						|| changeData instanceof PullRequestAssigneeRemoveData
 						|| changeData instanceof PullRequestSourceBranchDeleteData
 						|| changeData instanceof PullRequestSourceBranchRestoreData
 						|| changeData instanceof PullRequestReferencedFromCodeCommentData
@@ -673,7 +703,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			}
 			if (!(event instanceof PullRequestOpened 
 					|| event instanceof PullRequestMergePreviewCalculated
-					|| event instanceof PullRequestBuildEvent
+					|| event instanceof PullRequestVerificationEvent
 					|| minorChange)) {
 				event.getRequest().setLastUpdate(event.getLastUpdate());
 			}
@@ -690,9 +720,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		for (PullRequestBuild pullRequestBuild: build.getPullRequestBuilds())  
-			listenerRegistry.post(new PullRequestBuildEvent(pullRequestBuild));
-		checkAsync(build.getPullRequestBuilds()
+		for (PullRequestVerification verification: build.getVerifications())  
+			listenerRegistry.post(new PullRequestVerificationEvent(verification));
+		checkAsync(build.getVerifications()
 				.stream()
 				.map(it->it.getRequest())
 				.collect(Collectors.toList()));
@@ -749,10 +779,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Transactional
 	@Override
-	public void checkQuality(PullRequest request) {
+	public void checkQuality(PullRequest request, List<User> unpreferableReviewers) {
+		unpreferableReviewers = new ArrayList<>(unpreferableReviewers);
+		unpreferableReviewers.remove(request.getSubmitter());
+		unpreferableReviewers.add(request.getSubmitter());
 		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(
 				request.getTargetBranch(), request.getSubmitter());
-		checkReviews(branchProtection.getParsedReviewRequirement(), request.getLatestUpdate());
+		checkReviews(branchProtection.getParsedReviewRequirement(), request.getLatestUpdate(), unpreferableReviewers);
 
 		ReviewRequirement checkedRequirement = ReviewRequirement.parse(null, true);
 		for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
@@ -765,26 +798,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				FileProtection fileProtection = branchProtection.getFileProtection(file);
 				if (!checkedRequirement.covers(fileProtection.getParsedReviewRequirement())) {
 					checkedRequirement.mergeWith(fileProtection.getParsedReviewRequirement());
-					checkReviews(fileProtection.getParsedReviewRequirement(), update);
+					checkReviews(fileProtection.getParsedReviewRequirement(), update, unpreferableReviewers);
 				}
 			}
 		}
 
 		checkBuilds(request);
-		
-		Project project = request.getTargetProject();
-		Permission writeCode = new ProjectPermission(project, new WriteCode()); 
-		if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writeCode)) {
-			Collection<User> writers = new ArrayList<>();
-			for (User facade: SecurityUtils.getAuthorizedUsers(project, new WriteCode())) 
-				writers.add(userManager.load(facade.getId()));
-			checkReviews(writers, 1, request.getLatestUpdate());
-		}
 	}
 
 	private void checkBuilds(PullRequest request) {
-		Collection<PullRequestBuild> prevPullRequestBuilds = new ArrayList<>(request.getPullRequestBuilds());
-		request.getPullRequestBuilds().clear();
+		Collection<PullRequestVerification> prevVerifications = new ArrayList<>(request.getVerifications());
+		request.getVerifications().clear();
 		MergePreview preview = request.getMergePreview();
 		if (preview != null && preview.getMergeCommitHash() != null) {
 			Project project = request.getTargetProject();
@@ -810,20 +834,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 										public void run(Map<String, List<String>> paramMap) {
 											Build build = jobManager.submit(request.getTargetProject(), 
 													commitId, job.getName(), paramMap, null);
-											PullRequestBuild pullRequestBuild = null;
-											for (PullRequestBuild prevPullRequestBuild: prevPullRequestBuilds) {
-												if (prevPullRequestBuild.getBuild().equals(build)) {
-													pullRequestBuild = prevPullRequestBuild;
+											PullRequestVerification verification = null;
+											for (PullRequestVerification prevVerification: prevVerifications) {
+												if (prevVerification.getBuild().equals(build)) {
+													verification = prevVerification;
 													break;
 												}
 											}
-											if (pullRequestBuild == null) {
-												pullRequestBuild = new PullRequestBuild();
-												pullRequestBuild.setRequest(request);
-												pullRequestBuild.setBuild(build);
+											if (verification == null) {
+												verification = new PullRequestVerification();
+												verification.setRequest(request);
+												verification.setBuild(build);
 											}
-											pullRequestBuild.setRequired(required);
-											request.getPullRequestBuilds().add(pullRequestBuild);
+											verification.setRequired(required);
+											request.getVerifications().add(verification);
 										}
 										
 									}.run();
@@ -841,7 +865,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 	
-	private void checkReviews(ReviewRequirement reviewRequirement, PullRequestUpdate update) {
+	private void checkReviews(ReviewRequirement reviewRequirement, PullRequestUpdate update, List<User> unpreferableReviewers) {
 		PullRequest request = update.getRequest();
 		
 		for (User user: reviewRequirement.getUsers()) {
@@ -851,8 +875,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				review.setRequest(request);
 				review.setUser(user);
 				request.getReviews().add(review);
-			} else if (review.getExcludeDate() != null) {
-				review.setExcludeDate(null);
 			} else if (review.getUpdate() == null || review.getUpdate().getId()<update.getId()) {
 				review.setResult(null);
 			}
@@ -861,11 +883,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (Map.Entry<Group, Integer> entry: reviewRequirement.getGroups().entrySet()) {
 			Group group = entry.getKey();
 			int requiredCount = entry.getValue();
-			checkReviews(group.getMembers(), requiredCount, update);
+			checkReviews(group.getMembers(), requiredCount, update, unpreferableReviewers);
 		}
 	}
 	
-	private void checkReviews(Collection<User> users, int requiredCount, PullRequestUpdate update) {
+	private void checkReviews(Collection<User> users, int requiredCount, 
+			PullRequestUpdate update, List<User> unpreferableReviewers) {
 		PullRequest request = update.getRequest();
 
 		if (requiredCount == 0)
@@ -875,7 +898,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Set<User> potentialReviewers = new HashSet<>();
 		for (User user: users) {
 			PullRequestReview review = request.getReview(user);
-			if (review != null && review.getExcludeDate() == null) {
+			if (review != null) {
 				if (review.getResult() == null)
 					requiredCount--;
 				else if (review.getUpdate() != null && review.getUpdate().getId()>=update.getId())
@@ -895,11 +918,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<User> candidateReviewers = new ArrayList<>();
 		for (User user: potentialReviewers) {
 			PullRequestReview review = request.getReview(user);
-			if (review != null && review.getExcludeDate() == null)
+			if (review != null)
 				candidateReviewers.add(user);
 		}
 		
-		sortByCommitCount(candidateReviewers, update);
+		Project project = request.getTargetProject();
+		
+		commitInfoManager.sortUsersByContribution(candidateReviewers, project, update.getChangedFiles());
 		
 		for (User user: candidateReviewers) {
 			reviewers.add(user);
@@ -912,10 +937,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			candidateReviewers = new ArrayList<>();
 			for (User user: potentialReviewers) {
 				PullRequestReview review = request.getReview(user);
-				if (review == null) 
+				if (review == null && !unpreferableReviewers.contains(user)) 
 					candidateReviewers.add(user);
 			}
-			sortByCommitCount(candidateReviewers, update);
+			commitInfoManager.sortUsersByContribution(candidateReviewers, project, update.getChangedFiles());
 			for (User user: candidateReviewers) {
 				reviewers.add(user);
 				PullRequestReview review = new PullRequestReview();
@@ -928,19 +953,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 		
 		if (reviewers.size() < missingCount) {
-			List<PullRequestReview> excludedReviews = new ArrayList<>();
-			for (User user: potentialReviewers) {
-				PullRequestReview review = request.getReview(user);
-				if (review != null && review.getExcludeDate() != null)
-					excludedReviews.add(review);
-			}
-			excludedReviews.sort(Comparator.comparing(PullRequestReview::getExcludeDate));
-			
-			for (PullRequestReview review: excludedReviews) {
-				reviewers.add(review.getUser());
-				review.setExcludeDate(null);
-				if (reviewers.size() == missingCount)
-					break;
+			for (User reviewer: unpreferableReviewers) {
+				PullRequestReview review = request.getReview(reviewer);
+				if (review == null && potentialReviewers.contains(reviewer)) { 
+					reviewers.add(reviewer);
+					review = new PullRequestReview();
+					review.setRequest(request);
+					review.setUser(reviewer);
+					request.getReviews().add(review);
+					if (reviewers.size() == missingCount)
+						break;
+				}
 			}
 		}
 		if (reviewers.size() < missingCount) {
@@ -949,56 +972,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					reviewers, missingCount, update.getRequest().getNumber());
 			throw new OneException(errorMessage);
 		}
-	}
-	
-	private void sortByCommitCount(List<User> users, PullRequestUpdate update) {
-		if (users.size() <= 1)
-			return;
-		
-		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		Map<User, Long> commitCounts = new HashMap<>();
-		for (User user: users)
-			commitCounts.put(user, 0L);
-
-		int count = 0;
-		for (String path: update.getChangedFiles()) {
-			int addedCommitCount = addCommitCounts(commitCounts, commitInfoManager, path, update);
-			while (addedCommitCount == 0) {
-				if (path.contains("/")) {
-					path = StringUtils.substringBeforeLast(path, "/");
-					addedCommitCount = addCommitCounts(commitCounts, commitInfoManager, path, update);
-				} else {
-					addCommitCounts(commitCounts, commitInfoManager, "", update);
-					break;
-				}
-			}
-			if (++count >= MAX_COMMIT_FILES)
-				break;
-		}
-
-		Collections.sort(users, new Comparator<User>() {
-
-			@Override
-			public int compare(User o1, User o2) {
-				if (commitCounts.get(o1) < commitCounts.get(o2))
-					return 1;
-				else
-					return -1;
-			}
-			
-		});
-	}
-	
-	private int addCommitCounts(Map<User, Long> commitCounts, CommitInfoManager commitInfoManager, 
-			String path, PullRequestUpdate update) {
-		int addedCommitCount = 0;
-		for (Map.Entry<User, Long> entry: commitCounts.entrySet()) {
-			User user = entry.getKey();
-			int commitCount = commitInfoManager.getCommitCount(update.getRequest().getTargetProject(), user, path);
-			entry.setValue(entry.getValue() + commitCount);
-			addedCommitCount += commitCount;
-		}
-		return addedCommitCount;
 	}
 	
 	private Predicate[] getPredicates(@Nullable Project targetProject, 

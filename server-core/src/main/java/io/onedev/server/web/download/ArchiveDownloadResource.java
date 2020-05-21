@@ -21,7 +21,7 @@ import org.eclipse.jgit.archive.ZipFormat;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 public class ArchiveDownloadResource extends AbstractResource {
 

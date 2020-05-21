@@ -84,7 +84,7 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 					InputCompletion completion;
 					if (appendTitle) {
 						String content = contentBeforeCaret.substring(0, hashIndex) + suggestion.getContent() 
-								+ ": " + suggestion.getDescription(); 
+								+ " - " + suggestion.getDescription(); 
 						completion = new InputCompletion(suggestion.getContent(), 
 								content + inputStatus.getContentAfterCaret(), content.length(), 
 								suggestion.getDescription(), suggestion.getMatch());

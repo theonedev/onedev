@@ -80,4 +80,6 @@ public interface CommitInfoManager {
 
 	Collection<ObjectId> getFixCommits(Project project, Long issueNumber);
 	
+	void sortUsersByContribution(List<User> users, Project project, Collection<String> files);
+	
 }

@@ -21,7 +21,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.my.sshkeys.MySshKeysPage;
 
 @SuppressWarnings("serial")

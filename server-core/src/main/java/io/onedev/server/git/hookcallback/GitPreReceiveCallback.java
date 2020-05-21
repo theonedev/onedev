@@ -34,9 +34,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.util.SecurityUtils;
 
 @SuppressWarnings("serial")
 @Singleton

@@ -114,23 +114,6 @@ public class ReviewRequirement {
 		return groups;
 	}
 	
-	public boolean satisfied(User user) {
-		for (User eachUser: users) {
-			if (!eachUser.equals(user))
-				return false;
-		}
-		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
-			Group group = entry.getKey();
-			int requiredCount = entry.getValue();
-			if (requiredCount == 0 || requiredCount > group.getMembers().size())
-				requiredCount = group.getMembers().size();
-
-			if (requiredCount > 1 || requiredCount == 1 && !group.getMembers().contains(user))
-				return false;
-		}
-		return true;
-	}
-	
 	@Nullable
 	public static String onRenameGroup(@Nullable String reviewRequirementString, String oldName, String newName) {
 		ReviewRequirement reviewRequirement = parse(reviewRequirementString, false);

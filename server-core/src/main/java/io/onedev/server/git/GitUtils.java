@@ -399,13 +399,18 @@ public class GitUtils {
         		merger.setBase(commit.getParent(0));
         		if (merger.merge(headCommit, commit)) {
 					if (!headCommit.getTree().getId().equals(merger.getResultTreeId())) {
-				        CommitBuilder newCommit = new CommitBuilder();
-				        newCommit.setAuthor(commit.getAuthorIdent());
-				        newCommit.setCommitter(committer);
-				        newCommit.setParentId(headCommit);
-				        newCommit.setMessage(commit.getFullMessage());
-				        newCommit.setTreeId(merger.getResultTreeId());
-				        headCommit = revWalk.parseCommit(inserter.insert(newCommit));
+						if (!commit.getTree().getId().equals(merger.getResultTreeId()) 
+								|| !commit.getParent(0).equals(headCommit)) {
+					        CommitBuilder commitBuilder = new CommitBuilder();
+					        commitBuilder.setAuthor(commit.getAuthorIdent());
+					        commitBuilder.setCommitter(committer);
+					        commitBuilder.setParentId(headCommit);
+					        commitBuilder.setMessage(commit.getFullMessage());
+					        commitBuilder.setTreeId(merger.getResultTreeId());
+					        headCommit = revWalk.parseCommit(inserter.insert(commitBuilder));
+						} else {
+							headCommit = commit;
+						}
 					}
         		} else {
         			return null;

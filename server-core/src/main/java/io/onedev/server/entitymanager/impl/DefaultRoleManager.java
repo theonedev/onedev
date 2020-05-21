@@ -94,44 +94,44 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 	
 	@Transactional
 	public void setupDefaults() {
-		Role developer = new Role();
-		developer.setName("Developer");
-		developer.setCodePrivilege(CodePrivilege.WRITE);
-		developer.setScheduleIssues(true);
-		developer.setEditableIssueFields(new AllIssueFields());
+		Role codeWriter = new Role();
+		codeWriter.setName("Code Writer");
+		codeWriter.setCodePrivilege(CodePrivilege.WRITE);
+		codeWriter.setScheduleIssues(true);
+		codeWriter.setEditableIssueFields(new AllIssueFields());
 		
 		JobPrivilege jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
 		jobPrivilege.setRunJob(true);
-		developer.getJobPrivileges().add(jobPrivilege);
+		codeWriter.getJobPrivileges().add(jobPrivilege);
 		
-		save(developer, null);
+		save(codeWriter, null);
 
-		Role tester = new Role();
-		tester.setName("Tester");
-		tester.setCodePrivilege(CodePrivilege.READ);
-		tester.setScheduleIssues(true);
-		tester.setEditableIssueFields(new AllIssueFields());
+		Role codeReader = new Role();
+		codeReader.setName("Code Reader");
+		codeReader.setCodePrivilege(CodePrivilege.READ);
+		codeReader.setScheduleIssues(true);
+		codeReader.setEditableIssueFields(new AllIssueFields());
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
 		jobPrivilege.setAccessLog(true);
-		tester.getJobPrivileges().add(jobPrivilege);
+		codeReader.getJobPrivileges().add(jobPrivilege);
 		
-		save(tester, null);
+		save(codeReader, null);
 		
-		Role reporter = new Role();
-		reporter.setName("Reporter");
-		reporter.setCodePrivilege(CodePrivilege.NONE);
+		Role issueReporter = new Role();
+		issueReporter.setName("Issue Reporter");
+		issueReporter.setCodePrivilege(CodePrivilege.NONE);
 		ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
 		allfieldsExcept.getExcludeFields().add("Assignees");
-		reporter.setEditableIssueFields(allfieldsExcept);
+		issueReporter.setEditableIssueFields(allfieldsExcept);
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
-		reporter.getJobPrivileges().add(jobPrivilege);
+		issueReporter.getJobPrivileges().add(jobPrivilege);
 
-		save(reporter, null);					
+		save(issueReporter, null);					
 	}
 
     @Sessional

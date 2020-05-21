@@ -16,7 +16,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.ConfirmClickModifier;

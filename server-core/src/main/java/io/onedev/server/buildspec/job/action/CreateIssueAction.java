@@ -22,7 +22,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.fieldsupply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.FieldNamesProvider;
 import io.onedev.server.web.editable.annotation.Interpolative;

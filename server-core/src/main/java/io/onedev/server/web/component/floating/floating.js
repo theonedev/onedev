@@ -44,11 +44,16 @@ onedev.server.floating = {
 		
 		var openTriggered = false;
 		$floating.data("afterElementReplace", function() {
-			if ($floating.data("alignment"))
-				$floating.align($floating.data("alignment"));
-			if (!openTriggered) {
-				$floating.trigger("open");
-				openTriggered = true;
+			var alignment = $floating.data("alignment");
+			if (alignment && alignment.target && alignment.target.element 
+					&& !document.body.contains(alignment.target.element)) {
+				onedev.server.floating.close($floating, true);
+			} else {
+				$floating.align(alignment);
+				if (!openTriggered) {
+					$floating.trigger("open");
+					openTriggered = true;
+				}
 			}
 		});
 		$(document).on("afterElementReplace", $floating.data("afterElementReplace"));

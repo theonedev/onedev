@@ -41,7 +41,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.util.validation.annotation.UserName;
@@ -101,10 +101,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReview> reviews = new ArrayList<>();
+	private Collection<PullRequestReview> pullRequestReviews = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestAssignment> pullRequestAssignments = new ArrayList<>();
 	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
+    private Collection<PullRequestWatch> pullRequestWatches = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueWatch> issueWatches = new ArrayList<>();

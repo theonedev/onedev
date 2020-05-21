@@ -25,73 +25,68 @@
 				</div>
 				<a wicket:id="moreInfo" class="more-info" title="More info"><span class="fa fa-ellipsis-h"></span></a>
 			</div>
-			<div wicket:id="requestSummary" class="summary">
+			<div wicket:id="requestSummary" class="summary resize-aware">
                 <div wicket:id="checkError" class="alert alert-danger"></div>
-				<div wicket:id="discardedNote" class="discarded alert alert-danger">
-					<i class="fa fa-exclamation-circle"></i> <b>This pull request has been discarded</b>
+				<div wicket:id="discarded" class="discarded alert alert-danger">
+					<i class="fa fa-exclamation-circle"></i> This pull request has been discarded
 				</div>
-				<div wicket:id="mergedNote" class="merged-note alert alert-success">
-					<div wicket:id="fastForwarded">
-						<i class="fa fa-check-circle"></i> <b>Target branch was fast-forwarded to source branch</b>
-					</div>
-					<div wicket:id="merged">
-						<i class="fa fa-check-circle"></i> <b>Commits were merged into target branch</b>
-					</div>
-					<div wicket:id="mergedOutside">
-						<i class="fa fa-check-circle"></i> <b>Commits were merged into target branch by someone outside of this pull request</b>
-					</div>
-					<div wicket:id="squashed">
-						<i class="fa fa-check-circle"></i> <b>Commits were squashed into a single commit in target branch</b>
-					</div>
-					<div wicket:id="rebased">
-						<i class="fa fa-check-circle"></i> <b>Commits were rebased onto target branch</b>
-					</div>
+				<div wicket:id="fastForwarded" class="fast-forwarded alert alert-success">
+					<i class="fa fa-check-circle"></i> Target branch was fast-forwarded to source branch
 				</div>
-				<div wicket:id="mergeStatus" class="merge-status">
-					<div wicket:id="calculating" class="calculating alert alert-warning">
-						<img src="/img/ajax-indicator-big.gif"> <b>Calculating merge preview...</b>
-					</div>
-					<div wicket:id="noConflict" class="no-conflict alert alert-success">
-						<label><i class="fa fa-check-circle"></i> Able to merge without conflicts</label>
-						<div>
-							OneDev will merge automatically after all reviews and builds pass
-						</div>						
-					</div>
-					<div wicket:id="conflict" class="conflict alert alert-danger">
-						<label><i class="fa fa-exclamation-circle"></i> There are merge conflicts</label>
-						<wicket:enclosure child="resolveInstructions">
-						<div>
-							Please follow <a wicket:id="resolveInstructions" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
-						</div>
-						</wicket:enclosure>
-					</div>
+				<div wicket:id="merged" class="merged alert alert-success">
+					<i class="fa fa-check-circle"></i> Commits were merged into target branch
 				</div>
-				<div wicket:id="operations" class="operations">
-					<div class="buttons">
-						<a wicket:id="approve" class="btn btn-sm btn-primary">Approve</a>
-						<a wicket:id="requestForChanges" class="btn btn-sm btn-primary">Request for changes</a>
-						<a wicket:id="discard" class="btn btn-sm btn-danger">Discard</a>
-						<a wicket:id="reopen" class="btn btn-sm btn-primary">Reopen</a>
-						<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-primary">Delete source branch</a>
-						<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-primary">Restore source branch</a>
-					</div>
-					<div wicket:id="confirm" class="confirm"></div>
+				<div wicket:id="mergedOutside" class="merged-outside alert alert-success">
+					<i class="fa fa-check-circle"></i> Commits were merged into target branch by someone outside of this pull request
 				</div>
+				<div wicket:id="squashed" class="squashed alert alert-success">
+					<i class="fa fa-check-circle"></i> Commits were squashed into a single commit on target branch
+				</div>
+				<div wicket:id="rebased">
+					<i class="fa fa-check-circle"></i> Commits were rebased onto target branch
+				</div>
+				<div wicket:id="calculatingMergePreview" class="calculating-merge-preview alert alert-warning">
+					<img src="/img/ajax-indicator-big.gif"> Calculating merge preview...
+				</div>
+				<div wicket:id="calculatedMergePreview" class="calculated-merge-preview alert alert-success">
+					<i class="fa fa-check-circle"></i> Able to merge without conflicts
+				</div>
+				<div wicket:id="hasMergeConflict" class="has-merge-conflict alert alert-danger">
+					<i class="fa fa-exclamation-circle"></i> There are merge conflicts. 
+					<wicket:enclosure child="resolveInstructions">
+						Please follow <a wicket:id="resolveInstructions" href="javascript:void(0);">this instruction</a> to resolve the conflicts
+					</wicket:enclosure>
+				</div>
+				<div wicket:id="requestedForChanges" class="requested-for-changes alert alert-danger">
+					<i class="fa fa-hande-stop-o"></i> Pull request can not be merged now as <a class="more-info">some reviewers</a> are requesting for changes
+				</div>
+				<div wicket:id="waitingForReviews" class="waiting-for-reviews alert alert-warning">
+					<i class="fa fa-clock-o"></i> Pull request can not be merged now as it is waiting approvals from <a class="more-info">some reviewers</a>
+				</div>
+				<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds alert alert-danger">
+					<i class="fa fa-times-circle"></i> Pull request can not be merged now as <a class="more-info">some required builds</a> are not successful
+				</div>
+				<div wicket:id="unfinishedBuilds" class="unfinished-builds alert alert-warning">
+					<i class="fa fa-clock-o"></i> Pull request can not be merged now as <a class="more-info">some required builds</a> are not finished yet
+				</div>
+				<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers alert alert-info">
+					<i class="fa fa-info-circle"></i> Pull request can only be merged by users with code write permission
+				</div>
+			</div>
+			<div wicket:id="requestOperations" class="operations">
+				<a wicket:id="merge" class="btn btn-sm btn-success">Merge</a>
+				<a wicket:id="discard" class="btn btn-sm btn-danger">Discard</a>
+				<a wicket:id="approve" class="btn btn-sm btn-primary">Approve</a>
+				<a wicket:id="requestForChanges" class="btn btn-sm btn-primary">Request for changes</a>
+				<a wicket:id="reopen" class="btn btn-sm btn-primary">Reopen</a>
+				<a wicket:id="deleteSourceBranch" class="btn btn-sm btn-primary">Delete source branch</a>
+				<a wicket:id="restoreSourceBranch" class="btn btn-sm btn-primary">Restore source branch</a>
 			</div>
 			<ul wicket:id="requestTabs" class="tabs nav nav-tabs"></ul>
 			<wicket:child></wicket:child>
 		</div>
 		<div wicket:id="moreInfo"></div>
 	</div>
-	<wicket:fragment wicket:id="operationConfirmFrag">
-		<div wicket:id="hint" class="hint"></div>
-		<div wicket:id="feedback"></div>
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="note"></div>
-			<input wicket:id="submit" type="submit" value="Ok" class="btn btn-primary">
-			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default">
-		</form>
-	</wicket:fragment>
 	<wicket:fragment wicket:id="codeCommentsTabLinkFrag">
 		<a wicket:id="link" class="code-comments">Code Comments <i class="fa fa-circle"></i></a>
 	</wicket:fragment>
@@ -99,8 +94,9 @@
 		<div wicket:id="requestNav" class="nav"></div>
 		<wicket:enclosure child="reviews">
 		<div class="reviews">
-			<div class="head">Reviews</div>
+			<div class="head">Reviewers</div>
 			<div wicket:id="reviews" class="body"></div>
+			<div wicket:id="reviewerHelp" class="help-block">Pull request can only be merged after getting approvals from all reviewers</div>
 		</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
@@ -115,6 +111,13 @@
 					</a>
                 </div>
 			</div>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="assignments">
+		<div class="assignments">
+			<div class="head">Assignees</div>
+			<div wicket:id="assignments" class="body"></div>
+			<div wicket:id="assigneeHelp" class="help-block">Assignees are expected to merge the pull request</div>
 		</div>
 		</wicket:enclosure>
 		<div wicket:id="mergeStrategy" class="merge-strategy">

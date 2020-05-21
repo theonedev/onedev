@@ -16,7 +16,7 @@ import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.concurrent.PrioritizedCallable;
 import io.onedev.server.util.concurrent.PrioritizedFutureTask;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;

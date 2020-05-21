@@ -18,8 +18,8 @@ import io.onedev.server.git.Contributor;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.avatar.AvatarManager;
 
 class TopContributorsResource extends AbstractResource {

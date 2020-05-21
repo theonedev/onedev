@@ -248,9 +248,18 @@ public class BranchProtection implements Serializable {
 	 * @return
 	 * 			result of the check. 
 	 */
-	public boolean isReviewRequiredForModification(User user, Project project, String branch, @Nullable String file) {
-		return !getParsedReviewRequirement().satisfied(user) 
-				|| file != null && !getFileProtection(file).getParsedReviewRequirement().satisfied(user); 
+	public boolean isReviewRequiredForModification(User user, Project project, 
+			String branch, @Nullable String file) {
+		ReviewRequirement requirement = getParsedReviewRequirement();
+		if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty()) 
+			return true;
+		
+		if (file != null) {
+			requirement = getFileProtection(file).getParsedReviewRequirement();
+			return !requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty();
+		} 
+		
+		return false;
 	}
 	
 	public boolean isBuildRequiredForModification(Project project, String branch, @Nullable String file) {
@@ -275,13 +284,16 @@ public class BranchProtection implements Serializable {
 	 */
 	public boolean isReviewRequiredForPush(User user, Project project, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		if (!getParsedReviewRequirement().satisfied(user)) 
+		ReviewRequirement requirement = getParsedReviewRequirement();
+		if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty()) 
 			return true;
-
+		
 		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) {
-			if (!getFileProtection(changedFile).getParsedReviewRequirement().satisfied(user)) 
+			requirement = getFileProtection(changedFile).getParsedReviewRequirement();
+			if (!requirement.getUsers().isEmpty() || !requirement.getGroups().isEmpty())
 				return true;
 		}
+
 		return false;
 	}
 

@@ -110,7 +110,8 @@ import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestBuildManager;
+import io.onedev.server.entitymanager.PullRequestAssignmentManager;
+import io.onedev.server.entitymanager.PullRequestVerificationManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -144,7 +145,8 @@ import io.onedev.server.entitymanager.impl.DefaultIssueWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
 import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
 import io.onedev.server.entitymanager.impl.DefaultProjectManager;
-import io.onedev.server.entitymanager.impl.DefaultPullRequestBuildManager;
+import io.onedev.server.entitymanager.impl.DefaultPullRequestAssignmentManager;
+import io.onedev.server.entitymanager.impl.DefaultPullRequestVerificationManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestManager;
@@ -224,6 +226,7 @@ import io.onedev.server.security.OneFilterChainResolver;
 import io.onedev.server.security.OnePasswordService;
 import io.onedev.server.security.OneRememberMeManager;
 import io.onedev.server.security.OneWebSecurityManager;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.DefaultKeyPairProvider;
 import io.onedev.server.ssh.DefaultSshAuthenticator;
 import io.onedev.server.ssh.SshAuthenticator;
@@ -233,7 +236,6 @@ import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.DefaultAttachmentStorageManager;
 import io.onedev.server.storage.DefaultStorageManager;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
@@ -356,7 +358,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildDependenceManager.class).to(DefaultBuildDependenceManager.class);
 		bind(JobManager.class).to(DefaultJobManager.class);
 		bind(LogManager.class).to(DefaultLogManager.class);
-		bind(PullRequestBuildManager.class).to(DefaultPullRequestBuildManager.class);
+		bind(PullRequestVerificationManager.class).to(DefaultPullRequestVerificationManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(IssueManager.class).to(DefaultIssueManager.class);
 		bind(IssueFieldManager.class).to(DefaultIssueFieldManager.class);
@@ -396,8 +398,10 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentQuerySettingManager.class).to(DefaultCodeCommentQuerySettingManager.class);
 		bind(CommitQuerySettingManager.class).to(DefaultCommitQuerySettingManager.class);
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
-		bind(WebHookManager.class);
+		bind(PullRequestAssignmentManager.class).to(DefaultPullRequestAssignmentManager.class);
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
+		
+		bind(WebHookManager.class);
 		
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
 

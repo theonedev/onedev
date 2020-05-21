@@ -16,7 +16,7 @@ import com.google.common.base.Joiner;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 public class ServerLogDownloadResource extends AbstractResource {
 

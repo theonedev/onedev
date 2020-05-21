@@ -91,7 +91,18 @@
 					</tr>
 					<tr class="reviewers">
 						<td class="name">Reviewers</td>
-						<td class="value"><div wicket:id="reviewers"></div></td>
+						<td class="value">
+							<div wicket:id="reviewers"></div>
+							<div class="help-block">Pull request can only be merged after getting approvals from all reviewers</div>
+						</td>
+					</tr>
+					<tr class="assignees">
+						<td class="name">Assignees</td>
+						<td class="value">
+							<div wicket:id="assignees"></div>
+							<div class="help-block">Assignees have code write permission and will be responsible 
+							for merging the pull request</div>
+						</td>
 					</tr>
 				</table>
 				<div class="clearfix">

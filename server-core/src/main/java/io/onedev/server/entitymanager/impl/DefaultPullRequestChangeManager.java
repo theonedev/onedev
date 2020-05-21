@@ -20,7 +20,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleCha
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 
 @Singleton
 public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullRequestChange> 

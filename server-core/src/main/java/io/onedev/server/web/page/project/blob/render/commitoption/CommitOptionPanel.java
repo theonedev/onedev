@@ -22,12 +22,8 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
-import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
@@ -55,19 +51,20 @@ import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Provider;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
-import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.blob.RevisionResolved;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.util.CommitMessageBean;
 
 @SuppressWarnings("serial")
 public abstract class CommitOptionPanel extends Panel {
@@ -76,15 +73,15 @@ public abstract class CommitOptionPanel extends Panel {
 	
 	private final Provider<byte[]> newContentProvider;
 	
-	private String commitSummary;
-	
-	private String commitDetail;
+	private CommitMessageBean commitMessageBean = new CommitMessageBean();
 	
 	private BlobChange change;
 	
 	private boolean contentModified;
 	
 	private Set<String> oldPaths;
+	
+	private Form<?> form;
 	
 	private final String autosaveKey;
 	
@@ -146,7 +143,6 @@ public abstract class CommitOptionPanel extends Panel {
 	private void newChangedContainer(@Nullable AjaxRequestTarget target) {
 		WebMarkupContainer changedContainer = new WebMarkupContainer("changed");
 		changedContainer.setVisible(change != null);
-		changedContainer.setOutputMarkupPlaceholderTag(true);
 		if (change != null) {
 			changedContainer.add(new BlobDiffPanel("changes", new AbstractReadOnlyModel<Project>() {
 
@@ -160,15 +156,15 @@ public abstract class CommitOptionPanel extends Panel {
 			changedContainer.add(new WebMarkupContainer("changes"));
 		}
 		if (target != null) {
-			replace(changedContainer);
-			target.add(changedContainer);
+			form.replace(changedContainer);
+			target.add(form);
 			if (change != null) {
 				String script = String.format("$('#%s .commit-option input[type=submit]').val('Commit and overwrite');", 
 						getMarkupId());
 				target.appendJavaScript(script);
 			}
 		} else {
-			add(changedContainer);		
+			form.add(changedContainer);		
 		}
 	}
 	
@@ -176,74 +172,22 @@ public abstract class CommitOptionPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		FeedbackPanel feedback = new NotificationPanel("feedback", this);
-		feedback.setOutputMarkupPlaceholderTag(true);
-		add(feedback);
-				
-		newChangedContainer(null);
-		
-		Form<?> form = new Form<Void>("form");
+		form = new Form<Void>("form");
+		form.setOutputMarkupId(true);
 		add(form);
 
-		form.add(new TextField<String>("commitSummary", new IModel<String>() {
+		form.add(new NotificationPanel("feedback", form));
+		newChangedContainer(null);
+		commitMessageBean.setSummary(getDefaultCommitMessage());
+		form.add(BeanContext.edit("commitMessage", commitMessageBean));
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return commitSummary;
-			}
-
-			@Override
-			public void setObject(String object) {
-				commitSummary = object;
-			}
-			
-		}) {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				tag.put("placeholder", getDefaultCommitMessage());
-			}
-			
-		}.add(new ReferenceInputBehavior(true) {
-
-			@Override
-			protected Project getProject() {
-				return context.getProject();
-			}
-			
-		}));
-		
-		form.add(new TextArea<String>("commitDetail", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return commitDetail;
-			}
-
-			@Override
-			public void setObject(String object) {
-				commitDetail = object;
-			}
-			
-		}).add(new ReferenceInputBehavior(true) {
-
-			@Override
-			protected Project getProject() {
-				return context.getProject();
-			}
-			
-		}));
-		
 		AjaxButton saveButton = new AjaxButton("save") {
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				target.add(form);
+			}
 
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -264,7 +208,7 @@ public abstract class CommitOptionPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				if (save(target, feedback, getPosition())) {
+				if (save(target, getPosition())) {
 					String script = String.format(""
 							+ "$('#%s').attr('disabled', 'disabled').val('Please wait...');"
 							+ "onedev.server.form.markClean($('form'));", getMarkupId());
@@ -307,19 +251,17 @@ public abstract class CommitOptionPanel extends Panel {
 				|| !Objects.equal(context.getBlobIdent().path, context.getNewPath());
 	}
 	
-	private boolean save(AjaxRequestTarget target, FeedbackPanel feedback, @Nullable String position) {
+	private boolean save(AjaxRequestTarget target, @Nullable String position) {
 		change = null;
 		
 		if (newContentProvider != null && StringUtils.isBlank(context.getNewPath())) {
-			CommitOptionPanel.this.error("Please specify file name.");
-			target.add(feedback);
+			form.error("Please specify file name.");
+			target.add(form);
 			return false;
 		} else {
-			String commitMessage = commitSummary;
-			if (StringUtils.isBlank(commitMessage))
-				commitMessage = getDefaultCommitMessage();
-			if (StringUtils.isNotBlank(commitDetail))
-				commitMessage += "\n\n" + commitDetail;
+			String commitMessage = commitMessageBean.getSummary();
+			if (StringUtils.isNotBlank(commitMessageBean.getBody()))
+				commitMessage += "\n\n" + commitMessageBean.getBody();
 			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 			String revision = context.getBlobIdent().revision;
@@ -338,12 +280,12 @@ public abstract class CommitOptionPanel extends Panel {
 			if (newContentProvider != null) {
 				String newPath = context.getNewPath();
 				if (revision != null && context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
-					CommitOptionPanel.this.error("Review required for this change. Please submit pull request instead");
-					target.add(feedback);
+					form.error("Review required for this change. Please submit pull request instead");
+					target.add(form);
 					return false;
 				} else if (revision != null && context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
-					CommitOptionPanel.this.error("Build required for this change. Please submit pull request instead");
-					target.add(feedback);
+					form.error("Build required for this change. Please submit pull request instead");
+					target.add(form);
 					return false;
 				}
 				
@@ -370,14 +312,14 @@ public abstract class CommitOptionPanel extends Panel {
 					newCommitId = new BlobEdits(oldPaths, newBlobs).commit(repository, refName, 
 							prevCommitId, prevCommitId, user.asPerson(), commitMessage);
 				} catch (ObjectAlreadyExistsException e) {
-					CommitOptionPanel.this.error("A path with same name already exists. "
+					form.error("A path with same name already exists. "
 							+ "Please choose a different name and try again.");
-					target.add(feedback);
+					target.add(form);
 					break;
 				} catch (NotTreeException e) {
-					CommitOptionPanel.this.error("A file exists where you’re trying to create a subdirectory. "
+					form.error("A file exists where you’re trying to create a subdirectory. "
 							+ "Choose a new path and try again..");
-					target.add(feedback);
+					target.add(form);
 					break;
 				} catch (ObsoleteCommitException e) {
 					try (RevWalk revWalk = new RevWalk(repository)) {

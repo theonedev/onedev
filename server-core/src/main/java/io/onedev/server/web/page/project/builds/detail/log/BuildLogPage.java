@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.build.log.BuildLogPanel;
 import io.onedev.server.web.download.BuildLogDownloadResource;
 import io.onedev.server.web.download.BuildLogDownloadResourceReference;

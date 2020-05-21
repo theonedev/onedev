@@ -40,7 +40,7 @@ public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		PullRequestReview review = request.getReview(user);
-		return review != null && review.getExcludeDate() == null && review.getResult() == null;
+		return review != null && review.getResult() == null;
 	}
 
 	@Override

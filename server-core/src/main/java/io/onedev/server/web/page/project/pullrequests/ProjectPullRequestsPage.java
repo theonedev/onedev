@@ -26,7 +26,7 @@ import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;

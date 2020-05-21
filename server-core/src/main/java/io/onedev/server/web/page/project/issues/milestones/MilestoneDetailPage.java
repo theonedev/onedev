@@ -26,7 +26,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;

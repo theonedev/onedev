@@ -15,7 +15,7 @@ import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.mapper.OneResourceMapper;

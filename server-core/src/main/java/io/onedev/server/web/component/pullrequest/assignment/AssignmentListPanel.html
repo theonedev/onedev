@@ -1,0 +1,19 @@
+<wicket:panel>
+	<table class="assignments">
+		<tr wicket:id="assignments">
+			<td class="user pull-left">
+				<a wicket:id="user"></a> 
+			</td>
+			<td class="actions">
+				<a wicket:id="delete" title="Remove this assignee"><i class="fa fa-trash"></i></a>
+			</td>
+		</tr>
+		<wicket:enclosure>
+		<tr class="add-assignee">
+			<td colspan="2">
+				<input wicket:id="addAssignee" type="hidden" class="form-control">
+			</td>
+		</tr>
+		</wicket:enclosure>
+	</table>
+</wicket:panel>

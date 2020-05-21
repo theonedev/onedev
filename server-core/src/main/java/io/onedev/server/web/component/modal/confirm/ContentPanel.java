@@ -18,9 +18,9 @@ import io.onedev.server.OneException;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
-abstract class ConfirmPanel extends Panel {
+abstract class ContentPanel extends Panel {
 	
-	public ConfirmPanel(String id) {
+	public ContentPanel(String id) {
 		super(id);
 	}
 
@@ -57,7 +57,7 @@ abstract class ConfirmPanel extends Panel {
 					onConfirm(target);
 				} catch (OneException e) {
 					error(e.getMessage());
-					target.add(ConfirmPanel.this);
+					target.add(ContentPanel.this);
 				}
 			}
 			

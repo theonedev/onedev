@@ -59,10 +59,10 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.NumberCriteria;
 import io.onedev.server.search.entity.issue.TitleCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -612,7 +612,7 @@ public abstract class IssueListPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 				
-				fragment.add(new CopyToClipboardLink("copy", Model.of("#" + issue.getNumber() + ": " + issue.getTitle())));
+				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.describe())));
 				
 				fragment.add(new Label("votes", issue.getVoteCount()));
 				fragment.add(new Label("comments", issue.getCommentCount()));

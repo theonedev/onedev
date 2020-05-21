@@ -21,7 +21,7 @@ import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;

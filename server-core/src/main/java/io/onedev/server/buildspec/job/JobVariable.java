@@ -67,7 +67,7 @@ public enum JobVariable {
 
 		@Override
 		public String getValue(Build build) {
-			return build.getPullRequestBuilds()
+			return build.getVerifications()
 					.stream()
 					.map(it->it.getRequest().getId().toString())
 					.collect(Collectors.joining(" "));

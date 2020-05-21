@@ -1,0 +1,19 @@
+table.assignments>tbody>tr>td {
+	padding: 6px 12px;
+}
+table.assignments>tbody>tr>td:first-child {
+	padding-left: 0;
+}
+table.assignments>tbody>tr>td:last-child {
+	padding-right: 0;
+}
+table.assignments>tbody>tr:first-child>td {
+	padding-top: 0;
+}
+table.assignments>tbody>tr:last-child>td {
+	padding-bottom: 0;
+}
+table.assignments>tbody>tr>td.actions {
+	font-size: 16px;
+	text-align: right;
+}

@@ -164,7 +164,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_DEPENDENTS = "dependents";
 	
-	public static final String PROP_PULL_REQUEST_BUILDS = "pullRequestBuilds";
+	public static final String PROP_VERIFICATIONS = "verifications";
 	
 	public static final String NAME_ERROR_MESSAGE = "Error Message";
 	
@@ -285,7 +285,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestBuild> pullRequestBuilds = new ArrayList<>();
+	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 	
 	private transient Map<String, List<String>> paramMap;
 	
@@ -430,6 +430,10 @@ public class Build extends AbstractEntity implements Referenceable {
 				|| status == Status.TIMED_OUT;
 	}
 	
+	public boolean isSuccessful() {
+		return status == Status.SUCCESSFUL;
+	}
+	
 	public Date getSubmitDate() {
 		return submitDate;
 	}
@@ -516,12 +520,12 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.updatedRef = updatedRef;
 	}
 
-	public Collection<PullRequestBuild> getPullRequestBuilds() {
-		return pullRequestBuilds;
+	public Collection<PullRequestVerification> getVerifications() {
+		return verifications;
 	}
 
-	public void setPullRequestBuilds(Collection<PullRequestBuild> pullRequestBuilds) {
-		this.pullRequestBuilds = pullRequestBuilds;
+	public void setVerifications(Collection<PullRequestVerification> verifications) {
+		this.verifications = verifications;
 	}
 	
 	public Map<String, List<String>> getParamMap() {

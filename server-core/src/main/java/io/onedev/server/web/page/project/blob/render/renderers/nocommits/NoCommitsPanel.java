@@ -17,7 +17,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;

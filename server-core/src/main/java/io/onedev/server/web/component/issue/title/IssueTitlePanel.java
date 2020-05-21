@@ -36,8 +36,8 @@ import io.onedev.server.model.support.issue.fieldspec.DateField;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -143,8 +143,7 @@ public abstract class IssueTitlePanel extends Panel {
 			}
 			
 		});
-		String copyContent = "#" + getIssue().getNumber() + ": " + getIssue().getTitle();
-		titleViewer.add(new CopyToClipboardLink("copy", Model.of(copyContent)));
+		titleViewer.add(new CopyToClipboardLink("copy", Model.of(getIssue().describe())));
 		
 		if (withIssueCreation) {
 			titleViewer.add(new BookmarkablePageLink<Void>("create", NewIssuePage.class) {

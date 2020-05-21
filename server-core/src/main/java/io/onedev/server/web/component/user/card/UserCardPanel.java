@@ -45,8 +45,7 @@ public class UserCardPanel extends Panel {
 			builder.append("<i>System Account</i>");
 		} else {
 			User user = OneDev.getInstance(UserManager.class).load(userId);
-			builder.append("<div><a href='mailto:" + user.getEmail() + "'>" 
-					+ HtmlEscape.escapeHtml5(user.getEmail()) + "</a></div>");
+			builder.append("<i>@" + HtmlEscape.escapeHtml5(user.getName()) + "</i>");
 		}
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}

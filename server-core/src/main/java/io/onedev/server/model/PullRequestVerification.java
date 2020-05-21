@@ -12,7 +12,7 @@ import javax.persistence.UniqueConstraint;
 @Table(
 		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_build_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_request_id", "o_build_id"})})
-public class PullRequestBuild extends AbstractEntity {
+public class PullRequestVerification extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	

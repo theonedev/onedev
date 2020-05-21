@@ -22,8 +22,8 @@ import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.CommitField;
 import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedCommit;
-import io.onedev.server.util.SecurityUtils;
 
 public class FieldOperatorCriteria extends FieldCriteria {
 

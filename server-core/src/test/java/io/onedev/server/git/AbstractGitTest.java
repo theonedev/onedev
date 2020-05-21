@@ -124,13 +124,13 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		}
 	}
 	
-	protected void commit(String comment) {
+	protected String commit(String comment) {
 		CommitCommand ci = git.commit();
 		ci.setMessage(comment);
 		ci.setAuthor(user);
 		ci.setCommitter(user);
 		try {
-			ci.call();
+			return ci.call().name();
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
@@ -141,14 +141,14 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 		add(path);
 	}
 	
-	protected void addFileAndCommit(String path, String content, String comment) {
+	protected String addFileAndCommit(String path, String content, String comment) {
 		addFile(path, content);
-		commit(comment);
+		return commit(comment);
 	}
 	
-	protected void removeFileAndCommit(String path, String comment) {
+	protected String removeFileAndCommit(String path, String comment) {
 		rm(path);
-		commit(comment);
+		return commit(comment);
 	}
 
 	protected void updateRef(String refName, String newValue, @Nullable String oldValue) {

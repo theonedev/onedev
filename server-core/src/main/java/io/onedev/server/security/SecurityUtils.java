@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.security;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -183,7 +183,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader"));
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
@@ -223,7 +223,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Open");
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
-		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Code Writer", "Code Reader"));
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);

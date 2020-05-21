@@ -19,7 +19,7 @@ import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 

@@ -43,9 +43,15 @@ body.NewPullRequestPage #layout>.body {
 	content: "*"; 
 	color: red;
 }
-#new-pull-request>.page-content table.reviewers {
+#new-pull-request>.page-content table.reviews {
 	width: auto;
+	min-width: 250px;
 }
+#new-pull-request>.page-content table.assignments {
+	width: auto;
+	min-width: 250px;
+}
+
 #new-pull-request>.page-content>.status>.can-send form .alert-danger {
 	margin-bottom: 0; 
 	margin-top: 16px;
@@ -86,8 +92,4 @@ body.NewPullRequestPage #layout>.body {
 #new-pull-request>.page-content>.status>.can-send .merge-strategy .status .calculating img {
 	width: 24px;
 	height: 24px;
-}
-#new-pull-request>.page-content>.status>.can-send .merge-strategy .merge-without-review {
-	margin-top: 20px;
-	margin-bottom: 0;
 }

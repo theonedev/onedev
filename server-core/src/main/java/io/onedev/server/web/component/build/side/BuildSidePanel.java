@@ -34,9 +34,9 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
@@ -264,7 +264,7 @@ public abstract class BuildSidePanel extends Panel {
 
 			@Override
 			protected List<PullRequest> load() {
-				return getBuild().getPullRequestBuilds()
+				return getBuild().getVerifications()
 						.stream()
 						.map(it->it.getRequest())
 						.collect(Collectors.toList());

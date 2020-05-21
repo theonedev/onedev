@@ -96,6 +96,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private static final int MAX_HISTORY_PATHS = 100;
 	
+	private static final int MAX_COMMIT_FILES = 100;
+	
 	private static final String INFO_DIR = "commit";
 	
 	private static final String DEFAULT_STORE = "default";
@@ -1477,6 +1479,55 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			
 		});
 		
+	}
+	
+	@Override
+	public void sortUsersByContribution(List<User> users, Project project, Collection<String> files) {
+		if (users.size() <= 1)
+			return;
+		
+		Map<User, Long> commitCounts = new HashMap<>();
+		for (User user: users)
+			commitCounts.put(user, 0L);
+
+		int count = 0;
+		for (String path: files) {
+			int addedCommitCount = addCommitCounts(project, commitCounts, path);
+			while (addedCommitCount == 0) {
+				if (path.contains("/")) {
+					path = StringUtils.substringBeforeLast(path, "/");
+					addedCommitCount = addCommitCounts(project, commitCounts, path);
+				} else {
+					addCommitCounts(project, commitCounts, "");
+					break;
+				}
+			}
+			if (++count >= MAX_COMMIT_FILES)
+				break;
+		}
+
+		Collections.sort(users, new Comparator<User>() {
+
+			@Override
+			public int compare(User o1, User o2) {
+				if (commitCounts.get(o1) < commitCounts.get(o2))
+					return 1;
+				else
+					return -1;
+			}
+			
+		});
+	}
+	
+	private int addCommitCounts(Project project, Map<User, Long> commitCounts, String path) {
+		int addedCommitCount = 0;
+		for (Map.Entry<User, Long> entry: commitCounts.entrySet()) {
+			User user = entry.getKey();
+			int commitCount = getCommitCount(project, user, path);
+			entry.setValue(entry.getValue() + commitCount);
+			addedCommitCount += commitCount;
+		}
+		return addedCommitCount;
 	}
 
 	private static class NextIndex {

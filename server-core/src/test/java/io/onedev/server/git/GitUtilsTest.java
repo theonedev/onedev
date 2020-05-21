@@ -65,6 +65,20 @@ public class GitUtilsTest extends AbstractGitTest {
 	}
 
 	@Test
+	public void testRebaseWithoutChange() throws Exception {
+		addFileAndCommit("initial", "", "initial");
+		git.checkout().setCreateBranch(true).setName("dev").call();
+		String commitHash1 = addFileAndCommit("dev1", "", "dev1");
+		String commitHash2 = addFileAndCommit("dev2", "", "dev2");
+		ObjectId masterId = git.getRepository().resolve("master");
+		ObjectId newCommitId = GitUtils.rebase(git.getRepository(), git.getRepository().resolve("dev"), masterId, user);
+		try (	RevWalk revWalk = new RevWalk(git.getRepository())) {
+			assertEquals(commitHash2, newCommitId.name());
+			assertEquals(commitHash1, revWalk.parseCommit(newCommitId).getParent(0).name());
+		}
+	}
+	
+	@Test
 	public void testRebaseWithConflicts() throws Exception {
 		addFileAndCommit("initial", "", "initial");
 		git.checkout().setCreateBranch(true).setName("dev").call();

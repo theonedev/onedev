@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.review;
+package io.onedev.server.web.component.pullrequest.review;
 
 import java.util.ArrayList;
 import java.util.Iterator;

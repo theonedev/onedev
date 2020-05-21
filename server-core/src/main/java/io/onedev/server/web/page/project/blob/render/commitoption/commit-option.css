@@ -6,10 +6,15 @@
 	font-size: 16px;
 	margin-bottom: 20px;
 }
-.commit-option>.body>.changed>.changes {
+.commit-option>.body .changed>.changes {
 	margin-bottom: 20px;
-	display: none;
 }  
-.commit-option .text-diff>.head>.actions {
+.commit-option>.body .text-diff>.head>.actions {
 	display: none;
+}
+.commit-option>.body .text-diff>.head>.actions {
+	display: none;
+}
+.commit-option>.body textarea {
+	height: 360px;
 }
