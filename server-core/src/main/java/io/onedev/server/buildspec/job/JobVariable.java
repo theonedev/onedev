@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.job;
 import java.util.stream.Collectors;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 
 public enum JobVariable {
@@ -28,6 +29,28 @@ public enum JobVariable {
 		@Override
 		public String getValue(Build build) {
 			return build.getUpdatedRef();
+		}
+		
+	},
+	UPDATED_BRANCH {
+
+		@Override
+		public String getValue(Build build) {
+			if (build.getUpdatedRef() != null)
+				return GitUtils.ref2branch(build.getUpdatedRef());
+			else
+				return null;
+		}
+		
+	},
+	UPDATED_TAG {
+
+		@Override
+		public String getValue(Build build) {
+			if (build.getUpdatedRef() != null)
+				return GitUtils.ref2tag(build.getUpdatedRef());
+			else
+				return null;
 		}
 		
 	},

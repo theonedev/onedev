@@ -96,8 +96,8 @@ public abstract class RevisionPicker extends DropdownLink {
 			} 
 			label = HtmlEscape.escapeHtml5(label);
 		} else {
-			label = "<i>choose</i>";
-			iconClass = "fa fa-ext fa-commit";
+			label = "Choose Revision";
+			iconClass = "";
 		}
 		
 		return Model.of(String.format("<i class='%s'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", iconClass, label));

@@ -4,11 +4,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Repository;
 
 import com.google.common.base.Preconditions;
 
@@ -16,8 +13,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
 abstract class CreateBranchPanel extends Panel {
@@ -26,7 +26,7 @@ abstract class CreateBranchPanel extends Panel {
 	
 	private final String revision;
 	
-	private String branchName;
+	private BranchBean helperBean = new BranchBean();
 	
 	public CreateBranchPanel(String id, IModel<Project> projectModel, String revision) {
 		super(id);
@@ -42,25 +42,8 @@ abstract class CreateBranchPanel extends Panel {
 		form.setOutputMarkupId(true);
 		form.add(new NotificationPanel("feedback", form));
 		
-		final TextField<String> nameInput;
-		form.add(nameInput = new TextField<String>("name", new IModel<String>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return branchName;
-			}
-
-			@Override
-			public void setObject(String object) {
-				branchName = object;
-			}
-			
-		}));
-		nameInput.setOutputMarkupId(true);
+		BeanEditor editor;
+		form.add(editor = BeanContext.edit("editor", helperBean));
 		
 		form.add(new AjaxButton("create") {
 
@@ -68,32 +51,26 @@ abstract class CreateBranchPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				if (branchName == null) {
-					form.error("Branch name is required.");
-					target.focusComponent(nameInput);
+				Project project = projectModel.getObject();
+				User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+				String branchName = helperBean.getName();
+				if (project.getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+					editor.error(new Path(new PathNode.Named("name")), 
+							"Branch '" + branchName + "' already exists, please choose a different name");
 					target.add(form);
-				} else if (!Repository.isValidRefName(Constants.R_HEADS + branchName)) {
-					form.error("Invalid branch name.");
-					target.focusComponent(nameInput);
-					target.add(form);
-				} else if (projectModel.getObject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
-					form.error("Branch '" + branchName + "' already exists, please choose a different name.");
-					target.focusComponent(nameInput);
+				} else if (project.getBranchProtection(branchName, user).isPreventCreation()) {
+					editor.error(new Path(new PathNode.Named("name")), "Unable to create protected branch");
 					target.add(form);
 				} else {
-					Project project = projectModel.getObject();
-					User user = Preconditions.checkNotNull(SecurityUtils.getUser());
-
-					BranchProtection protection = project.getBranchProtection(branchName, user);
-					if (protection.isPreventCreation()) {
-						form.error("Unable to create protected branch");
-						target.focusComponent(nameInput);
-						target.add(form);
-					} else {
-						project.createBranch(branchName, revision);
-						onCreate(target, branchName);
-					}
+					project.createBranch(branchName, revision);
+					onCreate(target, branchName);
 				}
+			}
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				target.add(form);
 			}
 
 		});

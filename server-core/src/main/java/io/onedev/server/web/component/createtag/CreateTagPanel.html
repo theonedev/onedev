@@ -6,16 +6,7 @@
 		</div>
 		<div class="modal-body">
 			<div wicket:id="feedback"></div>
-			<wicket:enclosure child="name">
-			<div class="form-group">
-				<label>Tag Name *</label>
-				<input wicket:id="name" class="form-control">
-			</div>
-			</wicket:enclosure>
-			<div class="form-group">
-				<label>Tag Message</label>
-				<textarea wicket:id="message" rows="10" class="form-control"></textarea>
-			</div>
+			<div wicket:id="editor"></div>
 		</div>
 		<div class="modal-footer">
 			<button wicket:id="create" class="btn btn-primary">Create</button>

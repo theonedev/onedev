@@ -51,7 +51,6 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
@@ -68,11 +67,13 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.User;
 import io.onedev.server.search.entity.pullrequest.OpenCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
@@ -83,7 +84,8 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.revisionpicker.RevisionPicker;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -405,9 +407,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 		add(new ModalLink("createBranch") {
 
-			private String branchName;
-			
-			private String branchRevision = getProject().getDefaultBranch();
+			private BranchBeanWithRevision helperBean = new BranchBeanWithRevision();
 			
 			@Override
 			protected void onConfigure() {
@@ -416,88 +416,47 @@ public class ProjectBranchesPage extends ProjectPage {
 				setVisible(SecurityUtils.canCreateBranch(getProject(), Constants.R_HEADS));
 			}
 
-			private RevisionPicker newRevisionPicker() {
-				return new RevisionPicker("revision", projectModel, branchRevision) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String revision) {
-						branchRevision = revision; 
-						RevisionPicker revisionPicker = newRevisionPicker();
-						getParent().replace(revisionPicker);
-						target.add(revisionPicker);
-					}
-					
-				};
-			}
-			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "createBranchFrag", ProjectBranchesPage.this);
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				form.add(new NotificationPanel("feedback", form));
-				
-				branchRevision = getProject().getDefaultBranch();
-				branchName = null;
-				
-				final TextField<String> nameInput;
-				form.add(nameInput = new TextField<String>("name", new IModel<String>() {
 
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return branchName;
-					}
-
-					@Override
-					public void setObject(String object) {
-						branchName = object;
-					}
-					
-				}));
-				nameInput.setOutputMarkupId(true);
+				helperBean.setName(null);
+				helperBean.setRevision(null);
 				
-				form.add(newRevisionPicker());
+				BeanEditor editor;
+				form.add(editor = BeanContext.edit("editor", helperBean));
+				
 				form.add(new AjaxButton("create") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						
-						if (branchName == null) {
-							form.error("Branch name is required.");
-							target.focusComponent(nameInput);
+						String branchName = helperBean.getName();
+						User user = Preconditions.checkNotNull(getLoginUser());
+						if (getProject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
+							editor.error(new Path(new PathNode.Named("name")), 
+									"Branch '" + branchName + "' already exists, please choose a different name");
 							target.add(form);
-						} else if (branchRevision == null) {
-							form.error("Create from is required.");
-							target.focusComponent(nameInput);
-							target.add(form);
-						} else if (!Repository.isValidRefName(Constants.R_HEADS + branchName)) {
-							form.error("Invalid branch name.");
-							target.focusComponent(nameInput);
-							target.add(form);
-						} else if (getProject().getObjectId(GitUtils.branch2ref(branchName), false) != null) {
-							form.error("Branch '" + branchName + "' already exists, please choose a different name.");
-							target.focusComponent(nameInput);
+						} else if (getProject().getBranchProtection(branchName, user).isPreventCreation()) {
+							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected branch");
 							target.add(form);
 						} else {
-							Project project = getProject();
-							BranchProtection protection = project.getBranchProtection(branchName, getLoginUser());
-							if (protection.isPreventCreation()) {
-								form.error("Unable to create protected branch");
-								target.focusComponent(nameInput);
-								target.add(form);
-							} else {
-								project.createBranch(branchName, branchRevision);
-								modal.close();
-								target.add(branchesTable);
-								
-								getSession().success("Branch '" + branchName + "' created");
-							}
+							getProject().createBranch(branchName, helperBean.getRevision());
+							modal.close();
+							target.add(branchesTable);
+							
+							getSession().success("Branch '" + branchName + "' created");
 						}
+					}
+
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
 					}
 
 				});

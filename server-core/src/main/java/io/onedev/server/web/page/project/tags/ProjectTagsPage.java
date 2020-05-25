@@ -24,7 +24,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -39,9 +38,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
+
+import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
@@ -52,8 +52,10 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.Path;
+import io.onedev.server.util.PathNode;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -65,9 +67,10 @@ import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.revisionpicker.RevisionPicker;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.PersonIdentPanel;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -193,11 +196,7 @@ public class ProjectTagsPage extends ProjectPage {
 		
 		add(new ModalLink("createTag") {
 
-			private String tagName;
-			
-			private String tagMessage;
-			
-			private String tagRevision = getProject().getDefaultBranch();
+			private TagBeanWithRevision helperBean = new TagBeanWithRevision();
 			
 			@Override
 			protected void onConfigure() {
@@ -206,103 +205,48 @@ public class ProjectTagsPage extends ProjectPage {
 				setVisible(SecurityUtils.canCreateTag(getProject(), Constants.R_TAGS));
 			}
 
-			private RevisionPicker newRevisionPicker() {
-				return new RevisionPicker("revision", projectModel, tagRevision) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String revision) {
-						tagRevision = revision; 
-						RevisionPicker revisionPicker = newRevisionPicker();
-						getParent().replace(revisionPicker);
-						target.add(revisionPicker);
-					}
-					
-				};
-			}
-			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "createTagFrag", ProjectTagsPage.this);
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				form.add(new NotificationPanel("feedback", form));
-				tagName = null;
-				final TextField<String> nameInput;
-				form.add(nameInput = new TextField<String>("name", new IModel<String>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return tagName;
-					}
-
-					@Override
-					public void setObject(String object) {
-						tagName = object;
-					}
-					
-				}));
-				nameInput.setOutputMarkupId(true);
+				helperBean.setName(null);
+				helperBean.setMessage(null);
+				helperBean.setRevision(null);
 				
-				tagMessage = null;
-				form.add(new TextArea<String>("message", new IModel<String>() {
-
-					@Override
-					public void detach() {
-					}
-
-					@Override
-					public String getObject() {
-						return tagMessage;
-					}
-
-					@Override
-					public void setObject(String object) {
-						tagMessage = object;
-					}
-					
-				}));
-				form.add(newRevisionPicker());
+				BeanEditor editor;
+				form.add(editor = BeanContext.edit("editor", helperBean));
+				
 				form.add(new AjaxButton("create") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						
-						if (tagName == null) {
-							form.error("Tag name is required.");
-							target.focusComponent(nameInput);
+						String tagName = helperBean.getName();
+						User user = Preconditions.checkNotNull(getLoginUser());
+						
+						if (getProject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
+							editor.error(new Path(new PathNode.Named("name")), 
+									"Tag '" + tagName + "' already exists, please choose a different name.");
 							target.add(form);
-						} else if (tagRevision == null) {
-							form.error("Create from is required.");
-							target.focusComponent(nameInput);
-							target.add(form);
-						} else if (!Repository.isValidRefName(Constants.R_HEADS + tagName)) {
-							form.error("Invalid tag name.");
-							target.focusComponent(nameInput);
-							target.add(form);
-						} else if (getProject().getObjectId(GitUtils.tag2ref(tagName), false) != null) {
-							form.error("Tag '" + tagName + "' already exists, please choose a different name.");
-							target.focusComponent(nameInput);
+						} else if (getProject().getTagProtection(tagName, user).isPreventCreation()) {
+							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
 							target.add(form);
 						} else {
-							Project project = getProject();
-							TagProtection protection = project.getTagProtection(tagName, getLoginUser());
-							if (protection.isPreventCreation()) {
-								form.error("Unable to create protected tag");
-								target.focusComponent(nameInput);
-								target.add(form);
-							} else {
-								getProject().createTag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
-								modal.close();
-								target.add(tagsTable);
-								
-								getSession().success("Tag '" + tagName + "' created");
-							}
+							getProject().createTag(tagName, helperBean.getRevision(), user.asPerson(), helperBean.getMessage());
+							modal.close();
+							target.add(tagsTable);
+							
+							getSession().success("Tag '" + tagName + "' created");
 						}
+					}
+
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
 					}
 
 				});
