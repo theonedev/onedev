@@ -165,6 +165,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_VERIFICATIONS= "verifications";
 	
+	public static final String PROP_ASSIGNMENTS = "assignments";
+	
 	public static final String PROP_UUID = "uuid";
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";

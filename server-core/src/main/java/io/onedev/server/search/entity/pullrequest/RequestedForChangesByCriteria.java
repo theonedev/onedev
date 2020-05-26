@@ -28,11 +28,9 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
-		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.PROP_EXCLUDE_DATE);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
 		join.on(builder.and(
 				builder.equal(userPath, user), 
-				builder.isNull(excludeDatePath), 
 				builder.equal(approvedPath, false)));
 		return join.isNotNull();
 	}

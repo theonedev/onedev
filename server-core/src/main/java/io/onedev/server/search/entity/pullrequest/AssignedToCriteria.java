@@ -8,42 +8,38 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 
-public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
+public class AssignedToCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final User user;
 	
-	public ToBeReviewedByCriteria(User user) {
+	public AssignedToCriteria(User user) {
 		this.user = user;
 	}
 	
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
-		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
-		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
-		join.on(builder.and(
-				builder.equal(userPath, user), 
-				builder.isNull(approvedPath)));
+		Join<?, ?> join = root.join(PullRequest.PROP_ASSIGNMENTS, JoinType.LEFT);
+		Path<?> userPath = EntityQuery.getPath(join, PullRequestAssignment.PROP_USER);
+		join.on(builder.equal(userPath, user));
 		return join.isNotNull();
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		PullRequestReview review = request.getReview(user);
-		return review != null && review.getResult() == null;
+		return request.getAssignments().stream().anyMatch(it->it.getUser().equals(user));
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) + " " + quote(user.getName());
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.AssignedTo) + " " 
+				+ quote(user.getName());
 	}
 
 }

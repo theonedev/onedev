@@ -98,6 +98,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new RequestedForChangesByMeCriteria();
 						case PullRequestQueryLexer.ApprovedByMe:
 							return new ApprovedByMeCriteria();
+						case PullRequestQueryLexer.AssignedToMe:
+							return new AssignedToMeCriteria();
 						case PullRequestQueryLexer.DiscardedByMe:
 							return new DiscardedByMeCriteria();
 						case PullRequestQueryLexer.SomeoneRequestedForChanges:
@@ -123,6 +125,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new ToBeReviewedByCriteria(getUser(value));
 						case PullRequestQueryLexer.ApprovedBy:
 							return new ApprovedByCriteria(getUser(value));
+						case PullRequestQueryLexer.AssignedTo:
+							return new AssignedToCriteria(getUser(value));
 						case PullRequestQueryLexer.RequestedForChangesBy:
 							return new RequestedForChangesByCriteria(getUser(value));
 						case PullRequestQueryLexer.SubmittedBy:

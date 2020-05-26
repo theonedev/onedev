@@ -7,8 +7,8 @@ query
     ;
 
 criteria
-	: operator=(Open|Merged|Discarded|SubmittedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|DiscardedByMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|ToBeVerifiedByBuilds|HasMergeConflicts) #OperatorCriteria
-    | operator=(ToBeReviewedBy|ApprovedBy|RequestedForChangesBy|SubmittedBy|DiscardedBy|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	: operator=(Open|Merged|Discarded|AssignedToMe|SubmittedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|DiscardedByMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|ToBeVerifiedByBuilds|HasMergeConflicts) #OperatorCriteria
+    | operator=(ToBeReviewedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|DiscardedBy|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -40,6 +40,10 @@ RequestedForChangesByMe
     : 'requested' WS+ 'for' WS+ 'changes' WS+ 'by' WS+ 'me'
     ;
 
+AssignedToMe
+	: 'assigned' WS+ 'to' WS+ 'me'
+	;
+	
 ApprovedByMe
     : 'approved' WS+ 'by' WS+ 'me'
     ;
@@ -80,6 +84,10 @@ RequestedForChangesBy
     : 'requested' WS+ 'for' WS+ 'changes' WS+ 'by'
     ;
 
+AssignedTo
+	: 'assigned' WS+ 'to'
+	;
+	
 ApprovedBy
     : 'approved' WS+ 'by'
     ;

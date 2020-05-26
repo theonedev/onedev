@@ -24,11 +24,9 @@ public class RequestedForChangesByMeCriteria extends EntityCriteria<PullRequest>
 		if (User.get() != null) {
 			Join<?, ?> join = root.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
 			Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
-			Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.PROP_EXCLUDE_DATE);
 			Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
 			join.on(builder.and(
 					builder.equal(userPath, User.get()), 
-					builder.isNull(excludeDatePath), 
 					builder.equal(approvedPath, false)));
 			return join.isNotNull();
 		} else {
