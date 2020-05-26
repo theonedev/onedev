@@ -492,7 +492,7 @@ public abstract class IssueListPanel extends Panel {
 			public Iterator<? extends Issue> iterator(long first, long count) {
 				try {
 					return getIssueManager().query(getProject(), parsedQueryModel.getObject(), 
-							(int)first, (int)count).iterator();
+							(int)first, (int)count, true).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
 					return new ArrayList<Issue>().iterator();

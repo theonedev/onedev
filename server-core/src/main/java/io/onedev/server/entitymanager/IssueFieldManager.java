@@ -1,6 +1,6 @@
 package io.onedev.server.entitymanager;
 
-import java.util.List;
+import java.util.Collection;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
@@ -14,6 +14,6 @@ public interface IssueFieldManager extends EntityManager<IssueField> {
 	
 	void onRenameGroup(String oldName, String newName);
 			
-	void populateFields(List<Issue> issues);
+	void populateFields(Collection<Issue> issues);
 	
 }

@@ -3,7 +3,6 @@ package io.onedev.server.web.component.pullrequest.review;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -14,14 +13,19 @@ import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public class ReviewerChoice extends SelectToAddChoice<User> {
+public abstract class ReviewerChoice extends SelectToAddChoice<User> {
 
-	private final IModel<PullRequest> requestModel;
-	
-	public ReviewerChoice(String id, IModel<PullRequest> requestModel) {
-		super(id, new ReviewerProvider(requestModel));
+	public ReviewerChoice(String id) {
+		super(id);
 		
-		this.requestModel = requestModel;
+		setProvider(new ReviewerProvider() {
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return ReviewerChoice.this.getPullRequest();
+			}
+			
+		});
 	}
 
 	@Override
@@ -40,25 +44,19 @@ public class ReviewerChoice extends SelectToAddChoice<User> {
 		
 		response.render(JavaScriptHeaderItem.forReference(new UserChoiceResourceReference()));
 	}
-	
-	@Override
-	protected void onDetach() {
-		requestModel.detach();
-		
-		super.onDetach();
-	}
+
+	protected abstract PullRequest getPullRequest();
 
 	@Override
 	protected void onSelect(AjaxRequestTarget target, User user) {
-		PullRequest request = requestModel.getObject();
 		PullRequestReview review = new PullRequestReview();
-		review.setRequest(request);
+		review.setRequest(getPullRequest());
 		review.setUser(user);
 		
-		if (!request.isNew())
+		if (!getPullRequest().isNew())
 			OneDev.getInstance(PullRequestReviewManager.class).addReviewer(review);
 		else
-			request.getReviews().add(review);
+			getPullRequest().getReviews().add(review);
 	};
 	
 }

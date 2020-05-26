@@ -23,6 +23,8 @@ public class PullRequestReview extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_REQUEST = "request";
+	
 	public static final String PROP_USER = "user";
 	
 	public static final String PROP_RESULT = "result";

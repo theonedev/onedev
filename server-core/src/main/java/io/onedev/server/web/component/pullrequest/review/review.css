@@ -1,7 +1,7 @@
 table.reviews>tbody>tr>td {
 	padding: 6px 12px;
 }
-table.reviews>tbody>tr>td.result {
+table.reviews>tbody>tr>td.status {
 	font-size: 16px;
 	width: 16px;
 	padding-right: 0;
@@ -22,26 +22,37 @@ table.reviews>tbody>tr>td.actions {
 	font-size: 16px;
 	text-align: right;
 }
-table.reviews>tbody>tr>td.result span {
+table.reviews>tbody>tr>td.status span {
 	cursor: default;
 }
-table.reviews>tbody>tr>td.result span.awaiting {
+.review-status.pending {
 	color: #DCB412;
 }
-table.reviews>tbody>tr>td.result span.approved {
+.review-status.approved {
 	color: #35A612;
 }
-table.reviews>tbody>tr>td.result span.request-for-changes {
+.review-status.requested-for-changes {
 	color: #F93333;
 }
-.review-action {
+.review-detail {
 	padding: 8px;
 }
-.review-action>.title {
+.review-detail>.title {
 	font-weight: bold;
 }
-.review-action>.comment {
+.review-detail>.comment {
 	border-top: 1px solid #D8D8D8;
 	margin-top: 8px;
 	padding-top: 8px;
+}
+.reviewer-avatar {
+	display: inline-block;
+	position: relative;
+}
+.reviewer-avatar>i {
+	font-size: 11px;
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	background: white;
 }

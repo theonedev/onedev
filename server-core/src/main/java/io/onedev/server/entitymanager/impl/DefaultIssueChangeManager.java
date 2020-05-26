@@ -293,7 +293,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 														query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 														Build.push(build);
 														try {
-															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
+															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
 																issue.removeFields(transition.getRemoveFields());
 																changeState(issue, transition.getToState(), new HashMap<>(), null);
 															}
@@ -357,7 +357,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 														query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 														PullRequest.push(request);
 														try {
-															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
+															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
 																issue.removeFields(transition.getRemoveFields());
 																changeState(issue, transition.getToState(), new HashMap<>(), null);
 															}
@@ -491,7 +491,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 																
 															});
 															try {
-																for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
+																for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
 																	issue.removeFields(transition.getRemoveFields());
 																	changeState(issue, transition.getToState(), new HashMap<>(), null);
 																}

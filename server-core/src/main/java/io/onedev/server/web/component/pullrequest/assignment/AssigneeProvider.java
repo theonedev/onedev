@@ -5,8 +5,6 @@ import static io.onedev.server.util.match.MatchScoreUtils.filterAndSort;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.wicket.model.IModel;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
@@ -19,19 +17,13 @@ import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 
-public class AssigneeProvider extends AbstractUserChoiceProvider {
+public abstract class AssigneeProvider extends AbstractUserChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 
-	private final IModel<PullRequest> requestModel;
-	
-	public AssigneeProvider(IModel<PullRequest> requestModel) {
-		this.requestModel = requestModel;
-	}
-	
 	@Override
 	public void query(String term, int page, Response<User> response) {
-		PullRequest request = requestModel.getObject();
+		PullRequest request = getPullRequest();
 		List<User> assignees = OneDev.getInstance(UserManager.class).queryAndSort(request.getParticipants());
 		assignees.retainAll(SecurityUtils.getAuthorizedUsers(request.getTargetProject(), new WriteCode()));
 		assignees.removeAll(request.getAssignments().stream().map(it->it.getUser()).collect(Collectors.toSet()));
@@ -48,11 +40,6 @@ public class AssigneeProvider extends AbstractUserChoiceProvider {
 		}), page, WebConstants.PAGE_SIZE);
 	}
 
-	@Override
-	public void detach() {
-		requestModel.detach();
-		
-		super.detach();
-	}
-
+	protected abstract PullRequest getPullRequest();
+	
 }

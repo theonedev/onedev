@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import org.hibernate.criterion.Restrictions;
 
@@ -24,6 +28,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveD
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -139,4 +144,24 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		for (PullRequestReview review: request.getReviews())
 			save(review);
 	}
+	
+	@Sessional
+	@Override
+	public void populateReviews(Collection<PullRequest> requests) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<PullRequestReview> query = builder.createQuery(PullRequestReview.class);
+		
+		Root<PullRequestReview> root = query.from(PullRequestReview.class);
+		query.select(root);
+		root.join(PullRequestReview.PROP_REQUEST);
+		
+		query.where(root.get(PullRequestReview.PROP_REQUEST).in(requests));
+		
+		for (PullRequest request: requests)
+			request.setReviews(new ArrayList<>());
+		
+		for (PullRequestReview review: getSession().createQuery(query).getResultList())
+			review.getRequest().getReviews().add(review);
+	}
+	
 }

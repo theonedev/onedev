@@ -35,6 +35,7 @@ import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -45,8 +46,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityQuery;
@@ -68,6 +71,8 @@ import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
+import io.onedev.server.web.component.pullrequest.review.ReviewerAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -336,6 +341,29 @@ public abstract class PullRequestListPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 
+				RepeatingView reviewsView = new RepeatingView("reviews");
+				for (PullRequestReview review: request.getSortedReviews()) {
+					Long reviewId = review.getId();
+					reviewsView.add(new ReviewerAvatar(reviewsView.newChildId()) {
+
+						@Override
+						protected PullRequestReview getReview() {
+							return OneDev.getInstance(PullRequestReviewManager.class).load(reviewId);
+						}
+						
+					});
+				}
+				fragment.add(reviewsView);
+				
+				fragment.add(new PullRequestJobsPanel("jobs") {
+					
+					@Override
+					protected PullRequest getPullRequest() {
+						return rowModel.getObject();
+					}
+					
+				});
+
 				fragment.add(new Label("comments", request.getCommentCount()));
 				
 				fragment.add(new RequestStatusLabel("status", rowModel));
@@ -382,7 +410,7 @@ public abstract class PullRequestListPanel extends Panel {
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				try {
 					return getPullRequestManager().query(getProject(), parsedQueryModel.getObject(), 
-							(int)first, (int)count).iterator();
+							(int)first, (int)count, true, true).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
 					return new ArrayList<PullRequest>().iterator();
@@ -444,11 +472,12 @@ public abstract class PullRequestListPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-	
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
+		
 		response.render(CssHeaderItem.forReference(new PullRequestListCssResourceReference()));
 	}
-	
+
 }

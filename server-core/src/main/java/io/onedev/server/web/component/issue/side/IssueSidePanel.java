@@ -103,7 +103,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
-				return getIssueManager().query(inProject?getProject():null, query, offset, count);
+				return getIssueManager().query(inProject?getProject():null, query, offset, count, false);
 			}
 
 			@Override

@@ -72,8 +72,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
 	void checkQuality(PullRequest request, List<User> unpreferableReviewers);
 	
-	List<PullRequest> query(@Nullable Project targetProject, 
-			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
+	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
+			int firstResult, int maxResults, boolean loadReviews, boolean loadVerifications);
 	
 	int count(@Nullable Project targetProject, EntityCriteria<PullRequest> requestCriteria);
 	

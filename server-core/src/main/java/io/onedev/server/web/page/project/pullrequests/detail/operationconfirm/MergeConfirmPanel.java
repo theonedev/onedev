@@ -50,17 +50,15 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 			bean.setBody(builder.toString().trim());
 		}
 
-		String description;
+		String description = null;
 		MergeStrategy mergeStrategy = getPullRequest().getMergeStrategy();
 		MergePreview mergePreview = getPullRequest().getMergePreview();
 		boolean needMergeCommit = false;
 		if (mergeStrategy == CREATE_MERGE_COMMIT) { 
 			bean.setSummary("Merge pull request " + request.describe());
-			description = "Specify commit message of the merge commit";
 			needMergeCommit = true;
 		} else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) {
 			bean.setSummary("Pull request " + request.describe());
-			description = "Specify commit message of the squash commit";
 			needMergeCommit = true;
 		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
 			description = "Source branch commits will be rebased onto target branch";
@@ -70,11 +68,10 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 			needMergeCommit = false;
 		} else {
 			bean.setSummary("Merge pull request " + request.describe());
-			description = "Specify commit message of the merge commit";
 			needMergeCommit = true;
 		}
 		
-		getForm().add(new Label("description", description));
+		getForm().add(new Label("description", description).setVisible(description != null));
 		
 		getForm().add(BeanContext.edit("commitMessage", bean).setVisible(needMergeCommit));
 	}

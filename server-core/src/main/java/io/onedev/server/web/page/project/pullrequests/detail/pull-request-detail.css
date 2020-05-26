@@ -110,8 +110,12 @@ body.PullRequestDetailPage #layout>.body {
 	text-decoration: inherit;
 }
 
+#request-detail>.main>.operations { 
+	margin-bottom: 12px;
+}
 #request-detail>.main>.operations>a { 
 	margin-right: 8px;
+	margin-bottom: 8px;
 } 
 
 ul>li>a.code-comments .fa-circle {
@@ -148,6 +152,13 @@ ul>li>a.code-comments.new .fa-circle {
 	font-weight: bold;
 	margin-bottom: 12px;
 }
+#request-detail>.side-info>.content>div>.head>.warning {
+	color: #D09022;
+}
+#request-detail>.side-info .pull-request-jobs>.job {
+	margin-right: 12px;
+	line-height: 24px;
+}
 
 #request-detail>.side-info {
 	width: 360px;
@@ -162,13 +173,6 @@ ul>li>a.code-comments.new .fa-circle {
 #request-detail>.side-info>.content>div:first-child {
 	border-top: none;
 	padding-top: 0;
-}
-#request-detail>.side-info>.content>.jobs>.body>.job {
-	margin-right: 8px;
-	margin-bottom: 8px;
-}
-#request-detail>.side-info>.content>.jobs>.body {
-	margin-bottom: -8px;
 }
 #request-detail>.side-info>.content .manage .synchronize>.help {
 	margin-left: 4px;

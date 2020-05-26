@@ -141,7 +141,7 @@ abstract class CardListPanel extends Panel {
 
 	private List<Issue> queryIssues(int offset, int count) {
 		if (getQuery() != null) {
-			return getIssueManager().query(getProject(), getQuery(), offset, count);
+			return getIssueManager().query(getProject(), getQuery(), offset, count, true);
 		} else { 
 			return new ArrayList<>();
 		}

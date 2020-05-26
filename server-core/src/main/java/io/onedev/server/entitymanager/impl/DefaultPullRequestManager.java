@@ -1023,13 +1023,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public List<PullRequest> query(@Nullable Project targetProject,  
-			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
+	public List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
+			int firstResult, int maxResults, boolean loadReviews, boolean loadVerifiations) {
 		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
-		return query.getResultList();
+
+		List<PullRequest> requests = query.getResultList();
+		if (!requests.isEmpty()) {
+			pullRequestReviewManager.populateReviews(requests);
+			pullRequestVerificationManager.populateVerifications(requests);
+		}
+		
+		return requests;
 	}
 	
 	@Sessional

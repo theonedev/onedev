@@ -26,20 +26,20 @@
 				<a wicket:id="number" class="number"></a> 
 				<span wicket:id="title" class="title"></span> 
 			</div>
-			<div class="pull-right comments" title="Comments">
+			<div class="pull-right comments extra-info" title="Comments">
 				<span class="fa fa-comments-o"></span> <span wicket:id="comments"></span>
 			</div>
 		</div>
 		<div class="secondary clearfix">
-			<div class="pull-left clearfix">
-				<div class="status pull-left"><span wicket:id="status"></span></div>
-				<div class="branches pull-left">
-					<a wicket:id="target" title="Target"></a>
-					<span class="fa fa-arrow-left"></span>
-					<a wicket:id="source" title="Source"></a>
-				</div>
+			<div class="status pull-left"><span wicket:id="status"></span></div>
+			<div class="pull-left review" wicket:id="reviews"></div>
+			<div class="pull-left jobs" wicket:id="jobs"></div>
+			<div class="branches pull-left extra-info">
+				<a wicket:id="target" title="Target"></a>
+				<span class="fa fa-arrow-left"></span>
+				<a wicket:id="source" title="Source"></a>
 			</div>
-			<div class="last-update pull-right">
+			<div class="last-update pull-right extra-info">
 				<a wicket:id="user"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
 			</div>
 		</div>

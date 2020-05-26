@@ -10,6 +10,11 @@ public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 	private transient T selection;
 	
 	public SelectToAddChoice(String id, ChoiceProvider<T> choiceProvider) {
+		this(id);
+		setProvider(choiceProvider);
+	}
+
+	public SelectToAddChoice(String id) {
 		super(id);
 		
 		setModel(new IModel<T>() {
@@ -29,10 +34,8 @@ public abstract class SelectToAddChoice<T> extends Select2Choice<T> {
 			}
 			
 		});
-
-		setProvider(choiceProvider);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

@@ -1,23 +1,14 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
-import static io.onedev.server.model.Build.NAME_JOB;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.criteria.Criteria.quote;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,8 +36,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -62,7 +51,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -71,8 +59,6 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
@@ -92,8 +78,6 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -103,6 +87,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
 import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
+import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -113,7 +98,6 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -148,8 +132,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		super(params);
 		
 		String requestNumberString = params.get(PARAM_REQUEST).toString();
-		if (StringUtils.isBlank(requestNumberString))
-			throw new RestartResponseException(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), null, 0));
+		if (StringUtils.isBlank(requestNumberString)) {
+			throw new RestartResponseException(ProjectPullRequestsPage.class, 
+					ProjectPullRequestsPage.paramsOf(getProject(), null, 0));
+		}
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -157,8 +143,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected PullRequest load() {
 				Long requestNumber = Long.valueOf(requestNumberString);
 				PullRequest request = getPullRequestManager().find(getProject(), requestNumber);
-				if (request == null)
-					throw new EntityNotFoundException("Unable to find pull request #" + requestNumber + " in project " + getProject());
+				if (request == null) {
+					throw new EntityNotFoundException("Unable to find pull request #" 
+							+ requestNumber + " in project " + getProject());
+				}
 				else if (!request.getTargetProject().equals(getProject()))
 					throw new RestartResponseException(getPageClass(), paramsOf(request));
 				else
@@ -167,8 +155,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		};
 		
-		if (!getPullRequest().isValid())
-			throw new RestartResponseException(InvalidPullRequestPage.class, InvalidPullRequestPage.paramsOf(getPullRequest()));
+		if (!getPullRequest().isValid()) {
+			throw new RestartResponseException(InvalidPullRequestPage.class, 
+					InvalidPullRequestPage.paramsOf(getPullRequest()));
+		}
 			
 		latestUpdateId = requestModel.getObject().getLatestUpdate().getId();
 	}
@@ -494,7 +484,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				MergePreview preview = getPullRequest().getMergePreview();
-				setVisible(getPullRequest().isOpen() && preview != null 
+				setVisible(getPullRequest().isOpen() 
+						&& preview != null 
 						&& preview.getMergeCommitHash() == null);
 			}
 
@@ -505,7 +496,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				MergePreview preview = getPullRequest().getMergePreview();
-				setVisible(getPullRequest().isOpen() && preview != null 
+				setVisible(getPullRequest().isOpen() 
+						&& preview != null 
 						&& preview.getMergeCommitHash() != null);
 			}
 
@@ -516,7 +508,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(requestedForChanges());
+				setVisible(getPullRequest().isOpen() && requestedForChanges());
 			}
 			
 		});
@@ -526,7 +518,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(!requestedForChanges() 
+				setVisible(getPullRequest().isOpen() && !requestedForChanges() 
 						&& getPullRequest().getReviews().stream().anyMatch(it-> it.getResult()==null));
 			}
 			
@@ -536,7 +528,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(hasUnsuccessfulRequiredBuilds());
+				setVisible(getPullRequest().isOpen() && hasUnsuccessfulRequiredBuilds());
 			}
 			
 		});
@@ -547,7 +539,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				super.onConfigure();
 				
 				Stream<PullRequestVerification> stream = getPullRequest().getVerifications().stream();
-				setVisible(!hasUnsuccessfulRequiredBuilds() 
+				setVisible(getPullRequest().isOpen() && !hasUnsuccessfulRequiredBuilds() 
 						&& stream.anyMatch(it-> it.isRequired() && !it.getBuild().isFinished()));
 			}
 			
@@ -557,9 +549,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!SecurityUtils.canWriteCode(getProject()) 
-						&& getPullRequest().isAllReviewsApproved() 
-						&& getPullRequest().isRequiredBuildsSuccessful());
+				setVisible(getPullRequest().isOpen() && !SecurityUtils.canWriteCode(getProject()) 
+						&& getPullRequest().isAllReviewsApproved() && getPullRequest().isRequiredBuildsSuccessful());
 			}
 			
 		});
@@ -659,7 +650,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, boolean inProject) {
-						return getPullRequestManager().query(inProject?getProject():null, query, offset, count);
+						return getPullRequestManager().query(inProject?getProject():null, query, offset, count, false, false);
 					}
 
 					@Override
@@ -683,7 +674,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				});
 				
 				fragment.add(newMergeStrategyContainer());
-				fragment.add(new ReviewListPanel("reviews", requestModel));
+				fragment.add(new ReviewListPanel("reviews") {
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return PullRequestDetailPage.this.getPullRequest();
+					}
+					
+				});
 				fragment.add(new WebMarkupContainer("reviewerHelp") {
 
 					@Override
@@ -693,119 +691,72 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 					
 				});
-				fragment.add(new AssignmentListPanel("assignments", requestModel));
+				fragment.add(new WebMarkupContainer("hiddenJobsNote") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						
+						boolean hasHiddenJobs = false;
+						for (String jobName: getPullRequest().getVerifications().stream()
+								.map(it->it.getBuild().getJobName()).collect(Collectors.toSet())) {
+							if (!SecurityUtils.canAccess(getProject(), jobName)) {
+								hasHiddenJobs = true;
+								break;
+							}
+						}
+						setVisible(hasHiddenJobs);
+					}
+					
+				});
+				fragment.add(new PullRequestJobsPanel("jobs") {
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return PullRequestDetailPage.this.getPullRequest();
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!getPullRequest().getVerifications().isEmpty());
+					}
+
+				});
+				fragment.add(new WebMarkupContainer("jobsHelp") {
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+
+						boolean hasVisibleRequiredJobs = false;
+						for (String jobName: getPullRequest().getVerifications().stream()
+								.filter(it->it.isRequired())
+								.map(it->it.getBuild().getJobName())
+								.collect(Collectors.toSet())) {
+							if (SecurityUtils.canAccess(getProject(), jobName)) {
+								hasVisibleRequiredJobs = true;
+								break;
+							}
+						}
+						setVisible(hasVisibleRequiredJobs);
+					}
+					
+				});
+				fragment.add(new AssignmentListPanel("assignments") {
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return PullRequestDetailPage.this.getPullRequest();
+					}
+					
+				});
 				fragment.add(new WebMarkupContainer("assigneeHelp") {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
-					}
-					
-				});
-				
-				fragment.add(new ListView<JobBuilds>("jobs", new LoadableDetachableModel<List<JobBuilds>>() {
-
-					@Override
-					protected List<JobBuilds> load() {
-						PullRequest request = getPullRequest();
-						Map<String, List<PullRequestVerification>> map = new HashMap<>();
-						for (PullRequestVerification verification: request.getVerifications()) {
-							String jobName = verification.getBuild().getJobName();
-							List<PullRequestVerification> list = map.get(jobName);
-							if (list == null) {
-								list = new ArrayList<>();
-								map.put(jobName, list);
-							}
-							list.add(verification);
-						}
-						List<JobBuilds> listOfJobBuilds = new ArrayList<>();
-						for (Map.Entry<String, List<PullRequestVerification>> entry: map.entrySet()) {
-							List<Build> builds = entry.getValue().stream().map(it->it.getBuild()).collect(Collectors.toList());
-							Collections.sort(builds);
-							listOfJobBuilds.add(new JobBuilds(entry.getKey(), entry.getValue().iterator().next().isRequired(), builds));
-						}
-						Collections.sort(listOfJobBuilds, new Comparator<JobBuilds>() {
-
-							@Override
-							public int compare(JobBuilds o1, JobBuilds o2) {
-								return o1.getBuilds().iterator().next().getId().compareTo(o2.getBuilds().iterator().next().getId());
-							}
-							
-						});
-						return listOfJobBuilds;
-					}
-					
-				}) {
-
-					@Override
-					protected void populateItem(ListItem<JobBuilds> item) {
-						JobBuilds jobBuilds = item.getModelObject();
-
-						String jobName = jobBuilds.getJobName();
-						Status status = Status.getOverallStatus(jobBuilds.getBuilds()
-								.stream()
-								.map(it->it.getStatus())
-								.collect(Collectors.toSet()));
-						
-						WebMarkupContainer link = new DropdownLink("job") {
-
-							@Override
-							protected Component newContent(String id, FloatingPanel dropdown) {
-								return new SimpleBuildListPanel(id, new LoadableDetachableModel<List<Build>>() {
-
-									@Override
-									protected List<Build> load() {
-										return item.getModelObject().getBuilds();
-									}
-									
-								}) {
-									
-									@Override
-									protected Component newListLink(String componentId) {
-										String query = "" 
-												+ getRuleName(AssociatedWithPullRequest) + " " + quote("#" + getPullRequest().getNumber()) 
-												+ " " + getRuleName(And) + " "
-												+ quote(NAME_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
-										return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
-												ProjectBuildsPage.paramsOf(getPullRequest().getTargetProject(), query, 0));
-									}
-									
-								};
-							}
-
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								String title;
-								if (status != null) {
-									if (status != Status.SUCCESSFUL)
-										title = "Some builds are "; 
-									else
-										title = "Builds are "; 
-									title += status.getDisplayName().toLowerCase() + ", click for details";
-								} else {
-									title = "No builds";
-								}
-								tag.put("title", title);
-							}
-							
-						};
-										
-						link.add(new BuildStatusIcon("status", Model.of(status)));
-						item.add(link);
-
-						if (jobBuilds.isRequired())
-							link.add(new Label("name", jobName + " (required)"));
-						else
-							link.add(new Label("name", jobName));
-						item.add(link);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(!getModelObject().isEmpty());
 					}
 					
 				});
@@ -848,7 +799,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				fragment.setOutputMarkupId(true);
 				return fragment;
 			}
-			
+
 		};
 	}
 	
@@ -1498,30 +1449,4 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 	}
 	
-	private static class JobBuilds {
-		private final String jobName;
-
-		private final boolean required;
-		
-		private final List<Build> builds;
-		
-		public JobBuilds(String jobName, boolean required, List<Build> builds) {
-			this.jobName = jobName;
-			this.required = required;
-			this.builds = builds;
-		}
-
-		public String getJobName() {
-			return jobName;
-		}
-
-		public boolean isRequired() {
-			return required;
-		}
-
-		public List<Build> getBuilds() {
-			return builds;
-		}
-		
-	}
 }

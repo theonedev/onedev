@@ -258,13 +258,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Sessional
 	@Override
 	public List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults) {
+			int firstResult, int maxResults, boolean loadFields) {
 		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(project, getSession(), issueQuery);
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
-		if (!issues.isEmpty())
+		if (loadFields && !issues.isEmpty())
 			issueFieldManager.populateFields(issues);
 		
 		return issues;

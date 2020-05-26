@@ -58,16 +58,16 @@
 					</wicket:enclosure>
 				</div>
 				<div wicket:id="requestedForChanges" class="requested-for-changes alert alert-danger">
-					<i class="fa fa-hande-stop-o"></i> Pull request can not be merged now as <a class="more-info">some reviewers</a> are requesting for changes
+					<i class="fa fa-hande-stop-o"></i> Pull request can not be merged now as it was <a class="more-info">requested for changes</a> 
 				</div>
 				<div wicket:id="waitingForReviews" class="waiting-for-reviews alert alert-warning">
-					<i class="fa fa-clock-o"></i> Pull request can not be merged now as it is waiting approvals from <a class="more-info">some reviewers</a>
+					<i class="fa fa-clock-o"></i> Pull request can not be merged now as it is <a class="more-info">pending review</a>
 				</div>
 				<div wicket:id="unsuccessfulBuilds" class="unsuccessful-builds alert alert-danger">
-					<i class="fa fa-times-circle"></i> Pull request can not be merged now as <a class="more-info">some required builds</a> are not successful
+					<i class="fa fa-times-circle"></i> Pull request can not be merged now as <a class="more-info">required builds</a> are not successful
 				</div>
 				<div wicket:id="unfinishedBuilds" class="unfinished-builds alert alert-warning">
-					<i class="fa fa-clock-o"></i> Pull request can not be merged now as <a class="more-info">some required builds</a> are not finished yet
+					<i class="fa fa-clock-o"></i> Pull request can not be merged now as <a class="more-info">required builds</a> are not finished yet
 				</div>
 				<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers alert alert-info">
 					<i class="fa fa-info-circle"></i> Pull request can only be merged by users with code write permission
@@ -101,16 +101,9 @@
 		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
-			<div class="head">Jobs</div> 
-			<div class="body clearfix">
-				<div wicket:id="jobs" class="job pull-left">
-					<a wicket:id="job" class="btn btn-default">
-						<span wicket:id="status" class="status"></span>
-						<b wicket:id="name" class="name"></b>
-						<i class="fa fa-angle-down"></i>
-					</a>
-                </div>
-			</div>
+			<div class="head">Jobs <i wicket:id="hiddenJobsNote" class="fa fa-exclamation-circle warning" title="Some jobs are hidden to permission policy"></i></div> 
+			<div wicket:id="jobs" class="body"></div>
+			<div wicket:id="jobsHelp" class="help-block">Jobs marked with &lowast; are required to be successful</div>
 		</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="assignments">

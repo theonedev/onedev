@@ -3,14 +3,12 @@ package io.onedev.server.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -77,16 +75,15 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 
 	@Sessional
 	@Override
-	public void populateFields(List<Issue> issues) {
+	public void populateFields(Collection<Issue> issues) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<IssueField> query = builder.createQuery(IssueField.class);
 		
 		Root<IssueField> root = query.from(IssueField.class);
 		query.select(root);
-		root.join("issue");
+		root.join(IssueField.PROP_ISSUE);
 		
-		Expression<String> issueExpr = root.get("issue");
-		query.where(issueExpr.in(issues));
+		query.where(root.get(IssueField.PROP_ISSUE).in(issues));
 		
 		for (Issue issue: issues)
 			issue.setFields(new ArrayList<>());

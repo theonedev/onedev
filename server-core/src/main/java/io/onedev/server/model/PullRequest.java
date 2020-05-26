@@ -12,6 +12,7 @@ import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -292,6 +293,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Boolean mergedIntoTarget;
 
 	private transient List<PullRequestUpdate> sortedUpdates;
+	
+	private transient List<PullRequestReview> sortedReviews;
 	
 	private transient Optional<MergePreview> mergePreviewOpt;
 	
@@ -577,6 +580,25 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			Collections.sort(sortedUpdates);
 		}
 		return sortedUpdates;
+	}
+	
+	public List<PullRequestReview> getSortedReviews() {
+		if (sortedReviews == null) {
+			sortedReviews = new ArrayList<>(reviews);
+			
+			Collections.sort(sortedReviews, new Comparator<PullRequestReview>() {
+
+				@Override
+				public int compare(PullRequestReview o1, PullRequestReview o2) {
+					if (o1.getId() != null && o2.getId() != null)
+						return o1.getId().compareTo(o1.getId());
+					else
+						return 0;
+				}
+				
+			});
+		}
+		return sortedReviews;
 	}
 
 	public MergeStrategy getMergeStrategy() {

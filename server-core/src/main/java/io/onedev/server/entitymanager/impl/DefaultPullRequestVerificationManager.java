@@ -1,11 +1,15 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestVerificationManager;
@@ -50,6 +54,24 @@ public class DefaultPullRequestVerificationManager extends AbstractEntityManager
 			if (isNew)
 				listenerRegistry.post(new PullRequestVerificationEvent(build));
 		}
+	}
+
+	@Override
+	public void populateVerifications(Collection<PullRequest> requests) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<PullRequestVerification> query = builder.createQuery(PullRequestVerification.class);
+		
+		Root<PullRequestVerification> root = query.from(PullRequestVerification.class);
+		query.select(root);
+		root.join(PullRequestVerification.PROP_REQUEST);
+		
+		query.where(root.get(PullRequestVerification.PROP_REQUEST).in(requests));
+		
+		for (PullRequest request: requests)
+			request.setVerifications(new ArrayList<>());
+		
+		for (PullRequestVerification verification: getSession().createQuery(query).getResultList())
+			verification.getRequest().getVerifications().add(verification);
 	}
 
 }

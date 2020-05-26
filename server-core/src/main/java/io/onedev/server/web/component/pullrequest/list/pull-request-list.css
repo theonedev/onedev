@@ -1,5 +1,5 @@
 @media(max-width: 991px) {
-	.pull-request-list>.body .pull-right {
+	.pull-request-list>.body .extra-info {
 		display: none;
 	}
 }
@@ -38,8 +38,15 @@
 .pull-request-list>.body td .primary {
 	margin-bottom: 8px;
 }
-.pull-request-list>.body td .secondary>.pull-left>div {
-	margin-right: 20px;
+.pull-request-list>.body td .primary>.pull-left {
+	margin-right: 12px;
+}
+
+.pull-request-list>.body td .secondary {
+	line-height: 24px;
+}
+.pull-request-list>.body td .secondary>.pull-left {
+	margin-right: 12px;
 }
 .pull-request-list>.body td .branches .fa {
 	color: #666;
@@ -48,7 +55,6 @@
 .pull-request-list>.body td .last-update, 
 .pull-request-list>.body td .comments {
 	color: #888;
-	font-size: 13px;
 }
 
 .pull-request-list>.body .new-indicator {

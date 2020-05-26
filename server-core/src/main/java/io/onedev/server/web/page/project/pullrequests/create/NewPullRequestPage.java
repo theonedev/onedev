@@ -706,8 +706,22 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		});
 
 		form.add(newMergeStrategyContainer());
-		form.add(new ReviewListPanel("reviewers", requestModel));
-		form.add(new AssignmentListPanel("assignees", requestModel));
+		form.add(new ReviewListPanel("reviewers") {
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return NewPullRequestPage.this.getPullRequest();
+			}
+			
+		});
+		form.add(new AssignmentListPanel("assignees") {
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return NewPullRequestPage.this.getPullRequest();
+			}
+			
+		});
 		
 		return fragment;
 	}

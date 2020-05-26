@@ -33,7 +33,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	void open(Issue issue);
 	
 	List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults);
+			int firstResult, int maxResults, boolean loadFields);
 	
 	int count(@Nullable Project project, @Nullable IssueCriteria issueCriteria);
 	

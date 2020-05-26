@@ -2,30 +2,23 @@ package io.onedev.server.web.component.pullrequest.review;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
@@ -33,51 +26,32 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 
 @SuppressWarnings("serial")
-public class ReviewListPanel extends GenericPanel<PullRequest> {
+public abstract class ReviewListPanel extends Panel {
 
 	private static final MetaDataKey<ArrayList<User>> UNPREFERABLE_REVIEWERS = new MetaDataKey<ArrayList<User>>() {};
 	
 	private final IModel<List<PullRequestReview>> reviewsModel;
 	
-	public ReviewListPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public ReviewListPanel(String id) {
+		super(id);
 		
 		reviewsModel = new LoadableDetachableModel<List<PullRequestReview>>() {
 
 			@Override
 			protected List<PullRequestReview> load() {
-				PullRequest request = getPullRequest();
-				List<PullRequestReview> reviews = new ArrayList<>(request.getReviews());
-				
-				Collections.sort(reviews, new Comparator<PullRequestReview>() {
-
-					@Override
-					public int compare(PullRequestReview o1, PullRequestReview o2) {
-						if (o1.getId() != null && o2.getId() != null)
-							return o1.getId().compareTo(o1.getId());
-						else
-							return 0;
-					}
-					
-				});
-				
-				return reviews;
+				return getPullRequest().getSortedReviews();
 			}
 			
 		};		
 	}
 
-	private PullRequest getPullRequest() {
-		return getModelObject();
-	}
+	protected abstract PullRequest getPullRequest();
 	
 	@Override
 	protected void onDetach() {
@@ -106,48 +80,14 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				
 				PullRequest request = getPullRequest();
 				
-				WebMarkupContainer result = new WebMarkupContainer("result");
-				if (review.getResult() != null) {
-					if (review.getResult().isApproved())
-						result.add(AttributeAppender.append("class", "approved fa fa-check-circle"));
-					else 
-						result.add(AttributeAppender.append("class", "request-for-changes fa fa-hand-stop-o"));
-				} else {
-					result.add(AttributeAppender.append("class", "awaiting fa fa-clock-o"));
-				}
-				result.add(new DropdownHoverBehavior() {
-					
+				item.add(new ReviewStatusIcon("status") {
+
 					@Override
-					protected Component newContent(String id) {
-						ReviewResult result = item.getModelObject().getResult();
-						
-						String title;
-						if (result != null) {
-							if (result.isApproved())
-								title = "Approved";
-							else
-								title = "Request for changes";
-						} else {
-							title = "Waiting for review";
-						}
-						StringBuilder builder = new StringBuilder();
-						builder.append("<div class='title'>").append(title).append("</div>");
-						
-						if (result != null && result.getComment() != null) {
-							MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
-							String rendered = markdownManager.render(result.getComment());
-							builder.append("<div class='comment'>").append(HtmlUtils.clean(rendered).body().html()).append("</div>");
-						}
-						Label label = new Label(id, builder.toString());
-						label.add(AttributeAppender.append("class", "review-action"));
-						label.setEscapeModelStrings(false);
-						return label;
+					protected ReviewResult getResult() {
+						return item.getModelObject().getResult();
 					}
 					
-				});
-				result.setVisible(!request.isNew());
-				
-				item.add(result);
+				}.setVisible(!request.isNew()));
 				
 				item.add(new AjaxLink<Void>("delete") {
 
@@ -194,7 +134,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			
 		});
 		
-		add(new ReviewerChoice("addReviewer", getModel()) {
+		add(new ReviewerChoice("addReviewer") {
 
 			@Override
 			protected void onConfigure() {
@@ -207,6 +147,11 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				super.onSelect(target, user);
 				if (getPullRequest().isNew())
 					target.add(ReviewListPanel.this);
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return ReviewListPanel.this.getPullRequest();
 			}
 		                                                                                                                              
 		});
@@ -232,7 +177,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ReviewListCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new ReviewCssResourceReference()));
 	}
 
 }

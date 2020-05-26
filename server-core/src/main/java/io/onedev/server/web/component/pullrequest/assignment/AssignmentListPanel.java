@@ -14,7 +14,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -32,12 +32,12 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 
 @SuppressWarnings("serial")
-public class AssignmentListPanel extends GenericPanel<PullRequest> {
+public abstract class AssignmentListPanel extends Panel {
 
 	private final IModel<List<PullRequestAssignment>> assignmentsModel;
 	
-	public AssignmentListPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public AssignmentListPanel(String id) {
+		super(id);
 		
 		assignmentsModel = new LoadableDetachableModel<List<PullRequestAssignment>>() {
 
@@ -64,9 +64,7 @@ public class AssignmentListPanel extends GenericPanel<PullRequest> {
 		};		
 	}
 
-	private PullRequest getPullRequest() {
-		return getModelObject();
-	}
+	protected abstract PullRequest getPullRequest();
 	
 	@Override
 	protected void onDetach() {
@@ -132,7 +130,7 @@ public class AssignmentListPanel extends GenericPanel<PullRequest> {
 			
 		});
 		
-		add(new AssigneeChoice("addAssignee", getModel()) {
+		add(new AssigneeChoice("addAssignee") {
 
 			@Override
 			protected void onConfigure() {
@@ -146,6 +144,11 @@ public class AssignmentListPanel extends GenericPanel<PullRequest> {
 				super.onSelect(target, user);
 				if (getPullRequest().isNew())
 					target.add(AssignmentListPanel.this);
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return AssignmentListPanel.this.getPullRequest();
 			}
 		                                                                                                                              
 		});

@@ -21,6 +21,8 @@ public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_ISSUE = "issue";
+	
 	public static final String PROP_NAME = "name";
 	
 	public static final String PROP_VALUE = "value";
