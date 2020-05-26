@@ -30,6 +30,8 @@ onedev.server.codemirror = {
 	setModeByFileName: function(cm, fileName) {
 		if (fileName.endsWith(".cbl") || fileName.endsWith(".pco")) {
 			onedev.server.codemirror.setModeByName(cm, "cobol");
+		} else if (fileName.endsWith(".js")) {
+			onedev.server.codemirror.setModeByName(cm, "jsx");
 		} else if (fileName == ".onedev-buildspec") {
 			onedev.server.codemirror.setModeByName(cm, "xml");
 		} else {
