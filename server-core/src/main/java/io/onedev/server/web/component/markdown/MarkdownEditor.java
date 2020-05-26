@@ -1,19 +1,6 @@
 package io.onedev.server.web.component.markdown;
 
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
-
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.Cookie;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -42,11 +29,19 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.crypt.Base64;
 import org.unbescape.javascript.JavaScriptEscape;
-
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -260,11 +255,13 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					break;
 				case "loadEmojis":
 					emojis = new ArrayList<>();
+					String urlPattern =  RequestCycle.get().urlFor(new PackageResourceReference(EmojiOnes.class,
+					        "icon/FILENAME.png"), new PageParameters()).toString();
+					
 					for (Map.Entry<String, String> entry: EmojiOnes.getInstance().all().entrySet()) {
 						Map<String, String> emoji = new HashMap<>();
 						emoji.put("name", entry.getKey());
-						emoji.put("url", RequestCycle.get().urlFor(new PackageResourceReference(
-								EmojiOnes.class, "icon/" + entry.getValue() + ".png"), new PageParameters()).toString());
+						emoji.put("url", urlPattern.replace("FILENAME", entry.getValue()));
 						emojis.add(emoji);
 					}
 
