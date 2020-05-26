@@ -31,6 +31,7 @@ public class DefaultPullRequestQuerySettingManager extends AbstractEntityManager
 	public PullRequestQuerySetting find(Project project, User user) {
 		EntityCriteria<PullRequestQuerySetting> criteria = newCriteria();
 		criteria.add(Restrictions.and(Restrictions.eq("project", project), Restrictions.eq("user", user)));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 

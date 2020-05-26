@@ -31,6 +31,7 @@ public class DefaultBuildQuerySettingManager extends AbstractEntityManager<Build
 	public BuildQuerySetting find(Project project, User user) {
 		EntityCriteria<BuildQuerySetting> criteria = newCriteria();
 		criteria.add(Restrictions.and(Restrictions.eq("project", project), Restrictions.eq("user", user)));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 

@@ -45,6 +45,10 @@
 .pull-request-list>.body td .secondary {
 	line-height: 24px;
 }
+.pull-request-list>.body td .secondary .status, 
+.pull-request-list>.body td .secondary .review {
+	margin-top: -2px;
+}
 .pull-request-list>.body td .secondary>.pull-left {
 	margin-right: 12px;
 }

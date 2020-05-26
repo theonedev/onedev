@@ -31,6 +31,7 @@ public class DefaultIssueQuerySettingManager extends AbstractEntityManager<Issue
 	public IssueQuerySetting find(Project project, User user) {
 		EntityCriteria<IssueQuerySetting> criteria = newCriteria();
 		criteria.add(Restrictions.and(Restrictions.eq("project", project), Restrictions.eq("user", user)));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 

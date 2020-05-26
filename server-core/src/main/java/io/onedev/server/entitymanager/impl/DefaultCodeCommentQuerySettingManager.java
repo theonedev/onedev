@@ -29,6 +29,7 @@ public class DefaultCodeCommentQuerySettingManager extends AbstractEntityManager
 	public CodeCommentQuerySetting find(Project project, User user) {
 		EntityCriteria<CodeCommentQuerySetting> criteria = newCriteria();
 		criteria.add(Restrictions.and(Restrictions.eq("project", project), Restrictions.eq("user", user)));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 

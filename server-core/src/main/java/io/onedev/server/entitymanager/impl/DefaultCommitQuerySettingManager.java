@@ -31,6 +31,7 @@ public class DefaultCommitQuerySettingManager extends AbstractEntityManager<Comm
 	public CommitQuerySetting find(Project project, User user) {
 		EntityCriteria<CommitQuerySetting> criteria = newCriteria();
 		criteria.add(Restrictions.and(Restrictions.eq("project", project), Restrictions.eq("user", user)));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 
