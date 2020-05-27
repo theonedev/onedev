@@ -1,23 +1,20 @@
 package io.onedev.server.model.support.issue.changedata;
 
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import com.google.common.base.Objects;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.diff.DiffSupport;
-import io.onedev.server.web.component.issue.activities.activity.DiffAndCommentAwarePanel;
+import io.onedev.server.web.component.issue.activities.activity.IssueFieldChangePanel;
 
 public class IssueBatchUpdateData extends IssueFieldChangeData {
 
@@ -33,8 +30,10 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	
 	private String comment;
 	
-	public IssueBatchUpdateData(String oldState, String newState, @Nullable Milestone oldMilestone, @Nullable Milestone newMilestone, 
-			Map<String, Input> oldFields, Map<String, Input> newFields, @Nullable String comment) {
+	public IssueBatchUpdateData(String oldState, String newState, 
+			@Nullable Milestone oldMilestone, @Nullable Milestone newMilestone, 
+			Map<String, Input> oldFields, Map<String, Input> newFields, 
+			@Nullable String comment) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;
@@ -44,33 +43,23 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	}
 
 	@Override
-	protected List<String> getOldLines() {
-		List<String> oldLines = super.getOldLines();
-		if (!Objects.equal(oldMilestone, newMilestone)) {
-			if (oldMilestone != null)
-				oldLines.add(0, "Milestone: " + oldMilestone);
-			else
-				oldLines.add(0, "Milestone: ");
-		}
-		if (!Objects.equal(oldState, newState)) {
-			oldLines.add(0, "State: " + oldState);
-		}
-		return oldLines;
+	public Map<String, String> getOldFieldValues() {
+		Map<String, String> oldFieldValues = new LinkedHashMap<>();
+		oldFieldValues.put("State", oldState);
+		if (oldMilestone != null)
+			oldFieldValues.put("Milestone", oldMilestone);
+		oldFieldValues.putAll(super.getOldFieldValues());
+		return oldFieldValues;
 	}
 
 	@Override
-	protected List<String> getNewLines() {
-		List<String> newLines = super.getNewLines();
-		if (!Objects.equal(oldMilestone, newMilestone)) {
-			if (newMilestone != null)
-				newLines.add(0, "Milestone: " + newMilestone);
-			else
-				newLines.add(0, "Milestone: ");
-		}
-		if (!Objects.equal(oldState, newState)) {
-			newLines.add(0, "State: " + newState);
-		}
-		return newLines;
+	public Map<String, String> getNewFieldValues() {
+		Map<String, String> newFieldValues = new LinkedHashMap<>();
+		newFieldValues.put("State", newState);
+		if (newMilestone != null)
+			newFieldValues.put("Milestone", newMilestone);
+		newFieldValues.putAll(super.getNewFieldValues());
+		return newFieldValues;
 	}
 
 	public String getNewState() {
@@ -90,8 +79,8 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
-		return new CommentSupport() {
+	public CommentAware getCommentAware() {
+		return new CommentAware() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -111,7 +100,7 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	@Override
 	public Component render(String componentId, IssueChange change) {
 		Long changeId = change.getId();
-		return new DiffAndCommentAwarePanel(componentId) {
+		return new IssueFieldChangePanel(componentId, true) {
 			
 			private static final long serialVersionUID = 1L;
 
@@ -120,34 +109,6 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 				return OneDev.getInstance(IssueChangeManager.class).load(changeId);
 			}
 
-			@Override
-			protected DiffSupport getDiffSupport() {
-				return new DiffSupport() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public List<String> getOldLines() {
-						return IssueBatchUpdateData.this.getOldLines();
-					}
-
-					@Override
-					public List<String> getNewLines() {
-						return IssueBatchUpdateData.this.getNewLines();
-					}
-
-					@Override
-					public String getOldFileName() {
-						return "a.txt";
-					}
-
-					@Override
-					public String getNewFileName() {
-						return "b.txt";
-					}
-					
-				};
-			}
 		};
 	}
 

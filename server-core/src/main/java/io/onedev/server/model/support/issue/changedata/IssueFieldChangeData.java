@@ -20,9 +20,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
-import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
+import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
 public class IssueFieldChangeData implements IssueChangeData {
 
@@ -37,37 +37,18 @@ public class IssueFieldChangeData implements IssueChangeData {
 		this.newFields = copyNonEmptyFields(newFields);
 	}
 	
-	protected List<String> getOldLines() {
-		List<String> oldLines = new ArrayList<>();
-		for (Input oldField: oldFields.values()) {
-			Input newField = newFields.get(oldField.getName());
-			if (newField == null || !describe(oldField).equals(describe(newField)))
-				oldLines.add(describe(oldField));
-		}
-		for (Input newField: newFields.values()) {
-			if (!oldFields.containsKey(newField.getName()))
-				oldLines.add("");
-		}
-		return oldLines;
+	public Map<String, String> getOldFieldValues() {
+		Map<String, String> oldFieldValues = new LinkedHashMap<>();
+		for (Map.Entry<String, Input> entry: oldFields.entrySet())
+			oldFieldValues.put(entry.getKey(), StringUtils.join(entry.getValue().getValues()));
+		return oldFieldValues;
 	}
 	
-	protected List<String> getNewLines() {
-		List<String> newLines = new ArrayList<>();
-		for (Input oldField: oldFields.values()) {
-			Input newField = newFields.get(oldField.getName());
-			if (newField != null) {
-				if (!describe(oldField).equals(describe(newField))) {
-					newLines.add(describe(newField));
-				}
-			} else {
-				newLines.add("");
-			}
-		}
-		for (Input newField: newFields.values()) {
-			if (!oldFields.containsKey(newField.getName()))
-				newLines.add(describe(newField));
-		}
-		return newLines;
+	public Map<String, String> getNewFieldValues() {
+		Map<String, String> newFieldValues = new LinkedHashMap<>();
+		for (Map.Entry<String, Input> entry: newFields.entrySet())
+			newFieldValues.put(entry.getKey(), StringUtils.join(entry.getValue().getValues()));
+		return newFieldValues;
 	}
 	
 	private Map<String, Input> copyNonEmptyFields(Map<String, Input> fields) {
@@ -85,7 +66,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new PlainDiffPanel(componentId, getOldLines(), "a.txt", getNewLines(), "b.txt", true);
+		return new PropertyChangePanel(componentId, getOldFieldValues(), getNewFieldValues(), true);
 	}
 
 	@Override
@@ -104,7 +85,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 	
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 

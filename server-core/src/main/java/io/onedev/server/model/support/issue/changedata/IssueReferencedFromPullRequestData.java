@@ -11,7 +11,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
 
 public class IssueReferencedFromPullRequestData implements IssueChangeData {
@@ -42,7 +42,7 @@ public class IssueReferencedFromPullRequestData implements IssueChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 	

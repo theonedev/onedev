@@ -6,14 +6,13 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentSupport;
-import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
+import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.util.CommentAware;
+import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
 public class IssueTitleChangeData implements IssueChangeData {
 
@@ -30,7 +29,10 @@ public class IssueTitleChangeData implements IssueChangeData {
 	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new PlainDiffPanel(componentId, Lists.newArrayList(oldTitle), "a.txt", Lists.newArrayList(newTitle), "b.txt", true);
+		return new PropertyChangePanel(componentId, 
+				CollectionUtils.newHashMap("Title", oldTitle), 
+				CollectionUtils.newHashMap("Title", newTitle), 
+				true);
 	}
 	
 	@Override
@@ -42,7 +44,7 @@ public class IssueTitleChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 	

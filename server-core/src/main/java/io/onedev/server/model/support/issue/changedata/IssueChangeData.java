@@ -12,7 +12,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 
 public interface IssueChangeData extends Serializable {
 	
@@ -21,7 +21,7 @@ public interface IssueChangeData extends Serializable {
 	String getActivity(@Nullable Issue withIssue);
 
 	@Nullable
-	CommentSupport getCommentSupport();
+	CommentAware getCommentAware();
 	
 	Map<String, Collection<User>> getNewUsers();
 	

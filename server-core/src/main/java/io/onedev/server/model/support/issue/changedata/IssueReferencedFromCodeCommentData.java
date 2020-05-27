@@ -11,7 +11,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
 
 public class IssueReferencedFromCodeCommentData implements IssueChangeData {
@@ -42,7 +42,7 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 

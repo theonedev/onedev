@@ -197,11 +197,13 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Override
-	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment) {
+	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
+			Collection<String> removeFields, @Nullable String comment) {
 		String prevState = issue.getState();
 		Map<String, Input> prevFields = issue.getFieldInputs();
+		
 		issue.setState(state);
-
+		issue.removeFields(removeFields);
 		issue.setFieldValues(fieldValues);
 		
 		issueFieldManager.saveFields(issue);
@@ -294,8 +296,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 														Build.push(build);
 														try {
 															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
-																issue.removeFields(transition.getRemoveFields());
-																changeState(issue, transition.getToState(), new HashMap<>(), null);
+																changeState(issue, transition.getToState(), new HashMap<>(), 
+																		transition.getRemoveFields(), null);
 															}
 														} finally {
 															Build.pop();
@@ -358,8 +360,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 														PullRequest.push(request);
 														try {
 															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
-																issue.removeFields(transition.getRemoveFields());
-																changeState(issue, transition.getToState(), new HashMap<>(), null);
+																changeState(issue, transition.getToState(), new HashMap<>(), 
+																		transition.getRemoveFields(), null);
 															}
 														} finally {
 															PullRequest.pop();
@@ -492,8 +494,8 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 															});
 															try {
 																for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
-																	issue.removeFields(transition.getRemoveFields());
-																	changeState(issue, transition.getToState(), new HashMap<>(), null);
+																	changeState(issue, transition.getToState(), new HashMap<>(), 
+																			transition.getRemoveFields(), null);
 																}
 															} finally {
 																ProjectScopedCommit.pop();

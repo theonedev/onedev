@@ -55,11 +55,10 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				getIssue().removeFields(getTransition().getRemoveFields());
 				Map<String, Object> fieldValues = IssueUtils.getFieldValues(
 						editor.newComponentContext(), fieldBean, trigger.getPromptFields());
-				OneDev.getInstance(IssueChangeManager.class).changeState(
-						getIssue(), getTransition().getToState(), fieldValues, null);
+				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), 
+						getTransition().getToState(), fieldValues, getTransition().getRemoveFields(), null);
 				onSaved(target);
 			}
 

@@ -161,11 +161,11 @@ public abstract class IssueOperationsPanel extends Panel {
 							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 								super.onSubmit(target, form);
 
-								getIssue().removeFields(transition.getRemoveFields());
 								Map<String, Object> fieldValues = IssueUtils.getFieldValues(
 										editor.newComponentContext(), fieldBean, trigger.getPromptFields());
 								IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
-								manager.changeState(getIssue(), transition.getToState(), fieldValues, comment);
+								manager.changeState(getIssue(), transition.getToState(), fieldValues, 
+										transition.getRemoveFields(), comment);
 								target.add(IssueOperationsPanel.this);
 							}
 							

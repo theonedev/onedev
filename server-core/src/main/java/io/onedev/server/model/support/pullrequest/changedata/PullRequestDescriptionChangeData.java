@@ -1,14 +1,10 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import java.util.List;
-
 import org.apache.wicket.Component;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.util.CommentSupport;
-import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
+import io.onedev.server.util.CommentAware;
 
 public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 
@@ -23,6 +19,14 @@ public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 		this.newDescription = newDescription;
 	}
 	
+	public String getOldDescription() {
+		return oldDescription;
+	}
+
+	public String getNewDescription() {
+		return newDescription;
+	}
+
 	@Override
 	public String getActivity(PullRequest withRequest) {
 		String activity = "changed description";
@@ -33,13 +37,11 @@ public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 
 	@Override
 	public Component render(String componentId, PullRequestChange change) {
-		List<String> oldLines = StringUtils.splitAndTrim(oldDescription, "\n");
-		List<String> newLines = StringUtils.splitAndTrim(newDescription, "\n");
-		return new PlainDiffPanel(componentId, oldLines, "a.txt", newLines, "b.txt", true);
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 

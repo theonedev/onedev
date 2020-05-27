@@ -517,6 +517,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			if (fieldNames.contains(it.next().getName()))
 				it.remove();
 		}
+		fieldInputs = null;
 	}
 	
 	public void setFieldValues(Map<String, Object> fieldValues) {

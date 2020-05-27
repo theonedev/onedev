@@ -49,7 +49,8 @@ onedev.server.floating = {
 					&& !document.body.contains(alignment.target.element)) {
 				onedev.server.floating.close($floating, true);
 			} else {
-				$floating.align(alignment);
+				if (alignment)
+					$floating.align(alignment);
 				if (!openTriggered) {
 					$floating.trigger("open");
 					openTriggered = true;

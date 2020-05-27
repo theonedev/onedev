@@ -12,41 +12,39 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.diff.DiffSupport;
-import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
+import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 @SuppressWarnings("serial")
-public abstract class DiffAndCommentAwarePanel extends Panel {
+public abstract class IssueFieldChangePanel extends Panel {
 
-	private static final String DIFF_ID = "diff";
+	private final boolean hideNameIfOnlyOneRow;
 	
-	private static final String COMMENT_ID = "comment";
-	
-	public DiffAndCommentAwarePanel(String id) {
+	public IssueFieldChangePanel(String id, boolean hideNameIfOnlyOneRow) {
 		super(id);
+		this.hideNameIfOnlyOneRow = hideNameIfOnlyOneRow;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DiffSupport diffSupport = getDiffSupport();
-		if (diffSupport != null)
-			add(new PlainDiffPanel(DIFF_ID, diffSupport.getOldLines(), diffSupport.getOldFileName(), diffSupport.getNewLines(), diffSupport.getNewFileName(), true));
-		else
-			add(new WebMarkupContainer(DIFF_ID).setVisible(false));
+		IssueFieldChangeData changeData = (IssueFieldChangeData) getChange().getData();
 		
-		if (getChange().getData().getCommentSupport() != null) {
-			add(new ProjectCommentPanel(COMMENT_ID) {
+		add(new PropertyChangePanel("change", changeData.getOldFieldValues(), changeData.getNewFieldValues(), 
+				hideNameIfOnlyOneRow));
+		
+		if (changeData.getCommentAware() != null) {
+			add(new ProjectCommentPanel("comment") {
 
 				@Override
 				protected String getComment() {
-					return getChange().getData().getCommentSupport().getComment();
+					return getChange().getData().getCommentAware().getComment();
 				}
 
 				@Override
@@ -56,7 +54,7 @@ public abstract class DiffAndCommentAwarePanel extends Panel {
 
 				@Override
 				protected void onSaveComment(AjaxRequestTarget target, String comment) {
-					getChange().getData().getCommentSupport().setComment(comment);
+					getChange().getData().getCommentAware().setComment(comment);
 					OneDev.getInstance(IssueChangeManager.class).save(getChange());
 				}
 
@@ -92,12 +90,11 @@ public abstract class DiffAndCommentAwarePanel extends Panel {
 				
 			});			
 		} else {
-			add(new WebMarkupContainer(COMMENT_ID).setVisible(false));
+			add(new WebMarkupContainer("comment").setVisible(false));
 		}
+		
 	}
-
-	protected abstract IssueChange getChange();
 	
-	protected abstract DiffSupport getDiffSupport();
+	protected abstract IssueChange getChange();
 	
 }

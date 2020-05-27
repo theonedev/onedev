@@ -8,7 +8,7 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 
 public interface PullRequestChangeData extends Serializable {
 
@@ -17,6 +17,6 @@ public interface PullRequestChangeData extends Serializable {
 	abstract String getActivity(@Nullable PullRequest withRequest);
 	
 	@Nullable
-	abstract CommentSupport getCommentSupport();
+	abstract CommentAware getCommentAware();
 
 }

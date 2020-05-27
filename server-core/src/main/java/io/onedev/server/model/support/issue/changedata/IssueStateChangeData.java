@@ -1,6 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -11,10 +11,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.diff.DiffSupport;
-import io.onedev.server.web.component.issue.activities.activity.DiffAndCommentAwarePanel;
+import io.onedev.server.web.component.issue.activities.activity.IssueFieldChangePanel;
 
 public class IssueStateChangeData extends IssueFieldChangeData {
 
@@ -26,8 +25,9 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	
 	private String comment;
 	
-	public IssueStateChangeData(String oldState, String newState, Map<String, Input> oldFields, 
-			Map<String, Input> newFields, @Nullable String comment) {
+	public IssueStateChangeData(String oldState, String newState, 
+			Map<String, Input> oldFields, Map<String, Input> newFields, 
+			@Nullable String comment) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;
@@ -35,17 +35,19 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	}
 
 	@Override
-	protected List<String> getOldLines() {
-		List<String> oldLines = super.getOldLines();
-		oldLines.add(0, "State: " + oldState);
-		return oldLines;
+	public Map<String, String> getOldFieldValues() {
+		Map<String, String> oldFieldValues = new LinkedHashMap<>();
+		oldFieldValues.put("State", oldState);
+		oldFieldValues.putAll(super.getOldFieldValues());
+		return oldFieldValues;
 	}
 
 	@Override
-	protected List<String> getNewLines() {
-		List<String> newLines = super.getNewLines();
-		newLines.add(0, "State: " + newState);
-		return newLines;
+	public Map<String, String> getNewFieldValues() {
+		Map<String, String> newFieldValues = new LinkedHashMap<>();
+		newFieldValues.put("State", newState);
+		newFieldValues.putAll(super.getNewFieldValues());
+		return newFieldValues;
 	}
 
 	public String getNewState() {
@@ -57,8 +59,8 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
-		return new CommentSupport() {
+	public CommentAware getCommentAware() {
+		return new CommentAware() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -78,7 +80,8 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	@Override
 	public Component render(String componentId, IssueChange change) {
 		Long changeId = change.getId();
-		return new DiffAndCommentAwarePanel(componentId) {
+		
+		return new IssueFieldChangePanel(componentId, true) {
 			
 			private static final long serialVersionUID = 1L;
 
@@ -87,34 +90,6 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 				return OneDev.getInstance(IssueChangeManager.class).load(changeId);
 			}
 
-			@Override
-			protected DiffSupport getDiffSupport() {
-				return new DiffSupport() {
-
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public List<String> getOldLines() {
-						return IssueStateChangeData.this.getOldLines();
-					}
-
-					@Override
-					public List<String> getNewLines() {
-						return IssueStateChangeData.this.getNewLines();
-					}
-
-					@Override
-					public String getOldFileName() {
-						return "a.txt";
-					}
-
-					@Override
-					public String getNewFileName() {
-						return "b.txt";
-					}
-					
-				};
-			}
 		};
 	}
 

@@ -23,8 +23,8 @@ public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 
 	@Override
 	public String getMarkdown() {
-		if (change.getData().getCommentSupport() != null)
-			return change.getData().getCommentSupport().getComment();
+		if (change.getData().getCommentAware() != null)
+			return change.getData().getCommentAware().getComment();
 		else
 			return null;
 	}

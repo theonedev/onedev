@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -22,7 +23,8 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 	
 	void changeFields(Issue issue, Map<String, Object> fieldValues);
 	
-	void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment);
+	void changeState(Issue issue, String state, Map<String, Object> fieldValues, 
+			Collection<String> removeFields, @Nullable String comment);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
 			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 

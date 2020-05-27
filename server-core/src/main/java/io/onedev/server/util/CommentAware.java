@@ -2,7 +2,7 @@ package io.onedev.server.util;
 
 import java.io.Serializable;
 
-public interface CommentSupport extends Serializable {
+public interface CommentAware extends Serializable {
 	
 	String getComment();
 	

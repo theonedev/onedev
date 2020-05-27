@@ -10,7 +10,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 
 public class IssueReferencedFromIssueData implements IssueChangeData {
@@ -41,7 +41,7 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 	

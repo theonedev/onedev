@@ -18,8 +18,8 @@ public class PullRequestChangeEvent extends PullRequestEvent implements Markdown
 
 	@Override
 	public String getMarkdown() {
-		if (change.getData().getCommentSupport() != null)
-			return change.getData().getCommentSupport().getComment();
+		if (change.getData().getCommentAware() != null)
+			return change.getData().getCommentAware().getComment();
 		else
 			return null;
 	}

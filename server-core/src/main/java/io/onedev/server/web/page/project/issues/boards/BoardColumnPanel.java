@@ -392,8 +392,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							
 						};
 					} else {
-						issue.removeFields(transitionRef.get().getRemoveFields());
-						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), new HashMap<>(), null);
+						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), 
+								new HashMap<>(), transitionRef.get().getRemoveFields(), null);
 						markAccepted(target, issue, true);
 					}
 				} else {

@@ -53,9 +53,10 @@
 .issue-activities .activity>.content>.body .actions .middot {
 	margin: 0 4px;
 }
-.issue-activities .activity>.content>.body .plain.diff {
+.issue-activities .activity>.content>.body .field-change>.change {
 	margin-bottom: 12px;
 }
+
 .issue-activities .activity>.content>.head a {
 	color: #999;
 	margin-left: 8px;

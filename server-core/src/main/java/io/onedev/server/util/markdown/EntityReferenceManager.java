@@ -235,15 +235,15 @@ public class EntityReferenceManager {
 			addReferenceChange(comment.getIssue(), comment.getContent());
 		} else if (event.getEntity() instanceof IssueChange) {
 			IssueChange change = (IssueChange) event.getEntity();
-			if (change.getData().getCommentSupport() != null)
-				addReferenceChange(change.getIssue(), change.getData().getCommentSupport().getComment());
+			if (change.getData().getCommentAware() != null)
+				addReferenceChange(change.getIssue(), change.getData().getCommentAware().getComment());
 		} else if (event.getEntity() instanceof PullRequestComment) {
 			PullRequestComment comment = (PullRequestComment) event.getEntity();
 			addReferenceChange(comment.getRequest(), comment.getContent());
 		} else if (event.getEntity() instanceof PullRequestChange) {
 			PullRequestChange change = (PullRequestChange) event.getEntity();
-			if (change.getData().getCommentSupport() != null)
-				addReferenceChange(change.getRequest(), change.getData().getCommentSupport().getComment());
+			if (change.getData().getCommentAware() != null)
+				addReferenceChange(change.getRequest(), change.getData().getCommentAware().getComment());
 		} else if (event.getEntity() instanceof CodeCommentReply) {
 			CodeCommentReply reply = (CodeCommentReply) event.getEntity();
 			addReferenceChange(reply.getComment(), reply.getContent());

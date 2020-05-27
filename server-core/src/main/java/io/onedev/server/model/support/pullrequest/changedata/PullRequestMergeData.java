@@ -6,7 +6,7 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 
 public class PullRequestMergeData implements PullRequestChangeData {
 
@@ -36,7 +36,7 @@ public class PullRequestMergeData implements PullRequestChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 

@@ -5,7 +5,7 @@ import org.apache.wicket.Component;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.util.CommentSupport;
+import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 
 public class PullRequestReferencedFromIssueData implements PullRequestChangeData {
@@ -36,7 +36,7 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 

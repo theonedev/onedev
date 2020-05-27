@@ -2,18 +2,15 @@ package io.onedev.server.model.support.issue.changedata;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CommentSupport;
-import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
+import io.onedev.server.util.CommentAware;
 
 public class IssueDescriptionChangeData implements IssueChangeData {
 
@@ -28,11 +25,17 @@ public class IssueDescriptionChangeData implements IssueChangeData {
 		this.newDescription = newDescription;
 	}
 	
+	public String getOldDescription() {
+		return oldDescription;
+	}
+
+	public String getNewDescription() {
+		return newDescription;
+	}
+
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		List<String> oldLines = StringUtils.splitAndTrim(oldDescription, "\n");
-		List<String> newLines = StringUtils.splitAndTrim(newDescription, "\n");
-		return new PlainDiffPanel(componentId, oldLines, "a.txt", newLines, "b.txt", true);
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
@@ -44,7 +47,7 @@ public class IssueDescriptionChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public CommentSupport getCommentSupport() {
+	public CommentAware getCommentAware() {
 		return null;
 	}
 	

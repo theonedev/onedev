@@ -1,0 +1,12 @@
+.property-change {
+	width: auto;
+	border: 1px dotted #BBB;
+	font-size: 13px;
+}
+.property-change td.name {
+	white-space: nowrap;
+}
+.property-change th, .property-change td {
+	padding: 4px 8px;
+	border-bottom: 1px dotted #BBB;
+}
