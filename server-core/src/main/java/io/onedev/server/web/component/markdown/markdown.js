@@ -1041,12 +1041,15 @@ onedev.server.markdown = {
 		var $emojis = $head.children(".emojis");
 		var $resizeHandles = $container.find(".ui-resizable-handle");
 		
-		var contentHtml = "";
+		$emojis.html("");
+		var emojiHtml;
+		
 		for (var i in emojis) {
 			var emoji = emojis[i];
-			contentHtml += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
+			emojiHtml = "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
+			$emojis.append(emojiHtml);
 		}
-		$emojis.html(contentHtml);
+		
 		$emojis.removeClass("loading");
 		$emojis.addClass("loaded");
 		$emojis.find(".emoji").click(function() {
