@@ -1,10 +1,12 @@
 onedev.server.inputassist = {
-	init: function(inputId, callback) {
+	onDomReady: function(inputId, callback) {
 		var $input = $("#" + inputId);
+		
+		onedev.server.inputassist.markErrors(inputId, []);
 		
 		$input.data("prevValue", $input.val());
 		$input.data("prevCaret", -1);
-		$input.on("input click keyup", function(e) {
+		$input.on("paste click keyup assist", function(e) {
 			var value = $input.val();
 			var caret;
 			if ($input.is(":focus"))
@@ -20,6 +22,9 @@ onedev.server.inputassist = {
 			if (value.trim().length == 0)
 				onedev.server.inputassist.markErrors(inputId, []);
 		});
+		$input.on("clear", function(e) {
+			onedev.server.inputassist.markErrors(inputId, []);
+		});
 		$input.on("blur", function(e) {
 			$input.data("prevCaret", -1);
 		});
@@ -33,6 +38,7 @@ onedev.server.inputassist = {
 			$input.blur();
 			$input.focus();
 			$input.trigger("input");
+			$input.trigger("assist");
 		});
 		
 		$input.bind("keydown", "up", function() {

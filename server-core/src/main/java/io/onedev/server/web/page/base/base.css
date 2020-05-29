@@ -519,6 +519,9 @@ a.input-clear {
 a.input-clear.input-group-clear {
 	right: 45px;
 }
+a.input-clear.input-group-clear-2 {
+	right: 78px;
+}
 .message-box>.content, .confirm-box>.content {
 	font-size: 18px;
 	padding: 10px 20px;

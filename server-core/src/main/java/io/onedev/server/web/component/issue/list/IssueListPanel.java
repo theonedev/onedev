@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -54,7 +55,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.DateField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.NumberField;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.NumberCriteria;
@@ -77,6 +83,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -93,28 +100,13 @@ import io.onedev.server.web.util.ReferenceTransformer;
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
 
-	private final IModel<String> queryModel;
+	private final IModel<String> queryStringModel;
 	
-	private final IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<IssueQuery>() {
 
 		@Override
 		protected IssueQuery load() {
-			String query = queryModel.getObject();
-			try {
-				return IssueQuery.merge(getBaseQuery(), IssueQuery.parse(getProject(), query, true, true, false, false, false));
-			} catch (OneException e) {
-				error(e.getMessage());
-				return null;
-			} catch (Exception e) {
-				warn("Not a valid formal query, performing fuzzy query");
-				try {
-					EntityQuery.getProjectScopedNumber(getProject(), query);
-					return IssueQuery.merge(getBaseQuery(), 
-							new IssueQuery(new NumberCriteria(getProject(), query, IssueQueryLexer.Is)));
-				} catch (Exception e2) {
-					return IssueQuery.merge(getBaseQuery(), new IssueQuery(new TitleCriteria("*" + query + "*")));
-				}
-			}
+			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 		
 	};
@@ -125,9 +117,15 @@ public abstract class IssueListPanel extends Panel {
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
+	private WebMarkupContainer body;	
+	
+	private Component saveQueryLink;
+	
+	private TextField<String> queryInput;
+	
 	public IssueListPanel(String id, IModel<String> queryModel) {
 		super(id);
-		this.queryModel = queryModel;
+		this.queryStringModel = queryModel;
 	}
 	
 	private IssueManager getIssueManager() {
@@ -136,8 +134,8 @@ public abstract class IssueListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
+		queryStringModel.detach();
 		queryModel.detach();
-		parsedQueryModel.detach();
 		super.onDetach();
 	}
 	
@@ -145,6 +143,25 @@ public abstract class IssueListPanel extends Panel {
 
 	protected IssueQuery getBaseQuery() {
 		return new IssueQuery();
+	}
+	
+	@Nullable
+	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
+		try {
+			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, true, true, false, false, false));
+		} catch (OneException e) {
+			error(e.getMessage());
+			return null;
+		} catch (Exception e) {
+			warn("Not a valid formal query, performing fuzzy query");
+			try {
+				EntityQuery.getProjectScopedNumber(getProject(), queryString);
+				return IssueQuery.merge(baseQuery, 
+						new IssueQuery(new NumberCriteria(getProject(), queryString, IssueQueryLexer.Is)));
+			} catch (Exception e2) {
+				return IssueQuery.merge(baseQuery, new IssueQuery(new TitleCriteria(queryString)));
+			}
+		}
 	}
 
 	@Nullable
@@ -159,6 +176,13 @@ public abstract class IssueListPanel extends Panel {
 	
 	private GlobalIssueSetting getGlobalIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
+	private void doQuery(AjaxRequestTarget target) {
+		issuesTable.setCurrentPage(0);
+		target.add(body);
+		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+			target.add(saveQueryLink);
 	}
 	
 	@Override
@@ -189,13 +213,12 @@ public abstract class IssueListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		Component saveQueryLink;
 		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(parsedQueryModel.getObject() != null);
+				setEnabled(queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -209,13 +232,64 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
 		
-		TextField<String> input = new TextField<String>("input", queryModel);
-		input.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		add(new DropdownLink("orderBy") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				List<String> orderFields = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
+				if (getProject() != null)
+					orderFields.remove(Issue.NAME_PROJECT);
+				for (FieldSpec field: getGlobalIssueSetting().getFieldSpecs()) {
+					if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
+						orderFields.add(field.getName());
+				}
+				
+				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public List<EntitySort> getObject() {
+						IssueQuery query = parse(queryStringModel.getObject(), new IssueQuery());
+						IssueListPanel.this.getFeedbackMessages().clear();
+						if (query != null) 
+							return query.getSorts();
+						else
+							return new ArrayList<>();
+					}
+
+					@Override
+					public void setObject(List<EntitySort> object) {
+						IssueQuery query = parse(queryStringModel.getObject(), new IssueQuery());
+						IssueListPanel.this.getFeedbackMessages().clear();
+						if (query == null)
+							query = new IssueQuery();
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
+						String queryString = query.toString();
+						if (queryString.length() != 0)
+							queryStringModel.setObject(queryString);
+						else
+							queryStringModel.setObject(null);
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						target.add(queryInput);
+						doQuery(target);
+					}
+					
+				});
+			}
+			
+		});	
+		
+		queryInput = new TextField<String>("input", queryStringModel);
+		queryInput.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -224,24 +298,27 @@ public abstract class IssueListPanel extends Panel {
 			
 		}, true, true, false, false, false));
 		
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		add(body.setOutputMarkupId(true));
+		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				doQuery(target);
+			}
+			
+		});
 		
-		Form<?> form = new Form<Void>("query");
-		form.add(input);
-		form.add(new AjaxButton("submit") {
+		Form<?> queryForm = new Form<Void>("query");
+		queryForm.add(queryInput);
+		queryForm.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				issuesTable.setCurrentPage(0);
-				target.add(body);
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
+				doQuery(target);
 			}
 			
 		});
-		add(form);
+		add(queryForm);
 		
 		add(new ModalLink("listFields") {
 
@@ -343,8 +420,8 @@ public abstract class IssueListPanel extends Panel {
 		});
 
 		String query;
-		if (parsedQueryModel.getObject() != null)
-			query = parsedQueryModel.getObject().toString();
+		if (queryModel.getObject() != null)
+			query = queryModel.getObject().toString();
 		else
 			query = null;
 		
@@ -418,7 +495,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected IssueQuery getIssueQuery() {
-						return parsedQueryModel.getObject();
+						return queryModel.getObject();
 					}
 
 				};
@@ -470,7 +547,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					protected IssueQuery getIssueQuery() {
-						return parsedQueryModel.getObject();
+						return queryModel.getObject();
 					}
 
 				};
@@ -491,7 +568,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
 				try {
-					return getIssueManager().query(getProject(), parsedQueryModel.getObject(), 
+					return getIssueManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count, true).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
@@ -501,10 +578,10 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			public long calcSize() {
-				IssueQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null) {
+				IssueQuery query = queryModel.getObject();
+				if (query != null) {
 					try {
-						return getIssueManager().count(getProject(), parsedQuery.getCriteria());
+						return getIssueManager().count(getProject(), query.getCriteria());
 					} catch (OneException e) {
 						error(e.getMessage());
 					}
@@ -526,6 +603,9 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		};
+		
+		body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
 		
@@ -564,7 +644,7 @@ public abstract class IssueListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
 				Item<?> row = cellItem.findParent(Item.class);
 				
-				Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
 				
 				String label;

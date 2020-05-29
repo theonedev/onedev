@@ -21,10 +21,12 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -226,6 +228,7 @@ public class RevisionDiffPanel extends Panel {
     					}
     				}
     			} catch (Exception e) {
+    				error("Malformed path filter");
     			}
     		} else {
     			filteredChanges.addAll(changes);
@@ -350,6 +353,8 @@ public class RevisionDiffPanel extends Panel {
 
 	private ListView<BlobChange> diffsView;
 	
+	private WebMarkupContainer body;
+	
 	public RevisionDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
 			@Nullable IModel<String> blameModel, @Nullable CommentSupport commentSupport) {
@@ -396,6 +401,11 @@ public class RevisionDiffPanel extends Panel {
 			diffMode = DiffViewMode.valueOf(cookie.getValue());
 	}
 
+	private void doFilter(AjaxRequestTarget target) {
+		body.replace(commentContainer = newCommentContainer());
+		target.add(body);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -450,20 +460,6 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 
-		WebMarkupContainer body = new WebMarkupContainer(BODY_ID) {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onDomReady();"));
-				response.render(OnLoadHeaderItem.forScript("onedev.server.revisionDiff.onWindowLoad();"));
-			}
-			
-		};
-		body.setOutputMarkupId(true);
-		add(body);
-		
 		for (DiffViewMode each: DiffViewMode.values()) {
 			add(new AjaxLink<Void>(each.name().toLowerCase()) {
 
@@ -589,24 +585,15 @@ public class RevisionDiffPanel extends Panel {
 			}
 			
 		});
-		
-		WebMarkupContainer invalidPathFilter;
-		add(invalidPathFilter = new WebMarkupContainer("invalidPathFilter") {
 
+		filterInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				try {
-					if (StringUtils.isNotBlank(pathFilterModel.getObject()))
-						PatternSet.parse(pathFilterModel.getObject());
-					setVisible(false);
-				} catch (Exception e) {
-					setVisible(true);
-				}
+			protected void onUpdate(AjaxRequestTarget target) {
+				doFilter(target);
 			}
 			
 		});
-		invalidPathFilter.setOutputMarkupPlaceholderTag(true);
 		
 		pathFilterForm.add(new AjaxButton("submit") {
 
@@ -619,14 +606,28 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				body.replace(commentContainer = newCommentContainer());
-				target.add(body);
-				target.add(invalidPathFilter);
+				doFilter(target);
 			}
 			
 		});
+		
 		add(pathFilterForm);
 
+		body = new WebMarkupContainer(BODY_ID) {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				
+				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onDomReady();"));
+				response.render(OnLoadHeaderItem.forScript("onedev.server.revisionDiff.onWindowLoad();"));
+			}
+			
+		};
+		body.setOutputMarkupId(true);
+		add(body);
+
+		body.add(new FencedFeedbackPanel("feedback", this));
 		body.add(commentContainer = newCommentContainer());
 		
 		Component totalFilesLink;

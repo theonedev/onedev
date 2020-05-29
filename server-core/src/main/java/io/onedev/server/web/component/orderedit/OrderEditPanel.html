@@ -1,0 +1,29 @@
+<wicket:panel>
+	<div class="order-edit">
+		<table wicket:id="selected" class="selected">
+			<tr wicket:id="selectedItems" class="clearfix">
+				<td class="drag-indicator">
+					<i class="fa fa-reorder"></i>
+				</td>
+				<td class="index"><span wicket:id="index"></span></td>
+				<td class="name"><span wicket:id="name"></span></td>
+				<td class="checkbox">
+					<label>
+						<input wicket:id="descending" type="checkbox"> descending 
+					</label>
+				</td>
+				<td class="actions">
+					<a wicket:id="remove" title="Remove"><i class="fa fa-times"></i></a>
+				</td>
+			</tr>
+		</table>
+		<table wicket:id="available" class="available">
+			<tr wicket:id="availableItems">
+				<td class="name"><span wicket:id="name"></span></td>
+				<td class="actions">
+					<a wicket:id="add" title="Add"><i class="fa fa-plus"></i></a>
+				</td>
+			</tr>
+		</table>
+	</div>
+</wicket:panel>

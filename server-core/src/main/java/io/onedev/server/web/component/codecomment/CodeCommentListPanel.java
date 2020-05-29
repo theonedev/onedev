@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -47,6 +48,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.ContentCriteria;
@@ -58,7 +60,10 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -73,23 +78,23 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
-	private final IModel<String> queryModel;
+	private final IModel<String> queryStringModel;
 	
-	private final IModel<CodeCommentQuery> parsedQueryModel = new LoadableDetachableModel<CodeCommentQuery>() {
+	private final IModel<CodeCommentQuery> queryModel = new LoadableDetachableModel<CodeCommentQuery>() {
 
 		@Override
 		protected CodeCommentQuery load() {
-			String query = queryModel.getObject();
+			String queryString = queryStringModel.getObject();
 			try {
-				return CodeCommentQuery.parse(getProject(), query);
+				return CodeCommentQuery.parse(getProject(), queryString);
 			} catch (OneException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
-				warn("Not a valid formal query, interpreted as fuzzy query");
+				warn("Not a valid formal query, performing fuzzy query");
 				List<EntityCriteria<CodeComment>> criterias = new ArrayList<>();
-				criterias.add(new ContentCriteria(query));
-				criterias.add(new PathCriteria("*" + query + "*"));
+				criterias.add(new ContentCriteria(queryString));
+				criterias.add(new PathCriteria("*" + queryString + "*"));
 				return new CodeCommentQuery(new OrEntityCriteria<CodeComment>(criterias));
 			}
 		}
@@ -98,13 +103,26 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 	private DataTable<CodeComment, Void> commentsTable;
 	
+	private TextField<String> queryInput;
+	
+	private Component saveQueryLink;
+	
+	private WebMarkupContainer body;
+	
 	public CodeCommentListPanel(String id, IModel<String> queryModel) {
 		super(id);
-		this.queryModel = queryModel;
+		this.queryStringModel = queryModel;
 	}
 
 	private CodeCommentManager getCodeCommentManager() {
 		return OneDev.getInstance(CodeCommentManager.class);
+	}
+	
+	private void doQuery(AjaxRequestTarget target) {
+		commentsTable.setCurrentPage(0);
+		target.add(body);
+		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+			target.add(saveQueryLink);
 	}
 	
 	@Override
@@ -135,13 +153,12 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		Component saveQueryLink;
 		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(parsedQueryModel.getObject() != null);
+				setEnabled(queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -155,13 +172,59 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
 		
-		TextField<String> input = new TextField<String>("input", queryModel);
-		input.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		add(new DropdownLink("orderBy") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				List<String> orderFields = new ArrayList<>(CodeComment.ORDER_FIELDS.keySet());
+				
+				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public List<EntitySort> getObject() {
+						CodeCommentQuery query = queryModel.getObject();
+						CodeCommentListPanel.this.getFeedbackMessages().clear();
+						if (query != null) 
+							return query.getSorts();
+						else
+							return new ArrayList<>();
+					}
+
+					@Override
+					public void setObject(List<EntitySort> object) {
+						CodeCommentQuery query = queryModel.getObject();
+						CodeCommentListPanel.this.getFeedbackMessages().clear();
+						if (query == null)
+							query = new CodeCommentQuery();
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
+						queryModel.setObject(query);
+						String queryString = query.toString();
+						if (queryString.length() != 0)
+							queryStringModel.setObject(queryString);
+						else
+							queryStringModel.setObject(null);
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						target.add(queryInput);
+						doQuery(target);
+					}
+					
+				});
+			}
+			
+		});	
+		
+		queryInput = new TextField<String>("input", queryStringModel);
+		queryInput.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -169,25 +232,30 @@ public abstract class CodeCommentListPanel extends Panel {
 			}
 			
 		}));
+		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				doQuery(target);
+			}
+			
+		});
 		
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		add(body.setOutputMarkupId(true));
-		
-		Form<?> form = new Form<Void>("query");
-		form.add(input);
-		form.add(new AjaxButton("submit") {
+		Form<?> queryForm = new Form<Void>("query");
+		queryForm.add(queryInput);
+		queryForm.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				commentsTable.setCurrentPage(0);
-				target.add(body);
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
+				doQuery(target);
 			}
 			
 		});
-		add(form);
+		add(queryForm);
+		
+		body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
 
@@ -197,7 +265,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
 				try {
 					return getCodeCommentManager().query(getProject(), getPullRequest(), 
-							parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+							queryModel.getObject(), (int)first, (int)count).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
 					return new ArrayList<CodeComment>().iterator();
@@ -206,10 +274,10 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public long calcSize() {
-				CodeCommentQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null) {
+				CodeCommentQuery query = queryModel.getObject();
+				if (query != null) {
 					try {
-						return getCodeCommentManager().count(getProject(), getPullRequest(), parsedQuery.getCriteria());
+						return getCodeCommentManager().count(getProject(), getPullRequest(), query.getCriteria());
 					} catch (OneException e) {
 						error(e.getMessage());
 					}
@@ -346,8 +414,8 @@ public abstract class CodeCommentListPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
+		queryStringModel.detach();
 		queryModel.detach();
-		parsedQueryModel.detach();
 		super.onDetach();
 	}
 

@@ -29,10 +29,6 @@
 .revision-diff>.head td.whitespace-option {
 	width: 140px;
 }
-.revision-diff>.head .invalid-path-filter .alert {
-    margin-top: 20px;
-    margin-bottom: 0;
-}
 .revision-diff>.body>.title {
 	font-size: 16px;
 	margin-bottom: 16px;	

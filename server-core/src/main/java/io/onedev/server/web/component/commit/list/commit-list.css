@@ -7,6 +7,7 @@
 .commit-list>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
+	white-space: nowrap;
 }
 .commit-list>.head>.operations>*:last-child {
 	margin-right: 0;

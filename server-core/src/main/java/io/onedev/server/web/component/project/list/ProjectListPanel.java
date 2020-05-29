@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -40,6 +41,7 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.project.NameCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -50,7 +52,10 @@ import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -62,24 +67,24 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 	
-	private final IModel<String> queryModel;
+	private final IModel<String> queryStringModel;
 	
 	private final int expectedCount;
 	
-	private final IModel<ProjectQuery> parsedQueryModel = new LoadableDetachableModel<ProjectQuery>() {
+	private final IModel<ProjectQuery> queryModel = new LoadableDetachableModel<ProjectQuery>() {
 
 		@Override
 		protected ProjectQuery load() {
-			String query = queryModel.getObject();
+			String queryString = queryStringModel.getObject();
 			try {
-				return ProjectQuery.parse(query);
+				return ProjectQuery.parse(queryString);
 			} catch (OneException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
 				List<EntityCriteria<Project>> criterias = new ArrayList<>();
-				criterias.add(new NameCriteria("*" + query + "*"));
+				criterias.add(new NameCriteria("*" + queryString + "*"));
 				return new ProjectQuery(new OrEntityCriteria<Project>(criterias));
 			}
 		}
@@ -88,9 +93,15 @@ public class ProjectListPanel extends Panel {
 	
 	private DataTable<Project, Void> dataTable;	
 	
+	private WebMarkupContainer body;
+	
+	private Component saveQueryLink;	
+	
+	private TextField<String> queryInput;
+	
 	public ProjectListPanel(String id, IModel<String> queryModel, int expectedCount) {
 		super(id);
-		this.queryModel = queryModel;
+		this.queryStringModel = queryModel;
 		this.expectedCount = expectedCount;
 	}
 	
@@ -100,8 +111,8 @@ public class ProjectListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
+		queryStringModel.detach();
 		queryModel.detach();
-		parsedQueryModel.detach();
 		super.onDetach();
 	}
 	
@@ -115,6 +126,13 @@ public class ProjectListPanel extends Panel {
 		return null;
 	}
 
+	private void doQuery(AjaxRequestTarget target) {
+		dataTable.setCurrentPage(0);
+		target.add(body);
+		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+			target.add(saveQueryLink);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -147,13 +165,12 @@ public class ProjectListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 
-		Component saveQueryLink;
 		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(parsedQueryModel.getObject() != null);
+				setEnabled(queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -167,41 +184,90 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
 			}		
 			
 		});
 		
-		TextField<String> input = new TextField<String>("input", queryModel);
-		input.add(new ProjectQueryBehavior());
+		add(new DropdownLink("orderBy") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				List<String> orderFields = new ArrayList<>(Project.ORDER_FIELDS.keySet());
+				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public List<EntitySort> getObject() {
+						ProjectQuery query = queryModel.getObject();
+						ProjectListPanel.this.getFeedbackMessages().clear();
+						if (query != null) 
+							return query.getSorts();
+						else
+							return new ArrayList<>();
+					}
+
+					@Override
+					public void setObject(List<EntitySort> object) {
+						ProjectQuery query = queryModel.getObject();
+						ProjectListPanel.this.getFeedbackMessages().clear();
+						if (query == null)
+							query = new ProjectQuery();
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
+						queryModel.setObject(query);
+						String queryString = query.toString();
+						if (queryString.length() != 0)
+							queryStringModel.setObject(queryString);
+						else
+							queryStringModel.setObject(null);
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						target.add(queryInput);
+						doQuery(target);
+					}
+					
+				});
+			}
+			
+		});
 		
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		add(body.setOutputMarkupId(true));
+		queryInput = new TextField<String>("input", queryStringModel);
+		queryInput.setOutputMarkupId(true);
+		queryInput.add(new ProjectQueryBehavior());
 		
-		Form<?> form = new Form<Void>("query");
-		form.add(input);
-		form.add(new AjaxButton("submit") {
+		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				doQuery(target);
+			}
+			
+		});
+		
+		Form<?> queryForm = new Form<Void>("query");
+		queryForm.add(queryInput);
+		queryForm.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				dataTable.setCurrentPage(0);
-				target.add(body);
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
+				doQuery(target);
 			}
 			
 		});
 		if (SecurityUtils.canCreateProjects())
-			form.add(AttributeAppender.append("class", "can-create-projects"));
-		add(form);
+			queryForm.add(AttributeAppender.append("class", "can-create-projects"));
+		add(queryForm);
 		
 		SortableDataProvider<Project, Void> dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
 
 			@Override
 			public Iterator<? extends Project> iterator(long first, long count) {
 				try {
-					return getProjectManager().query(parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+					return getProjectManager().query(queryModel.getObject(), (int)first, (int)count).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
 					return new ArrayList<Project>().iterator();
@@ -210,10 +276,10 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			public long calcSize() {
-				ProjectQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null) {
+				ProjectQuery query = queryModel.getObject();
+				if (query != null) {
 					try {
-						return getProjectManager().count(parsedQuery.getCriteria());
+						return getProjectManager().count(query.getCriteria());
 					} catch (OneException e) {
 						error(e.getMessage());
 					}
@@ -238,6 +304,9 @@ public class ProjectListPanel extends Panel {
 		
 		if (expectedCount != 0 && expectedCount != dataProvider.size())
 			warn("Some projects might be hidden due to permission policy");
+		
+		body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
 		

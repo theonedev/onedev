@@ -1,0 +1,22 @@
+.order-edit {
+	padding: 8px;
+	overflow: hidden !important;
+}
+.order-edit tr:hover td {
+	background: #F2F2F2;
+}
+.order-edit td {
+	padding: 8px;
+	white-space: nowrap;
+}
+.order-edit .checkbox {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.order-edit .index, .order-edit .drag-indicator {
+	padding-right: 0;
+	text-align: right;
+}
+.order-edit .available td.name {
+	width: 1px;
+}

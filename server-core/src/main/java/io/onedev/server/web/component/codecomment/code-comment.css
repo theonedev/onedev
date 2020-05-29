@@ -4,6 +4,7 @@
 .code-comments>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
+	white-space: nowrap;
 }
 .code-comments>.head>.operations>*:last-child {
 	margin-right: 0;

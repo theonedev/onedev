@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Path;
@@ -185,8 +186,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			builder.append(getCriteria().toString()).append(" ");
 		if (!getSorts().isEmpty()) {
 			builder.append("order by ");
-			for (EntitySort sort: getSorts())
-				builder.append(sort.toString()).append(" ");
+			builder.append(getSorts().stream().map(it->it.toString()).collect(Collectors.joining(" and ")));
 		}
 		return builder.toString().trim();
 	}

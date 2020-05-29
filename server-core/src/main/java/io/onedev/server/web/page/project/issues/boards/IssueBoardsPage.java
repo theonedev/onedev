@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.issues.boards;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -42,10 +44,16 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.DateField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.NumberField;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.NumberCriteria;
@@ -63,6 +71,7 @@ import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
@@ -87,59 +96,68 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	private final boolean backlog;
 	
-	private String query;
+	private String queryString;
 	
-	private String backlogQuery;
+	private String backlogQueryString;
 	
 	private Fragment contentFrag;
 	
-	private final IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
+	private WebMarkupContainer body;
+	
+	private TextField<String> queryInput;
+	
+	private final IModel<IssueQuery> queryModel = new LoadableDetachableModel<IssueQuery>() {
 
 		@Override
 		protected IssueQuery load() {
-			return parse(false, getBoard().getBaseQuery(), query);
+			return parse(false, getBoard().getBaseQuery(), queryString);
 		}
 		
 	};
 	
-	private final IModel<IssueQuery> parsedBacklogQueryModel = new LoadableDetachableModel<IssueQuery>() {
+	private final IModel<IssueQuery> backlogQueryModel = new LoadableDetachableModel<IssueQuery>() {
 
 		@Override
 		protected IssueQuery load() {
-			return parse(true, getBoard().getBacklogBaseQuery(), backlogQuery);
+			return parse(true, getBoard().getBacklogBaseQuery(), backlogQueryString);
 		}
 		
 	};
 	
-	private IssueQuery parse(boolean backlog, @Nullable String baseQuery, @Nullable String query) {
-		contentFrag.getFeedbackMessages().clear(new IFeedbackMessageFilter() {
+	private IFeedbackMessageFilter newFeedbackMessageFilter(boolean backlog) {
+		return new IFeedbackMessageFilter() {
 			
 			@Override
 			public boolean accept(FeedbackMessage message) {
 				return ((QueryParseMessage)message.getMessage()).backlog == backlog;
 			}
 			
-		});
+		};		
+	}
+	
+	@Nullable
+	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String queryString) {
+		contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
 		
-		IssueQuery parsedQuery;
+		IssueQuery query;
 		try {
-			parsedQuery = IssueQuery.parse(getProject(), query, true, true, false, false, false);
+			query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
 		} catch (OneException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
 			contentFrag.warn(new QueryParseMessage(backlog, "Not a valid %sformal query, performing fuzzy query"));
 			try {
-				EntityQuery.getProjectScopedNumber(getProject(), query);
-				parsedQuery = new IssueQuery(new NumberCriteria(getProject(), query, IssueQueryLexer.Is));
+				EntityQuery.getProjectScopedNumber(getProject(), queryString);
+				query = new IssueQuery(new NumberCriteria(getProject(), queryString, IssueQueryLexer.Is));
 			} catch (Exception e2) {
-				parsedQuery = new IssueQuery(new TitleCriteria("*" + query + "*"));
+				query = new IssueQuery(new TitleCriteria(queryString));
 			}
 		}
 
-		IssueQuery parsedBaseQuery;
+		IssueQuery baseQuery;
 		try {
-			parsedBaseQuery = IssueQuery.parse(getProject(), baseQuery, true, true, false, false, false);
+			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
 		} catch (OneException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
 			return null;
@@ -147,7 +165,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			contentFrag.error(new QueryParseMessage(backlog, "Malformed %sbase query: " + e.getMessage()));
 			return null;
 		}
-		return IssueQuery.merge(parsedBaseQuery, parsedQuery);
+		return IssueQuery.merge(baseQuery, query);
 	}
 	
 	public IssueBoardsPage(PageParameters params) {
@@ -192,8 +210,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		};
 		
 		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
-		query = params.get(PARAM_QUERY).toString();
-		backlogQuery = params.get(PARAM_BACKLOG_QUERY).toString();
+		queryString = params.get(PARAM_QUERY).toString();
+		backlogQueryString = params.get(PARAM_BACKLOG_QUERY).toString();
 	}
 	
 	private MilestoneManager getMilestoneManager() {
@@ -203,8 +221,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	@Override
 	protected void onDetach() {
 		milestoneModel.detach();
-		parsedQueryModel.detach();
-		parsedBacklogQueryModel.detach();
+		queryModel.detach();
+		backlogQueryModel.detach();
 		super.onDetach();
 	}
 
@@ -219,6 +237,25 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	@Nullable
 	public Milestone getMilestone() {
 		return milestoneModel.getObject();
+	}
+	
+	private void doQuery(AjaxRequestTarget target) {
+		if (backlog) {
+			backlogQueryString = queryInput.getModelObject();
+			getPageParameters().set(PARAM_BACKLOG_QUERY, backlogQueryString);
+		} else { 
+			queryString = queryInput.getModelObject();
+			getPageParameters().set(PARAM_QUERY, queryString);
+		}
+
+		PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
+				getMilestone(), backlog, queryString, backlogQueryString);
+			
+		CharSequence url = RequestCycle.get().urlFor(IssueBoardsPage.class, params);
+		pushState(target, url.toString(), queryInput.getModelObject());
+		
+		target.add(body);
+		target.appendJavaScript("$(window).resize();");
 	}
 	
 	@Override
@@ -271,7 +308,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
 									getProject(), item.getModelObject(), getMilestone(), 
-									backlog, backlogQuery, query);
+									backlog, backlogQueryString, queryString);
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
@@ -311,7 +348,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										nextBoard = null;
 									else
 										nextBoard = currentBoard;
-									PageParameters params = IssueBoardsPage.paramsOf(getProject(), nextBoard, getMilestone(), backlog, query, backlogQuery);
+									PageParameters params = IssueBoardsPage.paramsOf(getProject(), nextBoard, getMilestone(), backlog, queryString, backlogQueryString);
 									setResponsePage(IssueBoardsPage.class, params);
 								}
 
@@ -368,7 +405,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				@Override
 				public void onClick() {
-					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), !backlog, query, backlogQuery);
+					PageParameters params = paramsOf(getProject(), getBoard(), getMilestone(), !backlog, queryString, backlogQueryString);
 					setResponsePage(IssueBoardsPage.class, params);
 				}
 
@@ -430,7 +467,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
 									getMilestoneManager().save(milestone);
 									setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-											getProject(), getBoard(), milestone, backlog, query, backlogQuery));
+											getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString));
 								} else {
 									getMilestoneManager().save(milestone);
 								}
@@ -444,7 +481,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							@Override
 							protected void populateItem(ListItem<Milestone> item) {
 								Milestone milestone = item.getModelObject();
-								PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, backlog, query, backlogQuery);
+								PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString);
 								Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 								link.add(new Label("name", milestone.getName()));
 								item.add(link);
@@ -515,7 +552,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 										if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
 											getMilestoneManager().delete(milestone);
 											setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-													getProject(), getBoard(), null, backlog, query, backlogQuery));
+													getProject(), getBoard(), null, backlog, queryString, backlogQueryString));
 										} else {
 											getMilestoneManager().delete(milestone);
 										}
@@ -576,7 +613,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				form.add(new WebMarkupContainer("milestone").setVisible(false));
 			}
 			
-			TextField<String> input = new TextField<String>("input", new IModel<String>() {
+			queryInput = new TextField<String>("input", new IModel<String>() {
 
 				@Override
 				public void detach() {
@@ -584,27 +621,120 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				@Override
 				public String getObject() {
-					return backlog?backlogQuery:query;
+					return backlog?backlogQueryString:queryString;
 				}
 
 				@Override
 				public void setObject(String object) {
 					if (backlog)
-						backlogQuery = object;
+						backlogQueryString = object;
 					else
-						query = object;
+						queryString = object;
 				}
 				
 			});
-			input.add(new IssueQueryBehavior(projectModel, true, true, false, false, false));
-			if (backlog)
-				input.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
-			else
-				input.add(AttributeAppender.append("placeholder", "Filter issues"));
+			
+			queryInput.add(new IssueQueryBehavior(projectModel, true, true, false, false, false));
+			
+			queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 				
-			form.add(input);
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					doQuery(target);
+				}
+				
+			});
+			
+			if (backlog)
+				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
+			else
+				queryInput.add(AttributeAppender.append("placeholder", "Filter issues"));
+				
+			form.add(queryInput);
 
-			WebMarkupContainer body = new WebMarkupContainer("body") {
+			form.add(new DropdownLink("orderBy") {
+
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					List<String> orderFields = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
+					orderFields.remove(Issue.NAME_PROJECT);
+					for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
+						if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
+							orderFields.add(field.getName());
+					}
+					
+					return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+
+						@Override
+						public void detach() {
+						}
+
+						@Override
+						public List<EntitySort> getObject() {
+							IssueQuery query;
+							
+							if (backlog) 
+								query = parse(true, null, backlogQueryString);
+							else 
+								query = parse(false, null, queryString);
+							
+							contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
+							if (query != null) 
+								return query.getSorts();
+							else
+								return new ArrayList<>();
+						}
+
+						@Override
+						public void setObject(List<EntitySort> object) {
+							IssueQuery query;
+							
+							if (backlog) 
+								query = parse(true, null, backlogQueryString);
+							else 
+								query = parse(false, null, queryString);
+							
+							contentFrag.getFeedbackMessages().clear(newFeedbackMessageFilter(backlog));
+							
+							if (query == null)
+								query = new IssueQuery();
+							query.getSorts().clear();
+							query.getSorts().addAll(object);
+							
+							if (backlog) {
+								backlogQueryString = query.toString();
+								if (backlogQueryString.length() == 0)
+									backlogQueryString = null;
+							} else {
+								queryString = query.toString();
+								if (queryString.length() == 0)
+									queryString = null;
+							}
+							
+							AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+							target.add(queryInput);
+							
+							doQuery(target);
+						}
+						
+					});
+				}
+				
+			});	
+			
+			form.add(new AjaxButton("submit") {
+
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					doQuery(target);
+				}
+				
+			});
+			
+			contentFrag.add(form);
+			
+			body = new WebMarkupContainer("body") {
 
 				@Override
 				public void renderHead(IHeaderResponse response) {
@@ -617,34 +747,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			body.add(new FencedFeedbackPanel("feedback", contentFrag));
 			contentFrag.add(body);
 			
-			form.add(new AjaxButton("submit") {
-
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-					
-					if (backlog) {
-						backlogQuery = input.getModelObject();
-						getPageParameters().set(PARAM_BACKLOG_QUERY, backlogQuery);
-					} else { 
-						query = input.getModelObject();
-						getPageParameters().set(PARAM_QUERY, query);
-					}
-
-					PageParameters params = IssueBoardsPage.paramsOf(getProject(), getBoard(), 
-							getMilestone(), backlog, query, backlogQuery);
-						
-					CharSequence url = RequestCycle.get().urlFor(IssueBoardsPage.class, params);
-					pushState(target, url.toString(), input.getModelObject());
-					
-					target.add(body);
-					target.appendJavaScript("$(window).resize();");
-				}
-				
-			});
-			
-			contentFrag.add(form);
-			
 			RepeatingView columnsView = new RepeatingView("columns");
 			if (backlog) {
 				columnsView.add(new BacklogColumnPanel("backlog") {
@@ -656,7 +758,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 					@Override
 					protected IssueQuery getBacklogQuery() {
-						return parsedBacklogQueryModel.getObject();
+						return backlogQueryModel.getObject();
 					}
 
 				});
@@ -687,7 +789,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 					@Override
 					protected IssueQuery getBoardQuery() {
-						return parsedQueryModel.getObject();
+						return queryModel.getObject();
 					}
 
 				});
@@ -736,11 +838,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		if (backlog) {
-			backlogQuery = (String) data; 
-			getPageParameters().set(PARAM_BACKLOG_QUERY, backlogQuery);
+			backlogQueryString = (String) data; 
+			getPageParameters().set(PARAM_BACKLOG_QUERY, backlogQueryString);
 		} else {
-			query = (String) data;
-			getPageParameters().set(PARAM_QUERY, query);
+			queryString = (String) data;
+			getPageParameters().set(PARAM_QUERY, queryString);
 		}
 		
 		target.add(contentFrag);
@@ -781,7 +883,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onBoardCreated(AjaxRequestTarget target, BoardSpec board) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestone(), backlog, query, backlogQuery));
+							getProject(), board, getMilestone(), backlog, queryString, backlogQueryString));
 					modal.close();
 				}
 
@@ -813,7 +915,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onMilestoneCreated(AjaxRequestTarget target, Milestone milestone) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, query, backlogQuery));
+							getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString));
 				}
 
 				@Override
@@ -842,7 +944,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onMilestoneSaved(AjaxRequestTarget target, Milestone milestone) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), getBoard(), milestone, backlog, query, backlogQuery));
+							getProject(), getBoard(), milestone, backlog, queryString, backlogQueryString));
 				}
 
 				@Override
@@ -873,7 +975,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-							getProject(), board, getMilestone(), backlog, query, backlogQuery));
+							getProject(), board, getMilestone(), backlog, queryString, backlogQueryString));
 				}
 
 				@Override

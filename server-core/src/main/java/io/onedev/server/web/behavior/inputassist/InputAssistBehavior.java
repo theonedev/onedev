@@ -216,7 +216,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 		response.render(JavaScriptHeaderItem.forReference(new InputAssistResourceReference()));
 		
-		String script = String.format("onedev.server.inputassist.init('%s', %s);", 
+		String script = String.format("onedev.server.inputassist.onDomReady('%s', %s);", 
 				getComponent().getMarkupId(true), 
 				getCallbackFunction(explicit("type"), explicit("input"), explicit("caret")));
 		

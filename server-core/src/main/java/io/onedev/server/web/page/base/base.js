@@ -693,18 +693,24 @@ onedev.server = {
 	
 	setupInputClear: function() {
 		function installClearer($container) {
-			$container.find(".clearable-wrapper").each(function() {
+			var selector = ".clearable-wrapper";
+			var $clearableWrappers = $container.closest(selector);
+			if ($clearableWrappers.length == 0)
+				$clearableWrappers = $container.find(selector).addBack(selector);
+			$clearableWrappers.each(function() {
 				var $wrapper = $(this);
                 var $input = $wrapper.find("input[type=text], input:not([type])");
 				if (!$input.hasClass("clearable")) {
 					$input.addClass("clearable");
 					var $clear = $("<a class='input-clear'>x</a>");
 					$wrapper.append($clear);
-					if ($input.next().hasClass("input-group-btn"))
-						$clear.addClass("input-group-clear");
+					if ($input.next().hasClass("input-group-btn")) {
+						$clear.addClass("input-group-clear input-group-clear-" + $input.next().children("button").length);
+					}
 					$clear.click(function() {
 						$input.val("");
 						$input.focus();
+						$input.trigger("clear");
 						$input.trigger("input");
 					});
 					function setVisibility() {

@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -91,27 +92,27 @@ public abstract class CommitListPanel extends Panel {
 	
 	private static final int MAX_PAGES = 50;
 	
-	private final IModel<String> queryModel;
+	private final IModel<String> queryStringModel;
 	
-	private final IModel<CommitQuery> parsedQueryModel = new LoadableDetachableModel<CommitQuery>() {
+	private final IModel<CommitQuery> queryModel = new LoadableDetachableModel<CommitQuery>() {
 
 		@Override
 		protected CommitQuery load() {
 			getFeedbackMessages().clear();
-			String query = queryModel.getObject();
+			String queryString = queryStringModel.getObject();
 			try {
-				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), query));
+				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString));
 			} catch (OneException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
 				warn("Not a valid formal query, performing fuzzy query");
 				List<CommitCriteria> criterias = new ArrayList<>();
-				ObjectId commitId = getProject().getObjectId(query, false);
+				ObjectId commitId = getProject().getObjectId(queryString, false);
 				if (commitId != null)
-					criterias.add(new RevisionCriteria(Lists.newArrayList(new Revision(query, null))));
+					criterias.add(new RevisionCriteria(Lists.newArrayList(new Revision(queryString, null))));
 				else
-					criterias.add(new MessageCriteria(Lists.newArrayList(query)));
+					criterias.add(new MessageCriteria(Lists.newArrayList(queryString)));
 				return CommitQuery.merge(getBaseQuery(), new CommitQuery(criterias));
 			}
 		}
@@ -137,7 +138,7 @@ public abstract class CommitListPanel extends Panel {
 		
 		@Override
 		protected Commits load() {
-			CommitQuery query = parsedQueryModel.getObject();
+			CommitQuery query = queryModel.getObject();
 			Commits commits = new Commits();
 			List<String> commitHashes;
 			if (query != null) {
@@ -230,15 +231,17 @@ public abstract class CommitListPanel extends Panel {
 	
 	private RepeatingView commitsView;
 	
+	private Component saveQueryLink;
+	
 	public CommitListPanel(String id, IModel<String> queryModel) {
 		super(id);
-		this.queryModel = queryModel;
+		this.queryStringModel = queryModel;
 	}
 	
 	@Override
 	protected void onDetach() {
+		queryStringModel.detach();
 		queryModel.detach();
-		parsedQueryModel.detach();
 		commitsModel.detach();
 		labelsModel.detach();
 		super.onDetach();
@@ -258,6 +261,15 @@ public abstract class CommitListPanel extends Panel {
 	@Nullable
 	protected QuerySaveSupport getQuerySaveSupport() {
 		return null;
+	}
+	
+	private void doQuery(AjaxRequestTarget target) {
+		page = 1;
+		target.add(body);
+		target.add(foot);
+		target.appendJavaScript(renderCommitGraph());
+		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+			target.add(saveQueryLink);
 	}
 	
 	@Override
@@ -288,13 +300,12 @@ public abstract class CommitListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		Component saveQueryLink;
 		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(parsedQueryModel.getObject() != null);
+				setEnabled(queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -308,13 +319,13 @@ public abstract class CommitListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
 		
-		TextField<String> input = new TextField<String>("input", queryModel);
-		input.add(new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		TextField<String> queryInput = new TextField<String>("input", queryStringModel);
+		queryInput.add(new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -322,24 +333,27 @@ public abstract class CommitListPanel extends Panel {
 			}
 			
 		}));
+		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				doQuery(target);
+			}
+			
+		});
 		
-		Form<?> form = new Form<Void>("query");
-		form.add(input);
-		form.add(new AjaxButton("submit") {
+		Form<?> queryForm = new Form<Void>("query");
+		queryForm.add(queryInput);
+		queryForm.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				page = 1;
-				target.add(body);
-				target.add(foot);
-				target.appendJavaScript(renderCommitGraph());
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
+				doQuery(target);
 			}
 			
 		});
-		add(form);
+		add(queryForm);
 		
 		body = new WebMarkupContainer("body") {
 			
@@ -502,7 +516,7 @@ public abstract class CommitListPanel extends Panel {
 				@Override
 				protected List<Pattern> load() {
 					List<Pattern> patterns =  new ArrayList<>();
-					for (CommitCriteria criteria: parsedQueryModel.getObject().getCriterias()) {
+					for (CommitCriteria criteria: queryModel.getObject().getCriterias()) {
 						if (criteria instanceof MessageCriteria) {
 							for (String value: ((MessageCriteria) criteria).getValues())
 								patterns.add(Pattern.compile(value, Pattern.CASE_INSENSITIVE));
@@ -540,7 +554,7 @@ public abstract class CommitListPanel extends Panel {
 			 */
 			String path = null;
 			
-			for (CommitCriteria criteria: parsedQueryModel.getObject().getCriterias()) {
+			for (CommitCriteria criteria: queryModel.getObject().getCriterias()) {
 				if (criteria instanceof PathCriteria) {
 					for (String value: ((PathCriteria) criteria).getValues()) {
 						if (value.contains("*") || path != null) {

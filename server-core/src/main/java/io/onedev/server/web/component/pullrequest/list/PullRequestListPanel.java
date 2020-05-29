@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -53,6 +54,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.pullrequest.NumberCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
@@ -69,6 +71,7 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
@@ -87,37 +90,28 @@ import io.onedev.server.web.util.ReferenceTransformer;
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
 
-	private final IModel<String> queryModel;
+	private final IModel<String> queryStringModel;
 	
-	private final IModel<PullRequestQuery> parsedQueryModel = new LoadableDetachableModel<PullRequestQuery>() {
+	private final IModel<PullRequestQuery> queryModel = new LoadableDetachableModel<PullRequestQuery>() {
 
 		@Override
 		protected PullRequestQuery load() {
-			String query = queryModel.getObject();
-			try {
-				return PullRequestQuery.merge(getBaseQuery(), PullRequestQuery.parse(getProject(), query));
-			} catch (OneException e) {
-				error(e.getMessage());
-				return null;
-			} catch (Exception e) {
-				warn("Not a valid formal query, performing fuzzy query");
-				try {
-					EntityQuery.getProjectScopedNumber(getProject(), query);
-					return PullRequestQuery.merge(getBaseQuery(), 
-							new PullRequestQuery(new NumberCriteria(getProject(), query, PullRequestQueryLexer.Is)));
-				} catch (Exception e2) {
-					return PullRequestQuery.merge(getBaseQuery(), new PullRequestQuery(new TitleCriteria("*" + query + "*")));
-				}
-			}
+			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 		
 	};
 	
 	private DataTable<PullRequest, Void> requestsTable;
 	
+	private TextField<String> queryInput;
+	
+	private Component saveQueryLink;
+	
+	private WebMarkupContainer body;
+	
 	public PullRequestListPanel(String id, IModel<String> queryModel) {
 		super(id);
-		this.queryModel = queryModel;
+		this.queryStringModel = queryModel;
 	}
 
 	private PullRequestManager getPullRequestManager() {
@@ -138,16 +132,42 @@ public abstract class PullRequestListPanel extends Panel {
 		return null;
 	}
 	
+	@Nullable
+	private PullRequestQuery parse(@Nullable String queryString, PullRequestQuery baseQuery) {
+		try {
+			return PullRequestQuery.merge(baseQuery, PullRequestQuery.parse(getProject(), queryString));
+		} catch (OneException e) {
+			error(e.getMessage());
+			return null;
+		} catch (Exception e) {
+			warn("Not a valid formal query, performing fuzzy query");
+			try {
+				EntityQuery.getProjectScopedNumber(getProject(), queryString);
+				return PullRequestQuery.merge(baseQuery, 
+						new PullRequestQuery(new NumberCriteria(getProject(), queryString, PullRequestQueryLexer.Is)));
+			} catch (Exception e2) {
+				return PullRequestQuery.merge(baseQuery, new PullRequestQuery(new TitleCriteria(queryString)));
+			}
+		}
+	}
+	
 	@Override
 	protected void onDetach() {
+		queryStringModel.detach();
 		queryModel.detach();
-		parsedQueryModel.detach();
 		super.onDetach();
 	}
 	
 	@Nullable
 	protected abstract Project getProject();
 
+	private void doQuery(AjaxRequestTarget target) {
+		requestsTable.setCurrentPage(0);
+		target.add(body);
+		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+			target.add(saveQueryLink);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -176,13 +196,12 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 
-		Component saveQueryLink;
 		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(parsedQueryModel.getObject() != null);
+				setEnabled(queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -196,13 +215,60 @@ public abstract class PullRequestListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
 		
-		TextField<String> input = new TextField<String>("input", queryModel);
-		input.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		add(new DropdownLink("orderBy") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				List<String> orderFields = new ArrayList<>(PullRequest.ORDER_FIELDS.keySet());
+				if (getProject() != null)
+					orderFields.remove(PullRequest.NAME_TARGET_PROJECT);
+				
+				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public List<EntitySort> getObject() {
+						PullRequestQuery query = parse(queryStringModel.getObject(), new PullRequestQuery());
+						PullRequestListPanel.this.getFeedbackMessages().clear();
+						if (query != null) 
+							return query.getSorts();
+						else
+							return new ArrayList<>();
+					}
+
+					@Override
+					public void setObject(List<EntitySort> object) {
+						PullRequestQuery query = parse(queryStringModel.getObject(), new PullRequestQuery());
+						PullRequestListPanel.this.getFeedbackMessages().clear();
+						if (query == null)
+							query = new PullRequestQuery();
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
+						String queryString = query.toString();
+						if (queryString.length() != 0)
+							queryStringModel.setObject(queryString);
+						else
+							queryStringModel.setObject(null);
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						target.add(queryInput);
+						doQuery(target);
+					}
+					
+				});
+			}
+			
+		});	
+		
+		queryInput = new TextField<String>("input", queryStringModel);
+		queryInput.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -210,27 +276,29 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		}));
+		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				doQuery(target);
+			}
+			
+		});
 		
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		add(body.setOutputMarkupId(true));
-
-		Form<?> form = new Form<Void>("query");
-		form.add(input);
-		form.add(new AjaxButton("submit") {
+		Form<?> queryForm = new Form<Void>("query");
+		queryForm.add(queryInput);
+		queryForm.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				requestsTable.setCurrentPage(0);
-				target.add(body);
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
+				doQuery(target);
 			}
 			
 		});
 		if (getProject() == null || SecurityUtils.canReadCode(getProject()))
-			form.add(AttributeAppender.append("class", "can-create-pull-requests"));
-		add(form);
+			queryForm.add(AttributeAppender.append("class", "can-create-pull-requests"));
+		add(queryForm);
 
 		if (getProject() != null) {
 			add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
@@ -265,6 +333,9 @@ public abstract class PullRequestListPanel extends Panel {
 			}.setEscapeModelStrings(false));
 		}
 		
+		body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
+
 		body.add(new FencedFeedbackPanel("feedback", this));
 		
 		List<IColumn<PullRequest, Void>> columns = new ArrayList<>();
@@ -291,7 +362,7 @@ public abstract class PullRequestListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "contentFrag", PullRequestListPanel.this);
 				
 				Item<?> row = cellItem.findParent(Item.class);
-				Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
 
 				String label;
@@ -409,7 +480,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
 				try {
-					return getPullRequestManager().query(getProject(), parsedQueryModel.getObject(), 
+					return getPullRequestManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count, true, true).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
@@ -419,10 +490,10 @@ public abstract class PullRequestListPanel extends Panel {
 
 			@Override
 			public long calcSize() {
-				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null) {
+				PullRequestQuery query = queryModel.getObject();
+				if (query != null) {
 					try {
-						return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
+						return getPullRequestManager().count(getProject(), query.getCriteria());
 					} catch (OneException e) {
 						error(e.getMessage());
 					}

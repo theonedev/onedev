@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -56,6 +57,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.OrEntityCriteria;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryLexer;
@@ -73,12 +75,15 @@ import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
@@ -91,42 +96,30 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public abstract class BuildListPanel extends Panel {
 	
-	private final IModel<String> queryModel;
+	private final IModel<String> queryStringModel;
 	
 	private final int expectedCount;
 	
-	private final IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
+	private final IModel<BuildQuery> queryModel = new LoadableDetachableModel<BuildQuery>() {
 
 		@Override
 		protected BuildQuery load() {
-			String query = queryModel.getObject();
-			try {
-				return BuildQuery.merge(getBaseQuery(), BuildQuery.parse(getProject(), query, true, true));
-			} catch (OneException e) {
-				error(e.getMessage());
-				return null;
-			} catch (Exception e) {
-				warn("Not a valid formal query, performing fuzzy query");
-				try {
-					EntityQuery.getProjectScopedNumber(getProject(), query);
-					return BuildQuery.merge(getBaseQuery(), 
-							new BuildQuery(new NumberCriteria(getProject(), query, BuildQueryLexer.Is)));
-				} catch (Exception e2) {
-					List<EntityCriteria<Build>> criterias = new ArrayList<>();
-					criterias.add(new VersionCriteria("*" + query + "*"));
-					criterias.add(new JobCriteria("*" + query + "*"));
-					return BuildQuery.merge(getBaseQuery(), new BuildQuery(new OrEntityCriteria<Build>(criterias)));
-				}
-			}
+			return parse(queryStringModel.getObject(), getBaseQuery());
 		}
 		
 	};
 	
 	private DataTable<Build, Void> buildsTable;
 	
+	private TextField<String> queryInput;
+	
+	private WebMarkupContainer body;
+	
+	private Component saveQueryLink;
+	
 	public BuildListPanel(String id, IModel<String> queryModel, int expectedCount) {
 		super(id);
-		this.queryModel = queryModel;
+		this.queryStringModel = queryModel;
 		this.expectedCount = expectedCount;
 	}
 	
@@ -134,10 +127,32 @@ public abstract class BuildListPanel extends Panel {
 		return OneDev.getInstance(BuildManager.class);
 	}
 	
+	@Nullable
+	private BuildQuery parse(@Nullable String queryString, BuildQuery baseQuery) {
+		try {
+			return BuildQuery.merge(baseQuery, BuildQuery.parse(getProject(), queryString, true, true));
+		} catch (OneException e) {
+			error(e.getMessage());
+			return null;
+		} catch (Exception e) {
+			warn("Not a valid formal query, performing fuzzy query");
+			try {
+				EntityQuery.getProjectScopedNumber(getProject(), queryString);
+				return BuildQuery.merge(baseQuery, 
+						new BuildQuery(new NumberCriteria(getProject(), queryString, BuildQueryLexer.Is)));
+			} catch (Exception e2) {
+				List<EntityCriteria<Build>> criterias = new ArrayList<>();
+				criterias.add(new VersionCriteria("*" + queryString + "*"));
+				criterias.add(new JobCriteria("*" + queryString + "*"));
+				return BuildQuery.merge(baseQuery, new BuildQuery(new OrEntityCriteria<Build>(criterias)));
+			}
+		}
+	}
+	
 	@Override
 	protected void onDetach() {
+		queryStringModel.detach();
 		queryModel.detach();
-		parsedQueryModel.detach();
 		super.onDetach();
 	}
 	
@@ -162,13 +177,17 @@ public abstract class BuildListPanel extends Panel {
 		return OneDev.getInstance(SettingManager.class).getBuildSetting();
 	}
 	
+	private void doQuery(AjaxRequestTarget target) {
+		buildsTable.setCurrentPage(0);
+		target.add(body);
+		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+			target.add(saveQueryLink);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer body = new WebMarkupContainer("body");
-		add(body.setOutputMarkupId(true));
-		
 		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
@@ -193,13 +212,12 @@ public abstract class BuildListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		Component saveQueryLink;
 		add(saveQueryLink = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(parsedQueryModel.getObject() != null);
+				setEnabled(queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -213,7 +231,7 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
 			}		
 			
 		}.setOutputMarkupId(true));
@@ -317,8 +335,55 @@ public abstract class BuildListPanel extends Panel {
 			
 		});		
 		
-		TextField<String> input = new TextField<String>("input", queryModel);
-		input.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
+		add(new DropdownLink("orderBy") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				List<String> orderFields = new ArrayList<>(Build.ORDER_FIELDS.keySet());
+				if (getProject() != null)
+					orderFields.remove(Build.NAME_PROJECT);
+				
+				return new OrderEditPanel(id, orderFields, new IModel<List<EntitySort>> () {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public List<EntitySort> getObject() {
+						BuildQuery query = parse(queryStringModel.getObject(), new BuildQuery());
+						BuildListPanel.this.getFeedbackMessages().clear();
+						if (query != null) 
+							return query.getSorts();
+						else
+							return new ArrayList<>();
+					}
+
+					@Override
+					public void setObject(List<EntitySort> object) {
+						BuildQuery query = parse(queryStringModel.getObject(), new BuildQuery());
+						BuildListPanel.this.getFeedbackMessages().clear();
+						if (query == null)
+							query = new BuildQuery();
+						query.getSorts().clear();
+						query.getSorts().addAll(object);
+						String queryString = query.toString();
+						if (queryString.length() != 0)
+							queryStringModel.setObject(queryString);
+						else
+							queryStringModel.setObject(null);
+						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
+						target.add(queryInput);
+						doQuery(target);
+					}
+					
+				});
+			}
+			
+		});	
+		
+		queryInput = new TextField<String>("input", queryStringModel);
+		queryInput.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {
@@ -327,28 +392,34 @@ public abstract class BuildListPanel extends Panel {
 			
 		}, true, true, true));
 		
-		Form<?> form = new Form<Void>("query");
-		form.add(input);
-		form.add(new AjaxButton("submit") {
+		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				doQuery(target);
+			}
+			
+		});
+		
+		Form<?> queryForm = new Form<Void>("query");
+		queryForm.add(queryInput);
+		queryForm.add(new AjaxButton("submit") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				buildsTable.setCurrentPage(0);
-				target.add(body);
-				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(saveQueryLink);
+				doQuery(target);
 			}
 			
 		});
-		add(form);
+		add(queryForm);
 		
 		SortableDataProvider<Build, Void> dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
 				try {
-					return getBuildManager().query(getProject(), parsedQueryModel.getObject(), 
+					return getBuildManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count).iterator();
 				} catch (OneException e) {
 					error(e.getMessage());
@@ -358,10 +429,10 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public long calcSize() {
-				BuildQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null) {
+				BuildQuery query = queryModel.getObject();
+				if (query != null) {
 					try {
-						return getBuildManager().count(getProject(), parsedQuery.getCriteria());
+						return getBuildManager().count(getProject(), query.getCriteria());
 					} catch (OneException e) {
 						error(e.getMessage());
 					}
@@ -387,6 +458,9 @@ public abstract class BuildListPanel extends Panel {
 		if (expectedCount != 0 && expectedCount != dataProvider.size())
 			warn("Some builds might be hidden due to permission policy");
 		
+		body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
+		
 		body.add(new FencedFeedbackPanel("feedback", this));
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
@@ -410,7 +484,7 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
 						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-						Cursor cursor = new Cursor(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
+						Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
 								(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
 						WebSession.get().setBuildCursor(cursor);								
 

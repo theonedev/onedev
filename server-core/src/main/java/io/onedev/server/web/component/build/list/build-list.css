@@ -12,6 +12,7 @@
 .build-list>.head>.operations>* {
 	margin-right: 16px;
 	color: #444;
+	white-space: nowrap;
 }
 .build-list>.head>.operations>*:last-child {
 	margin-right: 0;
