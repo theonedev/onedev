@@ -50,6 +50,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -72,6 +73,7 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.interpolative.Interpolative;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -643,7 +645,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
 		for (JobSecret secret: getProject().getBuildSetting().getJobSecrets()) {
-			if (secret.isAuthorized(getProject(), getCommitId()))
+			if (isOnBranches(secret.getAuthorizedBranches()))
 				secretValuesToMask.add(secret.getValue());
 		}
 		
@@ -683,10 +685,19 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public String getSecretValue(String secretName) {
-		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX))
+		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
 			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
-		else
-			return project.getBuildSetting().getSecretValue(project, secretName, ObjectId.fromString(getCommitHash()));
+		} else {
+			for (JobSecret secret: getProject().getBuildSetting().getJobSecrets()) {
+				if (secret.getName().equals(secretName)) {
+					if (isOnBranches(secret.getAuthorizedBranches()))				
+						return secret.getValue();
+					else
+						throw new OneException("Job secret not authorized: " + secretName);
+				}
+			}
+			throw new OneException("No job secret found: " + secretName);
+		}
 	}
 	
 	public BuildSpec getSpec() {
@@ -936,6 +947,26 @@ public class Build extends AbstractEntity implements Referenceable {
 					return buildAware.getBuild();
 			}
 			return null;
+		}
+	}
+
+	public boolean isOnBranches(@Nullable String branches) {
+		if (branches == null)
+			branches = "**";
+		if (project.isCommitOnBranches(getCommitId(), branches)) {
+			return true;
+		} else {
+			PatternSet patternSet = PatternSet.parse(branches);
+			PathMatcher matcher = new PathMatcher();
+			for (PullRequestVerification verification: getVerifications()) {
+				PullRequest request = verification.getRequest();
+				if (project.equals(request.getSourceProject()) 
+						&& patternSet.matches(matcher, request.getTargetBranch())
+						&& patternSet.matches(matcher, request.getSourceBranch())) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 	

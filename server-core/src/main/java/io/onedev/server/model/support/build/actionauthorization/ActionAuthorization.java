@@ -43,7 +43,7 @@ public abstract class ActionAuthorization implements Serializable {
 	}
 	
 	public boolean isAuthorized(Build build, PostBuildAction postBuildAction) {
-		return matches(postBuildAction) && (authorizedBranches == null || build.getProject().isCommitOnBranches(build.getCommitId(), authorizedBranches));
+		return matches(postBuildAction) && build.isOnBranches(getAuthorizedBranches());
 	}
 
 	protected abstract boolean matches(PostBuildAction postBuildAction);

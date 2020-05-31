@@ -6,14 +6,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.ObjectId;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -96,18 +92,6 @@ public class ProjectBuildSetting implements Serializable {
 				return namedQuery;
 		}
 		return null;
-	}
-	
-	public String getSecretValue(Project project, String secretName, ObjectId commitId) {
-		for (JobSecret secret: getJobSecrets()) {
-			if (secret.getName().equals(secretName)) {
-				if (secret.isAuthorized(project, commitId))				
-					return secret.getValue();
-				else
-					throw new OneException("Job secret not authorized: " + secretName);
-			}
-		}
-		throw new OneException("No job secret found: " + secretName);
 	}
 	
 	public boolean isActionAuthorized(Build build, PostBuildAction action) {

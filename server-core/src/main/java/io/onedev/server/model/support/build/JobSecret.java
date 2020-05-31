@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputCompletion;
@@ -12,8 +11,6 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.match.PathMatcher;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.SecretName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -95,15 +92,6 @@ public class JobSecret implements Serializable {
 			return SuggestionUtils.suggestBranches(project, matchWith);
 		else
 			return new ArrayList<>();
-	}
-	
-	public boolean isAuthorized(Project project, ObjectId commitId) {
-		return authorizedBranches == null || project.isCommitOnBranches(commitId, authorizedBranches);
-	}
-	
-	public boolean isAuthorized(Project project, String branch) {
-		return authorizedBranches == null 
-				|| PatternSet.parse(authorizedBranches).matches(new PathMatcher(), branch);
 	}
 	
 }
