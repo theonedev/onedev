@@ -85,3 +85,8 @@ body.BranchProtectionsPage, body.TagProtectionsPage, body.WebHooksPage {
 body.SecretListPage .help-block {
 	margin: 0 0 16px 0;
 }
+
+.job-secret-edit textarea {
+    font-family: monospace;
+    height: 200px !important;
+}

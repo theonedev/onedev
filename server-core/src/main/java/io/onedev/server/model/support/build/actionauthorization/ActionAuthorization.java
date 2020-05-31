@@ -6,7 +6,6 @@ import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -42,11 +41,7 @@ public abstract class ActionAuthorization implements Serializable {
 			return new ArrayList<>();
 	}
 	
-	public boolean isAuthorized(Build build, PostBuildAction postBuildAction) {
-		return matches(postBuildAction) && build.isOnBranches(getAuthorizedBranches());
-	}
-
-	protected abstract boolean matches(PostBuildAction postBuildAction);
+	public abstract boolean matches(PostBuildAction postBuildAction);
 	
 	public abstract String getActionDescription();
 	

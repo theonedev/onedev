@@ -12,6 +12,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
+import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
+import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -30,6 +32,11 @@ public class ProjectBuildSetting implements Serializable {
 	private List<ActionAuthorization> actionAuthorizations = new ArrayList<>();
 	
 	private transient GlobalBuildSetting globalSetting;
+	
+	public ProjectBuildSetting() {
+		actionAuthorizations.add(new CloseMilestoneAuthorization());
+		actionAuthorizations.add(new CreateTagAuthorization());
+	}
 	
 	public List<JobSecret> getJobSecrets() {
 		return jobSecrets;
@@ -96,15 +103,11 @@ public class ProjectBuildSetting implements Serializable {
 	
 	public boolean isActionAuthorized(Build build, PostBuildAction action) {
 		List<ActionAuthorization> authorizations = getActionAuthorizations();
-		if (!authorizations.isEmpty()) {
-			for (ActionAuthorization authorization: authorizations) {
-				if (authorization.isAuthorized(build, action)) 
-					return true;
-			}
-			return false;
-		} else {
-			return true;
+		for (ActionAuthorization authorization: authorizations) {
+			if (authorization.matches(action) && build.isOnBranches(authorization.getAuthorizedBranches())) 
+				return true;
 		}
+		return false;
 	}
 	
 }

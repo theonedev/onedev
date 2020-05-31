@@ -6,17 +6,13 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.annotation.SecretName;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.Patterns;
-import io.onedev.server.web.editable.annotation.SuggestionProvider;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
@@ -31,7 +27,6 @@ public class JobSecret implements Serializable {
 	private String authorizedBranches;
 	
 	@Editable(order=100)
-	@SuggestionProvider("suggestNames")
 	@NotEmpty
 	@SecretName
 	public String getName() {
@@ -42,27 +37,9 @@ public class JobSecret implements Serializable {
 		this.name = name;
 	}
 	
-	@SuppressWarnings("unused")
-	private static List<InputCompletion> suggestNames(InputStatus inputStatus) {
-		Project project = Project.get();
-		List<InputCompletion> suggestions = new ArrayList<>();
-		if (project != null) {
-			for (JobSecret secret: project.getBuildSetting().getJobSecrets()) {
-				LinearRange match = LinearRange.match(secret.getName(), inputStatus.getContentBeforeCaret());
-				if (match != null) {
-					InputCompletion suggestion = new InputCompletion(secret.getName(), 
-							secret.getName() + inputStatus.getContentAfterCaret(), 
-							secret.getName().length(), "override inherited", match);
-					suggestions.add(suggestion);
-				}
-			}
-		} 
-		return suggestions;
-	}
-
 	@Editable(order=200)
-	@Password
 	@NotEmpty
+	@Multiline
 	public String getValue() {
 		return value;
 	}
