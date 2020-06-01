@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.apache.wicket.Component;
@@ -27,6 +28,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
+import io.onedev.server.buildspec.job.gitcredential.DefaultCredential;
+import io.onedev.server.buildspec.job.gitcredential.GitCredential;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
@@ -79,8 +82,8 @@ public class Job implements Serializable, Validatable {
 	
 	private Integer cloneDepth;
 	
-	private List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
-	
+	private GitCredential cloneCredential = new DefaultCredential();
+
 	private List<JobDependency> jobDependencies = new ArrayList<>();
 	
 	private List<ProjectDependency> projectDependencies = new ArrayList<>();
@@ -230,16 +233,17 @@ public class Job implements Serializable, Validatable {
 		this.cloneDepth = cloneDepth;
 	}
 
-	@Editable(order=9100, group="Source Retrieval", description="For git submodules accessing via http/https, you will "
-			+ "need to specify credentials here if required")
-	@Valid
+	@Editable(order=9060, group="Source Retrieval", description="By default code is cloned via an auto-generated credential, "
+			+ "which only has read permission over current project. In case the job needs to push code to server, or want "
+			+ "to clone private submodules, you should supply custom credential with appropriate permissions here")
 	@ShowCondition("isRetrieveSourceEnabled")
-	public List<SubmoduleCredential> getSubmoduleCredentials() {
-		return submoduleCredentials;
+	@NotNull
+	public GitCredential getCloneCredential() {
+		return cloneCredential;
 	}
 
-	public void setSubmoduleCredentials(List<SubmoduleCredential> submoduleCredentials) {
-		this.submoduleCredentials = submoduleCredentials;
+	public void setCloneCredential(GitCredential cloneCredential) {
+		this.cloneCredential = cloneCredential;
 	}
 
 	@SuppressWarnings("unused")
@@ -457,22 +461,6 @@ public class Job implements Serializable, Validatable {
 						.addPropertyNode("paramSpecs").addConstraintViolation();
 			} else {
 				paramSpecNames.add(paramSpec.getName());
-			}
-		}
-		
-		if (retrieveSource) {
-			int index = 0;
-			for (SubmoduleCredential credential: getSubmoduleCredentials()) {
-				if (credential.getUrl() != null 
-						&& !credential.getUrl().startsWith("http://") 
-						&& !credential.getUrl().startsWith("https://")) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Can only provide credentials for submodules accessing via http/https")
-							.addPropertyNode("submoduleCredentials").addPropertyNode("url")
-								.inIterable().atIndex(index)
-							.addConstraintViolation();
-				}
-				index++;
 			}
 		}
 		

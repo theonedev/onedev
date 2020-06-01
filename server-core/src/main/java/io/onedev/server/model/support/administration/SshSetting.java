@@ -13,8 +13,6 @@ import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.sshd.common.digest.BuiltinDigests;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -29,7 +27,7 @@ public class SshSetting implements Serializable, Validatable {
 	
     private String serverUrl;
 
-    private String privateKey;
+    private String pemPrivateKey;
     
 	@Editable(name="SSH Server URL", order=90, description="This property will be used as base to construct "
 			+ "urls of various ssh services such as git over ssh")
@@ -46,23 +44,46 @@ public class SshSetting implements Serializable, Validatable {
     		+ "by ssh server to establish connections with client")
     @Multiline
     @NotEmpty
-    public String getPrivateKey() {
-        return privateKey;
+    public String getPemPrivateKey() {
+        return pemPrivateKey;
     }
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
+    public void setPemPrivateKey(String pemPrivateKey) {
+        this.pemPrivateKey = pemPrivateKey;
     }
     
     public String getFingerPrint() {
         try {
-			PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(
-					OneDev.getInstance(SettingManager.class).getSshSetting().getPrivateKey());
+			PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(pemPrivateKey);
 			PublicKey publicKey = KeyUtils.recoverPublicKey(privateKey);
 			return KeyUtils.getFingerPrint(BuiltinDigests.sha256, publicKey);
 		} catch (IOException | GeneralSecurityException e) {
 			throw new RuntimeException(e);
 		}
+    }
+    
+    public PrivateKey getPrivateKey() {
+		try {
+			return SshKeyUtils.decodePEMPrivateKey(pemPrivateKey);
+		} catch (IOException | GeneralSecurityException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    public PublicKey getPublicKey() {
+		try {
+			return KeyUtils.recoverPublicKey(getPrivateKey());
+		} catch (GeneralSecurityException e) {
+			throw new RuntimeException(e);
+		}
+    }
+    
+    public String getServerName() {
+    	String serverName = serverUrl;
+    	if (serverName.startsWith("ssh://"))
+    		serverName = serverName.substring("ssh://".length());
+    	serverName = StringUtils.stripEnd(serverName, "/\\");
+    	return StringUtils.substringBefore(serverName, ":");
     }
     
     @Override
@@ -71,9 +92,9 @@ public class SshSetting implements Serializable, Validatable {
 			serverUrl = StringUtils.stripEnd(serverUrl, "/\\");
     	
         boolean hasErrors = false;
-        String propertyNode = "privateKey";
+        String propertyNode = "pemPrivateKey";
         try {
-            SshKeyUtils.decodePEMPrivateKey(privateKey);
+            SshKeyUtils.decodePEMPrivateKey(pemPrivateKey);
         } catch (Exception e) {
             context.buildConstraintViolationWithTemplate("The provided key is not valid. Please check and try again")
                     .addPropertyNode(propertyNode).addConstraintViolation()

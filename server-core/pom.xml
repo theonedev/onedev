@@ -211,9 +211,9 @@
 			<artifactId>org.eclipse.jgit.archive</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jgit</groupId>
-			<artifactId>org.eclipse.jgit.ssh.apache</artifactId>
-		</dependency>
+	        <groupId>org.apache.sshd</groupId>
+	        <artifactId>sshd-core</artifactId>
+	    </dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
@@ -325,7 +325,7 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>k8s-helper</artifactId>
-			<version>1.0.16</version>
+			<version>1.0.17</version>
 		</dependency>
 	</dependencies>
 	<properties>

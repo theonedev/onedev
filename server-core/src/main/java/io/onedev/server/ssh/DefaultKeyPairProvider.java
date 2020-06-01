@@ -31,7 +31,7 @@ public class DefaultKeyPairProvider implements KeyPairProvider {
         SshSetting sshSetting = settingManager.getSshSetting();
         
         try {
-            PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(sshSetting.getPrivateKey());
+            PrivateKey privateKey = SshKeyUtils.decodePEMPrivateKey(sshSetting.getPemPrivateKey());
             PublicKey publicKey = KeyUtils.recoverPublicKey(privateKey);
             return Lists.newArrayList(new KeyPair(publicKey, privateKey));
         } catch (Exception e) {

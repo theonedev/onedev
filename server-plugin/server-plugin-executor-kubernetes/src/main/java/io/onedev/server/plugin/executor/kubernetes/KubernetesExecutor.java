@@ -680,11 +680,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			String k8sHelperClassPath;
 			String containerBuildHome;
 			String containerCacheHome;
+			String containerUserHome;
 			String trustCertsHome;
 			String dockerSock;
 			if (baselineOsInfo.isLinux()) {
 				containerBuildHome = "/onedev-build";
 				containerCacheHome = containerBuildHome + "/cache";
+				containerUserHome = "/root/onedev";
 				trustCertsHome = containerBuildHome + "/trust-certs";
 				k8sHelperClassPath = "/k8s-helper/*";
 				mainContainerSpec.put("command", Lists.newArrayList("sh"));
@@ -693,6 +695,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			} else {
 				containerBuildHome = "C:\\onedev-build";
 				containerCacheHome = containerBuildHome + "\\cache";
+				containerUserHome = "C:\\Users\\ContainerAdministrator\\onedev";
 				trustCertsHome = containerBuildHome + "\\trust-certs";
 				k8sHelperClassPath = "C:\\k8s-helper\\*";
 				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
@@ -703,6 +706,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			Map<String, String> buildHomeMount = CollectionUtils.newLinkedHashMap(
 					"name", "build-home", 
 					"mountPath", containerBuildHome);
+			Map<String, String> userHomeMount = CollectionUtils.newLinkedHashMap(
+					"name", "user-home", 
+					"mountPath", containerUserHome);
 			Map<String, String> cacheHomeMount = CollectionUtils.newLinkedHashMap(
 					"name", "cache-home", 
 					"mountPath", containerCacheHome);
@@ -713,7 +719,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"name", "docker-sock", 
 					"mountPath", dockerSock);
 			
-			List<Object> volumeMounts = Lists.<Object>newArrayList(buildHomeMount, cacheHomeMount);
+			List<Object> volumeMounts = Lists.<Object>newArrayList(buildHomeMount, userHomeMount, cacheHomeMount);
 			if (trustCertsConfigMapName != null)
 				volumeMounts.add(trustCertsMount);
 			if (dockerSock != null)
@@ -790,12 +796,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			Map<Object, Object> buildHomeVolume = CollectionUtils.newLinkedHashMap(
 					"name", "build-home", 
 					"emptyDir", CollectionUtils.newLinkedHashMap());
+			Map<Object, Object> userHomeVolume = CollectionUtils.newLinkedHashMap(
+					"name", "user-home", 
+					"emptyDir", CollectionUtils.newLinkedHashMap());
 			Map<Object, Object> cacheHomeVolume = CollectionUtils.newLinkedHashMap(
 					"name", "cache-home", 
 					"hostPath", CollectionUtils.newLinkedHashMap(
 							"path", baselineOsInfo.getCacheHome(), 
 							"type", "DirectoryOrCreate"));
-			List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, cacheHomeVolume);
+			List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, userHomeVolume, cacheHomeVolume);
 			if (trustCertsConfigMapName != null) {
 				Map<Object, Object> trustCertsHomeVolume = CollectionUtils.newLinkedHashMap(
 						"name", "trust-certs-home", 

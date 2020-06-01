@@ -49,6 +49,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.CacheInstance;
+import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
@@ -354,6 +355,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Long buildNumber = build.getNumber();
 				String projectName = build.getProject().getName();
 				File projectGitDir = build.getProject().getGitDir();
+				CloneInfo cloneInfo = job.getCloneCredential().newCloneInfo(build, jobToken);
 				
 				AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
 				executionRef.set(new JobExecution(executorService.submit(new Runnable() {
@@ -365,7 +367,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						try {
 							Set<String> includeFiles = new HashSet<>();
 							Set<String> excludeFiles = new HashSet<>();
-							List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
 							AtomicInteger maxRetries = new AtomicInteger(0);
 							AtomicInteger retryDelay = new AtomicInteger(0);
 							List<CacheSpec> caches = new ArrayList<>();
@@ -396,16 +397,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											includeFiles.addAll(patternSet.getIncludes());
 											excludeFiles.addAll(patternSet.getExcludes());
 										}
-										if (job.isRetrieveSource()) {
-											for (SubmoduleCredential submoduleCredential: job.getSubmoduleCredentials()) {
-												SubmoduleCredential resolvedSubmoduleCredential = new SubmoduleCredential();
-												resolvedSubmoduleCredential.setUrl(submoduleCredential.getUrl());
-												resolvedSubmoduleCredential.setUserName(submoduleCredential.getUserName());
-												resolvedSubmoduleCredential.setPasswordSecret(
-														build.getSecretValue(submoduleCredential.getPasswordSecret()));
-												submoduleCredentials.add(resolvedSubmoduleCredential);
-											}
-										}
 										for (CacheSpec cache: job.getCaches())
 											caches.add(build.interpolateProperties(cache));
 										for (JobService service: job.getServices())
@@ -430,7 +421,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										try {
 											return new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
 													serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
-													submoduleCredentials, job.getCpuRequirement(), job.getMemoryRequirement(), 
+													cloneInfo, job.getCpuRequirement(), job.getMemoryRequirement(), 
 													commitId, caches, new PatternSet(includeFiles, excludeFiles), 
 													executor.getCacheTTL(), retried.get(), services, jobLogger) {
 												

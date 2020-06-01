@@ -547,10 +547,10 @@
 				<version>${jgit.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.jgit</groupId>
-				<artifactId>org.eclipse.jgit.ssh.apache</artifactId>
-				<version>${jgit.version}</version>
-		        </dependency>
+		        <groupId>org.apache.sshd</groupId>
+		        <artifactId>sshd-core</artifactId>
+		        <version>2.2.0</version>
+		    </dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>
@@ -570,7 +570,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.17</commons.version>
+		<commons.version>1.1.18</commons.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

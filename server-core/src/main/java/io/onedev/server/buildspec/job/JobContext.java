@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -30,7 +31,7 @@ public abstract class JobContext {
 	
 	private final Integer cloneDepth;
 	
-	private final List<SubmoduleCredential> submoduleCredentials;
+	private final CloneInfo cloneInfo;
 	
 	private final String cpuRequirement;
 	
@@ -54,12 +55,12 @@ public abstract class JobContext {
 	
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
-	public JobContext(String projectName, Long buildNumber, File projectGitDir, String image, 
-			File workspace, List<String> commands, boolean retrieveSource, Integer cloneDepth,
-			List<SubmoduleCredential> submoduleCredentials, String cpuRequirement, String 
-			memoryRequirement, ObjectId commitId, Collection<CacheSpec> caches, 
-			PatternSet collectFiles, int cacheTTL, int retried, List<JobService> services, 
-			JobLogger logger) {
+	public JobContext(String projectName, Long buildNumber, 
+			File projectGitDir, String image, File workspace, List<String> commands, 
+			boolean retrieveSource, Integer cloneDepth, CloneInfo cloneInfo, 
+			String cpuRequirement, String memoryRequirement, ObjectId commitId, 
+			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
+			int retried, List<JobService> services, JobLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
@@ -68,7 +69,7 @@ public abstract class JobContext {
 		this.commands = commands;
 		this.retrieveSource = retrieveSource;
 		this.cloneDepth = cloneDepth;
-		this.submoduleCredentials = submoduleCredentials;
+		this.cloneInfo = cloneInfo;
 		this.cpuRequirement = cpuRequirement;
 		this.memoryRequirement = memoryRequirement;
 		this.commitId = commitId;
@@ -116,8 +117,8 @@ public abstract class JobContext {
 		return cloneDepth;
 	}
 
-	public List<SubmoduleCredential> getSubmoduleCredentials() {
-		return submoduleCredentials;
+	public CloneInfo getCloneInfo() {
+		return cloneInfo;
 	}
 
 	public String getCpuRequirement() {

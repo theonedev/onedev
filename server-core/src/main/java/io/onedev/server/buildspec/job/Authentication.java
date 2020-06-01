@@ -29,7 +29,7 @@ public class Authentication implements Serializable {
 		this.userName = userName;
 	}
 
-	@Editable(order=10100, description="Specify a project secret to be used as password")
+	@Editable(order=10100, description="Specify a secret to be used as password")
 	@ChoiceProvider("getPasswordSecretChoices")
 	@NotEmpty
 	public String getPasswordSecret() {

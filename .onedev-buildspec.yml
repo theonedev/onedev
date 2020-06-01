@@ -6,7 +6,7 @@ jobs:
   - set -e
   - echo "Detecting project version (may require some time while downloading maven
     dependencies)..."
-  - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version
+  - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version
     -q -DforceStdout)
   - echo "##onedev[SetBuildVersion '$buildVersion']"
   - mvn test

@@ -170,7 +170,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			SshSetting sshSetting = new SshSetting();
 			Url sshServerUrl = OneDev.getInstance().guessServerUrl(true);
             sshSetting.setServerUrl(StringUtils.stripEnd(sshServerUrl.toString(StringMode.FULL), "/"));
-            sshSetting.setPrivateKey(SshKeyUtils.generatePEMPrivateKey());
+            sshSetting.setPemPrivateKey(SshKeyUtils.generatePEMPrivateKey());
             
             settingManager.saveSshSetting(sshSetting);
         }

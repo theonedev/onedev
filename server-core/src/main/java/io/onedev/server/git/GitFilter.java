@@ -278,9 +278,8 @@ public class GitFilter implements Filter {
 				writeInitial(response, service);
 				upload = true;
 			} else {
-				if (!SecurityUtils.canWriteCode(project)) {
+				if (!SecurityUtils.canWriteCode(project))
 					throw new UnauthorizedException("You do not have permission to push to this project.");
-				}
 				writeInitial(response, service);
 				upload = false;
 			}
