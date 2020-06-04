@@ -1222,33 +1222,35 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 				@Override
 				public void consume(String line) {
-					if (line.startsWith("{")) {
-						json.append("{").append("\n");
-					} else if (line.startsWith("}")) {
-						json.append("}");
-						logger.trace("Watching event:\n" + json.toString());
-						try {
-							JsonNode eventNode = mapper.readTree(json.toString()); 
-							String type = eventNode.get("type").asText();
-							String reason = eventNode.get("reason").asText();
-							JsonNode messageNode = eventNode.get("message");
-							String message = messageNode!=null? messageNode.asText(): reason;
-							if (type.equals("Warning")) {
-								if (reason.equals("FailedScheduling"))
-									jobLogger.log("Kubernetes: " + message);
-								else
-									stopWatchRef.set(new StopWatch(new OneException(message)));
-							} else if (type.equals("Normal") && reason.equals("Started")) {
-								stopWatchRef.set(new StopWatch(null));
+					if (stopWatchRef.get() == null) {
+						if (line.startsWith("{")) {
+							json.append("{").append("\n");
+						} else if (line.startsWith("}")) {
+							json.append("}");
+							logger.trace("Checking event:\n" + json.toString());
+							try {
+								JsonNode eventNode = mapper.readTree(json.toString()); 
+								String type = eventNode.get("type").asText();
+								String reason = eventNode.get("reason").asText();
+								JsonNode messageNode = eventNode.get("message");
+								String message = messageNode!=null? messageNode.asText(): reason;
+								if (type.equals("Warning")) {
+									if (reason.equals("FailedScheduling"))
+										jobLogger.log("Kubernetes: " + message);
+									else 
+										stopWatchRef.set(new StopWatch(new OneException(message)));
+								} else if (type.equals("Normal") && reason.equals("Started")) {
+									stopWatchRef.set(new StopWatch(null));
+								}
+								if (stopWatchRef.get() != null)
+									thread.interrupt();
+							} catch (Exception e) {
+								logger.error("Error processing event watching record", e);
 							}
-							if (stopWatchRef.get() != null)
-								thread.interrupt();
-						} catch (Exception e) {
-							logger.error("Error processing event watching record", e);
+							json.setLength(0);
+						} else {
+							json.append(line).append("\n");
 						}
-						json.setLength(0);
-					} else {
-						json.append(line).append("\n");
 					}
 				}
 				
