@@ -36,7 +36,7 @@ onedev.server.codeSupport = {
 				    	var end = cm.getCursor().ch;
 				    	var matchWith = cm.doc.getLine(line).substring(start, end);
 				    	$input.data("showHintCallback", showHintCallback);
-				    	varQueryCallback(matchWith, line, start, end);
+				    	varQueryCallback(matchWith, line, start);
 					}
 		    		hint.async = true;
 					CodeMirror.showHint(cm, hint, {completeSingle: false});
@@ -50,11 +50,13 @@ onedev.server.codeSupport = {
 		
 	    onedev.server.codeSupport.trackWidth(inputId);
     },
-    showVariables: function(inputId, variables, line, start, end) {
-    	$("#" + inputId).data("showHintCallback")({
+    showVariables: function(inputId, variables, line, start) {
+    	var $input = $("#" + inputId);
+		var cm = $input.next(".CodeMirror")[0].CodeMirror;		
+    	$input.data("showHintCallback")({
     		list: variables,
     		from: CodeMirror.Pos(line, start-1),
-    		to: CodeMirror.Pos(line, end)
+    		to: CodeMirror.Pos(line, cm.getCursor().ch)
     	});
     },
 	onViewerDomReady: function(inputId, modeName) {

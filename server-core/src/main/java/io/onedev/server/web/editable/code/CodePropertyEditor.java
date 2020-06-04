@@ -3,7 +3,9 @@ package io.onedev.server.web.editable.code;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -66,6 +68,12 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 		});
 		add(behavior = new AbstractPostAjaxBehavior() {
 			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setChannel(new AjaxChannel("input-assist", AjaxChannel.Type.DROP));
+			}
+			
 			@SuppressWarnings("unchecked")
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -74,7 +82,6 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 				matchWith = StringUtils.unescape(matchWith.toLowerCase());
 				String line = params.getParameterValue("line").toString();
 				String start = params.getParameterValue("start").toString();
-				String end = params.getParameterValue("end").toString();
 				
 				String variableProvider = getCode().variableProvider();
 				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
@@ -95,8 +102,8 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 					}
 				}
 				try {
-					String script = String.format("onedev.server.codeSupport.showVariables('%s', %s, %s, %s, %s);", 
-							input.getMarkupId(), mapper.writeValueAsString(variablesNode), line, start, end);
+					String script = String.format("onedev.server.codeSupport.showVariables('%s', %s, %s, %s);", 
+							input.getMarkupId(), mapper.writeValueAsString(variablesNode), line, start);
 					target.appendJavaScript(script);
 				} catch (JsonProcessingException e) {
 					throw new RuntimeException(e);
