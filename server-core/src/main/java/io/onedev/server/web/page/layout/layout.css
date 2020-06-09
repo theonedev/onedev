@@ -104,6 +104,10 @@
 	font-size: 16px;
 	border-bottom: 1px solid #E0E0E0;
 }
+.floating.side>.content>.head>.help-block {
+	font-weight: normal;
+	margin-bottom: 0;
+}
 .floating.side>.content>.body {
 	padding: 12px;
 }
@@ -133,4 +137,8 @@
     margin-bottom: 20px;
     padding-bottom: 20px;
     border-bottom: 1px solid #E8E8E8;
+}
+.page-title>.help-block {
+	font-weight: normal;
+	margin-bottom: -10px;
 }

@@ -18,7 +18,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -86,7 +85,8 @@ public class UserMembershipsPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebMarkupContainer("externalManagedNote").setVisible(getUser().isMembershipExternalManaged()));
+		add(new Label("externalManagedNote", "Group membership of this user is managed from " + getUser().getAuthSource())
+				.setVisible(getUser().isMembershipExternalManaged()));
 		
 		TextField<String> searchField;
 		

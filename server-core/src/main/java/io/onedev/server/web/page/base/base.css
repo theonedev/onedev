@@ -617,7 +617,11 @@ a.disabled, a[disabled="disabled"] {
 		width: 360px;
 	}
 }
-
+.floating.side.def-detail .additional-info {
+	margin-bottom: 12px;
+	border-bottom: 1px solid #EEE;
+	padding-bottom: 12px;
+}
 .floating.side.def-detail .actions {
 	margin-bottom: 12px;
 }

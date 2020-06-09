@@ -1,5 +1,10 @@
 package io.onedev.server.entitymanager.impl;
 
+import static io.onedev.server.model.User.PROP_PASSWORD;
+import static io.onedev.server.model.User.PROP_SSO_INFO;
+import static io.onedev.server.model.support.SsoInfo.PROP_CONNECTOR;
+import static io.onedev.server.model.support.SsoInfo.PROP_SUBJECT;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -20,6 +25,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.IdManager;
@@ -217,6 +223,16 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		return find(criteria);
     }
 
+	@Sessional
+    @Override
+    public User findBySsoInfo(SsoInfo ssoInfo) {
+		EntityCriteria<User> criteria = newCriteria();
+		criteria.add(Restrictions.eq(User.PROP_SSO_INFO + "." + SsoInfo.PROP_CONNECTOR, ssoInfo.getConnector()));
+		criteria.add(Restrictions.eq(User.PROP_SSO_INFO + "." + SsoInfo.PROP_SUBJECT, ssoInfo.getSubject()));
+		criteria.setCacheable(true);
+		return find(criteria);
+    }
+	
 	@Override
 	public List<User> query() {
 		EntityCriteria<User> criteria = newCriteria();
@@ -256,5 +272,27 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		users.addAll(0, topUsers);
 		return users;
 	}
-	
+
+	@Transactional
+	@Override
+	public void onRenameSsoConnector(String oldName, String newName) {
+		String connectorProp = PROP_SSO_INFO + "." + PROP_CONNECTOR;
+    	Query<?> query = getSession().createQuery(String.format("update User set %s=:newName "
+    			+ "where %s=:oldName", connectorProp, connectorProp));
+    	query.setParameter("oldName", oldName);
+    	query.setParameter("newName", newName);
+    	query.executeUpdate();
+	}
+
+	@Transactional
+	@Override
+	public void onDeleteSsoConnector(String name) {
+		String connectorProp = PROP_SSO_INFO + "." + PROP_CONNECTOR;
+		String subjectProp = PROP_SSO_INFO + "." + PROP_SUBJECT;
+    	Query<?> query = getSession().createQuery(String.format("update User set %s=null, %s=null, %s='12345' "
+    			+ "where %s=:name", connectorProp, subjectProp, PROP_PASSWORD, connectorProp));
+    	query.setParameter("name", name);
+    	query.executeUpdate();
+	}
+
 }

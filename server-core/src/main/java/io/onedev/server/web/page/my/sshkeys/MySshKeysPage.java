@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -70,12 +70,14 @@ public class MySshKeysPage extends MyPage {
             
         });
 		
-        add(new WebMarkupContainer("sshKeyNote") {
+        add(new Label("sshKeyNote", "Your SSH keys are managed from " + getLoginUser().getAuthSource()) {
+        	
         	@Override
         	protected void onConfigure() {
         		super.onConfigure();
         		setVisible(getLoginUser().isSshKeyExternalManaged());
         	}
+        	
         });
 		
 		add(keyList.setOutputMarkupId(true));

@@ -14,11 +14,13 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -37,7 +39,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -51,8 +55,11 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 
 @Entity
-@Table(indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_EMAIL), 
-		@Index(columnList=PROP_FULL_NAME)})
+@Table(
+		indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_EMAIL), 
+				@Index(columnList=PROP_FULL_NAME), @Index(columnList=SsoInfo.COLUMN_CONNECTOR), 
+				@Index(columnList=SsoInfo.COLUMN_SUBJECT)}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={SsoInfo.COLUMN_CONNECTOR, SsoInfo.COLUMN_SUBJECT})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
@@ -69,7 +76,17 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final String PROP_EMAIL = "email";
 	
+	public static final String PROP_PASSWORD = "password";
+	
 	public static final String PROP_FULL_NAME = "fullName";
+	
+	public static final String PROP_SSO_INFO = "ssoInfo";
+	
+	public static final String AUTH_SOURCE_BUILTIN_USER_STORE = "Builtin User Store";
+	
+	public static final String AUTH_SOURCE_EXTERNAL_AUTHENTICATOR = "External Authenticator";
+	
+	public static final String AUTH_SOURCE_SSO_PROVIDER = "SSO Provider: ";
 	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
 
@@ -88,6 +105,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private String password;
 
 	private String fullName;
+	
+	@Embedded
+	private SsoInfo ssoInfo;
 	
 	@Column(unique=true, nullable=false)
 	private String email;
@@ -399,7 +419,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     }
 
     public boolean isExternalManaged() {
-    	return this.getPassword().equals(EXTERNAL_MANAGED);
+    	return getPassword().equals(EXTERNAL_MANAGED);
     }
     
 	@Editable(order=200)
@@ -411,6 +431,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.fullName = fullName;
 	}
 	
+	public SsoInfo getSsoInfo() {
+		return ssoInfo;
+	}
+
+	public void setSsoInfo(SsoInfo ssoInfo) {
+		this.ssoInfo = ssoInfo;
+	}
+
 	@Editable(order=300)
 	@NotEmpty
 	@Email
@@ -526,8 +554,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
     public boolean isSshKeyExternalManaged() {
     	if (isExternalManaged()) {
-    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
-    		return authenticator != null && authenticator.isManagingSshKeys();
+    		if (getSsoInfo() != null) {
+    			return false;
+    		} else {
+	    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
+	    		return authenticator != null && authenticator.isManagingSshKeys();
+    		}
     	} else {
     		return false;
     	}
@@ -535,11 +567,30 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     public boolean isMembershipExternalManaged() {
     	if (isExternalManaged()) {
-    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
-    		return authenticator != null && authenticator.isManagingMemberships();
+    		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+    		if (getSsoInfo() != null) {
+    			SsoConnector ssoConnector = settingManager.getSsoConnectors().stream()
+    					.filter(it->it.getName().equals(getSsoInfo().getConnector()))
+    					.findFirst().orElse(null);
+    			return ssoConnector != null && ssoConnector.isManagingMemberships();
+    		} else {
+	    		Authenticator authenticator = settingManager.getAuthenticator();
+	    		return authenticator != null && authenticator.isManagingMemberships();
+    		}
     	} else {
     		return false;
     	}
     }
-    
+
+    public String getAuthSource() {
+		if (isExternalManaged()) {
+			if (getSsoInfo() != null)
+				return AUTH_SOURCE_SSO_PROVIDER + getSsoInfo().getConnector();
+			else
+				return AUTH_SOURCE_EXTERNAL_AUTHENTICATOR;
+		} else {
+			return AUTH_SOURCE_BUILTIN_USER_STORE;
+		}
+    }
+	    
 }

@@ -22,10 +22,14 @@
 				</div>
 			</div>
 		</form>
-		<hr />
-		<p class="text-right">
+		<div class="forget-register">
 			<a wicket:id="forgetPassword">Forgot your password?</a>
 			<a wicket:id="registerUser">Register a user</a>
-		</p>
+		</div>
+		<wicket:enclosure child="ssoButtons">
+		<div class="sso">
+			<a wicket:id="ssoButtons" class="btn btn-default"><img wicket:id="image"> <span wicket:id="label"></span></a>
+		</div>
+		</wicket:enclosure>
 	</div>
 </wicket:extend>

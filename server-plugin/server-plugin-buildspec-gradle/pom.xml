@@ -15,6 +15,6 @@
 		</dependency>
 	</dependencies>
 	<properties>
-		<moduleClass>org.server.plugin.buildspec.gradle.GradleModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.buildspec.gradle.GradleModule</moduleClass>
 	</properties>
 </project>

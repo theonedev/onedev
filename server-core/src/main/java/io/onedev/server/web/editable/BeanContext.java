@@ -125,7 +125,8 @@ public class BeanContext implements Serializable {
 			
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel, 
 			Set<String> properties, boolean excluded) {
-		BeanContext editContext = new BeanContext(beanModel.getObject().getClass(), properties, excluded);
+		Class<?> beanClass = HibernateProxyHelper.getClassWithoutInitializingProxy(beanModel.getObject());
+		BeanContext editContext = new BeanContext(beanClass, properties, excluded);
 		return editContext.renderForView(componentId, beanModel);
 	}
 	

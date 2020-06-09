@@ -34,6 +34,8 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.ssh.SshSettingPage;
+import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
+import io.onedev.server.web.page.admin.sso.SsoProcessPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
@@ -141,8 +143,9 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("logout", LogoutPage.class));
 		add(new OnePageMapper("register", RegisterPage.class));
 		add(new OnePageMapper("forget", ForgetPage.class));
+		add(new OnePageMapper(SsoProcessPage.MOUNTED_PATH + "/${stage}/${connector}", SsoProcessPage.class));
 	}
-	
+ 	
 	private void addAdministrationPages() {
 		add(new OnePageMapper("administration", UserListPage.class));
 		add(new OnePageMapper("administration/users", UserListPage.class));
@@ -172,6 +175,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/backup", DatabaseBackupPage.class));
 		add(new OnePageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
+		add(new OnePageMapper("administration/settings/sso-connectors", SsoConnectorListPage.class));
 		add(new OnePageMapper("administration/settings/ssh", SshSettingPage.class));
 
 		add(new OnePageMapper("administration/settings/job-executors", JobExecutorsPage.class));

@@ -193,7 +193,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			executor.setName("auto-discovered");
 			settingManager.saveJobExecutors(Lists.newArrayList(executor));
 		}
-		setting = settingManager.getSetting(Key.JOB_SCRIPTS);
+		setting = settingManager.getSetting(Key.SSO_CONNECTORS);
+		if (setting == null) {
+			settingManager.saveSsoConnectors(Lists.newArrayList());
+		}
+		setting = settingManager.getSetting(Key.GROOVY_SCRIPTS);
 		if (setting == null) {
 			settingManager.saveGroovyScripts(Lists.newArrayList());
 		}

@@ -5,16 +5,12 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.model.support.administration.authenticator.ldap.LdapAuthenticator;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.sshkey.InsertSshKeyPanel;
@@ -71,42 +67,22 @@ public class UserSshKeysPage extends UserPage {
             @Override
             protected void onConfigure() {
             	super.onConfigure();
-            	setVisible(determineNewSSHKeyVisibility());
+            	setVisible(!getUser().isSshKeyExternalManaged());
             }
-            
 
         });
         
-        add(new WebMarkupContainer("sshKeyNote") {
+        add(new Label("sshKeyNote", "SSH keys of this user are managed from " + getUser().getAuthSource()) {
+        	
         	@Override
         	protected void onConfigure() {
         		super.onConfigure();
-        		setVisible(determineSSHKeyNoteVisibility());
+        		setVisible(getUser().isSshKeyExternalManaged());
         	}
+        	
         });
         
         add(keyList.setOutputMarkupId(true));
     }
     
-    private boolean determineSSHKeyNoteVisibility() {
-    	return !determineNewSSHKeyVisibility();
-    }
-    
-    private boolean determineNewSSHKeyVisibility() {
-    	if (!getUser().isExternalManaged()) {
-    		return true;
-    	}
-    	
-    	Authenticator auth = OneDev.getInstance(SettingManager.class).getAuthenticator();
-		
-    	if (auth == null || !(auth instanceof LdapAuthenticator)) {
-    		return true;
-    	}
-    	
-    	if (((LdapAuthenticator) auth).getUserSshKeyAttribute() != null) {
-    		return false;
-    	}
-    	
-    	return true;
-    }
 }

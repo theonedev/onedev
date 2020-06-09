@@ -4,8 +4,6 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.model.SshKey;
-
 public class Authenticated {
 	
 	private final String fullName;
@@ -14,10 +12,10 @@ public class Authenticated {
 	
 	private final Collection<String> groupNames;
 	
-	private final Collection<SshKey> sshKeys;
+	private final Collection<String> sshKeys;
 	
-	public Authenticated(String email, @Nullable String fullName,
-			@Nullable Collection<String> groupNames, @Nullable Collection<SshKey> sshKeys) {
+	public Authenticated(String email, @Nullable String fullName, 
+			@Nullable Collection<String> groupNames, @Nullable Collection<String> sshKeys) {
 		this.email = email;
 		this.fullName = fullName;
 		this.groupNames = groupNames;
@@ -39,7 +37,7 @@ public class Authenticated {
 	}
 
 	@Nullable
-	public Collection<SshKey> getSshKeys() {
+	public Collection<String> getSshKeys() {
 		return sshKeys;
 	}
 

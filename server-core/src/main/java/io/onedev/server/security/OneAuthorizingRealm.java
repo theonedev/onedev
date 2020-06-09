@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -40,12 +39,13 @@ import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
-import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -77,6 +77,8 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     
     private final TransactionManager transactionManager;
     
+    private final SshKeyManager sshKeyManager;
+    
     @SuppressWarnings("serial")
 	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = 
 			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
@@ -85,7 +87,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     public OneAuthorizingRealm(UserManager userManager, SettingManager settingManager, 
     		MembershipManager membershipManager, GroupManager groupManager, 
     		ProjectManager projectManager, SessionManager sessionManager, 
-    		TransactionManager transactionManager) {
+    		TransactionManager transactionManager, SshKeyManager sshKeyManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
@@ -97,6 +99,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     	this.projectManager = projectManager;
     	this.sessionManager = sessionManager;
     	this.transactionManager = transactionManager;
+    	this.sshKeyManager = sshKeyManager;
     }
 
 	private Collection<Permission> getGroupPermissions(Group group, @Nullable User user) {
@@ -188,95 +191,113 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		}
 	}
 	
+	private User newUser(String userName, Authenticated authenticated, 
+			@Nullable SsoInfo ssoInfo, @Nullable String defaultGroup) {
+		User user = new User();
+		user.setName(userName);
+		user.setPassword(User.EXTERNAL_MANAGED);
+		user.setEmail(authenticated.getEmail());
+		if (authenticated.getFullName() != null)
+			user.setFullName(authenticated.getFullName());
+		user.setSsoInfo(ssoInfo);
+		
+		userManager.save(user);
+
+		Collection<String> groupNames = authenticated.getGroupNames();
+		if (groupNames == null && defaultGroup != null)
+			groupNames = Sets.newHashSet(defaultGroup);
+		if (groupNames != null) 
+			membershipManager.syncMemberships(user, groupNames);
+		
+    	if (authenticated.getSshKeys() != null)
+    		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
+    	return user;
+	}
+	
+	private void updateUser(User user, Authenticated authenticated, @Nullable String userName) {
+		if (userName != null)
+			user.setName(userName);
+		user.setEmail(authenticated.getEmail());
+		if (authenticated.getFullName() != null)
+			user.setFullName(authenticated.getFullName());
+		userManager.save(user);
+		if (authenticated.getGroupNames() != null)
+			membershipManager.syncMemberships(user, authenticated.getGroupNames());
+		
+    	if (authenticated.getSshKeys() != null)
+    		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
+	}
+	
 	@Override
-	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+	public boolean supports(AuthenticationToken token) {
+		return token instanceof UsernamePasswordToken || token instanceof SsoAuthenticated;
+	}
+
+	@Override
+	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
+			throws AuthenticationException {
 		return transactionManager.call(new Callable<AuthenticationInfo>() {
 
 			@Override
-			public AuthenticationInfo call() throws Exception {
-		    	User user = userManager.findByName(((UsernamePasswordToken) token).getUsername());
-		    	Authenticator authenticator;
-		    	if ((user == null || user.getPassword().equals(User.EXTERNAL_MANAGED)) && 
-		    			((authenticator = settingManager.getAuthenticator()) != null)) {
-	        		Authenticated authenticated;
-	        		try {
-	        			authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-	        		} catch (Exception e) {
-	        			if (e instanceof AuthenticationException) {
-	        				logger.debug("Authentication not passed", e);
-	            			throw ExceptionUtils.unchecked(e);
-	        			} else {
-	        				logger.error("Error authenticating user", e);
-	            			throw new AuthenticationException("Error authenticating user", e);
-	        			}
-	        		}
-	    			if (user != null) {
-	    				user.setEmail(authenticated.getEmail());
-	    				if (authenticated.getFullName() != null)
-	    					user.setFullName(authenticated.getFullName());
-
-	    				Collection<String> existingGroupNames = new HashSet<>();
-	    				for (Membership membership: user.getMemberships()) 
-	    					existingGroupNames.add(membership.getGroup().getName());
-	    				if (authenticated.getGroupNames() != null) {
-	    					Collection<String> retrievedGroupNames = new HashSet<>();
-	    					for (String groupName: authenticated.getGroupNames()) {
-	    						Group group = groupManager.find(groupName);
-	    						if (group != null) {
-	    							if (!existingGroupNames.contains(groupName)) {
-	    								Membership membership = new Membership();
-	    								membership.setGroup(group);
-	    								membership.setUser(user);
-	    								membershipManager.save(membership);
-	    								user.getMemberships().add(membership);
-	    								existingGroupNames.add(groupName);
-	    							}
-	    							retrievedGroupNames.add(groupName);
-	    						} else {
-	    							logger.warn("Group '{}' from external authenticator is not defined", groupName);
-	    						}
-	    					}
-	        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
-	        					Membership membership = it.next();
-	        					if (!retrievedGroupNames.contains(membership.getGroup().getName())) {
-	        						it.remove();
-	        						membershipManager.delete(membership);
-	        					}
-	        				}
-	    				}
-	    				userManager.save(user);
+			public AuthenticationInfo call() {
+				try {
+					String userName = (String) token.getPrincipal();
+					User user;
+					if (token instanceof UsernamePasswordToken) {
+				    	user = userManager.findByName(userName);
+				    	if (user == null) {
+					    	Authenticator authenticator = settingManager.getAuthenticator();
+			    			if (authenticator != null) {
+			    				Authenticated authenticated = authenticator.authenticate((UsernamePasswordToken) token);
+			    				if (userManager.findByEmail(authenticated.getEmail()) != null)
+			    					throw new AuthenticationException("Email '" + authenticated.getEmail() + "' has already been used by another account");
+			        			user = newUser(userName, authenticated, null, authenticator.getDefaultGroup());
+			    			} 
+				    	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
+			    			if (user.getSsoInfo() != null) {
+			    				throw new AuthenticationException("Account '" + userName 
+			    						+ "' is set to authenticate via " + User.AUTH_SOURCE_SSO_PROVIDER + user.getSsoInfo().getConnector());
+			    			}
+					    	Authenticator authenticator = settingManager.getAuthenticator();
+			    			if (authenticator != null) {
+			    				Authenticated authenticated = authenticator.authenticate((UsernamePasswordToken) token);
+			    				if (!authenticated.getEmail().equals(user.getEmail()) && userManager.findByEmail(authenticated.getEmail()) != null) 
+			    					throw new AuthenticationException("Email '" + authenticated.getEmail() + "' has already been used by another account");
+			        			updateUser(user, authenticated, null);
+			    			} else {
+			    				throw new AuthenticationException("Account '" + userName + "' is set to authenticate "
+			    						+ "externally but " + User.AUTH_SOURCE_EXTERNAL_AUTHENTICATOR + " is not defined");
+			    			}
+				    	} 				
+					} else {
+						SsoAuthenticated authenticated = (SsoAuthenticated) token;
+						SsoInfo ssoInfo = authenticated.getSsoInfo();
+				    	user = userManager.findBySsoInfo(ssoInfo);
+				    	if (user == null) {
+				    		if (userManager.findByName(userName) != null)
+				    			throw new AuthenticationException("Account '" + userName + "' already exists");
+				    		if (userManager.findByEmail(authenticated.getEmail()) != null)
+				    			throw new AuthenticationException("Email '" + authenticated.getEmail() + "' has already been used by another account");
+			    			user = newUser(userName, authenticated, ssoInfo, authenticated.getConnector().getDefaultGroup());
+				    	} else {
+				    		if (!authenticated.getUserName().equals(user.getName()) && userManager.findByName(authenticated.getUserName()) != null)
+				    			throw new AuthenticationException("Account '" + userName + "' already exists");
+				    		if (!authenticated.getEmail().equals(user.getEmail()) && userManager.findByEmail(authenticated.getEmail()) != null)
+				    			throw new AuthenticationException("Email '" + authenticated.getEmail() + "' has already been used by another account");
+			    			updateUser(user, authenticated, authenticated.getUserName());
+				    	}				
+					}
+			    	return user;
+				} catch (Exception e) {
+	    			if (e instanceof AuthenticationException) {
+	    				logger.debug("Authentication not passed", e);
+	        			throw ExceptionUtils.unchecked(e);
 	    			} else {
-	    				user = new User();
-	    				user.setName(((UsernamePasswordToken) token).getUsername());
-	    				user.setPassword(User.EXTERNAL_MANAGED);
-	    				user.setEmail(authenticated.getEmail());
-	    				if (authenticated.getFullName() != null)
-	    					user.setFullName(authenticated.getFullName());
-	    				userManager.save(user);
-	    				
-	    				if (authenticated.getGroupNames() == null && authenticator.getDefaultGroup() != null) {
-    						Group group = groupManager.find(authenticator.getDefaultGroup());
-    						if (group != null) {
-    							Membership membership = new Membership();
-    							membership.setGroup(group);
-    							membership.setUser(user);
-    							user.getMemberships().add(membership);
-    							membershipManager.save(membership);
-    						} else {
-    							logger.error("Group not found: " + authenticator.getDefaultGroup());
-    						}
-	    				}
+	    				logger.error("Error authenticating user", e);
+	        			throw new AuthenticationException("Error authenticating user", e);
 	    			}
-	    			
-			    	if (authenticated.getSshKeys() != null) {
-			    		SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
-			    		sshKeyManager.syncSshKeys(user, authenticated.getSshKeys());
-			    	}
-		    	}
-		    	
-		    	return user;		
+				}
 			}
-			
 		});
 	}
 }

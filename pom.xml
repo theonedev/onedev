@@ -1,130 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
-    <modelVersion>4.0.0</modelVersion>  
-    <parent>
-    	<groupId>io.onedev</groupId>
-    	<artifactId>parent</artifactId>
-    	<version>1.0.5</version>
-    </parent>
-    <artifactId>server</artifactId>  
-    <version>3.2.0</version>  
-    <packaging>pom</packaging>  
-    <build> 
-        <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
-        <pluginManagement> 
-            <plugins> 
-                <plugin> 
-                    <groupId>org.antlr</groupId>  
-                    <artifactId>antlr4-maven-plugin</artifactId>  
-                    <version>${antlr.version}</version>  
-                    <executions> 
-                        <execution> 
-                            <goals> 
-                                <goal>antlr4</goal> 
-                            </goals> 
-                        </execution> 
-                    </executions>  
-                    <configuration> 
-                        <sourceDirectory>${basedir}/src/main/java</sourceDirectory> 
-                        <listener>true</listener>
-	                    <visitor>true</visitor> 
-                    </configuration> 
-                </plugin>  
-                <plugin> 
-                    <groupId>org.eclipse.m2e</groupId>  
-                    <artifactId>lifecycle-mapping</artifactId>  
-                    <version>1.0.0</version>  
-                    <configuration> 
-                        <lifecycleMappingMetadata> 
-                            <pluginExecutions> 
-                                <pluginExecution> 
-                                    <pluginExecutionFilter> 
-                                        <groupId>io.onedev</groupId>  
-                                        <artifactId>plugin-maven</artifactId>  
-                                        <versionRange>[2.0.0,]</versionRange>  
-                                        <goals> 
-                                            <goal>populate-resources</goal>  
-                                        </goals> 
-                                    </pluginExecutionFilter>  
-                                    <action> 
-                                        <execute> 
-                                            <runOnIncremental>true</runOnIncremental>  
-                                            <runOnConfiguration>true</runOnConfiguration> 
-                                        </execute> 
-                                    </action> 
-                                </pluginExecution>  
-                                <pluginExecution> 
-                                    <pluginExecutionFilter> 
-                                        <groupId>org.codehaus.gmaven</groupId>  
-                                        <artifactId>groovy-maven-plugin</artifactId>  
-                                        <versionRange>[2.0,]</versionRange>  
-                                        <goals>
-                                        	<goal>execute</goal>
-                                        </goals>
-                                    </pluginExecutionFilter>  
-                                    <action> 
-                                        <execute> 
-                                            <runOnIncremental>true</runOnIncremental>  
-                                            <runOnConfiguration>true</runOnConfiguration> 
-                                        </execute> 
-                                    </action> 
-                                </pluginExecution>  
-                                <pluginExecution> 
-                                    <pluginExecutionFilter> 
-                                        <groupId>org.apache.maven.plugins</groupId>  
-                                        <artifactId>maven-jar-plugin</artifactId>  
-                                        <versionRange>[1.0.0,]</versionRange>  
-                                        <goals> 
-                                            <goal>jar</goal> 
-                                        </goals> 
-                                    </pluginExecutionFilter>  
-                                    <action> 
-                                        <ignore/> 
-                                    </action> 
-                                </pluginExecution> 
-                            </pluginExecutions> 
-                        </lifecycleMappingMetadata> 
-                    </configuration> 
-                </plugin>  
-                <plugin> 
-                    <artifactId>maven-jar-plugin</artifactId>  
-                    <version>3.0.2</version>  
-                    <executions> 
-                        <execution> 
-                            <id>default-jar</id>  
-                            <phase>never</phase>  
-                            <configuration> 
-                                <finalName>unwanted</finalName>  
-                                <classifier>unwanted</classifier> 
-                            </configuration> 
-                        </execution> 
-                    </executions> 
-                </plugin>  
-            </plugins> 
-        </pluginManagement>  
-        <plugins>
-	        <plugin> 
-	            <groupId>io.onedev</groupId>  
-	            <artifactId>plugin-maven</artifactId>  
-	            <version>2.0.4</version>  
-	            <executions> 
-	                <execution> 
-	                    <id>populate-resources</id>  
-	                    <phase>compile</phase>  
-	                    <goals> 
-	                        <goal>populate-resources</goal> 
-	                    </goals> 
-	                </execution>  
-	                <execution> 
-	                    <id>package-artifacts</id>  
-	                    <phase>package</phase>  
-	                    <goals> 
-	                        <goal>package-artifacts</goal> 
-	                    </goals> 
-	                </execution>  
-	            </executions> 
-	        </plugin>  
-        </plugins>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.onedev</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.0.5</version>
+	</parent>
+	<artifactId>server</artifactId>
+	<version>3.2.0</version>
+	<packaging>pom</packaging>
+	<build>
+		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.antlr</groupId>
+					<artifactId>antlr4-maven-plugin</artifactId>
+					<version>${antlr.version}</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>antlr4</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+						<listener>true</listener>
+						<visitor>true</visitor>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>io.onedev</groupId>
+										<artifactId>plugin-maven</artifactId>
+										<versionRange>[2.0.0,]</versionRange>
+										<goals>
+											<goal>populate-resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.codehaus.gmaven</groupId>
+										<artifactId>groovy-maven-plugin</artifactId>
+										<versionRange>[2.0,]</versionRange>
+										<goals>
+											<goal>execute</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.apache.maven.plugins</groupId>
+										<artifactId>maven-jar-plugin</artifactId>
+										<versionRange>[1.0.0,]</versionRange>
+										<goals>
+											<goal>jar</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.0.2</version>
+					<executions>
+						<execution>
+							<id>default-jar</id>
+							<phase>never</phase>
+							<configuration>
+								<finalName>unwanted</finalName>
+								<classifier>unwanted</classifier>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>io.onedev</groupId>
+				<artifactId>plugin-maven</artifactId>
+				<version>2.0.4</version>
+				<executions>
+					<execution>
+						<id>populate-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>populate-resources</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>package-artifacts</id>
+						<phase>package</phase>
+						<goals>
+							<goal>package-artifacts</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
@@ -142,12 +144,12 @@
 				</includes>
 			</resource>
 		</resources>
-    </build>  	
-    <modules> 
-        <module>server-core</module>
+	</build>
+	<modules>
+		<module>server-core</module>
 		<module>server-plugin</module>
-        <module>server-product</module>
-    </modules>  
+		<module>server-product</module>
+	</modules>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -250,7 +252,7 @@
 				<groupId>org.apache.wicket</groupId>
 				<artifactId>wicket-native-websocket-core</artifactId>
 				<version>${wicket.version}</version>
-			</dependency>			
+			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jersey.containers</groupId>
 				<artifactId>jersey-container-servlet</artifactId>
@@ -295,6 +297,11 @@
 				<groupId>org.ehcache</groupId>
 				<artifactId>ehcache</artifactId>
 				<version>3.8.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>oauth2-oidc-sdk</artifactId>
+				<version>3.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.zaxxer</groupId>
@@ -547,10 +554,10 @@
 				<version>${jgit.version}</version>
 			</dependency>
 			<dependency>
-		        <groupId>org.apache.sshd</groupId>
-		        <artifactId>sshd-core</artifactId>
-		        <version>2.2.0</version>
-		    </dependency>
+				<groupId>org.apache.sshd</groupId>
+				<artifactId>sshd-core</artifactId>
+				<version>2.2.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>

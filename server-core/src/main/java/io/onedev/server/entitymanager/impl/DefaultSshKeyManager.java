@@ -1,5 +1,8 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +11,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
 import org.slf4j.Logger;
@@ -24,6 +28,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.ssh.SshKeyUtils;
 
 @Singleton
 public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implements SshKeyManager {
@@ -46,32 +51,38 @@ public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implemen
     
     @Transactional
     @Override
-    public void syncSshKeys(User user, Collection<SshKey> sshKeys) {
-		Collection<SshKey> currentSshKeys = user.getSshKeys();
+    public void syncSshKeys(User user, Collection<String> sshKeys) {
+    	Map<String, SshKey> syncMap = new HashMap<>();
+    	for (String content: sshKeys) {
+    		try {
+    			PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
+    	        String digest = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, pubEntry);
+    			
+    	        SshKey sshKey = new SshKey();
+    	        sshKey.setDigest(digest);
+    	        sshKey.setContent(content);
+    	        sshKey.setOwner(user);
+    	        sshKey.setDate(new Date());
+    	        syncMap.put(content, sshKey);
+    		} catch (IOException | GeneralSecurityException e) {
+    			logger.error("Error parsing SSH key", e);
+    		}
+    	}
 
-		Map<String, SshKey> currentKeysMap = keysToMap(currentSshKeys);
-		Map<String, SshKey> keysMap = keysToMap(sshKeys);
-		MapDifference<String, SshKey> diff = Maps.difference(currentKeysMap, keysMap);
+    	Map<String, SshKey> currentMap = new HashMap<>();
+		user.getSshKeys().forEach(sshKey -> currentMap.put(sshKey.getContent(), sshKey));
 		
-		diff.entriesOnlyOnLeft().values().forEach((key) -> delete(key));
+		MapDifference<String, SshKey> diff = Maps.difference(currentMap, syncMap);
 		
-		diff.entriesOnlyOnRight().values().forEach((key) -> {
-			if (findByDigest(key.getDigest()) == null) {
-				key.setDate(new Date());
-				key.setOwner(user);
-				save(key);	
-			} else {
-				logger.warn("SSH key is already in use (digest: {})", key.getDigest());
-			}
+		diff.entriesOnlyOnLeft().values().forEach(sshKey -> delete(sshKey));
+		
+		diff.entriesOnlyOnRight().values().forEach(sshKey -> {
+			if (findByDigest(sshKey.getDigest()) == null) 
+				save(sshKey);	
+			else 
+				logger.warn("SSH key is already in use (digest: {})", sshKey.getDigest());
 		});
 		
     }
 
-	private Map<String, SshKey> keysToMap(Collection<SshKey> sshKeys) {
-		Map<String, SshKey> keysMap = new HashMap<String, SshKey>();
-		// use content as map key as we want to update key if key comment is changed
-		sshKeys.forEach((key) -> keysMap.put(key.getContent(), key));
-		return keysMap;
-	}
-	
 }

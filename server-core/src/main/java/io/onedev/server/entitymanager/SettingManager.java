@@ -17,6 +17,7 @@ import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface SettingManager extends EntityManager<Setting> {
@@ -129,5 +130,9 @@ public interface SettingManager extends EntityManager<Setting> {
     SshSetting getSshSetting();
 
     void saveSshSetting(SshSetting sshSetting);
-	
+
+    List<SsoConnector> getSsoConnectors();
+    
+    void saveSsoConnectors(List<SsoConnector> ssoConnectors);
+    
 }

@@ -41,6 +41,7 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.ssh.SshSettingPage;
+import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
@@ -109,11 +110,16 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof SecuritySettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("externelAuthentication"));
+		administrationContainer.add(item = new WebMarkupContainer("externalAuthentication"));
 		item.add(new ViewStateAwarePageLink<Void>("link", AuthenticatorPage.class));
 		if (getPage() instanceof AuthenticatorPage)
 			item.add(AttributeAppender.append("class", "active"));
 
+		administrationContainer.add(item = new WebMarkupContainer("sso"));
+		item.add(new ViewStateAwarePageLink<Void>("link", SsoConnectorListPage.class));
+		if (getPage() instanceof SsoConnectorListPage)
+			item.add(AttributeAppender.append("class", "active"));
+		
 	    administrationContainer.add(item = new WebMarkupContainer("sshSetting"));
 	    item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
 	    if (getPage() instanceof SshSettingPage)
@@ -203,7 +209,7 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MyAvatarPage.class));
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
-		
+				
 		signedInContainer.add(item = new WebMarkupContainer("myPassword"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MyPasswordPage.class));
 		if (getPage() instanceof MyPasswordPage)

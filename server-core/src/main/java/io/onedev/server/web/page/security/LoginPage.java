@@ -1,22 +1,34 @@
 package io.onedev.server.web.page.security;
 
+import static io.onedev.server.web.page.admin.sso.SsoProcessPage.MOUNTED_PATH;
+import static io.onedev.server.web.page.admin.sso.SsoProcessPage.STAGE_INITIATE;
+
+import java.util.List;
+
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.image.ExternalImage;
+import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.base.BasePage;
@@ -30,10 +42,18 @@ public class LoginPage extends BasePage {
 
 	private boolean rememberMe;
 	
+	private String errorMessage;
+	
 	public LoginPage(PageParameters params) {
 		super(params);
+		
 		if (SecurityUtils.getSubject().isAuthenticated())
 			throw new RestartResponseException(getApplication().getHomePage());
+	}
+	
+	public LoginPage(String errorMessage) {
+		super(new PageParameters());
+		this.errorMessage = errorMessage;
 	}
 	
 	@Override
@@ -48,7 +68,7 @@ public class LoginPage extends BasePage {
 			protected void onSubmit() {
 				super.onSubmit();
 				try {
-					WebSession.get().login(userName, password, rememberMe);
+					WebSession.get().login(new UsernamePasswordToken(userName, password, rememberMe));
 					continueToOriginalDestination();
 					setResponsePage(getApplication().getHomePage());
 				} catch (IncorrectCredentialsException e) {
@@ -61,6 +81,9 @@ public class LoginPage extends BasePage {
 			}
 			
 		};
+		
+		if (errorMessage != null) 
+			form.error(errorMessage);
 		
 		form.add(new TextField<String>("userName", new IModel<String>() {
 
@@ -126,8 +149,23 @@ public class LoginPage extends BasePage {
 			
 		});
 
-		boolean enableSelfRegister = OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister();
+		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+		
+		boolean enableSelfRegister = settingManager.getSecuritySetting().isEnableSelfRegister();
 		add(new ViewStateAwarePageLink<Void>("registerUser", RegisterPage.class).setVisible(enableSelfRegister));
+
+		String serverUrl = settingManager.getSystemSetting().getServerUrl();
+		
+		List<SsoConnector> ssoConnectors = settingManager.getSsoConnectors();
+		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
+		for (SsoConnector connector: ssoConnectors) {
+			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
+					Model.of(serverUrl + "/" + MOUNTED_PATH + "/" + STAGE_INITIATE + "/" + connector.getName()));
+			ssoButton.add(new ExternalImage("image", connector.getButtonImageUrl()));
+			ssoButton.add(new Label("label", "Login with " + connector.getName()));
+			ssoButtonsView.add(ssoButton);
+		}
+		add(ssoButtonsView.setVisible(!ssoConnectors.isEmpty()));
 	}
 
 	@Override
@@ -135,5 +173,5 @@ public class LoginPage extends BasePage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new LoginResourceReference()));
 	}
-
+	
 }

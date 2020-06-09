@@ -19,7 +19,10 @@ public class LogoutPage extends BasePage {
 		if (getLoginUser() != null || OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableAnonymousAccess())
 			getSession().warn("You've been logged out");
         
-        throw new RestartResponseException(getApplication().getHomePage());
+		if (OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableAnonymousAccess())
+			throw new RestartResponseException(getApplication().getHomePage());
+		else
+			throw new RestartResponseException(LoginPage.class);
 	}
 	
 }
