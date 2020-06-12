@@ -1,7 +1,9 @@
 package io.onedev.server.search.commit;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
@@ -43,4 +45,12 @@ public class MessageCriteria extends CommitCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		List<String> parts = new ArrayList<>();
+		for (String value: values) 
+			parts.add(getRuleName(CommitQueryLexer.MESSAGE) + parens(value));
+		return StringUtils.join(parts, " ");
+	}
+	
 }

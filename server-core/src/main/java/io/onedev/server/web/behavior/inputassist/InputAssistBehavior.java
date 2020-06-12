@@ -202,12 +202,16 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			} else if (dropdown != null) {
 				dropdown.close();
 			}
+			onInput(target, inputContent);
 		}
 	}
 	
 	public void close() {
 		if (dropdown != null)
 			dropdown.close();
+	}
+	
+	protected void onInput(AjaxRequestTarget target, String content) {
 	}
 	
 	@Override

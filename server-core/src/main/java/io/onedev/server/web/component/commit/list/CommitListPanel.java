@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -233,6 +234,8 @@ public abstract class CommitListPanel extends Panel {
 	
 	private Component saveQueryLink;
 	
+	private boolean querySubmitted = true;
+	
 	public CommitListPanel(String id, IModel<String> queryModel) {
 		super(id);
 		this.queryStringModel = queryModel;
@@ -267,6 +270,7 @@ public abstract class CommitListPanel extends Panel {
 		page = 1;
 		target.add(body);
 		target.add(foot);
+		querySubmitted = true;
 		target.appendJavaScript(renderCommitGraph());
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -305,7 +309,7 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(queryModel.getObject() != null);
+				setEnabled(querySubmitted && queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -315,11 +319,15 @@ public abstract class CommitListPanel extends Panel {
 				configure();
 				if (!isEnabled()) 
 					tag.put("disabled", "disabled");
+				if (!querySubmitted)
+					tag.put("title", "Query not submitted");
+				else if (queryModel.getObject() == null)
+					tag.put("title", "Can not save malformed query");
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
 		}.setOutputMarkupId(true));
@@ -332,7 +340,18 @@ public abstract class CommitListPanel extends Panel {
 				return getProject();
 			}
 			
-		}));
+		}) {
+			
+			@Override
+			protected void onInput(AjaxRequestTarget target, String inputContent) {
+				CommitListPanel.this.getFeedbackMessages().clear();
+				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
+						.equals(StringUtils.trimToEmpty(inputContent));
+				target.add(saveQueryLink);
+			}
+			
+		});
+		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 			
 			@Override

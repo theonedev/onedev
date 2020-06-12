@@ -1,7 +1,9 @@
 package io.onedev.server.search.commit;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
@@ -36,6 +38,14 @@ public class AfterCriteria extends CommitCriteria {
 				return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		List<String> parts = new ArrayList<>();
+		for (String value: values) 
+			parts.add(getRuleName(CommitQueryLexer.AFTER) + parens(value));
+		return StringUtils.join(parts, " ");
 	}
 
 }

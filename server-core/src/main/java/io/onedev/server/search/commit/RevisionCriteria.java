@@ -1,9 +1,11 @@
 package io.onedev.server.search.commit;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.base.Preconditions;
@@ -64,4 +66,12 @@ public class RevisionCriteria extends CommitCriteria {
 		}
 	}
 
+	@Override
+	public String toString() {
+		List<String> parts = new ArrayList<>();
+		for (Revision revision: revisions) 
+			parts.add(revision.toString());
+		return StringUtils.join(parts, " ");
+	}
+	
 }

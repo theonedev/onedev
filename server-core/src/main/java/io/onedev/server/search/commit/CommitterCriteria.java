@@ -1,5 +1,6 @@
 package io.onedev.server.search.commit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,4 +58,16 @@ public class CommitterCriteria extends CommitCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		List<String> parts = new ArrayList<>();
+		for (String value: values) {
+			if (value != null)
+				parts.add(getRuleName(CommitQueryLexer.COMMITTER) + parens(value));
+			else
+				parts.add(getRuleName(CommitQueryLexer.CommittedByMe));
+		}
+		return StringUtils.join(parts, " ");
+	}
+	
 }

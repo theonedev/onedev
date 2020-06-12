@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
+import io.onedev.commons.codeassist.AntlrUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
@@ -21,5 +23,13 @@ public abstract class CommitCriteria implements Serializable {
 	public abstract void fill(Project project, RevListCommand command);
 	
 	public abstract boolean matches(RefUpdated event);
+	
+	public static String getRuleName(int rule) {
+		return AntlrUtils.getLexerRuleName(CommitQueryLexer.ruleNames, rule).replace(' ', '-');
+	}
+	
+	public static String parens(String value) {
+		return "(" + StringUtils.escape(value, "()") + ")";
+	}
 	
 }

@@ -13,7 +13,7 @@ public class SaveQueryBean implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String name;
-
+	
 	@Editable(description="Specify name of the saved query")
 	@NotEmpty
 	@OmitName

@@ -12,23 +12,37 @@ public class Revision implements Serializable {
 	
 	private final String value;
 	
-	private Scope scope;
+	private final Scope scope;
+
+	private final String toString;
 	
-	public Revision(String value, @Nullable Scope scope) {
+	public Revision(String value, @Nullable Scope scope, @Nullable String toString) {
 		this.value = value;
 		this.scope = scope;
+		this.toString = toString;
 	}
 
+	public Revision(String value, @Nullable Scope scope) {
+		this(value, scope, null);
+	}
+	
 	public Scope getScope() {
 		return scope;
 	}
 
-	public void setScope(Scope scope) {
-		this.scope = scope;
-	}
-
 	public String getValue() {
 		return value;
+	}
+
+	@Override
+	public String toString() {
+		String toString = this.toString;
+		if (toString == null) {
+			toString = CommitCriteria.getRuleName(CommitQueryLexer.COMMIT) + "(" + value + ")";
+			if (scope != null)
+				toString = scope.name().toLowerCase() + " " + toString;
+		}
+		return toString;
 	}
 	
 }

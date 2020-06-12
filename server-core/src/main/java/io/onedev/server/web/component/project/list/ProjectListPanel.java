@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -99,6 +100,8 @@ public class ProjectListPanel extends Panel {
 	
 	private TextField<String> queryInput;
 	
+	private boolean querySubmitted = true;
+	
 	public ProjectListPanel(String id, IModel<String> queryModel, int expectedCount) {
 		super(id);
 		this.queryStringModel = queryModel;
@@ -129,6 +132,7 @@ public class ProjectListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		dataTable.setCurrentPage(0);
 		target.add(body);
+		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
 	}
@@ -170,7 +174,7 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(queryModel.getObject() != null);
+				setEnabled(querySubmitted && queryModel.getObject() != null);
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -180,11 +184,15 @@ public class ProjectListPanel extends Panel {
 				configure();
 				if (!isEnabled()) 
 					tag.put("disabled", "disabled");
+				if (!querySubmitted)
+					tag.put("title", "Query not submitted");
+				else if (queryModel.getObject() == null)
+					tag.put("title", "Can not save malformed query");
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target, queryStringModel.getObject());
+				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
 		});
@@ -236,7 +244,17 @@ public class ProjectListPanel extends Panel {
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.setOutputMarkupId(true);
-		queryInput.add(new ProjectQueryBehavior());
+		queryInput.add(new ProjectQueryBehavior() {
+
+			@Override
+			protected void onInput(AjaxRequestTarget target, String inputContent) {
+				ProjectListPanel.this.getFeedbackMessages().clear();
+				querySubmitted = StringUtils.trimToEmpty(queryStringModel.getObject())
+						.equals(StringUtils.trimToEmpty(inputContent));
+				target.add(saveQueryLink);
+			}
+			
+		});
 		
 		queryInput.add(new AjaxFormComponentUpdatingBehavior("clear") {
 			

@@ -1,9 +1,11 @@
 package io.onedev.server.search.commit;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -61,4 +63,12 @@ public class PathCriteria extends CommitCriteria {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		List<String> parts = new ArrayList<>();
+		for (String value: values) 
+			parts.add(getRuleName(CommitQueryLexer.PATH) + parens(value));
+		return StringUtils.join(parts, " ");
+	}
+	
 }
