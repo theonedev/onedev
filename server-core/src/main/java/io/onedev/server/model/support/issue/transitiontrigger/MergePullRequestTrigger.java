@@ -2,17 +2,17 @@ package io.onedev.server.model.support.issue.transitiontrigger;
 
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=300, name="Pull request is discarded")
-public class DiscardPullRequest extends PullRequestTrigger {
+@Editable(order=250, name="Pull request is merged")
+public class MergePullRequestTrigger extends PullRequestTrigger {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String getDescription() {
 		if (getBranches() != null)
-			return "Pull request to branches '" + getBranches() + "' is discarded";
+			return "Pull request to branches '" + getBranches() + "' is merged";
 		else
-			return "Pull request to any branch is discarded";
+			return "Pull request to any branch is merged";
 	}
 
 }

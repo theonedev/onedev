@@ -49,8 +49,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 			@Override
 			protected IssueCriteria load() {
 				try {
-					IssueQuery query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
-					return query.getCriteria();
+					return IssueQuery.parse(getProject(), queryString, true, true, false, false, false).getCriteria();
 				} catch (Exception e) {
 					return null;
 				}

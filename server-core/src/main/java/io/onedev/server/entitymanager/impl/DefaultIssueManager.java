@@ -201,7 +201,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	}
 
 	private Predicate[] getPredicates(@Nullable Project project, 
-			io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Root<Issue> root, 
+			@Nullable io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Root<Issue> root, 
 			CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {

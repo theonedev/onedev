@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -242,8 +243,9 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	}
 
-	private Predicate[] getPredicates(Project project, io.onedev.server.search.entity.EntityCriteria<CodeComment> criteria, 
-			PullRequest request, Root<CodeComment> root, CriteriaBuilder builder) {
+	private Predicate[] getPredicates(Project project, 
+			@Nullable io.onedev.server.search.entity.EntityCriteria<CodeComment> criteria, 
+			@Nullable PullRequest request, Root<CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) 
 			predicates.add(builder.equal(root.get(CodeComment.PROP_REQUEST), request));

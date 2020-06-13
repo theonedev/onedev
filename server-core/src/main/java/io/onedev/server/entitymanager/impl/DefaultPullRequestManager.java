@@ -975,7 +975,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	private Predicate[] getPredicates(@Nullable Project targetProject, 
-			io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
+			@Nullable io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
 			Root<PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {

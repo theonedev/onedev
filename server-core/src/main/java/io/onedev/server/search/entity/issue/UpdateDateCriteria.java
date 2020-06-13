@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.DateUtils;
 
 public class UpdateDateCriteria extends IssueCriteria {
 
@@ -27,6 +28,12 @@ public class UpdateDateCriteria extends IssueCriteria {
 		this.value = value;
 	}
 
+	public UpdateDateCriteria(Date date, int operator) {
+		this.date = date;
+		this.operator = operator;
+		this.value = DateUtils.formatDate(date);
+	}
+	
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<Date> attribute = IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);

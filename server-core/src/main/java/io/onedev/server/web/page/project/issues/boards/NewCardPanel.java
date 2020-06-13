@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.issues.boards;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -87,6 +89,7 @@ abstract class NewCardPanel extends Panel {
 		add(form);
 	}
 
+	@Nullable
 	protected abstract IssueCriteria getTemplate();
 	
 	protected abstract void onClose(AjaxRequestTarget target);

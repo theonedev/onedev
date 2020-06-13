@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -558,7 +559,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		return query;
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
+	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
 			Root<Project> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (!SecurityUtils.isAdministrator()) {
