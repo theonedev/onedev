@@ -57,8 +57,8 @@ public class IssueNotificationManager {
 	private final SettingManager settingManager;
 	
 	@Inject
-	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
-			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager, 
+	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager,
+			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager,
 			UserManager userManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
@@ -76,11 +76,11 @@ public class IssueNotificationManager {
 		User user = event.getUser();
 
 		String url;
-		if (event instanceof IssueCommented) 
+		if (event instanceof IssueCommented)
 			url = urlManager.urlFor(((IssueCommented)event).getComment());
 		else if (event instanceof IssueChangeEvent)
 			url = urlManager.urlFor(((IssueChangeEvent)event).getChange());
-		else 
+		else
 			url = urlManager.urlFor(issue);
 		
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
@@ -190,7 +190,7 @@ public class IssueNotificationManager {
 						String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 						String textBody = String.format("Visit %s for details", url);
 						
-						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), 
+						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()),
 								subject, htmlBody, textBody);
 						
 						issueWatchManager.watch(issue, mentionedUser, true);
@@ -198,13 +198,13 @@ public class IssueNotificationManager {
 					}
 				}
 			}
-		} 		
+		}
 		
 		boolean notifyWatchers = false;
 		if (event instanceof IssueChangeEvent) {
 			IssueChangeData changeData = ((IssueChangeEvent) event).getChange().getData();
 			if (!(changeData instanceof IssueReferencedFromCodeCommentData
-					|| changeData instanceof IssueReferencedFromIssueData 
+					|| changeData instanceof IssueReferencedFromIssueData
 					|| changeData instanceof IssueReferencedFromPullRequestData)) {
 				notifyWatchers = true;
 			}
@@ -217,8 +217,8 @@ public class IssueNotificationManager {
 			
 			for (IssueWatch watch: issue.getWatches()) {
 				Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
-				if (watch.isWatching() 
-						&& (visitDate == null || visitDate.before(event.getDate())) 
+				if (watch.isWatching()
+						&& (visitDate == null || visitDate.before(event.getDate()))
 						&& !notifiedUsers.contains(watch.getUser())) {
 					usersToNotify.add(watch.getUser());
 				}
@@ -226,17 +226,23 @@ public class IssueNotificationManager {
 
 			if (!usersToNotify.isEmpty()) {
 				String subject;
-				if (user != null) 
+				if (user != null)
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
-				else 
+				else
 					subject = event.getActivity(true);
+
 				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 				String textBody = String.format("Visit %s for details", url);
-				
-				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), 
+
+				if (event instanceof MarkdownAware) {
+					String markdown = ((MarkdownAware) event).getMarkdown();
+					htmlBody = String.format("<pre>%s</pre><p>%s</p>", markdown, htmlBody);
+					textBody = String.format("%s\n\n%s", markdown, textBody);
+				}
+
+				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()),
 						subject, htmlBody, textBody);
-			}			
+			}
 		}
 	}
-	
 }
