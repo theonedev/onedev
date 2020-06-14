@@ -70,7 +70,7 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 	public String getActivity(boolean withEntity) {
 		String activity = "opened";
 		if (withEntity)
-			activity += " issue " + getIssue().describe();
+			activity += " issue " + getIssue().getNumberAndTitle();
 		return activity;
 	}
 

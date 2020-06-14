@@ -679,7 +679,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		return new ProjectScopedNumber(getProject(), getNumber());
 	}
 	
-	public String describe() {
+	public String getNumberAndTitle() {
 		return "#" + getNumber() + " - " + getTitle();
 	}
 	

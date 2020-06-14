@@ -27,7 +27,7 @@ public class PullRequestUpdated extends PullRequestEvent {
 	public String getActivity(boolean withEntity) {
 		String activity = "Commits added";
 		if (withEntity)
-			activity += " in pull request " + getRequest().describe();
+			activity += " in pull request " + getRequest().getNumberAndTitle();
 		return activity;
 	}
 

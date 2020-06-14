@@ -35,7 +35,7 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	@Override
 	public String getActivity(Issue withIssue) {
 		if (withIssue != null)
-			return "Another issue referenced issue " + withIssue.describe();
+			return "Another issue referenced issue " + withIssue.getNumberAndTitle();
 		else
 			return "Referenced from other issue";
 	}

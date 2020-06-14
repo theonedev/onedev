@@ -24,7 +24,7 @@ public class PullRequestApproveData implements PullRequestChangeData {
 	public String getActivity(PullRequest withRequest) {
 		String activity = "approved";
 		if (withRequest != null)
-			activity += " pull request " + withRequest.describe();
+			activity += " pull request " + withRequest.getNumberAndTitle();
 		return activity;
 	}
 

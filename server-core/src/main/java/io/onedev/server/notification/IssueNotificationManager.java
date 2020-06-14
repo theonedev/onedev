@@ -40,7 +40,7 @@ import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MentionParser;
 
 @Singleton
-public class IssueNotificationManager {
+public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -146,15 +146,13 @@ public class IssueNotificationManager {
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
-			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.describe());
-			String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-			String textBody = String.format("Visit %s for details", url);
+			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.getNumberAndTitle());
 			Set<String> emails = entry.getValue().getMembers()
 					.stream()
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, subject, htmlBody, textBody);
+			mailManager.sendMailAsync(emails, subject, getHtmlBody(event, url), getTextBody(event, url));
 			
 			for (User member: entry.getValue().getMembers())
 				issueWatchManager.watch(issue, member, true);
@@ -162,15 +160,13 @@ public class IssueNotificationManager {
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
-			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.describe());
-			String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-			String textBody = String.format("Visit %s for details", url);
+			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.getNumberAndTitle());
 			Set<String> emails = entry.getValue()
 					.stream()
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, subject, htmlBody, textBody);
+			mailManager.sendMailAsync(emails, subject, getHtmlBody(event, url), getTextBody(event, url));
 			
 			for (User each: entry.getValue())
 				issueWatchManager.watch(issue, each, true);
@@ -186,12 +182,9 @@ public class IssueNotificationManager {
 				for (String userName: new MentionParser().parseMentions(rendered)) {
 					User mentionedUser = userManager.findByName(userName);
 					if (mentionedUser != null) {
-						String subject = String.format("You are mentioned in issue %s", issue.describe());
-						String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-						String textBody = String.format("Visit %s for details", url);
-						
+						String subject = String.format("You are mentioned in issue %s", issue.getNumberAndTitle());
 						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()),
-								subject, htmlBody, textBody);
+								subject, getHtmlBody(event, url), getTextBody(event, url));
 						
 						issueWatchManager.watch(issue, mentionedUser, true);
 						notifiedUsers.add(mentionedUser);
@@ -231,17 +224,8 @@ public class IssueNotificationManager {
 				else
 					subject = event.getActivity(true);
 
-				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				String textBody = String.format("Visit %s for details", url);
-
-				if (event instanceof MarkdownAware) {
-					String markdown = ((MarkdownAware) event).getMarkdown();
-					htmlBody = String.format("<pre>%s</pre><p>%s</p>", markdown, htmlBody);
-					textBody = String.format("%s\n\n%s", markdown, textBody);
-				}
-
 				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()),
-						subject, htmlBody, textBody);
+						subject, getHtmlBody(event, url), getTextBody(event, url));
 			}
 		}
 	}

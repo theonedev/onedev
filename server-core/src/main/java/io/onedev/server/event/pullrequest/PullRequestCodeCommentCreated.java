@@ -19,7 +19,7 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent i
 	public String getActivity(boolean withEntity) {
 		String activity = "created code comment"; 
 		if (withEntity)
-			activity += " in pull request " + getRequest().describe();
+			activity += " in pull request " + getRequest().getNumberAndTitle();
 		return activity;
 	}
 

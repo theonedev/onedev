@@ -31,7 +31,7 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 	@Override
 	public String getActivity(Issue withIssue) {
 		if (withIssue != null)
-			return "A code comment referenced issue " + withIssue.describe();
+			return "A code comment referenced issue " + withIssue.getNumberAndTitle();
 		else
 			return "Referenced from code comment";
 	}

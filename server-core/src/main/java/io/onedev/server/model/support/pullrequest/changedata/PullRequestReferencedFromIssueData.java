@@ -30,7 +30,7 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 	@Override
 	public String getActivity(PullRequest withRequest) {
 		if (withRequest != null)
-			return "An issue referenced pull request " + withRequest.describe();
+			return "An issue referenced pull request " + withRequest.getNumberAndTitle();
 		else
 			return "Referenced from issue";
 	}

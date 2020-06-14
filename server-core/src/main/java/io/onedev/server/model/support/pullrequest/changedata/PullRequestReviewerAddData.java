@@ -20,7 +20,7 @@ public class PullRequestReviewerAddData implements PullRequestChangeData {
 	public String getActivity(PullRequest withRequest) {
 		String activity = "added reviewer \"" + reviewer + "\"";
 		if (withRequest != null)
-			activity += " in pull request " + withRequest.describe();
+			activity += " in pull request " + withRequest.getNumberAndTitle();
 		return activity;
 	}
 

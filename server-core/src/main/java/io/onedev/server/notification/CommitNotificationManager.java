@@ -26,7 +26,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.commit.CommitQuery;
 
 @Singleton
-public class CommitNotificationManager {
+public class CommitNotificationManager extends AbstractNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(CommitNotificationManager.class);
 	
@@ -40,7 +40,8 @@ public class CommitNotificationManager {
 		this.urlManager = urlManager;
 	}
 
-	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, User user, @Nullable NamedQuery query) {
+	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 
+			User user, @Nullable NamedQuery query) {
 		if (query != null) {
 			Collection<String> value = subscribedQueryStrings.get(user);
 			if (value == null) {
@@ -58,10 +59,14 @@ public class CommitNotificationManager {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 			for (CommitQuerySetting setting: project.getUserCommitQuerySettings()) {
-				for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions())
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(project.getNamedCommitQueries(), name));
-				for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) 
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(setting.getUserQueries(), name));
+				for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
+							NamedQuery.find(project.getNamedCommitQueries(), name));
+				}
+				for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) { 
+					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
+							NamedQuery.find(setting.getUserQueries(), name));
+				}
 			}
 			
 			Collection<String> notifyEmails = new HashSet<>();
@@ -75,7 +80,8 @@ public class CommitNotificationManager {
 							break;
 						}
 					} catch (Exception e) {
-						String message = String.format("Error processing commit subscription (user: %s, project: %s, commit: %s, query: %s)", 
+						String message = String.format("Error processing commit subscription "
+								+ "(user: %s, project: %s, commit: %s, query: %s)", 
 								user.getName(), project.getName(), event.getNewCommitId().name(), queryString);
 						logger.error(message, e);
 					} finally {
@@ -86,11 +92,11 @@ public class CommitNotificationManager {
 			
 			RevCommit commit = project.getRevCommit(event.getNewCommitId(), false);
 			if (commit != null) {
-				String subject = String.format("Subscribed commit at ref '%s': %s", event.getRefName(), commit.getShortMessage());
+				String subject = String.format("Subscribed commit at ref '%s': %s", 
+						event.getRefName(), commit.getShortMessage());
 				String url = urlManager.urlFor(project, commit);
-				String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				String textBody = String.format("Visit %s for details", url);
-				mailManager.sendMailAsync(notifyEmails, subject, htmlBody, textBody);
+				mailManager.sendMailAsync(notifyEmails, subject, 
+						getHtmlBody(event, url), getTextBody(event, url));
 			}
 		}
 	}

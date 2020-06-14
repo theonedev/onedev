@@ -73,7 +73,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 	public String getActivity(Issue withIssue) {
 		String activity = "changed fields";
 		if (withIssue != null)
-			activity += " of issue " + withIssue.describe();
+			activity += " of issue " + withIssue.getNumberAndTitle();
 		return activity;
 	}
 

@@ -25,7 +25,7 @@ public class PullRequestMergeData implements PullRequestChangeData {
 		} else {
 			String activity = "merged";
 			if (withRequest != null)
-				activity += " pull request " + withRequest.describe();
+				activity += " pull request " + withRequest.getNumberAndTitle();
 			return activity;
 		}
 	}

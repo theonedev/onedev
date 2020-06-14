@@ -25,7 +25,7 @@ public class PullRequestTitleChangeData implements PullRequestChangeData {
 	public String getActivity(PullRequest withRequest) {
 		String activity = "changed title";
 		if (withRequest != null)
-			activity += " of pull request " + withRequest.describe();
+			activity += " of pull request " + withRequest.getNumberAndTitle();
 		return activity;
 	}
 

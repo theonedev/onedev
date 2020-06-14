@@ -116,7 +116,7 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	public String getActivity(Issue withIssue) {
 		String activity = "batch edited";
 		if (withIssue != null)
-			activity += " issue " + withIssue.describe();
+			activity += " issue " + withIssue.getNumberAndTitle();
 		return activity;
 	}
 	

@@ -26,7 +26,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.build.BuildQuery;
 
 @Singleton
-public class BuildNotificationManager {
+public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BuildNotificationManager.class);
 	
@@ -69,9 +69,7 @@ public class BuildNotificationManager {
 					build.getNumber(), build.getStatus().getDisplayName().toLowerCase());
 		}
 		String url = urlManager.urlFor(build);
-		String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-		String textBody = String.format("Visit %s for details", url);
-		mailManager.sendMailAsync(emails, subject, htmlBody, textBody);
+		mailManager.sendMailAsync(emails, subject, getHtmlBody(null, url), getTextBody(null, url));
 	}
 	
 	@Sessional

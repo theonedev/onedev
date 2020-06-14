@@ -26,7 +26,7 @@ public class PullRequestMergeStrategyChangeData implements PullRequestChangeData
 	public String getActivity(PullRequest withRequest) {
 		String activity = "changed merge strategy";
 		if (withRequest != null)
-			activity += " of pull request" + withRequest.describe();
+			activity += " of pull request" + withRequest.getNumberAndTitle();
 		return activity;
 	}
 

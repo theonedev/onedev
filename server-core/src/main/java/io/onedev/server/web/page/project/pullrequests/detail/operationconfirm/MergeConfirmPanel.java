@@ -55,10 +55,10 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 		MergePreview mergePreview = getPullRequest().getMergePreview();
 		boolean needMergeCommit = false;
 		if (mergeStrategy == CREATE_MERGE_COMMIT) { 
-			bean.setSummary("Merge pull request " + request.describe());
+			bean.setSummary("Merge pull request " + request.getNumberAndTitle());
 			needMergeCommit = true;
 		} else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) {
-			bean.setSummary("Pull request " + request.describe());
+			bean.setSummary("Pull request " + request.getNumberAndTitle());
 			needMergeCommit = true;
 		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
 			description = "Source branch commits will be rebased onto target branch";
@@ -67,7 +67,7 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 			description = "Source branch commits will be fast-forwarded to target branch";
 			needMergeCommit = false;
 		} else {
-			bean.setSummary("Merge pull request " + request.describe());
+			bean.setSummary("Merge pull request " + request.getNumberAndTitle());
 			needMergeCommit = true;
 		}
 		

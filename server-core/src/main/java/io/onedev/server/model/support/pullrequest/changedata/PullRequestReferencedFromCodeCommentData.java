@@ -30,7 +30,7 @@ public class PullRequestReferencedFromCodeCommentData implements PullRequestChan
 	@Override
 	public String getActivity(PullRequest withRequest) {
 		if (withRequest != null)
-			return "A code comment referenced pull request " + withRequest.describe();
+			return "A code comment referenced pull request " + withRequest.getNumberAndTitle();
 		else
 			return "Referenced from code comment";
 	}

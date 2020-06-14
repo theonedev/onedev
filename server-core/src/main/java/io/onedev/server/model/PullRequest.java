@@ -1090,7 +1090,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		}
 	}
 	
-	public String describe() {
+	public String getNumberAndTitle() {
 		return "#" + getNumber() + " - " + getTitle();
 	}
 	

@@ -710,7 +710,7 @@ public abstract class IssueListPanel extends Panel {
 					
 				}.setEscapeModelStrings(false).setOutputMarkupId(true));
 				
-				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.describe())));
+				fragment.add(new CopyToClipboardLink("copy", Model.of(issue.getNumberAndTitle())));
 				
 				fragment.add(new Label("votes", issue.getVoteCount()));
 				fragment.add(new Label("comments", issue.getCommentCount()));

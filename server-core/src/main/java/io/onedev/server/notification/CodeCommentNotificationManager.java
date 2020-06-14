@@ -18,7 +18,7 @@ import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MentionParser;
 
 @Singleton
-public class CodeCommentNotificationManager {
+public class CodeCommentNotificationManager extends AbstractNotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -59,10 +59,8 @@ public class CodeCommentNotificationManager {
 					if (url != null) {
 						String subject = String.format("You are mentioned in a code comment on file '%s'", 
 								event.getComment().getMark().getPath());
-						String htmlBody = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-						String textBody = String.format("Visit %s for details", url);
-						
-						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, htmlBody, textBody);
+						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, 
+								getHtmlBody(event, url), getTextBody(event, url));
 					}
 				}
 			}

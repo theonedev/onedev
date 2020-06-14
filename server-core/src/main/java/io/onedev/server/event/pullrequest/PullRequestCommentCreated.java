@@ -25,7 +25,7 @@ public class PullRequestCommentCreated extends PullRequestEvent implements Markd
 	public String getActivity(boolean withEntity) {
 		String activity = "commented";
 		if (withEntity)
-			activity += " on pull request " + getRequest().describe();
+			activity += " on pull request " + getRequest().getNumberAndTitle();
 		return activity;
 	}
 

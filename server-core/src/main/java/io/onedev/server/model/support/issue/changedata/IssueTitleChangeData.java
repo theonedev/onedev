@@ -39,7 +39,7 @@ public class IssueTitleChangeData implements IssueChangeData {
 	public String getActivity(Issue withIssue) {
 		String activity = "changed title";
 		if (withIssue != null)
-			activity += " of issue " + withIssue.describe();
+			activity += " of issue " + withIssue.getNumberAndTitle();
 		return activity;
 	}
 

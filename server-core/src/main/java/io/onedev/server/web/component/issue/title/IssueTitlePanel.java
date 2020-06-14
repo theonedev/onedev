@@ -143,7 +143,7 @@ public abstract class IssueTitlePanel extends Panel {
 			}
 			
 		});
-		titleViewer.add(new CopyToClipboardLink("copy", Model.of(getIssue().describe())));
+		titleViewer.add(new CopyToClipboardLink("copy", Model.of(getIssue().getNumberAndTitle())));
 		
 		if (withIssueCreation) {
 			titleViewer.add(new BookmarkablePageLink<Void>("create", NewIssuePage.class) {

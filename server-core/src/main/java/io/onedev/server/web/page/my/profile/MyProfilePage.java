@@ -7,6 +7,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.model.User;
+import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.profileedit.ProfileEditPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.my.MyPage;
@@ -22,7 +23,7 @@ public class MyProfilePage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("externalManagedNote", "Profile of this user is managed from " + getLoginUser().getAuthSource())
+		add(new Label("externalManagedNote", "Your profile is managed from " + getLoginUser().getAuthSource())
 				.setVisible(getLoginUser().isExternalManaged()));
 		
 		if (getLoginUser().isExternalManaged()) { 
@@ -37,6 +38,16 @@ public class MyProfilePage extends MyPage {
 				
 			}));
 		}
+		
+		add(new UserDeleteLink("delete") {
+
+			@Override
+			protected User getUser() {
+				return getLoginUser();
+			}
+			
+		}.setVisible(getLoginUser().isExternalManaged()));
+		
 	}
 
 }

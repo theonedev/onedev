@@ -97,7 +97,7 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	public String getActivity(Issue withIssue) {
 		String activity = "changed state to '" + newState + "'";
 		if (withIssue != null)
-			activity += " for issue " + withIssue.describe();
+			activity += " for issue " + withIssue.getNumberAndTitle();
 		return activity;
 	}
 	

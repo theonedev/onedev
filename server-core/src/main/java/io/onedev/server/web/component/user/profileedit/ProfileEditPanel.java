@@ -5,24 +5,19 @@ import java.io.Serializable;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.flow.RedirectToUrlException;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
-import io.onedev.server.web.WebSession;
+import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.admin.user.UserListPage;
-import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public class ProfileEditPanel extends GenericPanel<User> {
@@ -93,29 +88,14 @@ public class ProfileEditPanel extends GenericPanel<User> {
 		
 		form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
 		
-		form.add(new Link<Void>("delete") {
+		form.add(new UserDeleteLink("delete") {
 
 			@Override
-			public void onClick() {
-				OneDev.getInstance(UserManager.class).delete(getUser());
-				Session.get().success("User '" + getUser().getDisplayName() + "' deleted");
-				
-				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(User.class);
-				if (redirectUrlAfterDelete != null)
-					throw new RedirectToUrlException(redirectUrlAfterDelete);
-				else
-					setResponsePage(UserListPage.class);
+			protected User getUser() {
+				return ProfileEditPanel.this.getUser();
 			}
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator() 
-						&& !getUser().isRoot() 
-						&& !getUser().equals(SecurityUtils.getUser()));
-			}
-
-		}.add(new ConfirmClickModifier("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));
+		});
 
 		add(form);
 	}

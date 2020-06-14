@@ -28,7 +28,7 @@ public class PullRequestVerificationEvent extends PullRequestEvent {
 			activity = "build #" + build.getNumber();
 		activity += " is " + build.getStatus().getDisplayName();
 		if (withEntity)
-			activity += " for pull request " + verification.getRequest().describe();
+			activity += " for pull request " + verification.getRequest().getNumberAndTitle();
 		return activity;
 	}
 

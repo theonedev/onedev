@@ -24,7 +24,7 @@ public class PullRequestRequestedForChangesData implements PullRequestChangeData
 	public String getActivity(PullRequest withRequest) {
 		String activity = "requested for changes";
 		if (withRequest != null)
-			activity += " in pull request " + withRequest.describe();
+			activity += " in pull request " + withRequest.getNumberAndTitle();
 		return activity;
 	}
 

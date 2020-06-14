@@ -24,7 +24,7 @@ public class PullRequestSourceBranchDeleteData implements PullRequestChangeData 
 	public String getActivity(PullRequest withRequest) {
 		String activity = "deleted source branch";
 		if (withRequest != null)
-			activity += " of pull request " + withRequest.describe();
+			activity += " of pull request " + withRequest.getNumberAndTitle();
 		return activity;
 	}
 

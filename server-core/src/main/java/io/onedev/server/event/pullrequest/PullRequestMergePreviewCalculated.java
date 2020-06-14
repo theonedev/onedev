@@ -14,7 +14,7 @@ public class PullRequestMergePreviewCalculated extends PullRequestEvent {
 	public String getActivity(boolean withEntity) {
 		String activity = "Merge preview calculated";
 		if (withEntity)
-			activity += " in pull request " + getRequest().describe();
+			activity += " in pull request " + getRequest().getNumberAndTitle();
 		return activity;
 	}
 
