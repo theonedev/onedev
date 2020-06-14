@@ -1,0 +1,22 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Common rules
+[*]
+charset = utf-8
+# Unix-style newlines with a newline ending every file
+end_of_line = lf
+
+# Source files
+[*.{java,css,js,html,xml}]
+indent_style = tab
+# Keep whitespaces
+trim_trailing_whitespace = false
+
+# YAML files
+[*.yml]
+# Use tab indentation for YAML files as the format requires it
+indent_style = tab
+indent_size = 2
