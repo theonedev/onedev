@@ -231,23 +231,25 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			});
 		}
 		
-		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, ProjectIssueListPage.class, 
-				ProjectIssuesPage.class, IssueDetailPage.class, NewIssuePage.class) {
-
-			@Override
-			public Component render(String componentId) {
-				return new ProjectTabLink(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, 
-								pageClass, ProjectIssueListPage.paramsOf(getProject(), 0));
-					}
-					
-				};
-			}
-			
-		});
+		if (getProject().isIssueManagementEnabled()) {
+			tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, ProjectIssueListPage.class,
+					ProjectIssuesPage.class, IssueDetailPage.class, NewIssuePage.class) {
+				
+				@Override
+				public Component render(String componentId) {
+					return new ProjectTabLink(componentId, this) {
+						
+						@Override
+						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+							return new ViewStateAwarePageLink<Void>(linkId,
+									pageClass, ProjectIssueListPage.paramsOf(getProject(), 0));
+						}
+						
+					};
+				}
+				
+			});
+		}
 		
 		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-play-circle", 0, ProjectBuildsPage.class, 
 				BuildDetailPage.class, InvalidBuildPage.class) {

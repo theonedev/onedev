@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -459,7 +461,12 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						protected Collection<Project> load() {
-							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject());
+							Collection<Project> projects = OneDev.getInstance(ProjectManager.class)
+									.getPermittedProjects(new AccessProject());
+							
+							Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagementEnabled();
+							CollectionUtils.filter(projects, issueManagementEnabledPredicate);
+							return projects;
 						}
 						
 					}) {
