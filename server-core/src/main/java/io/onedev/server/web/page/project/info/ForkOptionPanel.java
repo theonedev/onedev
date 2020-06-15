@@ -39,8 +39,9 @@ abstract class ForkOptionPanel extends Panel {
 		Project project = new Project();
 		project.setForkedFrom(getProject());
 		project.setName(getProject().getName() + "." + SecurityUtils.getUser().getName());
+		project.setIssueManagementEnabled(false);
 		
-		Collection<String> properties = Sets.newHashSet("name", "description");
+		Collection<String> properties = Sets.newHashSet("name", "description", "issueManagementEnabled");
 		
 		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
 		

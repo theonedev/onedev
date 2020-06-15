@@ -34,7 +34,7 @@ public class NewProjectPage extends LayoutPage {
 		
 		Project project = new Project();
 		
-		Collection<String> properties = Sets.newHashSet("name", "description");
+		Collection<String> properties = Sets.newHashSet("name", "description", "issueManagementEnabled");
 		
 		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
 		
