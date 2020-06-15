@@ -43,7 +43,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 		
 		add(new Label("help", "Git repository of this project is stored at: " + getProject().getGitDir()));
 		
-		Collection<String> properties = Sets.newHashSet("name", "description");
+		Collection<String> properties = Sets.newHashSet("name", "description", "issueManagementEnabled");
 		
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 

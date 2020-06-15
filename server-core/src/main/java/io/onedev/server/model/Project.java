@@ -256,6 +256,9 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
+	@Column
+	private boolean issueManagementEnabled = true;
+	
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
@@ -993,7 +996,16 @@ public class Project extends AbstractEntity {
 	public void setCodeComments(Collection<CodeComment> codeComments) {
 		this.codeComments = codeComments;
 	}
-
+	
+	@Editable(order=300, name="Issue management", description="Whether or not to provide issue management for the project")
+	public boolean isIssueManagementEnabled() {
+		return issueManagementEnabled;
+	}
+	
+	public void setIssueManagementEnabled(boolean issueManagementEnabled) {
+		this.issueManagementEnabled = issueManagementEnabled;
+	}
+	
 	public ProjectIssueSetting getIssueSetting() {
 		return issueSetting;
 	}
