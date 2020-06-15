@@ -38,6 +38,7 @@ import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.sso.SsoProcessPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
+import io.onedev.server.web.page.admin.user.accesstoken.UserAccessTokenPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
@@ -48,6 +49,7 @@ import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.issues.IssueListPage;
+import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
@@ -126,6 +128,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("my/avatar", MyAvatarPage.class));
 		add(new OnePageMapper("my/password", MyPasswordPage.class));
 		add(new OnePageMapper("my/ssh-keys", MySshKeysPage.class));
+		add(new OnePageMapper("my/access-token", MyAccessTokenPage.class));
 	}
 
 	private void addResources() {
@@ -157,6 +160,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/users/${user}/avatar", UserAvatarPage.class));
 		add(new OnePageMapper("administration/users/${user}/password", UserPasswordPage.class));
 		add(new OnePageMapper("administration/users/${user}/ssh-keys", UserSshKeysPage.class));
+		add(new OnePageMapper("administration/users/${user}/access-token", UserAccessTokenPage.class));
 		
 		add(new OnePageMapper("administration/roles", RoleListPage.class));
 		add(new OnePageMapper("administration/roles/new", NewRolePage.class));

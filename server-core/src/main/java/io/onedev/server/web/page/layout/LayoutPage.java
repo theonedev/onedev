@@ -48,6 +48,7 @@ import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.MyPage;
+import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.password.MyPasswordPage;
 import io.onedev.server.web.page.my.profile.MyProfilePage;
@@ -218,6 +219,11 @@ public abstract class LayoutPage extends BasePage {
 		signedInContainer.add(item = new WebMarkupContainer("mySshKeys"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
+		    item.add(AttributeAppender.append("class", "active"));
+		
+		signedInContainer.add(item = new WebMarkupContainer("myAccessToken"));
+		item.add(new ViewStateAwarePageLink<Void>("link", MyAccessTokenPage.class));
+		if (getPage() instanceof MyAccessTokenPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
 		PrincipalCollection prevPrincipals = SecurityUtils.getSubject().getPreviousPrincipals();

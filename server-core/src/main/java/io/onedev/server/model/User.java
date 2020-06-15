@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.model.User.PROP_EMAIL;
 import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
+import static io.onedev.server.model.User.PROP_ACCESS_TOKEN;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +23,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -58,13 +60,15 @@ import io.onedev.server.web.editable.annotation.Password;
 @Table(
 		indexes={@Index(columnList=PROP_NAME), @Index(columnList=PROP_EMAIL), 
 				@Index(columnList=PROP_FULL_NAME), @Index(columnList=SsoInfo.COLUMN_CONNECTOR), 
-				@Index(columnList=SsoInfo.COLUMN_SUBJECT)}, 
+				@Index(columnList=SsoInfo.COLUMN_SUBJECT), @Index(columnList=PROP_ACCESS_TOKEN)}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={SsoInfo.COLUMN_CONNECTOR, SsoInfo.COLUMN_SUBJECT})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final int ACCESS_TOKEN_LEN = 20;
 	
 	public static final Long SYSTEM_ID = -1L;
 	
@@ -81,6 +85,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	public static final String PROP_FULL_NAME = "fullName";
 	
 	public static final String PROP_SSO_INFO = "ssoInfo";
+	
+	public static final String PROP_ACCESS_TOKEN = "accessToken";
 	
 	public static final String AUTH_SOURCE_BUILTIN_USER_STORE = "Builtin User Store";
 	
@@ -111,6 +117,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
 	private String email;
+	
+	@Column(unique=true, nullable=false)
+	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -439,6 +448,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.ssoInfo = ssoInfo;
 	}
 
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
+	}
+
 	@Editable(order=300)
 	@NotEmpty
 	@Email
@@ -551,7 +568,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public void setSshKeys(Collection<SshKey> sshKeys) {
         this.sshKeys = sshKeys;
     }
-
+    
     public boolean isSshKeyExternalManaged() {
     	if (isExternalManaged()) {
     		if (getSsoInfo() != null) {

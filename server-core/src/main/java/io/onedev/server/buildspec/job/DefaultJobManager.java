@@ -33,7 +33,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
@@ -133,8 +132,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final BuildParamManager buildParamManager;
 	
-	private final PasswordService passwordService;
-
 	private final Validator validator;
 	
 	private volatile List<JobExecutor> jobExecutors;
@@ -145,7 +142,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
-			ProjectManager projectManager, PasswordService passwordService, Validator validator) {
+			ProjectManager projectManager, Validator validator) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -156,7 +153,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.sessionManager = sessionManager;
 		this.buildParamManager = buildParamManager;
 		this.projectManager = projectManager;
-		this.passwordService = passwordService;
 		this.validator = validator;
 	}
 
@@ -278,17 +274,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						throw new OneException("Unable to find dependency project: " + dependency.getProjectName());
 	
 					Subject subject;
-					if (dependency.getAuthentication() != null) {
-						String userName = dependency.getAuthentication().getUserName();
-						User user = userManager.findByName(userName);
+					if (dependency.getAccessTokenSecret() != null) {
+						String accessToken = build.getSecretValue(dependency.getAccessTokenSecret());
+						User user = userManager.findByAccessToken(accessToken);
 						if (user == null) {
 							throw new OneException("Unable to access dependency project '" 
-									+ dependency.getProjectName() + "': user not found");
-						}
-						String password = build.getSecretValue(dependency.getAuthentication().getPasswordSecret());
-						if (!passwordService.passwordsMatch(password, user.getPassword())) {
-							throw new OneException("Unable to access dependency project '" 
-									+ dependency.getProjectName() + "': password incorrect");
+									+ dependency.getProjectName() + "': invalid access token");
 						}
 						subject = user.asSubject();
 					} else {
@@ -919,7 +910,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Override
 	public boolean canPullCode(HttpServletRequest request, Project project) {
-		String jobToken = request.getHeader(JOB_TOKEN_HTTP_HEADER);
+		String jobToken = Job.getToken(request);
 		if (jobToken != null) {
 			JobContext context = getJobContext(jobToken, false);					
 			if (context != null)

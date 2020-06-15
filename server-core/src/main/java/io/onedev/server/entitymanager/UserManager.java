@@ -60,6 +60,9 @@ public interface UserManager extends EntityManager<User> {
 	@Nullable 
 	User findBySsoInfo(SsoInfo ssoInfo);
 	
+	@Nullable
+	User findByAccessToken(String accessToken);
+	
 	/**
 	 * Find user of specified name.
 	 * <p>

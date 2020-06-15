@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
@@ -25,6 +28,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
@@ -505,4 +509,13 @@ public class Job implements Serializable, Validatable {
 		return choices;
 	}
 
+	@Nullable
+	public static String getToken(HttpServletRequest request) {
+		String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (bearer != null && bearer.startsWith(KubernetesHelper.BEARER + " "))
+			return bearer.substring(KubernetesHelper.BEARER.length() + 1);
+		else
+			return null;
+	}
+	
 }

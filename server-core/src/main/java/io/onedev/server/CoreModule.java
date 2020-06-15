@@ -111,13 +111,13 @@ import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
-import io.onedev.server.entitymanager.PullRequestVerificationManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.entitymanager.PullRequestVerificationManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -146,13 +146,13 @@ import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
 import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
 import io.onedev.server.entitymanager.impl.DefaultProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestAssignmentManager;
-import io.onedev.server.entitymanager.impl.DefaultPullRequestVerificationManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestQuerySettingManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestReviewManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestUpdateManager;
+import io.onedev.server.entitymanager.impl.DefaultPullRequestVerificationManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultRoleManager;
 import io.onedev.server.entitymanager.impl.DefaultSettingManager;
@@ -219,14 +219,15 @@ import io.onedev.server.search.code.DefaultSearchManager;
 import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.security.BasicAuthenticationFilter;
+import io.onedev.server.security.BearerAuthenticationFilter;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.FilterChainConfigurator;
-import io.onedev.server.security.OneAuthorizingRealm;
 import io.onedev.server.security.OneFilterChainResolver;
 import io.onedev.server.security.OnePasswordService;
 import io.onedev.server.security.OneRememberMeManager;
 import io.onedev.server.security.OneWebSecurityManager;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.DefaultKeyPairProvider;
 import io.onedev.server.ssh.DefaultSshAuthenticator;
 import io.onedev.server.ssh.SshAuthenticator;
@@ -501,11 +502,13 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configureSecurity() {
-		bind(Realm.class).to(OneAuthorizingRealm.class);
+		contributeFromPackage(Realm.class, AbstractAuthorizingRealm.class);
+		
 		bind(RememberMeManager.class).to(OneRememberMeManager.class);
 		bind(WebSecurityManager.class).to(OneWebSecurityManager.class);
 		bind(FilterChainResolver.class).to(OneFilterChainResolver.class);
 		bind(BasicAuthenticationFilter.class);
+		bind(BearerAuthenticationFilter.class);
 		bind(PasswordService.class).to(OnePasswordService.class);
 		bind(ShiroFilter.class);
 		install(new ShiroAopModule());
@@ -513,9 +516,9 @@ public class CoreModule extends AbstractPluginModule {
 
             @Override
             public void configure(FilterChainManager filterChainManager) {
-                filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic");
-                filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic");
-                filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic");
+                filterChainManager.createChain("/**/info/refs", "noSessionCreation, authcBasic, authcBearer");
+                filterChainManager.createChain("/**/git-upload-pack", "noSessionCreation, authcBasic, authcBearer");
+                filterChainManager.createChain("/**/git-receive-pack", "noSessionCreation, authcBasic, authcBearer");
             }
             
         });

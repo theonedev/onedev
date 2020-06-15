@@ -28,6 +28,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.user.accesstoken.UserAccessTokenPage;
 import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
 import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
@@ -97,6 +98,7 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
 		tabs.add(new UserTab("SSH Keys", "fa fa-fw fa-shield", UserSshKeysPage.class));
+		tabs.add(new UserTab("Access Token", "fa fa-fw fa-ticket", UserAccessTokenPage.class));
 		
 		return tabs;
 	}

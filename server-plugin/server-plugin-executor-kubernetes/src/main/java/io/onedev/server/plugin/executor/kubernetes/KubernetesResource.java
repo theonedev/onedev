@@ -31,6 +31,7 @@ import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneException;
+import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 
@@ -119,18 +120,19 @@ public class KubernetesResource {
 	@GET
 	@Path("/test")
 	public Response test() {
-		String jobToken = request.getHeader(JobManager.JOB_TOKEN_HTTP_HEADER);
+		String jobToken = Job.getToken(request);
 		if (TEST_JOB_TOKEN.equals(jobToken))
 			return Response.ok().build();
-		else
-			return Response.status(400).entity("Invalid or no job token").build();
+		else 
+			return Response.status(400).entity("Invalid or missing job token").build();
 	}
 	
 	private String getJobToken() {
-		String jobToken = request.getHeader(JobManager.JOB_TOKEN_HTTP_HEADER);
-		if (jobToken == null)
-			throw new OneException("Http header '" + JobManager.JOB_TOKEN_HTTP_HEADER + "' is expected");
-		return jobToken;
+		String jobToken = Job.getToken(request);
+		if (jobToken != null)
+			return jobToken;
+		else
+			throw new OneException("Job token is expected");
 	}
 	
 }

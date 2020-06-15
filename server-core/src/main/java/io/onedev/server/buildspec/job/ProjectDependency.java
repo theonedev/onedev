@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.job;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -33,13 +34,13 @@ public class ProjectDependency implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private Authentication authentication;
-	
 	private String projectName;
 
 	private String buildNumber;
 	
 	private String artifacts = "**";
+	
+	private String accessTokenSecret;
 	
 	// change Named("projectName") also if change name of this property 
 	@Editable(order=200, name="Project", description="Specify project to retrieve artifacts from")
@@ -131,15 +132,22 @@ public class ProjectDependency implements Serializable {
 		return new ArrayList<>();
 	}
 
-	@Editable(order=500, description="Optionally authenticate to specified project. If not specified, "
-			+ "project artifacts will be accessed anonymously")
+	@Editable(order=500, description="Specify a secret to be used as access token to retrieve artifacts "
+			+ "from specified project. If not specified, project artifacts will be accessed anonymously")
+	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Nullable
-	public Authentication getAuthentication() {
-		return authentication;
+	public String getAccessTokenSecret() {
+		return accessTokenSecret;
 	}
 
-	public void setAuthentication(Authentication authentication) {
-		this.authentication = authentication;
+	public void setAccessTokenSecret(String accessTokenSecret) {
+		this.accessTokenSecret = accessTokenSecret;
 	}
-
+	
+	@SuppressWarnings("unused")
+	private static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getBuildSetting().getJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
+	}
+	
 }

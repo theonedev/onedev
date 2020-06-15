@@ -225,6 +225,15 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 
 	@Sessional
     @Override
+    public User findByAccessToken(String accessToken) {
+		EntityCriteria<User> criteria = newCriteria();
+		criteria.add(Restrictions.eq(User.PROP_ACCESS_TOKEN, accessToken));
+		criteria.setCacheable(true);
+		return find(criteria);
+    }
+	
+	@Sessional
+    @Override
     public User findBySsoInfo(SsoInfo ssoInfo) {
 		EntityCriteria<User> criteria = newCriteria();
 		criteria.add(Restrictions.eq(User.PROP_SSO_INFO + "." + SsoInfo.PROP_CONNECTOR, ssoInfo.getConnector()));

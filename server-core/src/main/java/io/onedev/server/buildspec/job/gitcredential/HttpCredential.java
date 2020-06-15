@@ -19,32 +19,21 @@ public class HttpCredential implements GitCredential {
 
 	private static final long serialVersionUID = 1L;
 
-	private String userName;
-	
-	private String passwordSecret;
+	private String accessTokenSecret;
 
-	@Editable(order=100)
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	@Editable(order=200, description="Specify a secret to be used as password")
-	@ChoiceProvider("getPasswordSecretChoices")
+	@Editable(order=200, description="Specify a secret to be used as access token")
+	@ChoiceProvider("getAccessTokenSecretChoices")
 	@NotEmpty
-	public String getPasswordSecret() {
-		return passwordSecret;
+	public String getAccessTokenSecret() {
+		return accessTokenSecret;
 	}
 
-	public void setPasswordSecret(String passwordSecret) {
-		this.passwordSecret = passwordSecret;
+	public void setAccessTokenSecret(String accessTokenSecret) {
+		this.accessTokenSecret = accessTokenSecret;
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<String> getPasswordSecretChoices() {
+	private static List<String> getAccessTokenSecretChoices() {
 		return Project.get().getBuildSetting().getJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
@@ -52,7 +41,7 @@ public class HttpCredential implements GitCredential {
 	@Override
 	public CloneInfo newCloneInfo(Build build, String jobToken) {
 		return new HttpCloneInfo(OneDev.getInstance(UrlManager.class).cloneUrlFor(build.getProject(), false), 
-				userName, build.getSecretValue(passwordSecret));
+				build.getSecretValue(accessTokenSecret));
 	}
 
 }

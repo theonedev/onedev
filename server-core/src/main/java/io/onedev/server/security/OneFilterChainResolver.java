@@ -14,19 +14,20 @@ public class OneFilterChainResolver extends PathMatchingFilterChainResolver {
 	@Inject
 	public OneFilterChainResolver(
 			Set<FilterChainConfigurator> filterChainConfigurators, 
-			BasicAuthenticationFilter basicAuthenticationFilter) {
+			BasicAuthenticationFilter basicAuthenticationFilter, 
+			BearerAuthenticationFilter bearerAuthenticationFilter) {
 		
 		super();
 		
 		FilterChainManager filterChainManager = getFilterChainManager();
 		
 		filterChainManager.addFilter("authcBasic", basicAuthenticationFilter);
+		filterChainManager.addFilter("authcBearer", bearerAuthenticationFilter);
 		
-		for (FilterChainConfigurator configurator: filterChainConfigurators) {
+		for (FilterChainConfigurator configurator: filterChainConfigurators)
 			configurator.configure(filterChainManager);
-		}
 		
-		filterChainManager.createChain("/**", "authcBasic");
+		filterChainManager.createChain("/**", "authcBasic, authcBearer");
 	}
 	
 }

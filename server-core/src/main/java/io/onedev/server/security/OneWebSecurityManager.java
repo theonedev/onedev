@@ -1,5 +1,7 @@
 package io.onedev.server.security;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.ServletRequest;
@@ -21,7 +23,7 @@ import org.apache.shiro.web.subject.support.WebDelegatingSubject;
 public class OneWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSecurityManager {
 
 	@Inject
-	public OneWebSecurityManager(Realm realm, RememberMeManager rememberMeManager) {
+	public OneWebSecurityManager(Set<Realm> realms, RememberMeManager rememberMeManager) {
 		
 		setSubjectFactory(new DefaultWebSubjectFactory() {
 
@@ -67,7 +69,7 @@ public class OneWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSe
 			
 		});
 		
-		setRealm(realm);
+		setRealms(realms);
 		setRememberMeManager(rememberMeManager);
 	}
 

@@ -2,6 +2,7 @@ package io.onedev.server.web.component.pullrequest.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -335,7 +337,17 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						protected Collection<Project> load() {
-							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(new ReadCode());
+							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
+									.getPermittedProjects(new ReadCode()));
+							Collections.sort(projects, new Comparator<Project>() {
+
+								@Override
+								public int compare(Project o1, Project o2) {
+									return o1.getName().compareTo(o2.getName());
+								}
+								
+							});
+							return projects;
 						}
 						
 					}) {

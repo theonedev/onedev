@@ -17,6 +17,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
+import com.google.common.collect.Sets;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.JobLogger;
@@ -156,7 +158,7 @@ abstract class JobExecutorEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				if (editor.isValid()) {
 					if (testData != null) {
-						new BeanEditModalPanel(target, testData) {
+						new BeanEditModalPanel(target, testData, Sets.newHashSet(), true, "Testing Job Executor") {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Serializable bean) {
