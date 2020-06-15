@@ -106,10 +106,12 @@ onedev.server.projectBlob = {
 		 */
 		$(document).on("keydown", function(e) {
 			if ($(".modal:visible").length == 0 && !onedev.server.util.canInput(e.target)) {
-				if (e.keyCode == 84) {
+				if (e.keyCode == 84) { // 't'
 					callback("quickSearch");
-				} else if (e.keyCode == 86) {
+				} else if (e.keyCode == 86) { // 'v'
 					callback("advancedSearch");
+				} else if (e.keyCode == 89) { // 'y'
+					callback("permalink");
 				}
 			}
 		});

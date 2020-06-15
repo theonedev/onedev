@@ -331,6 +331,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 						
 					};
 					break;
+				case "permalink":
+					BlobIdent newBlobIdent = new BlobIdent(state.blobIdent);
+					newBlobIdent.revision = resolvedRevision.name();
+					ProjectBlobPage.this.onSelect(target, newBlobIdent, null);
+					break;
 				default:
 					throw new IllegalStateException("Unexpected action: " + action);
 				}
@@ -826,6 +831,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		
 		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, projectModel, revision, canCreateRef) {
 	
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (isOnBranch())
+					tag.put("title", "Press 'y' to get permalink");
+			}
+
 			@Override
 			protected String getRevisionUrl(String revision) {
 				BlobIdent blobIdent = new BlobIdent(revision, null, FileMode.TREE.getBits());
