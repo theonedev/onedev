@@ -271,6 +271,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private String updatedRef;
 	
+	@Column(nullable=false, length=1000)
+	private String submitReason;
+	
 	@Column(length=MAX_ERROR_MESSAGE_LEN)
 	private String errorMessage;
 
@@ -442,6 +445,14 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setSubmitDate(Date submitDate) {
 		this.submitDate = submitDate;
+	}
+
+	public String getSubmitReason() {
+		return submitReason;
+	}
+
+	public void setSubmitReason(String submitReason) {
+		this.submitReason = submitReason;
 	}
 
 	public Date getPendingDate() {

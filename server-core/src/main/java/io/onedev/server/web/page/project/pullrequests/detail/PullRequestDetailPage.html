@@ -26,7 +26,11 @@
 				<a wicket:id="moreInfo" class="more-info" title="More info"><span class="fa fa-ellipsis-h"></span></a>
 			</div>
 			<div wicket:id="requestSummary" class="summary resize-aware">
-                <div wicket:id="checkError" class="alert alert-danger"></div>
+				<wicket:enclosure>
+                <div class="alert alert-danger">
+                	<i class="fa fa-exclamation-circle"></i>  <span wicket:id="checkError"></span>
+                </div>
+				</wicket:enclosure>
 				<div wicket:id="discarded" class="discarded alert alert-danger">
 					<i class="fa fa-exclamation-circle"></i> This pull request has been discarded
 				</div>

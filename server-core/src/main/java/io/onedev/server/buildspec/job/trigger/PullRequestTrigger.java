@@ -82,7 +82,7 @@ public class PullRequestTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
+	public String matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof PullRequestMergePreviewCalculated) {
 			PullRequestMergePreviewCalculated mergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
 			PullRequest request = mergePreviewCalculated.getRequest();
@@ -90,10 +90,13 @@ public class PullRequestTrigger extends JobTrigger {
 			Matcher matcher = new PathMatcher();
 			if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 					&& touchedFile(request)) {
-				return true;
+				if (request.getUpdates().size() == 1)
+					return "Pull request #" + request.getNumber() + " is opened";
+				else
+					return "Pull request #" + request.getNumber() + " is updated";
 			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override

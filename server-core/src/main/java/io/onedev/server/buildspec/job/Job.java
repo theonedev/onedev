@@ -415,10 +415,12 @@ public class Job implements Serializable, Validatable {
 		this.defaultFixedIssuesFilter = defaultFixedIssuesFilterQuery;
 	}
 
-	public JobTrigger getMatchedTrigger(ProjectEvent event) {
+	@Nullable
+	public JobTriggerMatch getTriggerMatch(ProjectEvent event) {
 		for (JobTrigger trigger: getTriggers()) {
-			if (trigger.matches(event, this))
-				return trigger;
+			String reason = trigger.matches(event, this);
+			if (reason != null)
+				return new JobTriggerMatch(trigger, reason);
 		}
 		return null;
 	}

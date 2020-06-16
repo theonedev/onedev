@@ -194,7 +194,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		state.urlAfterEdit = params.get(PARAM_URL_AFTER_EDIT).toString();
 
 		if (state.blobIdent.revision != null)
-			resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
+			resolvedRevision = getProject().getRevCommit(state.blobIdent.revision, true).copy();
 		
 		state.position = params.get(PARAM_POSITION).toString();
 		
@@ -332,9 +332,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 					};
 					break;
 				case "permalink":
-					BlobIdent newBlobIdent = new BlobIdent(state.blobIdent);
-					newBlobIdent.revision = resolvedRevision.name();
-					ProjectBlobPage.this.onSelect(target, newBlobIdent, null);
+					if (isOnBranch()) {
+						BlobIdent newBlobIdent = new BlobIdent(state.blobIdent);
+						newBlobIdent.revision = resolvedRevision.name();
+						ProjectBlobPage.this.onSelect(target, newBlobIdent, null);
+					}
 					break;
 				default:
 					throw new IllegalStateException("Unexpected action: " + action);
@@ -893,7 +895,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		 * resolved to existing value of resolvedRevision
 		 */
 		resolvedRevision = null;
-		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
+		resolvedRevision = getProject().getRevCommit(state.blobIdent.revision, true).copy();
 		
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 		newRevisionPicker(target);
@@ -1436,7 +1438,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 		ObjectId prevCommitId;
 		if (blobIdent.revision != null)
-			prevCommitId = getProject().getObjectId(blobIdent.revision, true);
+			prevCommitId = getProject().getRevCommit(blobIdent.revision, true).copy();
 		else
 			prevCommitId = ObjectId.zeroId();
 

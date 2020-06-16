@@ -63,7 +63,7 @@ public class TagCreateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
+	public String matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedTag = GitUtils.ref2tag(refUpdated.getRefName());
@@ -72,10 +72,10 @@ public class TagCreateTrigger extends JobTrigger {
 			if (updatedTag != null && !commitId.equals(ObjectId.zeroId()) 
 					&& (tags == null || PatternSet.parse(tags).matches(new PathMatcher(), updatedTag))
 					&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-				return true;
+				return "Tag '" + updatedTag + "' is created";
 			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override

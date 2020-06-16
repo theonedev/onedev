@@ -89,7 +89,8 @@ public class RunJobAction extends PostBuildAction {
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
 				OneDev.getInstance(JobManager.class).submit(build.getProject(), 
-						build.getCommitId(), getJobName(), paramMap, null); 
+						build.getCommitId(), getJobName(), paramMap, 
+						"Post build action of job '" + build.getJobName() + "'", null); 
 			}
 			
 		}.run();

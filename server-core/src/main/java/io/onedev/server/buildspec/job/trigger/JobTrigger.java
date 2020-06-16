@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 
 import org.apache.wicket.Component;
@@ -78,11 +79,14 @@ public abstract class JobTrigger implements Serializable {
 		return new ArrayList<>();
 	}
 	
-	public boolean matches(ProjectEvent event, Job job) {
+	@Nullable
+	public String matches(ProjectEvent event, Job job) {
 		String projectName = event.getProject().getName();
 		Matcher matcher = new StringMatcher();
-		return (projects == null || PatternSet.parse(projects).matches(matcher, projectName))
-				&& matchesWithoutProject(event, job);
+		if (projects == null || PatternSet.parse(projects).matches(matcher, projectName)) 
+			return matchesWithoutProject(event, job);
+		else 
+			return null;
 	}
 	
 	public String getDescription() {
@@ -92,7 +96,8 @@ public abstract class JobTrigger implements Serializable {
 		return description;
 	}
 
-	public abstract boolean matchesWithoutProject(ProjectEvent event, Job job);
+	@Nullable
+	public abstract String matchesWithoutProject(ProjectEvent event, Job job);
 	
 	public abstract String getDescriptionWithoutProject();
 }

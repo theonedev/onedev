@@ -86,16 +86,18 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
+	public String matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedBranch = GitUtils.ref2branch(refUpdated.getRefName());
 			Matcher matcher = new PathMatcher();
-			return updatedBranch != null 
+			if (updatedBranch != null 
 					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
-					&& touchedFile(refUpdated);
+					&& touchedFile(refUpdated)) {
+				return "Branch '" + updatedBranch + "' is updated";
+			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override

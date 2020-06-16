@@ -28,4 +28,5 @@ public abstract class ProjectEvent extends Event {
 		lastUpdate.setDate(getDate());
 		return lastUpdate;
 	}
+
 }

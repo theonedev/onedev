@@ -826,14 +826,19 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							if (trigger instanceof PullRequestTrigger) {
 								PullRequestTrigger pullRequestTrigger = (PullRequestTrigger) trigger;
 								PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = new PullRequestMergePreviewCalculated(request);
-								if (pullRequestTrigger.matches(pullRequestMergePreviewCalculated, job)) {
+								if (pullRequestTrigger.matches(pullRequestMergePreviewCalculated, job) != null) {
 									boolean required = requiredJobNames.contains(job.getName());
+									String submitReason;
+									if (request.getUpdates().size() == 1)
+										submitReason = "Pull request #" + request.getNumber() + " is opened";
+									else
+										submitReason = "Pull request #" + request.getNumber() + " is updated";
 									new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(trigger.getParams())) {
 										
 										@Override
 										public void run(Map<String, List<String>> paramMap) {
 											Build build = jobManager.submit(request.getTargetProject(), 
-													commitId, job.getName(), paramMap, null);
+													commitId, job.getName(), paramMap, submitReason, null);
 											PullRequestVerification verification = null;
 											for (PullRequestVerification prevVerification: prevVerifications) {
 												if (prevVerification.getBuild().equals(build)) {

@@ -65,7 +65,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 					Map<String, List<String>> paramMap = ParamSupply.getParamMap(
 							job, bean, job.getParamSpecMap().keySet());
 					Build build = OneDev.getInstance(JobManager.class).submit(getProject(), 
-							commitId, job.getName(), paramMap, null);
+							commitId, job.getName(), paramMap, "Submitted manually", null);
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 				}
 
@@ -87,7 +87,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 			};
 		} else {
 			Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId, 
-					job.getName(), new HashMap<>(), null);
+					job.getName(), new HashMap<>(), "Submitted manually", null);
 			setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build));
 		}
 	}

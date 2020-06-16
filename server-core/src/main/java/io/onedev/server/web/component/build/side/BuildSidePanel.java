@@ -142,6 +142,14 @@ public abstract class BuildSidePanel extends Panel {
 			}
 			
 		}));
+		general.add(new Label("submitReason", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return getBuild().getSubmitReason();
+			}
+			
+		}));
 		general.add(new Label("retryDate", new LoadableDetachableModel<String>() {
 
 			@Override

@@ -17,7 +17,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public boolean matchesWithoutProject(ProjectEvent event, Job job) {
+	public String matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof BuildFinished) {
 			BuildFinished buildFinished = (BuildFinished) event;
 			Build build = buildFinished.getBuild();
@@ -28,14 +28,14 @@ public class DependencyFinishedTrigger extends JobTrigger {
 						if (!param.isSecret()) {
 							List<String> paramValue = build.getParamMap().get(param.getName());
 							if (!param.getValuesProvider().getValues().contains(paramValue))
-								return false;
+								return null;
 						}
 					}
-					return true;
+					return "Dependency job '" + dependency.getJobName() + "' is finished";
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
 	@Override
