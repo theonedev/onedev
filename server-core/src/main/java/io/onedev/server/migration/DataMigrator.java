@@ -16,6 +16,7 @@ import java.util.Stack;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
@@ -2014,6 +2015,155 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}	
+	}
+	
+	// Migrate to 3.2.0
+	private void migrate42(File dataDir, Stack<Integer> versions) {
+		Map<String, String> commentRequests = new HashMap<>();
+		Map<String, String> projectNames = new HashMap<>();
+		Map<String, String> requestProjects = new HashMap<>();
+		Map<String, String> requestNumbers = new HashMap<>();
+		Map<String, String> requestTargetHeads = new HashMap<>();
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeCommentRelations.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					commentRequests.put(element.elementTextTrim("comment"), element.elementTextTrim("request"));
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					requestProjects.put(id, element.elementTextTrim("targetProject"));
+					requestNumbers.put(id, element.elementTextTrim("number"));
+					Element lastMergePreviewElement = element.element("lastMergePreview");
+					if (lastMergePreviewElement != null) {
+						Element targetHeadElement = lastMergePreviewElement.element("targetHead");
+						requestTargetHeads.put(id, targetHeadElement.getTextTrim());
+						targetHeadElement.setName("targetHeadCommitHash");
+						lastMergePreviewElement.element("requestHead").setName("headCommitHash");
+						Element mergedElement = lastMergePreviewElement.element("merged");
+						if (mergedElement != null)
+							mergedElement.setName("mergeCommitHash");
+					}
+					element.element("headCommitHash").detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					projectNames.put(element.elementTextTrim("id"), element.elementText("name").trim());
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				try {
+					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					content = StringUtils.replace(content, 
+							"io.onedev.server.model.support.administration.authenticator.ldap.", 
+							"io.onedev.server.plugin.authenticator.ldap.");
+					content = StringUtils.replace(content, 
+							"io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequest", 
+							"io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequestTrigger");
+					content = StringUtils.replace(content, 
+							"io.onedev.server.model.support.issue.transitiontrigger.MergePullRequest", 
+							"io.onedev.server.model.support.issue.transitiontrigger.MergePullRequestTrigger");
+					content = StringUtils.replace(content, 
+							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest", 
+							"io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequestTrigger");
+					FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element keyElement = element.element("key");
+					if (keyElement.getTextTrim().equals("SSH")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.element("privateKey").setName("pemPrivateKey");
+					} else if (keyElement.getTextTrim().equals("JOB_SCRIPTS")) {
+						keyElement.setText("GROOVY_SCRIPTS");
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element buildSettingElement = element.element("buildSetting");
+					Element actionAuthorizationsElement = buildSettingElement.element("actionAuthorizations");
+					if (actionAuthorizationsElement.elements().isEmpty()) {
+						actionAuthorizationsElement.addElement("io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization");
+						actionAuthorizationsElement.addElement("io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization");
+					}
+					element.addElement("issueManagementEnabled").setText("true");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element compareContextElement = element.element("compareContext");
+					compareContextElement.element("compareCommit").setName("compareCommitHash");
+					Element markPosElement = element.element("markPos");
+					markPosElement.setName("mark");
+					markPosElement.element("commit").setName("commitHash");
+					String requestId = commentRequests.get(element.elementTextTrim("id"));
+					if (requestId != null)
+						element.addElement("request").setText(requestId);
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.addElement("submitReason").setText("Unknown");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentRelations.xml")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("PullRequestBuilds.xml")) {
+				try {
+					String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
+					content = StringUtils.replace(content, "PullRequestBuild", "PullRequestVerification");
+					FileUtils.deleteFile(file);
+					String newFileName = StringUtils.replace(file.getName(), "PullRequestBuild", "PullRequestVerification");
+					FileUtils.writeFile(new File(dataDir, newFileName), content, StandardCharsets.UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else if (file.getName().startsWith("PullRequestReviews.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Element excludeDateElement = element.element("excludeDate");
+					if (excludeDateElement != null)
+						excludeDateElement.detach();
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.addElement("accessToken").setText(RandomStringUtils.randomAlphanumeric(20));
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					element.element("mergeBaseCommitHash").detach();
+					String requestId = element.elementTextTrim("request");
+					String targetHead = requestTargetHeads.get(requestId);
+					if (targetHead != null) {
+						element.addElement("targetHeadCommitHash").setText(targetHead);
+					} else {
+						String requestNumber = requestNumbers.get(requestId);
+						String projectId = requestProjects.get(requestId);
+						String projectName = projectNames.get(projectId);
+						String message = String.format("Merge preview not available (project: %s, pull request: %d)", 
+								projectName, requestNumber);
+						throw new RuntimeException(message);
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
 	}
 	
 }

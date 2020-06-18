@@ -6,9 +6,9 @@ public class JobTriggerMatch {
 	
 	private final JobTrigger trigger;
 	
-	private final String reason;
+	private final SubmitReason reason;
 	
-	public JobTriggerMatch(JobTrigger trigger, String reason) {
+	public JobTriggerMatch(JobTrigger trigger, SubmitReason reason) {
 		this.trigger = trigger;
 		this.reason = reason;
 	}
@@ -17,8 +17,8 @@ public class JobTriggerMatch {
 		return trigger;
 	}
 
-	public String getReason() {
+	public SubmitReason getReason() {
 		return reason;
 	}
-	
+
 }

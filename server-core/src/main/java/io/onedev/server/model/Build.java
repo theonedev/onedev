@@ -1,6 +1,16 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.Build.*;
+import static io.onedev.server.model.Build.PROP_CANCELLER_NAME;
+import static io.onedev.server.model.Build.PROP_COMMIT;
+import static io.onedev.server.model.Build.PROP_FINISH_DATE;
+import static io.onedev.server.model.Build.PROP_JOB;
+import static io.onedev.server.model.Build.PROP_NUMBER;
+import static io.onedev.server.model.Build.PROP_PENDING_DATE;
+import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
+import static io.onedev.server.model.Build.PROP_STATUS;
+import static io.onedev.server.model.Build.PROP_SUBMITTER_NAME;
+import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
+import static io.onedev.server.model.Build.PROP_VERSION;
 
 import java.io.File;
 import java.io.IOException;
@@ -973,6 +983,7 @@ public class Build extends AbstractEntity implements Referenceable {
 				PullRequest request = verification.getRequest();
 				if (project.equals(request.getSourceProject()) 
 						&& patternSet.matches(matcher, request.getTargetBranch())
+						&& request.getSourceBranch() != null 
 						&& patternSet.matches(matcher, request.getSourceBranch())) {
 					return true;
 				}

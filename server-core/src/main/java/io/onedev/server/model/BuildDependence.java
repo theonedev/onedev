@@ -70,5 +70,5 @@ public class BuildDependence extends AbstractEntity {
 	public void setArtifacts(String artifacts) {
 		this.artifacts = artifacts;
 	}
-	
+
 }

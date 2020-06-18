@@ -4,15 +4,25 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
+
+import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.Node;
+import org.yaml.snakeyaml.nodes.NodeTuple;
+import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import com.google.common.collect.Lists;
 
@@ -216,6 +226,40 @@ public class BuildSpec implements Serializable, Validatable {
 			}
 		} else {
 			return null;
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void migrate1(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			if (((ScalarNode)specTuple.getKeyNode()).getValue().equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (Iterator<NodeTuple> itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						NodeTuple jobTuple = itJobTuple.next();
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("submoduleCredentials")) {
+							itJobTuple.remove();
+						} else if (jobTupleKey.equals("projectDependencies")) {
+							SequenceNode projectDependenciesNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node projectDependenciesItem: projectDependenciesNode.getValue()) {
+								MappingNode projectDependencyNode = (MappingNode) projectDependenciesItem;
+								for (Iterator<NodeTuple> itProjectDependencyTuple = projectDependencyNode.getValue().iterator(); 
+										itProjectDependencyTuple.hasNext();) {
+									NodeTuple projectDependencyTuple = itProjectDependencyTuple.next();
+									if (((ScalarNode)projectDependencyTuple.getKeyNode()).getValue().equals("authentication"))
+										itProjectDependencyTuple.remove();
+								}								
+							}
+						}
+					}
+					NodeTuple cloneCredentialTuple = new NodeTuple(
+							new ScalarNode(Tag.STR, "cloneCredential"), 
+							new MappingNode(new Tag("!DefaultCredential"), Lists.newArrayList(), FlowStyle.BLOCK));
+					jobNode.getValue().add(cloneCredentialTuple);
+				}
+			}
 		}
 	}
 	

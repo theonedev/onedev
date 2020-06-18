@@ -7,10 +7,12 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -86,7 +88,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public String matchesWithoutProject(ProjectEvent event, Job job) {
+	public SubmitReason matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedBranch = GitUtils.ref2branch(refUpdated.getRefName());
@@ -94,7 +96,24 @@ public class BranchUpdateTrigger extends JobTrigger {
 			if (updatedBranch != null 
 					&& (branches == null || PatternSet.parse(branches).matches(matcher, updatedBranch)) 
 					&& touchedFile(refUpdated)) {
-				return "Branch '" + updatedBranch + "' is updated";
+				return new SubmitReason() {
+
+					@Override
+					public String getUpdatedRef() {
+						return refUpdated.getRefName();
+					}
+
+					@Override
+					public PullRequest getPullRequest() {
+						return null;
+					}
+
+					@Override
+					public String getDescription() {
+						return "Branch '" + updatedBranch + "' is updated";
+					}
+					
+				};
 			}
 		}
 		return null;

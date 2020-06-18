@@ -418,7 +418,7 @@ public class Job implements Serializable, Validatable {
 	@Nullable
 	public JobTriggerMatch getTriggerMatch(ProjectEvent event) {
 		for (JobTrigger trigger: getTriggers()) {
-			String reason = trigger.matches(event, this);
+			SubmitReason reason = trigger.matches(event, this);
 			if (reason != null)
 				return new JobTriggerMatch(trigger, reason);
 		}

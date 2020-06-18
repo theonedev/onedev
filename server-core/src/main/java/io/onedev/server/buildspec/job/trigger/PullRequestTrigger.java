@@ -7,6 +7,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.git.GitUtils;
@@ -82,7 +83,7 @@ public class PullRequestTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public String matchesWithoutProject(ProjectEvent event, Job job) {
+	public SubmitReason matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof PullRequestMergePreviewCalculated) {
 			PullRequestMergePreviewCalculated mergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
 			PullRequest request = mergePreviewCalculated.getRequest();
@@ -90,10 +91,27 @@ public class PullRequestTrigger extends JobTrigger {
 			Matcher matcher = new PathMatcher();
 			if ((branches == null || PatternSet.parse(branches).matches(matcher, targetBranch)) 
 					&& touchedFile(request)) {
-				if (request.getUpdates().size() == 1)
-					return "Pull request #" + request.getNumber() + " is opened";
-				else
-					return "Pull request #" + request.getNumber() + " is updated";
+				return new SubmitReason() {
+
+					@Override
+					public String getUpdatedRef() {
+						return null;
+					}
+
+					@Override
+					public PullRequest getPullRequest() {
+						return request;
+					}
+
+					@Override
+					public String getDescription() {
+						if (request.getUpdates().size() == 1)
+							return "Pull request #" + request.getNumber() + " is opened";
+						else
+							return "Pull request #" + request.getNumber() + " is updated";
+					}
+					
+				};
 			}
 		}
 		return null;

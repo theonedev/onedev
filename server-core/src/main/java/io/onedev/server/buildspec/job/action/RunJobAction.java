@@ -15,9 +15,11 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.MatrixRunner;
@@ -84,13 +86,30 @@ public class RunJobAction extends PostBuildAction {
 	
 	@Override
 	public void execute(Build build) {
-		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(getJobParams())) {
+		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(getJobParams(), build)) {
 			
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
+				SubmitReason reason = new SubmitReason() {
+
+					@Override
+					public String getUpdatedRef() {
+						return null;
+					}
+
+					@Override
+					public PullRequest getPullRequest() {
+						return null;
+					}
+
+					@Override
+					public String getDescription() {
+						return "Post build action of job '" + build.getJobName() + "'";
+					}
+					
+				};
 				OneDev.getInstance(JobManager.class).submit(build.getProject(), 
-						build.getCommitId(), getJobName(), paramMap, 
-						"Post build action of job '" + build.getJobName() + "'", null); 
+						build.getCommitId(), getJobName(), paramMap, reason); 
 			}
 			
 		}.run();

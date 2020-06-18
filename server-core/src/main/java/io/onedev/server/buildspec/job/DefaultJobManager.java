@@ -66,7 +66,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRetrying;
@@ -80,6 +79,7 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
@@ -172,7 +172,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Transactional
 	@Override
 	public Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, String reason, @Nullable String updatedRef) {
+			Map<String, List<String>> paramMap, SubmitReason reason) {
     	Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
     	transactionManager.mustRunAfterTransaction(new Runnable() {
 
@@ -189,16 +189,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         	
         	validate(project, commitId);
         	
-			return submit(project, commitId, jobName, paramMap, reason, 
-					updatedRef, new LinkedHashSet<>()); 
+			return submit(project, commitId, jobName, paramMap, reason, new LinkedHashSet<>()); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
 	private Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, String reason, 
-			String updatedRef, Set<String> checkedJobNames) {
+			Map<String, List<String>> paramMap, SubmitReason reason, Set<String> checkedJobNames) {
 		
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
@@ -208,9 +206,17 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setJobName(jobName);
 			build.setSubmitDate(new Date());
 			build.setStatus(Build.Status.WAITING);
-			build.setSubmitReason(reason);
+			build.setSubmitReason(reason.getDescription());
 			build.setSubmitter(SecurityUtils.getUser());
-			build.setUpdatedRef(updatedRef);
+			build.setUpdatedRef(reason.getUpdatedRef());
+
+			// Set up verifications in order to be authorized to access secret value 
+			if (reason.getPullRequest() != null) {
+				PullRequestVerification verification = new PullRequestVerification();
+				verification.setBuild(build);
+				verification.setRequest(reason.getPullRequest());
+				build.getVerifications().add(verification);
+			}
 			
 			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 			
@@ -251,12 +257,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Build.push(build);
 				try {
 					for (JobDependency dependency: build.getJob().getJobDependencies()) {
-						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(dependency.getJobParams())) {
+						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(dependency.getJobParams(), build)) {
 							
 							@Override
 							public void run(Map<String, List<String>> params) {
 								Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-										params, reason, updatedRef, new LinkedHashSet<>(checkedJobNames));
+										params, reason, new LinkedHashSet<>(checkedJobNames));
 								BuildDependence dependence = new BuildDependence();
 								dependence.setDependency(dependencyBuild);
 								dependence.setDependent(build);
@@ -302,7 +308,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					JobPermission jobPermission = new JobPermission(dependencyBuild.getJobName(), new AccessBuild());
 					if (!subject.isPermitted(new ProjectPermission(dependencyProject, jobPermission))) {
 						throw new OneException("Unable to access dependency build '" 
-								+ dependency.getProjectName() + "#" + dependencyBuild.getNumber() + "': permission denied");
+								+ dependencyBuild.getFQN() + "': permission denied");
 					}
 					
 					BuildDependence dependence = new BuildDependence();
@@ -605,14 +611,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							JobTriggerMatch match = job.getTriggerMatch(event);
 							if (match != null) {
 								Map<String, List<List<String>>> paramMatrix = 
-										ParamSupply.getParamMatrix(match.getTrigger().getParams());						
+										ParamSupply.getParamMatrix(match.getTrigger().getParams(), null);						
 								Long projectId = event.getProject().getId();
-								
-								String updatedRef;
-								if (event instanceof RefUpdated)
-									updatedRef = ((RefUpdated)event).getRefName();
-								else
-									updatedRef = null;
 								
 								// run asynchrously as session may get closed due to exception
 								transactionManager.runAfterCommit(new Runnable() {
@@ -631,8 +631,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 														@Override
 														public void run(Map<String, List<String>> paramMap) {
-															submit(project, commitId, job.getName(), paramMap, 
-																	match.getReason(), updatedRef); 
+															submit(project, commitId, job.getName(), paramMap, match.getReason()); 
 														}
 														
 													}.run();

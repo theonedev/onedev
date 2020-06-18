@@ -1,5 +1,6 @@
 package io.onedev.server.security;
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -7,6 +8,9 @@ import javax.inject.Singleton;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
 import org.apache.shiro.mgt.RememberMeManager;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
@@ -24,7 +28,6 @@ public class OneWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSe
 
 	@Inject
 	public OneWebSecurityManager(Set<Realm> realms, RememberMeManager rememberMeManager) {
-		
 		setSubjectFactory(new DefaultWebSubjectFactory() {
 
 			@Override
@@ -65,6 +68,19 @@ public class OneWebSecurityManager extends org.apache.shiro.web.mgt.DefaultWebSe
 							}
 		        	
 		        };
+			}
+			
+		});
+		
+		setAuthenticator(new ModularRealmAuthenticator() {
+
+			@Override
+			protected AuthenticationInfo doMultiRealmAuthentication(Collection<Realm> realms, AuthenticationToken token) {
+		        for (Realm realm : realms) {
+		            if (realm.supports(token)) 
+		                return realm.getAuthenticationInfo(token);
+		        }
+		        return null;
 			}
 			
 		});

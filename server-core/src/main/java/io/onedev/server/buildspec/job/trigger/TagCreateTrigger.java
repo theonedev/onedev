@@ -6,10 +6,12 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -63,7 +65,7 @@ public class TagCreateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public String matchesWithoutProject(ProjectEvent event, Job job) {
+	public SubmitReason matchesWithoutProject(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedTag = GitUtils.ref2tag(refUpdated.getRefName());
@@ -72,7 +74,24 @@ public class TagCreateTrigger extends JobTrigger {
 			if (updatedTag != null && !commitId.equals(ObjectId.zeroId()) 
 					&& (tags == null || PatternSet.parse(tags).matches(new PathMatcher(), updatedTag))
 					&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-				return "Tag '" + updatedTag + "' is created";
+				return new SubmitReason() {
+
+					@Override
+					public String getUpdatedRef() {
+						return refUpdated.getRefName();
+					}
+
+					@Override
+					public PullRequest getPullRequest() {
+						return null;
+					}
+
+					@Override
+					public String getDescription() {
+						return "Tag '" + updatedTag + "' is created";
+					}
+					
+				};
 			}
 		}
 		return null;

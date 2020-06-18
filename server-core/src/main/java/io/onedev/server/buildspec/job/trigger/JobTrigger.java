@@ -12,6 +12,7 @@ import org.apache.wicket.Component;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.event.ProjectEvent;
@@ -80,7 +81,7 @@ public abstract class JobTrigger implements Serializable {
 	}
 	
 	@Nullable
-	public String matches(ProjectEvent event, Job job) {
+	public SubmitReason matches(ProjectEvent event, Job job) {
 		String projectName = event.getProject().getName();
 		Matcher matcher = new StringMatcher();
 		if (projects == null || PatternSet.parse(projects).matches(matcher, projectName)) 
@@ -97,7 +98,7 @@ public abstract class JobTrigger implements Serializable {
 	}
 
 	@Nullable
-	public abstract String matchesWithoutProject(ProjectEvent event, Job job);
+	public abstract SubmitReason matchesWithoutProject(ProjectEvent event, Job job);
 	
 	public abstract String getDescriptionWithoutProject();
 }

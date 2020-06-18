@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramspec.SecretParam;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -246,10 +247,28 @@ public class ParamSupply implements Serializable {
 		return paramMap;
 	}
 
-	public static Map<String, List<List<String>>> getParamMatrix(List<ParamSupply> params) {
+	public static Map<String, List<List<String>>> getParamMatrix(List<ParamSupply> params, @Nullable Build build) {
 		Map<String, List<List<String>>> paramMatrix = new LinkedHashMap<>();
-		for (ParamSupply param: params) 
-			paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
+		for (ParamSupply param: params) {
+			/*
+			 * Resolve secret value with current build context as otherwise we may not be authorized to 
+			 * access the secret value. This is possible for instance if a pull request triggers a job, 
+			 * and then post-action of the job triggers another job with a parameter taking value of 
+			 * a secret accessible by the pull request   
+			 */
+			if (param.isSecret() && build != null) { 
+				List<List<String>> resolvedValues = new ArrayList<>();
+				for (List<String> value: param.getValuesProvider().getValues()) {
+					List<String> resolvedValue = new ArrayList<>();
+					for (String each: value) 
+						resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getSecretValue(each));
+					resolvedValues.add(resolvedValue);
+				}
+				paramMatrix.put(param.getName(), resolvedValues);
+			} else {
+				paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
+			}
+		}
 		return paramMatrix;
 	}
 

@@ -1389,7 +1389,7 @@ public class Project extends AbstractEntity {
 			return PatternSet.parse(branches).matches(matcher, "master");
 		}
 	}
-
+	
 	public Collection<String> getChangedFiles(ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
 		if (gitEnvs != null && !gitEnvs.isEmpty()) {
