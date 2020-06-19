@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 
 import javax.inject.Singleton;
 
@@ -2141,8 +2142,10 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Users.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) 
-					element.addElement("accessToken").setText(RandomStringUtils.randomAlphanumeric(20));
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("accessToken").setText(RandomStringUtils.randomAlphanumeric(40));
+					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
+				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);

@@ -68,7 +68,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final int ACCESS_TOKEN_LEN = 20;
+	public static final int ACCESS_TOKEN_LEN = 40;
 	
 	public static final Long SYSTEM_ID = -1L;
 	
