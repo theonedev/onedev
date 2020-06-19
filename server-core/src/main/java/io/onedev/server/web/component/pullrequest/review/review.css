@@ -25,14 +25,21 @@ table.reviews>tbody>tr>td.actions {
 table.reviews>tbody>tr>td.status span {
 	cursor: default;
 }
+.review-status {
+	width: 16px;
+	height: 24px;
+	display: inline-block;
+	background-position: center;
+	background-repeat: no-repeat no-repeat;
+}
 .review-status.pending {
-	color: #DCB412;
+	background-image: url("time.png");
 }
 .review-status.approved {
-	color: #35A612;
+	background-image: url("accept.png");
 }
 .review-status.requested-for-changes {
-	color: #F93333;
+	background-image: url("hand.png");
 }
 .review-detail {
 	padding: 8px;
@@ -50,9 +57,10 @@ table.reviews>tbody>tr>td.status span {
 	position: relative;
 }
 .reviewer-avatar>i {
-	font-size: 11px;
+	width: 12px;
+	height: 12px;
 	position: absolute;
-	right: 0;
+	right: -2px;
 	bottom: 0;
-	background: white;
+	background-size: 12px;
 }

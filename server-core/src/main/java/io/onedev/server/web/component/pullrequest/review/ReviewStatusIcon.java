@@ -59,11 +59,11 @@ public abstract class ReviewStatusIcon extends WebComponent {
 			@Override
 			public String getObject() {
 				if (getResult() == null)
-					return "review-status fa fa-clock-o pending";
+					return "review-status pending";
 				else if (getResult().isApproved())
-					return "review-status fa fa-check-circle approved";
+					return "review-status approved";
 				else
-					return "review-status fa fa-hand-stop-o requested-for-changes";
+					return "review-status requested-for-changes";
 			}
 			
 		}));
