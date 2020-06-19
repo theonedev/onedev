@@ -22,10 +22,14 @@ public class MyPasswordPage extends MyPage {
 		
 		if (getLoginUser().getPassword().equals(User.EXTERNAL_MANAGED)) {
 			String message;
-			if (getLoginUser().getSsoInfo() != null)
-				message = "You are currently authenticated via SSO provider '" + getLoginUser().getSsoInfo().getConnector() + "', please change password there instead";
-			else
-				message = "You are currently authenticated via external system, please change password there instead";
+			if (getLoginUser().getSsoInfo().getConnector() != null) {
+				message = "You are currently authenticated via SSO provider '" 
+						+ getLoginUser().getSsoInfo().getConnector() 
+						+ "', please change password there instead";
+			} else {
+				message = "You are currently authenticated via external system, "
+						+ "please change password there instead";
+			}
 			add(new Label("content", message).add(AttributeAppender.append("class", "alert alert-warning")));
 		} else {
 			add(new PasswordEditPanel("content", new AbstractReadOnlyModel<User>() {

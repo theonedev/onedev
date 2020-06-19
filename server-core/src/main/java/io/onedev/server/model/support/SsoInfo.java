@@ -1,7 +1,9 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -21,9 +23,15 @@ public class SsoInfo implements Serializable {
 	@Column(name=COLUMN_CONNECTOR)
 	private String connector;
 	
-	@Column(name=COLUMN_SUBJECT)
-	private String subject;
+	/*
+	 * SQL Server treats null as a value when checking unique constraints. So we 
+	 * need to populate subject even if no SSO is used to avoid violating unique
+	 * constraint on connector and subject combo
+	 */
+	@Column(name=COLUMN_SUBJECT, nullable=false)
+	private String subject = UUID.randomUUID().toString();
 
+	@Nullable
 	public String getConnector() {
 		return connector;
 	}

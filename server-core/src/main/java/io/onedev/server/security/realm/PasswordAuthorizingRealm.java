@@ -122,7 +122,7 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		        			user = newUser(userName, authenticated, authenticator.getDefaultGroup());
 		    			} 
 			    	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
-		    			if (user.getSsoInfo() != null) {
+		    			if (user.getSsoInfo().getConnector() != null) {
 		    				throw new AuthenticationException("Account '" + userName 
 		    						+ "' is set to authenticate via " + User.AUTH_SOURCE_SSO_PROVIDER 
 		    						+ user.getSsoInfo().getConnector());

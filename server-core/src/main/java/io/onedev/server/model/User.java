@@ -113,7 +113,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String fullName;
 	
 	@Embedded
-	private SsoInfo ssoInfo;
+	private SsoInfo ssoInfo = new SsoInfo();
 	
 	@Column(unique=true, nullable=false)
 	private String email;
@@ -571,7 +571,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     public boolean isSshKeyExternalManaged() {
     	if (isExternalManaged()) {
-    		if (getSsoInfo() != null) {
+    		if (getSsoInfo().getConnector() != null) {
     			return false;
     		} else {
 	    		Authenticator authenticator = OneDev.getInstance(SettingManager.class).getAuthenticator();
@@ -585,7 +585,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public boolean isMembershipExternalManaged() {
     	if (isExternalManaged()) {
     		SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-    		if (getSsoInfo() != null) {
+    		if (getSsoInfo().getConnector() != null) {
     			SsoConnector ssoConnector = settingManager.getSsoConnectors().stream()
     					.filter(it->it.getName().equals(getSsoInfo().getConnector()))
     					.findFirst().orElse(null);
@@ -601,7 +601,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
     public String getAuthSource() {
 		if (isExternalManaged()) {
-			if (getSsoInfo() != null)
+			if (getSsoInfo().getConnector() != null)
 				return AUTH_SOURCE_SSO_PROVIDER + getSsoInfo().getConnector();
 			else
 				return AUTH_SOURCE_EXTERNAL_AUTHENTICATOR;

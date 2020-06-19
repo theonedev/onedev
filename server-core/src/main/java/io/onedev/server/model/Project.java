@@ -256,7 +256,6 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
-	@Column
 	private boolean issueManagementEnabled = true;
 	
 	@Lob

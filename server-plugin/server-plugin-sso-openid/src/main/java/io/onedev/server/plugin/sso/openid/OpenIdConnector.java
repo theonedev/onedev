@@ -32,7 +32,6 @@ import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.TokenErrorResponse;
 import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -47,7 +46,6 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
 import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCAccessTokenResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 
@@ -190,9 +188,14 @@ public class OpenIdConnector extends SsoConnector {
 				TokenRequest tokenRequest = new TokenRequest(
 						new URI(getCachedProviderMetadata().getTokenEndpoint()), clientAuth, codeGrant);
 				HTTPResponse httpResponse = tokenRequest.toHTTPRequest().send();
-				TokenResponse tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
-				if (tokenResponse instanceof TokenErrorResponse) {
-					ErrorObject error = ((TokenErrorResponse) tokenResponse).getErrorObject();
+				if (httpResponse.getStatusCode() == HTTPResponse.SC_OK) {
+					JSONObject jsonObject = httpResponse.getContentAsJSONObject();
+					if (jsonObject.get("error") != null) 
+						throw buildException(TokenErrorResponse.parse(jsonObject).getErrorObject());
+					else 
+						return processTokenResponse(OIDCAccessTokenResponse.parse(jsonObject));
+				} else {
+					ErrorObject error = TokenErrorResponse.parse(httpResponse).getErrorObject();
 					if (error != null) {
 						throw buildException(error);
 					} else {
@@ -200,8 +203,6 @@ public class OpenIdConnector extends SsoConnector {
 								httpResponse.getStatusCode());
 						throw new AuthenticationException(message);
 					}
-				} else { 
-					return processTokenResponse((OIDCAccessTokenResponse) tokenResponse);
 				}
 			}
 		} catch (ParseException | URISyntaxException|SerializeException|IOException e) {
