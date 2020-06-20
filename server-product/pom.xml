@@ -55,6 +55,11 @@
 			<artifactId>server-plugin-sso-openid</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-markdown</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 	<properties>
 		<executables>bin/*.sh, boot/wrapper-*</executables>

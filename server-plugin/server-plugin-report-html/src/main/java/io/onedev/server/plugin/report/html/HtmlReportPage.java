@@ -67,7 +67,7 @@ public class HtmlReportPage extends BuildDetailPage {
 
 			}.add(AttributeAppender.append("src", startPageUrl.toString())));
 		} else {
-			add(new Label("htmlReport", "No html report published: " + reportName) {
+			add(new Label("htmlReport", "No html report published") {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {

@@ -1,3 +1,11 @@
+body.BuildDetailPage #layout>.body {
+	padding: 50px 0 0 0;
+}
+#build-detail>.main {
+	overflow: auto;
+	position: relative;
+	padding: 20px;
+}
 #build-detail>.main>div {
     margin-bottom: 20px;
 }
@@ -51,7 +59,7 @@
 }
 @media(min-width: 1150px) {
 	#build-detail>.main {
-		padding-right: 360px;
+		margin-right: 360px;
 	}
 	#build-detail .side-info {
 		box-shadow: none;
