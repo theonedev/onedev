@@ -23,7 +23,7 @@ import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.web.editable.annotation.Editable;
 import net.minidev.json.JSONObject;
 
-@Editable(name="OpenID (GitHub)", order=100)
+@Editable(name="OpenID (GitHub)", order=100, description="Refer to this <a href='$docRoot/pages/github-sso.md' target='_blank'>usage scenario</a> for an example setup")
 public class GitHubConnector extends OpenIdConnector {
 
 	private static final long serialVersionUID = 1L;

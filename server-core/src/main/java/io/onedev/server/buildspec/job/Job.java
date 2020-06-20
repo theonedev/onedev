@@ -238,8 +238,8 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9060, group="Source Retrieval", description="By default code is cloned via an auto-generated credential, "
-			+ "which only has read permission over current project. In case the job needs to push code to server, or want "
-			+ "to clone private submodules, you should supply custom credential with appropriate permissions here")
+			+ "which only has read permission over current project. In case the job needs to <a href='$docRoot/pages/push-in-job.md' target='_blank'>push code to server</a>, or want "
+			+ "to <a href='$docRoot/pages/clone-submodules-via-ssh.md' target='_blank'>clone private submodules</a>, you should supply custom credential with appropriate permissions here")
 	@ShowCondition("isRetrieveSourceEnabled")
 	@NotNull
 	public GitCredential getCloneCredential() {

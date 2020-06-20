@@ -8,6 +8,7 @@ import static io.onedev.server.model.support.SsoInfo.PROP_SUBJECT;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -298,8 +299,9 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 	public void onDeleteSsoConnector(String name) {
 		String connectorProp = PROP_SSO_INFO + "." + PROP_CONNECTOR;
 		String subjectProp = PROP_SSO_INFO + "." + PROP_SUBJECT;
-    	Query<?> query = getSession().createQuery(String.format("update User set %s=null, %s=null, %s='12345' "
-    			+ "where %s=:name", connectorProp, subjectProp, PROP_PASSWORD, connectorProp));
+    	Query<?> query = getSession().createQuery(String.format("update User set %s=null, %s='%s', %s='12345' "
+    			+ "where %s=:name", 
+    			connectorProp, subjectProp, UUID.randomUUID().toString(), PROP_PASSWORD, connectorProp));
     	query.setParameter("name", name);
     	query.executeUpdate();
 	}

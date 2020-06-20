@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.admin.user.profile;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -25,19 +26,21 @@ public class UserProfilePage extends UserPage {
 		add(new Label("externalManagedNote", "Profile of this user is managed from " + getUser().getAuthSource())
 				.setVisible(getUser().isExternalManaged()));
 		
-		if (getUser().isExternalManaged()) 
+		if (getUser().isExternalManaged()) {
 			add(BeanContext.view("content", getUser(), Sets.newHashSet("password"), true));
-		else 
-			add(new ProfileEditPanel("content", userModel));
-		
-		add(new UserDeleteLink("delete") {
+			add(new UserDeleteLink("delete") {
 
-			@Override
-			protected User getUser() {
-				return UserProfilePage.this.getUser();
-			}
-			
-		}.setVisible(getUser().isExternalManaged()));
+				@Override
+				protected User getUser() {
+					return UserProfilePage.this.getUser();
+				}
+				
+			});
+		} else {
+			add(new ProfileEditPanel("content", userModel));
+			add(new WebMarkupContainer("delete").setVisible(false));
+		}
+		
 	}
 
 }

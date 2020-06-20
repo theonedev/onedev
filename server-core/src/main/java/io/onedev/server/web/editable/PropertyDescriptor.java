@@ -170,11 +170,10 @@ public class PropertyDescriptor implements Serializable {
 	
 	public String getDescription() {
 		String description = EditableUtils.getDescription(getPropertyGetter());
-		if (description != null) {
+		if (description != null) 
 			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
-		} else {
+		else 
 			return null;
-		}
 	}
 
 }
