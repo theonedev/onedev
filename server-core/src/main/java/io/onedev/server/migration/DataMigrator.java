@@ -2021,10 +2021,8 @@ public class DataMigrator {
 	// Migrate to 3.2.0
 	private void migrate42(File dataDir, Stack<Integer> versions) {
 		Map<String, String> commentRequests = new HashMap<>();
-		Map<String, String> projectNames = new HashMap<>();
-		Map<String, String> requestProjects = new HashMap<>();
-		Map<String, String> requestNumbers = new HashMap<>();
 		Map<String, String> requestTargetHeads = new HashMap<>();
+		Map<String, String> requestBaseCommits = new HashMap<>();
 		
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("CodeCommentRelations.xml")) {
@@ -2035,8 +2033,7 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					String id = element.elementTextTrim("id");
-					requestProjects.put(id, element.elementTextTrim("targetProject"));
-					requestNumbers.put(id, element.elementTextTrim("number"));
+					requestBaseCommits.put(id, element.elementTextTrim("baseCommitHash"));
 					Element lastMergePreviewElement = element.element("lastMergePreview");
 					if (lastMergePreviewElement != null) {
 						Element targetHeadElement = lastMergePreviewElement.element("targetHead");
@@ -2046,15 +2043,11 @@ public class DataMigrator {
 						Element mergedElement = lastMergePreviewElement.element("merged");
 						if (mergedElement != null)
 							mergedElement.setName("mergeCommitHash");
-					}
+					} 
 					element.element("headCommitHash").detach();
 				}
 				dom.writeToFile(file, false);
-			} else if (file.getName().startsWith("Projects.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements())
-					projectNames.put(element.elementTextTrim("id"), element.elementText("name").trim());
-			}
+			} 
 		}
 		
 		for (File file: dataDir.listFiles()) {
@@ -2153,16 +2146,11 @@ public class DataMigrator {
 					element.element("mergeBaseCommitHash").detach();
 					String requestId = element.elementTextTrim("request");
 					String targetHead = requestTargetHeads.get(requestId);
-					if (targetHead != null) {
-						element.addElement("targetHeadCommitHash").setText(targetHead);
-					} else {
-						String requestNumber = requestNumbers.get(requestId);
-						String projectId = requestProjects.get(requestId);
-						String projectName = projectNames.get(projectId);
-						String message = String.format("Merge preview not available (project: %s, pull request: %d)", 
-								projectName, requestNumber);
-						throw new RuntimeException(message);
-					}
+					Element targetHeadCommitHashElement = element.addElement("targetHeadCommitHash");
+					if (targetHead != null) 
+						targetHeadCommitHashElement.setText(targetHead);
+					else
+						targetHeadCommitHashElement.setText(requestBaseCommits.get(requestId));
 				}
 				dom.writeToFile(file, false);
 			}
