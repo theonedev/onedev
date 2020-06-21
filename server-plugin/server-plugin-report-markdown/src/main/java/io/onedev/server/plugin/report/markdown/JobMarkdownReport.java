@@ -44,7 +44,7 @@ public class JobMarkdownReport extends JobReport {
 		this.reportName = reportName;
 	}
 	
-	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, for instance: manual/index.md. "
+	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, for instance: <tt>manual/index.md</tt>. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty

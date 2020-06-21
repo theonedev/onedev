@@ -104,7 +104,7 @@ public class ProjectDependency implements Serializable {
 	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(suggester="suggestArtifacts", interpolative=true)
+	@Patterns(suggester="suggestArtifacts", interpolative=true, path=true)
 	@NotEmpty
 	public String getArtifacts() {
 		return artifacts;

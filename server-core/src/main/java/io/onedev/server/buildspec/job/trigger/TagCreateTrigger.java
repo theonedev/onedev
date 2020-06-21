@@ -29,8 +29,8 @@ public class TagCreateTrigger extends JobTrigger {
 	private String branches;
 	
 	@Editable(name="Tags", order=100, description="Optionally specify space-separated tags to check. "
-			+ "Use * or ? for wildcard match. Leave empty to match all tags")
-	@Patterns(suggester="suggestTags")
+			+ "Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to match all tags")
+	@Patterns(suggester="suggestTags", path=true)
 	@NameOfEmptyValue("Any tag")
 	public String getTags() {
 		return tags;
@@ -47,9 +47,9 @@ public class TagCreateTrigger extends JobTrigger {
 
 	@Editable(name="On Branches", order=200, description="This trigger will only be applicable "
 			+ "if tagged commit is on branches specified here. Multiple branches should be "
-			+ "separated with spaces. Use * or ? for wildcard match. Leave empty to match all "
+			+ "separated with spaces. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to match all "
 			+ "branches")
-	@Patterns(suggester="suggestBranches")
+	@Patterns(suggester="suggestBranches", path=true)
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;

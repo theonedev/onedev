@@ -21,8 +21,8 @@ public abstract class ActionAuthorization implements Serializable {
 
 	@Editable(order=1000, description="Action is allowed only if build runs on "
 			+ "specified branches. Multiple branches should be separated with space. "
-			+ "Use * or ? for wildcard match")
-	@Patterns(suggester = "suggestBranches")
+			+ "Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>")
+	@Patterns(suggester = "suggestBranches", path=true)
 	@NameOfEmptyValue("All")
 	public String getAuthorizedBranches() {
 		return authorizedBranches;

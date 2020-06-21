@@ -91,8 +91,8 @@ public class GroovyScript implements Serializable {
 	}
 	
 	@Editable(order=500, description="Optionally specify space-separated branches allowed to "
-		+ "execute this script. Use * or ? for wildcard match. Leave empty to allow all")
-	@Patterns
+		+ "execute this script. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to allow all")
+	@Patterns(path=true)
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
 	@NameOfEmptyValue("All")
 	public String getAllowedBranches() {

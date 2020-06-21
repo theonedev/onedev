@@ -51,8 +51,8 @@ public class JobSecret implements Serializable {
 	@Editable(order=300, description=""
 			+ "Optionally specify space-separated branches to authorize.\n"
 			+ "Only builds from authorized branches can access this secret.\n"
-			+ "Use * or ? for wildcard match. Leave empty to authorize all branches")
-	@Patterns(suggester = "suggestBranches")
+			+ "Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to authorize all branches")
+	@Patterns(suggester = "suggestBranches", path=true)
 	@NameOfEmptyValue("All")
 	public String getAuthorizedBranches() {
 		return authorizedBranches;

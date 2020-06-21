@@ -25,4 +25,5 @@ public @interface Patterns {
 
     Class<? extends Payload>[] payload() default {};
     
+    boolean path() default false;
 }

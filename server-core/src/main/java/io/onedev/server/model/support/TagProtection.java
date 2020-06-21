@@ -43,8 +43,8 @@ public class TagProtection implements Serializable {
 		this.enabled = enabled;
 	}
 
-	@Editable(order=100, description="Specify space-separated tags to be protected. Use * or ? for wildcard match")
-	@Patterns(suggester = "suggestTags")
+	@Editable(order=100, description="Specify space-separated tags to be protected. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>")
+	@Patterns(suggester = "suggestTags", path=true)
 	@NotEmpty
 	public String getTags() {
 		return tags;

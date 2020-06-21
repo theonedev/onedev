@@ -1,6 +1,7 @@
 package io.onedev.server.web.behavior.inputassist;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
@@ -14,6 +15,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.server.OneDev;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 
 @SuppressWarnings("serial")
@@ -31,7 +33,9 @@ abstract class AssistPanel extends Panel {
 		super(id);
 		this.input = input;
 		this.suggestions = suggestions;
-		this.hints = hints;
+		this.hints = hints.stream()
+				.map(it->it.replace("$docRoot", OneDev.getInstance().getDocRoot()))
+				.collect(Collectors.toList());
 	}
 
 	@Override

@@ -291,7 +291,7 @@ public class Job implements Serializable, Validatable {
 			+ "Artifact files are relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, and may use * or ? for pattern match. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(interpolative = true)
+	@Patterns(interpolative = true, path=true)
 	@NameOfEmptyValue("No artifacts")
 	public String getArtifacts() {
 		return artifacts;

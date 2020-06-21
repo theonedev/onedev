@@ -56,7 +56,7 @@ public class PatternsEditSupport implements EditSupport {
 									protected List<String> getHints(TerminalExpect terminalExpect) {
 										return Lists.newArrayList(
 												"Pattern containing spaces or starting with dash needs to be quoted",
-												"Use * or ? for wildcard match"
+												patterns.path()? "Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>": "Use * or ? for wildcard match"
 												);
 									}
 									

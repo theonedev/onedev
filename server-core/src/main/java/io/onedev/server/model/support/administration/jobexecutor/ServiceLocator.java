@@ -39,9 +39,9 @@ public class ServiceLocator implements Serializable {
 	}
 	
 	@Editable(order=200, name="Applicable Images", description="Optionally specify space-separated "
-			+ "service images applicable for this locator. Use * or ? for wildcard match. Leave "
+			+ "service images applicable for this locator. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave "
 			+ "empty to match all")
-	@Patterns
+	@Patterns(path=true)
 	@NameOfEmptyValue("All")
 	public String getServiceImages() {
 		return serviceImages;

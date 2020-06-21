@@ -27,8 +27,8 @@ public abstract class PullRequestTrigger extends TransitionTrigger {
 	
 	@Editable(name="Target Branches", order=100, 
 			description="Optionally specify space-separated target branches of the pull requests to check. "
-					+ "Use * or ? for wildcard match. Leave empty to match all branches")
-	@Patterns(suggester = "suggestBranches")
+					+ "Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to match all branches")
+	@Patterns(suggester = "suggestBranches", path=true)
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
