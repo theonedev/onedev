@@ -15,70 +15,70 @@ With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Po
 
 Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
 
-![Job Executor](doc/images/features/job-executor.png)
+![Job Executor](doc/images/job-executor.png)
 
 ### Create Build Spec in a Breeze
 
 No complex yaml grammars to remember. Create build spec for your projects with GUI and auto-completion instantly without learning.
 
-![Cispec](doc/images/features/cispec.gif)
+![Cispec](doc/images/cispec.gif)
 
 ### Flexible Build Workflow and Pipeline
 
 Conditional build parameters. Create matrix builds by combining different parameters. Connect jobs to create pipelines. Run jobs concurrently to speed up processing. Run jobs automatically upon certain events, or manually by authorized users
 
-![Build Workflow](doc/images/features/build-workflow.gif)
+![Build Workflow](doc/images/build-workflow.gif)
 
 ### Custom Issue States and Fields
 
 Add custom issue states and fields. Configure field dependencies. Transit issue state automatically upon certain events, or manually by authorized users 
 
-![Custom Issue](doc/images/features/custom-issue.gif)
+![Custom Issue](doc/images/custom-issue.gif)
 
 ### Auto-Refreshing Issue Boards
 
 Define issue boards to show issues in columns based on values of specified field. Perform issue operations without leaving the board. Refresh board automatically to reflect most recent issue state.
 
-![Issue Boards](doc/images/features/issue-boards.gif)
+![Issue Boards](doc/images/issue-boards.gif)
 
 ### Code Intelligence
 
 Symbol search and navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 
-![Symbol Search](doc/images/features/symbol-search.gif)
+![Symbol Search](doc/images/symbol-search.gif)
 
 ### Code Discussions and Comprehensions
 
 Instant and lightweight code discussions on code and diff blocks without creating pull requests. Discussions stay with the code to help code comprehension even if file is changed or renamed. 
 
-![Code Comments](doc/images/features/code-comments.gif)
+![Code Comments](doc/images/code-comments.gif)
 
 ### Flexible Pull Request Review Policies
 
 Enforce pull request review with branch protections. Specify required reviewers and builds for desired file patterns. 
 
-![Branch Protection](doc/images/features/branch-protection.gif)
+![Branch Protection](doc/images/branch-protection.gif)
 
 ### Painless Pull Request Review
 
 Review pull request commits as a whole or one by one. Organize code discussions in threads to show changes since last review explicitly
 
-![Increment Review](doc/images/features/increment-review.gif)
+![Increment Review](doc/images/increment-review.gif)
 
 ### Powerful Query Language
 
 Perform sophisticated queries against projects, commits, builds, issues, pull requests or code comments with a powerful query language. Save query for quick access. Subscribe to saved query to get notified of interesting events.
 
-![Powerful Query](doc/images/features/powerful-query.gif)
+![Powerful Query](doc/images/powerful-query.gif)
 
 ### Deep Integration of Code, Issue, Pull Request and Build
 
 Configure issues to transit to desired state upon commit, build or pull request events. See commit and pull request events in issue activities. Query fixed issues between builds. Find builds or pull requests fixing particular issues or commits
 
-![Issue Query](doc/images/features/issue-query.gif)
+![Issue Query](doc/images/issue-query.gif)
 
 ### Fine Grained Permission Control
 
 Define permission schemes best suiting your development workflow. For instance, you may specify who can change particular source folder, who can assign issues, who can run release builds, or who can access build log, etc.
 
-![Role](doc/images/features/role.png)
+![Role](doc/images/role.png)
