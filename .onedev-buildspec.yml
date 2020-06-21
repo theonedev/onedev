@@ -72,6 +72,11 @@ jobs:
   - jobName: CI
     requireSuccessful: true
   artifacts: '*.zip *.sh'
+  reports:
+  - !JobMarkdownReport
+    filePatterns: doc/**
+    reportName: Incompatibilities
+    startPage: doc/incompatibilities.md
   cpuRequirement: 250m
   memoryRequirement: 128m
   retryCondition: never
