@@ -94,7 +94,7 @@ jobs:
   image: alpine/git:1.0.7
   commands:
   - git config --global --unset http.extraHeader
-  - git push -f https://robinshine:@secrets:github-password@\@github.com/theonedev/server
+  - git push -f https://robinshine:@secrets:github-token@\@github.com/theonedev/server
     HEAD:master
   triggers:
   - !BranchUpdateTrigger
@@ -114,7 +114,7 @@ jobs:
   - set -e
   - git fetch --tags
   - git config --global --unset http.extraHeader
-  - git push -f --tags https://robinshine:@secrets:github-password@\@github.com/theonedev/onedev
+  - git push -f --tags https://robinshine:@secrets:github-token@\@github.com/theonedev/onedev
   triggers:
   - !TagCreateTrigger
     projects: onedev-server
