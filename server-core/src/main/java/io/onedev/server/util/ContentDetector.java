@@ -56,6 +56,7 @@ public class ContentDetector {
 		MediaType mediaType = detectMediaType(contentBytes, fileName);
 		
 		return !mediaType.getType().equalsIgnoreCase("text")
+				&& !mediaType.equals(MediaType.application("rls-services+xml"))
 				&& !mediaType.equals(MediaType.application("xhtml+xml"))
 				&& !mediaType.equals(MediaType.APPLICATION_XML)
 				&& !mediaType.equals(MediaType.application("x-bat"))
