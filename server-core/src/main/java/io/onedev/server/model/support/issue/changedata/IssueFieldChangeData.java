@@ -66,7 +66,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 	
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new PropertyChangePanel(componentId, getOldFieldValues(), getNewFieldValues(), true);
+		return new PropertyChangePanel(componentId, getOldFieldValues(), getNewFieldValues(), false);
 	}
 
 	@Override
