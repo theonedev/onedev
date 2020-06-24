@@ -19,7 +19,7 @@ public class MentionParser {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 	
-	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)($|\\s+)");
+	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)(?=$|\\s+)");
 
 	public Collection<String> parseMentions(String rendered) {
 		return parseMentions(Jsoup.parseBodyFragment(rendered));		
@@ -49,7 +49,7 @@ public class MentionParser {
 				String userTag;
 				mentions.add(userName);
 				userTag = toHtml(userName);
-				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + userTag + matcher.group(3));
+				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + userTag);
 			}
 			HtmlUtils.appendTail(matcher, node);
 		}
