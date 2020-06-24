@@ -55,6 +55,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescript
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -285,7 +286,14 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 				@Override
 				protected AttachmentSupport getAttachmentSupport() {
-					return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID());
+					return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID()) {
+						
+						@Override
+						public boolean canDeleteAttachment() {
+							return SecurityUtils.canManagePullRequests(getProject());
+						}
+						
+					};
 				}
 
 				@Override

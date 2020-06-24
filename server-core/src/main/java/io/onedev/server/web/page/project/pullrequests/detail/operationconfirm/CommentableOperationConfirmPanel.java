@@ -13,6 +13,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -40,8 +41,14 @@ public abstract class CommentableOperationConfirmPanel extends OperationConfirmP
 			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getLatestUpdate().getRequest().getTargetProject(), 
-						getLatestUpdate().getRequest().getUUID());
+				return new ProjectAttachmentSupport(getProject(), getLatestUpdate().getRequest().getUUID()) {
+
+					@Override
+					public boolean canDeleteAttachment() {
+						return SecurityUtils.canManagePullRequests(getProject());
+					}
+					
+				};
 			}
 
 			@Override

@@ -65,8 +65,14 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(IssueCommentedPanel.this.getComment().getIssue().getProject(), 
-						IssueCommentedPanel.this.getComment().getIssue().getUUID());
+				return new ProjectAttachmentSupport(getProject(), IssueCommentedPanel.this.getComment().getIssue().getUUID()) {
+
+					@Override
+					public boolean canDeleteAttachment() {
+						return SecurityUtils.canManageIssues(getProject());
+					}
+					
+				};
 			}
 
 			@Override

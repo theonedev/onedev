@@ -231,7 +231,14 @@ public abstract class IssueActivitiesPanel extends Panel {
 
 				@Override
 				protected AttachmentSupport getAttachmentSupport() {
-					return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
+					return new ProjectAttachmentSupport(getProject(), getIssue().getUUID()) {
+
+						@Override
+						public boolean canDeleteAttachment() {
+							return SecurityUtils.canManageIssues(getProject());
+						}
+						
+					};
 				}
 
 				@Override

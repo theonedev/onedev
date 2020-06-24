@@ -453,7 +453,14 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected ProjectAttachmentSupport getAttachmentSupport() {
-							return new ProjectAttachmentSupport(context.getProject(), uuid);
+							return new ProjectAttachmentSupport(context.getProject(), uuid) {
+
+								@Override
+								public boolean canDeleteAttachment() {
+									return SecurityUtils.canManageCodeComments(context.getProject());
+								}
+								
+							};
 						}
 
 						@Override

@@ -791,7 +791,14 @@ public class RevisionDiffPanel extends Panel {
 
 								@Override
 								protected ProjectAttachmentSupport getAttachmentSupport() {
-									return new ProjectAttachmentSupport(projectModel.getObject(), uuid);
+									return new ProjectAttachmentSupport(projectModel.getObject(), uuid) {
+
+										@Override
+										public boolean canDeleteAttachment() {
+											return SecurityUtils.canManageCodeComments(projectModel.getObject());
+										}
+										
+									};
 								}
 
 								@Override

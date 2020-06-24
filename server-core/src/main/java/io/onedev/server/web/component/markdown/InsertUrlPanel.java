@@ -18,6 +18,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -53,6 +54,7 @@ import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.blob.folderpicker.BlobFolderPicker;
 import io.onedev.server.web.component.blob.picker.BlobPicker;
@@ -301,6 +303,18 @@ abstract class InsertUrlPanel extends Panel {
 						item.add(new AjaxLink<Void>("delete") {
 
 							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete '" + attachmentName + "'?"));
+							}
+
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setVisible(attachmentSupport.canDeleteAttachment());
+							}
+
+							@Override
 							public void onClick(AjaxRequestTarget target) {
 								attachmentSupport.deleteAttachemnt(attachmentName);
 								target.add(fragment);
@@ -342,6 +356,12 @@ abstract class InsertUrlPanel extends Panel {
 						
 						item.add(new AjaxLink<Void>("delete") {
 
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete '" + attachmentName + "'?"));
+							}
+							
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								attachmentSupport.deleteAttachemnt(attachmentName);

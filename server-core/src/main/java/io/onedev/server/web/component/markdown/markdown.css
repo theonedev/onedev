@@ -228,12 +228,14 @@ body.fullscreen {
 	margin-bottom: 0;
 }
 
+.insert-url .attachment.image {
+	text-align: center;
+}
 .insert-url .attachment.image img {
 	max-width: 100%;
-	border-radius: 4px 4px 0 0 ;
 }
 .insert-url .attachment.image .btn {
-	border-radius: 0 0 4px 4px;
+	margin-top: 8px;
 }
 
 .insert-url .alert-info {

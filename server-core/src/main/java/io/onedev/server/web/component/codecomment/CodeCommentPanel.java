@@ -143,7 +143,14 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID());
+						return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID()) {
+
+							@Override
+							public boolean canDeleteAttachment() {
+								return SecurityUtils.canManageCodeComments(getProject());
+							}
+							
+						};
 					}
 
 					@Override
@@ -291,7 +298,14 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID());
+						return new ProjectAttachmentSupport(getProject(), getComment().getUUID()) {
+
+							@Override
+							public boolean canDeleteAttachment() {
+								return SecurityUtils.canManageCodeComments(getProject());
+							}
+							
+						};
 					}
 
 					@Override
@@ -596,7 +610,14 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID());
+				return new ProjectAttachmentSupport(getProject(), getComment().getUUID()) {
+
+					@Override
+					public boolean canDeleteAttachment() {
+						return SecurityUtils.canManageCodeComments(getProject());
+					}
+					
+				};
 			}
 
 			@Override

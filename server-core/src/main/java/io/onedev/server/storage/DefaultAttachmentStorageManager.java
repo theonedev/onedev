@@ -72,13 +72,17 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 	}
 	
 	private void permanentizeAttachmentStorage(File attachmentBase, String attachmentStorageUUID) {
-		File tempAttachmentStorage = new File(attachmentBase, TEMP + "/" + attachmentStorageUUID);
 		File permanentAttachmentStorage = getPermanentAttachmentStorage(attachmentBase, attachmentStorageUUID);
-		if (tempAttachmentStorage.exists() && !permanentAttachmentStorage.exists()) {
-			try {
-				FileUtils.moveDirectory(tempAttachmentStorage, permanentAttachmentStorage);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+		if (!permanentAttachmentStorage.exists()) {
+			File tempAttachmentStorage = new File(attachmentBase, TEMP + "/" + attachmentStorageUUID);
+			if (tempAttachmentStorage.exists()) {
+				try {
+					FileUtils.moveDirectory(tempAttachmentStorage, permanentAttachmentStorage);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				FileUtils.createDir(permanentAttachmentStorage);
 			}
 		}
 	}

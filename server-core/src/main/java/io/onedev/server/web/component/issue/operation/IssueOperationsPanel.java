@@ -39,6 +39,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.IssueStateLabel;
@@ -135,7 +136,14 @@ public abstract class IssueOperationsPanel extends Panel {
 
 							@Override
 							protected AttachmentSupport getAttachmentSupport() {
-								return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
+								return new ProjectAttachmentSupport(getProject(), getIssue().getUUID()) {
+									
+									@Override
+									public boolean canDeleteAttachment() {
+										return SecurityUtils.canManageIssues(getProject());
+									}
+									
+								};
 							}
 
 							@Override

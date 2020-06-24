@@ -60,7 +60,14 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
+				return new ProjectAttachmentSupport(getProject(), getIssue().getUUID()) {
+					
+					@Override
+					public boolean canDeleteAttachment() {
+						return SecurityUtils.canManageIssues(getProject());
+					}
+					
+				};
 			}
 
 			@Override

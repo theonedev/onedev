@@ -25,7 +25,7 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.download.AttachmentDownloadResource;
 import io.onedev.server.web.download.AttachmentDownloadResourceReference;
 
-public class ProjectAttachmentSupport implements AttachmentSupport {
+public abstract class ProjectAttachmentSupport implements AttachmentSupport {
 
 	private static final long serialVersionUID = 1L;
 

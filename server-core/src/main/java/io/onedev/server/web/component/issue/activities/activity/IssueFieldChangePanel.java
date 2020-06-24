@@ -65,7 +65,14 @@ public abstract class IssueFieldChangePanel extends Panel {
 
 				@Override
 				protected AttachmentSupport getAttachmentSupport() {
-					return new ProjectAttachmentSupport(getProject(), getChange().getIssue().getUUID());
+					return new ProjectAttachmentSupport(getProject(), getChange().getIssue().getUUID()) {
+
+						@Override
+						public boolean canDeleteAttachment() {
+							return SecurityUtils.canManageIssues(getProject());
+						}
+						
+					};
 				}
 
 				@Override
