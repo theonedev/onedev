@@ -3,7 +3,6 @@ package io.onedev.server.entitymanager.impl;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofOpen;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofSource;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofSourceProject;
-import static io.onedev.server.model.PullRequest.CriterionHelper.ofSubmitter;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofTarget;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofTargetProject;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
@@ -623,11 +622,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public PullRequest findLatest(Project targetProject, User submitter) {
+	public PullRequest findLatest(Project targetProject) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSourceProject(targetProject), ofTargetProject(targetProject)));
-		criteria.add(ofSubmitter(submitter));
 		criteria.addOrder(Order.desc("id"));
 		return find(criteria);
 	}

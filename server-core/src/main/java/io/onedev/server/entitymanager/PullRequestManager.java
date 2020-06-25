@@ -40,7 +40,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     PullRequest find(ProjectScopedNumber pullRequestFQN);
     
 	@Nullable
-	PullRequest findLatest(Project targetProject, User submitter);
+	PullRequest findLatest(Project targetProject);
 	
     void discard(PullRequest request, @Nullable String note);
     

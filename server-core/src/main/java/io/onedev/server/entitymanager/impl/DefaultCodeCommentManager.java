@@ -109,7 +109,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		super.delete(comment);
 
 		PullRequest request = comment.getRequest();
-		request.setCommentCount(request.getCommentCount() - comment.getReplyCount() - 1);
+		if (request != null)
+			request.setCommentCount(request.getCommentCount() - comment.getReplyCount() - 1);
 	}
 
 	@Transactional

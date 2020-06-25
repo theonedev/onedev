@@ -191,7 +191,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		}
 
 		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
-		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
+		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(target.getProject());
 		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
 			pullRequestRef.set(prevRequest);
 		else if (target.getBranch() != null && source.getBranch() != null)
@@ -293,7 +293,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Project project, String branch) {
-				PageParameters params = paramsOf(project, new ProjectAndBranch(project, branch), source); 
+				PageParameters params = paramsOf(getProject(), new ProjectAndBranch(project, branch), source); 
 				
 				/*
 				 * Use below code instead of calling setResponsePage() to make sure the dropdown is 
@@ -349,7 +349,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			public void onClick() {
-				PageParameters params = paramsOf(source.getProject(), source, target); 
+				PageParameters params = paramsOf(getProject(), source, target); 
 				setResponsePage(NewPullRequestPage.class, params);
 			}
 			
@@ -433,7 +433,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected Project getProject() {
-				return NewPullRequestPage.this.getProject();
+				return getPullRequest().getSourceProject();
 			}
 
 		}.setOutputMarkupId(true);
@@ -707,7 +707,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected Project getProject() {
-				return NewPullRequestPage.this.getProject();
+				return target.getProject();
 			}
 			
 		});
@@ -905,7 +905,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject()) && SecurityUtils.canReadCode(source.getProject());
+		return SecurityUtils.canReadCode(target.getProject()) && SecurityUtils.canReadCode(source.getProject());
 	}
 	
 }
