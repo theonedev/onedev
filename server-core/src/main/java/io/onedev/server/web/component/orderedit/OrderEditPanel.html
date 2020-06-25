@@ -17,13 +17,13 @@
 				</td>
 			</tr>
 		</table>
-		<table wicket:id="available" class="available">
-			<tr wicket:id="availableItems">
-				<td class="name"><span wicket:id="name"></span></td>
-				<td class="actions">
-					<a wicket:id="add" title="Add"><i class="fa fa-plus"></i></a>
-				</td>
-			</tr>
-		</table>
+		<ul wicket:id="available" class="available list-unstyled">
+			<li wicket:id="availableItems">
+				<a wicket:id="add" title="Add">
+					<i class="fa fa-plus"></i>
+					<span wicket:id="name"></span>
+				</a>
+			</li>
+		</ul>
 	</div>
 </wicket:panel>

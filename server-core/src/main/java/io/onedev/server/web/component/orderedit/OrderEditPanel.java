@@ -137,9 +137,14 @@ public class OrderEditPanel extends GenericPanel<List<EntitySort>> {
 			@Override
 			protected void populateItem(ListItem<String> item) {
 				String field = item.getModelObject();
-				item.add(new Label("name", field));
 				
 				item.add(new AjaxLink<Void>("add") {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new Label("name", field));
+					}
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
