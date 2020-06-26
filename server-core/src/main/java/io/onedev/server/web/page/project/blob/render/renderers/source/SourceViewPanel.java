@@ -561,43 +561,39 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					context.onAddComment(target, mark);
 					target.appendJavaScript(String.format("onedev.server.sourceView.onAddComment(%s);", getJson(mark)));
 					break;
-				case "toggleComment":
+				case "openComment":
 					Long commentId = params.getParameterValue("param1").toLong();
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
-					if (!comment.equals(context.getOpenComment())) {
-						CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentId) {
+					CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, commentId) {
 
-							@Override
-							protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-								SourceViewPanel.this.onCommentDeleted(target, comment);
-							}
+						@Override
+						protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
+							SourceViewPanel.this.onCommentDeleted(target, comment);
+						}
 
-							@Override
-							protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-								OneDev.getInstance(CodeCommentManager.class).save(comment);
-								target.add(commentContainer.get("head"));
-							}
+						@Override
+						protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+							OneDev.getInstance(CodeCommentManager.class).save(comment);
+							target.add(commentContainer.get("head"));
+						}
 
-							@Override
-							protected PullRequest getPullRequest() {
-								return context.getPullRequest();
-							}
+						@Override
+						protected PullRequest getPullRequest() {
+							return context.getPullRequest();
+						}
 
-							@Override
-							protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-								SourceViewPanel.this.onSaveCommentReply(reply);
-							}
+						@Override
+						protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
+							SourceViewPanel.this.onSaveCommentReply(reply);
+						}
 
-						};
-						commentContainer.replace(commentPanel);
-						commentContainer.setVisible(true);
-						target.add(commentContainer);
-						script = String.format("onedev.server.sourceView.onOpenComment(%s);", getJsonOfComment(comment));
-						target.appendJavaScript(script);
-						context.onCommentOpened(target, comment);
-					} else {
-						closeComment(target);
-					}
+					};
+					commentContainer.replace(commentPanel);
+					commentContainer.setVisible(true);
+					target.add(commentContainer);
+					script = String.format("onedev.server.sourceView.onOpenComment(%s);", getJsonOfComment(comment));
+					target.appendJavaScript(script);
+					context.onCommentOpened(target, comment);
 					break;
 				case "outlineSearch":
 					new ModalPanel(target) {

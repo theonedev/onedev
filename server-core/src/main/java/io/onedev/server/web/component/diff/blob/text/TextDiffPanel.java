@@ -385,18 +385,13 @@ public class TextDiffPanel extends Panel implements SourceAware {
 							getMarkupId(), getJson(mark));
 					target.appendJavaScript(script);
 					break;
-				case "toggleComment": 
+				case "openComment": 
 					Long commentId = params.getParameterValue("param1").toLong();
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
-					CodeComment prevComment = commentSupport.getOpenComment();
-					commentSupport.onToggleComment(target, comment);
-					if (!comment.equals(prevComment)) {
-						script = String.format("onedev.server.textDiff.onOpenComment($('#%s'), %s);", 
-								getMarkupId(), getJsonOfComment(comment));
-						target.appendJavaScript(script);
-					} else {
-						onCommentClosed(target, comment);
-					}
+					commentSupport.onOpenComment(target, comment);
+					script = String.format("onedev.server.textDiff.onOpenComment($('#%s'), %s);", 
+							getMarkupId(), getJsonOfComment(comment));
+					target.appendJavaScript(script);
 					break;
 				}
 			}

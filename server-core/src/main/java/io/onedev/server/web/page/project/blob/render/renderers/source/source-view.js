@@ -287,7 +287,7 @@ onedev.server.sourceView = {
 			for (var i in comments) {
 				var comment = comments[i];
 				var index = parseInt(i) + 1;
-				content += "<a class='comment-trigger' title='Click to show details of this comment'>#" + comment.id + "</a>";
+				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + comment.id + "</a>";
 			}
 			$indicator.popover({
 				html: true, 
@@ -306,12 +306,14 @@ onedev.server.sourceView = {
 						onedev.server.sourceView.restoreMark();
 					});
 					$(this).click(function() {
-    					if ($(".source-view form.dirty").length != 0 
-    							&& !confirm("There are unsaved changes, discard and continue?")) {
-    						return;
-    					}
-						var comment = comments[$(this).index()];			        						
-						callback("toggleComment", comment.id);
+						if (!$(this).hasClass("active")) {
+	    					if ($(".source-view form.dirty").length != 0 
+	    							&& !confirm("There are unsaved changes, discard and continue?")) {
+	    						return;
+	    					}
+							var comment = comments[$(this).index()];			        						
+							callback("openComment", comment.id);
+						}
 					});
 				});
 				onedev.server.sourceView.highlightCommentTrigger();				
@@ -327,11 +329,13 @@ onedev.server.sourceView = {
 				onedev.server.sourceView.restoreMark();
 			});
 			$indicator.click(function() {
-				if ($(".source-view form.dirty").length != 0 
-						&& !confirm("There are unsaved changes, discard and continue?")) {
-					return;
+				if (!$indicator.hasClass("active")) {
+					if ($(".source-view form.dirty").length != 0 
+							&& !confirm("There are unsaved changes, discard and continue?")) {
+						return;
+					}
+					callback("openComment", comment.id);
 				}
-				callback("toggleComment", comment.id);
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		

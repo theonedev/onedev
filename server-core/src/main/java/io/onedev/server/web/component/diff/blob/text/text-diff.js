@@ -790,12 +790,14 @@ onedev.server.textDiff = {
 						onedev.server.textDiff.restoreMark($container);
 					});
 					$(this).click(function() {
-    					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-    							&& !confirm("There are unsaved changes, discard and continue?")) {
-    						return;
-    					}
-						var comment = comments[$(this).index()];			        						
-						callback("toggleComment", comment.id);
+						if (!$(this).hasClass("active")) {
+	    					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
+	    							&& !confirm("There are unsaved changes, discard and continue?")) {
+	    						return;
+	    					}
+							var comment = comments[$(this).index()];			        						
+							callback("openComment", comment.id);
+						}
 					});
 				});
 				onedev.server.textDiff.highlightCommentTrigger($container);				
@@ -811,11 +813,13 @@ onedev.server.textDiff = {
 				onedev.server.textDiff.restoreMark($container);
 			});
 			$indicator.click(function() {
-				if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-						&& !confirm("There are unsaved changes, discard and continue?")) {
-					return;
+				if (!$indicator.hasClass("active")) {
+					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
+							&& !confirm("There are unsaved changes, discard and continue?")) {
+						return;
+					}
+					callback("openComment", comment.id);
 				}
-				callback("toggleComment", comment.id);
 			});
 		}
 		$lineNumTd.children(".comment-indicator").remove();
@@ -894,9 +898,6 @@ onedev.server.textDiff = {
 			onedev.server.textDiff.addCommentIndicator($container, leftSide, line, comments);
 		}
 		onedev.server.textDiff.highlightCommentTrigger($container);				
-		var mark = $container.data("mark");
-		if (mark)
-			onedev.server.textDiff.scrollIntoView($container, mark);
 	},
 	onOpenComment: function($container, comment) {
 		$container.data("openComment", comment);
@@ -907,9 +908,6 @@ onedev.server.textDiff = {
 	},
 	onCloseComment: function($container) {
 		$container.removeData("openComment");
-		var mark = $container.data("mark");
-		if (mark)
-			onedev.server.textDiff.scrollIntoView($container, mark);
 		onedev.server.textDiff.highlightCommentTrigger($container);
 	},
 	onAddComment: function($container, mark) {

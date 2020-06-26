@@ -755,8 +755,8 @@ public class RevisionDiffPanel extends Panel {
 						}
 	
 						@Override
-						public void onToggleComment(AjaxRequestTarget target, CodeComment comment) {
-							RevisionDiffPanel.this.onToggleComment(target, comment);
+						public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+							RevisionDiffPanel.this.onOpenComment(target, comment);
 						}
 	
 						@Override
@@ -825,6 +825,7 @@ public class RevisionDiffPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									clearComment(target);
+									target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 									Mark mark = getMark();
 									if (mark != null) {
 										SourceAware sourceAware = getSourceAware(mark.getPath());
@@ -832,8 +833,6 @@ public class RevisionDiffPanel extends Panel {
 											sourceAware.unmark(target);
 										((CommentSupport)commentSupport).onUnmark(target);
 									}
-									
-									target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 								}
 								
 							});
@@ -986,56 +985,51 @@ public class RevisionDiffPanel extends Panel {
 		return compareContext;
 	}
 	
-	private void onToggleComment(AjaxRequestTarget target, CodeComment comment) {
-		if (!comment.equals(getOpenComment())) {
-			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, comment.getId()) {
+	private void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+		CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, comment.getId()) {
 
-				@Override
-				protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-					RevisionDiffPanel.this.onCommentDeleted(target, comment);
-				}
-
-				@Override
-				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					commentSupport.onSaveComment(comment);
-					target.add(commentContainer.get("head"));
-				}
-
-				@Override
-				protected PullRequest getPullRequest() {
-					return requestModel.getObject();
-				}
-
-				@Override
-				protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-					reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
-					commentSupport.onSaveCommentReply(reply);
-				}
-				
-			};
-			
-			commentContainer.replace(commentPanel);
-			commentContainer.setVisible(true);
-			target.add(commentContainer);
-			
-			CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
-			if (prevComment != null) {
-				SourceAware sourceAware = getSourceAware(prevComment.getMark().getPath());
-				if (sourceAware != null) 
-					sourceAware.onCommentClosed(target, prevComment);
-			} 
-			
-			Mark prevMark = RevisionDiffPanel.this.getMark();
-			if (prevMark != null) {
-				SourceAware sourceAware = getSourceAware(prevMark.getPath());
-				if (sourceAware != null)
-					sourceAware.unmark(target);
+			@Override
+			protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
+				RevisionDiffPanel.this.onCommentDeleted(target, comment);
 			}
-			commentSupport.onCommentOpened(target, comment);
-		} else {
-			clearComment(target);
-			commentSupport.onCommentClosed(target);
+
+			@Override
+			protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+				commentSupport.onSaveComment(comment);
+				target.add(commentContainer.get("head"));
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return requestModel.getObject();
+			}
+
+			@Override
+			protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
+				reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
+				commentSupport.onSaveCommentReply(reply);
+			}
+			
+		};
+		
+		commentContainer.replace(commentPanel);
+		commentContainer.setVisible(true);
+		target.add(commentContainer);
+		
+		CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
+		if (prevComment != null) {
+			SourceAware sourceAware = getSourceAware(prevComment.getMark().getPath());
+			if (sourceAware != null) 
+				sourceAware.onCommentClosed(target, prevComment);
+		} 
+		
+		Mark prevMark = RevisionDiffPanel.this.getMark();
+		if (prevMark != null) {
+			SourceAware sourceAware = getSourceAware(prevMark.getPath());
+			if (sourceAware != null)
+				sourceAware.unmark(target);
 		}
+		commentSupport.onCommentOpened(target, comment);
 		target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 	}
 	
@@ -1162,15 +1156,15 @@ public class RevisionDiffPanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				clearComment(target);
 				CodeComment comment = getOpenComment();
+				clearComment(target);
+				target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 				if (comment != null) {
 					SourceAware sourceAware = getSourceAware(comment.getMark().getPath());
 					if (sourceAware != null) 
 						sourceAware.onCommentClosed(target, comment);
 					commentSupport.onCommentClosed(target);
 				}
-				target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 			}
 			
 		});

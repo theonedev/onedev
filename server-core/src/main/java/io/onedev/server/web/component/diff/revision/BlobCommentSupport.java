@@ -21,7 +21,7 @@ public interface BlobCommentSupport extends Serializable {
 	
 	@Nullable CodeComment getOpenComment();
 
-	void onToggleComment(AjaxRequestTarget target, CodeComment comment);
+	void onOpenComment(AjaxRequestTarget target, CodeComment comment);
 	
 	void onAddComment(AjaxRequestTarget target, Mark mark);
 	
