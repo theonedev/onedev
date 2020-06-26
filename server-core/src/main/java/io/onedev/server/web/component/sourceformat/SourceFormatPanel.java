@@ -63,7 +63,7 @@ public class SourceFormatPanel extends Panel {
 		
 		cookie = request.getCookie(COOKIE_LINE_WRAP_MODE);
 		if (cookie != null)
-			lineWrapMode = cookie.getValue();
+			lineWrapMode = cookie.getValue().replace('-', ' ');
 		else
 			lineWrapMode = "Soft wrap";
 	}
@@ -153,7 +153,7 @@ public class SourceFormatPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				Cookie cookie = new Cookie(COOKIE_LINE_WRAP_MODE, lineWrapMode);				
+				Cookie cookie = new Cookie(COOKIE_LINE_WRAP_MODE, lineWrapMode.replace(' ', '-'));				
 				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);

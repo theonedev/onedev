@@ -273,6 +273,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		};
 		
 		WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
 		head.add(new DropdownLink("context") {
