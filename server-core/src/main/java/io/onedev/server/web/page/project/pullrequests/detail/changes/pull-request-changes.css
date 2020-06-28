@@ -19,6 +19,7 @@
 }
 .commits-selector>.short-cuts>a {
 	margin-right: 8px;
+	font-size: 16px;
 }
 .commits-selector>.head {
 	padding: 8px;
