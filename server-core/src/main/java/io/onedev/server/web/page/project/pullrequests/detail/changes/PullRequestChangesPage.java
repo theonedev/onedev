@@ -5,12 +5,14 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -20,6 +22,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -42,10 +45,17 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
@@ -326,6 +336,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 				AbstractPostAjaxBehavior callbackBehavior = new AbstractPostAjaxBehavior() {
 					
 					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
+
+					@Override
 					protected void respond(AjaxRequestTarget target) {
 						IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 						state.oldCommitHash = params.getParameterValue("oldCommit").toString();
@@ -361,11 +377,98 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 					
 				};
 				fragment.add(callbackBehavior);
+				fragment.add(new Link<Void>("allChanges") {
+
+					@Override
+					public void onClick() {
+						PullRequestChangesPage.State state = new PullRequestChangesPage.State();
+						
+						PullRequest request = getPullRequest();
+						state.oldCommitHash = request.getBaseCommitHash();
+						state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+						setResponsePage(PullRequestChangesPage.class, 
+								PullRequestChangesPage.paramsOf(request, state));
+					}
+					
+				});
+				
+				fragment.add(new Link<Date>("changesSinceLastReview", new LoadableDetachableModel<Date>() {
+
+					@Override
+					protected Date load() {
+						Date lastReviewDate = null;
+						User user = getLoginUser();
+						if (user != null) {
+							PullRequest request = getPullRequest();
+							for (PullRequestComment comment: request.getComments()) { 
+								if (comment.getUser().equals(user) && 
+										(lastReviewDate == null || lastReviewDate.before(comment.getDate()))) {
+									lastReviewDate = comment.getDate();
+								}
+							}
+							
+							for (PullRequestChange change: request.getChanges()) {
+								if (change.getUser().equals(user) 
+										&& (lastReviewDate == null || lastReviewDate.before(change.getDate()))
+										&& (change.getData() instanceof PullRequestApproveData 
+												|| change.getData() instanceof PullRequestReopenData
+												|| change.getData() instanceof PullRequestRequestedForChangesData)) {
+									lastReviewDate = change.getDate();
+								}
+							}
+							
+							for (CodeComment comment: request.getCodeComments()) {
+								if (comment.getUser().equals(user) && 
+										(lastReviewDate == null || lastReviewDate.before(comment.getCreateDate()))) {
+									lastReviewDate = comment.getCreateDate();
+								}
+								for (CodeCommentReply reply: comment.getReplies()) {
+									if (reply.getUser().equals(user) && 
+											(lastReviewDate == null || lastReviewDate.before(reply.getDate()))) {
+										lastReviewDate = reply.getDate();
+									}
+								}
+							}
+						}
+						return lastReviewDate;
+					}
+					
+				}) {
+
+					@Override
+					public void onClick() {
+						PullRequestChangesPage.State state = new PullRequestChangesPage.State();
+						
+						PullRequest request = getPullRequest();
+						state.oldCommitHash = request.getBaseCommitHash();
+						for (PullRequestUpdate update: request.getSortedUpdates()) {
+							if (update.getDate().before(getModelObject()))
+								state.oldCommitHash = update.getHeadCommitHash();
+						}
+						
+						state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+						setResponsePage(PullRequestChangesPage.class, 
+								PullRequestChangesPage.paramsOf(request, state));
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						Date lastReviewDate = getModelObject();
+						setVisible(lastReviewDate != null 
+								&& lastReviewDate.before(getPullRequest().getLatestUpdate().getDate()));
+					}
+					
+				});
 				fragment.add(new ListView<RevCommit>("commits", commitsModel) {
 
 					@Override
 					protected void populateItem(ListItem<RevCommit> item) {
 						RevCommit commit = item.getModelObject();
+						if (!getPullRequest().getPendingCommits().contains(commit)) {
+							item.add(AttributeAppender.append("class", "rebased"));
+							item.add(AttributeAppender.append("title", "This commit is rebased"));
+						}
 						item.add(AttributeAppender.append("data-hash", commit.name()));
 						item.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 						item.add(new Label("subject", commit.getShortMessage()));

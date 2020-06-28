@@ -14,6 +14,12 @@
 	color: #666;
 }
 
+.commits-selector>.short-cuts {
+	padding: 8px;
+}
+.commits-selector>.short-cuts>a {
+	margin-right: 8px;
+}
 .commits-selector>.head {
 	padding: 8px;
 	border-bottom: 1px solid #DDD;
@@ -27,6 +33,10 @@
 	margin-bottom: 0;
 	padding: 8px;
 	overflow-y: auto;
+}
+.commits-selector ul li.rebased a,
+.commits-selector ul li.rebased a span {
+	color: #aaa;
 }
 .commits-selector ul a {
 	text-decoration: none;

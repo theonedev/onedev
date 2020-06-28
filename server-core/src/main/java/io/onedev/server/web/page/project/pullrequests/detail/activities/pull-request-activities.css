@@ -34,6 +34,15 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content .alert {
 	margin: 16px 0;
 }
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased,
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased a,
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased span,
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased:before {
+	color: #aaa;
+}
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased img {
+	opacity: 36%;
+}
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit {
 	position: relative;
 	margin: 8px 0;

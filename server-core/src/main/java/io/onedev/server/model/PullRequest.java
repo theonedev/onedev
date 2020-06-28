@@ -42,6 +42,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -305,6 +306,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Collection<Long> fixedIssueNumbers;
 	
 	private transient Collection<User> participants;
+	
+	private transient Collection<RevCommit> pendingCommits;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	private String checkError;
@@ -837,6 +840,23 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return false;
 	}
 	
+	public Collection<RevCommit> getPendingCommits() {
+		if (pendingCommits == null) {
+			pendingCommits = new HashSet<>();
+			Project project = getTargetProject();
+			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
+				ObjectId headCommitId = ObjectId.fromString(getLatestUpdate().getHeadCommitHash());
+				revWalk.markStart(revWalk.parseCommit(headCommitId));
+				ObjectId targetHeadCommitId = ObjectId.fromString(getLatestUpdate().getTargetHeadCommitHash());
+				revWalk.markUninteresting(revWalk.parseCommit(targetHeadCommitId));
+				revWalk.forEach(c->pendingCommits.add(c));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return pendingCommits;
+	}
+
 	@Nullable
 	public ComparingInfo getRequestComparingInfo(CodeComment.ComparingInfo commentComparingInfo) {
 		List<String> commitHashes = new ArrayList<>();
