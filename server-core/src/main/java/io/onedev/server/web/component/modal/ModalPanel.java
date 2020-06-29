@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -23,17 +24,17 @@ public abstract class ModalPanel extends Panel {
 	
 	private boolean inited;
 	
-	public ModalPanel(AjaxRequestTarget target) {
-		this(target, null);
+	public ModalPanel(IPartialPageRequestHandler handler) {
+		this(handler, null);
 	}
 	
-	public ModalPanel(AjaxRequestTarget target, IModel<?> model) {
-		super(((BasePage)target.getPage()).getRootComponents().newChildId(), model);
+	public ModalPanel(IPartialPageRequestHandler handler, IModel<?> model) {
+		super(((BasePage)handler.getPage()).getRootComponents().newChildId(), model);
 		
-		BasePage page = (BasePage) target.getPage(); 
+		BasePage page = (BasePage) handler.getPage(); 
 		page.getRootComponents().add(this);
-		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
-		target.add(this);
+		handler.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
+		handler.add(this);
 	}
 	
 	@Override

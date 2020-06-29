@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting;
+package io.onedev.server.web.page.admin.issuesetting.fieldspec;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -30,6 +30,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -86,8 +87,10 @@ public class MarkdownViewer extends GenericPanel<String> {
 				if (markdown != null) {
 					MarkdownManager markdownManager = AppLoader.getInstance(MarkdownManager.class);
 					String html = markdownManager.render(markdown);
-					ProjectPage page = (ProjectPage) getPage();
-					return markdownManager.process(page.getProject(), html, getRenderContext());
+					Project project = null;
+					if (getPage() instanceof ProjectPage)
+						project = ((ProjectPage) getPage()).getProject(); 
+					return markdownManager.process(project, html, getRenderContext());
 				} else {
 					return null;
 				}

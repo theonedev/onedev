@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting;
+package io.onedev.server.web.page.admin.issuesetting.defaultboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +41,7 @@ import io.onedev.server.web.component.issue.board.BoardEditPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
@@ -147,6 +148,27 @@ public class DefaultBoardListPage extends IssueSettingPage {
 					}
 					
 				});
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject()) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+					}
+					
+				});
+			}
+
+			@Override
+			public String getCssClass() {
+				return "ellipsis";
 			}
 			
 		});		

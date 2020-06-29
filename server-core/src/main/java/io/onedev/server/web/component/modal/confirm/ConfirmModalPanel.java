@@ -4,14 +4,15 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
 public abstract class ConfirmModalPanel extends ModalPanel {
 
-	public ConfirmModalPanel(AjaxRequestTarget target) {
-		super(target);
+	public ConfirmModalPanel(IPartialPageRequestHandler handler) {
+		super(handler);
 	}
 
 	@Override

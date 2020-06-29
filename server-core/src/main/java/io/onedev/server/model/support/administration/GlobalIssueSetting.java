@@ -23,6 +23,7 @@ import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider
 import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
 import io.onedev.server.model.support.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
@@ -60,6 +61,8 @@ public class GlobalIssueSetting implements Serializable {
 	private List<String> listFields = new ArrayList<>();
 	
 	private List<NamedIssueQuery> namedQueries = new ArrayList<>();
+	
+	private List<IssueTemplate> issueTemplates = new ArrayList<>();
 	
 	private boolean reconciled = true;
 	
@@ -582,6 +585,14 @@ public class GlobalIssueSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 	
+	public List<IssueTemplate> getIssueTemplates() {
+		return issueTemplates;
+	}
+
+	public void setIssueTemplates(List<IssueTemplate> issueTemplates) {
+		this.issueTemplates = issueTemplates;
+	}
+
 	@Nullable
 	public NamedIssueQuery getNamedQuery(String name) {
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {

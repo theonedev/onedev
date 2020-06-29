@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting;
+package io.onedev.server.web.page.admin.issuesetting.statespec;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,8 +16,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -31,30 +29,37 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
-public class IssueFieldListPage extends IssueSettingPage {
+public class IssueStateListPage extends IssueSettingPage {
 
-	public IssueFieldListPage(PageParameters params) {
+	public IssueStateListPage(PageParameters params) {
 		super(params);
 	}
 
-	private DataTable<FieldSpec, Void> fieldsTable;
+	private DataTable<StateSpec, Void> statesTable;
+	
+	private int getStateSpecIndex(String stateName) {
+		for (int i=0; i<getSetting().getStateSpecs().size(); i++) {
+			if (getSetting().getStateSpecs().get(i).getName().equals(stateName))
+				return i;
+		}
+		return -1;
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -64,11 +69,11 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new FieldEditPanel(id, -1) {
+				return new StateEditPanel(id, -1) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
-						target.add(fieldsTable);
+						target.add(statesTable);
 						modal.close();
 					}
 
@@ -79,7 +84,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 					@Override
 					protected GlobalIssueSetting getSetting() {
-						return IssueFieldListPage.this.getSetting();
+						return IssueStateListPage.this.getSetting();
 					}
 
 				};
@@ -87,67 +92,71 @@ public class IssueFieldListPage extends IssueSettingPage {
 			
 		});
 		
-		List<IColumn<FieldSpec, Void>> columns = new ArrayList<>();
+		List<IColumn<StateSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Name")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				StateSpec state = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, state) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span> " 
-								+ HtmlEscape.escapeHtml5(field.getName())).setEscapeModelStrings(false);
+						String label = "<span class='drag-indicator fa fa-reorder'></span> " 
+								+ HtmlEscape.escapeHtml5(state.getName());
+
+						if (getStateSpecIndex(state.getName()) == 0)
+							label += " <span class='label label-default'>Initial</span>";
+						return new Label(componentId, label).setEscapeModelStrings(false);
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Color")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				StateSpec state = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, state) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, EditableUtils.getDisplayName(field.getClass()));
+						return new Label(componentId).add(AttributeAppender.append("style", "background: " + state.getColor() + ";"));
 					}
 					
-				});
-			}
-		});		
-		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Display in Issue List")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, TextUtils.describe(getSetting().getListFields().contains(field.getName())));
-					}
-					
-				});
-			}
-
-			@Override
-			public String getCssClass() {
-				return "display-in-issue-list";
+				}.add(AttributeAppender.append("class", "color")));
 			}
 			
 		});		
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Description")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				StateSpec state = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, state) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						String description = state.getDescription();
+						if (description != null)
+							return new Label(componentId, description);
+						else
+							return new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false);
+					}
+					
+				});
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, rowModel.getObject()) {
 
 					@Override
@@ -165,21 +174,21 @@ public class IssueFieldListPage extends IssueSettingPage {
 			
 		});		
 		
-		IDataProvider<FieldSpec> dataProvider = new ListDataProvider<FieldSpec>() {
+		IDataProvider<StateSpec> dataProvider = new ListDataProvider<StateSpec>() {
 
 			@Override
-			protected List<FieldSpec> getData() {
-				return getSetting().getFieldSpecs();
+			protected List<StateSpec> getData() {
+				return getSetting().getStateSpecs();
 			}
 
 		};
 		
-		add(fieldsTable = new DataTable<FieldSpec, Void>("issueFields", columns, dataProvider, Integer.MAX_VALUE));
-		fieldsTable.addTopToolbar(new HeadersToolbar<Void>(fieldsTable, null));
-		fieldsTable.addBottomToolbar(new NoRecordsToolbar(fieldsTable));
-		fieldsTable.setOutputMarkupId(true);
+		add(statesTable = new DataTable<StateSpec, Void>("issueStates", columns, dataProvider, Integer.MAX_VALUE));
+		statesTable.addTopToolbar(new HeadersToolbar<Void>(statesTable, null));
+		statesTable.addBottomToolbar(new NoRecordsToolbar(statesTable));
+		statesTable.setOutputMarkupId(true);
 		
-		fieldsTable.add(new SortBehavior() {
+		statesTable.add(new SortBehavior() {
 
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
@@ -187,86 +196,69 @@ public class IssueFieldListPage extends IssueSettingPage {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(getSetting().getFieldSpecs(), fromIndex+i, fromIndex+i+1);
+						Collections.swap(getSetting().getStateSpecs(), fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(getSetting().getFieldSpecs(), fromIndex-i, fromIndex-i-1);
+						Collections.swap(getSetting().getStateSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-				target.add(fieldsTable);
+				target.add(statesTable);
 			}
 			
 		}.sortable("tbody"));
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new InputSpecCssResourceReference()));
-	}
-
-	private int getFieldSpecIndex(String fieldName) {
-		for (int i=0; i<getSetting().getFieldSpecs().size(); i++) {
-			if (getSetting().getFieldSpecs().get(i).getName().equals(fieldName))
-				return i;
-		}
-		return -1;
-	}
-	
 	private abstract class ColumnFragment extends Fragment {
 
-		private final FieldSpec field;
+		private final StateSpec state;
 		
-		public ColumnFragment(String id, FieldSpec field) {
-			super(id, "columnFrag", IssueFieldListPage.this);
-			this.field = field;
+		public ColumnFragment(String id, StateSpec state) {
+			super(id, "columnFrag", IssueStateListPage.this);
+			this.state = state;
 		}
-		
-		protected abstract Component newLabel(String componentId);
 
 		@Override
 		protected void onInitialize() {
 			super.onInitialize();
-			
-			int index = getFieldSpecIndex(field.getName());
+			int index = getStateSpecIndex(state.getName());				
 			Preconditions.checkState(index != -1);
-			
 			AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					new SideFloating(target, SideFloating.Placement.RIGHT) {
 
+						private StateSpec getState() {
+							return getSetting().getStateSpecs().get(index);
+						}
+						
 						@Override
 						protected String getTitle() {
-							return field.getName() + " (type: " + EditableUtils.getDisplayName(field.getClass()) + ")";
+							return getState().getName();
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "field-spec input-spec def-detail"));
+							add(AttributeAppender.append("class", "state-spec def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
-							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldListPage.this);
-							fragment.add(BeanContext.view("viewer1", field, Sets.newHashSet("name"), true));
-							FieldBean bean = new FieldBean();
-							bean.setPromptUponIssueOpen(getSetting().getPromptFieldsUponIssueOpen().contains(field.getName()));
-							fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
+							Fragment fragment = new Fragment(id, "viewStateFrag", IssueStateListPage.this);
+							fragment.add(BeanContext.view("viewer", getState(), Sets.newHashSet("name"), true));
 							fragment.add(new ModalLink("edit") {
 
 								@Override
 								protected Component newContent(String id, ModalPanel modal) {
 									sideFloating.close();
-									return new FieldEditPanel(id, index) {
+									return new StateEditPanel(id, index) {
 
 										@Override
 										protected void onSave(AjaxRequestTarget target) {
-											target.add(fieldsTable);
+											target.add(statesTable);
 											modal.close();
 										}
 
@@ -277,7 +269,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 										@Override
 										protected GlobalIssueSetting getSetting() {
-											return IssueFieldListPage.this.getSetting();
+											return IssueStateListPage.this.getSetting();
 										}
 
 									};
@@ -289,27 +281,28 @@ public class IssueFieldListPage extends IssueSettingPage {
 								@Override
 								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this field?"));
+									attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this state?"));
 								}
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getSetting().getFieldSpecs().remove(index);
+									getSetting().getStateSpecs().remove(index);
 									getSetting().setReconciled(false);
-									send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-									target.add(fieldsTable);
+									target.add(statesTable);
+									send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
 									close();
 								}
 								
 							});
 							
+							fragment.add(new NotificationPanel("feedback", fragment));
 							fragment.setOutputMarkupId(true);
 							
 							return fragment;
 						}
 
-					};
+					};		
 				}
 				
 			};
@@ -317,6 +310,6 @@ public class IssueFieldListPage extends IssueSettingPage {
 			add(link);
 		}
 		
+		protected abstract Component newLabel(String componentId);
 	}
-	
 }

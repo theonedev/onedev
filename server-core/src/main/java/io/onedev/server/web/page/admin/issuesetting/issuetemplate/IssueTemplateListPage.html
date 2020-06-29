@@ -1,21 +1,20 @@
 <wicket:extend>
-	<div class="help-block">Define all custom issue states here. Each project can 
-	decide to use all or a subset of these states via its issue transition setting. 
-	The first state will be used as initial state of created issues</div>
-	<div class="issue-states def-list list">
+	<div class="help-block">Define issue templates here. When a new issue is created, the first 
+	template with criteria matching the issue will be used </div>
+	<div class="issue-templates def-list list">
 		<div class="head clearfix">
 			<div class="pull-left">
 				<a wicket:id="addNew" class="btn btn-success"><i class="fa fa-plus"></i> Add New</a>
 			</div>
 		</div>
 		<div class="body">
-			<table wicket:id="issueStates" class="table table-hover"></table>
+			<table wicket:id="issueTemplates" class="table table-hover"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="columnFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="viewStateFrag">
+	<wicket:fragment wicket:id="viewTemplateFrag">
 		<div class="actions">
 			<a wicket:id="edit" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Edit</a>
 			<a wicket:id="delete" class="btn btn-sm btn-default"><i class="fa fa-trash"></i> Delete</a>

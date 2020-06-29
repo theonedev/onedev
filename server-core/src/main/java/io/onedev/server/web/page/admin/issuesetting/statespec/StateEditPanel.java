@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting;
+package io.onedev.server.web.page.admin.issuesetting.statespec;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;

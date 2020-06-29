@@ -21,10 +21,11 @@ import io.onedev.server.web.page.admin.group.authorization.GroupAuthorizationsPa
 import io.onedev.server.web.page.admin.group.create.NewGroupPage;
 import io.onedev.server.web.page.admin.group.membership.GroupMembershipsPage;
 import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
-import io.onedev.server.web.page.admin.issuesetting.DefaultBoardListPage;
-import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
-import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
-import io.onedev.server.web.page.admin.issuesetting.StateTransitionsPage;
+import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardListPage;
+import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
+import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
+import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
+import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionsPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
@@ -189,6 +190,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));
 		add(new OnePageMapper("administration/settings/state-transitions", StateTransitionsPage.class));
 		add(new OnePageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
+		add(new OnePageMapper("administration/settings/issue-templates", IssueTemplateListPage.class));
 		
 		add(new OnePageMapper("administration/server-log", ServerLogPage.class));
 		add(new OnePageMapper("administration/server-information", ServerInformationPage.class));

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.issuesetting;
+package io.onedev.server.web.page.admin.issuesetting.transitionspec;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -7,6 +7,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.component.issue.statetransition.StateTransitionListPanel;
 import io.onedev.server.web.component.issue.statetransition.UseDefaultListener;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 
 @SuppressWarnings("serial")
 public class StateTransitionsPage extends IssueSettingPage {

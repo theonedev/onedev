@@ -1,0 +1,5 @@
+@media(min-width: 768px) {
+.issue-template.floating.side.def-detail {
+    width: 600px;
+}
+}

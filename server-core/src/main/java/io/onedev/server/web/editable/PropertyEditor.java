@@ -80,11 +80,14 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 	}
 	
 	protected void onPropertyUpdating(IPartialPageRequestHandler target) {
-		validate();
-		if (isValid()) 
-			send(getParent(), Broadcast.BUBBLE, new PropertyUpdating(target, descriptor.getPropertyName()));								
-		else
-			clearErrors();
+		convertInput();
+		clearErrors();
+		
+		/**
+		 * Bump up event even if some properties are invalid as we may need to do something with 
+		 * partial properties of the bean. For instance to update issue description template
+		 */
+		send(getParent(), Broadcast.BUBBLE, new PropertyUpdating(target, descriptor.getPropertyName()));								
 	}
 	
 	public PropertyDescriptor getDescriptor() {
