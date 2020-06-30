@@ -27,7 +27,9 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 public class IssueUtils {
 	
 	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
-			"fix", "fixed", "fixes", "fixing", "resolve", "resolved", "resolves", "resolving");
+			"fix", "fixed", "fixes", "fixing", 
+			"resolve", "resolved", "resolves", "resolving", 
+			"close", "closed", "closes", "closing");
 	
     private static final Pattern ISSUE_FIX_PATTERN;
     
