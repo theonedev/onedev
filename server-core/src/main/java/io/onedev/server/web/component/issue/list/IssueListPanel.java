@@ -37,7 +37,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -441,14 +441,16 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 
-		String query;
-		if (queryModel.getObject() != null)
-			query = queryModel.getObject().toString();
-		else
-			query = null;
-		
 		if (getProject() != null) {
-			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
+			add(new Link<Void>("newIssue") {
+
+				@Override
+				public void onClick() {
+					setResponsePage(NewIssuePage.class, 
+							NewIssuePage.paramsOf(getProject(), queryStringModel.getObject()));
+				}
+				
+			});
 		} else {
 			add(new DropdownLink("newIssue") {
 
@@ -484,7 +486,8 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Project project) {
-							setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(project, query));
+							setResponsePage(NewIssuePage.class, 
+									NewIssuePage.paramsOf(project, queryStringModel.getObject()));
 						}
 
 					};
