@@ -37,12 +37,10 @@ public abstract class JobSecretEditPanel extends Panel {
 		form.setOutputMarkupId(true);
 		
 		JobSecret editingSecret;
-		if (index != -1) {
+		if (index != -1) 
 			editingSecret = getProject().getBuildSetting().getJobSecrets().get(index);
-			editingSecret.setValue(null);
-		} else {
+		else 
 			editingSecret = new JobSecret();
-		}
 		
 		BeanEditor editor = BeanContext.edit("editor", editingSecret);
 		form.add(editor);
