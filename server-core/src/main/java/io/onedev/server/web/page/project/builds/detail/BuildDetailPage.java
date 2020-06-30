@@ -35,12 +35,16 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -52,6 +56,9 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.joblist.JobListPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
@@ -83,6 +90,26 @@ public abstract class BuildDetailPage extends ProjectPage
 	private static final int MAX_TABS_BEFORE_COLLAPSE = 10;
 	
 	protected final IModel<Build> buildModel;
+	
+	private final IModel<List<Job>> downstreamJobsModel = new LoadableDetachableModel<List<Job>>() {
+
+		@Override
+		protected List<Job> load() {
+			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
+			
+			List<Job> downstreamJobs = new ArrayList<>();
+			for (Job job: buildSpec.getJobs()) {
+				for (JobDependency dependency: job.getJobDependencies()) {
+					if (dependency.getJobName().equals(getBuild().getJobName()) 
+							&& getBuild().matchParams(dependency.getJobParams())) { 
+						downstreamJobs.add(job);
+					}
+				}
+			}
+			return downstreamJobs;
+		}
+		
+	};
 	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
@@ -142,12 +169,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		WebMarkupContainer summary = new WebMarkupContainer("summary");
-		summary.add(newBuildObserver(getBuild().getId()));
-		summary.setOutputMarkupId(true);
-		add(summary);
-		
-		summary.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		add(new Label("title", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -158,9 +180,22 @@ public abstract class BuildDetailPage extends ProjectPage
 				
 			}
 			
-		}));
+		}) {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(newBuildObserver(getBuild().getId()));
+				setOutputMarkupId(true);
+			}
+			
+		});
 		
-		summary.add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
+		WebMarkupContainer statusContainer = new WebMarkupContainer("status");
+		add(statusContainer);
+		statusContainer.add(newBuildObserver(getBuild().getId()));
+		statusContainer.setOutputMarkupId(true);
+		statusContainer.add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
 
 			@Override
 			public Status getObject() {
@@ -175,7 +210,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 			
 		});
-		summary.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
+		statusContainer.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -184,7 +219,13 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}));
 		
-		summary.add(new AjaxLink<Void>("rebuild") {
+		WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
+		actionsContainer.setOutputMarkupId(true);
+		add(actionsContainer);
+		
+		actionsContainer.add(newBuildObserver(getBuild().getId()));
+		
+		actionsContainer.add(new AjaxLink<Void>("rebuild") {
 
 			private void resubmit(Serializable paramBean) {
 				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
@@ -250,7 +291,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		});
 		
-		summary.add(new Link<Void>("cancel") {
+		actionsContainer.add(new Link<Void>("cancel") {
 
 			@Override
 			public void onClick() {
@@ -266,7 +307,34 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		}.add(new ConfirmClickModifier("Do you really want to cancel this build?")));
 		
-		summary.add(new SideInfoLink("moreInfo"));
+		add(new DropdownLink("downstream") {
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new JobListPanel(id, getBuild().getCommitId(), downstreamJobsModel.getObject()) {
+					
+					@Override
+					protected Project getProject() {
+						return BuildDetailPage.this.getProject();
+					}
+
+					@Override
+					protected void onRunJob(AjaxRequestTarget target) {
+						dropdown.close();
+					}
+					
+				};
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!downstreamJobsModel.getObject().isEmpty());
+			}
+			
+		});
+		
+		add(new SideInfoLink("moreInfo"));
 		
 		add(new Label("errorMessage", new AbstractReadOnlyModel<String>() {
 

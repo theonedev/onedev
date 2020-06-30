@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -52,6 +53,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -65,6 +67,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramspec.SecretParam;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
@@ -79,6 +82,7 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
@@ -992,4 +996,40 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 	}
 	
+	public boolean matchParams(List<ParamSupply> paramSupplies) {
+		AtomicBoolean matches = new AtomicBoolean(false);
+		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(paramSupplies, null)) {
+			
+			@Override
+			public void run(Map<String, List<String>> params) {
+				if (!matches.get()) {
+					boolean matching = true;
+					for (Map.Entry<String, List<String>> entry: params.entrySet()) {
+						if (!(getJob().getParamSpecMap().get(entry.getKey()) instanceof SecretParam)) {
+							List<String> paramValues = getParamMap().get(entry.getKey());
+							if (paramValues != null) {
+								if (!entry.getValue().isEmpty()) {
+									if (!Objects.equal(new HashSet<>(entry.getValue()), new HashSet<>(paramValues))) {
+										matching = false;
+										break;
+									}
+								} else if (paramValues.size() != 1 || paramValues.iterator().next() != null) {
+									matching = false;
+									break;
+								}
+							} else {
+								matching = false;
+								break;
+							}
+						}
+					}
+					if (matching)
+						matches.set(true);
+				}
+			}
+			
+		}.run();
+		
+		return matches.get();
+	}
 }

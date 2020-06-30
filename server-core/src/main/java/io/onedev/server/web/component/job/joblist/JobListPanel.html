@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="job-list">
+    	<div wicket:id="jobs" class="job">
+        	<div class="head">
+            	<a wicket:id="name" class="name"><b wicket:id="label"></b></a>
+                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><i class="fa fa-list-ul"></i></a>
+                <a wicket:id="run" class="run" title="Run this job"><i class="fa fa-play"></i></a>
+            </div>
+            <div class="body">
+				<div wicket:id="detail"></div>
+			</div>
+		</div>
+		<div wicket:id="note" class="note"><i class="fa fa-info-circle"></i> Some jobs are hidden due to permission policy</div>
+	</div>
+</wicket:panel>

@@ -2,24 +2,16 @@ package io.onedev.server.web.component.commit.status;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
@@ -28,22 +20,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.JobDefLink;
-import io.onedev.server.web.component.job.RunJobLink;
+import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
 @SuppressWarnings("serial")
 public abstract class CommitStatusPanel extends Panel {
@@ -52,38 +37,25 @@ public abstract class CommitStatusPanel extends Panel {
 	
 	private final ObjectId commitId;
 	
-	private final IModel<List<Job>> allJobsModel = new LoadableDetachableModel<List<Job>>() {
-
-		@Override
-		protected List<Job> load() {
-			try {
-				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
-				if (buildSpec != null)
-					return buildSpec.getJobs();
-			} catch (Exception e) {
-				logger.error("Error retrieving build spec (project: {}, commit: {})", 
-						getProject().getName(), commitId.name(), e);
-			}
-			return new ArrayList<>();
-		}
-		
-	};
-	
-	private final IModel<List<Job>> accessibleJobsModel = new LoadableDetachableModel<List<Job>>() {
+	private final IModel<List<Job>> jobsModel = new LoadableDetachableModel<List<Job>>() {
 
 		@Override
 		protected List<Job> load() {
 			List<Job> jobs = new ArrayList<>();
-			for (Job job: allJobsModel.getObject()) {
-				if (SecurityUtils.canAccess(getProject(), job.getName()))
-					jobs.add(job);
+			try {
+				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
+				if (buildSpec != null)
+					jobs.addAll(buildSpec.getJobs());
+			} catch (Exception e) {
+				logger.error("Error retrieving build spec (project: {}, commit: {})", 
+						getProject().getName(), commitId.name(), e);
 			}
 			return jobs;
 		}
 		
 	};
 	
-	private IModel<Status> statusModel = new LoadableDetachableModel<Status>() {
+	private final IModel<Status> statusModel = new LoadableDetachableModel<Status>() {
 
 		@Override
 		protected Status load() {
@@ -107,93 +79,19 @@ public abstract class CommitStatusPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "detailFrag", CommitStatusPanel.this);
-				
-				fragment.add(new WebMarkupContainer("note") {
+				return new JobListPanel(id, commitId, jobsModel.getObject()) {
 
 					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(accessibleJobsModel.getObject().size() != allJobsModel.getObject().size());
+					protected Project getProject() {
+						return CommitStatusPanel.this.getProject();
 					}
-					
-				});
-				
-				RepeatingView jobsView = new RepeatingView("jobs");
-				fragment.add(jobsView);
-				for (Job job: accessibleJobsModel.getObject()) {
-					WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
-					Status status = getProject().getCommitStatus(commitId).get(job.getName());
-					
-					Link<Void> defLink = new JobDefLink("name", commitId, job.getName()) {
 
-						@Override
-						protected Project getProject() {
-							return CommitStatusPanel.this.getProject();
-						}
-						
-					};
-					defLink.add(new Label("label", job.getName()));
-					jobItem.add(defLink);
-					
-					jobItem.add(new RunJobLink("run", commitId, job.getName()) {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							super.onClick(target);
-							dropdown.close();
-						}
-
-						@Override
-						protected Project getProject() {
-							return CommitStatusPanel.this.getProject();
-						}
-						
-					});
-					
-					jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
-							ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName()), 0)) {
-						
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setVisible(status != null);
-						}
-						
-					});
-					
-					IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
-
-						@Override
-						protected List<Build> load() {
-							BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-							List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName()));
-							builds.sort(Comparator.comparing(Build::getNumber));
-							return builds;
-						}
-						
-					};
-					jobItem.add(new SimpleBuildListPanel("detail", buildsModel));
-					
-					jobItem.setOutputMarkupId(true);
-					jobsView.add(jobItem);
-				}
-				
-				fragment.add(new WebSocketObserver() {
-					
 					@Override
-					public void onObservableChanged(IPartialPageRequestHandler handler) {
-						handler.add(component);
+					protected void onRunJob(AjaxRequestTarget target) {
+						dropdown.close();
 					}
 					
-					@Override
-					public Collection<String> getObservables() {
-						return getWebSocketObservables();
-					}
-					
-				});
-				
-				return fragment;
+				};
 			}
 
 			@Override
@@ -236,8 +134,7 @@ public abstract class CommitStatusPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		allJobsModel.detach();
-		accessibleJobsModel.detach();
+		jobsModel.detach();
 		statusModel.detach();
 		super.onDetach();
 	}
@@ -245,7 +142,7 @@ public abstract class CommitStatusPanel extends Panel {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!allJobsModel.getObject().isEmpty());
+		setVisible(!jobsModel.getObject().isEmpty());
 	}
 
 	@Override
