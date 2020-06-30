@@ -81,12 +81,16 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 	}
 	
 	public String getCommitMessage() {
-		StringBuilder builder = new StringBuilder(bean.getSummary());
-		if (bean.getBody() != null) {
-			builder.append("\n\n");
-			builder.append(bean.getBody());
+		if (bean.getSummary() != null) {
+			StringBuilder builder = new StringBuilder(bean.getSummary());
+			if (bean.getBody() != null) {
+				builder.append("\n\n");
+				builder.append(bean.getBody());
+			}
+			return builder.toString();
+		} else {
+			return null;
 		}
-		return builder.toString();
 	}
 
 	@Override
