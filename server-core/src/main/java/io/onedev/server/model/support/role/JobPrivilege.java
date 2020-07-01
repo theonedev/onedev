@@ -14,6 +14,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -33,9 +34,9 @@ public class JobPrivilege implements Serializable {
 	
 	private String accessibleReports;
 	
-	@Editable(order=100, description="Specify space-separated jobs. Use * or ? for wildcard match. "
-			+ "<b class='red'>NOTE: </b> Permission to access build artifacts will be granted "
-			+ "implicitly in matched jobs even if no other permissions are specified here")
+	@Editable(order=100, description="Specify space-separated jobs. Use '*' or '?' for wildcard match. "
+			+ "Prefix with '-' to exclude. <b class='red'>NOTE: </b> Permission to access build artifacts "
+			+ "will be granted implicitly in matched jobs even if no other permissions are specified here")
 	@Patterns(suggester = "suggestJobNames")
 	@NotEmpty
 	public String getJobNames() {
@@ -99,9 +100,11 @@ public class JobPrivilege implements Serializable {
 		return !(boolean) EditContext.get().getInputValue("accessLog");
 	}
 	
-	@Editable(order=400, name="Access Build Reports", description="Optionally specify space-separated reports. Use * or ? for wildcard match")
+	@Editable(order=400, name="Access Build Reports", description="Optionally specify space-separated reports. "
+			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all")
 	@ShowCondition("isAccessLogDisabled")
 	@Patterns
+	@NameOfEmptyValue("All Reports")
 	@Nullable
 	public String getAccessibleReports() {
 		return accessibleReports;

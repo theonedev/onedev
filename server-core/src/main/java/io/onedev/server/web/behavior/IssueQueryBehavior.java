@@ -282,7 +282,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
 							|| fieldName.equals(Issue.NAME_MILESTONE)) {
-						hints.add("Use * for wildcard match");
+						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}
 				}

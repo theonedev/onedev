@@ -70,7 +70,8 @@ public class BranchProtection implements Serializable {
 		this.enabled = enabled;
 	}
 
-	@Editable(order=100, description="Specify space-separated branches to be protected. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>")
+	@Editable(order=100, description="Specify space-separated branches to be protected. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude")
 	@Patterns(suggester = "suggestBranches", path=true)
 	@NotEmpty
 	public String getBranches() {

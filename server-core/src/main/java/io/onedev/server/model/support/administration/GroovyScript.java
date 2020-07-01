@@ -78,7 +78,8 @@ public class GroovyScript implements Serializable {
 	}
 
 	@Editable(order=400, description="Optionally specify space-separated projects allowed to "
-			+ "execute this script. Use * or ? for wildcard match. Leave empty to allow all")
+			+ "execute this script. Use '*' or '?' for wildcard match. Prefix with '-' to exclude. "
+			+ "Leave empty to allow all")
 	@Patterns(suggester = "suggestProjects")
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
 	@NameOfEmptyValue("All")
@@ -91,7 +92,8 @@ public class GroovyScript implements Serializable {
 	}
 	
 	@Editable(order=500, description="Optionally specify space-separated branches allowed to "
-		+ "execute this script. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to allow all")
+		+ "execute this script. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+		+ "Prefix with '-' to exclude. Leave empty to allow all")
 	@Patterns(path=true)
 	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
 	@NameOfEmptyValue("All")

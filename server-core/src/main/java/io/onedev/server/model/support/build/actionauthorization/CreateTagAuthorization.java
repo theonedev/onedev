@@ -20,7 +20,8 @@ public class CreateTagAuthorization extends ActionAuthorization {
 
 	private String tagNames;
 
-	@Editable(order=100, description="Specify space-separated tag names. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>")
+	@Editable(order=100, description="Specify space-separated tag names. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestTags", path=true)
 	@NameOfEmptyValue("All")
 	public String getTagNames() {

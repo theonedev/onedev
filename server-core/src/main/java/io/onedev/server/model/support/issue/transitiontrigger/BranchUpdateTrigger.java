@@ -25,7 +25,8 @@ public class BranchUpdateTrigger extends TransitionTrigger {
 	}
 	
 	@Editable(order=200, name="Applicable Branches", description="Optionally specify space-separated branches "
-			+ "applicable for this trigger. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>")
+			+ "applicable for this trigger. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(suggester = "suggestBranches", path=true)
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {

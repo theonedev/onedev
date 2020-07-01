@@ -31,7 +31,8 @@ public class BranchUpdateTrigger extends JobTrigger {
 	private String paths;
 	
 	@Editable(name="Branches", order=100, description="Optionally specify space-separated branches "
-			+ "to check. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave empty to match all branches")
+			+ "to check. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
@@ -48,8 +49,8 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Editable(name="Touched Files", order=200, 
-			description="Optionally specify space-separated files to check. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
-					+ "Leave empty to match all files")
+			description="Optionally specify space-separated files to check. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+					+ "Prefix with '-' to exclude. Leave empty to match all files")
 	@Patterns(suggester = "getPathSuggestions", path=true)
 	@NameOfEmptyValue("Any file")
 	public String getPaths() {

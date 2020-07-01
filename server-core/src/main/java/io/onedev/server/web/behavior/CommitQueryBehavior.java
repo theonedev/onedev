@@ -126,7 +126,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						|| tokenType == CommitQueryParser.AUTHOR
 						|| tokenType == CommitQueryParser.PATH
 						|| tokenType == CommitQueryParser.MESSAGE) {
-					hints.add("Use * for wildcard match");
+					hints.add("Use '*' for wildcard match");
 					hints.add("Use '\\' to escape brackets");
 				}
 			}

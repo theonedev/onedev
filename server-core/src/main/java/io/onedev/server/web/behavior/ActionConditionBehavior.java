@@ -117,7 +117,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 			if ("criteriaValue".equals(spec.getLabel())) {
 				String unmatched = terminalExpect.getUnmatchedText();
 				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) // only when we input criteria value
-					hints.add("Use * for wildcard match");
+					hints.add("Use '*' for wildcard match");
 			}
 		} 
 		return hints;

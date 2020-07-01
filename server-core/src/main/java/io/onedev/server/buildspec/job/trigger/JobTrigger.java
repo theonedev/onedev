@@ -39,8 +39,8 @@ public abstract class JobTrigger implements Serializable {
 
 	@Editable(name="Applicable Projects", order=900, description="Optionally specify space-separated projects "
 			+ "applicable for this trigger. This is useful for instance when you want to prevent "
-			+ "the job from being triggered in forked projects. Use * or ? for wildcard match. "
-			+ "Leave empty to match all projects")
+			+ "the job from being triggered in forked projects. Use '*' or '?' for wildcard match. "
+			+ "Prefix with '-' to exclude. Leave empty to match all projects")
 	@Patterns(suggester="suggestProjects")
 	@NameOfEmptyValue("Any project")
 	public String getProjects() {

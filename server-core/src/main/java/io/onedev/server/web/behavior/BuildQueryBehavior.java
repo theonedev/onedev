@@ -196,7 +196,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 					if (fieldName.equals(Build.NAME_PROJECT)
 							|| fieldName.equals(Build.NAME_VERSION)
 							|| fieldName.equals(Build.NAME_JOB)) {
-						hints.add("Use * for wildcard match");
+						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}
 				}

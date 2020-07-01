@@ -26,8 +26,8 @@ public class ServiceLocator implements Serializable {
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
 	@Editable(order=100, name="Applicable Names", description="Optionally specify space-separated "
-			+ "service names applicable for this locator. Use * or ? for wildcard match. Leave empty to "
-			+ "match all")
+			+ "service names applicable for this locator. Use '*' or '?' for wildcard match. "
+			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns
 	@NameOfEmptyValue("All")
 	public String getServiceNames() {
@@ -39,8 +39,8 @@ public class ServiceLocator implements Serializable {
 	}
 	
 	@Editable(order=200, name="Applicable Images", description="Optionally specify space-separated "
-			+ "service images applicable for this locator. Use **, * or ? for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Leave "
-			+ "empty to match all")
+			+ "service images applicable for this locator. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "Prefix with '-' to exclude. Leave empty to match all")
 	@Patterns(path=true)
 	@NameOfEmptyValue("All")
 	public String getServiceImages() {
