@@ -353,6 +353,8 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedStates.addAll(transition.getUndefinedStates());
 		for (BoardSpec board: getBoardSpecs())
 			undefinedStates.addAll(board.getUndefinedStates(null));
+		for (IssueTemplate template: getIssueTemplates())
+			undefinedStates.addAll(template.getUndefinedStates());
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
@@ -380,6 +382,8 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedFields.addAll(field.getUndefinedFields());
 		for (BoardSpec board: getBoardSpecs())
 			undefinedFields.addAll(board.getUndefinedFields(null));
+		for (IssueTemplate template: getIssueTemplates())
+			undefinedFields.addAll(template.getUndefinedFields());
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
@@ -398,6 +402,8 @@ public class GlobalIssueSetting implements Serializable {
 			undefinedFieldValues.addAll(field.getUndefinedFieldValues());
 		for (BoardSpec board: getBoardSpecs())
 			undefinedFieldValues.addAll(board.getUndefinedFieldValues(null));
+		for (IssueTemplate template: getIssueTemplates())
+			undefinedFieldValues.addAll(template.getUndefinedFieldValues());
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
@@ -415,6 +421,10 @@ public class GlobalIssueSetting implements Serializable {
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
 			if (it.next().fixUndefinedStates(null, resolutions))
+				it.remove();
+		}
+		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
+			if (it.next().fixUndefinedStates(resolutions))
 				it.remove();
 		}
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
@@ -450,6 +460,10 @@ public class GlobalIssueSetting implements Serializable {
 			if (it.next().fixUndefinedFields(null, resolutions))
 				it.remove();
 		}
+		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
+			if (it.next().fixUndefinedFields(resolutions))
+				it.remove();
+		}
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
@@ -481,6 +495,10 @@ public class GlobalIssueSetting implements Serializable {
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
 			if (it.next().fixUndefinedFieldValues(null, resolutions))
+				it.remove();
+		}
+		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
+			if (it.next().fixUndefinedFieldValues(resolutions))
 				it.remove();
 		}
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
