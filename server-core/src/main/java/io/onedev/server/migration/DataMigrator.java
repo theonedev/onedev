@@ -2157,4 +2157,21 @@ public class DataMigrator {
 		}
 	}
 	
+	// Migrate to 3.2.2
+	private void migrate43(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null)
+							valueElement.addElement("issueTemplates");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
