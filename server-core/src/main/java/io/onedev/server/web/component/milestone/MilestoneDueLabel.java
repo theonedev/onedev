@@ -21,7 +21,10 @@ public class MilestoneDueLabel extends Label {
 			@Override
 			protected String load() {
 				Milestone milestone = milestoneModel.getObject();
-				return DateUtils.formatDate(milestone.getDueDate());
+				if (milestone.getDueDate() != null)
+					return DateUtils.formatDate(milestone.getDueDate());
+				else
+					return "<i>No Due Date</i>";
 			}
 			
 		});
@@ -37,9 +40,24 @@ public class MilestoneDueLabel extends Label {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		Milestone milestone = milestoneModel.getObject();
-		if (!milestone.isClosed() && milestone.getDueDate().before(new Date())) 
-			add(AttributeAppender.append("style", "color: red;"));		
+
+		add(AttributeAppender.append("style", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				Milestone milestone = milestoneModel.getObject();
+				if (!milestone.isClosed() 
+						&& milestone.getDueDate() != null 
+						&& milestone.getDueDate().before(new Date())) { 
+					return "color: red;";		
+				} else {
+					return "";
+				}
+			}
+			
+		}));
+		
+		setEscapeModelStrings(milestoneModel.getObject().getDueDate() != null);
 	}
 
 }

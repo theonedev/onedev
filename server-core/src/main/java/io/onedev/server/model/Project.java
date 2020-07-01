@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1171,12 +1170,12 @@ public class Project extends AbstractEntity {
 			sortedMilestones = new ArrayList<>();
 			List<Milestone> open = getMilestones().stream()
 					.filter(it->!it.isClosed())
-					.sorted(Comparator.comparing(Milestone::getDueDate))
+					.sorted(new Milestone.DueDateComparator())
 					.collect(Collectors.toList());
 			sortedMilestones.addAll(open);
 			List<Milestone> closed = getMilestones().stream()
 					.filter(it->it.isClosed())
-					.sorted(Comparator.comparing(Milestone::getDueDate))
+					.sorted(new Milestone.DueDateComparator())
 					.collect(Collectors.toList());
 			Collections.reverse(closed);
 			sortedMilestones.addAll(closed);

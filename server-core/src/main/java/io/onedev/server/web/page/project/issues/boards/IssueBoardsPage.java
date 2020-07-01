@@ -429,12 +429,17 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 							@Override
 							public String getObject() {
-								return getMilestone().getName() + " (" + DateUtils.formatDate(getMilestone().getDueDate()) + ")";
+								String label = getMilestone().getName();
+								if (getMilestone().getDueDate() != null)
+									label += " (" + DateUtils.formatDate(getMilestone().getDueDate()) + ")";
+								return label;
 							}
 							
 						}));
 
-						if (getMilestone().getDueDate().before(new Date()) && !getMilestone().isClosed()) {
+						if (getMilestone().getDueDate() != null 
+								&& getMilestone().getDueDate().before(new Date()) 
+								&& !getMilestone().isClosed()) {
 							add(AttributeAppender.append("class", "btn-danger"));
 							add(AttributeAppender.replace("title", "Milestone is due"));
 						} else {
