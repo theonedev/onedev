@@ -29,6 +29,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
@@ -198,7 +199,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			IssueChangeData changeData = ((IssueChangeEvent) event).getChange().getData();
 			if (!(changeData instanceof IssueReferencedFromCodeCommentData
 					|| changeData instanceof IssueReferencedFromIssueData
-					|| changeData instanceof IssueReferencedFromPullRequestData)) {
+					|| changeData instanceof IssueReferencedFromPullRequestData
+					|| changeData instanceof IssueDescriptionChangeData)) {
 				notifyWatchers = true;
 			}
 		} else {
