@@ -39,7 +39,7 @@ public class DefaultWicketServlet extends WicketServlet {
 	@Sessional
 	@Override
 	public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
-		((HttpServletResponse)res).setHeader("X-FRAME-OPTIONS", "SAMEORIGION");
+		((HttpServletResponse)res).setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
 		super.service(req, res);
 	}
 
