@@ -10,6 +10,6 @@ import io.onedev.server.model.Project;
 @ExtensionPoint
 public interface MarkdownProcessor {
 	
-	void process(@Nullable Project project, Document rendered, @Nullable Object context);
+	void process(Document rendered, @Nullable Project project, @Nullable Object context);
 	
 }

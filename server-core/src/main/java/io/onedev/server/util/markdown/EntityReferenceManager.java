@@ -56,7 +56,7 @@ public class EntityReferenceManager {
 	private void addReferenceChange(Issue issue, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
-			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(issue.getProject(), document)) {
+			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(document, issue.getProject())) {
 				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
 				if (referencedIssue != null && !referencedIssue.equals(issue)) {
 					boolean found = false;
@@ -82,7 +82,7 @@ public class EntityReferenceManager {
 					}
 				}
 			}
-			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(issue.getProject(), document)) {
+			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(document, issue.getProject())) {
 				PullRequest referencedRequest  = OneDev.getInstance(PullRequestManager.class).find(referencedRequestFQN);
 				if (referencedRequest != null) {
 					boolean found = false;
@@ -114,7 +114,7 @@ public class EntityReferenceManager {
 	private void addReferenceChange(PullRequest request, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
-			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(request.getTargetProject(), document)) {
+			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(document, request.getTargetProject())) {
 				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
 				if (referencedIssue != null) {
 					boolean found = false;
@@ -140,7 +140,7 @@ public class EntityReferenceManager {
 					}
 				}
 			}
-			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(request.getTargetProject(), document)) {
+			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(document, request.getTargetProject())) {
 				PullRequest referencedRequest = OneDev.getInstance(PullRequestManager.class).find(referencedRequestFQN);
 				if (referencedRequest != null && !referencedRequest.equals(request)) {
 					boolean found = false;
@@ -172,7 +172,7 @@ public class EntityReferenceManager {
 	private void addReferenceChange(CodeComment comment, String markdown) {
 		if (markdown != null) {
 			Document document = Jsoup.parseBodyFragment(markdownManager.render(markdown));			
-			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(comment.getProject(), document)) {
+			for (ProjectScopedNumber referencedIssueFQN: new ReferenceParser(Issue.class).parseReferences(document, comment.getProject())) {
 				Issue referencedIssue = OneDev.getInstance(IssueManager.class).find(referencedIssueFQN);
 				if (referencedIssue != null) {
 					boolean found = false;
@@ -198,7 +198,7 @@ public class EntityReferenceManager {
 					}
 				}
 			}
-			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(comment.getProject(), document)) {
+			for (ProjectScopedNumber referencedRequestFQN: new ReferenceParser(PullRequest.class).parseReferences(document, comment.getProject())) {
 				PullRequest referencedRequest = OneDev.getInstance(PullRequestManager.class).find(referencedRequestFQN);
 				if (referencedRequest != null) {
 					boolean found = false;

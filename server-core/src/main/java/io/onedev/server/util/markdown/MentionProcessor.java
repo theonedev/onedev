@@ -10,7 +10,7 @@ import io.onedev.server.model.Project;
 public class MentionProcessor extends MentionParser implements MarkdownProcessor {
 	
 	@Override
-	public void process(Project project, Document document, Object context) {
+	public void process(Document document, Project project, Object context) {
 		parseMentions(document);
 	}
 

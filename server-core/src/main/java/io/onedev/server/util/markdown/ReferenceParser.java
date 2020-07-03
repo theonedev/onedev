@@ -46,10 +46,10 @@ public class ReferenceParser {
 	}
 	
 	public Collection<ProjectScopedNumber> parseReferences(Project project, String rendered) {
-		return parseReferences(project, Jsoup.parseBodyFragment(rendered));		
+		return parseReferences(Jsoup.parseBodyFragment(rendered), project);		
 	}
 	
-	public Collection<ProjectScopedNumber> parseReferences(@Nullable Project project, Document document) {
+	public Collection<ProjectScopedNumber> parseReferences(Document document, @Nullable Project project) {
 		Collection<ProjectScopedNumber> references = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {

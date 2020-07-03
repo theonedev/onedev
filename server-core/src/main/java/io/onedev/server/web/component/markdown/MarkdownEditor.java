@@ -131,14 +131,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	}
 	
 	protected String renderMarkdown(String markdown) {
-		MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
-		String rendered = markdownManager.render(markdown);
 		Project project ;
 		if (getPage() instanceof ProjectPage)
 			project = ((ProjectPage) getPage()).getProject();
 		else
 			project = null;
-		return markdownManager.process(project, rendered, blobRenderContext);
+		
+		MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
+		return manager.process(manager.render(markdown), project, blobRenderContext);
 	}
 	
 	@Override

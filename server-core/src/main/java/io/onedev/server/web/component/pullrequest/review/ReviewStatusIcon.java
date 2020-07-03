@@ -44,7 +44,8 @@ public abstract class ReviewStatusIcon extends WebComponent {
 				if (getResult() != null && getResult().getComment() != null) {
 					MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
 					String rendered = markdownManager.render(getResult().getComment());
-					builder.append("<div class='comment'>").append(HtmlUtils.clean(rendered).body().html()).append("</div>");
+					String sanitized = HtmlUtils.sanitize(HtmlUtils.parse(rendered)).body().html();
+					builder.append("<div class='comment'>").append(sanitized).append("</div>");
 				}
 				Label label = new Label(id, builder.toString());
 				label.add(AttributeAppender.append("class", "review-detail"));

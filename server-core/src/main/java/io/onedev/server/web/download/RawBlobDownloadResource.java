@@ -18,8 +18,12 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jetty.io.EofException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
@@ -30,6 +34,8 @@ import io.onedev.server.security.SecurityUtils;
 public class RawBlobDownloadResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(RawBlobDownloadResource.class);
 
 	private static final String PARAM_PROJECT = "project";
 
@@ -133,7 +139,15 @@ public class RawBlobDownloadResource extends AbstractResource {
 						startByte = 0L;
 					if (endByte == null || endByte == -1)
 						endByte = blob.getSize() - 1;
-					copyRange(is, attributes.getResponse().getOutputStream(), startByte, endByte);
+					try {
+						copyRange(is, attributes.getResponse().getOutputStream(), startByte, endByte);
+					} catch (Exception e) {
+						EofException eofException = ExceptionUtils.find(e, EofException.class);
+						if (eofException != null) 
+							logger.trace("EOF while writing data", eofException);
+						else 
+							throw e;
+					}
 				}
 			}
 

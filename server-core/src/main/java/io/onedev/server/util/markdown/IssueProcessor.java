@@ -17,8 +17,8 @@ public class IssueProcessor extends ReferenceParser implements MarkdownProcessor
 	}
 
 	@Override
-	public void process(@Nullable Project project, Document document, Object context) {
-		parseReferences(project, document);
+	public void process(Document document, @Nullable Project project, Object context) {
+		parseReferences(document, project);
 	}
 
 	@Override

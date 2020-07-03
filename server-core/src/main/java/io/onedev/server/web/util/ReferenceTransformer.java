@@ -49,7 +49,7 @@ public class ReferenceTransformer implements Function<String, String> {
 						IssueActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
-		}.parseReferences(project, doc);
+		}.parseReferences(doc, project);
 
 		new ReferenceParser(PullRequest.class) {
 
@@ -59,7 +59,7 @@ public class ReferenceTransformer implements Function<String, String> {
 						PullRequestActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
-		}.parseReferences(project, doc);
+		}.parseReferences(doc, project);
 
 		new ReferenceParser(Build.class) {
 
@@ -69,7 +69,7 @@ public class ReferenceTransformer implements Function<String, String> {
 						BuildDashboardPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
-		}.parseReferences(project, doc);
+		}.parseReferences(doc, project);
 		
 		if (url != null) {
 			StringBuilder builder = new StringBuilder();

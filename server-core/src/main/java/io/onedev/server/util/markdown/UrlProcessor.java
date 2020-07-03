@@ -27,7 +27,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 public class UrlProcessor implements MarkdownProcessor {
 
 	@Override
-	public void process(Project project, Document rendered, Object context) {
+	public void process(Document rendered, Project project, Object context) {
 		if (context instanceof BlobRenderContext && project != null) {
 			BlobRenderContext blobRenderContext = (BlobRenderContext) context;
 			Repository repository = project.getRepository();

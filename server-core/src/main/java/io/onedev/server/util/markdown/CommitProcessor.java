@@ -34,7 +34,7 @@ public class CommitProcessor implements MarkdownProcessor {
 	}
 
 	@Override
-	public void process(@Nullable Project project, Document rendered, Object context) {
+	public void process(Document rendered, @Nullable Project project, Object context) {
 		TextNodeVisitor visitor = new TextNodeVisitor() {
 			
 			@Override

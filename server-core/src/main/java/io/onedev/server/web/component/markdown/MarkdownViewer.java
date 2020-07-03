@@ -85,12 +85,12 @@ public class MarkdownViewer extends GenericPanel<String> {
 			protected String load() {
 				String markdown = MarkdownViewer.this.getModelObject();
 				if (markdown != null) {
-					MarkdownManager markdownManager = AppLoader.getInstance(MarkdownManager.class);
-					String html = markdownManager.render(markdown);
 					Project project = null;
 					if (getPage() instanceof ProjectPage)
 						project = ((ProjectPage) getPage()).getProject(); 
-					return markdownManager.process(project, html, getRenderContext());
+					
+					MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
+					return manager.process(manager.render(markdown), project, getRenderContext());
 				} else {
 					return null;
 				}

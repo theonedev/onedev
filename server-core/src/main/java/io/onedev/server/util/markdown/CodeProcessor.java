@@ -24,7 +24,7 @@ import io.onedev.server.model.Project;
 public class CodeProcessor implements MarkdownProcessor {
 	
 	@Override
-	public void process(@Nullable Project project, Document rendered, Object context) {
+	public void process(Document rendered, @Nullable Project project, Object context) {
 		Collection<Element> codeElements = new ArrayList<>();
 		new NodeTraversor(new NodeVisitor() {
 
