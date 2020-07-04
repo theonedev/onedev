@@ -633,7 +633,7 @@ public abstract class CommitListPanel extends Panel {
 				
 			};
 			item.add(commitStatus);
-
+			
 			item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 				@Override

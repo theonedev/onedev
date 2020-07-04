@@ -16,6 +16,7 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -24,8 +25,12 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
@@ -44,6 +49,22 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class BuildSpec implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final LoadingCache<String, byte[]> parseCache =  CacheBuilder.newBuilder().softValues().build(new CacheLoader<String, byte[]>() {
+	        
+		@Override
+        public byte[] load(String key) {
+			String buildSpecString = key;
+			if (buildSpecString.trim().startsWith("<?xml")) 
+				buildSpecString = XmlBuildSpecMigrator.migrate(buildSpecString);
+			try {
+				return SerializationUtils.serialize(VersionedYamlDoc.fromYaml(buildSpecString).toBean(BuildSpec.class));
+			} catch (Exception e) {
+				throw new InvalidBuildSpecException("Invalid build spec", e);
+			}
+        }
+	        
+	});
 	
 	public static final String BLOB_PATH = ".onedev-buildspec.yml";
 	
@@ -217,12 +238,14 @@ public class BuildSpec implements Serializable, Validatable {
 	public static BuildSpec parse(byte[] bytes) {
 		String buildSpecString = new String(bytes, StandardCharsets.UTF_8); 
 		if (StringUtils.isNotBlank(buildSpecString)) {
-			if (buildSpecString.trim().startsWith("<?xml"))
-				buildSpecString = XmlBuildSpecMigrator.migrate(buildSpecString);
 			try {
-				return VersionedYamlDoc.fromYaml(buildSpecString).toBean(BuildSpec.class);
+				return SerializationUtils.deserialize(parseCache.getUnchecked(buildSpecString));
 			} catch (Exception e) {
-				throw new InvalidBuildSpecException("Invalid build spec", e);
+				InvalidBuildSpecException invalidBuildSpecException = ExceptionUtils.find(e, InvalidBuildSpecException.class);
+				if (invalidBuildSpecException != null)
+					throw invalidBuildSpecException;
+				else 
+					throw e;
 			}
 		} else {
 			return null;
