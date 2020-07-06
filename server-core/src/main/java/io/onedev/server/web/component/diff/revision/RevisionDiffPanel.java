@@ -214,16 +214,13 @@ public class RevisionDiffPanel extends Panel {
     				Matcher matcher = new PathMatcher();
     				for (BlobChange change: changes) {
 	        			String oldPath = change.getOldBlobIdent().path;
-	        			if (oldPath == null)
-	        				oldPath = "";
-	        			else
+	        			if (oldPath != null)
 	        				oldPath = oldPath.toLowerCase();
 	        			String newPath = change.getNewBlobIdent().path;
-	        			if (newPath == null)
-	        				newPath = "";
-	        			else
+	        			if (newPath != null)
 	        				newPath = newPath.toLowerCase();
-    					if (patternSet.matches(matcher, oldPath) || patternSet.matches(matcher, newPath)) {
+    					if (oldPath != null && patternSet.matches(matcher, oldPath) 
+    							|| newPath != null && patternSet.matches(matcher, newPath)) {
     						filteredChanges.add(change);
     					}
     				}
