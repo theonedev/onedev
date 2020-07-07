@@ -405,6 +405,8 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	
 	public static VersionedXmlDoc fromXML(String xml) {
 		try {
+			// May contain some invalid characters, parse with 1.1
+			xml = StringUtils.replace(xml, "<?xml version=\"1.0\"", "<?xml version=\"1.1\"");
 			return new VersionedXmlDoc(new SAXReader().read(new StringReader(xml)));
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
