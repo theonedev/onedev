@@ -57,6 +57,22 @@
 								</pluginExecution>
 								<pluginExecution>
 									<pluginExecutionFilter>
+										<groupId>com.gitlab.haynes</groupId>
+										<artifactId>libsass-maven-plugin</artifactId>
+										<versionRange>[0.2.24,]</versionRange>
+										<goals>
+											<goal>compile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+											<runOnConfiguration>true</runOnConfiguration>
+										</execute>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
 										<groupId>org.codehaus.gmaven</groupId>
 										<artifactId>groovy-maven-plugin</artifactId>
 										<versionRange>[2.0,]</versionRange>
@@ -106,6 +122,24 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
+				<groupId>com.gitlab.haynes</groupId>
+				<artifactId>libsass-maven-plugin</artifactId>
+				<version>0.2.24</version>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<inputPath>${basedir}/src/main/java</inputPath>
+					<outputPath>${project.build.outputDirectory}</outputPath>
+					<sourceMapOutputPath>${project.build.outputDirectory}</sourceMapOutputPath>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
 				<version>2.0.4</version>
@@ -132,6 +166,7 @@
 				<directory>src/main/java</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
+					<exclude>**/*.scss</exclude>
 				</excludes>
 			</resource>
 			<resource>
