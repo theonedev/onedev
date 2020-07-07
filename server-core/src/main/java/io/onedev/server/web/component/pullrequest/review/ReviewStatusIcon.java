@@ -1,18 +1,13 @@
 package io.onedev.server.web.component.pullrequest.review;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.commons.utils.HtmlUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
-import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 
 @SuppressWarnings("serial")
 public abstract class ReviewStatusIcon extends WebComponent {
@@ -25,10 +20,10 @@ public abstract class ReviewStatusIcon extends WebComponent {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new DropdownHoverBehavior() {
-			
+		add(AttributeAppender.append("title", new LoadableDetachableModel<String>() {
+
 			@Override
-			protected Component newContent(String id) {
+			protected String load() {
 				String title;
 				if (getResult() != null) {
 					if (getResult().isApproved())
@@ -38,22 +33,10 @@ public abstract class ReviewStatusIcon extends WebComponent {
 				} else {
 					title = "Pending review";
 				}
-				StringBuilder builder = new StringBuilder();
-				builder.append("<div class='title'>").append(title).append("</div>");
-				
-				if (getResult() != null && getResult().getComment() != null) {
-					MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
-					String rendered = markdownManager.render(getResult().getComment());
-					String sanitized = HtmlUtils.sanitize(HtmlUtils.parse(rendered)).body().html();
-					builder.append("<div class='comment'>").append(sanitized).append("</div>");
-				}
-				Label label = new Label(id, builder.toString());
-				label.add(AttributeAppender.append("class", "review-detail"));
-				label.setEscapeModelStrings(false);
-				return label;
+				return title;
 			}
 			
-		});
+		}));
 		
 		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 

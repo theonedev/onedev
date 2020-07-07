@@ -927,6 +927,11 @@ onedev.server.markdown = {
 	},
 	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback) {
 		var $container = $("#" + containerId);
+		var $rendered = $container.find(".markdown-rendered");
+		
+		var content = $rendered.data("content");
+		if (content) 
+			$rendered.html(content).removeData("content");
 		
 		if (taskCallback) {
 			var $task = $container.find(".task-list-item");
@@ -963,7 +968,6 @@ onedev.server.markdown = {
 			}
 		}, alignment);
 		
-		var $rendered = $container.find(".markdown-rendered");
 		onedev.server.markdown.initRendered($rendered);
 		
 		var $img = $rendered.find("img");
