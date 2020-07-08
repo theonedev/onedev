@@ -146,7 +146,7 @@
 				<executions>
 					<execution>
 						<id>populate-resources</id>
-						<phase>compile</phase>
+						<phase>process-resources</phase>
 						<goals>
 							<goal>populate-resources</goal>
 						</goals>
