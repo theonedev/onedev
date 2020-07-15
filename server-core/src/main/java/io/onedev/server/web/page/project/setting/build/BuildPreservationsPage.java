@@ -2,10 +2,10 @@ package io.onedev.server.web.page.project.setting.build;
 
 import java.io.Serializable;
 
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.editable.PropertyContext;
@@ -40,7 +40,7 @@ public class BuildPreservationsPage extends BuildSettingPage {
 			}
 			
 		};
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(editor);
 		add(form);
 	}

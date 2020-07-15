@@ -10,10 +10,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextField;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextFieldConfig;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.form.DateTextFieldConfig.TodayButton;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.datepicker.DatePicker;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -32,14 +30,13 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DateTextFieldConfig config = new DateTextFieldConfig();
-		config.autoClose(true).withFormat(DateEditSupport.DATE_INPUT_FORMAT)
-				.highlightToday(true).showTodayButton(TodayButton.TRUE);
-		input = new DateTextField("input", Model.of(getModelObject()), config);
+		input = new DatePicker("input", Model.of(getModelObject()));
 		input.setType(getDescriptor().getPropertyClass());
 		Method propertyGetter = getDescriptor().getPropertyGetter();
 		if (propertyGetter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(propertyGetter)));
+		else if (getDescriptor().isPropertyRequired())
+			input.add(AttributeModifier.replace("placeholder", "Choose date..."));
 
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(input);

@@ -28,7 +28,8 @@ onedev.server.floating = {
 		$(document).on("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
 		
 		$floating.data("keydown", function(e) {
-			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0) {
+			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0 
+					&& $(".flatpickr-calendar.open").length == 0) {
 				onedev.server.floating.close($floating, true);
 			}
 		});
@@ -82,7 +83,10 @@ onedev.server.floating = {
 					$floating.remove();
 				});
 			} else {
-				$floating.remove();
+				// remove floating later, otherwise, closeCallback attached to floating will not execute
+				setTimeout(function() {
+					$floating.remove();
+				}, 0);
 			}
 		}
 	}

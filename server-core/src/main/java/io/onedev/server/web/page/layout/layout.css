@@ -1,29 +1,31 @@
-.navbar-brand {
-	padding-top: 14px;
-	padding-bottom: 14px;
-	margin-right: 12px;
+.navbar.fixed-top {
+    max-height: 500px;
+	overflow-y: auto;
 }
 .navbar-brand img {
 	width: 32px;
 	height: 32px;
-	margin-left: -6px;
-	margin-top: -8px;
-}
-.navbar-brand .separator {
-	border-left: 1px solid #444;
-	height: 30px;
-	position: absolute;
-	left: 52px;
-	top: 11px;
-}
-@media(min-width: 768px) {
-	.navbar-header>.nav-context, .navbar-brand .separator {
-		display: none;
-	}
 }
 .navbar-header>.nav-context {
 	color: white;
-	margin-top: 14px;
+	display: inline-block;
+	margin-top: 10px;
+}
+@media(min-width: 768px) {
+	.navbar-header>.nav-context {
+		display: none;
+	}
+	.navbar.fixed-top {
+		overflow-y: visible;
+	}
+}
+.navbar .nav-link .fa {
+	font-size: 20px;
+	vertical-align: bottom;
+}
+.navbar .avatar {
+	width: 24px;
+	height: 24px;
 }
 .navbar-header>.nav-context .text {
 	text-overflow: ellipsis;
@@ -35,31 +37,12 @@
 	color: white;
 	text-decoration: none;
 }
-.navbar a {
-	font-size: 16px;
-}
-.navbar .dropdown-menu a {
-	font-size: 14px;
-}
-.navbar-nav>li.signed-in>a {
-	padding-top: 10px;
-	padding-bottom: 10px;
-}
-.navbar img.avatar {
-	width: 30px;
-	height: 30px;
-}
-.navbar .dropdown-menu .dropdown-header {
-	font-size: 16px;
-	padding: 4px 20px 0 20px;
-}
-
 @media (max-width: 767px) {
 	.navbar .github .icon, 
 	.navbar .help .icon, 
 	.navbar .signed-in .avatar, 
 	.navbar .signed-in .dropdown-header, 
-	.navbar .signed-in .dropdown-header+.divider {
+	.navbar .signed-in .dropdown-header+.dropdown-divider {
 		display: none;
 	}
 }
@@ -72,17 +55,17 @@
 }
 
 #layout>.body {
-	padding: 70px 20px 20px 20px;
+	padding: 79px 20px 20px 20px;
 	width: 100%;
 }
 
 #layout .sidebar {
-	top: 50px;
+	top: 59px;
 }
 
 .floating.side {
 	position: fixed;
-	top: 51px;
+	top: 59px;
 	border-top: none;
 	border-bottom: none;
 	bottom: 0;

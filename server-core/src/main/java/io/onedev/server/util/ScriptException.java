@@ -1,8 +1,8 @@
 package io.onedev.server.util;
 
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 
-public class ScriptException extends OneException {
+public class ScriptException extends GeneralException {
 
 	private static final long serialVersionUID = 1L;
 

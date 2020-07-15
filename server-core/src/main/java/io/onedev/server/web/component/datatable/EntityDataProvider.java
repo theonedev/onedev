@@ -11,6 +11,7 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 @SuppressWarnings("serial")
 public class EntityDataProvider<T extends AbstractEntity> extends LoadableDetachableDataProvider<T, String> {

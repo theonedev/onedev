@@ -41,7 +41,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
@@ -142,7 +142,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		IssueQuery query;
 		try {
 			query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
-		} catch (OneException e) {
+		} catch (GeneralException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
@@ -158,7 +158,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		IssueQuery baseQuery;
 		try {
 			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
-		} catch (OneException e) {
+		} catch (GeneralException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
@@ -177,7 +177,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		if (StringUtils.isNotBlank(boardName)) {
 			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
-				throw new OneException("Can not find issue board: " + boardName);
+				throw new GeneralException("Can not find issue board: " + boardName);
 		} else if (!boards.isEmpty()) {
 			boardIndex = 0;
 		} else {
@@ -189,7 +189,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		if (milestoneName != null) {
 			milestone = getProject().getMilestone(milestoneName);
 			if (milestone == null)
-				throw new OneException("Can not find milestone: " + milestoneName);
+				throw new GeneralException("Can not find milestone: " + milestoneName);
 		} else if (!getProject().getSortedMilestones().isEmpty()) {
 			milestone = getProject().getSortedMilestones().iterator().next();
 		} else {
@@ -418,6 +418,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			if (getMilestone() != null) {
 				Fragment milestoneFragment = new Fragment("milestone", "hasMilestoneFrag", this);
+				milestoneFragment.setRenderBodyOnly(true);
 				milestoneFragment.add(new DropdownLink("link") {
 
 					private boolean showClosed;
@@ -443,7 +444,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							add(AttributeAppender.append("class", "btn-danger"));
 							add(AttributeAppender.replace("title", "Milestone is due"));
 						} else {
-							add(AttributeAppender.append("class", "btn-default"));
+							add(AttributeAppender.append("class", "btn-outline-secondary"));
 						}
 					}
 
@@ -613,7 +614,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						return Model.of("<i class=\"fa fa-plus\"></i> Add Milestone");
 					}
 					
-				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-default")));
+				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-outline-secondary")));
 			} else {
 				form.add(new WebMarkupContainer("milestone").setVisible(false));
 			}

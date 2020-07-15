@@ -67,7 +67,7 @@ abstract class MenuPanel extends Panel {
 					item.add(fragment);
 				} else {
 					item.add(new Label("content", "<div></div>").setEscapeModelStrings(false));
-					item.add(AttributeAppender.append("class", "divider"));
+					item.add(AttributeAppender.append("class", "dropdown-divider"));
 				}
 			}
 			

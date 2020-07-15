@@ -1,5 +1,5 @@
 body.CommitDetailPage #layout>.body {
-	padding: 50px 0 0 0;
+	padding: 59px 0 0 0;
 }
 #commit-detail {
 	position: relative;
@@ -31,10 +31,6 @@ body.CommitDetailPage #layout>.body {
 #commit-detail>.info>.message>.subject>.pull-right {
 	margin-left: 8px;
 	margin-bottom: 8px;
-}
-#commit-detail>.info>.message>.subject .btn-group .fa {
-	color: #666;
-	font-size: 12px;
 }
 #commit-detail>.info>.message>.detail {
 	color: #666;
@@ -83,9 +79,6 @@ body.CommitDetailPage #layout>.body {
 }
 #commit-detail>.info>.contribution-and-parents .parents>div>*:last-child {
 	margin-right: 0;
-}
-#commit-detail>.info>.contribution-and-parents .parents .fa {
-	font-size: 12px;
 }
 #commit-detail>.jobs {
 	margin-bottom: 10px;

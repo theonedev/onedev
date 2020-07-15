@@ -93,7 +93,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			public String getObject() {
-				return !titleInput.isValid()?" has-error":"";
+				return !titleInput.isValid()?" is-invalid":"";
 			}
 			
 		}));

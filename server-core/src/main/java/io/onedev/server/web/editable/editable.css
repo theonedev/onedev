@@ -71,17 +71,6 @@
 .property-editor>.bean-list>table>*>tr>.actions {
     font-size: 18px;
 }
-.property-editor>.list>table>tfoot>tr>td.norecords-td>div,
-.property-editor>.bean-list>table>tfoot>tr>td.no-elements>div {
-    border-top: 2px solid #DDD;
-    margin-top: -7px;
-    padding: 8px 0 0 8px;
-}
-.property-viewer>.bean-list>tfoot>tr>td.no-elements>div {
-    border-top: 2px solid #DDD;
-    margin-top: -7px;
-    padding-top: 7px;
-}
 
 .editable>.polymorphic>.type-selector {
 	margin-bottom: 15px;

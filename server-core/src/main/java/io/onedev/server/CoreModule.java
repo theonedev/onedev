@@ -44,7 +44,6 @@ import org.apache.sshd.common.keyprovider.KeyPairProvider;
 import org.apache.wicket.Application;
 import org.apache.wicket.core.request.mapper.StalePageException;
 import org.apache.wicket.protocol.http.PageExpiredException;
-import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -222,10 +221,10 @@ import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.BearerAuthenticationFilter;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.FilterChainConfigurator;
-import io.onedev.server.security.OneFilterChainResolver;
-import io.onedev.server.security.OnePasswordService;
-import io.onedev.server.security.OneRememberMeManager;
-import io.onedev.server.security.OneWebSecurityManager;
+import io.onedev.server.security.DefaultFilterChainResolver;
+import io.onedev.server.security.DefaultPasswordService;
+import io.onedev.server.security.DefaultRememberMeManager;
+import io.onedev.server.security.DefaultWebSecurityManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.DefaultKeyPairProvider;
@@ -267,7 +266,7 @@ import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
 import io.onedev.server.web.ExpectedExceptionContribution;
-import io.onedev.server.web.OneWebApplication;
+import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.ResourcePackScopeContribution;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -281,7 +280,7 @@ import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
-import io.onedev.server.web.mapper.OnePageMapper;
+import io.onedev.server.web.mapper.GeneralPageMapper;
 import io.onedev.server.web.page.DashboardPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.layout.BuildListTab;
@@ -504,12 +503,12 @@ public class CoreModule extends AbstractPluginModule {
 	private void configureSecurity() {
 		contributeFromPackage(Realm.class, AbstractAuthorizingRealm.class);
 		
-		bind(RememberMeManager.class).to(OneRememberMeManager.class);
-		bind(WebSecurityManager.class).to(OneWebSecurityManager.class);
-		bind(FilterChainResolver.class).to(OneFilterChainResolver.class);
+		bind(RememberMeManager.class).to(DefaultRememberMeManager.class);
+		bind(WebSecurityManager.class).to(DefaultWebSecurityManager.class);
+		bind(FilterChainResolver.class).to(DefaultFilterChainResolver.class);
 		bind(BasicAuthenticationFilter.class);
 		bind(BearerAuthenticationFilter.class);
-		bind(PasswordService.class).to(OnePasswordService.class);
+		bind(PasswordService.class).to(DefaultPasswordService.class);
 		bind(ShiroFilter.class);
 		install(new ShiroAopModule());
         contribute(FilterChainConfigurator.class, new FilterChainConfigurator() {
@@ -568,8 +567,8 @@ public class CoreModule extends AbstractPluginModule {
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
 		
-		bind(WebApplication.class).to(OneWebApplication.class);
-		bind(Application.class).to(OneWebApplication.class);
+		bind(org.apache.wicket.protocol.http.WebApplication.class).to(WebApplication.class);
+		bind(Application.class).to(WebApplication.class);
 		bind(AvatarManager.class).to(DefaultAvatarManager.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
@@ -578,8 +577,8 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
 			
 			@Override
-			public void configure(WebApplication application) {
-				application.mount(new OnePageMapper("/test", TestPage.class));
+			public void configure(org.apache.wicket.protocol.http.WebApplication application) {
+				application.mount(new GeneralPageMapper("/test", TestPage.class));
 			}
 			
 		});
@@ -598,7 +597,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public Collection<Class<?>> getResourcePackScopes() {
-				return Lists.newArrayList(OneWebApplication.class);
+				return Lists.newArrayList(WebApplication.class);
 			}
 			
 		});
@@ -609,7 +608,7 @@ public class CoreModule extends AbstractPluginModule {
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
 						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
-						OneException.class, PageExpiredException.class, StalePageException.class);
+						GeneralException.class, PageExpiredException.class, StalePageException.class);
 			}
 			
 		});

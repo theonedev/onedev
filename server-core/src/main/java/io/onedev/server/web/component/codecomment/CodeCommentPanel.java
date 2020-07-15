@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -38,7 +39,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -168,7 +168,7 @@ public abstract class CodeCommentPanel extends Panel {
 				contentInput.setRequired(true);
 				contentInput.setLabel(Model.of("Comment"));
 				
-				NotificationPanel feedback = new NotificationPanel("feedback", form); 
+				FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
@@ -323,7 +323,7 @@ public abstract class CodeCommentPanel extends Panel {
 				contentInput.setLabel(Model.of("Comment"));
 				form.add(contentInput);
 				
-				NotificationPanel feedback = new NotificationPanel("feedback", form); 
+				FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 				feedback.setOutputMarkupPlaceholderTag(true);
 				form.add(feedback);
 				
@@ -635,7 +635,7 @@ public abstract class CodeCommentPanel extends Panel {
 		contentInput.setLabel(Model.of("Comment"));
 		form.add(contentInput);
 		
-		NotificationPanel feedback = new NotificationPanel("feedback", form); 
+		FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 		feedback.setOutputMarkupPlaceholderTag(true);
 		form.add(feedback);
 		

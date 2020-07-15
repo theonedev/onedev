@@ -1,5 +1,6 @@
 (function ( $ ) {
     $.fn.selectionPopover = function(action, options) {
+
     	var $container = jQuery(this);
     	$container.css("position", "relative");
     	function popover(options) {

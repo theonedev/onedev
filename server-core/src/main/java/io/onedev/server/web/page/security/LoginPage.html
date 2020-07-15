@@ -4,21 +4,22 @@
 		<div wicket:id="feedback"></div>
 		<form wicket:id="form" method="post">
 			<div class="input-group username">
-				<span class="input-group-addon"><i class="fa fa-user fa-fw"></i></span>
+				<span class="input-group-prepend"><span class="input-group-text"><i class="fa fa-user fa-fw"></i></span></span>
 				<input wicket:id="userName" autocomplete="username" type="text" class="form-control input-lg" placeholder="User name" />
 			</div>
 			<div class="input-group password">
-				<span class="input-group-addon"><i class="fa fa-key fa-fw"></i></span>
+				<span class="input-group-prepend"><span class="input-group-text"><i class="fa fa-key fa-fw"></i></span></span>
 				<input wicket:id="password" autocomplete="current-password" type="password" class="form-control input-lg" placeholder="Password" />
 			</div>
 			<div class="row">
 				<div class="col-sm-6">
-					<div class="checkbox">
-						<label><input wicket:id="rememberMe" type="checkbox">Remember Me</label>
+					<div class="form-check form-group">
+						<input wicket:id="rememberMe" id="rememberMe" type="checkbox" class="form-check-input">
+						<label class="form-check-label" for="rememberMe">Remember Me</label>
 					</div>				
 				</div>
 				<div class="col-sm-6">
-					<button class="btn btn-primary" type="submit">Sign in</button>
+					<button class="btn btn-primary btn-block" type="submit">Sign in</button>
 				</div>
 			</div>
 		</form>
@@ -28,7 +29,7 @@
 		</div>
 		<wicket:enclosure child="ssoButtons">
 		<div class="sso">
-			<a wicket:id="ssoButtons" class="btn btn-default"><img wicket:id="image"> <span wicket:id="label"></span></a>
+			<a wicket:id="ssoButtons" class="btn btn-secondary"><img wicket:id="image"> <span wicket:id="label"></span></a>
 		</div>
 		</wicket:enclosure>
 	</div>

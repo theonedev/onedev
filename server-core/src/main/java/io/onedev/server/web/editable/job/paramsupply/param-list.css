@@ -20,7 +20,7 @@
 .job-params-edit>.job-param .specified-value>a>i {
     font-size: 20px;
 }
-.job-params-edit>.job-param .specified-value.has-error {
+.job-params-edit>.job-param .specified-value.is-invalid {
     background: #FEDADA;
     color: #DD4B4B;
 }

@@ -11,6 +11,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -25,7 +26,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
@@ -60,7 +60,7 @@ public class LoginPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new NotificationPanel("feedback"));
+		add(new FencedFeedbackPanel("feedback"));
 		
 		StatelessForm<?> form = new StatelessForm<Void>("form") {
 

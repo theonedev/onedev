@@ -12,8 +12,6 @@
 #milestone-list>.body tbody td.actions {
 	white-space: nowrap;
 }
-#milestone-list>.body tbody td.issue-stats .state-stats {
-}
 
 .milestone-sort.active:before {
 	font-family: "FontAwesome";
@@ -42,7 +40,6 @@
 }
 #milestone-detail>.title .due, #milestone-detail>.title a {
 	font-weight: normal;
-	font-size: 16px;
 }
 #milestone-detail .description {
 	background: #F5F5F5;

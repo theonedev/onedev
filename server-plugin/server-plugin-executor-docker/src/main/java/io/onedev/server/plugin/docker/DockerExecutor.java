@@ -44,7 +44,7 @@ import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.SshCloneInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
@@ -434,7 +434,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					
 				}).checkReturnCode();
 				
-				throw new OneException(String.format("Service '" + jobService.getName() + "' is stopped unexpectedly"));
+				throw new GeneralException(String.format("Service '" + jobService.getName() + "' is stopped unexpectedly"));
 			}
 			
 			try {
@@ -807,7 +807,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					if (argument.startsWith(option))
 						return true;
 				} else {
-					throw new OneException("Invalid option: " + option);
+					throw new GeneralException("Invalid option: " + option);
 				}
 			}
 		}

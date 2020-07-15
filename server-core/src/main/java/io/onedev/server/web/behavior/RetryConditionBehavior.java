@@ -16,7 +16,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
@@ -93,7 +93,7 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 				try {
 					RetryCondition.checkField(job, fieldName, 
 							AntlrUtils.getLexerRule(RetryConditionLexer.ruleNames, suggestedLiteral));
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					return null;
 				}
 			}

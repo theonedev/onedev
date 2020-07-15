@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.BeanUtils;
@@ -61,18 +61,18 @@ public class VariableInterpolator implements Function<String, String> {
 						}
 						return StringUtils.join(paramValues, ",");
 					} else {
-						throw new OneException("Invisible param: " + paramName);
+						throw new GeneralException("Invisible param: " + paramName);
 					}
 				}					
 			}
-			throw new OneException("Undefined param: " + paramName);
+			throw new GeneralException("Undefined param: " + paramName);
 		} else if (t.startsWith(PREFIX_PROPERTIES)) {
 			String propertyName = t.substring(PREFIX_PROPERTIES.length());
 			String propertyValue = build.getSpec().getPropertyMap().get(propertyName);
 			if (propertyValue != null)
 				return propertyValue;
 			else
-				throw new OneException("Undefined property: " + propertyName);
+				throw new GeneralException("Undefined property: " + propertyName);
 		} else if (t.startsWith(PREFIX_SECRETS)) {
 			String secretName = t.substring(PREFIX_SECRETS.length());
 			return build.getSecretValue(secretName);
@@ -86,7 +86,7 @@ public class VariableInterpolator implements Function<String, String> {
 			else
 				return "";
 		} else {
-			throw new OneException("Unrecognized interpolation variable: " + t);
+			throw new GeneralException("Unrecognized interpolation variable: " + t);
 		}
 	}
 

@@ -39,7 +39,7 @@ public class IssueStateLabel extends Label {
 			add(AttributeAppender.append("title", "State"));
 		}
 		
-		add(AttributeAppender.append("class", "issue-state label"));
+		add(AttributeAppender.append("class", "issue-state badge"));
 	}
 
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.web.editable.EditableUtils;
@@ -46,7 +46,7 @@ public class AutoDiscoveredJobExecutor extends JobExecutor {
 			jobExecutor.setJobMatch(getJobMatch());
 			jobExecutor.execute(jobToken, context);
 		} else {
-			throw new OneException("No job executors discovered");
+			throw new GeneralException("No job executors discovered");
 		}
 	}
 

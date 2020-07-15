@@ -20,7 +20,7 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
@@ -133,7 +133,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 									} else {
 										return null;
 									}
-								} catch (OneException ex) {
+								} catch (GeneralException ex) {
 								}
 							}
 						}
@@ -176,7 +176,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				String fieldName = BuildQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					BuildQuery.checkField(getProject(), fieldName, BuildQuery.getOperator(suggestedLiteral));
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					return null;
 				}
 			} 

@@ -1,8 +1,8 @@
 package io.onedev.server.util.usage;
 
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 
-public class InUseException extends OneException {
+public class InUseException extends GeneralException {
 
 	private static final long serialVersionUID = 1L;
 

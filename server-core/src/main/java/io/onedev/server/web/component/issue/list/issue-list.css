@@ -11,10 +11,10 @@
 	margin-bottom: 20px;
 }
 .issue-list>.head>form {
-	margin-right: 100px;
+	margin-right: 120px;
 }
 .issue-list>.head>.open-new {
-	width: 80px;
+	width: 100px;
 	position: absolute;
 	right: 0;
 	top: 0;
@@ -35,7 +35,6 @@
 
 .issue-list>.body td .issue-state {
 	margin-right: 4px;
-	font-size: 11px;
 }
 .issue-list>.body td .secondary>.pull-left>div {
 	margin-right: 12px;

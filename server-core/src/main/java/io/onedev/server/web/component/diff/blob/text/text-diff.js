@@ -775,9 +775,10 @@ onedev.server.textDiff = {
 			}
 			$indicator.popover({
 				html: true, 
-				container: $lineNumTd,
-				placement: "right auto",
-				template: "<div class='" + oldOrNew + " popover comment-popover' data-line='" + line + "'><div class='arrow'></div><div class='popover-content'></div></div>",
+				sanitize: false, 
+				container: $lineNumTd[0],
+				placement: "auto",
+				template: "<div class='" + oldOrNew + " popover comment-popover' data-line='" + line + "'><div class='arrow'></div><div class='popover-body'></div></div>",
 				content: content
 			});
 			$indicator.on('shown.bs.popover', function () {

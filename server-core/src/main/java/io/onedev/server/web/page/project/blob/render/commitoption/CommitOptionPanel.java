@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -37,7 +38,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
@@ -176,7 +176,7 @@ public abstract class CommitOptionPanel extends Panel {
 		form.setOutputMarkupId(true);
 		add(form);
 
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		newChangedContainer(null);
 		commitMessageBean.setSummary(getDefaultCommitMessage());
 		form.add(BeanContext.edit("commitMessage", commitMessageBean));

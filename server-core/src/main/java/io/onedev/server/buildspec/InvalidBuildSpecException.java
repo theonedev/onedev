@@ -1,8 +1,8 @@
 package io.onedev.server.buildspec;
 
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 
-public class InvalidBuildSpecException extends OneException {
+public class InvalidBuildSpecException extends GeneralException {
 
 	private static final long serialVersionUID = 1L;
 

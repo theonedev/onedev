@@ -76,8 +76,7 @@
 }
 #issue-boards>.body>.columns>.column>.content>.head .badge {
 	margin-left: 8px;
-	margin-top: 2px;
-	font-size: 10px;
+	margin-top: 3px;
 }
 #issue-boards>.body>.columns>.column>.content>.head a {
 	color: #666;
@@ -210,6 +209,7 @@
 	padding-right: 20px;
 	border-right: 1px solid #D8D8D8;
 	margin-right: 30px;
+	display: block;
 }
 
 @media (max-width: 992px) {

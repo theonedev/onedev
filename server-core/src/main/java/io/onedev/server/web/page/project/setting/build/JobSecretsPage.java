@@ -27,7 +27,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
@@ -205,7 +205,7 @@ public class JobSecretsPage extends BuildSettingPage {
 			}
 		};
 		
-		add(secretsTable = new DefaultDataTable<>("secrets", columns, dataProvider, 
+		add(secretsTable = new HistoryAwareDataTable<>("secrets", columns, dataProvider, 
 				Integer.MAX_VALUE, null));		
 		secretsTable.setOutputMarkupId(true);
 	}

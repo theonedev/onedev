@@ -5,7 +5,7 @@
 		<div class="list">
 			<div class="head clearfix">
 				<div class="input-group pull-left base">
-					<span class="input-group-addon">Base</span> 
+					<span class="input-group-prepend"><span class="input-group-text">Base</span></span> 
 					<input wicket:id="baseBranch" type="hidden" class="form-control">					
 				</div>
 				<div class="pull-left clearable-wrapper">
@@ -27,8 +27,8 @@
 		<div class="title">
 			<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a>
 			<span wicket:id="buildStatus" class="build-status"></span>
-			<span class="label label-default" wicket:id="default">default</span>
-			<a wicket:id="makeDefault" class="make-default btn btn-xs btn-default"><i class="fa fa-check"></i> make default</a>
+			<span class="badge badge-secondary" wicket:id="default">default</span>
+			<a wicket:id="makeDefault" class="make-default btn btn-sm btn-secondary"><i class="fa fa-check"></i> make default</a>
 		</div>
 		<div class="commit-message">
 			<a wicket:id="messageLink"><span wicket:id="message"></span></a>
@@ -50,30 +50,29 @@
 	<wicket:fragment wicket:id="createBranchFrag">
 		<form wicket:id="form" class="create-branch">
 			<div class="modal-header">
-				<h4 class="modal-title">Create Branch</h4>
+				<h5 class="modal-title">Create Branch</h5>
+				<button wicket:id="close" type="button" class="close">&times;</button>
 			</div>
 			<div class="modal-body">
 				<div wicket:id="feedback"></div>
 				<div wicket:id="editor"></div>
 			</div>
 			<div class="modal-footer">
-				<div class="form-group">
-					<button wicket:id="create" class="btn btn-primary">Create</button>
-					<button wicket:id="cancel" class="btn btn-default">Cancel</button>
-				</div>
+				<button wicket:id="create" class="btn btn-primary">Create</button>
+				<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="confirmDeleteBranchFrag">
         <div class="confirm-delete-branch">
             <div class="modal-header">
+                <h5 class="modal-title">Please confirm</h5>
                 <button wicket:id="close" type="button" class="close">&times;</button>
-                <h4 class="modal-title">Please confirm</h4>
             </div>
             <div wicket:id="body" class="modal-body"></div>
             <div class="modal-footer">
                 <a wicket:id="delete" class="btn btn-danger">Delete</a>
-                <a wicket:id="cancel" class="btn btn-default">Cancel</a>
+                <a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
             </div>
         </div>
 	</wicket:fragment>

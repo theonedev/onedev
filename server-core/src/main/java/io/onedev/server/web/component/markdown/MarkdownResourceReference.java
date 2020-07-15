@@ -6,10 +6,10 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import de.agilecoders.wicket.webjars.request.resource.WebjarsCssResourceReference;
 import io.onedev.server.web.asset.atwho.AtWhoResourceReference;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
+import io.onedev.server.web.asset.codemirror.CodeThemeCssResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
@@ -45,7 +45,7 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(MarkdownResourceReference.class, "markdown.css")));
-		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/theme/eclipse.css")));
+		dependencies.add(CssHeaderItem.forReference(new CodeThemeCssResourceReference()));
 		return dependencies;
 	}
 	

@@ -62,7 +62,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -718,10 +718,10 @@ public class Build extends AbstractEntity implements Referenceable {
 					if (isOnBranches(secret.getAuthorizedBranches()))				
 						return secret.getValue();
 					else
-						throw new OneException("Job secret not authorized: " + secretName);
+						throw new GeneralException("Job secret not authorized: " + secretName);
 				}
 			}
-			throw new OneException("No job secret found: " + secretName);
+			throw new GeneralException("No job secret found: " + secretName);
 		}
 	}
 	

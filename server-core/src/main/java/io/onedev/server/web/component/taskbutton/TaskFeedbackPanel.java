@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractAjaxTimerBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -13,7 +14,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.time.Duration;
 import org.unbescape.html.HtmlEscape;
@@ -45,26 +46,37 @@ abstract class TaskFeedbackPanel extends Panel {
 			
 		});
 		
-		Component closeLabel = new Label("label", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				if (getResult() != null)
-					return "Ok";
-				else
-					return "Cancel";
-			}
-			
-		}).setOutputMarkupId(true);
-		
-		add(new AjaxLink<Void>("closeButton") {
+		Component closeButton;
+		add(closeButton = new AjaxLink<Void>("closeButton") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onClose(target);
 			}
+
+			@Override
+			public IModel<?> getBody() {
+				return new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						if (getResult() != null)
+							return "Ok";
+						else
+							return "Cancel";
+					}
+					
+				};
+			}
 			
-		}.add(closeLabel));
+		}.add(AttributeModifier.replace("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return getResult() != null? "btn btn-primary": "btn btn-secondary";
+			}
+			
+		})));
 
 		Component messagesLabel = new Label("messages", new LoadableDetachableModel<String>() {
 
@@ -121,7 +133,7 @@ abstract class TaskFeedbackPanel extends Panel {
 			@Override
 			protected void onTimer(AjaxRequestTarget target) {
 				if (getResult() != null) {
-					target.add(closeLabel);
+					target.add(closeButton);
 					target.add(resultLabel);
 					stop(target);
 				}

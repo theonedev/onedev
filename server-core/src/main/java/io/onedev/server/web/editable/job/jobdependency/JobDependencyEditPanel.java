@@ -6,11 +6,11 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobDependency;
@@ -54,7 +54,7 @@ abstract class JobDependencyEditPanel extends Panel implements BuildSpecAware, J
 			
 		};
 		
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		
 		form.add(new AjaxLink<Void>("close") {
 

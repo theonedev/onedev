@@ -4,8 +4,8 @@
 			<form wicket:id="query" class="clearable-wrapper">
 				<div class="input-group">
 					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query commits here">
-					<span class="input-group-btn">
-						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					<span class="input-group-append">
+						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary" title="Query"><i class="fa fa-search"></i></button>
 					</span>
 				</div>
 			</form>
@@ -22,7 +22,7 @@
             <div wicket:id="noCommits" class="no-records">No commits found</div>
         </div>
         <div wicket:id="foot" class="foot">
-            <a wicket:id="more" class="btn btn-default">More commits</a>
+            <a wicket:id="more" class="btn btn-secondary">More commits</a>
             <div wicket:id="tooMany" class="alert alert-warning">Too many commits to load</div>
         </div>
 	</div>
@@ -34,7 +34,7 @@
 			<div class="message-and-labels clearfix">
 				<div wicket:id="message" class="message pull-left"></div>
 				<div wicket:id="labels" class="pull-left">
-					<span wicket:id="label" class="label label-default"></span>
+					<span wicket:id="label" class="badge badge-secondary"></span>
 				</div>
 			</div>
 			<div wicket:id="contribution"></div>
@@ -42,13 +42,13 @@
 		<div class="actions">
 	        <span wicket:id="buildStatus" class="build-status"></span>
 	        <span class="btn-group hash">
-	            <a wicket:id="hashLink" class="btn btn-default hash"><span wicket:id="hash"></span></a>
-	            <a wicket:id="copyHash" class="btn btn-default"><i class="fa fa-clipboard"></i></a>
+	            <a wicket:id="hashLink" class="btn btn-outline-secondary hash"><span wicket:id="hash"></span></a>
+	            <a wicket:id="copyHash" class="btn btn-outline-secondary"><i class="fa fa-clipboard"></i></a>
 	        </span>
 	        <span class="btn-group browse">
-	            <a wicket:id="browseCode" title="Browse code" class="btn btn-default"><i class="fa fa-file-text-o"></i></a>
+	            <a wicket:id="browseCode" title="Browse code" class="btn btn-outline-secondary"><i class="fa fa-file-text-o"></i></a>
 	            <wicket:enclosure>
-	            <a wicket:id="compare" class="compare btn btn-default" title="Compare with base revision"><i class="fa fa-ext fa-file-diff"></i></a>
+	            <a wicket:id="compare" class="compare btn btn-outline-secondary" title="Compare with base revision"><i class="fa fa-ext fa-file-diff"></i></a>
 	            </wicket:enclosure>
 	        </span>
 		</div>

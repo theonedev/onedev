@@ -310,16 +310,6 @@
 				<version>2.7.9</version>
 			</dependency>
 			<dependency>
-				<groupId>de.agilecoders.wicket</groupId>
-				<artifactId>wicket-bootstrap-core</artifactId>
-				<version>${wicketbootstrap.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.agilecoders.wicket</groupId>
-				<artifactId>wicket-bootstrap-extensions</artifactId>
-				<version>${wicketbootstrap.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
 				<version>4.1</version>
@@ -428,16 +418,6 @@
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars</groupId>
-				<artifactId>font-awesome</artifactId>
-				<version>4.7.0</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars.npm</groupId>
-				<artifactId>codemirror</artifactId>
-				<version>5.21.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.shiro</groupId>
@@ -564,7 +544,12 @@
 				<artifactId>sshd-core</artifactId>
 				<version>2.2.0</version>
 			</dependency>
-		</dependencies>
+			<dependency>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
+				<version>20090211</version>
+			</dependency>
+  		</dependencies>
 	</dependencyManagement>
 	<repositories>
 		<repository>
@@ -589,7 +574,7 @@
 		<logback.version>1.0.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>
 		<jetty.version>9.4.24.v20191120</jetty.version>
-		<wicket.version>7.14.0</wicket.version>
+		<wicket.version>7.17.0</wicket.version>
 		<jersey.version>2.26</jersey.version>
 		<hibernate.version>5.4.9.Final</hibernate.version>
 		<wicketbootstrap.version>0.10.18</wicketbootstrap.version>

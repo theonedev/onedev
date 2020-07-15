@@ -77,7 +77,7 @@ public class TagProtectionsPage extends ProjectSettingPage {
 				target.add(container);
 			}
 			
-		}.items("li.protection").handle(".panel-heading"));
+		}.items("li.protection").handle(".card-header"));
 		
 		container.add(newAddNewFrag());
 	}

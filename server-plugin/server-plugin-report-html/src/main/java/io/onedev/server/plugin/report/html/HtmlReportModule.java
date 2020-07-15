@@ -17,8 +17,8 @@ import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.OnePageMapper;
-import io.onedev.server.web.mapper.OneResourceMapper;
+import io.onedev.server.web.mapper.GeneralPageMapper;
+import io.onedev.server.web.mapper.GeneralResourceMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 
@@ -75,8 +75,8 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new OnePageMapper("projects/${project}/builds/${build}/html-reports/${report}", HtmlReportPage.class));
-				application.mount(new OneResourceMapper("downloads/projects/${project}/builds/${build}/html-reports/${report}/${path}", 
+				application.mount(new GeneralPageMapper("projects/${project}/builds/${build}/html-reports/${report}", HtmlReportPage.class));
+				application.mount(new GeneralResourceMapper("downloads/projects/${project}/builds/${build}/html-reports/${report}/${path}", 
 						new HtmlReportDownloadResourceReference()));
 			}
 			

@@ -2,8 +2,8 @@
 	<div class="issue-batch-edit">
 		<form wicket:id="form">
 			<div class="modal-header">
+				<h5 wicket:id="title" class="modal-title"></h5>
 				<button wicket:id="close" type="button" class="close">&times;</button>
-				<h4 wicket:id="title" class="modal-title"></h4>
 			</div>
 			<div class="modal-body">
 				<div class="select-fields">
@@ -37,9 +37,9 @@
 				<div wicket:id="customFieldsEditor"></div>
 				<div wicket:id="comment" placeholder="Leave a comment"></div>
 			</div>				
-			<div class="modal-footer clearfix">
+			<div class="modal-footer">
 				<input wicket:id="save" type="submit" class="btn btn-primary" value="Save">
-				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
 			</div>
 		</form>
 	</div>

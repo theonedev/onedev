@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="modal-header">
+		<h5 wicket:id="title" class="modal-title"></h5>
 		<button wicket:id="close" type="button" class="close">&times;</button>
-		<h4 wicket:id="title" class="modal-title"></h4>
 	</div>
 	<div wicket:id="content" class="modal-body insert-url"></div>
 	
@@ -42,7 +42,7 @@
 			<li wicket:id="attachments" class="attachment file">
 				<div class="row">
 					<div class="col-md-9">
-						<a wicket:id="select" title="Insert link to this file" class="insert btn btn-block btn-default"><span wicket:id="file"></span></a>
+						<a wicket:id="select" title="Insert link to this file" class="insert btn btn-block btn-secondary"><span wicket:id="file"></span></a>
 					</div>
 					<div class="col-md-3">
 						<a wicket:id="delete" title="Remove this file" class="delete btn btn-danger"><i class="fa fa-trash"></i> Remove</a>
@@ -70,7 +70,7 @@
   				<label>Directory</label>
   				<div>
 					<input wicket:id="directory" class="form-control"></input> 
-					<a wicket:id="select" title="Select" class="btn btn-default"><i class="fa fa-folder-open-o"></i></a>
+					<a wicket:id="select" title="Select" class="btn btn-secondary"><i class="fa fa-folder-open-o"></i></a>
   				</div>
 				<p class="help-block">Optionally specify relative directory to put uploaded files</p>
 			</div>			

@@ -79,7 +79,6 @@ onedev.server.sourceView = {
 		cm.on("scroll", function() {
 			onedev.server.symboltooltip.removeTooltip(document.getElementById(symbolTooltipId));					
 			onedev.server.mouseState.moved = false;					
-			repositionCommentPopovers();					
 		});
 		
     	var cursorActivityTimer;
@@ -140,30 +139,7 @@ onedev.server.sourceView = {
 			}
 			
 			cm.setSize($code.width(), $code.height());
-			repositionCommentPopovers();
 		});
-		
-		function repositionCommentPopovers() {
-			$(".comment-popover:visible").each(function() {
-				var $popover = $(this);
-				var lineInfo = cm.lineInfo($popover.data("line"));
-				if (lineInfo.gutterMarkers) {
-					var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
-					if (gutter) {
-						var $indicator = $(gutter).children("a");
-						if ($indicator.offset().top+$indicator.height() < $sourceView.offset().top 
-								|| $indicator.offset().top > $sourceView.offset().top+$sourceView.height()) {
-							$popover.css("left", "-10000px");
-						} else {
-							$popover.css({
-								"left": $indicator.offset().left + $indicator.outerWidth() - $sourceView.offset().left,
-								"top": $indicator.offset().top + ($indicator.outerHeight() - $popover.outerHeight())/2 - $sourceView.offset().top
-							});
-						}
-					}
-				}
-			});
-		}
 	},
 	checkShortcutsBinding() {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
@@ -291,15 +267,16 @@ onedev.server.sourceView = {
 			}
 			$indicator.popover({
 				html: true, 
-				container: ".source-view",
-				placement: "right auto",
-				template: "<div data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-content'></div></div>",
+				container: ".source-view>.code",
+				sanitize: false,
+				placement: "auto",
+				template: "<div data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-body'></div></div>",
 				content: content
 			});
 			$indicator.on('shown.bs.popover', function () {
 				$(".comment-popover[data-line='" + line + "'] a").each(function() {
 					$(this).mouseover(function() {
-						var comment = comments[$(this).index()];			        						
+						var comment = comments[$(this).index()];
 						onedev.server.codemirror.mark(cm, comment.mark);
 					});
 					$(this).mouseout(function() {

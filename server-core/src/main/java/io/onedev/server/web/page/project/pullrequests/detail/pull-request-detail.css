@@ -8,7 +8,7 @@
 }
 
 body.PullRequestDetailPage #layout>.body {
-	padding: 50px 0 0 0;
+	padding: 59px 0 0 0;
 }
 #request-detail>.main {
 	overflow: auto;
@@ -134,6 +134,7 @@ ul>li>a.code-comments.new .fa-circle {
 	padding-right: 20px;
 	border-right: 1px solid #D8D8D8;
 	margin-right: 30px;
+	display: block;
 }
 #request-detail>.side-info>.content>.nav a {
 	position: absolute;

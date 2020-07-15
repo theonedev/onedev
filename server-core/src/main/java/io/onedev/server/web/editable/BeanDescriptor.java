@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -113,7 +113,7 @@ public class BeanDescriptor implements Serializable {
 					return property.getPropertyName();
 			}
 		}
-		throw new OneException("No property found with name: " + propertyNameOrDisplayName);
+		throw new GeneralException("No property found with name: " + propertyNameOrDisplayName);
 	}
 	
 }

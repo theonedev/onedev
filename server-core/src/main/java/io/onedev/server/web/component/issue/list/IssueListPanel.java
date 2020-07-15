@@ -51,7 +51,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -77,8 +77,6 @@ import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateLabel;
@@ -89,6 +87,7 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.pagenavigator.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -98,6 +97,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -156,7 +156,7 @@ public abstract class IssueListPanel extends Panel {
 	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
 		try {
 			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, true, true, false, false, false));
-		} catch (OneException e) {
+		} catch (GeneralException e) {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
@@ -609,7 +609,7 @@ public abstract class IssueListPanel extends Panel {
 				try {
 					return getIssueManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count, true).iterator();
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					error(e.getMessage());
 					return new ArrayList<Issue>().iterator();
 				}
@@ -621,7 +621,7 @@ public abstract class IssueListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getIssueManager().count(getProject(), query.getCriteria());
-					} catch (OneException e) {
+					} catch (GeneralException e) {
 						error(e.getMessage());
 					}
 				}

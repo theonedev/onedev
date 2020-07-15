@@ -1128,6 +1128,11 @@ the specific language governing permissions and limitations under the Apache Lic
             this.dropdown.show();
             this.positionDropdown();
 
+			if (this.container.closest(".is-invalid").length != 0 || this.container.hasClass("is-invalid"))
+				this.dropdown.addClass("is-invalid");
+			else 
+				this.dropdown.removeClass("is-invalid");
+							
             this.dropdown.addClass("select2-drop-active");
             this.ensureHighlightVisible();
 

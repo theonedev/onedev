@@ -1,5 +1,5 @@
 body.BuildDetailPage #layout>.body {
-	padding: 50px 0 0 0;
+	padding: 59px 0 0 0;
 }
 #build-detail>.main {
 	overflow: auto;
@@ -47,6 +47,7 @@ body.BuildDetailPage #layout>.body {
 	padding-right: 20px;
 	border-right: 1px solid #D8D8D8;
 	margin-right: 30px;
+	display: block;
 }
 
 @media(min-height: 800px) {

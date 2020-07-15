@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -15,8 +16,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -26,7 +27,6 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.util.Cursor;
-import io.onedev.server.OneException;
 
 @SuppressWarnings("serial")
 abstract class CardListPanel extends Panel {
@@ -39,7 +39,7 @@ abstract class CardListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new NotificationPanel("feedback", this));
+		add(new FencedFeedbackPanel("feedback", this));
 		
 		RepeatingView cardsView = new RepeatingView("cards");
 		int index = 0;
@@ -69,7 +69,7 @@ abstract class CardListPanel extends Panel {
 				});
 				index++;
 			}
-		} catch (OneException e) {
+		} catch (GeneralException e) {
 			error(e.getMessage());
 		}
 		add(cardsView);

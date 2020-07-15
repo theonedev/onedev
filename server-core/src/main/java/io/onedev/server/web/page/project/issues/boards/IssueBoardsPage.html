@@ -4,19 +4,19 @@
 		<div class="head">
 			<form wicket:id="query" class="clearable-wrapper">
 				<div class="input-group">
-					<span class="input-group-btn">
-						<a wicket:id="board" title="Board" class="board-selector btn btn-default">
+					<span class="input-group-prepend">
+						<a wicket:id="board" title="Board" class="board-selector btn btn-outline-secondary">
 							<i class="fa fa-columns"></i>
 							<span wicket:id="label"></span>
 							<i class="fa fa-caret-down"></i>
 						</a>
-						<a wicket:id="backlog" class="backlog btn btn-default"><i class="fa fa-inbox"></i> Backlog</a>
+						<a wicket:id="backlog" class="backlog btn btn-outline-secondary"><i class="fa fa-inbox"></i> Backlog</a>
 						<a wicket:id="milestone"></a>
 					</span>
 					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control">
-					<span class="input-group-btn">
-						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
-						<button wicket:id="orderBy" class="btn btn-default" title="Order by"><i class="fa fa-sort"></i></button>
+					<span class="input-group-append">
+						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary" title="Query"><i class="fa fa-search"></i></button>
+						<button wicket:id="orderBy" class="btn btn-outline-secondary" title="Order by"><i class="fa fa-sort"></i></button>
 					</span>
 				</div>
 			</form>
@@ -55,8 +55,8 @@
 					</td>
 				</tr>
 			</table>
-			<a wicket:id="newBoard" class="btn btn-default btn-sm btn-block new-board"><i class="fa fa-plus"></i> Add New Board</a>
-			<a wicket:id="useDefault" class="btn btn-default btn-sm btn-block use-global"><i class="fa fa-undo"></i> Use Default Boards</a>
+			<a wicket:id="newBoard" class="btn btn-outline-secondary btn-sm btn-block new-board"><i class="fa fa-plus"></i> Add New Board</a>
+			<a wicket:id="useDefault" class="btn btn-outline-secondary btn-sm btn-block use-global"><i class="fa fa-undo"></i> Use Default Boards</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneMenuFrag">
@@ -80,8 +80,8 @@
 					</td>
 				</tr>
 			</table>
-			<a wicket:id="showClosed" class="show-closed btn btn-block btn-default btn-sm"><i class="fa fa-angle-double-down"></i> Show Closed</a>
-			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-default btn-sm"><i class="fa fa-plus"></i> Add New Milestone</a>
+			<a wicket:id="showClosed" class="show-closed btn btn-block btn-outline-secondary btn-sm"><i class="fa fa-angle-double-down"></i> Show Closed</a>
+			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-outline-secondary btn-sm"><i class="fa fa-plus"></i> Add New Milestone</a>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

@@ -5,7 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -20,7 +20,7 @@ public class CancelledByMeCriteria extends EntityCriteria<Build> {
 			Path<User> attribute = root.get(Build.PROP_CANCELLER);
 			return builder.equal(attribute, User.get());
 		} else {
-			throw new OneException("Please login to perform this query");
+			throw new GeneralException("Please login to perform this query");
 		}
 	}
 
@@ -29,7 +29,7 @@ public class CancelledByMeCriteria extends EntityCriteria<Build> {
 		if (User.get() != null)
 			return User.get().equals(build.getCanceller());
 		else
-			throw new OneException("Please login to perform this query");
+			throw new GeneralException("Please login to perform this query");
 	}
 
 	@Override

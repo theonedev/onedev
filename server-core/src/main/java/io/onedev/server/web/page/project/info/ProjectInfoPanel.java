@@ -47,6 +47,11 @@ public abstract class ProjectInfoPanel extends Panel {
         add(new ModalLink("forkNow") {
 			
 			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				super.onClick(target);
 				onPromptForkOption(target);

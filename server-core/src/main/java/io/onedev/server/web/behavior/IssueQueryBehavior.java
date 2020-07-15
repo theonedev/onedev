@@ -45,7 +45,7 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
@@ -224,7 +224,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											|| fieldSpec instanceof TextField) {
 										return null;
 									}
-								} catch (OneException ex) {
+								} catch (GeneralException ex) {
 								}
 							}
 						}
@@ -260,7 +260,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					checkField(fieldName, getOperator(suggestedLiteral), 
 							withCurrentUserCriteria, withCurrentBuildCriteria, 
 							withCurrentPullRequestCriteria, withCurrentCommitCriteria);
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					return null;
 				}
 			}

@@ -41,7 +41,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
@@ -59,8 +59,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -73,6 +72,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
@@ -88,7 +88,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return CodeCommentQuery.parse(getProject(), queryString);
-			} catch (OneException e) {
+			} catch (GeneralException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
@@ -284,7 +284,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				try {
 					return getCodeCommentManager().query(getProject(), getPullRequest(), 
 							queryModel.getObject(), (int)first, (int)count).iterator();
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					error(e.getMessage());
 					return new ArrayList<CodeComment>().iterator();
 				}
@@ -296,7 +296,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getCodeCommentManager().count(getProject(), getPullRequest(), query.getCriteria());
-					} catch (OneException e) {
+					} catch (GeneralException e) {
 						error(e.getMessage());
 					}
 				} 
@@ -408,7 +408,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
-		body.add(commentsTable = new DefaultDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		body.add(commentsTable = new HistoryAwareDataTable<CodeComment, Void>("comments", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override

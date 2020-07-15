@@ -4,8 +4,8 @@
 			<form wicket:id="query" class="clearable-wrapper">
 				<div class="input-group">
 					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order builds here">
-					<span class="input-group-btn">
-						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					<span class="input-group-append">
+						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary" title="Query"><i class="fa fa-search"></i></button>
 					</span>
 				</div>
 			</form>
@@ -44,18 +44,16 @@
 		<div class="build-list-params">
 			<form wicket:id="form">
 				<div class="modal-header">
+					<h5 id="modal-title" class="modal-title">Params to Display</h5>
 					<button wicket:id="close" type="button" class="close">&times;</button>
-					<h4 id="modal-title" class="modal-title">
-						Params to Display
-					</h4>
 				</div>
 				<div class="modal-body">
 					<input wicket:id="params" type="hidden" class="form-control">
 				</div>
-				<div class="modal-footer clearfix">
+				<div class="modal-footer">
 					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
-					<a wicket:id="useDefault" class="btn btn-primary">Use Default</a>
-					<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+					<button wicket:id="useDefault" class="btn btn-primary">Use Default</button>
+					<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
 				</div>
 			</form>
 		</div>

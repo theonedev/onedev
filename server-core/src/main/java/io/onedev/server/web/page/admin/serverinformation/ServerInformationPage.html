@@ -26,8 +26,10 @@
 				<tr>
 					<td class="name">Heap Memory Usage</td>
 					<td class="value">
-						<div wicket:id="memoryUsage"></div>
-						<button wicket:id="gc" class="btn btn-default gc">Force Garbage Collection</button>
+						<div class="progress mb-3">
+						  <div wicket:id="memoryUsage" class="progress-bar"></div>
+						</div>					
+						<button wicket:id="gc" class="btn btn-outline-secondary btn-sm gc">Force Garbage Collection</button>
 					</td>
 				</tr>
 				<tr>

@@ -35,10 +35,6 @@
 .saved-queries>.body .subscription-status:after {
 	display: none;
 }
-.saved-queries>.body .watch-status:before, 
-.saved-queries>.body .subscription-status:before {
-	line-height: 12px;
-}
 .edit-saved-queries th {
 	font-weight: bold !important;
 }

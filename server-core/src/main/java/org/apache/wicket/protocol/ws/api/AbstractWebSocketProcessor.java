@@ -43,6 +43,7 @@ import org.apache.wicket.protocol.ws.api.message.AbortedMessage;
 import org.apache.wicket.protocol.ws.api.message.BinaryMessage;
 import org.apache.wicket.protocol.ws.api.message.ClosedMessage;
 import org.apache.wicket.protocol.ws.api.message.ConnectedMessage;
+import org.apache.wicket.protocol.ws.api.message.ErrorMessage;
 import org.apache.wicket.protocol.ws.api.message.IWebSocketMessage;
 import org.apache.wicket.protocol.ws.api.message.IWebSocketPushMessage;
 import org.apache.wicket.protocol.ws.api.message.TextMessage;
@@ -211,7 +212,7 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 		IKey key = getRegistryKey();
 		IWebSocketConnection connection = connectionRegistry.getConnection(application, sessionId, key);
 
-		if (connection != null && connection.isOpen())
+		if (connection != null && (connection.isOpen() || isSpecialMessage(message))) 
 		{
 			Application oldApplication = ThreadContext.getApplication();
 			Session oldSession = ThreadContext.getSession();
@@ -238,26 +239,33 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 					session = oldSession;
 				}
 
-				// Session is null if we copy the url with jsessionid to a new browser window 
-				if (session != null) {
-					IPageManager pageManager = session.getPageManager();
-					Page page = getPage(pageManager);
+				if (session == null)
+				{
+					connectionRegistry.removeConnection(application, sessionId, key);
+					LOG.debug("No Session could be found for session id '{}' and key '{}'!", sessionId, key);
+					return;
+				}
+				
+				IPageManager pageManager = session.getPageManager();
+				Page page = getPage(pageManager);
 
-					if (page != null) {
-						WebSocketRequestHandler requestHandler = webSocketSettings.newWebSocketRequestHandler(page, connection);
+				if (page != null) 
+				{
+					WebSocketRequestHandler requestHandler = webSocketSettings.newWebSocketRequestHandler(page, connection);
 
-						@SuppressWarnings("rawtypes")
-						WebSocketPayload payload = createEventPayload(message, requestHandler);
+					@SuppressWarnings("rawtypes")
+					WebSocketPayload payload = createEventPayload(message, requestHandler);
 
-						if (!(message instanceof ConnectedMessage || message instanceof ClosedMessage))
-						{
-							requestCycle.scheduleRequestHandlerAfterCurrent(requestHandler);
-						}
-
-						IRequestHandler broadcastingHandler = new WebSocketMessageBroadcastHandler(pageId, resourceName, payload);
-						requestMapper.setHandler(broadcastingHandler);
-						requestCycle.processRequestAndDetach();
+					if (!(message instanceof ConnectedMessage || isSpecialMessage(message))) 
+					{
+						requestCycle.scheduleRequestHandlerAfterCurrent(requestHandler);
 					}
+
+					IRequestHandler broadcastingHandler = new WebSocketMessageBroadcastHandler(pageId, resourceName, payload);
+					requestMapper.setHandler(broadcastingHandler);
+					requestCycle.processRequestAndDetach();
+				} else {
+					LOG.debug("Page with id '{}' has been expired. No message will be broadcast!", pageId);
 				}
 			}
 			catch (Exception x)
@@ -286,6 +294,11 @@ public abstract class AbstractWebSocketProcessor implements IWebSocketProcessor
 		{
 			LOG.debug("Either there is no connection({}) or it is closed.", connection);
 		}
+	}
+
+	private static boolean isSpecialMessage(IWebSocketMessage message)
+	{
+		return message instanceof ClosedMessage || message instanceof ErrorMessage || message instanceof AbortedMessage;
 	}
 
 	private RequestCycle createRequestCycle(WebSocketRequestMapper requestMapper, WebResponse webResponse)

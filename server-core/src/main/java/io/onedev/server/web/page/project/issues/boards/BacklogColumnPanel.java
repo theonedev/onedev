@@ -23,7 +23,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -65,7 +65,7 @@ abstract class BacklogColumnPanel extends Panel {
 			if (getQuery() != null) {
 				try {
 					return OneDev.getInstance(IssueManager.class).count(getProject(), getQuery().getCriteria());
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					return 0;
 				}
 			} else {

@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -73,7 +73,7 @@ public class CreateTagAction extends PostBuildAction {
 				project.createTag(tagName, build.getCommitHash(), tagIdent, getTagMessage());
 			}
 		} else {
-			throw new OneException("Creating tag '" + tagName + "' is not allowed in this build");
+			throw new GeneralException("Creating tag '" + tagName + "' is not allowed in this build");
 		}
 	}
 

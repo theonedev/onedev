@@ -14,7 +14,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
@@ -55,7 +55,7 @@ abstract class ContentPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				try {
 					onConfirm(target);
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					error(e.getMessage());
 					target.add(ContentPanel.this);
 				}

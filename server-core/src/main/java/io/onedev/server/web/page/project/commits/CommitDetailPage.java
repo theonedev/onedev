@@ -342,7 +342,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 					protected void onComponentTag(ComponentTag tag) {
 						super.onComponentTag(tag);
 						
-						String cssClasses = "btn btn-default";
+						String cssClasses = "btn btn-outline-secondary";
 						Build.Status status = getProject().getCommitStatus(commitId).get(job.getName());
 						String title;
 						if (status != null) {

@@ -94,7 +94,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 					@Override
 					protected String getCssClasses() {
-						return "btn btn-default btn-xs";
+						return "btn btn-outline-secondary btn-sm";
 					}
 
 					@Override

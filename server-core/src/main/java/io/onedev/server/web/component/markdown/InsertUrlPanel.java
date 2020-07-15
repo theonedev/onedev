@@ -21,6 +21,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
@@ -46,7 +47,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Preconditions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
@@ -121,7 +121,7 @@ abstract class InsertUrlPanel extends Panel {
 		};
 		
 		Form<?> form = new Form<Void>("form");
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		
 		form.add(new Label("urlLabel", isImage?"Image URL":"Link URL"));
 		form.add(new Label("urlHelp", isImage?"Absolute or relative url of the image":"Absolute or relative url of the link"));
@@ -419,7 +419,7 @@ abstract class InsertUrlPanel extends Panel {
 			};
 			form.setMaxSize(Bytes.bytes(attachmentSupport.getAttachmentMaxSize()));
 			form.setMultiPart(true);
-			form.add(new NotificationPanel("feedback", form));
+			form.add(new FencedFeedbackPanel("feedback", form));
 			
 			int maxFilesize = (int) (attachmentSupport.getAttachmentMaxSize()/1024/1024);
 			if (maxFilesize <= 0)
@@ -437,7 +437,7 @@ abstract class InsertUrlPanel extends Panel {
 			form.setFileMaxSize(Bytes.megabytes(Project.MAX_UPLOAD_SIZE));
 			add(form);
 			
-			NotificationPanel feedback = new NotificationPanel("feedback", form);
+			FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form);
 			feedback.setOutputMarkupPlaceholderTag(true);
 			form.add(feedback);
 			

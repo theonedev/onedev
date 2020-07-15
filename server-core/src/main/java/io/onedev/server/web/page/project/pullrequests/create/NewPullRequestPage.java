@@ -670,7 +670,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			public String getObject() {
-				return !titleInput.isValid()?" has-error":"";
+				return !titleInput.isValid()?" is-invalid":"";
 			}
 			
 		}));

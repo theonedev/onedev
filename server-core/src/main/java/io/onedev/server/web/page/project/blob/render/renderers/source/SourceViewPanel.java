@@ -25,6 +25,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.tree.ITreeProvider;
 import org.apache.wicket.extensions.markup.html.repeater.tree.NestedTree;
 import org.apache.wicket.extensions.markup.html.repeater.tree.theme.HumanTheme;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -53,7 +54,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractor;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
@@ -472,7 +472,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					});
 					contentInput.setRequired(true).setLabel(Model.of("Comment"));
 					
-					NotificationPanel feedback = new NotificationPanel("feedback", form); 
+					FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 					feedback.setOutputMarkupPlaceholderTag(true);
 					form.add(feedback);
 					

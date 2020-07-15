@@ -1,16 +1,16 @@
 <wicket:extend>
 	<div class="page-title">Tag Protection</div>
 	<div class="help-block">Define tag protection rules</div>
-	<div wicket:id="tagProtectionSetting" class="panel-list">
+	<div wicket:id="tagProtectionSetting" class="card-list">
 		<ul class="list-unstyled protections">
 			<li wicket:id="protections" class="protection"><div wicket:id="protection"></div></li>
 		</ul>
 		<div wicket:id="newProtection"></div>
 	</div>
 	<wicket:fragment wicket:id="editNewFrag">
-		<div class="protection panel panel-default">
-			<div class="panel-heading"><div class="panel-title">Edit Rule</div></div>
-			<div class="panel-body">
+		<div class="protection card">
+			<div class="card-header">Edit Rule</div>
+			<div class="card-body">
 				<div wicket:id="editor"></div>
 			</div>
 		</div>

@@ -19,7 +19,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -61,7 +61,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		if (first.getProject().equals(second.getProject())) { 
 			this.project = first.getProject();
 		} else {
-			throw new OneException("'" + getRuleName(IssueQueryLexer.FixedBetween) 
+			throw new GeneralException("'" + getRuleName(IssueQueryLexer.FixedBetween) 
 				+ "' should be used for same projects");
 		}
 	}

@@ -67,9 +67,9 @@
         <h1 class="pull-left">fontext</h1>
         <div id="sizes" class="pull-left">
             <span class="btn-group">
-                <a class="btn btn-default" data-size="1x">1X</a>
-                <a class="btn btn-default" data-size="2x">2X</a>
-                <a class="btn btn-default" data-size="3x">3X</a>
+                <a class="btn btn-secondary" data-size="1x">1X</a>
+                <a class="btn btn-secondary" data-size="2x">2X</a>
+                <a class="btn btn-secondary" data-size="3x">3X</a>
                 <a class="btn btn-success" data-size="4x">4X</a>
             </span>
         </div>
@@ -203,8 +203,8 @@
         $(document).ready(function() {
             $('#sizes .btn').click(function() {
                 var $self = $(this);
-                $('.btn-success').removeClass('btn-success').addClass('btn-default')
-                $self.removeClass('btn-default').addClass('btn-success')
+                $('.btn-success').removeClass('btn-success').addClass('btn-secondary')
+                $self.removeClass('btn-secondary').addClass('btn-success')
                 $('#content').removeClass().addClass('size-' + $self.data('size'))
             })
         })

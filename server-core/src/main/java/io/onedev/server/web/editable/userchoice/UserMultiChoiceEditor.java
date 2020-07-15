@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
@@ -73,6 +74,12 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			protected void onInitialize() {
 				super.onInitialize();
 				getSettings().configurePlaceholder(descriptor);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				System.out.println(hasErrorMessage());
 			}
 			
 		};

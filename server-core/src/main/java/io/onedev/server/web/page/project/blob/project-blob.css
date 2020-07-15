@@ -13,7 +13,7 @@ body.ProjectBlobPage.additionalWidth3 {
 }
 #project-blob>.head {
 	border-bottom: 1px solid #E0E0E0;
-	height: 31px;
+	height: 34px;
 }
 
 #project-blob>.head>.revision-picker {
@@ -33,12 +33,6 @@ body.ProjectBlobPage.additionalWidth3 {
 #project-blob>.head>.revision-picker:empty,
 #project-blob>.head>.build-status:empty {
 	display: none;
-}
-#project-blob>.head>.comment-context {
-	border-right: 1px solid #E0E0E0;
-	padding: 5px 8px 0 8px;
-	height: 31px;
-	cursor: pointer;
 }
 #project-blob>.head>a.revision-picker {
 	display: block;
@@ -60,7 +54,7 @@ body.ProjectBlobPage.additionalWidth3 {
 	padding: 0px 8px;
 }
 #project-blob>.head>.blob-navigator form.name input {
-	height: 30px;
+	height: 33px;
 	border: 1px solid #E0E0E0;
 	border-top: none;
 	border-bottom: none;

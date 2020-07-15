@@ -1,86 +1,80 @@
 <wicket:extend>
 	<div id="layout">
-		<nav class="navbar navbar-fixed-top navbar-inverse">
-			<div class="container-fluid">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
-	        			<span class="sr-only">Toggle navigation</span>
-	        			<span class="icon-bar"></span>
-	        			<span class="icon-bar"></span>
-	        			<span class="icon-bar"></span>
-	      			</button>					
-	      			<a wicket:id="brandLink" class="navbar-brand">
-						<img alt="Brand" src="/img/logo.png">
-						<div class="separator"></div>
-					</a>
-					<div wicket:id="navContext" class="nav-context"></div>
-				</div>
-				<div class="collapse navbar-collapse" id="navbar-collapse">
-      				<ul class="nav navbar-nav tabs">
-						<li wicket:id="navTabs"><a wicket:id="tab"></a></li>
-        				<li wicket:id="navAdministration" class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administration <i class="fa fa-angle-down"></i></a>
-          					<ul class="dropdown-menu">
-								<li wicket:id="userManagement"><a wicket:id="link"><i class="fa fa-fw fa-user"></i> User Management</a></li>
-								<li wicket:id="roleManagement"><a wicket:id="link"><i class="fa fa-fw fa-vcard-o"></i> Role Management</a></li>
-								<li wicket:id="groupManagement"><a wicket:id="link"><i class="fa fa-fw fa-group"></i> Group Management</a></li>
-								<li wicket:id="securitySetting"><a wicket:id="link"><i class="fa fa-fw fa-lock"></i> Security Setting</a></li>
-								<li wicket:id="externalAuthentication"><a wicket:id="link"><i class="fa fa-fw fa-key"></i> External Authentication</a></li>
-								<li wicket:id="sso"><a wicket:id="link"><i class="fa fa-fw fa-sign-in"></i> Single Sign On Providers</a></li>
-								<li wicket:id="sshSetting"><a wicket:id="link"><i class="fa fa-fw fa-shield"></i> SSH Setting</a></li>
-								<li role="separator" class="divider"></li>
-								<li wicket:id="systemSetting"><a wicket:id="link"><i class="fa fa-fw fa-sliders"></i> System Setting</a></li>
-								<li wicket:id="issueSetting"><a wicket:id="link"><i class="fa fa-fw fa-bug"></i> Issue Setting</a></li>
-								<li wicket:id="mailSetting"><a wicket:id="link"><i class="fa fa-fw fa-envelope"></i> Mail Setting</a></li>
-								<li role="separator" class="divider"></li>
-								<li wicket:id="jobExecutors"><a wicket:id="link"><i class="fa fa-fw fa-cogs"></i> Job Executors</a></li>
-								<li wicket:id="groovyScripts"><a wicket:id="link"><i class="fa fa-fw fa-file-code-o"></i> Groovy Scripts</a></li>
-								<li role="separator" class="divider"></li>
-								<li wicket:id="databaseBackup"><a wicket:id="link"><i class="fa fa-fw fa-database"></i> Database Backup</a></li>
-								<li wicket:id="serverLog"><a wicket:id="link"><i class="fa fa-fw fa-file-text-o"></i> Server Log</a></li>
-								<li wicket:id="serverInformation"><a wicket:id="link"><i class="fa fa-fw fa-desktop"></i> Server Information</a></li>
-				          	</ul>        				
-				  		</li>
-					</ul>
- 					<ul class="nav navbar-nav navbar-right">
- 						<li class="github">
- 							<a href="https://github.com/theonedev/onedev" target="_blank">
- 								<i class="fa fa-github icon"></i>
- 								<span class="name">GitHub</span>
- 							</a>
- 						</li>
-        				<li class="dropdown help">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-question-circle icon"></i> <span class="name">Help</span> <i class="fa fa-angle-down"></i></a>
-          					<ul class="dropdown-menu">
-								<li wicket:id="productVersion" class="dropdown-header"></li>          					
-								<li role="separator" class="divider"></li>
-								<li><a wicket:id="docLink" target="_blank">Documentation</a></li>
-								<li><a href="https://github.com/theonedev/onedev/issues" target="_blank">Support &amp; Bug Report</a></li>
-				          	</ul>        				
-						</li>	
-				  		<wicket:container wicket:id="notSignedIn">
-				  		<li><a wicket:id="signIn">Sign in</a></li>
-				  		<wicket:enclosure child="signUp">				  	
-				  		<li><a wicket:id="signUp">Sign Up</a></li>
-				  		</wicket:enclosure>
-				  		</wicket:container>
-        				<li wicket:id="navSignedIn" class="dropdown signed-in">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span> <i class="fa fa-angle-down"></i></a>
-          					<ul class="dropdown-menu">
-								<li wicket:id="header" class="dropdown-header"></li>          					
-								<li role="separator" class="divider"></li>
-								<li wicket:id="myProfile"><a wicket:id="link"><i class="fa fa-fw fa-list-alt"></i> My Profile</a></li>
-								<li wicket:id="myAvatar"><a wicket:id="link"><i class="fa fa-fw fa-picture-o"></i> Edit Avatar</a></li>
-								<li wicket:id="myPassword"><a wicket:id="link"><i class="fa fa-fw fa-key"></i> Change Password</a></li>
-								<li wicket:id="mySshKeys"><a wicket:id="link"><i class="fa fa-fw fa-shield"></i> SSH Keys</a></li>
-								<li wicket:id="myAccessToken"><a wicket:id="link"><i class="fa fa-fw fa-ticket"></i> Access Token</a></li>
-								<li role="separator" class="divider"></li>
-								<li><a wicket:id="signOut"><i class="fa fa-fw fa-sign-out"></i> <span wicket:id="label"></span></a></li>
-				          	</ul>        				
-				  		</li>
-        			</ul>					
-			    </div>		    	
+		<nav class="navbar navbar-expand-md fixed-top navbar-dark bg-dark">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+        			<span class="navbar-toggler-icon"></span>
+      			</button>					
+      			<a wicket:id="brandLink" class="navbar-brand">
+					<img alt="Brand" src="/img/logo.png">
+				</a>
+				<div wicket:id="navContext" class="nav-context"></div>
 			</div>
+			<div class="collapse navbar-collapse" id="navbar-collapse">
+  				<ul class="navbar-nav">
+					<li wicket:id="navTabs" class="nav-item"><a wicket:id="tab" class="nav-link"></a></li>
+    				<li wicket:id="navAdministration" class="nav-item dropdown">
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administration</a>
+      					<div class="dropdown-menu">
+							<a wicket:id="userManagement" class="dropdown-item"><i class="fa fa-fw fa-user"></i> User Management</a>
+							<a wicket:id="roleManagement" class="dropdown-item"><i class="fa fa-fw fa-vcard-o"></i> Role Management</a>
+							<a wicket:id="groupManagement" class="dropdown-item"><i class="fa fa-fw fa-group"></i> Group Management</a>
+							<a wicket:id="securitySetting" class="dropdown-item"><i class="fa fa-fw fa-lock"></i> Security Setting</a>
+							<a wicket:id="externalAuthentication" class="dropdown-item"><i class="fa fa-fw fa-key"></i> External Authentication</a>
+							<a wicket:id="sso" class="dropdown-item"><i class="fa fa-fw fa-sign-in"></i> Single Sign On Providers</a>
+							<a wicket:id="sshSetting" class="dropdown-item"><i class="fa fa-fw fa-shield"></i> SSH Setting</a>
+							<div role="separator" class="dropdown-divider"></div>
+							<a wicket:id="systemSetting" class="dropdown-item"><i class="fa fa-fw fa-sliders"></i> System Setting</a>
+							<a wicket:id="issueSetting" class="dropdown-item"><i class="fa fa-fw fa-bug"></i> Issue Setting</a>
+							<a wicket:id="mailSetting" class="dropdown-item"><i class="fa fa-fw fa-envelope"></i> Mail Setting</a>
+							<div role="separator" class="dropdown-divider"></div>
+							<a wicket:id="jobExecutors" class="dropdown-item"><i class="fa fa-fw fa-cogs"></i> Job Executors</a>
+							<a wicket:id="groovyScripts" class="dropdown-item"><i class="fa fa-fw fa-file-code-o"></i> Groovy Scripts</a>
+							<div role="separator" class="dropdown-divider"></div>
+							<a wicket:id="databaseBackup" class="dropdown-item"><i class="fa fa-fw fa-database"></i> Database Backup</a>
+							<a wicket:id="serverLog" class="dropdown-item"><i class="fa fa-fw fa-file-text-o"></i> Server Log</a>
+							<a wicket:id="serverInformation" class="dropdown-item"><i class="fa fa-fw fa-desktop"></i> Server Information</a>
+			          	</div>        				
+			  		</li>
+				</ul>
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item github">
+						<a href="https://github.com/theonedev/onedev" class="nav-link" target="_blank">
+							<i class="fa fa-github icon"></i>
+							<span class="name">GitHub</span>
+						</a>
+					</li>
+    				<li class="nav-item dropdown help">
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-question-circle icon"></i> <span class="name">Help</span></a>
+      					<div class="dropdown-menu dropdown-menu-right">
+							<div wicket:id="productVersion" class="dropdown-item-text"></div>          					
+							<div role="separator" class="dropdown-divider"></div>
+							<a wicket:id="docLink" class="dropdown-item" target="_blank">Documentation</a>
+							<a href="https://github.com/theonedev/onedev/issues" class="dropdown-item" target="_blank">Support &amp; Bug Report</a>
+			          	</div>        				
+					</li>	
+			  		<wicket:container wicket:id="notSignedIn">
+			  		<li class="nav-item"><a wicket:id="signIn" class="nav-link">Sign in</a></li>
+			  		<wicket:enclosure child="signUp">				  	
+			  		<li class="nav-item"><a wicket:id="signUp" class="nav-link">Sign Up</a></li>
+			  		</wicket:enclosure>
+			  		</wicket:container>
+    				<li wicket:id="navSignedIn" class="nav-item dropdown signed-in">
+						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
+      					<div class="dropdown-menu dropdown-menu-right">
+							<div wicket:id="header" class="dropdown-item-text"></div>          					
+							<div role="separator" class="dropdown-divider"></div>
+							<a wicket:id="myProfile" class="dropdown-item"><i class="fa fa-fw fa-list-alt"></i> My Profile</a>
+							<a wicket:id="myAvatar" class="dropdown-item"><i class="fa fa-fw fa-picture-o"></i> Edit Avatar</a>
+							<a wicket:id="myPassword" class="dropdown-item"><i class="fa fa-fw fa-key"></i> Change Password</a>
+							<a wicket:id="mySshKeys" class="dropdown-item"><i class="fa fa-fw fa-shield"></i> SSH Keys</a>
+							<a wicket:id="myAccessToken" class="dropdown-item"><i class="fa fa-fw fa-ticket"></i> Access Token</a>
+							<div role="separator" class="dropdown-divider"></div>
+							<a wicket:id="signOut" class="dropdown-item"><i class="fa fa-fw fa-sign-out"></i> <span wicket:id="label"></span></a>
+			          	</div>        				
+			  		</li>
+    			</ul>					
+		    </div>		    	
 		</nav>	
 		<div class="body">
 			<wicket:child></wicket:child>

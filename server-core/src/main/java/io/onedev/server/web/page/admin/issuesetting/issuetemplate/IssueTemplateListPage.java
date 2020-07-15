@@ -15,6 +15,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -29,7 +30,6 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -257,7 +257,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 								
 							});
 							
-							fragment.add(new NotificationPanel("feedback", fragment));
+							fragment.add(new FencedFeedbackPanel("feedback", fragment));
 							fragment.setOutputMarkupId(true);
 							
 							return fragment;

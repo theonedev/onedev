@@ -952,11 +952,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					public String getObject() {
 						PullRequest request = getPullRequest();
 						if (request.isDiscarded())
-							return " label-danger";
+							return " badge-danger";
 						else if (request.isMerged())
-							return " label-success";
+							return " badge-success";
 						else
-							return " label-warning";
+							return " badge-warning";
 					}
 					
 				}));

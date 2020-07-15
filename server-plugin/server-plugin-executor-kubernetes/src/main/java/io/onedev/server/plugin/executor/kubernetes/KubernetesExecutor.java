@@ -41,7 +41,7 @@ import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
@@ -390,7 +390,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		if (!osInfos.isEmpty()) {
 			return OsInfo.getBaseline(osInfos);
 		} else {
-			throw new OneException("No applicable working nodes found");
+			throw new GeneralException("No applicable working nodes found");
 		}
 	}
 	
@@ -615,7 +615,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 					collectContainerLog(namespace, podName, "default", null, jobLogger);
 					String message = "Service '" + jobService.getName() + "' is stopped unexpectedly";
-					throw new OneException(message);
+					throw new GeneralException(message);
 				}
 			}
 			
@@ -894,7 +894,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					JsonNode initContainerStatusesNode = statusNode.get("initContainerStatuses");
 					String errorMessage = getContainerError(initContainerStatusesNode, "init");
 					if (errorMessage != null)
-						return new StopWatch(new OneException("Error executing init logic: " + errorMessage));
+						return new StopWatch(new GeneralException("Error executing init logic: " + errorMessage));
 					
 					JsonNode containerStatusesNode = statusNode.get("containerStatuses");
 					if (isContainerStarted(containerStatusesNode, "main")) 
@@ -933,11 +933,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					JsonNode containerStatusesNode = statusNode.get("containerStatuses");
 					String errorMessage = getContainerError(containerStatusesNode, "main");
 					if (errorMessage != null) {
-						return new StopWatch(new OneException(errorMessage));
+						return new StopWatch(new GeneralException(errorMessage));
 					} else {
 						errorMessage = getContainerError(containerStatusesNode, "sidecar");
 						if (errorMessage != null)
-							return new StopWatch(new OneException("Error executing sidecar logic: " + errorMessage));
+							return new StopWatch(new GeneralException("Error executing sidecar logic: " + errorMessage));
 						else if (isContainerStopped(containerStatusesNode, "sidecar"))
 							return new StopWatch(null);
 						else
@@ -1178,7 +1178,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						} 
 					}
 					if (errorMessage != null) 
-						stopWatchRef.set(new StopWatch(new OneException(errorMessage)));
+						stopWatchRef.set(new StopWatch(new GeneralException(errorMessage)));
 					else 
 						stopWatchRef.set(statusChecker.check(statusNode));
 					if (stopWatchRef.get() != null) 
@@ -1194,7 +1194,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 			}).checkReturnCode();
 			
-			throw new OneException("Unexpected end of pod watching");
+			throw new GeneralException("Unexpected end of pod watching");
 		} catch (Exception e) {
 			StopWatch stopWatch = stopWatchRef.get();
 			if (stopWatch != null) {
@@ -1238,7 +1238,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 									if (reason.equals("FailedScheduling"))
 										jobLogger.log("Kubernetes: " + message);
 									else 
-										stopWatchRef.set(new StopWatch(new OneException(message)));
+										stopWatchRef.set(new StopWatch(new GeneralException(message)));
 								} else if (type.equals("Normal") && reason.equals("Started")) {
 									stopWatchRef.set(new StopWatch(null));
 								}
@@ -1263,7 +1263,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 			}).checkReturnCode();
 			
-			throw new OneException("Unexpected end of event watching");
+			throw new GeneralException("Unexpected end of event watching");
 		} catch (Exception e) {
 			StopWatch stopWatch = stopWatchRef.get();
 			if (stopWatch != null) {
@@ -1322,7 +1322,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				kubectl.execute(logConsumer, logConsumer).checkReturnCode();
 			} catch (Exception e) {
 				if (errorMessageRef.get() != null) 
-					throw new OneException(errorMessageRef.get());
+					throw new GeneralException(errorMessageRef.get());
 				else
 					throw ExceptionUtils.unchecked(e);
 			}		
@@ -1423,20 +1423,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			if (osInfos.iterator().next().isLinux()) {
 				for (OsInfo osInfo: osInfos) {
 					if (!osInfo.isLinux())
-						throw new OneException("Linux and non-linux nodes should not be included in same executor");
+						throw new GeneralException("Linux and non-linux nodes should not be included in same executor");
 				}
 				return osInfos.iterator().next();
 			} else if (osInfos.iterator().next().isWindows()) {
 				OsInfo baseline = null;
 				for (OsInfo osInfo: osInfos) {
 					if (!osInfo.isWindows())
-						throw new OneException("Windows and non-windows nodes should not be included in same executor");
+						throw new GeneralException("Windows and non-windows nodes should not be included in same executor");
 					if (baseline == null || baseline.getWindowsVersion() > osInfo.getWindowsVersion())
 						baseline = osInfo;
 				}
 				return baseline;
 			} else {
-				throw new OneException("Either Windows or Linux nodes can be included in an executor");
+				throw new GeneralException("Either Windows or Linux nodes can be included in an executor");
 			}
 		}
 		
@@ -1446,7 +1446,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (kernelVersion.contains(entry.getKey()))
 					return entry.getValue();
 			}
-			throw new OneException("Unsupported windows kernel version: " + kernelVersion);
+			throw new GeneralException("Unsupported windows kernel version: " + kernelVersion);
 		}
 		
 		public String getHelperImageSuffix() {

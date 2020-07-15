@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
@@ -66,7 +66,7 @@ public class UserAuthorizationsPage extends UserPage {
 			}
 			
 		};
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
 		add(form);	
 	}

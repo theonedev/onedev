@@ -163,7 +163,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 										"background-color: %s; color: %s;", 
 										backgroundColor, fontColor);
 								label.add(AttributeAppender.append("style", style));
-								label.add(AttributeAppender.append("class", "label"));
+								label.add(AttributeAppender.append("class", "badge"));
 							} finally {
 								ComponentContext.pop();
 							}

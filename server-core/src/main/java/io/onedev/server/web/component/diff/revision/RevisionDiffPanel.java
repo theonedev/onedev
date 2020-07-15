@@ -62,7 +62,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
@@ -807,7 +806,7 @@ public class RevisionDiffPanel extends Panel {
 							contentInput.setRequired(true);
 							contentInput.setLabel(Model.of("Comment"));
 							
-							NotificationPanel feedback = new NotificationPanel("feedback", form); 
+							FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form); 
 							feedback.setOutputMarkupPlaceholderTag(true);
 							form.add(feedback);
 							

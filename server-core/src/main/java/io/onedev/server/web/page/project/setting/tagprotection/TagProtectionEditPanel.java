@@ -3,10 +3,10 @@ package io.onedev.server.web.page.project.setting.tagprotection;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.web.editable.BeanContext;
 
@@ -28,7 +28,7 @@ abstract class TagProtectionEditPanel extends Panel {
 		setOutputMarkupId(true);
 		
 		Form<?> form = new Form<Void>("form");
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 
 		form.add(BeanContext.edit("editor", protection));
 		

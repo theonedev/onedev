@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -16,7 +17,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
@@ -59,7 +59,7 @@ public abstract class BlobUploadPanel extends Panel {
 			
 		});
 		
-		NotificationPanel feedback = new NotificationPanel("feedback", form);
+		FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		form.add(feedback);
 		

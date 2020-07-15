@@ -158,7 +158,7 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 				}
 			}
 
-			data.postParameters = new HashMap<String, List<StringValue>>();
+			data.postParameters = new HashMap<>();
 			for (String s : request.getPostParameters().getParameterNames())
 			{
 				if (WebRequest.PARAM_AJAX.equals(s) || WebRequest.PARAM_AJAX_BASE_URL.equals(s) ||
@@ -166,8 +166,8 @@ public class RestartResponseAtInterceptPageException extends ResetResponseExcept
 				{
 					continue;
 				}
-				data.postParameters.put(s, new ArrayList<StringValue>(request.getPostParameters()
-					.getParameterValues(s)));
+				data.postParameters.put(s, new ArrayList<>(request.getPostParameters()
+						.getParameterValues(s)));
 			}
 			session.setMetaData(key, data);
 		}

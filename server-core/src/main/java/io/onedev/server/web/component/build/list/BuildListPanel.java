@@ -46,7 +46,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -74,8 +74,7 @@ import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
@@ -91,6 +90,7 @@ import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.Cursor;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
@@ -134,7 +134,7 @@ public abstract class BuildListPanel extends Panel {
 	private BuildQuery parse(@Nullable String queryString, BuildQuery baseQuery) {
 		try {
 			return BuildQuery.merge(baseQuery, BuildQuery.parse(getProject(), queryString, true, true));
-		} catch (OneException e) {
+		} catch (GeneralException e) {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
@@ -439,7 +439,7 @@ public abstract class BuildListPanel extends Panel {
 				try {
 					return getBuildManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count).iterator();
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					error(e.getMessage());
 					return new ArrayList<Build>().iterator();
 				}
@@ -451,7 +451,7 @@ public abstract class BuildListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getBuildManager().count(getProject(), query.getCriteria());
-					} catch (OneException e) {
+					} catch (GeneralException e) {
 						error(e.getMessage());
 					}
 				} 
@@ -664,7 +664,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});		
 		
-		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
+		body.add(buildsTable = new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

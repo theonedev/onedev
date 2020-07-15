@@ -40,9 +40,28 @@ import org.apache.wicket.util.lang.Args;
  */
 public class RedirectRequestHandler implements IRequestHandler
 {
+	public enum Mode
+	{
+		/**
+		 * Use {@link WebResponse#sendRedirect(String)}.
+		 * It will call {@link WebResponse#encodeRedirectURL(CharSequence)} and may URL-encode some parts of the {@code location}
+		 */
+		REDIRECT,
+		/**
+		 * Use {@link WebResponse#setStatus(int)} + {@link WebResponse#setHeader(String, String)}.
+		 * Sets the {@code location} as a value of {@code Location} response header as is, i.e. without url-encoding.
+		 */
+		STATUS,
+		/**
+		 * Decide dynamically depending on the value of {@code status} field
+		 */
+		AUTO;
+	}
 
 	private final String redirectUrl;
 	private final int status;
+
+	private Mode mode = Mode.AUTO;
 
 	/**
 	 * @param redirectUrl
@@ -87,34 +106,52 @@ public class RedirectRequestHandler implements IRequestHandler
 		return status;
 	}
 
-	/** {@inheritDoc} */
 	public void detach(final IRequestCycle requestCycle)
 	{
 	}
 
-	/** {@inheritDoc} */
+	public RedirectRequestHandler mode(Mode mode)
+	{
+		this.mode = mode != null ? mode : Mode.AUTO;
+		return this;
+	}
+
+	@Override
 	public void respond(final IRequestCycle requestCycle)
 	{
 		String location = requestCycle.getUrlRenderer().renderRelativeUrl(Url.parse(getRedirectUrl()));
-		
+
 		WebResponse response = (WebResponse)requestCycle.getResponse();
 
-		if (status == HttpServletResponse.SC_MOVED_TEMPORARILY)
+		if (mode == Mode.REDIRECT)
+		{
+			response.sendRedirect(location);
+		}
+		else if (mode == Mode.STATUS)
+		{
+			setStatus(response, requestCycle, location);
+		}
+		// Mode.AUTO
+		else if (status == HttpServletResponse.SC_MOVED_TEMPORARILY)
 		{
 			response.sendRedirect(location);
 		}
 		else
 		{
-			response.setStatus(status);
+			setStatus(response, requestCycle, location);
+		}
+	}
 
-			if (((WebRequest)requestCycle.getRequest()).isAjax())
-			{
-				response.setHeader("Ajax-Location", location);
-			}
-			else
-			{
-				response.setHeader("Location", location);
-			}
+	private void setStatus(final WebResponse response, final IRequestCycle requestCycle, final String location) {
+		response.setStatus(status);
+
+		if (((WebRequest)requestCycle.getRequest()).isAjax())
+		{
+			response.setHeader("Ajax-Location", location);
+		}
+		else
+		{
+			response.setHeader("Location", location);
 		}
 	}
 }

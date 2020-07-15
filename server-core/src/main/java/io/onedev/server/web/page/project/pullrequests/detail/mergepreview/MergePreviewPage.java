@@ -115,7 +115,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 
 				@Override
 				protected String getCssClasses() {
-					return "btn btn-default btn-sm";
+					return "btn btn-outline-secondary btn-sm";
 				}
 
 				@Override

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
@@ -44,6 +45,9 @@ import org.apache.wicket.markup.html.form.AutoLabelResolver.AutoLabelMarker;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.IPropertyReflectionAwareModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.parameter.EmptyRequestParameters;
 import org.apache.wicket.util.convert.ConversionException;
 import org.apache.wicket.util.convert.IConverter;
 import org.apache.wicket.util.lang.Args;
@@ -755,8 +759,7 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 */
 	public String[] getInputAsArray()
 	{
-		List<StringValue> list = getRequest().getRequestParameters().getParameterValues(
-			getInputName());
+		List<StringValue> list = getParameterValues(getInputName());
 
 		String[] values = null;
 		if (list != null)
@@ -784,6 +787,48 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 		return values;
 	}
 
+	/**
+	 * Reads the value(s) of the request parameter with name <em>inputName</em>
+	 * from either the query parameters for <em>GET</em> method or the request body
+	 * for <em>POST</em> method.
+	 *
+	 * @param inputName
+	 *      The name of the request parameter
+	 * @return The parameter's value(s)
+	 */
+	protected List<StringValue> getParameterValues(String inputName)
+	{
+		String method = Form.METHOD_POST;
+		final Request request = getRequest();
+		if (getRequest().getContainerRequest() instanceof HttpServletRequest)
+		{
+			method = ((HttpServletRequest)getRequest().getContainerRequest()).getMethod();
+		}
+		else
+		{
+			final Form<?> form = findParent(Form.class);
+			if (form != null)
+			{
+				method = form.getMethod();
+			}
+		}
+
+		final IRequestParameters parameters;
+		switch (method.toLowerCase(Locale.ROOT))
+		{
+			case Form.METHOD_POST:
+				parameters = request.getPostParameters();
+				break;
+			case Form.METHOD_GET:
+				parameters = request.getQueryParameters();
+				break;
+			default:
+				parameters = EmptyRequestParameters.INSTANCE;
+		}
+
+		return parameters.getParameterValues(inputName);
+	}
+	
 	/**
 	 * Gets the string to be used for the <tt>name</tt> attribute of the form element. Generated
 	 * using the path from the form to the component, excluding the form itself. Override it if you

@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -35,7 +36,6 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -315,7 +315,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			input.setRequired(true).setLabel(Model.of("Comment"));
 			form.add(input);
 			
-			form.add(new NotificationPanel("feedback", input));
+			form.add(new FencedFeedbackPanel("feedback", input));
 			
 			form.add(new AjaxSubmitLink("save") {
 

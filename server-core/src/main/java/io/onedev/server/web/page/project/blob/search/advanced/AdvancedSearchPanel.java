@@ -16,6 +16,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -34,7 +35,6 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidationError;
 import org.eclipse.jgit.lib.ObjectId;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -264,13 +264,13 @@ public abstract class AdvancedSearchPanel extends Panel {
 					
 				});
 				termContainer.add(termInput);
-				termContainer.add(new NotificationPanel("feedback", termInput));
+				termContainer.add(new FencedFeedbackPanel("feedback", termInput));
 				termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
 					protected String load() {
 						if (termInput.hasErrorMessage())
-							return " has-error";
+							return " is-invalid";
 						else
 							return "";
 					}
@@ -345,13 +345,13 @@ public abstract class AdvancedSearchPanel extends Panel {
 				});
 				
 				termContainer.add(termInput);
-				termContainer.add(new NotificationPanel("feedback", termInput));
+				termContainer.add(new FencedFeedbackPanel("feedback", termInput));
 				termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
 					protected String load() {
 						if (termInput.hasErrorMessage())
-							return " has-error";
+							return " is-invalid";
 						else
 							return "";
 					}
@@ -438,13 +438,13 @@ public abstract class AdvancedSearchPanel extends Panel {
 				});
 				
 				termContainer.add(termInput);
-				termContainer.add(new NotificationPanel("feedback", termInput));
+				termContainer.add(new FencedFeedbackPanel("feedback", termInput));
 				termContainer.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 					@Override
 					protected String load() {
 						if (termInput.hasErrorMessage())
-							return " has-error";
+							return " is-invalid";
 						else
 							return "";
 					}

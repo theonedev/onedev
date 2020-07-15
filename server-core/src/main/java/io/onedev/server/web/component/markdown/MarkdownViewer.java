@@ -5,6 +5,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -19,7 +20,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.StaleStateException;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -75,7 +75,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		NotificationPanel feedback = new NotificationPanel("feedback", this);
+		FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", this);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 		

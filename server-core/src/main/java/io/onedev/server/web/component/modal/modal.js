@@ -14,8 +14,10 @@ onedev.server.modal = {
 					&& $("body>.floating").length == 0 
 					&& $(".sp-container:visible").length == 0
 					&& $(".atwho-view:visible").length == 0
+					&& $(".flatpickr-calendar.open").length == 0
 					&& $modal.nextAll(".modal").length == 0
 					&& !$("body").hasClass("fullscreen")) {
+				console.log($(".flatpickr-calendar.open").length);
 				if ($modal.find(".leave-confirm.dirty").length != 0) {
 					if (confirm("There are unsaved changes, do you want to close?")) {
 						onedev.server.modal.close($modal, true);

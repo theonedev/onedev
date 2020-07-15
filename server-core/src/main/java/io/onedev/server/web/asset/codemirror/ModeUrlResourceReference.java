@@ -8,7 +8,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
 import io.onedev.commons.utils.StringUtils;
 
 public class ModeUrlResourceReference extends JavaScriptResourceReference {
@@ -31,7 +30,7 @@ public class ModeUrlResourceReference extends JavaScriptResourceReference {
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		WebjarsJavaScriptResourceReference metaReference = new WebjarsJavaScriptResourceReference("codemirror/current/mode/meta.js");
+		JavaScriptResourceReference metaReference = new JavaScriptResourceReference(ModeUrlResourceReference.class, "mode/meta.js");
 		String modeBase = StringUtils.substringBeforeLast(RequestCycle.get().urlFor(metaReference, new PageParameters()).toString(), "/");
 		dependencies.add(OnDomReadyHeaderItem.forScript("CodeMirror.modeURL = '" + modeBase + "/%N/%N.js';"));		
 		return dependencies;

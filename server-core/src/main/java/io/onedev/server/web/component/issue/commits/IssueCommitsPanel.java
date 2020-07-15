@@ -79,7 +79,7 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 					
 					@Override
 					protected String getCssClasses() {
-						return "btn btn-default";
+						return "btn btn-outline-secondary";
 					}
 
 					@Override

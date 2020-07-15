@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -96,7 +97,8 @@ abstract class JobExecutorPanel extends Panel {
 			
 		});
 		
-		add(new AjaxCheckBox("enable", Model.of(getExecutor().isEnabled())) {
+		AjaxCheckBox checkbox;
+		add(checkbox = new AjaxCheckBox("enable", Model.of(getExecutor().isEnabled())) {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
@@ -106,6 +108,7 @@ abstract class JobExecutorPanel extends Panel {
 			}
 			
 		});
+		add(new WebMarkupContainer("enableLabel").add(AttributeAppender.append("for", checkbox.getMarkupId())));
 		
 		add(BeanContext.view("executor", getExecutor()).setOutputMarkupId(true));
 		

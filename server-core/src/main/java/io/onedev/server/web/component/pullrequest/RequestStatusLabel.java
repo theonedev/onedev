@@ -42,11 +42,11 @@ public class RequestStatusLabel extends Label {
 				PullRequest request = getPullRequest();
 				CloseInfo closeInfo = request.getCloseInfo();
 				if (closeInfo == null)
-					return "label label-warning request-status";
+					return "badge badge-warning request-status";
 				else if (closeInfo.getStatus() == CloseInfo.Status.MERGED)
-					return "label label-success request-status";
+					return "badge badge-success request-status";
 				else
-					return "label label-danger request-status";
+					return "badge badge-danger request-status";
 			}
 			
 		}));

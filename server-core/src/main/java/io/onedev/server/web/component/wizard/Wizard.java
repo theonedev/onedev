@@ -10,6 +10,7 @@ package io.onedev.server.web.component.wizard;
 
 import java.util.List;
 
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -21,8 +22,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
 import com.google.common.base.Preconditions;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 
 @SuppressWarnings("serial")
 public abstract class Wizard extends Panel {
@@ -69,7 +68,7 @@ public abstract class Wizard extends Panel {
 			
 		});
 		
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(getActiveStep().render("content"));
 		form.add(new Link<Void>("previous") {
 

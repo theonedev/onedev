@@ -24,7 +24,7 @@ import com.google.common.base.Joiner;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
@@ -83,7 +83,7 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		if (pathSegment.length() != 0)
 			pathSegments.add(pathSegment);
 		else
-			throw new OneException("Markdown report path has to be specified");
+			throw new GeneralException("Markdown report path has to be specified");
 
 		for (int i = 0; i < params.getIndexedCount(); i++) {
 			pathSegment = params.get(i).toString();
@@ -100,7 +100,7 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		if (!markdownFile.exists() || markdownFile.isDirectory()) {
 			String message = String.format("Specified markdown path does not exist or is a directory (project: %s, build number: %d, path: %s)", 
 					project.getName(), build.getNumber(), markdownPath);
-			throw new OneException(message);
+			throw new GeneralException(message);
 		}
 			
 		ResourceResponse response = new ResourceResponse();

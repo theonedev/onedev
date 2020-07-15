@@ -29,7 +29,7 @@
 			<span wicket:id="contributor" class="contributor"></span>
 		</div>
 		<div class="actions">
-			<a wicket:id="download" title="Download tag archive"><i class="fa fa-download"></i> Download <i class="fa fa-caret-down"></i></a>
+			<a wicket:id="download" title="Download tag archive"><i class="fa fa-outline-download"></i> Download <i class="fa fa-caret-down"></i></a>
 			<a wicket:id="delete" title="Delete this tag"><i class="fa fa-trash"></i> Delete</a>
 		</div>
 	</wicket:fragment>
@@ -43,17 +43,16 @@
 	<wicket:fragment wicket:id="createTagFrag">
 		<form wicket:id="form" class="create-tag">
 			<div class="modal-header">
-				<h4 class="modal-title">Create Tag</h4>
+				<h5 class="modal-title">Create Tag</h5>
+				<button wicket:id="close" type="button" class="close">&times;</button>
 			</div>
 			<div class="modal-body">
 				<div wicket:id="feedback"></div>
 				<div wicket:id="editor"></div>
 			</div>
 			<div class="modal-footer">
-				<div class="form-group">
-					<button wicket:id="create" class="btn btn-primary">Create</button>
-					<button wicket:id="cancel" class="btn btn-default">Cancel</button>
-				</div>
+				<button wicket:id="create" class="btn btn-primary">Create</button>
+				<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
 			</div>
 		</form>
 	</wicket:fragment>

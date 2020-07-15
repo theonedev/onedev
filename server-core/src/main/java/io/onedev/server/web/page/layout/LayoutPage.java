@@ -91,78 +91,63 @@ public abstract class LayoutPage extends BasePage {
 		WebMarkupContainer administrationContainer = new WebMarkupContainer("navAdministration");
 		WebMarkupContainer item;
 		
-		administrationContainer.add(item = new WebMarkupContainer("userManagement"));
-		item.add(new ViewStateAwarePageLink<Void>("link", UserListPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("userManagement", UserListPage.class));
 		if (getPage() instanceof UserListPage || getPage() instanceof NewUserPage || getPage() instanceof UserPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("roleManagement"));
-		item.add(new ViewStateAwarePageLink<Void>("link", RoleListPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("roleManagement", RoleListPage.class));
 		if (getPage() instanceof RoleListPage || getPage() instanceof NewRolePage || getPage() instanceof RoleDetailPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("groupManagement"));
-		item.add(new ViewStateAwarePageLink<Void>("link", GroupListPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("groupManagement", GroupListPage.class));
 		if (getPage() instanceof GroupListPage || getPage() instanceof NewGroupPage || getPage() instanceof GroupPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("securitySetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", SecuritySettingPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("securitySetting", SecuritySettingPage.class));
 		if (getPage() instanceof SecuritySettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("externalAuthentication"));
-		item.add(new ViewStateAwarePageLink<Void>("link", AuthenticatorPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("externalAuthentication", AuthenticatorPage.class));
 		if (getPage() instanceof AuthenticatorPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		administrationContainer.add(item = new WebMarkupContainer("sso"));
-		item.add(new ViewStateAwarePageLink<Void>("link", SsoConnectorListPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("sso", SsoConnectorListPage.class));
 		if (getPage() instanceof SsoConnectorListPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-	    administrationContainer.add(item = new WebMarkupContainer("sshSetting"));
-	    item.add(new ViewStateAwarePageLink<Void>("link", SshSettingPage.class));
+	    administrationContainer.add(item = new ViewStateAwarePageLink<Void>("sshSetting", SshSettingPage.class));
 	    if (getPage() instanceof SshSettingPage)
 	        item.add(AttributeAppender.append("class", "active"));
 	    
-		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
-		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorsPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("jobExecutors", JobExecutorsPage.class));
 		if (getPage() instanceof JobExecutorsPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("groovyScripts"));
-		item.add(new ViewStateAwarePageLink<Void>("link", GroovyScriptListPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("groovyScripts", GroovyScriptListPage.class));
 		if (getPage() instanceof GroovyScriptListPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("systemSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", SystemSettingPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("systemSetting", SystemSettingPage.class));
 		if (getPage() instanceof SystemSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("issueSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", IssueFieldListPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("issueSetting", IssueFieldListPage.class));
 		if (getPage() instanceof IssueSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("mailSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MailSettingPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("mailSetting", MailSettingPage.class));
 		if (getPage() instanceof MailSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("databaseBackup"));
-		item.add(new ViewStateAwarePageLink<Void>("link", DatabaseBackupPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("databaseBackup", DatabaseBackupPage.class));
 		if (getPage() instanceof DatabaseBackupPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("serverLog"));
-		item.add(new ViewStateAwarePageLink<Void>("link", ServerLogPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("serverLog", ServerLogPage.class));
 		if (getPage() instanceof ServerLogPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("serverInformation"));
-		item.add(new ViewStateAwarePageLink<Void>("link", ServerInformationPage.class));
+		administrationContainer.add(item = new ViewStateAwarePageLink<Void>("serverInformation", ServerInformationPage.class));
 		if (getPage() instanceof ServerInformationPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
@@ -201,28 +186,23 @@ public abstract class LayoutPage extends BasePage {
 			signedInContainer.add(new WebMarkupContainer("header"));
 		}
 		
-		signedInContainer.add(item = new WebMarkupContainer("myProfile"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyProfilePage.class));
+		signedInContainer.add(item = new ViewStateAwarePageLink<Void>("myProfile", MyProfilePage.class));
 		if (getPage() instanceof MyProfilePage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		signedInContainer.add(item = new WebMarkupContainer("myAvatar"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyAvatarPage.class));
+		signedInContainer.add(item = new ViewStateAwarePageLink<Void>("myAvatar", MyAvatarPage.class));
 		if (getPage() instanceof MyAvatarPage)
 			item.add(AttributeAppender.append("class", "active"));
 				
-		signedInContainer.add(item = new WebMarkupContainer("myPassword"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyPasswordPage.class));
+		signedInContainer.add(item = new ViewStateAwarePageLink<Void>("myPassword", MyPasswordPage.class));
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
 
-		signedInContainer.add(item = new WebMarkupContainer("mySshKeys"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MySshKeysPage.class));
+		signedInContainer.add(item = new ViewStateAwarePageLink<Void>("mySshKeys", MySshKeysPage.class));
 		if (getPage() instanceof MySshKeysPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		
-		signedInContainer.add(item = new WebMarkupContainer("myAccessToken"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyAccessTokenPage.class));
+		signedInContainer.add(item = new ViewStateAwarePageLink<Void>("myAccessToken", MyAccessTokenPage.class));
 		if (getPage() instanceof MyAccessTokenPage)
 		    item.add(AttributeAppender.append("class", "active"));
 		

@@ -42,6 +42,7 @@
 	<logger name="org.apache.shiro.mgt" level="ERROR"/>
 	<logger name="org.apache.wicket.request.resource.ResourceReferenceRegistry" level="ERROR"/>
 	<logger name="org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator" level="ERROR"/>
+	<logger name="org.eclipse.jgit.util.FS" level="ERROR"></logger>
 	<logger name="io.onedev" level="INFO"/>	
 	
 	<root level="WARN">

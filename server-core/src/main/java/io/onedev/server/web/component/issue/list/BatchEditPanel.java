@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,7 +30,6 @@ import org.apache.wicket.model.PropertyModel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -98,7 +98,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		form.add(new Label("title", "Batch Editing " + getIssueCount() + " Issues"));
 		
-		form.add(new NotificationPanel("feedback", form));
+		form.add(new FencedFeedbackPanel("feedback", form));
 		
 		form.add(new CheckBox("stateCheck", new IModel<Boolean>() {
 

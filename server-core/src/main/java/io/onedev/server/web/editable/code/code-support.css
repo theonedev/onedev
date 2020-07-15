@@ -3,7 +3,7 @@
 	border-radius: 4px;
 	padding: 1px;
 }
-.has-error .code-support {
+.is-invalid .code-support {
 	border-color: #a94442;
 }
 .code-support .CodeMirror {

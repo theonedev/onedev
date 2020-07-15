@@ -1,6 +1,6 @@
 body {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Cantarell, Oxygen-Sans, Ubuntu, Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	background: white;
+	height: 100%;
 }
 a {
 	color: #1f3b7b;
@@ -18,11 +18,15 @@ a.embedded-reference {
 	color: #999;
 }
 
-.has-error.form-control {
-    border-color: #a94442;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+.is-invalid .form-control, .is-invalid.form-control {
+    border-color: #dc3545;
+	background: none;
 }
+.is-invalid .form-control:focus, .form-control.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
 .red {
 	color: red;
 }
@@ -117,6 +121,35 @@ form .required {
 	color: #B94A48;
 }
 
+.nav-tabs .nav-item.active .nav-link {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.help-block {
+	display: block;
+	font-size: 14px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+	color: #737373;	
+}
+
+table {
+	border-spacing: 0;
+}
+td, th {
+	padding: 0;
+}
+.table>thead>tr>th {
+	border-top: none;
+}
+tr.navigation>td {
+	padding: 20px;
+}
+.hidden {
+	display: none !important;
+}
 .noselect {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;  
@@ -132,13 +165,6 @@ table .row-selector {
 }
 table>thead>tr>th {
 	white-space: nowrap;
-}
-
-.navigator {
-	text-align: center;
-}
-.navigatorLabel {
-	display: none;
 }
 
 a.wicket_orderUp:after, a.wicket_orderDown:after, a.wicket_orderNone:after { 
@@ -162,11 +188,6 @@ a.wicket_orderDown:AFTER {
 .pagination a.first, .pagination a.prev, .pagination a.next, .pagination a.last {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.table>thead+tfoot>tr>td.norecords-td>div {
-    border-top: 2px solid #DDD;
-    margin-top: -10px;
-    padding-top: 10px;
-}
 .norecords-td {
 	font-style: italic;
 }
@@ -189,15 +210,6 @@ a.tree-junction {
 
 .help-block {
 	font-size: 13px;
-}
-
-.input-group .select2-container.form-control .select2-choice, 
-.input-group .select2-container.form-control .select2-choices {
-	border-radius: 0 4px 4px 0;
-}
-.select2-container .avatar {
-	margin-right: 4px;	
-	margin-top: -2px;
 }
 	
 /* Ajax Loading Indicator */
@@ -481,12 +493,8 @@ table>tbody>tr>td.actions a:last-child {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
-.dropdown-menu li a i {
+.dropdown-menu>.dropdown-item i {
 	margin-right: 4px;
-}
-
-.modal-header .close {
-	font-family: sans-serif;
 }
 
 .clearable-wrapper {
@@ -588,18 +596,11 @@ a.disabled, a[disabled="disabled"] {
 }
 
 .nav.nav-tabs>li.options {
-	float: right;
+	margin-left: auto;
 }
 
 .def-list table>tbody>tr>td {
 	padding: 0;
-}
-.def-list table td.norecords-td {
-	padding: 5px;
-}
-.def-list table>tfoot>tr>td.norecords-td>div {
-    margin-top: -7px;
-    padding-top: 7px;
 }
 
 .def-list table a {
@@ -634,23 +635,23 @@ td.ellipsis {
     font-size: 16px;
 }
 
-.panel {
+.card {
 	border-width: 2px;
 }
-.panel-list .drag-indicator {
+.card-list .drag-indicator {
 	margin-right: 8px;
 }
-.panel-list .panel-heading a {
+.card-list .card-header a {
 	color: #444; 
 	margin-right: 8px;
 }
-.panel-list .panel-heading input {
+.card-list .card-header input {
 	vertical-align: text-top;
 }
-.panel-list input[type="checkbox"]+label {
+.card-list input[type="checkbox"]+label {
 	font-weight: normal;
 }
-.panel-list .add-new {
+.card-list .add-new {
 	display: block; 
 	padding: 16px; 
 	background: #F2F2F2; 
@@ -660,17 +661,17 @@ td.ellipsis {
 	color: #444; 
 	margin-bottom: 16px;
 }
-.panel-list a.add-new:hover {
+.card-list a.add-new:hover {
 	text-decoration: none; 
 	background-color: #EBEBEB; 
 	border-color: #ADADAD;
 }
 
-.panel-list .disabled .panel, .panel-list .disabled .panel span, .panel-list .disabled .panel a {
+.cardlist .disabled .card, .card-list .disabled .card span, .card-list .disabled .card a {
 	color: #999;
 }
 
-.panel-heading .checkbox {
+.card-header .checkbox {
 	display: inline-block;
 	margin: 0;
 }

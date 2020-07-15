@@ -27,7 +27,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -96,7 +96,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		
 		if (project == null) 
-			throw new OneException("Unable to find project " + projectName);
+			throw new GeneralException("Unable to find project " + projectName);
 		
 		Long projectId = project.getId();
 		

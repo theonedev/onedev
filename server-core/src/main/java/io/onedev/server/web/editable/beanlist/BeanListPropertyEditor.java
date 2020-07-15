@@ -1,7 +1,5 @@
 package io.onedev.server.web.editable.beanlist;
 
-import static de.agilecoders.wicket.jquery.JQuery.$;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,9 +26,9 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
-import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.PathNode.Indexed;
 import io.onedev.server.util.PathNode.Named;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -258,7 +256,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				markFormDirty(target);
-				target.appendJavaScript($(row).chain("remove").get());
+				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
 				rows.remove(row);
 				target.add(noElements);
 				onPropertyUpdating(target);

@@ -9,20 +9,20 @@
 			<tr>
 				<td class="view-mode">
 					<span class="btn-group">
-						<a wicket:id="unified" class="btn btn-default">Unified</a>
-						<a wicket:id="split" class="btn btn-default">Split</a>
+						<a wicket:id="unified" class="btn btn-outline-secondary">Unified</a>
+						<a wicket:id="split" class="btn btn-outline-secondary">Split</a>
 					</span>
 				</td>
 				<td class="whitespace-option">
-					<span wicket:id="whitespaceOption" class="btn btn-default" title="White space options">White space <i class="caret"></i></span>
+					<span wicket:id="whitespaceOption" class="btn btn-outline-secondary dropdown-toggle" title="White space options">White space</span>
 				</td>
 				<td class="path-filter">				
 					<form wicket:id="pathFilter">
 						<div class="clearable-wrapper">
 							<div class="input-group">
 	                            <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by path">
-								<span class="input-group-btn">
-									<button wicket:id="submit" title="Filter" class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+								<span class="input-group-append">
+									<button wicket:id="submit" title="Filter" class="btn btn-outline-secondary" type="submit"><i class="fa fa-search"></i></button>
 								</span>
 							</div>
 						</div>
@@ -76,7 +76,7 @@
 			</div>
 			<div class="actions">
 				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
-				<button wicket:id="cancel" class="btn btn-sm btn-default">Cancel</button>
+				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
 			</div>
 		</form>
 	</wicket:fragment>

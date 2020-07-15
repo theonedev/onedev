@@ -2,13 +2,12 @@ package io.onedev.server.web.page.admin.serverinformation;
 
 import java.util.Date;
 
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar.Type;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
@@ -46,15 +45,24 @@ public class ServerInformationPage extends AdministrationPage {
 			}
 			
 		}));
-		add(new ProgressBar("memoryUsage", new LoadableDetachableModel<Integer>() {
+		
+		add(new Label("memoryUsage", new LoadableDetachableModel<String>() {
 
 			@Override
-			protected Integer load() {
+			protected String load() {
 				return (int)((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())*1.0 
-						/ Runtime.getRuntime().maxMemory() * 100);
+						/ Runtime.getRuntime().maxMemory() * 100) + "%";
 			}
 			
-		}, Type.SUCCESS, true));
+		}) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("style", "width: " + getDefaultModelObject());
+			}
+			
+		});
 		
 		add(new Label("osUserName", System.getProperty("user.name")));
 		

@@ -15,6 +15,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -30,7 +31,6 @@ import org.apache.wicket.request.http.WebResponse;
 
 import com.google.common.collect.Lists;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
@@ -260,7 +260,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 			input.setRequired(true).setLabel(Model.of("Comment"));
 			
 			Form<?> form = new Form<Void>("form");
-			form.add(new NotificationPanel("feedback", form));
+			form.add(new FencedFeedbackPanel("feedback", form));
 			form.add(input);
 			form.add(new AjaxSubmitLink("save") {
 

@@ -26,7 +26,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
@@ -191,7 +191,7 @@ public class ActionAuthorizationsPage extends BuildSettingPage {
 			}
 		};
 		
-		add(authorizationsTable = new DefaultDataTable<>("authorizations", columns, dataProvider, 
+		add(authorizationsTable = new HistoryAwareDataTable<>("authorizations", columns, dataProvider, 
 				Integer.MAX_VALUE, null));		
 		authorizationsTable.setOutputMarkupId(true);
 	}

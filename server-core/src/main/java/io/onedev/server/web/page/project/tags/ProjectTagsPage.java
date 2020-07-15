@@ -18,6 +18,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -43,7 +44,6 @@ import org.eclipse.jgit.revwalk.RevTag;
 
 import com.google.common.base.Preconditions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -61,8 +61,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -74,6 +73,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
@@ -210,7 +210,7 @@ public class ProjectTagsPage extends ProjectPage {
 				Fragment fragment = new Fragment(id, "createTagFrag", ProjectTagsPage.this);
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
-				form.add(new NotificationPanel("feedback", form));
+				form.add(new FencedFeedbackPanel("feedback", form));
 				helperBean.setName(null);
 				helperBean.setMessage(null);
 				helperBean.setRevision(null);
@@ -251,6 +251,14 @@ public class ProjectTagsPage extends ProjectPage {
 
 				});
 				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				});
+				form.add(new AjaxLink<Void>("close") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
@@ -407,7 +415,7 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 		};		
 		
-		add(tagsTable = new DefaultDataTable<RefInfo, Void>("tags", columns, dataProvider, 
+		add(tagsTable = new HistoryAwareDataTable<RefInfo, Void>("tags", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override

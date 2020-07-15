@@ -38,7 +38,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -51,8 +51,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -62,6 +61,7 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
@@ -79,7 +79,7 @@ public class ProjectListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return ProjectQuery.parse(queryString);
-			} catch (OneException e) {
+			} catch (GeneralException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
@@ -286,7 +286,7 @@ public class ProjectListPanel extends Panel {
 			public Iterator<? extends Project> iterator(long first, long count) {
 				try {
 					return getProjectManager().query(queryModel.getObject(), (int)first, (int)count).iterator();
-				} catch (OneException e) {
+				} catch (GeneralException e) {
 					error(e.getMessage());
 					return new ArrayList<Project>().iterator();
 				}
@@ -298,7 +298,7 @@ public class ProjectListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getProjectManager().count(query.getCriteria());
-					} catch (OneException e) {
+					} catch (GeneralException e) {
 						error(e.getMessage());
 					}
 				}
@@ -377,7 +377,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(dataTable = new DefaultDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(dataTable = new HistoryAwareDataTable<Project, Void>("projects", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

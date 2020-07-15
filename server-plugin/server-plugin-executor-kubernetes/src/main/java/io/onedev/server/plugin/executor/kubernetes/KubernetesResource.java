@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
@@ -132,7 +132,7 @@ public class KubernetesResource {
 		if (jobToken != null)
 			return jobToken;
 		else
-			throw new OneException("Job token is expected");
+			throw new GeneralException("Job token is expected");
 	}
 	
 }

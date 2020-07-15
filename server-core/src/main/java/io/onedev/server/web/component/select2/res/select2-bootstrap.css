@@ -50,6 +50,12 @@
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 
+.input-group>.select2-container:not(:first-child)>.select2-choice ,
+.input-group>.select2-container:not(:first-child)>.select2-choices {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
 .select2-container .select2-choices .select2-search-field input {
   -webkit-box-shadow: none;
   box-shadow: none;
@@ -59,7 +65,7 @@
  * Adjust Select2 input heights to match the Bootstrap default.
  */
 .select2-container .select2-choice {
-  height: 34px;
+  height: 38px;
   line-height: 1.42857;
 }
 
@@ -179,12 +185,12 @@
  */
 .select2-container .select2-choice .select2-arrow b,
 .select2-container .select2-choice div b {
-  background-position: 0 3px;
+  background-position: 0 6px;
 }
 
 .select2-dropdown-open .select2-choice .select2-arrow b,
 .select2-dropdown-open .select2-choice div b {
-  background-position: -18px 3px;
+  background-position: -18px 6px;
 }
 
 .select2-container.input-sm .select2-choice .select2-arrow b,
@@ -236,21 +242,23 @@
   border-top-color: #a47e3c;
 }
 
-.has-error .select2-choice,
-.has-error .select2-choices {
-  border-color: #b94a48;
+.is-invalid .select2-choice,
+.is-invalid .select2-choices,
+.is-invalid.select2-choice,
+.is-invalid.select2-choices {
+  border-color: #dc3545;
 }
-.has-error .select2-container-active .select2-choice,
-.has-error .select2-container-multi.select2-container-active .select2-choices {
-  border-color: #953b39;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #d59392;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #d59392;
+.is-invalid .select2-container-active .select2-choice,
+.is-invalid .select2-container-multi.select2-container-active .select2-choices, 
+.is-invalid.select2-container-active .select2-choice,
+.is-invalid.select2-container-multi.select2-container-active .select2-choices {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
-.has-error.select2-drop-active {
-  border-color: #953b39;
-}
-.has-error.select2-drop-active.select2-drop.select2-drop-above {
-  border-top-color: #953b39;
+.is-invalid .select2-drop-active,
+.is-invalid.select2-drop-active {
+  border-color: #dc3545;
+  box-shadow: 0 3px 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
 .has-success .select2-choice,
@@ -276,16 +284,18 @@
  */
 .select2-container-active .select2-choice,
 .select2-container-multi.select2-container-active .select2-choices {
-  border-color: #66afe9;
   outline: none;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
   -webkit-transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
   transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+  background-color: #fff;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
 .select2-drop-active {
-  border-color: #66afe9;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 3px 0 0.2rem rgba(0,123,255,.25);
 }
 
 .select2-drop-auto-width,
@@ -336,7 +346,7 @@
  */
 .select2-results .select2-highlighted {
   color: white;
-  background-color: #428bca;
+  background-color: #4c94f8;
 }
 
 /**

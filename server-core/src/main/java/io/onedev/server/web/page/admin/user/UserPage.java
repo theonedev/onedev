@@ -16,7 +16,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -52,7 +52,7 @@ public abstract class UserPage extends AdministrationPage {
 		
 		Long userId = Long.valueOf(userIdString);
 		if (userId == User.SYSTEM_ID)
-			throw new OneException("System user is not accessible");
+			throw new GeneralException("System user is not accessible");
 		
 		userModel = new LoadableDetachableModel<User>() {
 

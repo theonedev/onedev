@@ -59,7 +59,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
+import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobManager;
@@ -859,7 +859,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					}
 				}
 				if (!requiredJobNames.isEmpty())
-					throw new OneException("No pull request trigger to fire required builds: " + requiredJobNames);					
+					throw new GeneralException("No pull request trigger to fire required builds: " + requiredJobNames);					
 			} finally {
 				ScriptIdentity.pop();
 			}
@@ -971,7 +971,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			String errorMessage = String.format("Impossible to provide required number of reviewers "
 					+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
 					reviewers, missingCount, update.getRequest().getNumber());
-			throw new OneException(errorMessage);
+			throw new GeneralException(errorMessage);
 		}
 	}
 	

@@ -28,8 +28,8 @@ import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
-import io.onedev.server.web.component.datatable.DefaultDataTable;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.util.LoadableDetachableDataProvider;
 
 @SuppressWarnings("serial")
 public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
@@ -151,7 +151,7 @@ public class SshKeyListPanel extends GenericPanel<List<SshKey>> {
 			}
 		};
 		
-		add(sshKeysTable = new DefaultDataTable<SshKey, Void>("keys", columns, dataProvider, 
+		add(sshKeysTable = new HistoryAwareDataTable<SshKey, Void>("keys", columns, dataProvider, 
 				Integer.MAX_VALUE, null));
 	}
 

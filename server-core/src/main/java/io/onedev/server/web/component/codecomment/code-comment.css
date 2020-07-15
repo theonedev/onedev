@@ -98,12 +98,6 @@
 .code-comment>.add-reply {
 	margin-top: 16px;
 }
-.code-comment>.add-reply>a {
-	color: #999;
-}
-.code-comment>.add-reply>a:hover {
-	color: inherit;
-}
 .code-comment .markdown-rendered {
 	font-size: inherit;
 	line-height: inherit;

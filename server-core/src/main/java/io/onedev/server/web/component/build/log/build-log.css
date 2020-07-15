@@ -4,6 +4,7 @@
     position: relative;
     white-space: pre-wrap;
     word-break: normal;
+	padding: 8px;
 }
 .build-log>.log-entry>.date {
     padding-right: 8px;

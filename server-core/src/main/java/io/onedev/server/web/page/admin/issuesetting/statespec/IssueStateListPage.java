@@ -16,6 +16,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -29,7 +30,6 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -107,7 +107,7 @@ public class IssueStateListPage extends IssueSettingPage {
 								+ HtmlEscape.escapeHtml5(state.getName());
 
 						if (getStateSpecIndex(state.getName()) == 0)
-							label += " <span class='label label-default'>Initial</span>";
+							label += " <span class='badge badge-secondary'>Initial</span>";
 						return new Label(componentId, label).setEscapeModelStrings(false);
 					}
 					
@@ -296,7 +296,7 @@ public class IssueStateListPage extends IssueSettingPage {
 								
 							});
 							
-							fragment.add(new NotificationPanel("feedback", fragment));
+							fragment.add(new FencedFeedbackPanel("feedback", fragment));
 							fragment.setOutputMarkupId(true);
 							
 							return fragment;
