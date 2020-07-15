@@ -76,7 +76,7 @@ import io.onedev.server.web.util.ProjectAware;
 @SuppressWarnings("serial")
 public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
-	private static final String PARAM_PROJECT = "project";
+	protected static final String PARAM_PROJECT = "project";
 	
 	protected final IModel<Project> projectModel;
 	

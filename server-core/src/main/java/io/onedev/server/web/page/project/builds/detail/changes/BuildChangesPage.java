@@ -22,6 +22,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 
@@ -102,6 +103,11 @@ public class BuildChangesPage extends BuildDetailPage {
 		});
 	}
 	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject());
+	}
+
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		query = (String) data;

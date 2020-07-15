@@ -460,9 +460,7 @@ public abstract class BuildDetailPage extends ProjectPage
 							@Override
 							public void navTo(AjaxRequestTarget target, Build entity, Cursor cursor) {
 								WebSession.get().setBuildCursor(cursor);
-								PageParameters params = getPageParameters();
-								params.set(PARAM_BUILD, entity.getNumber());
-								setResponsePage(getPageClass(), params);
+								setResponsePage(getPageClass(), paramsOf(entity));
 							}
 							
 						};
