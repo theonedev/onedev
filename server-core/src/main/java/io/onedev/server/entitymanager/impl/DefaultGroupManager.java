@@ -102,7 +102,7 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	@Override
 	public Group find(String name) {
 		EntityCriteria<Group> criteria = newCriteria();
-		criteria.add(Restrictions.eq("name", name));
+		criteria.add(Restrictions.ilike("name", name));
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
