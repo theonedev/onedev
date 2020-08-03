@@ -215,6 +215,10 @@
 			<artifactId>sshd-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>net.i2p.crypto</groupId>
+			<artifactId>eddsa</artifactId>
+		</dependency>		
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 		</dependency>

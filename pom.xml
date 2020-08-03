@@ -559,6 +559,11 @@
 				<version>${jgit.version}</version>
 			</dependency>
 			<dependency>
+			  	<groupId>net.i2p.crypto</groupId>
+			  	<artifactId>eddsa</artifactId>
+			  	<version>0.3.0</version>
+			</dependency>			
+			<dependency>
 				<groupId>org.apache.sshd</groupId>
 				<artifactId>sshd-core</artifactId>
 				<version>2.2.0</version>
