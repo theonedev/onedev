@@ -6,7 +6,6 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.web.asset.scrollintoview.ScrollIntoViewResourceReference;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -32,7 +31,6 @@ public class TestPage extends BasePage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new TestResourceReference()));
-		response.render(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.test.onDomReady();"));
 	}		
 }
