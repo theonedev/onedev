@@ -368,6 +368,7 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				CommitListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}
 			

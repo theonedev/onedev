@@ -312,6 +312,7 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				PullRequestListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}
 			

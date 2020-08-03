@@ -426,6 +426,7 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				BuildListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}
 			

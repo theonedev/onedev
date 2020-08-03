@@ -336,6 +336,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				IssueListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}
 			
