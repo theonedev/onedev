@@ -248,7 +248,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 				try {
 					host = InetAddress.getLocalHost().getHostName();
 				} catch (UnknownHostException e2) {
-					throw new RuntimeException(e2);
+					host = "localhost";
 				}
 			}
 			

@@ -44,6 +44,8 @@
 	<logger name="org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator" level="ERROR"/>
 	<logger name="io.onedev" level="INFO"/>	
 	
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+	
 	<root level="WARN">
 		<appender-ref ref="FILE"/>
 		<appender-ref ref="CONSOLE"/>
