@@ -45,6 +45,8 @@
 	<logger name="org.eclipse.jgit.util.FS" level="ERROR"></logger>
 	<logger name="io.onedev" level="INFO"/>	
 	
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+	
 	<root level="WARN">
 		<appender-ref ref="FILE"/>
 		<appender-ref ref="CONSOLE"/>

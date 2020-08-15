@@ -266,6 +266,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				CodeCommentListPanel.this.getFeedbackMessages().clear();
 				doQuery(target);
 			}
 			

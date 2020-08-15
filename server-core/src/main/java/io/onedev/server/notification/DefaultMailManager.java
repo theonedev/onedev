@@ -101,7 +101,7 @@ public class DefaultMailManager implements MailManager {
 				try {
 					hostName = InetAddress.getLocalHost().getHostName();
 				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
+					hostName = "localhost";
 				}
 				senderEmail = "onedev@" + hostName;
 			}

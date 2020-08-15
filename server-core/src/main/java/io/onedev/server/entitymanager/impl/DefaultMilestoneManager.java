@@ -55,7 +55,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	public Milestone find(Project project, String name) {
 		EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
 		criteria.add(Restrictions.eq("project", project));
-		criteria.add(Restrictions.eq("name", name));
+		criteria.add(Restrictions.ilike("name", name));
 		criteria.setCacheable(true);
 		return find(criteria);
 	}

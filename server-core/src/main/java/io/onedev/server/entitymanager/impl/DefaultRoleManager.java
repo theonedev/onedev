@@ -87,7 +87,7 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 	@Override
 	public Role find(String name) {
 		EntityCriteria<Role> criteria = newCriteria();
-		criteria.add(Restrictions.eq("name", name));
+		criteria.add(Restrictions.ilike("name", name));
 		criteria.setCacheable(true);
 		return dao.find(criteria);
 	}

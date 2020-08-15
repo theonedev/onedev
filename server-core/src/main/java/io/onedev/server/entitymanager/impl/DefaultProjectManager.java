@@ -275,7 +275,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
     @Override
     public Project find(String projectName) {
 		EntityCriteria<Project> criteria = newCriteria();
-		criteria.add(Restrictions.eq("name", projectName));
+		criteria.add(Restrictions.ilike("name", projectName));
 		criteria.setCacheable(true);
 		return find(criteria);
     }

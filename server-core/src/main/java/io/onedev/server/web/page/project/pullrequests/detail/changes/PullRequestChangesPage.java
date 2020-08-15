@@ -408,7 +408,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 							}
 							
 							for (PullRequestChange change: request.getChanges()) {
-								if (change.getUser().equals(user) 
+								if (user.equals(change.getUser()) 
 										&& (lastReviewDate == null || lastReviewDate.before(change.getDate()))
 										&& (change.getData() instanceof PullRequestApproveData 
 												|| change.getData() instanceof PullRequestReopenData
@@ -418,12 +418,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 							}
 							
 							for (CodeComment comment: request.getCodeComments()) {
-								if (comment.getUser().equals(user) && 
+								if (user.equals(comment.getUser()) && 
 										(lastReviewDate == null || lastReviewDate.before(comment.getCreateDate()))) {
 									lastReviewDate = comment.getCreateDate();
 								}
 								for (CodeCommentReply reply: comment.getReplies()) {
-									if (reply.getUser().equals(user) && 
+									if (user.equals(reply.getUser()) && 
 											(lastReviewDate == null || lastReviewDate.before(reply.getDate()))) {
 										lastReviewDate = reply.getDate();
 									}

@@ -219,7 +219,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     @Override
     public User findByName(String userName) {
 		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.eq(User.PROP_NAME, userName));
+		criteria.add(Restrictions.ilike(User.PROP_NAME, userName));
 		criteria.setCacheable(true);
 		return find(criteria);
     }
@@ -260,7 +260,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     @Override
     public User findByEmail(String email) {
 		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.eq(User.PROP_EMAIL, email));
+		criteria.add(Restrictions.ilike(User.PROP_EMAIL, email));
 		criteria.setCacheable(true);
 		return find(criteria);
     }

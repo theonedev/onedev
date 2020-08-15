@@ -9,7 +9,7 @@
 		<version>1.0.5</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>3.2.4</version>
+	<version>3.2.6</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -539,6 +539,11 @@
 				<artifactId>org.eclipse.jgit.archive</artifactId>
 				<version>${jgit.version}</version>
 			</dependency>
+			<dependency>
+			  	<groupId>net.i2p.crypto</groupId>
+			  	<artifactId>eddsa</artifactId>
+			  	<version>0.3.0</version>
+			</dependency>			
 			<dependency>
 				<groupId>org.apache.sshd</groupId>
 				<artifactId>sshd-core</artifactId>
