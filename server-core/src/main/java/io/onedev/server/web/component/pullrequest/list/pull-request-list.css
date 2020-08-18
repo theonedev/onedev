@@ -36,7 +36,7 @@
 .pull-request-list>.body td .primary {
 	margin-bottom: 8px;
 }
-.pull-request-list>.body td .primary>.pull-left {
+.pull-request-list>.body td .primary>.float-left {
 	margin-right: 12px;
 }
 
@@ -47,12 +47,11 @@
 .pull-request-list>.body td .secondary .review {
 	margin-top: -2px;
 }
-.pull-request-list>.body td .secondary>.pull-left {
+.pull-request-list>.body td .secondary>.float-left {
 	margin-right: 12px;
 }
-.pull-request-list>.body td .branches .fa {
-	color: #666;
-	margin: 0 4px;
+.pull-request-list>.body td .branches svg {
+	margin: -2px 4px;
 }
 .pull-request-list>.body td .last-update, 
 .pull-request-list>.body td .comments {

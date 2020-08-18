@@ -8,39 +8,39 @@ import io.onedev.server.web.component.tabbable.PageTab;
 @SuppressWarnings("serial")
 public class ProjectSettingTab extends PageTab {
 
-	private final String iconClass;
+	private final String iconHref;
 	
-	public ProjectSettingTab(String title, String iconClass, 
+	public ProjectSettingTab(String title, String iconHref, 
 			Class<? extends ProjectSettingPage> mainPageClass) {
 		super(Model.of(title), mainPageClass);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 	}
 
-	public ProjectSettingTab(String title, String iconClass,
+	public ProjectSettingTab(String title, String iconHref,
 			Class<? extends ProjectSettingPage> mainPageClass, 
 			Class<? extends ProjectSettingPage> additionalPageClass1) {
 		super(Model.of(title), mainPageClass, additionalPageClass1);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 	}
 	
-	public ProjectSettingTab(String title, String iconClass, 
+	public ProjectSettingTab(String title, String iconHref, 
 			Class<? extends ProjectSettingPage> mainPageClass, 
 			Class<? extends ProjectSettingPage> additionalPageClass1, 
 			Class<? extends ProjectSettingPage> additionalPageClass2) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 	}
 	
-	public ProjectSettingTab(String title, String iconClass,  
+	public ProjectSettingTab(String title, String iconHref,  
 			Class<? extends ProjectSettingPage> mainPageClass, 
 			Class<? extends ProjectSettingPage> additionalPageClass1, 
 			Class<? extends ProjectSettingPage> additionalPageClass2,
 			Class<? extends ProjectSettingPage> additionalPageClass3) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2, additionalPageClass3);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 	}
 	
-	public ProjectSettingTab(String title, String iconClass,  
+	public ProjectSettingTab(String title, String iconHref,  
 			Class<? extends ProjectSettingPage> mainPageClass, 
 			Class<? extends ProjectSettingPage> additionalPageClass1, 
 			Class<? extends ProjectSettingPage> additionalPageClass2,
@@ -48,10 +48,10 @@ public class ProjectSettingTab extends PageTab {
 			Class<? extends ProjectSettingPage> additionalPageClass4) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2, 
 				additionalPageClass3, additionalPageClass4);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 	}
 	
-	public ProjectSettingTab(String title, String iconClass,  
+	public ProjectSettingTab(String title, String iconHref,  
 			Class<? extends ProjectSettingPage> mainPageClass, 
 			Class<? extends ProjectSettingPage> additionalPageClass1, 
 			Class<? extends ProjectSettingPage> additionalPageClass2,
@@ -60,16 +60,16 @@ public class ProjectSettingTab extends PageTab {
 			Class<? extends ProjectSettingPage> additionalPageClass5) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2, 
 				additionalPageClass3, additionalPageClass4, additionalPageClass5);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 	}
 	
 	@Override
 	public Component render(String componentId) {
-		return new ProjectSettingTabLink(componentId, this);
+		return new ProjectSettingTabHead(componentId, this);
 	}
 
-	public String getIconClass() {
-		return iconClass;
+	public String getIconHref() {
+		return iconHref;
 	}
 
 }

@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="code-comment">
 		<a wicket:id="outdatedContext" class="outdated-context">
-			<i class="fa fa-warning"></i> comment context outdated, click to update
+			<wicket:svg href="warning" class="icon"></wicket:svg> comment context outdated, click to update
 		</a>
 		<div wicket:id="comment" class="comment section"></div>
 		<div wicket:id="replies" class="reply section"></div>
@@ -11,8 +11,8 @@
 		<div class="user-avatar"><a wicket:id="userAvatar"></a></div>
 		<div class="detail">
 			<div class="head clearfix">
-				<span wicket:id="userName" class="user-name pull-left"></span>
-				<span class="reply pull-right">
+				<span wicket:id="userName" class="user-name float-left"></span>
+				<span class="reply float-right">
 					<span wicket:id="action" class="action"></span>
 					<span wicket:id="date" class="date"></span>
 				</span>
@@ -52,6 +52,6 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addReplyFrag">
-		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary"><i class="fa fa-reply"></i> Reply</a>
+		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary"><wicket:svg href="reply" class="icon"></wicket:svg> Reply</a>
 	</wicket:fragment>
 </wicket:panel>

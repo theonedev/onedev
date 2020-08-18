@@ -2,11 +2,11 @@
 	<div class="page-title">User Administration</div>
 	<div class="user-list list">
 		<div class="head clearfix">
-			<div class="pull-left clearable-wrapper">
+			<div class="float-left clearable-wrapper">
 				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter users">
 			</div>
-			<div class="pull-left">
-				<a wicket:id="addNew" class="btn btn-success"><i class="fa fa-plus"></i> Add New User</a>
+			<div class="float-left">
+				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New User</a>
 			</div>
 		</div>
 		<div class="body">
@@ -17,7 +17,7 @@
 		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="impersonate" title="Impersonate this user"><i class="fa fa-user-circle"></i></a>
-		<a wicket:id="delete" title="Delete this user"><i class="fa fa-trash"></i></a>
+		<a wicket:id="impersonate" title="Impersonate this user"><wicket:svg href="user-tick" class="icon"/></a>
+		<a wicket:id="delete" title="Delete this user"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

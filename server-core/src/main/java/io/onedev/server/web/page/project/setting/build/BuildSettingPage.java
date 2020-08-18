@@ -11,7 +11,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -56,7 +56,7 @@ public abstract class BuildSettingPage extends ProjectSettingPage {
 		add(new Tabbable("buildSettingTabs", tabs));
 	}
 
-	private class TabLink extends PageTabLink {
+	private class TabLink extends PageTabHead {
 
 		public TabLink(String id, PageTab tab) {
 			super(id, tab);

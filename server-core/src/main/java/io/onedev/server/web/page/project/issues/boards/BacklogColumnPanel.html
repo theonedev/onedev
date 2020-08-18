@@ -1,10 +1,10 @@
 <wicket:panel>
 	<div class="content">
 		<div class="head clearfix">
-			<span class="pull-left">Backlog</span>
-			<span wicket:id="count" class="badge pull-left"></span>
-			<a wicket:id="addCard" title="Add new card to this column" class="add-card pull-right"><i class="fa fa-plus"></i></a>
-			<a wicket:id="viewAsList" title="Show issues in list" class="view-list pull-right"><i class="fa fa-list-ul"></i></a>
+			<span class="float-left">Backlog</span>
+			<span wicket:id="count" class="float-left badge badge-secondary"></span>
+			<a wicket:id="addCard" title="Add new card to this column" class="add-card float-right"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			<a wicket:id="viewAsList" title="Show issues in list" class="view-list float-right"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
 		</div>
 		<div wicket:id="body" class="body"></div>
 	</div>

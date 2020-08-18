@@ -8,7 +8,7 @@ import org.apache.wicket.util.string.Strings;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.web.mapper.PathAwareUrl;
+import io.onedev.server.web.mapper.DynamicPathUrl;
 
 public class AbsoluteUrlRenderer extends UrlRenderer {
 
@@ -34,8 +34,8 @@ public class AbsoluteUrlRenderer extends UrlRenderer {
 	}
 
 	private Url copy(Url url) {
-		if (url instanceof PathAwareUrl)
-			return new PathAwareUrl(url);
+		if (url instanceof DynamicPathUrl)
+			return new DynamicPathUrl(url);
 		else
 			return new Url(url);
 	}

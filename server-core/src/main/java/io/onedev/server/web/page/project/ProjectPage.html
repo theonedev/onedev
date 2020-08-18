@@ -9,14 +9,14 @@
 		<a wicket:id="link">
 			<img wicket:id="avatar">
 			<span wicket:id="name"></span>
-			<i class="ellipsis"></i>
+			<wicket:svg href="ellipsis" class="icon"></wicket:svg>
 		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="navContextFrag">
 		<a wicket:id="dropdown" class="dropdown">
 			<img wicket:id="avatar">
 			<span wicket:id="name" class="ellipsis-text"></span>
-			<i class="fa fa-angle-down"></i>
+			<wicket:svg href="arrow" transform="rotate(90)" class="icon"></wicket:svg>
 		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="navContextDropdownFrag">
@@ -26,7 +26,11 @@
 				<wicket:container wicket:id="item"></wicket:container>
 			</li>
 			<li wicket:id="setting" class="setting">
-				<a onclick="$(this).parent().toggleClass('expanded'); var $floating = $(this).closest('.floating'); $floating.align($floating.data('alignment'));"><i class="fa fa-cog"></i> Settings <i class="fa fa-angle-down"></i></a>
+				<a onclick="$(this).parent().toggleClass('expanded'); var $floating = $(this).closest('.floating'); $floating.align($floating.data('alignment'));">
+					<wicket:svg href="gear" class="icon"></wicket:svg>
+					Settings
+					<wicket:svg href="arrow" class="icon" transform="rotate(90)"></wicket:svg>
+				</a>
 				<ul wicket:id="menu" class="menu list-unstyled"></ul>
 			</li>
 		</ul>

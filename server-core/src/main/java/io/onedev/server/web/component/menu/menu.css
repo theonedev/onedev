@@ -38,8 +38,10 @@
 .floating.menu ul>li>a>.icon {
 	position: absolute;
 	left: 8px;
-	top: 8px;
+	top: 14px;
 	color: #444;
+	width: 14px;
+	height: 14px;
 }
 .floating.menu ul>li.dropdown-divider div {
 	border-top: 1px solid #DDD;

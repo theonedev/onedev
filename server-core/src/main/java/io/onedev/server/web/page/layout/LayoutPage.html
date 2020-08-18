@@ -6,7 +6,7 @@
         			<span class="navbar-toggler-icon"></span>
       			</button>					
       			<a wicket:id="brandLink" class="navbar-brand">
-					<img alt="Brand" src="/img/logo.png">
+					<wicket:svg alt="OneDev" href="logo" class="icon"></wicket:svg>
 				</a>
 				<div wicket:id="navContext" class="nav-context"></div>
 			</div>
@@ -15,37 +15,85 @@
 					<li wicket:id="navTabs" class="nav-item"><a wicket:id="tab" class="nav-link"></a></li>
     				<li wicket:id="navAdministration" class="nav-item dropdown">
 						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administration</a>
-      					<div class="dropdown-menu">
-							<a wicket:id="userManagement" class="dropdown-item"><i class="fa fa-fw fa-user"></i> User Management</a>
-							<a wicket:id="roleManagement" class="dropdown-item"><i class="fa fa-fw fa-vcard-o"></i> Role Management</a>
-							<a wicket:id="groupManagement" class="dropdown-item"><i class="fa fa-fw fa-group"></i> Group Management</a>
-							<a wicket:id="securitySetting" class="dropdown-item"><i class="fa fa-fw fa-lock"></i> Security Setting</a>
-							<a wicket:id="externalAuthentication" class="dropdown-item"><i class="fa fa-fw fa-key"></i> External Authentication</a>
-							<a wicket:id="sso" class="dropdown-item"><i class="fa fa-fw fa-sign-in"></i> Single Sign On Providers</a>
-							<a wicket:id="sshSetting" class="dropdown-item"><i class="fa fa-fw fa-shield"></i> SSH Setting</a>
+      					<div class="dropdown-menu administration-menu">
+							<a wicket:id="userManagement" class="dropdown-item">
+								<wicket:svg href="user" class="icon"></wicket:svg>
+								User Management
+							</a>
+							<a wicket:id="roleManagement" class="dropdown-item">
+								<wicket:svg href="role" class="icon"></wicket:svg>
+								Role Management
+							</a>
+							<a wicket:id="groupManagement" class="dropdown-item">
+								<wicket:svg href="group" class="icon"></wicket:svg>
+								Group Management
+							</a>
+							<a wicket:id="securitySetting" class="dropdown-item">
+								<wicket:svg href="lock" class="icon"></wicket:svg>
+								Security Setting
+							</a>
+							<a wicket:id="externalAuthentication" class="dropdown-item">
+								<wicket:svg href="key" class="icon"></wicket:svg>
+								External Authentication
+							</a>
+							<a wicket:id="sso" class="dropdown-item">
+								<wicket:svg href="login" class="icon"></wicket:svg>
+								Single Sign On Providers
+							</a>
+							<a wicket:id="sshSetting" class="dropdown-item">
+								<wicket:svg href="shield" class="icon"></wicket:svg>
+								SSH Setting
+							</a>
 							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="systemSetting" class="dropdown-item"><i class="fa fa-fw fa-sliders"></i> System Setting</a>
-							<a wicket:id="issueSetting" class="dropdown-item"><i class="fa fa-fw fa-bug"></i> Issue Setting</a>
-							<a wicket:id="mailSetting" class="dropdown-item"><i class="fa fa-fw fa-envelope"></i> Mail Setting</a>
+							<a wicket:id="systemSetting" class="dropdown-item">
+								<wicket:svg href="sliders" class="icon"></wicket:svg>
+								System Setting
+							</a>
+							<a wicket:id="issueSetting" class="dropdown-item">
+								<wicket:svg href="bug" class="icon"></wicket:svg>
+								Issue Setting
+							</a>
+							<a wicket:id="mailSetting" class="dropdown-item">
+								<wicket:svg href="mail" class="icon"></wicket:svg>
+								Mail Setting
+							</a>
 							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="jobExecutors" class="dropdown-item"><i class="fa fa-fw fa-cogs"></i> Job Executors</a>
-							<a wicket:id="groovyScripts" class="dropdown-item"><i class="fa fa-fw fa-file-code-o"></i> Groovy Scripts</a>
+							<a wicket:id="jobExecutors" class="dropdown-item">
+								<wicket:svg href="run" class="icon"></wicket:svg>
+								Job Executors
+							</a>
+							<a wicket:id="groovyScripts" class="dropdown-item">
+								<wicket:svg href="script" class="icon"></wicket:svg>
+								Groovy Scripts
+							</a>
 							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="databaseBackup" class="dropdown-item"><i class="fa fa-fw fa-database"></i> Database Backup</a>
-							<a wicket:id="serverLog" class="dropdown-item"><i class="fa fa-fw fa-file-text-o"></i> Server Log</a>
-							<a wicket:id="serverInformation" class="dropdown-item"><i class="fa fa-fw fa-desktop"></i> Server Information</a>
+							<a wicket:id="databaseBackup" class="dropdown-item">
+								<wicket:svg href="database" class="icon"></wicket:svg>
+								Database Backup
+							</a>
+							<a wicket:id="serverLog" class="dropdown-item">
+								<wicket:svg href="log" class="icon"></wicket:svg>
+								Server Log
+							</a>
+							<a wicket:id="serverInformation" class="dropdown-item">
+								<wicket:svg href="computer" class="icon"></wicket:svg>
+								Server Information
+							</a>
 			          	</div>        				
 			  		</li>
 				</ul>
 				<ul class="navbar-nav ml-auto">
 					<li class="nav-item github">
 						<a href="https://github.com/theonedev/onedev" class="nav-link" target="_blank">
-							<i class="fa fa-github icon"></i>
+							<wicket:svg href="github-o" class="icon"></wicket:svg>
 							<span class="name">GitHub</span>
 						</a>
 					</li>
     				<li class="nav-item dropdown help">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-question-circle icon"></i> <span class="name">Help</span></a>
+						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							<wicket:svg href="question-circle" class="icon"></wicket:svg>
+							<span class="name">Help</span>
+						</a>
       					<div class="dropdown-menu dropdown-menu-right">
 							<div wicket:id="productVersion" class="dropdown-item-text"></div>          					
 							<div role="separator" class="dropdown-divider"></div>
@@ -61,16 +109,34 @@
 			  		</wicket:container>
     				<li wicket:id="navSignedIn" class="nav-item dropdown signed-in">
 						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
-      					<div class="dropdown-menu dropdown-menu-right">
+      					<div class="dropdown-menu dropdown-menu-right my-menu">
 							<div wicket:id="header" class="dropdown-item-text"></div>          					
 							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="myProfile" class="dropdown-item"><i class="fa fa-fw fa-list-alt"></i> My Profile</a>
-							<a wicket:id="myAvatar" class="dropdown-item"><i class="fa fa-fw fa-picture-o"></i> Edit Avatar</a>
-							<a wicket:id="myPassword" class="dropdown-item"><i class="fa fa-fw fa-key"></i> Change Password</a>
-							<a wicket:id="mySshKeys" class="dropdown-item"><i class="fa fa-fw fa-shield"></i> SSH Keys</a>
-							<a wicket:id="myAccessToken" class="dropdown-item"><i class="fa fa-fw fa-ticket"></i> Access Token</a>
+							<a wicket:id="myProfile" class="dropdown-item">
+								<wicket:svg href="profile" class="icon"></wicket:svg>
+								My Profile
+							</a>
+							<a wicket:id="myAvatar" class="dropdown-item">
+								<wicket:svg href="avatar" class="icon"></wicket:svg>
+								Edit Avatar
+							</a>
+							<a wicket:id="myPassword" class="dropdown-item">
+								<wicket:svg href="password" class="icon"></wicket:svg>
+								Change Password
+							</a>
+							<a wicket:id="mySshKeys" class="dropdown-item">
+								<wicket:svg href="key" class="icon"></wicket:svg>
+								SSH Keys
+							</a>
+							<a wicket:id="myAccessToken" class="dropdown-item">
+								<wicket:svg href="token" class="icon"></wicket:svg>
+								Access Token
+							</a>
 							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="signOut" class="dropdown-item"><i class="fa fa-fw fa-sign-out"></i> <span wicket:id="label"></span></a>
+							<a wicket:id="signOut" class="dropdown-item">
+								<wicket:svg href="logout" class="icon"></wicket:svg>
+								<span wicket:id="label"></span>
+							</a>
 			          	</div>        				
 			  		</li>
     			</ul>					

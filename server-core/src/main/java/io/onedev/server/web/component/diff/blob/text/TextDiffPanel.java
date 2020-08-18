@@ -66,6 +66,7 @@ import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.LineDiff;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.diff.blob.SourceAware;
@@ -75,6 +76,7 @@ import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 import io.onedev.server.web.component.diff.revision.BlobCommentSupport;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -1030,34 +1032,39 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	private void appendExpander(StringBuilder builder, int blockIndex, int skippedLines) {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
+		String expandSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
+				SpriteImage.getVersionedHref(IconScope.class, "expand2"));
+		String ellipsisSvg = String.format("<svg class='icon icon-sm'><use xlink:href='%s'/></svg>", 
+				SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
+		
 		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);
 		if (diffMode == DiffViewMode.UNIFIED) {
 			if (blameInfo != null) {
 				builder.append("<td colspan='3' class='expander noselect'><a title='Show more lines' href=\"")
-						.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
+						.append(script).append("\">").append(expandSvg).append("</a></td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
 				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
-						.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
+						.append(script).append("\">").append(expandSvg).append("</a></td>");
 			}
-			builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
-					.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
+			builder.append("<td colspan='2' class='skipped noselect'>").append(ellipsisSvg).append(" skipped ")
+					.append(skippedLines).append(" lines ").append(ellipsisSvg).append("</td>");
 		} else {
 			if (blameInfo != null) {
 				builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"").append(script)
-						.append("\"><i class='fa fa-sort'></i></a></td>");
-				builder.append("<td class='skipped noselect' colspan='6'><i class='fa fa-ellipsis-h'></i> skipped ")
-						.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
+						.append("\">").append(expandSvg).append("</a></td>");
+				builder.append("<td class='skipped noselect' colspan='6'>").append(ellipsisSvg).append(" skipped ")
+						.append(skippedLines).append(" lines ").append(ellipsisSvg).append("</td>");
 				blameInfo.lastCommitHash = null;
 				blameInfo.lastOldCommitHash = null;
 				blameInfo.lastNewCommitHash = null;
 			} else {
 				builder.append("<td class='expander noselect'><a title='Show more lines' href=\"").append(script)
-						.append("\"><i class='fa fa-sort'></i></a></td>");
-				builder.append("<td class='skipped noselect' colspan='5'><i class='fa fa-ellipsis-h'></i> skipped ")
-						.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
+						.append("\">").append(expandSvg).append("</a></td>");
+				builder.append("<td class='skipped noselect' colspan='5'>").append(ellipsisSvg).append(" skipped ")
+						.append(skippedLines).append(" lines ").append(ellipsisSvg).append("</td>");
 			}
 		}
 		builder.append("</tr>");

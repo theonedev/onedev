@@ -82,7 +82,6 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
         servletContextHandler.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
         GzipHandler gzipHandler = new GzipHandler();
-		gzipHandler.setIncludedMimeTypes("text/css", "application/javascript", "text/javascript");
 		gzipHandler.setHandler(servletContextHandler);
 
         jettyServer.setHandler(gzipHandler);

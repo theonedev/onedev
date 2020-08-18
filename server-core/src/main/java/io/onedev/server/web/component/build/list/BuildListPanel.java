@@ -242,7 +242,7 @@ public abstract class BuildListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
-		}.setOutputMarkupId(true));
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(new ModalLink("listParams") {
 

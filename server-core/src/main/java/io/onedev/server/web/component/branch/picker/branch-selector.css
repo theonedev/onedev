@@ -31,15 +31,14 @@ div.branch-selector .feedback {
 	color: #F94949; 
 	margin-bottom: 12px;
 }
-div.branch-selector .feedback:before {
-	font-family: "FontAwesome"; 
-	content: "\f071"; 
-	margin-right: 4px;
-}
-div.branch-selector a.current:before {
-	font-family: "FontAwesome"; 
-	content: "\f00c"; 
-	margin-right: 4px;	
+div.branch-selector a svg {
+	display: none;
 	position: absolute;
 	left: 4px;
+	top: 14px;
+	width: 12px;
+	height: 12px;
+}
+div.branch-selector a.current svg {
+	display: inline-block;
 }   

@@ -330,7 +330,7 @@ public abstract class CommitListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
-		}.setOutputMarkupId(true));
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		TextField<String> queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.add(new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {

@@ -12,8 +12,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.project.gitprotocol.GitProtocolPanel;
-import io.onedev.server.web.download.ArchiveDownloadResource;
-import io.onedev.server.web.download.ArchiveDownloadResourceReference;
+import io.onedev.server.web.resource.ArchiveResource;
+import io.onedev.server.web.resource.ArchiveResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class CloneOrDownloadPanel extends Panel {
@@ -55,8 +55,8 @@ public abstract class CloneOrDownloadPanel extends Panel {
 		});
 		
 		
-		add(new ResourceLink<Void>("downloadAsZip", new ArchiveDownloadResourceReference(), 
-				ArchiveDownloadResource.paramsOf(getProject(), getRevision(), ArchiveDownloadResource.FORMAT_ZIP)) {
+		add(new ResourceLink<Void>("downloadAsZip", new ArchiveResourceReference(), 
+				ArchiveResource.paramsOf(getProject(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
 
 			@Override
 			protected CharSequence getOnClickScript(CharSequence url) {
@@ -65,8 +65,8 @@ public abstract class CloneOrDownloadPanel extends Panel {
 			
 		});
 		
-		add(new ResourceLink<Void>("downloadAsTgz", new ArchiveDownloadResourceReference(), 
-				ArchiveDownloadResource.paramsOf(getProject(), getRevision(), ArchiveDownloadResource.FORMAT_TGZ)) {
+		add(new ResourceLink<Void>("downloadAsTgz", new ArchiveResourceReference(), 
+				ArchiveResource.paramsOf(getProject(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
 
 			@Override
 			protected CharSequence getOnClickScript(CharSequence url) {

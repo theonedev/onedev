@@ -17,7 +17,6 @@ onedev.server.modal = {
 					&& $(".flatpickr-calendar.open").length == 0
 					&& $modal.nextAll(".modal").length == 0
 					&& !$("body").hasClass("fullscreen")) {
-				console.log($(".flatpickr-calendar.open").length);
 				if ($modal.find(".leave-confirm.dirty").length != 0) {
 					if (confirm("There are unsaved changes, do you want to close?")) {
 						onedev.server.modal.close($modal, true);
@@ -42,7 +41,9 @@ onedev.server.modal = {
 		
 		$(document).off("keydown", $modal.data("keydown"));
 		
-		$modal.modal("hide").remove();
+		setTimeout(function() {
+			$modal.modal("hide").remove();
+		}, 0);
 	}
 	
 };

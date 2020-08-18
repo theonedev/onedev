@@ -183,7 +183,7 @@ onedev.server.stats = {
 								$container.append($content);
 								var $head = $("<div class='head clearfix'></div>");
 								$content.append($head);
-								var $left = $("<div class='pull-left'></div>");
+								var $left = $("<div class='float-left'></div>");
 								$head.append($left);
 								$left.append("<a class='user'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
 
@@ -205,7 +205,7 @@ onedev.server.stats = {
 								$totalContribution.append("<span class='commits'>" + contributor.totalCommits + " commits</span>");
 								$totalContribution.append("<span class='additions'>" + contributor.totalAdditions + " ++</span>");
 								$totalContribution.append("<span class='deletions'>" + contributor.totalDeletions + " --</span>");
-								$head.append("<div class='pull-right'>#" + (index + 1) + "</div>");
+								$head.append("<div class='float-right'>#" + (index + 1) + "</div>");
 								
 								var $body = $("<div class='body chart'></div>");
 								$content.append($body);

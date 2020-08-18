@@ -1,9 +1,9 @@
 <wicket:panel>
 	<div class="branch-protection card">
 		<div class="card-header">
-			<span class="drag-indicator"><i class="fa fa-reorder"></i></span>
-			<a wicket:id="edit" title="Edit this rule"><i class="fa fa-pencil"></i></a>
-			<a wicket:id="delete" title="Delete this rule"><i class="fa fa-trash"></i></a>
+			<span class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>
+			<a wicket:id="edit" title="Edit this rule"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+			<a wicket:id="delete" title="Delete this rule"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			<div class="form-check-inline">
 				<input wicket:id="enable" type="checkbox" class="form-check-input"> 
 				<label wicket:id="enableLabel" class="form-check-label">Enable</label>

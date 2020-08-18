@@ -1,9 +1,7 @@
-.subscription-status:BEFORE {
-	font-family: "FontAwesome";
+.subscription-status .icon {
+	display: none;
 }
-.subscription-status.subscribed:BEFORE {
-	content: "\f0a2";
-}
-.subscription-status.unsubscribed:BEFORE {
-	content: "\f1f7";
+.subscription-status.subscribed .icon-bell-ring, 
+.subscription-status.unsubscribed .icon-bell-off {
+	display: inline-block;
 }

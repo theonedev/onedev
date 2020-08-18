@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="blob-view autofit">
 		<div class="head clearfix">
-			<div class="pull-left info expanded">
+			<div class="float-left info expanded">
 				<wicket:enclosure child="lines">
 				<span wicket:id="lines"></span>
 				<span class="separator">|</span>
@@ -10,14 +10,23 @@
 				</wicket:enclosure>
 				<span wicket:id="size"></span>
 			</div>
-			<div class="actions-and-options pull-right clearfix">
-				<div wicket:id="options" class="pull-left options expanded"></div>
-				<div class="pull-left actions">
+			<div class="actions-and-options float-right clearfix">
+				<div wicket:id="options" class="float-left options expanded"></div>
+				<div class="float-left actions">
 					<wicket:container wicket:id="changeActions">
-					<a wicket:id="edit"><i class="fa fa-pencil"></i> Edit</a>
-					<a wicket:id="delete"><i class="fa fa-trash"></i> Delete</a>
+					<a wicket:id="edit">
+						<wicket:svg href="edit" class="icon"></wicket:svg>
+						Edit
+					</a>
+					<a wicket:id="delete">
+						<wicket:svg href="trash" class="icon"></wicket:svg>
+						Delete
+					</a>
 					</wicket:container>
-                    <a wicket:id="raw"><i class="fa fa-file-o"></i> Raw</a>
+                    <a wicket:id="raw">
+						<wicket:svg href="file" class="icon"></wicket:svg>
+						Raw
+					</a>
                     <wicket:enclosure child="viewPlain">
 					<label><input type="checkbox" wicket:id="viewPlain"> View Source</label>
                     </wicket:enclosure>

@@ -91,14 +91,14 @@ public abstract class UserPage extends AdministrationPage {
 	private List<? extends Tab> newTabs() {
 		List<PageTab> tabs = new ArrayList<>();
 		
-		tabs.add(new UserTab("Profile", "fa fa-fw fa-list-alt", UserProfilePage.class));
-		tabs.add(new UserTab("Edit Avatar", "fa fa-fw fa-picture-o", UserAvatarPage.class));
+		tabs.add(new UserTab("Profile", "profile", UserProfilePage.class));
+		tabs.add(new UserTab("Edit Avatar", "avatar", UserAvatarPage.class));
 			
-		tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", UserPasswordPage.class));
-		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
-		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
-		tabs.add(new UserTab("SSH Keys", "fa fa-fw fa-shield", UserSshKeysPage.class));
-		tabs.add(new UserTab("Access Token", "fa fa-fw fa-ticket", UserAccessTokenPage.class));
+		tabs.add(new UserTab("Change Password", "password", UserPasswordPage.class));
+		tabs.add(new UserTab("Belonging Groups", "group", UserMembershipsPage.class));
+		tabs.add(new UserTab("Authorized Projects", "project", UserAuthorizationsPage.class));
+		tabs.add(new UserTab("SSH Keys", "key", UserSshKeysPage.class));
+		tabs.add(new UserTab("Access Token", "token", UserAccessTokenPage.class));
 		
 		return tabs;
 	}

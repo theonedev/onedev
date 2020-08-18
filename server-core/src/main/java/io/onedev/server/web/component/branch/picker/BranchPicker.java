@@ -7,8 +7,10 @@ import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public abstract class BranchPicker extends DropdownLink {
@@ -49,8 +51,15 @@ public abstract class BranchPicker extends DropdownLink {
 
 	@Override
 	public IModel<?> getBody() {
-		return Model.of(String.format("<i class='fa fa-code-fork'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", 
-				branch!=null?HtmlEscape.escapeHtml5(branch):"<i>choose</i>"));
+		return Model.of(String.format(""
+				+ "<span class='branch-picker'>"
+				+ "  <svg class='icon'><use xlink:href='%s'/></svg>"
+				+ "  <span>%s</span> "
+				+ "  <svg class='icon icon-sm' transform='rotate(90)'><use xlink:href='%s'/></svg>"
+				+ "</span>", 
+				SpriteImage.getVersionedHref(IconScope.class, "branch"),
+				branch!=null?HtmlEscape.escapeHtml5(branch):"<i>choose</i>", 
+				SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 	}
 
 	@Override
@@ -60,4 +69,5 @@ public abstract class BranchPicker extends DropdownLink {
 	}
 
 	protected abstract void onSelect(AjaxRequestTarget target, String branch);
+	
 }

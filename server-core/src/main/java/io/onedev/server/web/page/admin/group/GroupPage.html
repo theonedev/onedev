@@ -5,11 +5,15 @@
 			<wicket:child></wicket:child>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="sidebarHeadFrag">
+		<wicket:svg href="group" class="icon"></wicket:svg>
+		<span wicket:id="name"></span>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="navContextFrag">
 		<a wicket:id="dropdown" class="dropdown group-dropdown">
-			<i class="fa fa-group"></i>
+			<wicket:svg href="group" class="icon"></wicket:svg>
 			<span wicket:id="name" class="ellipsis-text"></span>
-			<i class="fa fa-angle-down"></i>
+			<wicket:svg href="arrow" transform="rotate(90)" class="icon"></wicket:svg>
 		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="navContextDropdownFrag">

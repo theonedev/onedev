@@ -12,9 +12,11 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectAndRevision;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public abstract class RevisionPicker extends DropdownLink {
@@ -73,34 +75,42 @@ public abstract class RevisionPicker extends DropdownLink {
 
 	@Override
 	public IModel<?> getBody() {
-		String iconClass;
+		String icon;
 		String label;
 		if ("master".equals(revision)) { // default to use master branch when project is empty
 			label = "master";
-			iconClass = "fa fa-code-fork";
+			icon = "branch";
 		} else if (revision != null) {
 			ProjectAndRevision projectAndRevision = new ProjectAndRevision(projectModel.getObject(), revision);
 			label = projectAndRevision.getBranch();
 			if (label != null) {
-				iconClass = "fa fa-code-fork";
+				icon = "branch";
 			} else {
 				label = projectAndRevision.getTag();
 				if (label != null) {
-					iconClass = "fa fa-tag";
+					icon = "tag";
 				} else {
 					label = revision;
 					if (ObjectId.isId(label))
 						label = GitUtils.abbreviateSHA(label);
-					iconClass = "fa fa-ext fa-commit";
+					icon = "commit";
 				}
 			} 
 			label = HtmlEscape.escapeHtml5(label);
 		} else {
 			label = "Choose Revision";
-			iconClass = "";
+			icon = "";
 		}
 		
-		return Model.of(String.format("<i class='%s'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", iconClass, label));
+		return Model.of(String.format(""
+				+ "<span class='revision-picker'>"
+				+ "  %s"
+				+ "  <span>%s</span>"
+				+ "  <svg class='icon icon-sm' transform='rotate(90)'><use xlink:href='%s'/></svg>"
+				+ "</span>", 
+				icon.length()!=0?"<svg class='icon'><use xlink:href='" + SpriteImage.getVersionedHref(IconScope.class, icon) + "'/></svg>":"", 
+				label, 
+				SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 	}
 
 	@Override

@@ -46,10 +46,10 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 220px;
+    width: 240px;
 }
 .build-spec>.valid>.body>.jobs>.contents {
-    margin-left: 240px;
+    margin-left: 260px;
 }
 
 .build-spec>.valid>.body>.jobs>.side>.navs:not(:empty) {
@@ -60,6 +60,7 @@
     background: #444;
     border-radius: 4px;
     margin-bottom: 8px;
+	display: block;
 }
 .build-spec>.valid>.body>.jobs>.side>.navs>.nav a {
     color: #BBB;

@@ -52,6 +52,7 @@ import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.component.createtag.CreateTagPanel;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -374,9 +375,11 @@ public abstract class RevisionSelector extends Panel {
 			}
 			
 		};
+		
+		String icon;
 		if (itemValue.startsWith(COMMIT_FLAG)) {
 			link.add(new Label("label", ref));
-			link.add(AttributeAppender.append("class", "icon commit"));
+			icon = "commit";
 		} else if (itemValue.startsWith(ADD_FLAG)) {
 			String label;
 			if (branchesActive)
@@ -385,13 +388,18 @@ public abstract class RevisionSelector extends Panel {
 				label = "<div class='name'>Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
 			label += "<div class='revision'>from " + HtmlEscape.escapeHtml5(revision) + "</div>";
 			link.add(new Label("label", label).setEscapeModelStrings(false));
-			link.add(AttributeAppender.append("class", "icon add"));
+			icon = "plus";
 		} else if (ref.equals(revision)) {
 			link.add(new Label("label", ref));
-			link.add(AttributeAppender.append("class", "icon current"));
+			icon = "tick";
 		} else {
 			link.add(new Label("label", ref));
+			icon = null;
 		}
+		if (icon != null)
+			link.add(new SpriteImage("icon", icon));
+		else
+			link.add(new WebMarkupContainer("icon").setVisible(false));
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		item.setOutputMarkupId(true);
 		item.add(AttributeAppender.append("data-value", HtmlEscape.escapeHtml5(itemValue)));

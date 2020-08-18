@@ -6,7 +6,7 @@
 				<tr>
 					<td class="target branch revision">
 						<div class="title clearfix">
-							<label class="pull-left">Target</label>
+							<label class="float-left">Target</label>
 						</div>
 						<div wicket:id="target" class="selector"></div>
 						<div class="message">
@@ -14,7 +14,7 @@
 						</div>
 					</td>
 					<td class="action">
-						<a wicket:id="swap" class="swap btn btn-outline-secondary" title="Swap"><i class="fa fa-exchange"></i></a>
+						<a wicket:id="swap" class="swap btn btn-outline-secondary" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
 					</td>
 					<td class="source branch revision">
 						<div class="title">
@@ -106,7 +106,7 @@
 					</tr>
 				</table>
 				<div class="clearfix">
-					<input wicket:id="send" type="submit" class="btn btn-primary pull-left" value="Create Pull Request">
+					<input wicket:id="send" type="submit" class="btn btn-primary float-left" value="Create Pull Request">
 				</div>
 			</form>
 		</div>	

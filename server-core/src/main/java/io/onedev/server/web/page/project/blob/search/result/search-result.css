@@ -47,8 +47,11 @@
 .search-result>.body>li>ul {
 	margin-left: 34px;
 }
-.search-result>.body>li .fa-none {
-	color: white;
+.search-result>.body>li .arrow-right {
+	transform: rotate(0);
+}
+.search-result>.body>li .arrow-down {
+	transform: rotate(90deg);
 }
 .search-result>.body>li .scope {
 	color: #666; 

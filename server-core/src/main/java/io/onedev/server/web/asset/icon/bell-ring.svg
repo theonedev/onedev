@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="bell-ring.svg"
+   id="svg3231"
+   version="1.1"
+   viewBox="50 50 974 974"
+   height="200.00px"
+   width="200px"
+   class="icon">
+  <metadata
+     id="metadata3237">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs3235" />
+  <sodipodi:namedview
+     inkscape:current-layer="svg3231"
+     inkscape:window-maximized="1"
+     inkscape:window-y="23"
+     inkscape:window-x="0"
+     inkscape:cy="48.730351"
+     inkscape:cx="100"
+     inkscape:zoom="4.135"
+     showgrid="false"
+     id="namedview3233"
+     inkscape:window-height="971"
+     inkscape:window-width="1920"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <path
+     id="path3229"
+     d="M 728.59895,752.4216 V 475.08827 c 0,-106.66667 -85.33333,-192 -192,-192 -106.66666,0 -192,85.33333 -192,192 V 752.4216 h 384 m 85.33334,-42.66667 85.33333,85.33334 v 42.66666 H 173.93229 v -42.66666 l 85.33333,-85.33334 V 475.08827 c 0,-130.98667 90.88,-240.64 213.33333,-269.65334 V 176.4216 a 64,64 0 0 1 64,-64 64,64 0 0 1 64,64 v 29.01333 c 122.02667,29.01334 213.33334,138.66667 213.33334,269.65334 v 234.66666 m -277.33334,256 A 85.333333,85.333333 0 0 1 451.26562,880.4216 h 170.66667 a 85.333333,85.333333 0 0 1 -85.33334,85.33333 m 361.38667,-512 c -6.4,-113.06666 -64.42667,-213.33333 -151.46667,-273.92 l 61.01334,-61.01333 c 101.97333,77.65333 169.38666,197.97333 175.78666,334.93333 h -85.33333 m -571.30667,-273.92 c -87.04,60.58667 -145.06666,160.85334 -152.74666,273.92 H 88.598952 A 451.41333,451.41333 0 0 1 265.66562,118.8216 Z" />
+</svg>

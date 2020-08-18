@@ -1,10 +1,10 @@
 <wicket:panel>
 	<div class="pull-request-jobs clearfix">
 		<wicket:container wicket:id="jobs">
-			<a wicket:id="job" class="job pull-left">
+			<a wicket:id="job" class="job float-left">
 				<span wicket:id="status" class="status"></span>
 				<span wicket:id="name" class="name"></span>
-				<i class="fa fa-angle-down"></i>
+				<wicket:svg href="arrow" transform="rotate(90)" class="icon icon-sm"></wicket:svg>
 			</a>
 		</wicket:container>
 	</div>

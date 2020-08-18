@@ -3,13 +3,13 @@
     	<div wicket:id="jobs" class="job">
         	<div class="head">
             	<a wicket:id="name" class="name"><b wicket:id="label"></b></a>
-                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><i class="fa fa-list-ul"></i></a>
-                <a wicket:id="run" class="run" title="Run this job"><i class="fa fa-play"></i></a>
+                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+                <a wicket:id="run" class="run" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
             </div>
             <div class="body">
 				<div wicket:id="detail"></div>
 			</div>
 		</div>
-		<div wicket:id="note" class="note"><i class="fa fa-info-circle"></i> Some jobs are hidden due to permission policy</div>
+		<div wicket:id="note" class="note"><wicket:svg href="info-circle" class="icon"/> Some jobs are hidden due to permission policy</div>
 	</div>
 </wicket:panel>

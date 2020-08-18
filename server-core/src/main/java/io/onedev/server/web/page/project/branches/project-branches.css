@@ -22,15 +22,16 @@
 }
 #project-branches>.list>.body>table td.branch>.title>.name {
 	font-weight: bold;
-	font-size: 15px;
 }
 #project-branches .actions a {
 	color: #444;
 }
 
-#project-branches>.list>.body>table td.branch>.title>.label, 
-#project-branches>.list>.body>table td.branch>.title>.btn {
-	margin-left: 8px;
+#project-branches>.list>.body>table td.branch>.title>* {
+	margin-right: 8px;
+}
+#project-branches>.list>.body>table td.branch>.title .build-status svg {
+	margin: 0;
 }
 
 #project-branches>.list>.body>table td.behind {

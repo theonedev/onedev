@@ -195,7 +195,7 @@ public class ProjectListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
-		});
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(new DropdownLink("orderBy") {
 

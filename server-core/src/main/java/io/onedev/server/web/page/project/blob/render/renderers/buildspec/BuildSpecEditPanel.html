@@ -13,16 +13,16 @@
                         in css -->
                         <div class="navs"><div wicket:id="navs" class="nav">
                             <a class="select">
-                                <span class="drag-indicator"><i class="fa fa-reorder"></i></span>
+                                <span class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>
                                 <span class="name"></span>
                             </a>
-                            <a title="Delete job" class="delete"><i class="fa fa-trash"></i></a>
+                            <a title="Delete job" class="delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
                         </div></div>
                         <div class="add">
 	                        <a wicket:id="create" class="create btn btn-success">
-	                            <i class="fa fa-plus"></i> Add Job
+	                            <wicket:svg href="plus" class="icon"></wicket:svg> Add Job
 	                        </a>
-	                        <a wicket:id="suggestions" class="suggestions btn btn-success" title="Job suggestions"><i class="fa fa-magic"></i></a>
+	                        <a wicket:id="suggestions" class="suggestions btn btn-success" title="Job suggestions"><wicket:svg href="wand" class="icon"/></a>
                         </div>
                     </div>
                     <div class="contents">

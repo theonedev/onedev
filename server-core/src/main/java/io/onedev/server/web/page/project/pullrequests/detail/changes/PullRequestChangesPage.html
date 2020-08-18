@@ -1,14 +1,14 @@
 <wicket:extend>
 	<div class="changes">
 		<div wicket:id="changesHead" class="head clearfix">
-			<div class="pull-left btn-group">
-				<a wicket:id="prevCommitLink" class="btn btn-outline-secondary" title="Previous commit"><i class="fa fa-arrow-left"></i></a>
-				<a wicket:id="comparingCommits" class="btn btn-outline-secondary"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
-				<a wicket:id="nextCommitLink" class="btn btn-outline-secondary" title="Next commit"><i class="fa fa-arrow-right"></i></a>
+			<div class="float-left btn-group">
+				<button wicket:id="prevCommitLink" class="btn btn-outline-secondary" title="Previous commit"><wicket:svg href="arrow2" transform="rotate(180)" class="icon"></wicket:svg></button>
+				<button wicket:id="comparingCommits" class="btn btn-outline-secondary"><span wicket:id="label"></span> <wicket:svg href="arrow" transform="rotate(90)" class="icon"></wicket:svg></button>
+				<button wicket:id="nextCommitLink" class="btn btn-outline-secondary" title="Next commit"><wicket:svg href="arrow2" class="icon"></wicket:svg></button>
 			</div>
 			<wicket:enclosure child="fullChanges">
-			<div class="full-changes pull-left">
-				<a wicket:id="fullChanges" class="pull-left"><i class="fa fa-warning"></i> You are viewing a subset of all changes, click to show all changes</a>
+			<div class="full-changes float-left">
+				<a wicket:id="fullChanges" class="float-left"><wicket:svg href="warning-o" class="icon"></wicket:svg> You are viewing a subset of all changes, click to show all changes</a>
 			</div>
 			</wicket:enclosure>
 		</div>
@@ -21,13 +21,13 @@
 				<a wicket:id="changesSinceLastReview">Changes Since Last Review</a>
 			</div>
 			<div class="head clearfix">
-				<div class="title pull-left">Click to select a commit, or shift-click to select multiple commits</div>
+				<div class="title float-left">Click to select a commit, or shift-click to select multiple commits</div>
 				<a disabled="disabled">show changes</a>
 			</div>
 			<ul class="body list-unstyled autosize">
 				<li wicket:id="commits">
 					<a unselectable="on">
-						<span class="fa fa-ext fa-commit icon" unselectable="on"></span> 
+						<wicket:svg href="commit" class="icon" unselectable="on"></wicket:svg> 
 						<span wicket:id="hash" class="hash" unselectable="on"></span>
 						<span wicket:id="subject" class="subject" unselectable="on"></span>
 					</a>

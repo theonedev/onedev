@@ -874,7 +874,9 @@ onedev.server.markdown = {
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
 		$rendered.find("a.header-anchor").each(function() {
 			var $headerAnchor = $(this);
-			$headerAnchor.before("<a href='" + $headerAnchor.attr("href") + "' class='header-link'><i class='fa fa-link'></i></a>");
+			$headerAnchor.before("<a href='" + $headerAnchor.attr("href") 
+				+ "' class='header-link'><svg class='icon'><use xlink:href='" 
+				+ onedev.server.icons + "#link'/></svg></a>");
 		});
 		
 		$rendered.find("a").click(function() {

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="diff-modify.svg"
+   id="svg308"
+   version="1.1"
+   viewBox="0 0 1024 1024"
+   height="200.00px"
+   width="200px"
+   class="icon">
+  <metadata
+     id="metadata314">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs312" />
+  <sodipodi:namedview
+     inkscape:current-layer="svg308"
+     inkscape:window-maximized="1"
+     inkscape:window-y="23"
+     inkscape:window-x="0"
+     inkscape:cy="100"
+     inkscape:cx="68.681983"
+     inkscape:zoom="4.135"
+     showgrid="false"
+     id="namedview310"
+     inkscape:window-height="971"
+     inkscape:window-width="1920"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <path
+     id="path306"
+     d="M810.666667 85.333333H213.333333C140.8 85.333333 85.333333 140.8 85.333333 213.333333v597.333334c0 72.533333 55.466667 128 128 128h597.333334c72.533333 0 128-55.466667 128-128V213.333333c0-72.533333-55.466667-128-128-128z m42.666666 725.333334c0 25.6-17.066667 42.666667-42.666666 42.666666H213.333333c-25.6 0-42.666667-17.066667-42.666666-42.666666V213.333333c0-25.6 17.066667-42.666667 42.666666-42.666666h597.333334c25.6 0 42.666667 17.066667 42.666666 42.666666v597.333334z" />
+  <path
+     style="stroke-width:0.565353"
+     d="m 372.45392,513.85732 a 149.45175,147.64464 0 1 0 298.90347,0 149.45175,147.64464 0 1 0 -298.90347,0 z"
+     id="path561" />
+</svg>

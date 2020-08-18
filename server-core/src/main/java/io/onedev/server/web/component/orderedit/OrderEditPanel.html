@@ -3,7 +3,7 @@
 		<table wicket:id="selected" class="selected">
 			<tr wicket:id="selectedItems" class="clearfix">
 				<td class="drag-indicator">
-					<i class="fa fa-reorder"></i>
+					<wicket:svg href="grip" class="icon"/>
 				</td>
 				<td class="index"><span wicket:id="index"></span></td>
 				<td class="name"><span wicket:id="name"></span></td>
@@ -13,14 +13,14 @@
 					</label>
 				</td>
 				<td class="actions">
-					<a wicket:id="remove" title="Remove"><i class="fa fa-times"></i></a>
+					<a wicket:id="remove" title="Remove"><wicket:svg href="times" class="icon"/></a>
 				</td>
 			</tr>
 		</table>
 		<ul wicket:id="available" class="available list-unstyled">
 			<li wicket:id="availableItems">
 				<a wicket:id="add" title="Add">
-					<i class="fa fa-plus"></i>
+					<wicket:svg href="plus" class="icon"></wicket:svg>
 					<span wicket:id="name"></span>
 				</a>
 			</li>

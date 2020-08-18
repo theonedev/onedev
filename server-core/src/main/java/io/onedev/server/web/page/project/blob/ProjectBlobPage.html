@@ -1,13 +1,13 @@
 <wicket:extend>
 	<div id="project-blob">
 		<div class="head clearfix">
-			<a wicket:id="revisionPicker" class="revision-picker pull-left"></a>
-			<div wicket:id="buildStatus" class="build-status pull-left"></div>
-			<div wicket:id="blobNavigator" class="blob-navigator pull-left"></div>
-			<div wicket:id="blobOperations" class="operations pull-right">
-				<a wicket:id="cloneOrDownload" title="Clone or download project" class="clone-or-download"><b>Clone or Download <i class="fa fa-caret-down"></i></b></a>
-				<a wicket:id="add" title="Add files to current directory">Add <i class="fa fa-caret-down"></i></a>
-				<a wicket:id="search" title="Search files, symbols and texts">Search <i class="fa fa-caret-down"></i></a>
+			<a wicket:id="revisionPicker" class="revision-picker float-left"></a>
+			<div wicket:id="buildStatus" class="build-status float-left"></div>
+			<div wicket:id="blobNavigator" class="blob-navigator float-left"></div>
+			<div wicket:id="blobOperations" class="operations float-right">
+				<a wicket:id="cloneOrDownload" title="Clone or download project" class="clone-or-download"><b>Clone or Download <wicket:svg href="arrow" class="icon icon-sm" transform="rotate(90)"></wicket:svg></b></a>
+				<a wicket:id="add" title="Add files to current directory">Add <wicket:svg href="arrow" class="icon icon-sm" transform="rotate(90)"></wicket:svg></a>
+				<a wicket:id="search" title="Search files, symbols and texts">Search <wicket:svg href="arrow" class="icon icon-sm" transform="rotate(90)"></wicket:svg></a>
 				<a wicket:id="history" title="Commit history of current path">History</a>
 			</div>
 		</div>
@@ -17,7 +17,7 @@
 			<img wicket:id="icon">
 			<span>Revision indexing in progress... (search in this revision will be accurate after indexed)</span>
 		</div>
-		<div wicket:id="buildSupportNote" class="build-support-note"><i class="fa fa-info-circle"></i> Enable build support by <a wicket:id="addFile"></a></div>
+		<div wicket:id="buildSupportNote" class="build-support-note"><wicket:svg href="bulb" class="icon"/> Enable build support by <a wicket:id="addFile"></a></div>
 		<div wicket:id="blobContent" class="blob-content"></div>
 		<div wicket:id="searchResult" class="search-result">
 			<div id="search-result-resize-handle" class="ui-resizable-handle ui-resizable-n"></div>

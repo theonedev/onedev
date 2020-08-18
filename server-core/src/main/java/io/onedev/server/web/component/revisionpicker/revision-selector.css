@@ -1,3 +1,7 @@
+div.revision-selector {
+	padding: 12px;
+	position: relative;
+}
 div.revision-selector ul.nav-tabs>li.collapsed {
 	display: none !important;
 }
@@ -6,8 +10,12 @@ div.revision-selector ul.nav-tabs>li.expanded {
 }
 div.revision-selector input.revision {
 	margin-bottom: 12px;
-	background: url(search.gif) no-repeat right 6px center;
 	padding-right: 26px;
+}
+div.revision-selector .icon-magnify {
+	position: absolute;
+	top: 26px;
+	right: 14px;
 }
 div.revision-selector .nav-tabs {
 	margin-bottom: 8px;
@@ -20,9 +28,6 @@ div.revision-selector .nav-tabs>li>a {
 div.revision-selector .nav-tabs>li.active>a {
 	color: #333; 
 	font-weight: bold;
-}
-div.revision-selector {
-	padding: 12px;
 }
 div.revision-selector ul.items {
 	margin-bottom: 0;
@@ -45,26 +50,13 @@ div.revision-selector .feedback {
 	color: #F94949; 
 	margin-bottom: 12px;
 }
-div.revision-selector .feedback:before {
-	font-family: "FontAwesome"; 
-	content: "\f071"; 
-	margin-right: 4px;
-}
-div.revision-selector a.icon:before {
-	font-family: "FontAwesome"; 
-	margin-right: 4px;	
+div.revision-selector a .icon {
 	position: absolute;
 	color: #333;
 	left: 4px;
-}   
-div.revision-selector a.current:before {
-	content: "\f00c"; 
-}   
-div.revision-selector a.commit:before {
-	content: "\f1da"; 
-}   
-div.revision-selector a.add:before {
-	content: "\f067"; 
+	top: 14px;
+	width: 12px;
+	height: 12px;
 }   
 div.revision-selector ul.items>li>a .revision {
 	font-size: 13px;

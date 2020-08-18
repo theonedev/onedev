@@ -21,7 +21,7 @@ import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -61,7 +61,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 			
 			@Override
 			public Component render(String componentId) {
-				return new PageTabLink(componentId, this) {
+				return new PageTabHead(componentId, this) {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
@@ -102,7 +102,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 		
 		@Override
 		public Component render(String componentId) {
-			return new PageTabLink(componentId, this) {
+			return new PageTabHead(componentId, this) {
 
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {

@@ -8,46 +8,46 @@ import io.onedev.server.web.component.tabbable.PageTab;
 @SuppressWarnings("serial")
 public class ProjectTab extends PageTab {
 
-	private final String iconClass;
+	private final String iconHref;
 	
 	private final int count;
 
-	public ProjectTab(IModel<String> titleModel, String iconClass, int count, 
+	public ProjectTab(IModel<String> titleModel, String iconHref, int count, 
 			Class<? extends ProjectPage> mainPageClass) {
 		super(titleModel, mainPageClass);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 		this.count = count;
 	}
 
-	public ProjectTab(IModel<String> titleModel, String iconClass, int count, 
+	public ProjectTab(IModel<String> titleModel, String iconHref, int count, 
 			Class<? extends ProjectPage> mainPageClass, 
 			Class<? extends ProjectPage> additionalPageClass1) {
 		super(titleModel, mainPageClass, additionalPageClass1);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 		this.count = count;
 	}
 	
-	public ProjectTab(IModel<String> titleModel, String iconClass, int count, 
+	public ProjectTab(IModel<String> titleModel, String iconHref, int count, 
 			Class<? extends ProjectPage> mainPageClass, 
 			Class<? extends ProjectPage> additionalPageClass1, 
 			Class<? extends ProjectPage> additionalPageClass2) {
 		super(titleModel, mainPageClass, additionalPageClass1, additionalPageClass2);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 		this.count = count;
 	}
 	
-	public ProjectTab(IModel<String> titleModel, String iconClass, int count, 
+	public ProjectTab(IModel<String> titleModel, String iconHref, int count, 
 			Class<? extends ProjectPage> mainPageClass, 
 			Class<? extends ProjectPage> additionalPageClass1, 
 			Class<? extends ProjectPage> additionalPageClass2,
 			Class<? extends ProjectPage> additionalPageClass3) {
 		super(titleModel, mainPageClass, additionalPageClass1, 
 				additionalPageClass2, additionalPageClass3);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 		this.count = count;
 	}
 	
-	public ProjectTab(IModel<String> titleModel, String iconClass, int count,
+	public ProjectTab(IModel<String> titleModel, String iconHref, int count,
 			Class<? extends ProjectPage> mainPageClass, 
 			Class<? extends ProjectPage> additionalPageClass1, 
 			Class<? extends ProjectPage> additionalPageClass2,
@@ -55,11 +55,11 @@ public class ProjectTab extends PageTab {
 			Class<? extends ProjectPage> additionalPageClass4) {
 		super(titleModel, mainPageClass, additionalPageClass1, 
 				additionalPageClass2, additionalPageClass3, additionalPageClass4);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 		this.count = count;
 	}
 	
-	public ProjectTab(IModel<String> titleModel, String iconClass, int count,
+	public ProjectTab(IModel<String> titleModel, String iconHref, int count,
 			Class<? extends ProjectPage> mainPageClass, 
 			Class<? extends ProjectPage> additionalPageClass1, 
 			Class<? extends ProjectPage> additionalPageClass2,
@@ -68,12 +68,12 @@ public class ProjectTab extends PageTab {
 			Class<? extends ProjectPage> additionalPageClass5) {
 		super(titleModel, mainPageClass, additionalPageClass1, additionalPageClass2, 
 				additionalPageClass3, additionalPageClass4, additionalPageClass5);
-		this.iconClass = iconClass;
+		this.iconHref = iconHref;
 		this.count = count;
 	}
 	
-	public String getIconClass() {
-		return iconClass;
+	public String getIconHref() {
+		return iconHref;
 	}
 	
 	/**
@@ -83,9 +83,8 @@ public class ProjectTab extends PageTab {
 		return count;
 	}
 
-	@Override
 	public Component render(String componentId) {
-		return new ProjectTabLink(componentId, this);
+		return new ProjectTabHead(componentId, this);
 	}
 
 }

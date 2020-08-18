@@ -17,6 +17,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -40,6 +41,7 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.page.layout.SideFloating;
@@ -103,12 +105,12 @@ public class IssueStateListPage extends IssueSettingPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						String label = "<span class='drag-indicator fa fa-reorder'></span> " 
-								+ HtmlEscape.escapeHtml5(state.getName());
+						String html = String.format("<svg class='icon drag-indicator'><use xlink:href='%s'/></svg> %s", 
+								SpriteImage.getVersionedHref("grip"), HtmlEscape.escapeHtml5(state.getName()));
 
 						if (getStateSpecIndex(state.getName()) == 0)
-							label += " <span class='badge badge-secondary'>Initial</span>";
-						return new Label(componentId, label).setEscapeModelStrings(false);
+							html += " <span class='badge badge-secondary'>Initial</span>";
+						return new Label(componentId, html).setEscapeModelStrings(false);
 					}
 					
 				});
@@ -161,7 +163,16 @@ public class IssueStateListPage extends IssueSettingPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						return new SpriteImage(componentId, "ellipsis") {
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								tag.setName("svg");
+								tag.put("class", "icon");
+							}
+							
+						};
 					}
 					
 				});

@@ -53,11 +53,11 @@
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.author {
 	position: absolute;
-	left: 24px;
-	top: 4px;
+	left:32px;
+	top: 2px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.message {
-	padding: 0 130px 0 50px;
+	padding: 0 130px 0 60px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.with-status>.message {
 	padding-right: 175px;
@@ -67,12 +67,10 @@
 	top: 4px;
 	right: 4px;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit:before {
-	font-family: "FontExt";
-	content: "\f220";
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.icon {
 	position: absolute;
 	left: 4px;
-	color: #666;
+	top: 10px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content {
 	padding: 0 0 0 10px;

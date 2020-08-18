@@ -10,12 +10,7 @@
 .saved-queries>.head>.actions>a {
 	color: #444;
 	opacity: 100;
-	margin-right: 8px;
-	font-size: 16px;
-}
-.saved-queries>.head>.actions .close-saved-queries {
-	font-size: 17px;
-	display: inline-block;
+	margin-right: 0;
 }
 
 .saved-queries>.body>* {

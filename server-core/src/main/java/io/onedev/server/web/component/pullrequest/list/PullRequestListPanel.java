@@ -67,6 +67,7 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -80,6 +81,7 @@ import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewerAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -228,7 +230,7 @@ public abstract class PullRequestListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
-		}.setOutputMarkupId(true));
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(new DropdownLink("orderBy") {
 
@@ -323,13 +325,24 @@ public abstract class PullRequestListPanel extends Panel {
 
 		if (getProject() != null) {
 			add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
-					NewPullRequestPage.paramsOf(getProject())));		
+					NewPullRequestPage.paramsOf(getProject())) {
+				
+				@Override
+				public IModel<?> getBody() {
+					return Model.of(String.format(
+							"<svg class='icon'><use xlink:href='%s'/></svg> New", 
+							SpriteImage.getVersionedHref(IconScope.class, "plus")));
+				}
+				
+			}.setEscapeModelStrings(false));		
 		} else {
 			add(new DropdownLink("newRequest") {
 
 				@Override
 				public IModel<?> getBody() {
-					return Model.of("<i class='fa fa-plus'></i> New <i class='fa fa-caret-down'></i>");
+					return Model.of(String.format(
+							"<svg class='icon'><use xlink:href='%s'/></svg> New <svg class='icon' transform='rotate(90)'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref(IconScope.class, "plus"), SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 				}
 				
 				@Override

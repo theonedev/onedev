@@ -134,7 +134,7 @@ public class PageTab extends Tab {
 	 */
 	@Override
 	public Component render(String componentId) {
-		return new PageTabLink(componentId, this);
+		return new PageTabHead(componentId, this);
 	}
 	
 	@Override

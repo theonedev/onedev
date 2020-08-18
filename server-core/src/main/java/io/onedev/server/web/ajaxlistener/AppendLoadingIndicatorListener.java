@@ -6,7 +6,9 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 public class AppendLoadingIndicatorListener implements IAjaxCallListener {
 
@@ -47,8 +49,8 @@ public class AppendLoadingIndicatorListener implements IAjaxCallListener {
 		if (indicateSuccessful) {
 			return String.format(""
 					+ "$('#%s-working-indicator').remove();"
-					+ "$('#%s').after('<span id=\"%s-working-indicator\" class=\"fa fa-check working-indicator\"></span>');", 
-					component.getMarkupId(), component.getMarkupId(), component.getMarkupId());
+					+ "$('#%s').after('<svg id=\"%s-working-indicator\" class=\"icon working-indicator\"><use xlink:href=\"%s\"/></svg>');", 
+					component.getMarkupId(), component.getMarkupId(), component.getMarkupId(), SpriteImage.getVersionedHref(IconScope.class, "tick"));
 		} else {
 			return String.format("$('#%s-working-indicator').remove();", component.getMarkupId());
 		}

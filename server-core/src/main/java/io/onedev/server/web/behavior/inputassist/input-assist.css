@@ -22,11 +22,6 @@
 	font-size: 12px;
 	white-space: nowrap;
 }
-.input-assist tr.suggestion td.content:before {
-    font-family: FontAwesome; 
-	content: "\f105";
-	margin-right: 8px;
-}
 .input-assist td.description {
 	text-align: right;
 	font-size: 12px;

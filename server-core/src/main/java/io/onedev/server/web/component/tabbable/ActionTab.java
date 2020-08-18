@@ -22,7 +22,7 @@ public abstract class ActionTab extends Tab {
 	
 	@Override
 	public Component render(String componentId) {
-		return new ActionTabLink(componentId, this);
+		return new ActionTabHead(componentId, this);
 	}
 
 	public ActionTab setSelected(boolean selected) {

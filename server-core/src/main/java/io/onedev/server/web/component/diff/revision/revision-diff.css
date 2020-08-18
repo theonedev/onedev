@@ -36,37 +36,33 @@
 .revision-diff>.body>.alert {
 	margin-bottom: 16px;
 }
-.revision-diff>.body>.title>a:after {
-    font-family: FontAwesome; 
-    font-weight: bold;
-    content: "\f107";
+.revision-diff>.body>.title>a .icon {
+	transform: rotate(90deg);
 }
-.revision-diff>.body>.title>a.expanded:after {
-    content: "\f106";
+.revision-diff>.body>.title>a.expanded .icon {
+	transform: rotate(-90deg);
 }
 .revision-diff>.body>.diff-stats>.diff-stat {
 	font-size: 13px;
 }
 .revision-diff>.body>.diff-stats>.diff-stat>.icon {
+	width: 16px;
+	height: 16px;
 	margin-top: 2px;
-	margin-right: 0;
-}
-.revision-diff>.body>.diff-stats>.diff-stat .fa-square-o {
-	font-size: 16px;
 }
 .revision-diff>.body>.diff-stats>.diff-stat .has-comments {
 	color: #999;
 }
 
-.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-modified, 
-.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-renamed {
-	color: #D0B44C;
+.revision-diff>.body>.diff-stats>.diff-stat .dot-square, 
+.revision-diff>.body>.diff-stats>.diff-stat .arrow-square {
+	fill: #D0B44C;
 }
-.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-added {
-	color: #35C335;
+.revision-diff>.body>.diff-stats>.diff-stat .plus-square {
+	fill: #35C335;
 }
-.revision-diff>.body>.diff-stats>.diff-stat .fa-diff-removed {
-	color: #C33535;
+.revision-diff>.body>.diff-stats>.diff-stat .minus-square {
+	fill: #C33535;
 }
 .revision-diff>.body>.diff-stats {
 	margin-top: -10px;
@@ -114,15 +110,6 @@
 }
 .revision-diff>.body>.detail>.comment>.content>.head>a {
 	margin-right: 8px;
-}
-.revision-diff>.body>.detail>.comment>.content>.head .locate {
-	font-size: 20px;
-}
-.revision-diff>.body>.detail>.comment>.content>.head .context {
-	margin-top: -2px;
-}
-.revision-diff>.body>.detail>.comment>.content>.head .context .fa-ext {
-	font-size: 16px;
 }
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
 	position: absolute;

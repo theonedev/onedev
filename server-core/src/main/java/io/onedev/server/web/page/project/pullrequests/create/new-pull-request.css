@@ -80,6 +80,12 @@ body.NewPullRequestPage #layout>.body {
 	font-size: 16px;
 	font-weight: bold;
 }
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status svg,
+#new-pull-request>.page-content>.status>.can-send .merge-strategy .status img {
+	margin: -4px 8px 0 0;
+	width: 18px;
+	height: 18px;
+}
 #new-pull-request>.page-content>.status>.can-send .merge-strategy .status .no-conflict {
 	color: #399529;
 } 
@@ -88,8 +94,4 @@ body.NewPullRequestPage #layout>.body {
 } 
 #new-pull-request>.page-content>.status>.can-send .merge-strategy .status .calculating {
 	color: #BC7E12;
-}
-#new-pull-request>.page-content>.status>.can-send .merge-strategy .status .calculating img {
-	width: 24px;
-	height: 24px;
 }

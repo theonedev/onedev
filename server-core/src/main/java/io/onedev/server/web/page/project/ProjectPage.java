@@ -136,7 +136,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			protected List<? extends Tab> newTabs() {
 				List<ProjectTab> tabs = ProjectPage.this.newTabs();
 				if (SecurityUtils.canManage(getProject()))
-					tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
+					tabs.add(new ProjectTab(Model.of("Setting"), "gear", 0, GeneralSettingPage.class, ProjectSettingPage.class));
 				return tabs;
 			}
 
@@ -189,13 +189,13 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	private List<ProjectTab> newTabs() {
 		List<ProjectTab> tabs = new ArrayList<>();
 		if (SecurityUtils.canReadCode(getProject())) {
-			tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
-			tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
+			tabs.add(new ProjectTab(Model.of("Files"), "files", 0, ProjectBlobPage.class));
+			tabs.add(new ProjectTab(Model.of("Commits"), "commit", 0,
 					ProjectCommitsPage.class, CommitDetailPage.class) {
 				
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
+					return new ProjectTabHead(componentId, this) {
 						@Override
 						
 						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
@@ -207,18 +207,18 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				}
 				
 			});
-			tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
+			tabs.add(new ProjectTab(Model.of("Branches"), "branch", 
 					0, ProjectBranchesPage.class));
-			tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
+			tabs.add(new ProjectTab(Model.of("Tags"), "tag", 
 					0, ProjectTagsPage.class));
 			
-			tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
+			tabs.add(new ProjectTab(Model.of("Pull Requests"), "pull-request", 
 					0, ProjectPullRequestsPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, 
 					InvalidPullRequestPage.class) {
 				
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
+					return new ProjectTabHead(componentId, this) {
 						
 						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 							return new ViewStateAwarePageLink<Void>(linkId, 
@@ -232,12 +232,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		}
 		
 		if (getProject().isIssueManagementEnabled()) {
-			tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, ProjectIssueListPage.class,
+			tabs.add(new ProjectTab(Model.of("Issues"), "bug", 0, ProjectIssueListPage.class,
 					ProjectIssuesPage.class, IssueDetailPage.class, NewIssuePage.class) {
 				
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
+					return new ProjectTabHead(componentId, this) {
 						
 						@Override
 						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
@@ -251,12 +251,12 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			});
 		}
 		
-		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-play-circle", 0, ProjectBuildsPage.class, 
+		tabs.add(new ProjectTab(Model.of("Builds"), "play-circle", 0, ProjectBuildsPage.class, 
 				BuildDetailPage.class, InvalidBuildPage.class) {
 
 			@Override
 			public Component render(String componentId) {
-				return new ProjectTabLink(componentId, this) {
+				return new ProjectTabHead(componentId, this) {
 					
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
@@ -270,12 +270,11 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		});
 		
 		if (SecurityUtils.canReadCode(getProject())) {
-			tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
-					0, ProjectCodeCommentsPage.class) {
+			tabs.add(new ProjectTab(Model.of("Code Comments"), "comments", 0, ProjectCodeCommentsPage.class) {
 
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
+					return new ProjectTabHead(componentId, this) {
 						
 						@Override
 						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
@@ -287,8 +286,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				}
 				
 			});
-			tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
-			tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
+			tabs.add(new ProjectTab(Model.of("Compare"), "compare", 0, RevisionComparePage.class));
+			tabs.add(new ProjectTab(Model.of("Statistics"), "statistics", 0, ProjectContribsPage.class, 
 					ProjectStatsPage.class));
 		}
 		
@@ -347,14 +346,14 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	protected List<ProjectSettingTab> newSettingTabs() {
 		List<ProjectSettingTab> tabs = new ArrayList<>();
-		tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
-		tabs.add(new ProjectSettingTab("Edit Avatar", "fa fa-fw fa-picture-o", AvatarEditPage.class));
-		tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
-		tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionsPage.class));
-		tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionsPage.class));
-		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-play-circle", 
+		tabs.add(new ProjectSettingTab("General Setting", "sliders", GeneralSettingPage.class));
+		tabs.add(new ProjectSettingTab("Edit Avatar", "avatar", AvatarEditPage.class));
+		tabs.add(new ProjectSettingTab("Authorizations", "user", ProjectAuthorizationsPage.class));
+		tabs.add(new ProjectSettingTab("Branch Protection", "branch-lock", BranchProtectionsPage.class));
+		tabs.add(new ProjectSettingTab("Tag Protection", "tag-lock", TagProtectionsPage.class));
+		tabs.add(new ProjectSettingTab("Build Setting", "gear-run", 
 				JobSecretsPage.class, BuildSettingPage.class));
-		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
+		tabs.add(new ProjectSettingTab("Web Hooks", "webhook", WebHooksPage.class));
 		return tabs;
 	}
  

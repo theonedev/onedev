@@ -11,10 +11,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.util.WicketUtils;
@@ -35,7 +38,13 @@ public abstract class SideBar extends Panel {
 		
 		add(newHead("head"));
 		add(new Tabbable("tabs", newTabs()));
-		add(new WebMarkupContainer("miniToggle").setVisible(miniCookieKey!=null));
+		
+		String miniToggleContent = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
+				SpriteImage.getVersionedHref(IconScope.class, "arrow2"));
+		
+		add(new Label("miniToggle", miniToggleContent)
+				.setEscapeModelStrings(false)
+				.setVisible(miniCookieKey!=null));
 
 		add(AttributeAppender.append("class", "sidebar"));
 		

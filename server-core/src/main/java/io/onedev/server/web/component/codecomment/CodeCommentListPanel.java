@@ -183,7 +183,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
-		}.setOutputMarkupId(true));
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(new DropdownLink("orderBy") {
 

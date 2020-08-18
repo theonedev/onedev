@@ -11,7 +11,7 @@ public abstract class MenuItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Nullable
-	public String getIconClass() {
+	public String getIconHref() {
 		return null;
 	}
 	

@@ -61,6 +61,7 @@ import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -72,6 +73,7 @@ import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 
@@ -611,7 +613,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 					@Override
 					public IModel<?> getBody() {
-						return Model.of("<i class=\"fa fa-plus\"></i> Add Milestone");
+						return Model.of(String.format("<svg class='icon'><use xlink:href='%s'/></svg> Add Milestone", 
+								SpriteImage.getVersionedHref(IconScope.class, "plus")));
 					}
 					
 				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-outline-secondary")));

@@ -1,0 +1,4 @@
+<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+	<path stroke='currentColor' stroke-width="5" d='M1008 1024H16a16 16 0 0 1-16-16v-32a16 16 0 0 1 16-16h992a16 16 0 0 1 16 16v32a16 16 0 0 1-16 16zM928 832h-128a64 64 0 0 1-64-64V64a64 64 0 0 1 64-64h128a64 64 0 0 1 64 64v704a64 64 0 0 1-64 64z m0-768h-128v704h128V64zM576 832h-128a64 64 0 0 1-64-64V320a64 64 0 0 1 64-64h128a64 64 0 0 1 64 64v448a64 64 0 0 1-64 64z m0-512h-128v448h128V320zM224 832H96a64 64 0 0 1-64-64v-192a64 64 0 0 1 64-64h128a64 64 0 0 1 64 64v192a64 64 0 0 1-64 64z m0-256H96v192h128v-192z' />
+</svg>

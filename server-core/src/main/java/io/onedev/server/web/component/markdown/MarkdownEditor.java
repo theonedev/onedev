@@ -159,9 +159,6 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		container.add(preview);
 		container.add(edit);
 		
-		WebMarkupContainer splitIcon = new WebMarkupContainer("icon");
-		splitLink.add(splitIcon);
-
 		container.add(AttributeAppender.append("class", compactMode?"compact-mode":"normal-mode"));
 			
 		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())));

@@ -16,11 +16,10 @@ body.BuildDetailPage #layout>.body {
     position: relative;
     font-size: 24px;
 }
-#build-detail>.main>.summary .build-status {
-    font-size: 24px;
-}
-#build-detail>.main>.summary .build-status-running {
-    font-size: 22px;
+#build-detail>.main>.summary .status svg {
+	width: 24px;
+	height: 24px;
+	margin-right: 8px;
 }
 
 #build-detail>.main>.summary>* {

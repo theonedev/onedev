@@ -7,6 +7,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import io.onedev.server.git.BlobChange;
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public class BlobDiffTitle extends Panel {
@@ -31,7 +33,7 @@ public class BlobDiffTitle extends Panel {
 		if (change.getOldBlobIdent().mode != null && change.getNewBlobIdent().mode != null
 				&& !change.getOldBlobIdent().mode.equals(change.getNewBlobIdent().mode)) {
 			modeChange = Integer.toString(change.getOldBlobIdent().mode, 8) 
-					+ " <i class='fa fa-long-arrow-right'></i> " 
+					+ " " + SpriteImage.getVersionedHref(IconScope.class, "arrow3") + " " 
 					+ Integer.toString(change.getNewBlobIdent().mode, 8);
 		} else {
 			modeChange = null;

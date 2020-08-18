@@ -19,7 +19,7 @@ public abstract class AjaxActionTab extends ActionTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new ActionTabLink(componentId, this) {
+		return new ActionTabHead(componentId, this) {
 
 			@Override
 			protected WebMarkupContainer newLink(String id, ActionTab tab) {

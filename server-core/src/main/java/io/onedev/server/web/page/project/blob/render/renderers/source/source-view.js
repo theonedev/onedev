@@ -257,7 +257,7 @@ onedev.server.sourceView = {
 			 * list of comment triggers upon click, user can then click one of the 
 			 * trigger link to display the actual comment content  
 			 */
-			$gutter.append("<a><i class='fa fa-comments'></i></a>");
+			$gutter.append("<a><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comments'/></svg></a>");
 			var $indicator = $gutter.children("a");
 			var content = "";
 			for (var i in comments) {
@@ -297,7 +297,7 @@ onedev.server.sourceView = {
 			});
 		} else {
 			var comment = comments[0];
-			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><i class='fa fa-commenting'></i></a>");
+			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
 				onedev.server.codemirror.mark(cm, comment.mark);
@@ -324,11 +324,11 @@ onedev.server.sourceView = {
 		
 		var $content;
 		if (unableCommentMessage) {
-			$content = $("<div><span class='invalid'><i class='fa fa-warning'></i> " + unableCommentMessage + "</a>");
+			$content = $("<div><span class='invalid'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> " + unableCommentMessage + "</a>");
 		} else {
-			$content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
+			$content = $("<div><a class='permanent'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
 			$content.children("a.permanent").attr("href", markUrl);
-			$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
+			$content.append("<a class='copy-marked'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
 			var clipboard = new Clipboard(".copy-marked", {
 			    text: function(trigger) {
 			        return cm.getSelection("\n");
@@ -341,7 +341,7 @@ onedev.server.sourceView = {
 				$(".selection-popover").remove();
 			});
 			if (loggedIn) {
-				$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
+				$content.append("<a class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
 				$content.children("a.comment").click(function() {
 					if ($(".source-view").find("form.dirty").length != 0 
 							&& !confirm("There are unsaved changes, discard and continue?")) {
@@ -352,7 +352,7 @@ onedev.server.sourceView = {
 					callback("addComment", mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
-				$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
+				$content.append("<span class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</span>");
 			}			
 		}
 		

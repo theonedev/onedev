@@ -64,12 +64,6 @@ body.fullscreen {
 	border: 1px solid #E0E0E0;
 }
 
-.markdown-editor>.head>.actions .dropdown .active:BEFORE {
-	font-family: "FontAwesome";
-	content: "\f00c";
-	position: absolute;
-	left: 4px;
-}
 .markdown-editor .ui-resizable-handle {
 	background: #EEE url(hgrabber.png) no-repeat scroll center center;
     cursor: s-resize;
@@ -209,15 +203,6 @@ body.fullscreen {
 	color: inherit;	
 }
 
-.insert-url .directory>div {
-	position: relative;
-	padding-right: 48px;
-}
-.insert-url .directory>div>a {
-	position: absolute;
-	right: 0;
-	top: 0;
-}
 .insert-url .blob-picker {
 	padding: 0;
 }
@@ -321,16 +306,13 @@ body.fullscreen {
 	margin-top: 10px;
 }
 .markdown-rendered h2 .header-link {
-	margin-top: 6px;
+	margin-top: 4px;
 }
 .markdown-rendered h3 .header-link {
 	margin-top: 2px;
 }
-.markdown-rendered h4 .header-link {
-	margin-top: -2px;
-}
 .markdown-rendered h5 .header-link {
-	margin-top: -4px;
+	margin-top: -2px;
 }
 .markdown-rendered h6 .header-link {
 	margin-top: -6px;

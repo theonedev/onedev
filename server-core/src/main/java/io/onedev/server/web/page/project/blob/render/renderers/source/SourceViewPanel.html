@@ -4,9 +4,9 @@
 			<div class="ui-resizable-handle ui-resizable-e"></div>
 			<div class="content">
 				<div wicket:id="head" class="head clearfix">
-					<a wicket:id="context" class="pull-left context close" title="Compare with another revision"><i class="fa fa-ext fa-file-diff"></i></a>
-					<a wicket:id="locate" class="pull-left locate close" title="Locate marked text of this comment"><i class="fa fa-hand-o-right"></i></a>
-					<a wicket:id="close" class="pull-left close" title="Hide comment"><i class="fa fa-times"></i></a>
+					<a wicket:id="context" class="float-left context close" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+					<a wicket:id="locate" class="float-left locate close" title="Locate marked text of this comment"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+					<a wicket:id="close" class="float-left close" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 				</div>
 				<div wicket:id="body" class="body"></div>
 			</div>
@@ -16,8 +16,8 @@
 			<div class="ui-resizable-handle ui-resizable-w"></div>
 			<div class="content">
 				<div class="head clearfix">
-					<span class="pull-left">Outline</span>
-					<a wicket:id="close" class="pull-right close" title="Hide outline"><i class="fa fa-times"></i></a>
+					<span class="float-left">Outline</span>
+					<a wicket:id="close" class="float-right close" title="Hide outline"><wicket:svg href="times" class="icon"/></a>
 				</div>
 				<div wicket:id="body" class="body"></div>
 			</div>

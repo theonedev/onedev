@@ -1,5 +1,5 @@
 @media(max-width: 991px) {
-	.issue-list>.body .pull-right {
+	.issue-list>.body .float-right {
 		display: none;
 	}
 }
@@ -36,11 +36,11 @@
 .issue-list>.body td .issue-state {
 	margin-right: 4px;
 }
-.issue-list>.body td .secondary>.pull-left>div {
+.issue-list>.body td .secondary>.float-left>div {
 	margin-right: 12px;
 	margin-top: 8px;
 }
-.issue-list>.body td .secondary>.pull-right {
+.issue-list>.body td .secondary>.float-right {
 	margin-top: 8px;
 }
 .issue-list>.body td .last-update, .issue-list>.body td .comments, .issue-list>.body td .votes {

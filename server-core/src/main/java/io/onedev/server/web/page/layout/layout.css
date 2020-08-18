@@ -2,7 +2,7 @@
     max-height: 500px;
 	overflow-y: auto;
 }
-.navbar-brand img {
+.navbar-brand svg {
 	width: 32px;
 	height: 32px;
 }
@@ -19,13 +19,12 @@
 		overflow-y: visible;
 	}
 }
-.navbar .nav-link .fa {
-	font-size: 20px;
-	vertical-align: bottom;
-}
 .navbar .avatar {
 	width: 24px;
 	height: 24px;
+}
+.navbar-nav .nav-item .nav-link .icon {
+	margin: 0;
 }
 .navbar-header>.nav-context .text {
 	text-overflow: ellipsis;

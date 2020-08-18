@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -23,7 +22,7 @@ import org.apache.wicket.markup.html.link.DisabledAttributeLinkBehavior;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
@@ -36,6 +35,7 @@ import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.TextHit;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
@@ -405,24 +405,31 @@ public abstract class SearchResultPanel extends Panel {
 					protected void onInitialize() {
 						super.onInitialize();
 						
-						WebMarkupContainer icon = new WebMarkupContainer("icon");
-						icon.add(AttributeModifier.append("class", new LoadableDetachableModel<String>() {
+						add(new SpriteImage("icon", new AbstractReadOnlyModel<String>() {
 
 							@Override
-							protected String load() {
-								if (blobItem.getModelObject().getHits().isEmpty())
-									return "fa fa-fw fa-angle-right fa-none";
-								else if (hitsContainer.isVisibilityAllowed())
-									return "fa fa-fw fa-caret-down";
-								else
-									return "fa fa-fw fa-caret-right";
+							public String getObject() {
+								if (blobItem.getModelObject().getHits().isEmpty()) 
+									return "none";
+								else 
+									return "arrow";
 							}
 							
-						}));
+						}).add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+							@Override
+							public String getObject() {
+								if (blobItem.getModelObject().getHits().isEmpty())
+									return "none";
+								else if (hitsContainer.isVisibilityAllowed()) 
+									return "arrow-down";
+								else 
+									return "arrow-right";
+							}
+							
+						})));
 						
 						setOutputMarkupId(true);
-						
-						add(icon);
 					}
 
 					@Override

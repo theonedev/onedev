@@ -17,15 +17,12 @@
     border-radius: 4px;
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.editable>.group>a:AFTER {
-	font-family: "FontAwesome";    
-    margin-left: 12px; 
+.editable>.group>a .icon {
+    transform: rotate(90deg);
+	margin-left: 8px;
 }
-.editable>.group>a:AFTER {
-    content: "\f103";
-}
-.editable>.group.expanded>a:AFTER {
-    content: "\f102";
+.editable>.group.expanded>a .icon {
+    transform: rotate(-90deg);
 }
 .editable>.group>div, .editable>.group>table {
     display: none;

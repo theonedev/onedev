@@ -1,27 +1,27 @@
 <wicket:panel>
 	<div class="search-result">
 		<div class="head clearfix">
-			<div class="title pull-left">Search Result</div>
-			<div class="actions pull-left">
-				<a wicket:id="prevMatch" title="Show previous match"><i class="fa fa-arrow-up"></i></a>
-				<a wicket:id="nextMatch" title="Show next match"><i class="fa fa-arrow-down"></i></a>
-				<a wicket:id="expandAll" title="Expand all"><i class="fa fa-plus-square-o"></i></a>
-				<a wicket:id="collapseAll" title="Collapse all"><i class="fa fa-minus-square-o"></i></a>
+			<div class="title float-left">Search Result</div>
+			<div class="actions float-left">
+				<a wicket:id="prevMatch" title="Show previous match"><wicket:svg href="arrow3" transform="rotate(-90)" class="icon"></wicket:svg></a>
+				<a wicket:id="nextMatch" title="Show next match"><wicket:svg href="arrow3" transform="rotate(90)" class="icon"></wicket:svg></a>
+				<a wicket:id="expandAll" title="Expand all"><wicket:svg href="plus-square" class="icon"></wicket:svg></a>
+				<a wicket:id="collapseAll" title="Collapse all"><wicket:svg href="minus-square" class="icon"></wicket:svg></a>
 			</div>
 			<wicket:enclosure child="hasMoreMessage">
-				<div class="warning pull-left">
+				<div class="warning float-left">
 					(<span wicket:id="hasMoreMessage"></span>)
 				</div>
 			</wicket:enclosure>
-			<div class="pull-right">
-				<a wicket:id="close" class="close" title="Close"><i class="fa fa-close"></i></a>
+			<div class="float-right">
+				<a wicket:id="close" class="close" title="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
 			</div>
 		</div>
 		<ul class="body list-unstyled">
 			<li wicket:id="blobs" class="blob">
-				<a wicket:id="expandLink" class="expand"><i wicket:id="icon"></i></a> 
+				<a wicket:id="expandLink" class="expand"><svg wicket:id="icon" class="icon icon-sm"></svg></a> 
 				<a wicket:id="blobLink" class="blob selectable">
-					<i class="fa fa-file-o icon"></i>
+					<wicket:svg href="file" class="icon"></wicket:svg>
 					<span wicket:id="label"></span>
 				</a> 
 				<ul wicket:id="hits" class="list-unstyled">
@@ -40,7 +40,7 @@
 				</ul>
 			</li>
 			<li wicket:id="noMatchingResult" class="no-matching-result">
-				<i class="fa fa-warning"></i> Sorry, I am unable to find anything matching your query
+				<wicket:svg href="warning" class="icon"/> Sorry, I am unable to find anything matching your query
 			</li>
 		</ul>
 	</div>

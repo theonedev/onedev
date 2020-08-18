@@ -12,7 +12,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.tabbable.PageTabLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 
@@ -25,7 +25,7 @@ public class MarkdownReportTab extends BuildTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new PageTabLink(componentId, this) {
+		return new PageTabHead(componentId, this) {
 
 			@Override
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {

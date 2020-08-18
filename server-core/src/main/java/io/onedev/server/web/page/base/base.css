@@ -167,21 +167,6 @@ table>thead>tr>th {
 	white-space: nowrap;
 }
 
-a.wicket_orderUp:after, a.wicket_orderDown:after, a.wicket_orderNone:after { 
-    font-family: FontAwesome; 
-    font-weight: normal; 
-    font-style: normal; 
-    text-decoration: none; 
-	display: inline-block; 
-	color: #666; 
-	margin-left: 8px;
-}
-a.wicket_orderUp:AFTER { 
-	content: "\f062"; 
-}
-a.wicket_orderDown:AFTER { 
-	content: "\f063"; 
-}
 .pagination {
     margin-bottom: 0;
 }
@@ -311,9 +296,9 @@ a.tree-junction {
 	color: #333;
 }
 .center-box .logo {
-	width: 36px;
-	height: 36px;
-	margin-bottom: 8px;
+	width: 40px;
+	height: 40px;
+	margin-right: 8px;
 }
 @media(max-width: 738px) {
 	.center-box {
@@ -422,13 +407,13 @@ li.selectable.active a, a.selectable.active {
 	vertical-align: middle;
 	line-height: 16px;
 }
-.ellipsis-expander .fa {
+.ellipsis-expander svg {
 	color: #666;
 }
 .ellipsis-expander:hover {
 	background: #888;
 }
-.ellipsis-expander:hover .fa {
+.ellipsis-expander:hover svg {
 	color: white;
 }
 
@@ -442,7 +427,7 @@ input.search {
 .list>.foot {
 	margin-top: 8px;
 }
-.list>.head>.pull-left {
+.list>.head>.float-left {
 	margin-right: 20px;
 	margin-bottom: 8px;
 }
@@ -456,30 +441,6 @@ table>tbody>tr>td.actions a {
 }
 table>tbody>tr>td.actions a:last-child {
 	margin-right: 0;
-}
-
-.floating>.content>.selection {
-	padding: 16px;
-}
-.floating>.content>.selection>a {
-	padding: 4px;
-	display: block;
-	color: #666;
-	text-decoration: none;
-	max-width: 360px;
-}
-.floating>.content>.selection>a.active:BEFORE {
-	font-family: "FontAwesome";
-	content: "\f00c";
-	position: absolute;
-	left: 4px;
-}
-.floating>.content>.selection>a>.title {
-	font-weight: bold;
-	margin-bottom: 2px;
-}
-.floating>.content>.selection>a:hover {
-	background: #F0F0F0;
 }
 
 .nav-tabs {
@@ -504,7 +465,7 @@ table>tbody>tr>td.actions a:last-child {
     display: none;
 }
 .clearable-wrapper input.clearable {
-	padding-right: 20px;
+	padding-right: 22px;
 }
 a.input-clear {
 	font-family: sans-serif;
@@ -514,7 +475,7 @@ a.input-clear {
 	line-height: 24px;
 	font-size: 16px;
 	position: absolute;
-	right: 6px;
+	right: 8px;
 	top: 0; 
 	bottom: 0;
 	margin: auto;
@@ -524,11 +485,16 @@ a.input-clear {
 	background: white;
 	text-align: center;
 }
+a.input-clear .icon {
+	width: 14px;
+	height: 14px;
+	margin-top: 0;
+}
 a.input-clear.input-group-clear {
-	right: 45px;
+	right: 48px;
 }
 a.input-clear.input-group-clear-2 {
-	right: 78px;
+	right: 88px;
 }
 .message-box>.content, .confirm-box>.content {
 	font-size: 18px;
@@ -574,7 +540,7 @@ a.input-clear.input-group-clear-2 {
 	border-color: #AD8C07;
 }
 
-a.disabled, a[disabled="disabled"] {
+a.disabled:not(.btn), a[disabled="disabled"]:not(.btn) {
 	cursor: default;
 	color: #AAA !important;
 	text-decoration: none;
@@ -667,8 +633,12 @@ td.ellipsis {
 	border-color: #ADADAD;
 }
 
-.cardlist .disabled .card, .card-list .disabled .card span, .card-list .disabled .card a {
+.card-list .disabled .card, .card-list .disabled .card span, .card-list .disabled .card a {
 	color: #999;
+}
+.card-list .add-new svg {
+	width: 20px;
+	height: 20px;
 }
 
 .card-header .checkbox {
@@ -691,4 +661,44 @@ td.ellipsis {
 	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
 	font-size: 13px;
 	margin-bottom: 8px;
+}
+
+.icon {
+	fill: currentColor;
+	width: 18px;
+	height: 18px;
+	margin-top: -4px;
+}
+.icon.icon-sm {
+	width: 14px;
+	height: 14px;
+}
+.icon.icon-lg {
+	width: 22px;
+	height: 22px;
+}
+
+.btn .icon {
+	width: 16px;
+	height: 16px;
+}
+.btn.btn-sm .icon {
+	width: 14px;
+	height: 14px;
+	margin-top: -2px;
+}
+.dropdown-menu a>svg:first-child {
+	margin-right: 4px;
+}
+label.form-check-inline {
+	margin-bottom: 0;
+}
+
+@keyframes spin {
+	from {
+    	transform: rotate(0deg);
+  	}
+  	to {
+    	transform: rotate(360deg);
+  	}
 }

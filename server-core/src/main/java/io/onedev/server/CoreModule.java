@@ -280,7 +280,7 @@ import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
-import io.onedev.server.web.mapper.GeneralPageMapper;
+import io.onedev.server.web.mapper.DynamicPathPageMapper;
 import io.onedev.server.web.page.DashboardPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.layout.BuildListTab;
@@ -578,7 +578,7 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(org.apache.wicket.protocol.http.WebApplication application) {
-				application.mount(new GeneralPageMapper("/test", TestPage.class));
+				application.mount(new DynamicPathPageMapper("/test", TestPage.class));
 			}
 			
 		});

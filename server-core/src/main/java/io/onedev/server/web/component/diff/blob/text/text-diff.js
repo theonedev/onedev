@@ -328,7 +328,7 @@ onedev.server.textDiff = {
 
 			function showInvalidSelection() {
 				var $content = $("<div></div>");
-				$content.append("<a class='invalid'><i class='fa fa-warning'></i> Invalid selection, click for details</a>");
+				$content.append("<a class='invalid'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Invalid selection, click for details</a>");
 				$content.children("a").attr("href", doclink + "/pages/diff-selection.md").attr("target", "_blank");
 				return {
 					position: position, 
@@ -470,11 +470,11 @@ onedev.server.textDiff = {
 		var $container = $("#" + containerId);
 		
 		if (!markUrl) {
-			$content = $("<div><span class='invalid'><i class='fa fa-warning'></i> Unable to comment here</a>");
+			$content = $("<div><span class='invalid'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Unable to comment here</a>");
 		} else {
-			var $content = $("<div><a class='permanent'><i class='fa fa-link'></i> Permanent link of this selection</a>");
+			var $content = $("<div><a class='permanent'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
 			$content.children("a.permanent").attr("href", markUrl);
-			$content.append("<a class='copy-marked'><i class='fa fa-clipboard'></i> Copy selected text to clipboard</a>");
+			$content.append("<a class='copy-marked'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
 			var clipboard = new Clipboard(".copy-marked", {
 			    text: function(trigger) {
 			        return markedText;
@@ -484,7 +484,7 @@ onedev.server.textDiff = {
 				clipboard.destroy();
 			});
 			if (loggedIn) {
-				$content.append("<a class='comment'><i class='fa fa-comment'></i> Add comment on this selection</a>");
+				$content.append("<a class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
 				$content.children("a.comment").click(function() {
 					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
 							&& !confirm("There are unsaved changes, discard and continue?")) {
@@ -494,7 +494,7 @@ onedev.server.textDiff = {
 							mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
-				$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
+				$content.append("<span class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</span>");
 			}			
 		}		
 		
@@ -766,7 +766,7 @@ onedev.server.textDiff = {
 			 * trigger link to display the actual comment content  
 			 */
 			var oldOrNew = leftSide?"old":"new";
-			$indicator.append("<i class='fa fa-comments'></i>");
+			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comments'/></svg>");
 			var content = "";
 			for (var i in comments) {
 				var comment = comments[i];
@@ -806,7 +806,7 @@ onedev.server.textDiff = {
 		} else {
 			var comment = comments[0];
 			$indicator.addClass("comment-trigger").attr("title", "Click to show comment of marked text");
-			$indicator.append("<i class='fa fa-commenting'></i>");
+			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
 			$indicator.mouseover(function() {
 				onedev.server.textDiff.mark($container, comment.mark);
 			});

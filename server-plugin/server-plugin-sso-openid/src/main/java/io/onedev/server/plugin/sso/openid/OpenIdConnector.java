@@ -91,7 +91,7 @@ public class OpenIdConnector extends SsoConnector {
 	@Editable(order=100, description="Name of the provider will serve two purpose: "
 			+ "<ul>"
 			+ "<li>Display on login button"
-			+ "<li>Form the authorization callback url which will be <i>&lt;server url&gt;/" + SsoProcessPage.MOUNTED_PATH + "/" + SsoProcessPage.STAGE_CALLBACK + "/&lt;name&gt;</i>"
+			+ "<li>Form the authorization callback url which will be <i>&lt;server url&gt;/" + SsoProcessPage.MOUNT_PATH + "/" + SsoProcessPage.STAGE_CALLBACK + "/&lt;name&gt;</i>"
 			+ "</ul>")
 	@UrlSegment // will be used as part of callback url
 	@NotEmpty
@@ -347,7 +347,7 @@ public class OpenIdConnector extends SsoConnector {
 	private URI getCallbackUri() {
 		String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		try {
-			return new URI(serverUrl + "/" + SsoProcessPage.MOUNTED_PATH + "/" 
+			return new URI(serverUrl + "/" + SsoProcessPage.MOUNT_PATH + "/" 
 					+ SsoProcessPage.STAGE_CALLBACK + "/" + getName());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);

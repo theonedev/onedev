@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   class="icon"
+   width="200px"
+   height="200.00px"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   id="svg12"
+   sodipodi:docname="folder copy.svg"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     inkscape:document-rotation="0"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1251"
+     inkscape:window-height="791"
+     id="namedview14"
+     showgrid="false"
+     inkscape:zoom="3.235"
+     inkscape:cx="99.84544"
+     inkscape:cy="116.38331"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg12" />
+  <path
+     id="path10"
+     style="stroke-width:0.195312"
+     d="M 31.25 25 C 20.9625 25 12.5 33.4625 12.5 43.75 L 12.5 156.25 C 12.5 166.5375 20.9625 175 31.25 175 L 168.75 175 C 179.0375 175 187.5 166.5375 187.5 156.25 L 187.5 68.75 C 187.5 58.4625 179.0375 50 168.75 50 L 84.988281 50 L 76.8125 34.837891 C 73.537607 28.776312 67.202176 24.998662 60.3125 25 L 31.25 25 z M 31.25 37.5 L 60.300781 37.5 C 62.613281 37.5 64.713281 38.750391 65.800781 40.775391 L 70.775391 50 L 25 50 L 25 43.75 C 25 40.2375 27.7375 37.5 31.25 37.5 z M 25 62.5 L 168.75 62.5 C 172.2625 62.5 175 65.2375 175 68.75 L 175 156.25 C 175 159.7625 172.2625 162.5 168.75 162.5 L 31.25 162.5 C 27.777857 162.54966 24.95034 159.72214 25 156.25 L 25 62.5 z "
+     transform="scale(5.12)" />
+  <path
+     style="stroke-width:0.636636"
+     d="m 250.67704,758.2318 h 13.93589 l 25.97759,-37.38518 c 27.73649,-39.18254 60.74969,-75.24965 102.55737,-91.7854 33.01319,-13.06084 63.18509,-22.64678 117.30508,-23.96486 v 95.61978 L 770.22894,547.34108 510.45297,393.966 v 96.21891 c -85.23898,3.35507 -146.25926,24.80362 -193.88485,67.34122 -70.76189,63.14739 -65.89108,142.59089 -65.89108,162.60155 0.13529,10.66436 0,26.00187 0,38.10412 z"
+     id="path290" />
+</svg>

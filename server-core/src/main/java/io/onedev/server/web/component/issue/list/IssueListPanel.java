@@ -76,6 +76,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -92,6 +93,7 @@ import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
@@ -247,7 +249,7 @@ public abstract class IssueListPanel extends Panel {
 				getQuerySaveSupport().onSaveQuery(target, queryModel.getObject().toString());
 			}		
 			
-		}.setOutputMarkupId(true));
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(new DropdownLink("orderBy") {
 
@@ -446,18 +448,27 @@ public abstract class IssueListPanel extends Panel {
 			add(new Link<Void>("newIssue") {
 
 				@Override
+				public IModel<?> getBody() {
+					return Model.of(String.format(
+							"<svg class='icon'><use xlink:href='%s'/></svg> New", 
+							SpriteImage.getVersionedHref(IconScope.class, "plus")));
+				}
+				
+				@Override
 				public void onClick() {
 					setResponsePage(NewIssuePage.class, 
 							NewIssuePage.paramsOf(getProject(), queryStringModel.getObject()));
 				}
 				
-			});
+			}.setEscapeModelStrings(false));
 		} else {
 			add(new DropdownLink("newIssue") {
 
 				@Override
 				public IModel<?> getBody() {
-					return Model.of("<i class='fa fa-plus'></i> New <i class='fa fa-caret-down'></i>");
+					return Model.of(String.format(
+							"<svg class='icon'><use xlink:href='%s'/></svg> New <svg class='icon' transform='rotate(90)'><use xlink:href='%s'/></svg>", 
+							SpriteImage.getVersionedHref(IconScope.class, "plus"), SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 				}
 				
 				@Override

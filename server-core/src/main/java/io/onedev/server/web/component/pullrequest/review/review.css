@@ -2,9 +2,11 @@ table.reviews>tbody>tr>td {
 	padding: 6px 12px;
 }
 table.reviews>tbody>tr>td.status {
-	font-size: 16px;
 	width: 16px;
 	padding-right: 0;
+}
+table.reviews>tbody>tr>td.status .icon {
+	margin: 0;
 }
 table.reviews>tbody>tr>td:first-child {
 	padding-left: 0;
@@ -25,31 +27,26 @@ table.reviews>tbody>tr>td.actions {
 table.reviews>tbody>tr>td.status span {
 	cursor: default;
 }
-.review-status {
-	width: 16px;
-	height: 24px;
-	display: inline-block;
-	background-position: center;
-	background-repeat: no-repeat no-repeat;
-}
-.review-status.pending {
-	background-image: url("time.png");
-}
-.review-status.approved {
-	background-image: url("accept.png");
-}
-.review-status.requested-for-changes {
-	background-image: url("hand.png");
-}
+
 .reviewer-avatar {
-	display: inline-block;
 	position: relative;
 }
-.reviewer-avatar>i {
-	width: 12px;
-	height: 12px;
+.reviewer-avatar .review-status {
 	position: absolute;
-	right: -2px;
-	bottom: 0;
-	background-size: 12px;
+	left: 12px;
+	top: 16px;
+}
+.reviewer-avatar .review-status.icon {
+	width: 10px;
+	height: 10px;
+}
+
+.review-status-approved.icon {
+	fill: limegreen;
+}
+.review-status-request-for-changes.icon {
+	fill: tomato;
+}
+.review-status-pending.icon {
+	fill: orange;
 }

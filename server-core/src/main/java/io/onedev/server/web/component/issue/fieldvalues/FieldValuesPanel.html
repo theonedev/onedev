@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div wicket:id="content" class="field-values clearfix"></div>
 	<wicket:fragment wicket:id="nonEmptyValuesFrag">
-		<div wicket:id="values" class="value pull-left"><span wicket:id="value"></span></div>	
+		<div wicket:id="values" class="value float-left"><span wicket:id="value"></span></div>	
 	</wicket:fragment>
 	<wicket:fragment wicket:id="linkFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
@@ -9,11 +9,11 @@
 	<wicket:fragment wicket:id="commitFrag">
 		<span class="btn-group">
 	        <a wicket:id="hashLink" class="hash btn btn-sm btn-outline-secondary"><span wicket:id="hash"></span></a>
-	        <a wicket:id="copyHash" class="btn btn-sm btn-outline-secondary"><i class="fa fa-clipboard"></i></a>
+	        <a wicket:id="copyHash" class="btn btn-sm btn-outline-secondary"><wicket:svg href="copy" class="icon"></wicket:svg></a>
 		</span>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="notAccessibleCommitFrag">
         <span wicket:id="hash"></span>
-        <a wicket:id="copyHash"><i class="fa fa-clipboard"></i></a>
+        <a wicket:id="copyHash"><wicket:svg href="copy" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:panel>

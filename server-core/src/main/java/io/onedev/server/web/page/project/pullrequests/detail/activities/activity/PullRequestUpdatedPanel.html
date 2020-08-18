@@ -5,6 +5,7 @@
 	<div class="body">
 		<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
 		<div wicket:id="commits">
+			<wicket:svg href="commit" class="icon"></wicket:svg>
 			<div class="author"><span wicket:id="author"></span></div> 
 			<div class="message">
 				<div wicket:id="message"></div> 
@@ -13,10 +14,10 @@
 				<span wicket:id="buildStatus" class="build-status"></span>
 				<span class="btn-group hash">
 					<a wicket:id="hashLink" class="hash btn btn-sm btn-outline-secondary"><span wicket:id="hash"></span></a>
-                    <a wicket:id="copyHash" class="btn btn-sm btn-outline-secondary"><i class="fa fa-clipboard"></i></a>
+                    <a wicket:id="copyHash" class="btn btn-sm btn-outline-secondary"><wicket:svg href="copy" class="icon"></wicket:svg></a>
 				</span>
 				<span class="btn-group browse">
-					<a wicket:id="browseCode" title="Browse code" class="btn btn-outline-secondary btn-sm"><i class="fa fa-file-text-o"></i></a>
+					<a wicket:id="browseCode" title="Browse code" class="btn btn-outline-secondary btn-sm"><wicket:svg href="files" class="icon"></wicket:svg></a>
 				</span>
 			</div>
 		</div>

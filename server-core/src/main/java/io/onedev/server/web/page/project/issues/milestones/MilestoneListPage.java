@@ -143,6 +143,14 @@ public class MilestoneListPage extends ProjectIssuesPage {
 						}
 
 						@Override
+						public String getIconHref() {
+							if (sort == MilestoneListPage.this.sort)
+								return "tick";
+							else
+								return null;
+						}
+
+						@Override
 						public WebMarkupContainer newLink(String id) {
 							PageParameters params = paramsOf(getProject(), closed, sort);
 							Link<Void> link = new BookmarkablePageLink<Void>(id, MilestoneListPage.class, params);

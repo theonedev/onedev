@@ -3,8 +3,12 @@
 		<div class="head">
 			<h4 class="title">Saved Queries</h4>
 			<div class="actions">
-				<a wicket:id="edit" class="edit-saved-queries" title="Edit saved queries"><i class="fa fa-pencil"></i></a>
-				<a wicket:id="close" class="close-saved-queries" title="Hide saved queries"><i class="fa fa-times"></i></a>
+				<a wicket:id="edit" class="edit-saved-queries" title="Edit saved queries">
+					<wicket:svg href="edit" class="icon"></wicket:svg>
+				</a>
+				<a wicket:id="close" class="close-saved-queries" title="Hide saved queries">
+					<wicket:svg href="times" class="icon"></wicket:svg>
+				</a>
 			</div>
 		</div>
 		<hr>
@@ -23,7 +27,7 @@
 				</span>
 			</div>
 			<div wicket:id="watchHint" class="help-block">
-				<b><i class="fa fa-lightbulb-o"></i> Tips:</b> You may watch/unwatch specified queries above. 
+				<b><wicket:svg href="bulb" class="icon"/> Tips:</b> You may watch/unwatch specified queries above. 
 				The first matching query will take effect
 			</div>
 		</div>

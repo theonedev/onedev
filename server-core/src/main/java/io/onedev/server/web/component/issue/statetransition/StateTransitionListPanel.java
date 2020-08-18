@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -17,10 +15,10 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -36,13 +34,14 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.ConfirmClickModifier;
 
 @SuppressWarnings("serial")
 public abstract class StateTransitionListPanel extends Panel {
@@ -81,22 +80,6 @@ public abstract class StateTransitionListPanel extends Panel {
 			
 		});
 		
-		String message = "This will discard all project specific transitions, do you want to continue?";
-		add(new Link<Void>("useDefault") {
-
-			@Override
-			public void onClick() {
-				getUseDefaultListener().onUseDefault();
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getUseDefaultListener() != null);
-			}
-			
-		}.add(new ConfirmClickModifier(message)));
-		
 		List<IColumn<TransitionSpec, Void>> columns = new ArrayList<>();
 		
 		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("From States")) {
@@ -108,9 +91,10 @@ public abstract class StateTransitionListPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						String escaped = HtmlEscape.escapeHtml5(StringUtils.join(transition.getFromStates())); 
-						return new Label(componentId, "<span class='drag-indicator fa fa-reorder'></span> " + escaped)
-								.setEscapeModelStrings(false);
+						String icon = String.format("<svg class='drag-indicator icon'><use xlink:href='%s'/></svg>", 
+								SpriteImage.getVersionedHref(IconScope.class, "grip"));
+						String label = HtmlEscape.escapeHtml5(StringUtils.join(transition.getFromStates())); 
+						return new Label(componentId, icon + " " + label).setEscapeModelStrings(false);
 					}
 					
 				});
@@ -179,7 +163,16 @@ public abstract class StateTransitionListPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						return new SpriteImage(componentId, "ellipsis") {
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								tag.setName("svg");
+								tag.put("class", "icon");
+							}
+							
+						};
 					}
 					
 				});
@@ -341,8 +334,5 @@ public abstract class StateTransitionListPanel extends Panel {
 	}
 	
 	protected abstract void onChanged(AjaxRequestTarget target);
-	
-	@Nullable
-	protected abstract UseDefaultListener getUseDefaultListener();
 	
 }

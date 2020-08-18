@@ -22,7 +22,7 @@
 							<div class="input-group">
 	                            <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by path">
 								<span class="input-group-append">
-									<button wicket:id="submit" title="Filter" class="btn btn-outline-secondary" type="submit"><i class="fa fa-search"></i></button>
+									<button wicket:id="submit" title="Filter" class="btn btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 								</span>
 							</div>
 						</div>
@@ -32,19 +32,17 @@
 		</table>
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
-			<div class="title">
-				Total <a wicket:id="totalFiles" class="total-files"></a>
-			</div>
+			<div class="title"><a wicket:id="totalFiles" class="total-files"></a></div>
 			<div wicket:id="tooManyFiles" class="alert alert-warning">Sorry we are unable to display all files as there are too many</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
 				<li wicket:id="diffStats" class="diff-stat clearfix">
-					<i wicket:id="icon" class="icon fa-fw pull-left"></i>
-					<a wicket:id="file" class="file pull-left"><span wicket:id="name"></span></a>
-					<span wicket:id="hasComments" class="fa fa-comments" title="There are comments on this file"></span>
+					<svg wicket:id="icon" class="icon float-left"></svg>
+					<a wicket:id="file" class="file float-left"><span wicket:id="name"></span></a>
+					<span wicket:id="hasComments" title="There are comments on this file"><wicket:svg href="comments" class="icon"></wicket:svg></span>
 					<wicket:enclosure child="bar">
-					<span wicket:id="bar" class="bar pull-right"></span>
-					<span wicket:id="deletions" class="deletions pull-right"></span>
-					<span wicket:id="additions" class="additions pull-right"></span>
+					<span wicket:id="bar" class="bar float-right"></span>
+					<span wicket:id="deletions" class="deletions float-right"></span>
+					<span wicket:id="additions" class="additions float-right"></span>
 					</wicket:enclosure>
 				</li>
 			</ul>
@@ -53,9 +51,9 @@
 					<div class="ui-resizable-handle ui-resizable-e"></div>
 					<div class="content">
 						<div wicket:id="head" class="head clearfix">
-							<a wicket:id="context" class="pull-left context close" title="Compare with another revision"><i class="fa fa-ext fa-file-diff"></i></a>
-							<a wicket:id="locate" class="pull-left locate close"><i class="fa fa-hand-o-right"></i></a>
-							<a wicket:id="close" class="pull-left close" title="Hide comment"><i class="fa fa-times"></i></a>
+							<a wicket:id="context" class="float-left context close" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+							<a wicket:id="locate" class="float-left locate close"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+							<a wicket:id="close" class="float-left close" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 						</div>
 						<div wicket:id="body" class="body"></div>
 					</div>

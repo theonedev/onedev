@@ -92,7 +92,7 @@ import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.Mode;
@@ -1436,7 +1436,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				fragment.add(link);
 				return fragment;
 			} else {
-				return new PageTabLink(componentId, this) {
+				return new PageTabHead(componentId, this) {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {

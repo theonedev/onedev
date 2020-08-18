@@ -621,7 +621,7 @@ onedev.server = {
                 var $input = $wrapper.find("input[type=text], input:not([type])");
 				if (!$input.hasClass("clearable")) {
 					$input.addClass("clearable");
-					var $clear = $("<a class='input-clear'>x</a>");
+					var $clear = $("<a class='input-clear'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#times'/></svg></a>");
 					$wrapper.append($clear);
 					if ($input.next().hasClass("input-group-append")) {
 						$clear.addClass("input-group-clear input-group-clear-" + $input.next().children("button").length);
@@ -655,7 +655,8 @@ onedev.server = {
 		});		
 	},
 	
-	onDomReady: function() {
+	onDomReady: function(icons) {
+		onedev.server.icons = icons;
 		$(window).resize(function() {
 			$(document).find(".resize-aware").trigger("resized");
 		});

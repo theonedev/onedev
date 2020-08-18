@@ -2,66 +2,66 @@
 	<div wicket:id="container" class="markdown-editor autofit no-autosize name-changing-listener">
 		<div class="head">
 			<div class="actions clearfix">
-				<div class="pull-left normal-mode clearfix">
-					<a class="do-bold pull-left" title="Bold"><i class="fa fa-bold"></i></a>
-					<a class="do-italic pull-left" title="Italic"><i class="fa fa-italic"></i></a>
-					<a class="do-header pull-left" title="Heading"><i class="fa fa-header"></i></a>
-					<span class="separator pull-left"></span>
-					<a class="do-link pull-left" title="Link (Ctrl-L)"><i class="fa fa-link"></i></a>
-					<a class="do-image pull-left" title="Image (Ctrl-I)"><i class="fa fa-picture-o"></i></a>
-					<span class="separator pull-left"></span>
-					<a class="do-list pull-left" title="Unordered list"><i class="fa fa-list"></i></a>
-					<a class="do-orderlist pull-left" title="Ordered list"><i class="fa fa-list-ol"></i></a>
-					<a class="do-tasklist pull-left" title="Task list"><i class="fa fa-check-square-o"></i></a>
-					<a class="do-code pull-left" title="Code"><i class="fa fa-code"></i></a>
-					<a class="do-quote pull-left" title="Quote"><i class="fa fa-quote-left"></i></a>
-					<span class="separator pull-left"></span>
-					<a class="do-emoji pull-left" title="Show emojis"><i class="fa fa-smile-o"></i></a>
-					<a class="do-mention pull-left" title="Mention someone"><i class="fa fa-at"></i></a>
-					<div class="reference pull-left dropdown">
-						<a data-toggle="dropdown" title="Reference issue, build, or pull request"><i class="fa fa-hashtag"></i></a>
+				<div class="float-left normal-mode clearfix">
+					<a class="do-bold float-left" title="Bold"><wicket:svg href="bold" class="icon"></wicket:svg></a>
+					<a class="do-italic float-left" title="Italic"><wicket:svg href="italic" class="icon"></wicket:svg></a>
+					<a class="do-header float-left" title="Heading"><wicket:svg href="header" class="icon"></wicket:svg></a>
+					<span class="separator float-left"></span>
+					<a class="do-link float-left" title="Link (Ctrl-L)"><wicket:svg href="link" class="icon"></wicket:svg></a>
+					<a class="do-image float-left" title="Image (Ctrl-I)"><wicket:svg href="image" class="icon"></wicket:svg></a>
+					<span class="separator float-left"></span>
+					<a class="do-list float-left" title="Unordered list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+					<a class="do-orderlist float-left" title="Ordered list"><wicket:svg href="ordered-list" class="icon"></wicket:svg></a>
+					<a class="do-tasklist float-left" title="Task list"><wicket:svg href="tick-box" class="icon"></wicket:svg></a>
+					<a class="do-code float-left" title="Code"><wicket:svg href="code" class="icon"></wicket:svg></a>
+					<a class="do-quote float-left" title="Quote"><wicket:svg href="quote" class="icon"></wicket:svg></a>
+					<span class="separator float-left"></span>
+					<a class="do-emoji float-left" title="Show emojis"><wicket:svg href="smile" class="icon"></wicket:svg></a>
+					<a class="do-mention float-left" title="Mention someone"><wicket:svg href="at" class="icon"></wicket:svg></a>
+					<div class="reference float-left dropdown">
+						<a data-toggle="dropdown" title="Reference issue, build, or pull request"><wicket:svg href="hash" class="icon"></wicket:svg></a>
 						<div class="dropdown-menu" aria-labelledby="dLabel">
-							<a class="dropdown-item do-reference" data-reference="issue"><i class="fa fa-bug fa-fw"></i> Reference Issue</a>
-							<a class="dropdown-item do-reference" data-reference="pull request"><i class="fa fa-ext fa-branch-compare fa-fw"></i> Reference Pull Request</a>
-							<a class="dropdown-item do-reference" data-reference="build"><i class="fa fa-play-circle fa-fw"></i> Reference Build</a>
+							<a class="dropdown-item do-reference" data-reference="issue"><wicket:svg href="bug" class="icon"></wicket:svg> Reference Issue</a>
+							<a class="dropdown-item do-reference" data-reference="pull request"><wicket:svg href="pull-request" class="icon"></wicket:svg> Reference Pull Request</a>
+							<a class="dropdown-item do-reference" data-reference="build"><wicket:svg href="play-circle" class="icon"></wicket:svg> Reference Build</a>
 						</div>					
 					</div>
 				</div>
-				<div class="pull-left dropdown compact-mode">
-					<a href="#" data-toggle="dropdown" type="button"><i class="fa fa-chevron-down"></i></a>
+				<div class="float-left dropdown compact-mode">
+					<a href="#" data-toggle="dropdown" type="button"><wicket:svg href="menu" class="icon"></wicket:svg></a>
 					<div class="dropdown-menu" aria-labelledby="dLabel">
-						<a class="dropdown-item do-bold"><i class="fa fa-bold fa-fw"></i> Bold</a>
-				    	<a class="dropdown-item do-italic"><i class="fa fa-italic fa-fw"></i> Italic</a>
-						<a class="dropdown-item do-header"><i class="fa fa-header fa-fw"></i> Heading</a>
+						<a class="dropdown-item do-bold"><wicket:svg href="bold" class="icon"></wicket:svg> Bold</a>
+				    	<a class="dropdown-item do-italic"><wicket:svg href="italic" class="icon"></wicket:svg> Italic</a>
+						<a class="dropdown-item do-header"><wicket:svg href="header" class="icon"></wicket:svg> Heading</a>
 						<div class="dropdown-divider"></div>
-						<a class="dropdown-item do-link"><i class="fa fa-link fa-fw"></i> Link <span class="pull-right">Ctrl-L</span></a>
-						<a class="dropdown-item do-image"><i class="fa fa-picture-o fa-fw"></i> Image <span class="pull-right">Ctrl-I</span></a>
+						<a class="dropdown-item do-link"><wicket:svg href="link" class="icon"></wicket:svg> Link <span class="float-right">Ctrl-L</span></a>
+						<a class="dropdown-item do-image"><wicket:svg href="image" class="icon"></wicket:svg> Image <span class="float-right">Ctrl-I</span></a>
 						<div class="dropdown-divider"></div>
-						<a class="dropdown-item do-list"><i class="fa fa-list fa-fw"></i> Unordered List</a>
-						<a class="dropdown-item do-orderlist"><i class="fa fa-list-ol fa-fw"></i> Ordered List</a>
-						<a class="dropdown-item do-tasklist"><i class="fa fa-check-square-o fa-fw"></i> Task List</a>
-						<a class="dropdown-item do-code"><i class="fa fa-code fa-fw"></i> Code</a>
-						<a class="dropdown-item do-quote"><i class="fa fa-quote-left fa-fw"></i> Quote</a>
+						<a class="dropdown-item do-list"><wicket:svg href="unordered-list" class="icon"></wicket:svg> Unordered List</a>
+						<a class="dropdown-item do-orderlist"><wicket:svg href="ordered-list" class="icon"></wicket:svg> Ordered List</a>
+						<a class="dropdown-item do-tasklist"><wicket:svg href="tick-box" class="icon"></wicket:svg> Task List</a>
+						<a class="dropdown-item do-code"><wicket:svg href="code" class="icon"></wicket:svg> Code</a>
+						<a class="dropdown-item do-quote"><wicket:svg href="quote" class="icon"></wicket:svg> Quote</a>
 						<div class="dropdown-divider"></div>
-						<a class="dropdown-item do-emoji"><i class="fa fa-smile-o fa-fw"></i> Show Emojis</a>
-						<a class="dropdown-item do-mention"><i class="fa fa-at fa-fw"></i> Mention Someone</a>
-						<a class="dropdown-item do-reference" data-reference="issue"><i class="fa fa-bug fa-fw"></i> Reference Issue</a>
-						<a class="dropdown-item do-reference" data-reference="pull request"><i class="fa fa-ext fa-branch-compare fa-fw"></i> Reference Pull Request</a>
-						<a class="dropdown-item do-reference" data-reference="build"><i class="fa fa-play-circle fa-fw"></i> Reference Build</a>
+						<a class="dropdown-item do-emoji"><wicket:svg href="smile" class="icon"></wicket:svg> Show Emojis</a>
+						<a class="dropdown-item do-mention"><wicket:svg href="at" class="icon"></wicket:svg> Mention Someone</a>
+						<a class="dropdown-item do-reference" data-reference="issue"><wicket:svg href="bug" class="icon"></wicket:svg> Reference Issue</a>
+						<a class="dropdown-item do-reference" data-reference="pull request"><wicket:svg href="pull-request" class="icon"></wicket:svg> Reference Pull Request</a>
+						<a class="dropdown-item do-reference" data-reference="build"><wicket:svg href="play-circle" class="icon"></wicket:svg> Reference Build</a>
 					</div>
 				</div>
-				<div class="pull-right clearfix">
-					<a class="do-fullscreen pull-left" title="Full screen"><i class="fa fa-expand"></i></a>
-					<a class="do-help pull-left" title="Help"><i class="fa fa-question"></i></a>
-					<span class="separator pull-left"></span>
-					<a wicket:id="editLink" class="edit pull-left" title="Edit"><i class="fa fa-font"></i></a>
-					<a class="preview pull-left" title="Preview"><i class="fa fa-eye"></i></a>
-					<a wicket:id="splitLink" class="split pull-left" title="Split view"><i wicket:id="icon" class="fa fa-columns"></i></a>
+				<div class="float-right clearfix">
+					<a class="do-fullscreen float-left" title="Full screen"><wicket:svg href="expand" class="icon"></wicket:svg></a>
+					<a class="do-help float-left" title="Help"><wicket:svg href="question" class="icon"></wicket:svg></a>
+					<span class="separator float-left"></span>
+					<a wicket:id="editLink" class="edit float-left" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+					<a class="preview float-left" title="Preview"><wicket:svg href="eye" class="icon"></wicket:svg></a>
+					<a wicket:id="splitLink" class="split float-left" title="Split view"><wicket:svg href="split" class="icon"></wicket:svg></a>
 				</div>						
 			</div>			
 			<div class="warning alert alert-warning">
 				<a class="close" data-dismiss="alert"><span>&times;</span></a>
-				<div class="message"><i class="fa fa-warning"></i> Below content is restored from an unsaved change</div>
+				<div class="message"><wicket:svg href="warning" class="icon"/> Below content is restored from an unsaved change</div>
 			</div>
 			<div class="emojis"></div>
 			<div class="help">

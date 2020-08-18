@@ -29,6 +29,7 @@ import org.apache.wicket.core.request.handler.ListenerInvocationNotAllowedExcept
 import org.apache.wicket.core.request.handler.PageProvider;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.HomePageMapper;
+import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.markup.html.pages.AbstractErrorPage;
 import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
@@ -51,17 +52,24 @@ import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.resource.JQueryResourceReference;
 import org.apache.wicket.util.IProvider;
+import org.apache.wicket.util.file.IResourceFinder;
+import org.apache.wicket.util.resource.IResourceStream;
 import org.apache.wicket.util.time.Duration;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.GeneralException;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.usage.InUseException;
+import io.onedev.server.web.component.svg.SpriteImageResolver;
+import io.onedev.server.web.mapper.BaseResourceMapper;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.GeneralErrorPage;
 import io.onedev.server.web.page.error.InUseErrorPage;
 import io.onedev.server.web.page.layout.UICustomization;
+import io.onedev.server.web.resource.SvgSpriteResourceReference;
+import io.onedev.server.web.resource.SvgSpriteResourceStream;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketManager;
@@ -96,6 +104,20 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);
 		
+		getPageSettings().addComponentResolver(new SpriteImageResolver());
+		
+		getResourceSettings().getResourceFinders().add(new IResourceFinder() {
+
+			@Override
+			public IResourceStream find(Class<?> clazz, String pathname) {
+				if (pathname.contains(SvgSpriteResourceReference.RESOURCE_NAME)) 
+					return new SvgSpriteResourceStream(clazz);
+				else 
+					return null;
+			}
+
+		});
+		
 		getJavaScriptLibrarySettings().setJQueryReference(new JavaScriptResourceReference(
 				JQueryResourceReference.class, "jquery/jquery-3.5.1.min.js"));
 		
@@ -120,7 +142,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 						&& !(component instanceof AbstractErrorPage) 
 						&& !(component instanceof BasePage)
 						&& !(component instanceof BrowserInfoPage)) {
-					throw new RuntimeException("Page classes should extend from BasePage.");
+					throw new GeneralException("Page classes should extend from BasePage.");
 				}
 			}
 		});
@@ -211,6 +233,13 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 		
 		for (WebApplicationConfigurator configurator: applicationConfigurators)
 			configurator.configure(this);
+	}
+
+	@Override
+	public void mount(IRequestMapper mapper) {
+		if (mapper instanceof ResourceMapper && !(mapper instanceof BaseResourceMapper))
+			throw new GeneralException("Base resource mapper should be used");
+		super.mount(mapper);
 	}
 
 	@Override

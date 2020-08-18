@@ -2,7 +2,6 @@ package io.onedev.server.web.component.menu;
 
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -11,6 +10,8 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
+
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 abstract class MenuPanel extends Panel {
@@ -29,7 +30,7 @@ abstract class MenuPanel extends Panel {
 		boolean hasIcons = false;
 		boolean hasShortcuts = false;
 		for (MenuItem menuItem: menuItems) {
-			if (menuItem.getIconClass() != null)
+			if (menuItem.getIconHref() != null)
 				hasIcons = true;
 			if (menuItem.getShortcut() != null)
 				hasShortcuts = true;
@@ -55,12 +56,7 @@ abstract class MenuPanel extends Panel {
 				if (menuItem != null) {
 					Fragment fragment = new Fragment("content", "contentFrag", MenuPanel.this);
 					WebMarkupContainer link = menuItem.newLink("link");
-					Component icon = new WebMarkupContainer("icon");
-					String iconClass = menuItem.getIconClass();
-					if (iconClass != null) {
-						icon.add(AttributeAppender.append("class", iconClass + " fa fa-fw"));
-					}
-					link.add(icon);
+					link.add(new SpriteImage("icon", menuItem.getIconHref()));
 					link.add(new Label("label", menuItem.getLabel()));
 					link.add(new Label("shortcut", menuItem.getShortcut()));
 					fragment.add(link);

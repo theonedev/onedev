@@ -6,13 +6,13 @@
 				<tr>
 					<td class="left revision">
 						<div class="title clearfix">
-							<label class="pull-left">Base</label>
+							<label class="float-left">Base</label>
 							<wicket:enclosure child="compareWithMergeBase">
-							<div class="pull-left checkbox">
+							<div class="float-left checkbox">
 								<label>
 									<input wicket:id="compareWithMergeBase" type="checkbox">
 									common ancestor
-									<span wicket:id="mergeBaseTooltip"><i class="fa fa-question-circle"></i></span>
+									<span wicket:id="mergeBaseTooltip"><wicket:svg href="question-circle" class="icon"></wicket:svg></span>
 								</label>
 							</div>
 							</wicket:enclosure>
@@ -23,7 +23,7 @@
 						</div>
 					</td>
 					<td class="action">
-						<a wicket:id="swap" class="swap btn btn-outline-secondary" title="Swap"><i class="fa fa-exchange"></i></a>
+						<a wicket:id="swap" class="swap btn btn-outline-secondary" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
 					</td>
 					<td class="right revision">
 						<div class="title">

@@ -6,21 +6,21 @@
                 <th wicket:id="headers">
                     <span wicket:id="header"></span>
                     <span wicket:id="required" class="required"></span>
-                    <span wicket:id="help" class="fa fa-question-circle"></span>
+                    <span wicket:id="help"><wicket:svg href="question-circle" class="icon"/></span>
                 </th>
                 <th class="actions"></th>
             </thead>
             <tbody>
                 <tr wicket:id="elements">
                     <td class="actions minimum">
-                        <span class="drag-indicator fa fa-reorder"></span>
+                        <wicket:svg href="grip" class="icon drag-indicator"/>
                     </td>
                     <td wicket:id="properties">
                         <div wicket:id="propertyEditor"></div>
                         <div wicket:id="feedback"></div>
                     </td>
                     <td class="actions">
-                        <a wicket:id="deleteElement" title="Delete this"><span class="fa fa-trash delete"></span></a>
+                        <a wicket:id="deleteElement" title="Delete this"><wicket:svg href="trash" class="icon delete"/></a>
                     </td>
                 </tr>
             </tbody>
@@ -30,6 +30,6 @@
                 </tr>
             </tfoot>
         </table>
-         <div class="foot"><a wicket:id="addElement" title="Add new" class="add-element btn btn-success btn-sm"><i class="fa fa-plus"></i></a></div>
+         <div class="foot"><a wicket:id="addElement" title="Add new" class="add-element btn btn-success btn-sm"><wicket:svg href="plus" class="icon"></wicket:svg></a></div>
     </div>
 </wicket:panel>

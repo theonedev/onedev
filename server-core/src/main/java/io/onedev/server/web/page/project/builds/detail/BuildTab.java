@@ -7,7 +7,7 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTab;
-import io.onedev.server.web.component.tabbable.PageTabLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 
 @SuppressWarnings("serial")
 public class BuildTab extends PageTab {
@@ -18,7 +18,7 @@ public class BuildTab extends PageTab {
 	
 	@Override
 	public Component render(String componentId) {
-		return new PageTabLink(componentId, this) {
+		return new PageTabHead(componentId, this) {
 
 			@Override
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {

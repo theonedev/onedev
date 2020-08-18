@@ -1,27 +1,22 @@
-.watch-status:BEFORE {
-	font-family: "FontAwesome";
-}
 .watch-status:AFTER {
-	font-family: "FontAwesome";
 	margin-left: 4px;
-}
-.watch-status.default:BEFORE {
-	content: "\f10c";
 }
 .watch-status.default:AFTER {
 	content: "Watch if involved";
 }
-.watch-status.watch:BEFORE {
-	content: "\f06e";
-}
 .watch-status.watch:AFTER {
 	content: "Watch";
 }
-.watch-status.do-not-watch:BEFORE {
-	content: "\f070";
-}
 .watch-status.do-not-watch:AFTER {
 	content: "Do not watch";
+}
+.watch-status .icon {
+	display: none;
+}
+.watch-status.default .icon-bell, 
+.watch-status.watch .icon-bell-ring, 
+.watch-status.do-not-watch .icon-bell-off  {
+	display: inline-block;
 }
 
 .floating .watch-status {
@@ -34,11 +29,16 @@
 	text-decoration: none;
 	position: relative;
 }
-.floating .watch-status a.active:before {
-	font-family: "FontAwesome";
-	content: "\f00c";
+.floating .watch-status a .icon {
+	display: none;
 	position: absolute;
+	width: 12px;
+	height: 12px;
 	left: 8px;
+	top: 18px;
+}
+.floating .watch-status a.active .icon {
+	display: inline-block;
 }
 .floating .watch-status a .title {
 	font-weight: bold;

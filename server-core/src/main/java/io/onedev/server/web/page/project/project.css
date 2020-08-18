@@ -8,7 +8,7 @@
 }
 #project>.sidebar>.head a {
 	display: block;
-	border-bottom: 4px solid #EEE;
+	border-bottom: 1px solid #E0E0E0;
 	padding: 10px 22px 10px 4px;
 	font-size: 16px;
 	white-space: nowrap;
@@ -17,6 +17,7 @@
 	text-decoration: none;
 	color: #444;
 	height: 50px;
+	position: relative;
 }
 #project>.sidebar>.head a:hover {
 	background: #EEE;
@@ -24,17 +25,18 @@
 #project>.sidebar>.head img {
 	width: 32px;
 	height: 32px;
+	margin-right: 8px;
 }
-#project>.sidebar>.head i {
+#project>.sidebar>.head svg {
 	position: absolute;
-	right: 12px;
-	top: 12px;
-	font-style: normal;
-	font-size: 20px;
+	right: 8px;	
+	top: 18px;
+	transform: rotate(90deg);
 }
-#project>.sidebar>.head i:before {
-	font-family: "FontAwesome";
-	content: "\f142";
+#project>.minimized.sidebar>.head svg {
+	right: 14px;
+	top: 48px;
+	transform: rotate(0);
 }
 
 #project>.sidebar>.tabs {
@@ -45,13 +47,6 @@
 }
 #project>.minimized.sidebar>.head span {
 	display: none;
-}
-#project>.minimized.sidebar>.head i {
-	left: 11px;	
-	top: 38px;
-}
-#project>.minimized.sidebar>.head i:before {
-	content: "\f141";
 }
 
 #project>.minimized.sidebar>.tabs {

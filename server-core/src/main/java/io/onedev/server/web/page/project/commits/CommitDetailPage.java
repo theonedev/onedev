@@ -77,6 +77,7 @@ import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -247,6 +248,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 							ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 							Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class, 
 									ProjectBlobPage.paramsOf(projectModel.getObject(), state));
+							link.add(new SpriteImage("icon", "branch"));
 							link.add(new Label("label", branch));
 							item.add(link);
 							item.add(AttributeAppender.append("class", "branch"));
@@ -256,6 +258,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 							ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 							Link<Void> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class, 
 									ProjectBlobPage.paramsOf(projectModel.getObject(), state));
+							link.add(new SpriteImage("icon", "tag"));
 							link.add(new Label("label", tag));
 							item.add(link);
 							item.add(AttributeAppender.append("class", "tag"));

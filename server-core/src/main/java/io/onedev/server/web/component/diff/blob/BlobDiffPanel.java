@@ -4,10 +4,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -28,6 +26,7 @@ import io.onedev.server.web.component.diff.blob.text.TextDiffPanel;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 import io.onedev.server.web.component.diff.revision.BlobCommentSupport;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel implements SourceAware {
@@ -63,9 +62,9 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 		Fragment fragment = new Fragment(CONTENT_ID, "noDiffFrag", this);
 		fragment.add(new BlobDiffTitle("title", change));
 		if (warning)
-			fragment.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", "fa fa-warning")));
+			fragment.add(new SpriteImage("icon", "warning"));
 		else
-			fragment.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", "fa fa-info-circle")));
+			fragment.add(new SpriteImage("icon", "info"));
 		fragment.add(new Label("message", message));
 		return fragment;
 	}

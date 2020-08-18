@@ -3,8 +3,8 @@
 	A certain project can override this setting to define its own issue boards.</div>  
 	<div class="issue-boards def-list list">
 		<div class="head clearfix">
-			<div class="pull-left">
-				<a wicket:id="addNew" class="btn btn-success"><i class="fa fa-plus"></i> Add New</a>
+			<div class="float-left">
+				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New</a>
 			</div>
 		</div>
 		<div class="body">
@@ -16,8 +16,8 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="viewBoardFrag">
 		<div class="actions">
-			<a wicket:id="edit" class="btn btn-sm btn-outline-secondary"><i class="fa fa-pencil"></i> Edit</a>
-			<a wicket:id="delete" class="btn btn-sm btn-outline-secondary"><i class="fa fa-trash"></i> Delete</a>
+			<a wicket:id="edit" class="btn btn-sm btn-outline-secondary"><wicket:svg href="edit" class="icon"></wicket:svg> Edit</a>
+			<a wicket:id="delete" class="btn btn-sm btn-outline-secondary"><wicket:svg href="trash" class="icon"></wicket:svg> Delete</a>
 		</div>
 		<div wicket:id="viewer"></div>
 	</wicket:fragment>

@@ -160,6 +160,9 @@
 .text-diff>.body>tbody>tr>td.number>.comment-indicator:hover {
 	color: #555;
 }
+.text-diff>.body>tbody>tr>td.number>.comment-indicator svg {
+	margin-top: 0;
+}
 .comment-popover a {
 	display: block;
 	color: #999;

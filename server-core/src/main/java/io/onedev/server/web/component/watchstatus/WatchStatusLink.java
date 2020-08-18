@@ -5,11 +5,14 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public abstract class WatchStatusLink extends DropdownLink {
@@ -21,6 +24,9 @@ public abstract class WatchStatusLink extends DropdownLink {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		setEscapeModelStrings(false);
+		
 		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -35,9 +41,19 @@ public abstract class WatchStatusLink extends DropdownLink {
 			}
 			
 		}));
-		
 	}
 
+	@Override
+	public IModel<?> getBody() {
+		return Model.of(String.format(""
+				+ "<svg class='icon icon-bell-ring'><use xlink:href='%s'/></svg>"
+				+ "<svg class='icon icon-bell'><use xlink:href='%s'/></svg>"
+				+ "<svg class='icon icon-bell-off'><use xlink:href='%s'/></svg>", 
+				SpriteImage.getVersionedHref("bell-ring"), 
+				SpriteImage.getVersionedHref("bell"), 
+				SpriteImage.getVersionedHref("bell-off")));
+	}
+	
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
 		return new WatchStatusPanel(id) {

@@ -20,20 +20,7 @@
 .source-view>.comment>.content>.head>a {
 	margin-right: 8px;
 }
-.source-view>.comment>.content>.head .context {
-	margin-top: -2px;
-}
-.source-view>.comment>.content>.head .context .fa-ext {
-	font-size: 16px;
-}
-.source-view>.comment>.content>.head .locate {
-	font-size: 20px;
-}
 
-.source-view>.comment>.content>.head .permanent {
-	margin-top: 2px;
-	font-size: 18px;
-}
 .source-view>.comment>.ui-resizable-handle {
 	position: absolute;
 	border-right: 1px solid #E0E0E0;
@@ -95,10 +82,10 @@
 	padding-left: 4px;
 }
 .CodeMirror-comment a {
-	color: #999;
+	color: #999 !important;
 }
 .CodeMirror-comment a:hover {
-	color: #333;
+	color: #333 !important;
 }
 .comment-popover a {
 	display: block;

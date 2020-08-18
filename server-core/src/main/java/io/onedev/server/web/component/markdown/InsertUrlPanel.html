@@ -22,7 +22,7 @@
 				<input wicket:id="text" class="form-control text"></input>
 			</div>	
 			<div class="actions clearfix">
-				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary pull-right">Insert</button>	
+				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary float-right">Insert</button>	
 			</div>
 		</form>
 	</wicket:fragment>
@@ -33,7 +33,7 @@
 		<ul class="attachments list-unstyled">
 			<li wicket:id="attachments" class="attachment image">
 				<a wicket:id="select" title="Insert this image" class="insert"><img wicket:id="image"></img></a>
-				<a wicket:id="delete" title="Remove this image" class="delete btn btn-danger"><i class="fa fa-trash"></i> Remove</a>
+				<a wicket:id="delete" title="Remove this image" class="delete btn btn-danger"><wicket:svg href="trash" class="icon"></wicket:svg> Remove</a>
 			</li>
 		</ul>
 	</wicket:fragment>
@@ -45,7 +45,7 @@
 						<a wicket:id="select" title="Insert link to this file" class="insert btn btn-block btn-secondary"><span wicket:id="file"></span></a>
 					</div>
 					<div class="col-md-3">
-						<a wicket:id="delete" title="Remove this file" class="delete btn btn-danger"><i class="fa fa-trash"></i> Remove</a>
+						<a wicket:id="delete" title="Remove this file" class="delete btn btn-danger"><wicket:svg href="trash" class="icon"></wicket:svg> Remove</a>
 					</div>
 				</div>
 			</li>
@@ -56,7 +56,7 @@
 			<div wicket:id="feedback" class="feedback"></div>
 			<div wicket:id="file"></div>
 			<div class="actions clearfix">
-				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary pull-right">Insert</button>
+				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary float-right">Insert</button>
 			</div>
 		</form>
 	</wicket:fragment>
@@ -68,9 +68,11 @@
 			</div>
 			<div class="form-group directory">
   				<label>Directory</label>
-  				<div>
+  				<div class="input-group">
 					<input wicket:id="directory" class="form-control"></input> 
-					<a wicket:id="select" title="Select" class="btn btn-secondary"><i class="fa fa-folder-open-o"></i></a>
+					<span class="input-group-append">
+						<a wicket:id="select" title="Select" class="btn btn-secondary"><wicket:svg href="folder-open" class="icon"></wicket:svg></a>
+					</span>
   				</div>
 				<p class="help-block">Optionally specify relative directory to put uploaded files</p>
 			</div>			
@@ -83,7 +85,7 @@
 				<textarea wicket:id="detailCommitMessage" class="form-control" rows="5"></textarea>
 			</div>	
 			<div class="actions clearfix">
-				<button wicket:id="insert" class="btn btn-primary pull-right">Commit &amp; Insert</button>		    
+				<button wicket:id="insert" class="btn btn-primary float-right">Commit &amp; Insert</button>		    
 			</div>		
 		</form>
 	</wicket:fragment>

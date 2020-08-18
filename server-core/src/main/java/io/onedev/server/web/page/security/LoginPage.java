@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.security;
 
-import static io.onedev.server.web.page.admin.sso.SsoProcessPage.MOUNTED_PATH;
+import static io.onedev.server.web.page.admin.sso.SsoProcessPage.MOUNT_PATH;
 import static io.onedev.server.web.page.admin.sso.SsoProcessPage.STAGE_INITIATE;
 
 import java.util.List;
@@ -160,7 +160,7 @@ public class LoginPage extends BasePage {
 		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
 		for (SsoConnector connector: ssoConnectors) {
 			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
-					Model.of(serverUrl + "/" + MOUNTED_PATH + "/" + STAGE_INITIATE + "/" + connector.getName()));
+					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + connector.getName()));
 			ssoButton.add(new ExternalImage("image", connector.getButtonImageUrl()));
 			ssoButton.add(new Label("label", "Login with " + connector.getName()));
 			ssoButtonsView.add(ssoButton);

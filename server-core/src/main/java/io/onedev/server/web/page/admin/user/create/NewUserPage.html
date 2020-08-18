@@ -4,10 +4,11 @@
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="editor"></div>
 			<div class="actions clearfix">
-				<input class="btn btn-primary dirty-aware pull-left" value="Create" type="submit">
-				<div class="checkbox pull-left">
-					<label> <input wicket:id="continueToAdd" type="checkbox"> Continue to add other user after create</label>
-				</div>
+				<input class="btn btn-primary dirty-aware float-left" value="Create" type="submit">
+				<div class="form-check form-inline pt-1">
+					<input wicket:id="continueToAdd" id="continueToAdd" type="checkbox" class="form-check-input">
+					<label class="form-check-label" for="continueToAdd">Continue to add other user after create</label>
+				</div>				
 			</div>
 		</form>
 	</div>

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -24,6 +23,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
@@ -42,6 +42,7 @@ import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
@@ -208,21 +209,7 @@ public class FolderViewPanel extends Panel {
 					
 				}; 
 
-				WebMarkupContainer icon = new WebMarkupContainer("icon");
-				String iconClass;
-				if (blobIdent.isTree())
-					iconClass = "fa fa-folder-o";
-				else if (blobIdent.isGitLink()) 
-					iconClass = "fa fa-ext fa-folder-submodule-o";
-				else if (blobIdent.isSymbolLink()) 
-					iconClass = "fa fa-ext fa-folder-symbol-link-o";
-				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH) || blobIdent.path.equals(".onedev-buildspec"))
-					iconClass = "fa fa-cog";
-				else  
-					iconClass = "fa fa-file-text-o";
-				icon.add(AttributeModifier.append("class", iconClass));
-				
-				pathLink.add(icon);
+				pathLink.add(new BlobIcon("icon", Model.of(blobIdent)));
 				
 				if (context.getBlobIdent().path != null) 
 					pathLink.add(new Label("label", blobIdent.path.substring(context.getBlobIdent().path.length()+1)));

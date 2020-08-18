@@ -38,11 +38,11 @@
 }
 .commit-list>.body .commit>.detail {
 	padding-left: 48px; 
-	padding-right: 180px;
+	padding-right: 200px;
 	word-break: break-all;
 }
 .commit-list>.body .commit.with-status>.detail {
-	padding-right: 240px;
+	padding-right: 270px;
 }
 .commit-list>.body .commit>.actions {
 	position: absolute;
@@ -64,6 +64,9 @@
 }
 .commit-list>.body .message-and-labels .commit-message {
 	margin-right: 8px;
+}
+.commit-list>.body .message-and-labels .badge {
+	margin-right: 4px;
 }
 .commit-list>.body .commit>.actions>span {
     margin-left: 4px;

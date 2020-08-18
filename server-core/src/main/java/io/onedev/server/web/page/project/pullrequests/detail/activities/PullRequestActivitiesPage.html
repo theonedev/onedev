@@ -24,15 +24,15 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sinceChangesRowContentFrag">
 		<div>
-			<span class="icon fa fa-ext fa-file-diff"></span> <a wicket:id="sinceChanges">Changes since last visit</a>
+			<wicket:svg href="diff" class="icon"></wicket:svg> <a wicket:id="sinceChanges">Changes since last visit</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="optionsFrag">
 		<div class="request-activity-options">
 			<span class="btn-group">
-				<a wicket:id="showComments" class="btn btn-sm btn-outline-secondary" title="Show comments"><i class="fa fa-comments"></i></a>
-				<a wicket:id="showCommits" class="btn btn-sm btn-outline-secondary" title="Show commits"><i class="fa fa-ext fa-commit"></i></a>
-				<a wicket:id="showChangeHistory" class="btn btn-sm btn-outline-secondary" title="Show change history"><i class="fa fa-history"></i></a>
+				<a wicket:id="showComments" class="btn btn-sm btn-outline-secondary" title="Show comments"><wicket:svg href="comments" class="icon"></wicket:svg></a>
+				<a wicket:id="showCommits" class="btn btn-sm btn-outline-secondary" title="Show commits"><wicket:svg href="commit" class="icon"></wicket:svg></a>
+				<a wicket:id="showChangeHistory" class="btn btn-sm btn-outline-secondary" title="Show change history"><wicket:svg href="history" class="icon"></wicket:svg></a>
 			</span>
 		</div>
 	</wicket:fragment>

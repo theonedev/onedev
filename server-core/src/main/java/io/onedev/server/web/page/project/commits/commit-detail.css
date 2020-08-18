@@ -20,7 +20,7 @@ body.CommitDetailPage #layout>.body {
 	padding: 8px 12px 0 12px;
 	border-radius: 4px 4px 0 0;
 }
-#commit-detail>.info>.message>.subject>.pull-left {
+#commit-detail>.info>.message>.subject>.float-left {
 	font-size: 17px;
 	font-weight: bold;
 	padding-top: 2px;
@@ -28,7 +28,7 @@ body.CommitDetailPage #layout>.body {
 	margin-bottom: 8px;
 	word-break: break-word;
 }
-#commit-detail>.info>.message>.subject>.pull-right {
+#commit-detail>.info>.message>.subject>.float-right {
 	margin-left: 8px;
 	margin-bottom: 8px;
 }
@@ -45,18 +45,11 @@ body.CommitDetailPage #layout>.body {
 	background: #F9F9F9;
 	border-bottom: 2px solid #EEE;
 }
-#commit-detail>.info>.refs .branch:before {
-	font-family: Fontawesome;
-	content: "\f126";
-	color: #444;
-}
-#commit-detail>.info>.refs .tag:before {
-	font-family: Fontawesome;
-	content: "\f02b";
-	color: #444;
-}
 #commit-detail>.info>.refs>div>span {
-	margin-right: 6px;
+	margin-right: 8px;
+}
+#commit-detail>.info>.refs>div>span svg {
+	margin-right: 4px;
 }
 #commit-detail>.info>.contribution-and-parents {
 	padding: 16px 12px 0 54px;

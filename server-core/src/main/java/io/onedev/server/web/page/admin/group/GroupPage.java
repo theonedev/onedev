@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
@@ -66,8 +65,9 @@ public abstract class GroupPage extends AdministrationPage {
 
 			@Override
 			protected Component newHead(String componentId) {
-				String content = "<i class='fa fa-group'></i> " + HtmlEscape.escapeHtml5(getGroup().getName()); 
-				return new Label(componentId, content).setEscapeModelStrings(false);
+				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", GroupPage.this);
+				fragment.add(new Label("name", getGroup().getName())); 
+				return fragment;
 			}
 
 			@Override
@@ -81,9 +81,9 @@ public abstract class GroupPage extends AdministrationPage {
 	private List<? extends Tab> newTabs() {
 		List<PageTab> tabs = new ArrayList<>();
 		
-		tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
-		tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
-		tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
+		tabs.add(new GroupTab("Profile", "profile", GroupProfilePage.class));
+		tabs.add(new GroupTab("Members", "members", GroupMembershipsPage.class));
+		tabs.add(new GroupTab("Authorized Projects", "project", GroupAuthorizationsPage.class));
 		return tabs;
 	}
 

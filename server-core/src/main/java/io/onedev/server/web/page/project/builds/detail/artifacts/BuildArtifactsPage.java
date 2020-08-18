@@ -36,9 +36,10 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.download.ArtifactDownloadResource;
-import io.onedev.server.web.download.ArtifactDownloadResourceReference;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.resource.ArtifactResource;
+import io.onedev.server.web.resource.ArtifactResourceReference;
 
 @SuppressWarnings("serial")
 public class BuildArtifactsPage extends BuildDetailPage {
@@ -171,12 +172,14 @@ public class BuildArtifactsPage extends BuildDetailPage {
 							}
 							
 						};
+						link.add(new SpriteImage("icon", "folder"));
 						link.add(AttributeAppender.append("class", "folder"));
 					} else {
 						String artifactPath = getBuild().getArtifactsDir().toURI().relativize(file.toURI()).getPath();
-						PageParameters params = ArtifactDownloadResource.paramsOf(
+						PageParameters params = ArtifactResource.paramsOf(
 								getBuild().getProject(), getBuild().getNumber(), artifactPath); 
-						link = new ResourceLink<Void>("link", new ArtifactDownloadResourceReference(), params);
+						link = new ResourceLink<Void>("link", new ArtifactResourceReference(), params);
+						link.add(new SpriteImage("icon", "file"));
 						link.add(AttributeAppender.append("class", "file"));
 					}
 					link.add(new Label("label", file.getName()));

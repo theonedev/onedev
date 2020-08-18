@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   class="icon"
+   width="200px"
+   height="200.00px"
+   viewBox="50 50 974 974"
+   version="1.1"
+   id="svg96"
+   sodipodi:docname="bell.svg"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)">
+  <metadata
+     id="metadata102">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs100">
+    <linearGradient
+       id="linearGradient1233"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#070600;stop-opacity:1;"
+         offset="0"
+         id="stop1231" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     inkscape:document-rotation="0"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="971"
+     id="namedview98"
+     showgrid="false"
+     inkscape:zoom="4.135"
+     inkscape:cx="95.646917"
+     inkscape:cy="29.383313"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg96" />
+  <path
+     d="m 734.48771,748.88835 h -384 V 471.55502 c 0,-106.66667 85.33333,-192 192,-192 106.66667,0 192,85.33333 192,192 m 85.33333,234.66666 V 471.55502 c 0,-130.98667 -91.30667,-240.64 -213.33333,-269.65334 v -29.01333 a 64,64 0 0 0 -64,-64 64,64 0 0 0 -64,64 v 29.01333 C 356.03438,230.91502 265.15438,340.56835 265.15437,471.55502 v 234.66666 l -85.33333,85.33334 v 42.66666 H 905.15437 V 791.55502 M 542.48771,962.22168 a 85.333333,85.333333 0 0 0 85.33333,-85.33333 H 457.15437 a 85.333333,85.333333 0 0 0 85.33334,85.33333 z"
+     id="path94" />
+</svg>

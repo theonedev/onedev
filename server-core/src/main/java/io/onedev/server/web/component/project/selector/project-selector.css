@@ -7,16 +7,24 @@
 .project-selector ul {
 	margin-top: 12px;
 }
+.project-selector ul li {
+	position: relative;
+}
 .project-selector ul a {
 	padding: 5px 20px !important;
 }
-.project-selector ul a.current>span:before {
-	font-family: "FontAwesome"; 
-	content: "\f00c"; 
-	margin-right: 4px;	
+
+.project-selector a svg {
+	display: none;
 	position: absolute;
-	left: 24px;
+	left: 4px;
+	top: 16px;
+	width: 12px;
+	height: 12px;
 }
+.project-selector a.current svg {
+	display: inline-block;
+}   
 
 .project-selector .no-projects {
 	margin-top: 12px;

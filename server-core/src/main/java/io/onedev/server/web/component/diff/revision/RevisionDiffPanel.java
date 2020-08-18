@@ -103,6 +103,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.revisionpicker.RevisionSelector;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -501,9 +502,9 @@ public class RevisionDiffPanel extends Panel {
 						}
 
 						@Override
-						public String getIconClass() {
+						public String getIconHref() {
 							if (whitespaceOptionModel.getObject() == each)
-								return "fa fa-check";
+								return "tick";
 							else
 								return null;
 						}
@@ -631,10 +632,12 @@ public class RevisionDiffPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return changesAndCountModel.getObject().getChanges().size() + " files ";
+				String icon = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
+						SpriteImage.getVersionedHref("arrow2"));
+				return "Total " + changesAndCountModel.getObject().getChanges().size() + " files " + icon;
 			}
 			
-		}));
+		}).setEscapeModelStrings(false));
 		
 		body.add(new WebMarkupContainer("tooManyFiles") {
 
@@ -668,19 +671,19 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
-				String iconClass;
+				String icon;
 				if (change.getType() == null) {
-					iconClass = " fa fa-file-text-o";
+					icon = "file";
 				} else if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
-					iconClass = " fa-ext fa-diff-added";
+					icon = "plus-square";
 				else if (change.getType() == ChangeType.DELETE)
-					iconClass = " fa-ext fa-diff-removed";
+					icon = "minus-square";
 				else if (change.getType() == ChangeType.MODIFY)
-					iconClass = " fa-ext fa-diff-modified";
+					icon = "dot-square";
 				else
-					iconClass = " fa-ext fa-diff-renamed";
+					icon = "arrow-square";
 				
-				item.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", iconClass)));
+				item.add(new SpriteImage("icon", icon).add(AttributeAppender.append("class", icon)));
 
 				item.add(new WebMarkupContainer("hasComments").setVisible(!getComments(change).isEmpty()));
 				

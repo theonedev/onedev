@@ -79,13 +79,15 @@ body.PullRequestDetailPage #layout>.body {
 	font-size: 24px;
 	margin: 0;
 	color: #666;
-	transform: rotate(-90deg);
 }
 
 #request-detail>.main>.summary .alert {
 	margin-bottom: 0;
 	border-radius: 0;
 	border-bottom: 1px dotted #888;
+}
+#request-detail>.main>.summary .alert svg {
+	margin-right: 8px;
 }
 #request-detail>.main>.summary>.alert:first-child  {
 	border-radius: 4px 4px 0 0;
@@ -99,8 +101,9 @@ body.PullRequestDetailPage #layout>.body {
 }
 
 #request-detail>.main>.summary>.calculating-merge-preview img {
-	width: 24px;
-	height: 24px;
+	width: 18px;
+	height: 18px;
+	margin: -4px 8px 0 0;
 }
 #request-detail>.main>.summary .more-info.not-link {
 	color: inherit;
@@ -118,12 +121,14 @@ body.PullRequestDetailPage #layout>.body {
 	margin-bottom: 8px;
 } 
 
-ul>li>a.code-comments .fa-circle {
-	color: #4667EE;
+ul>li>a.code-comments .icon {
 	display: none;
-	margin-left: 4px;
+	fill: #4667EE;
+	margin: 0 0 0 4px;
+	width: 12px;
+	height: 12px;
 }
-ul>li>a.code-comments.new .fa-circle {
+ul>li>a.code-comments.new .icon {
 	display: inline;
 }
 

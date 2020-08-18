@@ -1,11 +1,14 @@
 package io.onedev.server.web.component.blob;
 
-import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.html.WebComponent;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public class BlobIcon extends WebComponent {
@@ -15,25 +18,24 @@ public class BlobIcon extends WebComponent {
 	}
 
 	@Override
-	protected void onInitialize() {
-		super.onInitialize();
+	public void onComponentTagBody(final MarkupStream markupStream, final ComponentTag openTag) {
+		String icon;
+		BlobIdent blobIdent = (BlobIdent) getDefaultModelObject();
 		
-		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				BlobIdent blobIdent = (BlobIdent) getDefaultModelObject();
-				if (blobIdent.isTree())
-					return " fa fa-folder-o";
-				else if (blobIdent.isGitLink()) 
-					return " fa fa-ext fa-folder-submodule-o";
-				else if (blobIdent.isSymbolLink()) 
-					return " fa fa-ext fa-folder-symbol-link-o";
-				else  
-					return " fa fa-file-text-o";
-			}
-			
-		}));
+		if (blobIdent.path.equals(BuildSpec.BLOB_PATH) || blobIdent.path.equals(".onedev-buildspec"))
+			icon = "gear";
+		else if (blobIdent.isTree())
+			icon = "folder";
+		else if (blobIdent.isGitLink()) 
+			icon = "folder-embed";
+		else if (blobIdent.isSymbolLink()) 
+			icon = "folder-redo";
+		else  
+			icon = "file";
+		
+		String versionedIcon = SpriteImage.getVersionedHref(IconScope.class, icon);
+		replaceComponentTagBody(markupStream, openTag, 
+				"<use xlink:href='" + versionedIcon + "'></use>");
 	}
-
+	
 }

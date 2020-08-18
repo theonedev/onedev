@@ -1,7 +1,7 @@
 #milestone-list>.head {
 	margin-bottom: 20px;
 }
-#milestone-list>.head>.pull-left {
+#milestone-list>.head>.float-left {
 	margin-right: 20px;
 }
 
@@ -13,12 +13,6 @@
 	white-space: nowrap;
 }
 
-.milestone-sort.active:before {
-	font-family: "FontAwesome";
-	content: "\f00c";
-	position: absolute;
-	left: 6px;
-}
 #new-milestone>.head, #milestone-edit>.head {
 	margin-bottom: 20px;
 }

@@ -17,14 +17,14 @@
 				</div>
 				</wicket:enclosure>
 				<div class="actions">
-					<a wicket:id="vote" class="btn btn-outline-secondary btn-sm vote"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="label"></span></a>
+					<a wicket:id="vote" class="btn btn-outline-secondary btn-sm vote"><wicket:svg href="thumb-up" class="icon"></wicket:svg> <span wicket:id="label"></span></a>
 				</div>
 			</div>
 		</div>
 		<div wicket:id="watches" class="watches"></div>
 		<wicket:enclosure child="delete">
 		<div class="actions">
-			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
+			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><wicket:svg href="trash" class="icon"></wicket:svg> Delete</a>
 		</div>
 		</wicket:enclosure>
 	</div>
@@ -44,7 +44,7 @@
 			</table>
 		</div>
 		<div class="actions">
-			<a wicket:id="edit" class="btn btn-outline-secondary btn-sm edit"><i class="fa fa-pencil"></i> Edit</a>
+			<a wicket:id="edit" class="btn btn-outline-secondary btn-sm edit"><wicket:svg href="edit" class="icon"></wicket:svg> Edit</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="fieldsEditFrag">
@@ -59,7 +59,7 @@
 	<wicket:fragment wicket:id="milestoneViewFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
 		<span wicket:id="status" class="status"></span> 
-		<a wicket:id="edit" title="Change milestone" class="edit action"><i class="fa fa-pencil"></i></a>
+		<a wicket:id="edit" title="Change milestone" class="edit action"><wicket:svg href="edit" class="icon"></wicket:svg></a>
 		<div wicket:id="progress" class="progress"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneEditFrag">

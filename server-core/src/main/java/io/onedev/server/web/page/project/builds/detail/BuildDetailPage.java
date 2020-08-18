@@ -63,7 +63,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
-import io.onedev.server.web.component.tabbable.PageTabLink;
+import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -400,7 +400,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 					@Override
 					public Component render(String componentId) {
-						return new PageTabLink(componentId, this) {
+						return new PageTabHead(componentId, this) {
 
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {

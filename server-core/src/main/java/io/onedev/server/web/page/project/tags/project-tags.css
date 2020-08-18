@@ -6,8 +6,14 @@
 }
 #project-tags .tag .title>a.name {
 	font-weight: bold;
-	font-size: 15px;
 }
+#project-tags .tag .title>* {
+	margin-right: 8px;
+}
+#project-tags .tag .title svg {
+	margin: 0;
+}
+
 #project-tags .tag .actions a {
 	color: #444;
 }

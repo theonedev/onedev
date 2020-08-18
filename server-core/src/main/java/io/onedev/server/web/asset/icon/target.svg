@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   class="icon"
+   width="200px"
+   height="200.00px"
+   viewBox="0 0 1024 1024"
+   version="1.1"
+   id="svg12"
+   sodipodi:docname="icon01.svg"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     inkscape:document-rotation="0"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="971"
+     id="namedview14"
+     showgrid="false"
+     inkscape:zoom="3.97"
+     inkscape:cx="100"
+     inkscape:cy="100"
+     inkscape:window-x="0"
+     inkscape:window-y="23"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg12" />
+  <path
+     d="m 516.51385,133.37172 c 211.8048,0 383.3571,172.03324 383.3571,384.4318 0,212.39859 -171.5523,384.43182 -383.3571,384.43182 -211.80478,0 -383.35707,-172.03323 -383.35707,-384.43182 0,-212.39856 171.55229,-384.4318 383.35707,-384.4318 m 0,-76.886364 c -253.97406,0 -460.028495,206.632094 -460.028495,461.318164 0,254.68608 206.054435,461.31818 460.028495,461.31818 253.97408,0 460.0285,-206.6321 460.0285,-461.31818 0,-254.68607 -206.05442,-461.318164 -460.0285,-461.318164 z m 0,307.545464 c 84.33856,0 153.34283,69.19771 153.34283,153.7727 0,84.57501 -69.00427,153.77273 -153.34283,153.77273 -84.33856,0 -153.34283,-69.19772 -153.34283,-153.77273 0,-84.57499 69.00427,-153.7727 153.34283,-153.7727 z"
+     stroke="currentColor"
+     stroke-width="23.9934"
+     id="path10" />
+</svg>

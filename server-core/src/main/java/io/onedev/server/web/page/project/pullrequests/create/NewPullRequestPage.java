@@ -80,6 +80,7 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.pullrequest.assignment.AssignmentListPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewListPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -792,13 +793,16 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				request.setLastMergePreview(mergePreview);
 				
 				if (merged != null) {
-					Component result = new Label(componentId, "<i class=\"fa fa-check-circle\"></i> Able to merge without conflicts");
+					String html = String.format("<svg class='icon'><use xlink:href='%s'/></svg> Able to merge without conflicts", 
+							SpriteImage.getVersionedHref("tick-circle-o"));
+					Component result = new Label(componentId, html);
 					result.add(AttributeAppender.append("class", "no-conflict"));
 					result.setEscapeModelStrings(false);
 					return result;
 				} else { 
-					Component result = new Label(componentId, 
-							"<i class=\"fa fa-warning\"></i> There are merge conflicts. You can still create the pull request though");
+					String html = String.format("<svg class='icon'><use xlink:href='%s'/></svg> There are merge conflicts. "
+							+ "You can still create the pull request though", SpriteImage.getVersionedHref("warning-o"));
+					Component result = new Label(componentId, html);
 					result.add(AttributeAppender.append("class", "conflict"));
 					result.setEscapeModelStrings(false);
 					return result;

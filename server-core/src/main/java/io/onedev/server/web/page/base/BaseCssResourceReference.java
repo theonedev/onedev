@@ -7,7 +7,6 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
 import io.onedev.server.web.asset.bootstrap.BootstrapCssResourceReference;
-import io.onedev.server.web.asset.fontext.FontExtCssResourceReference;
 
 public class BaseCssResourceReference extends CssResourceReference {
 
@@ -21,7 +20,6 @@ public class BaseCssResourceReference extends CssResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 	    dependencies.add(CssHeaderItem.forReference(new BootstrapCssResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new FontExtCssResourceReference()));
 		return dependencies;
 	}
 

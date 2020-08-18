@@ -103,7 +103,6 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
-import io.onedev.server.web.download.RawBlobDownloadResourceReference;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -115,6 +114,7 @@ import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPane
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
+import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -219,7 +219,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		
 		if (params.get(PARAM_RAW).toBoolean(false)) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
-					new ResourceReferenceRequestHandler(new RawBlobDownloadResourceReference(), getPageParameters()));
+					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
 		}
 	}
 	

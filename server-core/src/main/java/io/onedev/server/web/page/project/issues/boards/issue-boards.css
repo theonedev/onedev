@@ -41,9 +41,6 @@
 .milestone-menu .actions a {
 	color: #1f3b7b;
 }
-.milestone-selector.create .fa-caret-down {
-	display: none;
-}
 
 #issue-boards>.body>.columns {
 	position: relative;
@@ -171,8 +168,10 @@
 #issue-boards>.body .card .detail {
 	color: #666;
 	text-decoration: none;
-	font-size: 14px;
-	line-height: 18px;
+}
+#issue-boards>.body .card .detail svg {
+	width: 16px;
+	height: 16px;
 }
 .board-card-detail>.modal-header {
 	padding-right: 30px;

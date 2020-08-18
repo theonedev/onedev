@@ -20,6 +20,8 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.UrlUtils;
+import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -76,8 +78,8 @@ public class UrlProcessor implements MarkdownProcessor {
 											CharSequence urlToAddFile = RequestCycle.get().urlFor(ProjectBlobPage.class, 
 													ProjectBlobPage.paramsOf(project, state));
 											String htmlToAddFile = String.format(
-													"<a href='%s' title='Add this file' class='add-missing'><i class='fa fa-plus'></i></a>", 
-													urlToAddFile.toString());
+													"<a href='%s' title='Add this file' class='add-missing'><svg class='icon'><use xlink:href='%s'/></svg></a>", 
+													urlToAddFile.toString(), SpriteImage.getVersionedHref(IconScope.class, "plus"));
 											missingElement.after(htmlToAddFile);
 										}
 									}

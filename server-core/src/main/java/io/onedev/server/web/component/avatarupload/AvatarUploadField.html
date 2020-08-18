@@ -2,10 +2,10 @@
 	<div class="avatar-upload">
 		<input type="text" wicket:id="data">
 		<input wicket:id="fileInput" type="file" accept="image/*">
-		<label wicket:id="fileLabel"><i class="fa fa-file-image-o"></i> Select file...</label>
+		<label wicket:id="fileLabel"><wicket:svg href="image" class="icon"></wicket:svg> Select file...</label>
 		<div class="preview clearfix">
-			<div class="cropping pull-left"><img></div>
-			<div class="cropped pull-left"><img></div>
+			<div class="cropping float-left"><img></div>
+			<div class="cropped float-left"><img></div>
 		</div>
 	</div>
 </wicket:panel>
