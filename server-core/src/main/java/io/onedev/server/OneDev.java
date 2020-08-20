@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
+import org.eclipse.jgit.util.FS.FileStoreAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +125,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		} finally {
 			sessionManager.closeSession();
 		}
+		
+		// workaround for issue https://bugs.eclipse.org/bugs/show_bug.cgi?id=566170
+		FileStoreAttributes.setBackground(true);
 	}
 	
 	@Sessional
