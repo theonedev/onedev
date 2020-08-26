@@ -41,6 +41,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -63,6 +64,8 @@ public class GlobalIssueSetting implements Serializable {
 	private List<NamedIssueQuery> namedQueries = new ArrayList<>();
 	
 	private List<IssueTemplate> issueTemplates = new ArrayList<>();
+	
+	private String defaultMilestoneScript;
 	
 	private boolean reconciled = true;
 	
@@ -609,6 +612,15 @@ public class GlobalIssueSetting implements Serializable {
 
 	public void setIssueTemplates(List<IssueTemplate> issueTemplates) {
 		this.issueTemplates = issueTemplates;
+	}
+
+	@Code(language=Code.GROOVY)
+	public String getDefaultMilestoneScript() {
+		return defaultMilestoneScript;
+	}
+
+	public void setDefaultMilestoneScript(String defaultMilestoneScript) {
+		this.defaultMilestoneScript = defaultMilestoneScript;
 	}
 
 	@Nullable

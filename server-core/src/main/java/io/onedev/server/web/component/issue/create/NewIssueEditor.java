@@ -2,6 +2,7 @@ package io.onedev.server.web.component.issue.create;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -276,6 +277,11 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		issue.setSubmitDate(new Date());
 		issue.setState(getIssueSetting().getInitialStateSpec().getName());
 		issue.setSubmitter(SecurityUtils.getUser());
+		issue.setMilestone(getProject().getMilestones().stream()
+				.filter(it -> !it.isClosed() && it.getDueDate() != null)
+				.min(Comparator.comparing(Milestone::getDueDate))
+				.orElse(null));
+		
 		if (getTemplate() != null)
 			getTemplate().fill(issue);
 		return issue;
