@@ -40,6 +40,7 @@ import io.onedev.server.model.support.issue.IssueTemplate;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
@@ -82,7 +83,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 
 		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(); 
-		issue.setFieldValues(IssueUtils.getFieldValues(null, fieldBean, fieldNames));
+		issue.setFieldValues(IssueUtils.getFieldValues(new ComponentContext(this), fieldBean, fieldNames));
 		
 		titleInput = new TextField<String>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));

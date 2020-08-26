@@ -601,7 +601,7 @@
 		<shiro.version>1.4.2</shiro.version>
 		<jgit.version>5.7.0.202003110725-r</jgit.version>
 		<flexmark.version>0.18.3</flexmark.version>
-		<groovy.version>2.4.14</groovy.version>
+		<groovy.version>3.0.5</groovy.version>
 		<servlet.version>3.1.0</servlet.version>
 	</properties>
 </project>
