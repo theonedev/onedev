@@ -685,13 +685,33 @@ td.ellipsis {
 .btn.btn-sm .icon {
 	width: 14px;
 	height: 14px;
-	margin-top: -2px;
 }
+
+.btn .icon.icon-sm {
+	width: 14px;
+	height: 14px;
+}
+
 .dropdown-menu a>svg:first-child {
 	margin-right: 4px;
 }
 label.form-check-inline {
 	margin-bottom: 0;
+}
+.rotate-90 {
+	transform: rotate(90deg);
+}
+.rotate-180 {
+	transform: rotate(180deg);
+}
+.rotate-270 {
+	transform: rotate(270deg);
+}
+.flip-x {
+	transform: scaleX(-1);
+}
+.flip-y {
+	transform: scaleY(-1);
 }
 
 @keyframes spin {

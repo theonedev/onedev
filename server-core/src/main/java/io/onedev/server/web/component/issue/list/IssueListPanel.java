@@ -468,7 +468,7 @@ public abstract class IssueListPanel extends Panel {
 				@Override
 				public IModel<?> getBody() {
 					return Model.of(String.format(
-							"<svg class='icon'><use xlink:href='%s'/></svg> New <svg class='icon' transform='rotate(90)'><use xlink:href='%s'/></svg>", 
+							"<svg class='icon'><use xlink:href='%s'/></svg> New <svg class='icon rotate-90'><use xlink:href='%s'/></svg>", 
 							SpriteImage.getVersionedHref(IconScope.class, "plus"), SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 				}
 				

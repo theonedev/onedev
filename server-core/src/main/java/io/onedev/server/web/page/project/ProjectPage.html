@@ -16,7 +16,7 @@
 		<a wicket:id="dropdown" class="dropdown">
 			<img wicket:id="avatar">
 			<span wicket:id="name" class="ellipsis-text"></span>
-			<wicket:svg href="arrow" transform="rotate(90)" class="icon"></wicket:svg>
+			<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
 		</a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="navContextDropdownFrag">
@@ -29,7 +29,7 @@
 				<a onclick="$(this).parent().toggleClass('expanded'); var $floating = $(this).closest('.floating'); $floating.align($floating.data('alignment'));">
 					<wicket:svg href="gear" class="icon"></wicket:svg>
 					Settings
-					<wicket:svg href="arrow" class="icon" transform="rotate(90)"></wicket:svg>
+					<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
 				</a>
 				<ul wicket:id="menu" class="menu list-unstyled"></ul>
 			</li>
