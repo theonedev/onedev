@@ -32,7 +32,7 @@ import io.onedev.server.web.page.security.LoginPage;
 @SuppressWarnings("serial")
 public class NewIssuePage extends ProjectPage implements InputContext, ScriptIdentityAware {
 
-	private static final String PARAM_QUERY = "query";
+	private static final String PARAM_TEMPLATE = "query";
 	
 	private IModel<IssueCriteria> templateModel;
 	
@@ -43,7 +43,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 		
-		String queryString = params.get(PARAM_QUERY).toString();
+		String queryString = params.get(PARAM_TEMPLATE).toString();
 		templateModel = new LoadableDetachableModel<IssueCriteria>() {
 
 			@Override
@@ -125,10 +125,10 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 		return new SiteAdministrator();
 	}
 
-	public static PageParameters paramsOf(Project project, String query) {
+	public static PageParameters paramsOf(Project project, String template) {
 		PageParameters params = paramsOf(project);
-		if (query != null)
-			params.add(PARAM_QUERY, query);
+		if (template != null)
+			params.add(PARAM_TEMPLATE, template);
 		return params;
 	}
 	

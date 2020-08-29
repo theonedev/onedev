@@ -456,8 +456,9 @@ public abstract class IssueListPanel extends Panel {
 				
 				@Override
 				public void onClick() {
-					setResponsePage(NewIssuePage.class, 
-							NewIssuePage.paramsOf(getProject(), queryStringModel.getObject()));
+					IssueQuery query = queryModel.getObject();
+					String template = query!=null && query.getCriteria()!=null? query.getCriteria().toString(): null;
+					setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(getProject(), template));
 				}
 				
 			}.setEscapeModelStrings(false));

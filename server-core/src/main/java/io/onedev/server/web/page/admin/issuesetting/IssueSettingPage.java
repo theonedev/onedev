@@ -51,7 +51,7 @@ public class IssueSettingPage extends AdministrationPage {
 		tabs.add(new PageTab(Model.of("States"), IssueStateListPage.class));
 		tabs.add(new PageTab(Model.of("State Transitions"), StateTransitionsPage.class));
 		tabs.add(new PageTab(Model.of("Default Boards"), DefaultBoardListPage.class));
-		tabs.add(new PageTab(Model.of("Templates"), IssueTemplateListPage.class));
+		tabs.add(new PageTab(Model.of("Description Templates"), IssueTemplateListPage.class));
 		add(new Tabbable("issueSettingTabs", tabs));
 	}
 

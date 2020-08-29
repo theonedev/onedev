@@ -568,13 +568,17 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (IssueField field: getFields()) {
 				if (field.getType().equals(InputSpec.USER)) {
-					User user = userManager.findByName(field.getValue());
-					if (user != null)
-						participants.add(user);
+					if (field.getValue() != null) {
+						User user = userManager.findByName(field.getValue());
+						if (user != null)
+							participants.add(user);
+					}
 				} else if (field.getType().equals(InputSpec.GROUP)) {
-					Group group = OneDev.getInstance(GroupManager.class).find(field.getValue());
-					if (group != null)
-						participants.addAll(group.getMembers());
+					if (field.getValue() != null) {
+						Group group = OneDev.getInstance(GroupManager.class).find(field.getValue());
+						if (group != null)
+							participants.addAll(group.getMembers());
+					}
 				}
 			}
 			for (IssueComment comment: getComments()) {
