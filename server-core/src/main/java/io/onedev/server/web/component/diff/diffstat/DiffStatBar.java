@@ -36,7 +36,7 @@ public class DiffStatBar extends Panel {
 			public String getObject() {
 				StringBuffer sb = new StringBuffer();
 				for (int i=0; i<getAdditionBlocks(); i++)
-					sb.append("&#xf0c8; ");
+					sb.append("&#9632; ");
 				return sb.toString();
 			}
 			
@@ -48,7 +48,7 @@ public class DiffStatBar extends Panel {
 			public String getObject() {
 				StringBuffer sb = new StringBuffer();
 				for (int i=0; i<getDeletionBlocks(); i++)
-					sb.append("&#xf0c8; ");
+					sb.append("&#9632; ");
 				return sb.toString();
 			}
 		}).setEscapeModelStrings(false));
@@ -59,7 +59,7 @@ public class DiffStatBar extends Panel {
 			public String getObject() {
 				StringBuffer sb = new StringBuffer();
 				for (int i=0; i<MAX_BLOCKS - getAdditionBlocks() - getDeletionBlocks(); i++)
-					sb.append("&#xf0c8; ");
+					sb.append("&#9632; ");
 				
 				return sb.toString();
 			}
