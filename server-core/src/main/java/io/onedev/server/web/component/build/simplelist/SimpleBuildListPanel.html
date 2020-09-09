@@ -3,22 +3,19 @@
 	<wicket:fragment wicket:id="hasBuildsFrag">
 	    <div class="has-builds">
 	        <wicket:enclosure child="showInList">
-	            <div class="head">
-	                <span>Builds</span> 
+	            <div class="head d-flex align-items-center py-3 px-3 border-bottom">
+	                <h6 class="mb-0 mr-4">Builds</h6> 
 	                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
 	            </div>
 	        </wicket:enclosure>
-	        <div class="body">
+	        <div class="body py-2">
 	            <div wicket:id="builds">
-					<a wicket:id="build" class="build">
-						<span wicket:id="status" class="status"></span>
+					<a wicket:id="build" class="build d-flex align-items-center bg-hover-light text-hover-gray-dark px-3 py-2">
+						<svg wicket:id="status" class="status mr-2"></svg>
 						<span wicket:id="title" class="title"></span>
 					</a>
 	            </div>
 	        </div>
 	    </div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="noBuildsFrag">
-		<div class="no-builds">No builds</div>
 	</wicket:fragment>
 </wicket:panel>

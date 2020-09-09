@@ -79,18 +79,20 @@ onedev.server.codeSupport = {
         onedev.server.codemirror.setModeByName(cm, modeName);
 
         onedev.server.codeSupport.trackWidth(inputId);
+		$("#" + inputId).trigger("resized");
 	},
     trackWidth: function(inputId) {
-        function setWidth() {
-            var $cm = $("#" + inputId).next();
-            if ($cm.length != 0) {
-                var cm = $cm[0].CodeMirror;
-                cm.setSize(1, null);  // shrink temporarily in order to get original parent width
-                cm.setSize($cm.parent().width(), null);
-                cm.refresh();
-            }
-        }
-        setWidth();
-        $(window).resize(setWidth);
+		var $input = $("#" + inputId); 
+		$input.on("resized", function() {
+			setTimeout(function() {
+	            var $cm = $input.next();
+	            if ($cm.length != 0) {
+					$cm.hide();
+		            $cm[0].CodeMirror.setSize($cm.parent().width(), null);
+					$cm.show();
+					$cm[0].CodeMirror.refresh();
+	            }
+			}, 0);
+		});
     }
 }

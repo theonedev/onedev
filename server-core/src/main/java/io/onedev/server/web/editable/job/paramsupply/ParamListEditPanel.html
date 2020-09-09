@@ -1,25 +1,25 @@
 <wicket:panel>
     <div class="job-params-edit">
         <div wicket:id="params" class="job-param form-group">
-            <label class="name control-label">
+            <label class="name control-label font-weight-bolder">
                 <span wicket:id="name"></span>
-                <span wicket:id="required" class="required">*</span>
+                <span wicket:id="required" class="text-danger">*</span>
             </label>
-            <select wicket:id="valuesProvider" class="form-control values-provider"></select>
+            <select wicket:id="valuesProvider" class="form-control values-provider custom-select mb-3"></select>
             <div wicket:id="values" class="values"></div>
 	        <div wicket:id="feedback" class="feedback"></div>
-	        <p wicket:id="description" class="help-block"></p>
+	        <p wicket:id="description" class="form-text text-muted"></p>
         </div>
     </div>
     <wicket:fragment wicket:id="specifiedValuesFrag">
         <div wicket:id="values" class="specified-value">
-            <div wicket:id="value"></div>
-            <a wicket:id="delete" title="Delete this value"><wicket:svg href="trash" class="icon"></wicket:svg></a>
-            <div wicket:id="feedback" class="feedback"></div>
+			<div class="d-flex align-items-center mb-3">
+	            <div wicket:id="value" class="flex-grow-1 mr-3"></div>
+	            <a wicket:id="delete" class="flex-shrink-0 btn btn-icon btn-light btn-hover-danger" title="Delete this value"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			</div>
+            <div wicket:id="feedback" class="feedback mb-3"></div>
         </div>
-        <a wicket:id="add" class="btn btn-success btn-sm"><wicket:svg href="plus" class="icon"></wicket:svg> Add Value</a>
-        <a class="help" title="Add additional values to run matrix build. The job will run for each possible combination of different values across all parameters">
-			<wicket:svg href="question-circle" class="icon"/>
-		</a>
+        <a wicket:id="add" class="btn btn-light btn-hover-primary btn-block mb-1" title="Add value"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+        <div class="text-muted font-size-sm">Add additional values to run matrix build. The job will run for each possible combination of different values across all parameters</div>
     </wicket:fragment>
 </wicket:panel>

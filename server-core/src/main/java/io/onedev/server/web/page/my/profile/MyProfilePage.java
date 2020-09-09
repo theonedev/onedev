@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.my.profile;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -48,6 +49,11 @@ public class MyProfilePage extends MyPage {
 			
 		}.setVisible(getLoginUser().isExternalManaged()));
 		
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "My Profile");
 	}
 
 }

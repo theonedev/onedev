@@ -11,8 +11,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -74,7 +72,7 @@ public abstract class ProjectCommentPanel extends Panel {
 
 			}, getContentVersionSupport()));
 		} else {
-			viewer.add(new Label("content", "<i>No comment</i>").setEscapeModelStrings(false));
+			viewer.add(new Label("content", "<i class='text-muted'>No comment</i>").setEscapeModelStrings(false));
 		}
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
@@ -196,12 +194,6 @@ public abstract class ProjectCommentPanel extends Panel {
 		super.onInitialize();
 		
 		add(newViewer());
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectCommentCssResourceReference()));
 	}
 
 	@Nullable

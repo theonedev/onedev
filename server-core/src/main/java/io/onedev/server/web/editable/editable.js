@@ -3,7 +3,10 @@ onedev.server.editable = {
 		var $container = $("#" + containerId);
         var $groups = $container.children(".group");
         $groups.children("a").click(function() {
-            $(this).parent().toggleClass("expanded");
+			var $parent = $(this).parent();
+            $parent.toggleClass("expanded");
+			// Fix the issue that placeholder is not displayed after showing the group
+			$parent.find(".select2-container-multi+input").data("select2").clearSearch();
         });
         $groups.each(function() {
         	var $group = $(this);
@@ -16,7 +19,7 @@ onedev.server.editable = {
 		var $container = $("#" + containerId);
         var $groups = $container.children(".group");
         $groups.children("a").click(function() {
-            $(this).parent().toggleClass("expanded");   
+            $(this).parent().toggleClass("expanded"); 
             $(window).resize();  
         });
         $groups.each(function() {
@@ -25,15 +28,6 @@ onedev.server.editable = {
         		onedev.server.editable.checkGroup($group);
         });
     },
-	onBeanEditorPropertyContainerDomReady: function(containerId) {
-		var $container = $("#" + containerId);
-		$container.find("div.value>.checkbox").each(function() {
-			var $checkbox = $(this);
-			var $label = $checkbox.parent().prev("label.name");
-			$checkbox.children("label").append($label.children("span").text());
-			$label.remove();
-		});
-	}, 
 	checkGroup: function($group) {
 		var hasVisibleProperties = false;
 		if ($group.children("table").length != 0) {

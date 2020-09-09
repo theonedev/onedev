@@ -1,14 +1,8 @@
 .commit-message>.detail {
 	display: none; 
-	color: #666; 
-    font-size: 12px;
-    border: none;
-	border-left: 4px solid #E8E8E8;
-    background: none;
-    margin: 8px 0;
-    padding: 0 0 0 12px;
+    font-size: 0.9rem;
+	border-left: 4px solid var(--light-gray);
+    margin: 1rem 0;
+    padding: 0 0 0 1rem;
     border-radius: 0;
 }
-.commit:hover .commit-message>.detail {
-    border-left-color: #D8D8D8;
-} 

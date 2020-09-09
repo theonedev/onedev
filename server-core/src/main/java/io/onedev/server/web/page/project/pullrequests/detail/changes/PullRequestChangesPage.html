@@ -1,30 +1,30 @@
 <wicket:extend>
 	<div class="changes">
-		<div wicket:id="changesHead" class="head clearfix">
-			<div class="float-left btn-group">
-				<button wicket:id="prevCommitLink" class="btn btn-outline-secondary" title="Previous commit"><wicket:svg href="arrow2" class="icon rotate-180"></wicket:svg></button>
-				<button wicket:id="comparingCommits" class="btn btn-outline-secondary"><span wicket:id="label"></span> <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></button>
-				<button wicket:id="nextCommitLink" class="btn btn-outline-secondary" title="Next commit"><wicket:svg href="arrow2" class="icon"></wicket:svg></button>
+		<div wicket:id="changesHead" class="head">
+			<div class="btn-group btn-block mb-4">
+				<button wicket:id="prevCommitLink" class="btn btn-light-info btn-icon flex-grow-0 flex-shrink-0" title="Previous commit"><wicket:svg href="arrow" class="icon rotate-180"></wicket:svg></button>
+				<button wicket:id="comparingCommits" class="btn btn-light-info"><span wicket:id="label"></span> <wicket:svg href="arrow" class="ml-1 icon rotate-90"></wicket:svg></button>
+				<button wicket:id="nextCommitLink" class="btn btn-light-info btn-icon flex-grow-0 flex-shrink-0" title="Next commit"><wicket:svg href="arrow" class="icon"></wicket:svg></button>
 			</div>
 			<wicket:enclosure child="fullChanges">
-			<div class="full-changes float-left">
-				<a wicket:id="fullChanges" class="float-left"><wicket:svg href="warning-o" class="icon"></wicket:svg> You are viewing a subset of all changes, click to show all changes</a>
-			</div>
+				<div class="alert alert-light-info mb-4">
+					You are viewing a subset of all changes. <a wicket:id="fullChanges">show all changes</a>
+				</div>
 			</wicket:enclosure>
 		</div>
 		<div wicket:id="revisionDiff" class="body"></div>		
 	</div>
 	<wicket:fragment wicket:id="commitsFrag">
-		<div class="commits-selector noselect">
-			<div class="short-cuts">
-				<a wicket:id="allChanges">All Changes</a>
-				<a wicket:id="changesSinceLastReview">Changes Since Last Review</a>
+		<div class="commits-selector noselect p-4">
+			<div class="head">
+				<h6 class="mb-4">Click to select a commit, or shift-click to select multiple commits</h6>
+				<div class="links mb-4">
+					<a wicket:id="allChanges" class="btn btn-light btn-sm mr-2">All changes</a>
+					<a wicket:id="changesSinceLastReview" class="btn btn-light btn-sm mr-2">Changes since last review</a>
+					<a class="btn btn-light btn-sm selected-changes disabled">Show selected changes</a>
+				</div>
 			</div>
-			<div class="head clearfix">
-				<div class="title float-left">Click to select a commit, or shift-click to select multiple commits</div>
-				<a disabled="disabled">show changes</a>
-			</div>
-			<ul class="body list-unstyled autosize">
+			<ul class="body list-unstyled autosuit mb-0">
 				<li wicket:id="commits">
 					<a unselectable="on">
 						<wicket:svg href="commit" class="icon" unselectable="on"></wicket:svg> 

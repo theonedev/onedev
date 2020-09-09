@@ -1,17 +1,18 @@
 <wicket:panel>
-	<div class="project-selector">
+	<div class="project-selector p-4">
 		<wicket:enclosure child="search">
-		<div class="search">
-			<input wicket:id="search" class="form-control" placeholder="Search projects...">
+		<div class="d-flex align-items-center">
+			<input wicket:id="search" class="form-control form-control-sm branch" placeholder="Search project"></input>
+			<wicket:svg href="magnify" class="icon text-muted icon-magnify"></wicket:svg>
 		</div>
 		</wicket:enclosure>
-		<ul wicket:id="projects" class="list-unstyled projects autosize">
+		<ul wicket:id="projects" class="list-unstyled projects overflow-auto mb-0 mt-3">
 			<li wicket:id="projects" class="project selectable">
 				<a wicket:id="link">
-					<wicket:svg href="tick" class="icon"/> <img wicket:id="avatar"> <span wicket:id="name"></span>
+					<wicket:svg href="tick" class="icon mr-2"/> <img wicket:id="avatar" class="mr-1"> <span wicket:id="name"></span>
 				</a>
 			</li>
 		</ul>
-		<div wicket:id="noProjects" class="no-projects autosize">No Projects Found</div>
+		<div wicket:id="noProjects" class="no-projects alert alert-light-warning mb-0 mt-4">No Projects Found</div>
 	</div>
 </wicket:panel>

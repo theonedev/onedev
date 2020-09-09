@@ -51,8 +51,8 @@ import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.svg.SpriteImage;
-import io.onedev.server.web.page.init.ServerInitPage;
-import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -74,25 +74,45 @@ public abstract class BasePage extends WebPage {
 		if (!isPermitted())
 			unauthorized();
 		
-		add(new Label("pageTitle", getPageTitle()) {
+		AbstractPostAjaxBehavior popStateBehavior;
+		add(popStateBehavior = new AbstractPostAjaxBehavior() {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setMethod(Method.POST);
+			}
 
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+				String encodedData = params.getParameterValue("data").toString();
+				
+				byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
+				Serializable data = (Serializable) SerializationUtils.deserialize(bytes);
+				onPopState(target, data);
+				resizeWindow(target);
+				target.appendJavaScript("onedev.server.viewState.getFromHistoryAndSetToView();");
+			}
+
+		});
+		
+		add(new Label("pageTitle", getPageTitle()) {
+			
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				
-				/* 
-				 * Render page resources in first child to make sure every other resources appears after it, 
-				 * including onDomReady and onWindowLoad call
-				 */
 				response.render(JavaScriptHeaderItem.forReference(new BaseResourceReference()));
-				
-				response.render(OnDomReadyHeaderItem.forScript(String.format("onedev.server.onDomReady('%s');", 
-						SpriteImage.getVersionedHref(IconScope.class, null))));
+
+				response.render(OnDomReadyHeaderItem.forScript(
+						String.format("onedev.server.onDomReady('%s', %s);", 
+						SpriteImage.getVersionedHref(IconScope.class, null), 
+						popStateBehavior.getCallbackFunction(explicit("data")).toString())));
 				response.render(OnLoadHeaderItem.forScript("onedev.server.onWindowLoad();"));
 			}
 			
 		});
-
 		add(new WebMarkupContainer("pageRefresh") {
 
 			@Override
@@ -125,6 +145,7 @@ public abstract class BasePage extends WebPage {
 			builder.append(clazz.getSimpleName()).append(" ");
 			clazz = clazz.getSuperclass();
 		}
+		
 		String script = String.format("$('body').addClass('%s');", builder.toString());
 		add(new Label("script", script).setEscapeModelStrings(false));
 		
@@ -134,63 +155,29 @@ public abstract class BasePage extends WebPage {
 
 		add(rootComponents = new RepeatingView("rootComponents"));
 		
-		if (!(getPage() instanceof LoginPage)) {
-			add(new AbstractPostAjaxBehavior() {
+		int sessionTimeout = AppLoader.getInstance(ServletContextHandler.class)
+				.getSessionHandler().getMaxInactiveInterval();
+		add(new WebMarkupContainer("keepSessionAlive")
+				.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
+		
+		add(new WebSocketBehavior() {
+
+			@Override
+			protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
+				super.onMessage(handler, message);
 				
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.setMethod(Method.POST);
-				}
-
-				@Override
-				protected void respond(AjaxRequestTarget target) {
-					IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-					String encodedData = params.getParameterValue("data").toString();
-					
-					byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
-					Serializable data = (Serializable) SerializationUtils.deserialize(bytes);
-					onPopState(target, data);
-					target.appendJavaScript("onedev.server.viewState.getFromHistoryAndSetToView();");
-				}
-				
-				@Override
-				public void renderHead(Component component, IHeaderResponse response) {
-					super.renderHead(component, response);
-
-					String script = String.format("onedev.server.history.init(%s);", 
-							getCallbackFunction(explicit("data"))); 
-					response.render(OnDomReadyHeaderItem.forScript(script));
-				}
-
-			});
+				if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
+					List<String> observables = Splitter.on('\n').splitToList(
+							message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1));
+					for (WebSocketObserver observer: findWebSocketObservers()) {
+						if (CollectionUtils.containsAny(observer.getObservables(), observables))
+							observer.onObservableChanged(handler);
+					}
+				} 
+		 
+			}
 			
-			int sessionTimeout = AppLoader.getInstance(ServletContextHandler.class)
-					.getSessionHandler().getMaxInactiveInterval();
-			add(new WebMarkupContainer("keepSessionAlive")
-					.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
-			
-			add(new WebSocketBehavior() {
-
-				@Override
-				protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
-					super.onMessage(handler, message);
-					
-					if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
-						List<String> observables = Splitter.on('\n').splitToList(
-								message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1));
-						for (WebSocketObserver observer: findWebSocketObservers()) {
-							if (CollectionUtils.containsAny(observer.getObservables(), observables))
-								observer.onObservableChanged(handler);
-						}
-					} 
-			 
-				}
-				
-			});
-		} else {
-			add(new WebMarkupContainer("keepSessionAlive"));
-		}
+		});
 
 	}
 	
@@ -282,4 +269,9 @@ public abstract class BasePage extends WebPage {
 	protected int getPageRefreshInterval() {
 		return 0;
 	}
+	
+	public void resizeWindow(IPartialPageRequestHandler handler) {
+		handler.appendJavaScript("$(window).resize();");
+	}
+	
 }

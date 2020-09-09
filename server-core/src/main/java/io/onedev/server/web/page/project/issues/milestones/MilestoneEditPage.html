@@ -1,11 +1,19 @@
 <wicket:extend>
-	<div id="milestone-edit">
-		<div class="head"><h4>Edit Milestone</h4></div>
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="editor"></div>
-			<div class="actions">
-				<input type="submit" value="Ok" class="btn btn-primary dirty-aware"></input>
-			</div>
-		</form>
+	<div class="card m-5">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor"></div>
+				<div class="actions">
+					<input type="submit" value="Ok" class="btn btn-primary dirty-aware"></input>
+				</div>
+			</form>
+		</div>
 	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<a wicket:id="milestones">Milestones</a>
+		<span class="dot"></span>
+		<a wicket:id="milestone"><span wicket:id="name" class="text-truncated"></span></a>
+		<span class="dot"></span>
+		Edit
+	</wicket:fragment>
 </wicket:extend>

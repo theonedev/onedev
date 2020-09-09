@@ -1,9 +1,9 @@
 .source-format select {
-	color: #444;
-	height: 22px;
-	padding: 0;
-	border-radius: 3px;
+	padding: 0 2rem 0 1rem;
+	height: 2rem;
+	border-radius: 4px;
 }
-.source-format>div {
-	margin-left: 8px;
+
+.source-format>div:last-child {
+	margin-right: 0 !important;
 }

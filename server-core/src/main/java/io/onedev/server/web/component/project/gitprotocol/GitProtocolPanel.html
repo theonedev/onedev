@@ -1,13 +1,19 @@
 <wicket:panel>
-	<div class="git-protocol">
-		<div class="protocol clearfix">
-			<div wicket:id="current" class="float-left"></div>
-			<a wicket:id="switch" class="switch float-right"><span wicket:id="label"></span></a>
+	<div class="card">
+		<div class="card-header">
+			<div class="card-title">
+				<div wicket:id="current" class="mr-4"></div>
+			</div>
+			<div class="card-toolbar">
+				<a wicket:id="switch" class="link-primary font-weight-bold"><span wicket:id="label"></span></a>
+			</div>
 		</div>
-		<div wicket:id="noSshKeysWarning" class="no-ssh-keys alert alert-warning">
-			No SSH keys configured in your account. You may <a wicket:id="sshKeys">add a key</a> or switch to <a wicket:id="useHttp">HTTP(S)</a> url
+		<div class="card-body">
+			<div wicket:id="noSshKeysWarning" class="alert alert-light-warning mb-4">
+				No SSH keys configured in your account. You may <a wicket:id="sshKeys" class="link-primary">add a key</a> or switch to <a wicket:id="useHttp" class="link-primary">HTTP(S)</a> url
+			</div>
+			<div wicket:id="content"></div>
+			<div wicket:id="fingerPrint" class="mt-4 text-break text-muted"></div>
 		</div>
-		<div wicket:id="content" class="content"></div>
-		<div wicket:id="fingerPrint" class="finger-print"></div>
 	</div>
 </wicket:panel>

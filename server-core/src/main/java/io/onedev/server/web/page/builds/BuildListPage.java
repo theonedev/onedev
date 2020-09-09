@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -65,7 +66,7 @@ public class BuildListPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(savedQueries = new SavedQueriesPanel<NamedBuildQuery>("side") {
+		add(savedQueries = new SavedQueriesPanel<NamedBuildQuery>("savedQueries") {
 
 			@Override
 			protected NamedQueriesBean<NamedBuildQuery> newNamedQueriesBean() {
@@ -104,7 +105,7 @@ public class BuildListPage extends LayoutPage {
 
 		});
 		
-		add(buildList = new BuildListPanel("main", new IModel<String>() {
+		add(buildList = new BuildListPanel("builds", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -242,4 +243,10 @@ public class BuildListPage extends LayoutPage {
 		
 		return paramsOf(query, page, expectedCount);
 	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Builds");
+	}
+	
 }

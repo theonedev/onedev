@@ -1,71 +1,61 @@
-@media(max-width: 991px) {
-	#project-branches>.list>table .behind-ahead {
-		display: none;
-	}
-}
-#project-branches>.list>.head>.base {
+.project-branches .head>.base {
 	width: 240px;
 }
-#project-branches>.list>.body>table>thead {
+.project-branches .body>table>thead {
 	display: none;
 }
 
-#project-branches>.list>.body>table td.branch>div {
-	margin: 8px 0;
-}
-
-#project-branches>.list>.body>table .branch .make-default {
-	display: none;
-}
-#project-branches>.list>.body>table>tbody>tr:hover .branch .make-default {
-	display: inline;
-}
-#project-branches>.list>.body>table td.branch>.title>.name {
-	font-weight: bold;
-}
-#project-branches .actions a {
-	color: #444;
-}
-
-#project-branches>.list>.body>table td.branch>.title>* {
-	margin-right: 8px;
-}
-#project-branches>.list>.body>table td.branch>.title .build-status svg {
-	margin: 0;
-}
-
-#project-branches>.list>.body>table td.behind {
-	padding-right: 0;
-}
-#project-branches>.list>.body>table td.ahead {
+.project-branches .body>table td:first-child {
 	padding-left: 0;
 }
-#project-branches>.list>.body>table td.behind>div {
-	border-right: 2px solid #BBB;
+.project-branches .body>table td:last-child {
+	padding-right: 0;
 }
-#project-branches>.list>.body>table td.behind-ahead div.text {
+
+.project-branches .body>table td.branch>.title>.name {
+	font-weight: bold;
+	font-size: 1.1rem;
+}
+
+.project-branches .body>table td.behind {
+	padding-right: 0;
+}
+.project-branches .body>table td.ahead {
+	padding-left: 0;
+}
+.project-branches .body>table td.behind>div {
+	border-right: 2px solid var(--light-dark);
+}
+.project-branches .body>table td.behind-ahead div.text {
 	margin: 0 8px;
 }
-#project-branches>.list>.body>table td.behind-ahead {
+.project-branches .body>table td.behind-ahead {
 	font-size: 13px;
 	padding-top: 12px;
 	width: 20%;
 }
-#project-branches>.list>.body>table td.behind-ahead.behind>div {
+.project-branches .body>table td.behind-ahead.behind>div {
 	text-align: right;
 }
-#project-branches>.list>.body>table .bar {
+.project-branches .body>table .bar {
 	height: 6px;
 	display: inline-block;
 }
-#project-branches>.list>.body>table .ahead .bar {
-	background: #ccc;
-	border-radius: 0 2px 2px 0;
+.project-branches .body>table .ahead .bar {
+	background: var(--light-dark);
+	border-radius: 0 4px 4px 0;
 }
-#project-branches>.list>.body>table .behind .bar {
-	background: #ccc;
+.project-branches .body>table .behind .bar {
+	background: var(--light-dark);
 	border-radius: 2px 0 0 2px;
 }
+@media(max-width: 991px) {
+	.project-branches .body>table td {
+		padding-left: 0;
+		padding-right: 0;
+	}
+}
+
 #searching-branches {
 	position: absolute; 
 	left: 50%; 

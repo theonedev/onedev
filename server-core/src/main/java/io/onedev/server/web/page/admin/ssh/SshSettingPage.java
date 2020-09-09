@@ -1,7 +1,9 @@
 package io.onedev.server.web.page.admin.ssh;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -66,5 +68,10 @@ public class SshSettingPage extends AdministrationPage {
         form.setOutputMarkupId(true);
         add(form);
     }
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "SSH Setting");
+	}
     
 }

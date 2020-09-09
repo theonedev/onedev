@@ -446,27 +446,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()), true);
 	}
 	
-	/**
-	 * Get unmodifiable collection of updates of this pull request. To add update 
-	 * to the pull request, call {@link this#addUpdate(PullRequestUpdate)} instead.
-	 * 
-	 * @return
-	 * 			unmodifiable collection of updates
-	 */
 	public Collection<PullRequestUpdate> getUpdates() {
-		return Collections.unmodifiableCollection(updates);
+		return updates;
 	}
 	
 	public void setUpdates(Collection<PullRequestUpdate> updates) {
 		this.updates = updates;
 		sortedUpdates = null;
 	}
-
-	public void addUpdate(PullRequestUpdate update) {
-		updates.add(update);
-		sortedUpdates = null;
-	}
-
+	
 	public Collection<PullRequestVerification> getVerifications() {
 		return verifications;
 	}
@@ -713,6 +701,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public void setReviews(Collection<PullRequestReview> reviews) {
 		this.reviews = reviews;
+		sortedReviews = null;
 	}
 
 	public Collection<PullRequestAssignment> getAssignments() {

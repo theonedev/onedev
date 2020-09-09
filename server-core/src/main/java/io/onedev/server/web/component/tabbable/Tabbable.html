@@ -1,22 +1,6 @@
 <wicket:panel>
-	<li wicket:id="tabs" class="expanded nav-item">
+	<li wicket:id="tabs" class="nav-item">
 		<wicket:container wicket:id="tab"></wicket:container>
 	</li>
-	<li class="collapsed active nav-item">
-		<wicket:container wicket:id="collapsed"></wicket:container>
-	</li>
 	<li wicket:id="options" class="options"></li>
-	<wicket:fragment wicket:id="multiTabCollapsedFrag">
-		<a wicket:id="link" class="multiple nav-link"><span wicket:id="label"></span> <wicket:svg href="arrow" class="icon rotate-90"/></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="singleTabCollapsedFrag">
-		<a class="single nav-link"><span wicket:id="label"></span></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="tabsFrag">
-		<ul class="list-unstyled">
-			<li wicket:id="tabs" class="nav-item">
-				<wicket:container wicket:id="tab"></wicket:container>
-			</li>
-		</ul>
-	</wicket:fragment>
 </wicket:panel>

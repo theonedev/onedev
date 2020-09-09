@@ -1,16 +1,4 @@
-.build-log {
-    background: black;
-    color: white;
-    position: relative;
-    white-space: pre-wrap;
-    word-break: normal;
-	padding: 8px;
-}
-.build-log>.log-entry>.date {
-    padding-right: 8px;
-}
-.build-log>.too-many-entries, .build-log>.no-entries {
-    color: yellow;
-    font-size: 16px;
-    font-weight: bold;
+.build-log.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
+.build-log.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
+    background: var(--muted);
 }

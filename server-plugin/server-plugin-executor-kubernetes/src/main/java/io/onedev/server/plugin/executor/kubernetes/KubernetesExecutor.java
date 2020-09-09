@@ -54,7 +54,7 @@ import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -64,7 +64,7 @@ import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=100, description="This executor runs build jobs as pods in a kubernetes cluster. "
-		+ "<b class='red'>Note:</b> Make sure server url is specified correctly in system "
+		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "setting as job pods need to access it to download source and artifacts")
 @Horizontal
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
@@ -179,7 +179,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Override
-	public void test(TestData testData, JobLogger jobLogger) {
+	public void test(TestData testData, SimpleLogger jobLogger) {
 		execute(testData.getDockerImage(), KubernetesResource.TEST_JOB_TOKEN, jobLogger, null);
 	}
 	
@@ -193,7 +193,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return cmdline;
 	}
 	
-	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, JobLogger jobLogger) {
+	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, SimpleLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		File file = null;
 		try {
@@ -234,7 +234,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void deleteNamespace(String namespace, JobLogger jobLogger) {
+	private void deleteNamespace(String namespace, SimpleLogger jobLogger) {
 		try {
 			Commandline cmd = newKubeCtl();
 			cmd.timeout(NAMESPACE_DELETION_TIMEOUT).addArgs("delete", "namespace", namespace);
@@ -261,7 +261,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private String createNamespace(@Nullable JobContext jobContext, JobLogger jobLogger) {
+	private String createNamespace(@Nullable JobContext jobContext, SimpleLogger jobLogger) {
 		String namespace = getName() + "-";
 		if (jobContext != null) {
 			namespace += jobContext.getProjectName().replace('.', '-').replace('_', '-') + "-" 
@@ -362,7 +362,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			return null;
 	}
 	
-	private OsInfo getBaselineOsInfo(Collection<NodeSelectorEntry> nodeSelector, JobLogger jobLogger) {
+	private OsInfo getBaselineOsInfo(Collection<NodeSelectorEntry> nodeSelector, SimpleLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem} {.status.nodeInfo.kernelVersion} {.spec.unschedulable}{'|'}{end}");
 		for (NodeSelectorEntry entry: nodeSelector) 
@@ -399,7 +399,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Nullable
-	private String createImagePullSecret(String namespace, JobLogger jobLogger) {
+	private String createImagePullSecret(String namespace, SimpleLogger jobLogger) {
 		if (!getRegistryLogins().isEmpty()) {
 			Map<Object, Object> auths = new LinkedHashMap<>();
 			for (RegistryLogin login: getRegistryLogins()) {
@@ -436,7 +436,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Nullable
-	private String createTrustCertsConfigMap(String namespace, JobLogger jobLogger) {
+	private String createTrustCertsConfigMap(String namespace, SimpleLogger jobLogger) {
 		Map<String, String> configMapData = new LinkedHashMap<>();
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
 		File keystoreFile = serverConfig.getKeystoreFile();
@@ -473,7 +473,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void startService(String namespace, JobContext jobContext, JobService jobService, 
-			@Nullable String imagePullSecretName, JobLogger jobLogger) {
+			@Nullable String imagePullSecretName, SimpleLogger jobLogger) {
 		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
 		
 		List<NodeSelectorEntry> nodeSelector = getNodeSelector();
@@ -634,7 +634,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return map;
 	}
 	
-	private void execute(String dockerImage, String jobToken, JobLogger jobLogger, @Nullable JobContext jobContext) {
+	private void execute(String dockerImage, String jobToken, SimpleLogger jobLogger, @Nullable JobContext jobContext) {
 		jobLogger.log("Checking cluster access...");
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("cluster-info");
@@ -1017,7 +1017,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return false;
 	}
 	
-	private void updateCacheLabels(String nodeName, JobContext jobContext, JobLogger jobLogger) {
+	private void updateCacheLabels(String nodeName, JobContext jobContext, SimpleLogger jobLogger) {
 		jobLogger.log("Updating cache labels on node...");
 		
 		Commandline kubectl = newKubeCtl();
@@ -1102,7 +1102,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void watchPod(String namespace, String podName, StatusChecker statusChecker, JobLogger jobLogger) {
+	private void watchPod(String namespace, String podName, StatusChecker statusChecker, SimpleLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
@@ -1206,7 +1206,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}		
 	}
 	
-	private void checkEventError(String namespace, String podName, JobLogger jobLogger) {
+	private void checkEventError(String namespace, String podName, SimpleLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
@@ -1276,7 +1276,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void collectContainerLog(String namespace, String podName, String containerName, 
-			@Nullable String logEndMessage, JobLogger jobLogger) {
+			@Nullable String logEndMessage, SimpleLogger jobLogger) {
 		Thread thread = Thread.currentThread();
 		AtomicReference<String> errorMessageRef = new AtomicReference<>(null);
 		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);

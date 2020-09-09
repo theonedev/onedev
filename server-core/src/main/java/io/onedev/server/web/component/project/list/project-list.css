@@ -1,29 +1,6 @@
-@media(max-width: 767px) {
-	.project-list .expanded {
+@media(max-width: 575px) {
+	.project-list table>thead {
 		display: none;
 	}
 }
-.project-list>.head {
-	position: relative;
-}
-.project-list>.head>* {
-	margin-bottom: 20px;
-}
-.project-list>.head>form.can-create-projects {
-	margin-right: 100px;
-}
-.project-list>.head>.add-new {
-	width: 80px;
-	position: absolute;
-	right: 0;
-	top: 0;
-}
 
-.project-list>.head>.operations>* {
-	margin-right: 16px;
-	color: #444;
-	white-space: nowrap;
-}
-.project-list>.head>.operations>*:last-child {
-	margin-right: 0;
-}

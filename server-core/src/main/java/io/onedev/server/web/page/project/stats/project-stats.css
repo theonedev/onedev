@@ -1,85 +1,46 @@
-body.SourceLinesPage {
-	min-width: 300px;
-}
-#project-contribs .options {
-	margin-bottom: 20px;
-}
-#project-stats .note {
-	border-top: 1px solid #EEE;
-	padding: 20px 0;
-	color: #666;
-	font-size: 16px;
-}
-#project-contribs .options>.date-range {
-	font-size: 20px;
-}
-#project-contribs .options select {
+.project-contribs select {
 	width: 120px;
 }
-#project-contribs .overall {
+.project-contribs .overall {
 	height: 360px;
-	background: #F9F9F9;
-	margin-bottom: 20px;
-	border: 1px solid #EEE;
 }
-#project-contribs .overall .no-data {
+.project-contribs .overall .no-data {
 	text-align: center;
-	font-size: 24px;
-	margin-top: 20px;
+	font-size: 2rem;
+	margin-top: 2rem;
 	font-weight: bold;
 }
-#project-contribs .top-contributors .loading {
+
+.project-contribs .top-contributors .loading {
 	text-align: center;
-}
-#project-contribs .top-contributors .head .float-left {
-	padding-left: 48px;
-	position: relative;
-}
-#project-contribs .top-contributors .head .float-left .avatar {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 40px;
-	height: 40px;
-	border-radius: 1000px;
-}
-#project-contribs .top-contributors .row>div {
-	padding: 0;
-}
-#project-contribs .top-contributors .row>div>.content {
-	border: 1px solid #DDD;
-}
-#project-contribs .top-contributors .head {
-	padding: 12px;
 }
 
-#project-contribs .top-contributors .head .name {
-	margin-left: 0 !important;
-}
-#project-contribs .top-contributors .head .total-contribution span {
-	margin-right: 12px;
-	font-size: 12px;
-}
-#project-contribs .top-contributors .head .total-contribution span.additions {
+.project-contribs .top-contributors .head .total-contribution span.additions {
 	color: green;
 }
-#project-contribs .top-contributors .head .total-contribution span.deletions {
+.project-contribs .top-contributors .head .total-contribution span.deletions {
 	color: red;
 }
-#project-contribs .top-contributors .head .float-right {
-	font-size: 20px;
+
+.project-contribs .top-contributors .avatar {
+	width: 36px;
+	height: 36px;
 }
-#project-contribs .top-contributors .body {
-	background: #F9F9F9;
+.project-contribs .top-contributors .body {
 	height: 300px;
 }
-#source-lines>.chart {
-	height: 600px;
-	background: #F9F9F9;
-	border: 1px solid #EEE;
+.project-contribs .top-contributors .col-xl-6.left {
+	padding-right: 1rem;
 }
-#source-lines .no-data {
+.project-contribs .top-contributors .col-xl-6.right {
+	padding-left: 1rem;
+}
+
+.source-lines .chart {
+	min-height: 400px;
+}
+.source-lines .no-data {
 	text-align: center;
-	font-size: 36px;
+	font-size: 3rem;
 	font-style: italic;
 }

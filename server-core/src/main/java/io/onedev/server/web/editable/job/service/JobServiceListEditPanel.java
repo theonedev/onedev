@@ -16,8 +16,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -32,6 +30,7 @@ import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobService;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -204,7 +203,7 @@ class JobServiceListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public String getCssClass() {
-				return "actions";
+				return "actions minimum";
 			}
 			
 		});		
@@ -221,7 +220,8 @@ class JobServiceListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<JobService, Void> dataTable;
 		add(dataTable = new DataTable<JobService, Void>("services", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.add(new NoRecordsBehavior());
 		
 		dataTable.add(new SortBehavior() {
 
@@ -259,12 +259,6 @@ class JobServiceListEditPanel extends PropertyEditor<List<Serializable>> {
 		for (JobService each: services)
 			value.add(each);
 		return value;
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new JobServiceCssResourceReference()));
 	}
 	
 }

@@ -44,17 +44,17 @@ onedev.server.inputassist = {
 		$input.bind("keydown", "up", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("tr.active");
+				var $active = $dropdown.find("li.active");
 				if ($active.length != 0) {
-					var $prev = $active.prev("tr:not(.loading-indicator)");
+					var $prev = $active.prev("li:not(.loading-indicator)");
 					if ($prev.length != 0) {
 						$prev.addClass("active");
 						$active.removeClass("active");
 					}
 				} else {
-					$dropdown.find("tr:not(.loading-indicator)").last().addClass("active");
+					$dropdown.find("li:not(.loading-indicator)").last().addClass("active");
 				}
-				$dropdown.find(".suggestions tr.active").scrollIntoView();
+				$dropdown.find(".suggestions li.active").scrollIntoView();
 				onedev.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;
@@ -64,17 +64,17 @@ onedev.server.inputassist = {
 		$input.bind("keydown", "down", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("tr.active");
+				var $active = $dropdown.find("li.active");
 				if ($active.length != 0) {
-					var $next = $active.next("tr:not(.loading-indicator)");
+					var $next = $active.next("li:not(.loading-indicator)");
 					if ($next.length != 0) {
 						$next.addClass("active");
 						$active.removeClass("active");
 					}
 				} else {
-					$dropdown.find("tr:not(.loading-indicator)").first().addClass("active");
+					$dropdown.find("li:not(.loading-indicator)").first().addClass("active");
 				}
-				$dropdown.find(".suggestions tr.active").scrollIntoView();
+				$dropdown.find(".suggestions li.active").scrollIntoView();
 				onedev.server.inputassist.updateHelp($dropdown);
 				$dropdown.align($dropdown.data("alignment"));
 				return false;
@@ -84,7 +84,7 @@ onedev.server.inputassist = {
 		$input.bind("keydown", "return", function() {
 			var $dropdown = $input.data("dropdown");
 			if ($dropdown) {
-				var $active = $dropdown.find("tr.active");
+				var $active = $dropdown.find("li.active");
 				if ($active.length != 0) {
 					$input.data("update")($active);
 					return false;
@@ -103,11 +103,11 @@ onedev.server.inputassist = {
 					setTimeout(tab, 10);
 				} else {
 					tabbing = false;
-					var $active = $dropdown.find("tr.active");
+					var $active = $dropdown.find("li.active");
 					if ($active.length != 0) 
 						$input.data("update")($active);
-					else if ($dropdown.find("tr").length != 0)
-						$input.data("update")($dropdown.find("tr").first());
+					else if ($dropdown.find("li").length != 0)
+						$input.data("update")($dropdown.find("li").first());
 				}
 				return false;
 			} else {
@@ -173,7 +173,7 @@ onedev.server.inputassist = {
 		$dropdown.click(function() {
 			$input.focus();
 		});
-		var $item = $dropdown.find("tr");
+		var $item = $dropdown.find("li");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);
@@ -195,7 +195,7 @@ onedev.server.inputassist = {
 	},
 	
 	updateHelp: function($dropdown) {
-		if ($dropdown.find("tr.active").length != 0) {
+		if ($dropdown.find("li.active").length != 0) {
 			$dropdown.find(".help .complete").empty().append("Tab or &crarr; to use selected item.");
 		} else {
 			$dropdown.find(".help .complete").empty().append("Tab to use first item.");

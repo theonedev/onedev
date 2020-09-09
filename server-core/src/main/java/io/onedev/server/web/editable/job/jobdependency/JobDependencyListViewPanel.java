@@ -15,8 +15,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -27,10 +25,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.buildspec.job.JobDependency;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.page.layout.SideFloating.Placement;
 import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
@@ -126,7 +125,7 @@ class JobDependencyListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "ellipsis text-right";
 			}
 			
 		});		
@@ -145,8 +144,9 @@ class JobDependencyListViewPanel extends Panel {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
+				add(new NoRecordsBehavior());
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
 			}
 			
 		});
@@ -170,17 +170,17 @@ class JobDependencyListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, Placement.RIGHT) {
+					new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
-							return "Job Dependency";
+						protected Component newTitle(String componentId) {
+							return new Label(componentId, "Job Dependency");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-dependency def-detail"));
+							add(AttributeAppender.append("class", "job-dependency"));
 						}
 
 						@Override
@@ -195,12 +195,6 @@ class JobDependencyListViewPanel extends Panel {
 			link.add(newLabel("label"));
 			add(link);
 		}
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new JobDependencyCssResourceReference()));
 	}
 	
 }

@@ -81,9 +81,7 @@ import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
@@ -123,6 +121,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		}
 		
 	};
+	
+	private WebMarkupContainer refsContainer;
 	
 	private WebMarkupContainer revisionDiff;
 	
@@ -188,8 +188,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new CreateBranchLink("createBranch", projectModel, state.revision) {
 
 			@Override
-			protected void onCreate(AjaxRequestTarget target, String branch) {
-				setResponsePage(ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject()));
+			protected void onCreated(AjaxRequestTarget target, String branch) {
+				target.add(refsContainer);
 			}
 			
 		});
@@ -197,8 +197,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new CreateTagLink("createTag", projectModel, state.revision) {
 
 			@Override
-			protected void onCreate(AjaxRequestTarget target, String tag) {
-				setResponsePage(ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject()));
+			protected void onCreated(AjaxRequestTarget target, String tag) {
+				target.add(refsContainer);
 			}
 			
 		});
@@ -209,7 +209,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		else 
 			add(new WebMarkupContainer("detail").setVisible(false));
 		
-		add(new AjaxLazyLoadPanel("refs") {
+		add(refsContainer = new AjaxLazyLoadPanel("refs") {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
@@ -251,7 +251,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 							link.add(new SpriteImage("icon", "branch"));
 							link.add(new Label("label", branch));
 							item.add(link);
-							item.add(AttributeAppender.append("class", "branch"));
+							item.add(AttributeAppender.append("class", "branch ref"));
 						} else {
 							String tag = Preconditions.checkNotNull(GitUtils.ref2tag(ref));
 							BlobIdent blobIdent = new BlobIdent(tag, null, FileMode.TREE.getBits());
@@ -261,7 +261,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 							link.add(new SpriteImage("icon", "tag"));
 							link.add(new Label("label", tag));
 							item.add(link);
-							item.add(AttributeAppender.append("class", "tag"));
+							item.add(AttributeAppender.append("class", "tag ref"));
 						}
 					}
 					
@@ -575,7 +575,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CommitDetailResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.commitDetail.onDomReady();"));
 	}
 
 	public static PageParameters paramsOf(Project project, State state) {
@@ -730,6 +729,15 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
 		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("commits", ProjectCommitsPage.class, 
+				ProjectCommitsPage.paramsOf(getProject())));
+		fragment.add(new Label("commitHash", GitUtils.abbreviateSHA(getCommit().name())));
+		return fragment;
 	}
 	
 }

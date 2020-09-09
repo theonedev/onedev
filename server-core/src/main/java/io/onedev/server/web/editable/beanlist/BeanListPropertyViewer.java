@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -15,6 +16,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
@@ -52,7 +54,19 @@ public class BeanListPropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
+		WebMarkupContainer table = new WebMarkupContainer("table") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (elements.isEmpty()) 
+					NoRecordsBehavior.decorate(tag);
+			}
+			
+		};
+		add(table);
+		
+		table.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
@@ -62,7 +76,7 @@ public class BeanListPropertyViewer extends Panel {
 			}
 			
 		});
-		add(new ListView<Serializable>("rows", elements) {
+		table.add(new ListView<Serializable>("rows", elements) {
 
 			@Override
 			protected void populateItem(final ListItem<Serializable> rowItem) {
@@ -80,10 +94,10 @@ public class BeanListPropertyViewer extends Panel {
 			}
 			
 		});
-		WebMarkupContainer noElements = new WebMarkupContainer("noElements");
-		noElements.setVisible(elements.isEmpty());
-		noElements.add(AttributeModifier.append("colspan", propertyContexts.size()));
-		add(noElements);
+		WebMarkupContainer noRecords = new WebMarkupContainer("noRecords");
+		noRecords.add(new WebMarkupContainer("td").add(AttributeModifier.append("colspan", propertyContexts.size())));
+		noRecords.setVisible(elements.isEmpty());
+		table.add(noRecords);
 	}
 
 }

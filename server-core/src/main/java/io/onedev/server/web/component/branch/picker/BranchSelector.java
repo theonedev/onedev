@@ -100,6 +100,28 @@ public abstract class BranchSelector extends Panel {
 		};
 		add(keyBehavior);
 		
+		WebMarkupContainer noBranchesContainer = new WebMarkupContainer("noBranches") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(filteredBranches.isEmpty());
+			}
+			
+		};
+		noBranchesContainer.setOutputMarkupPlaceholderTag(true);
+		add(noBranchesContainer);
+		
+		WebMarkupContainer branchesContainer = new WebMarkupContainer("branches") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!filteredBranches.isEmpty());
+			}
+			
+		};
+		
 		branchField.add(new InputChangeBehavior() {
 			
 			@Override
@@ -119,12 +141,12 @@ public abstract class BranchSelector extends Panel {
 				
 				if (activeBranchIndex >= filteredBranches.size())
 					activeBranchIndex = 0;
-				target.add(get("branches"));
+				target.add(branchesContainer);
+				target.add(noBranchesContainer);
 			}
 			
 		});
 		
-		WebMarkupContainer branchesContainer = new WebMarkupContainer("branches");
 		branchesContainer.add(new ListView<String>("branches", filteredBranches) {
 
 			@Override
@@ -153,7 +175,8 @@ public abstract class BranchSelector extends Panel {
 			}
 			
 		});
-		branchesContainer.setOutputMarkupId(true);
+		
+		branchesContainer.setOutputMarkupPlaceholderTag(true);
 		add(branchesContainer);
 		
 		setOutputMarkupId(true);

@@ -8,9 +8,9 @@ onedev.server.requestChanges = {
 		var toIndexToApply = toIndex;
 		
 		function onIndexChanged() {
-			var $apply = $(".commits-selector>.head a"); 
+			var $apply = $(".commits-selector>.head a.selected-changes"); 
 			if (fromIndexToApply != fromIndex || toIndexToApply != toIndex) {
-				$apply.removeAttr("disabled").off("click").click(function() {
+				$apply.removeClass("disabled").off("click").click(function() {
 					var oldCommit;
 					if (fromIndexToApply == 0)
 						oldCommit = baseCommit;
@@ -20,7 +20,7 @@ onedev.server.requestChanges = {
 					callback(oldCommit, newCommit);
 				});
 			} else {
-				$apply.attr("disabled", "disabled");
+				$apply.addClass("disabled");
 			}
 			$commits.removeClass("selected").slice(fromIndexToApply, toIndexToApply+1).addClass("selected");
 		}

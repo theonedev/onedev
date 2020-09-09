@@ -1,27 +1,30 @@
 <wicket:extend>
-	<div id="project-blob">
-		<div class="head clearfix">
-			<a wicket:id="revisionPicker" class="revision-picker float-left"></a>
-			<div wicket:id="buildStatus" class="build-status float-left"></div>
-			<div wicket:id="blobNavigator" class="blob-navigator float-left"></div>
-			<div wicket:id="blobOperations" class="operations float-right">
-				<a wicket:id="cloneOrDownload" title="Clone or download project" class="clone-or-download"><b>Clone or Download <wicket:svg href="arrow" class="icon icon-sm rotate-90"></wicket:svg></b></a>
-				<a wicket:id="add" title="Add files to current directory">Add <wicket:svg href="arrow" class="icon icon-sm rotate-90"></wicket:svg></a>
-				<a wicket:id="search" title="Search files, symbols and texts">Search <wicket:svg href="arrow" class="icon icon-sm rotate-90"></wicket:svg></a>
-				<a wicket:id="history" title="Commit history of current path">History</a>
+	<div class="project-blob flex-grow-1 d-flex flex-column">
+		<div class="head d-flex align-items-center justify-content-between flex-wrap px-3 flex-shrink-0">
+			<div class="d-flex flex-wrap align-items-center">
+				<a wicket:id="revisionPicker" class="revision-picker mr-3 py-2"></a>
+				<div wicket:id="buildStatus" class="build-status mr-3 py-2"></div>
+				<div wicket:id="blobNavigator" class="blob-navigator mr-3 py-2"></div>
+			</div>
+			<div wicket:id="blobOperations" class="d-flex align-items-center py-2">
+				<a wicket:id="getCode" title="Code clone or download" class="mr-4 text-nowrap link-info font-weight-bold"><wicket:svg href="download2" class="icon"/> Code</a>
+				<a wicket:id="add" title="Add files to current directory" class="mr-3 text-nowrap dropdown-toggle">Add</a>
+				<a wicket:id="search" title="Search files, symbols and texts" class="mr-3 text-nowrap dropdown-toggle">Search</a>
+				<a wicket:id="history" title="Commit history of current path" class="text-nowrap">History</a>
 			</div>
 		</div>
-		<!-- below is used to hold file navigator if there is not enough space in head -->
-		<div class="blob-navigator clearfix"></div>
-		<div wicket:id="revisionIndexing" class="revision-indexing">
-			<img wicket:id="icon">
-			<span>Revision indexing in progress... (search in this revision will be accurate after indexed)</span>
+		<div wicket:id="revisionIndexing" class="p-3 revision-indexing text-warning flex-shrink-0">
+			<wicket:svg href="loading" class="icon spin"/>
+			Revision indexing in progress... (search in this revision will be accurate after indexed)
 		</div>
-		<div wicket:id="buildSupportNote" class="build-support-note"><wicket:svg href="bulb" class="icon"/> Enable build support by <a wicket:id="addFile"></a></div>
-		<div wicket:id="blobContent" class="blob-content"></div>
-		<div wicket:id="searchResult" class="search-result">
-			<div id="search-result-resize-handle" class="ui-resizable-handle ui-resizable-n"></div>
-			<div wicket:id="content"></div>
+		<div wicket:id="buildSupportNote" class="build-support-note p-3 text-info flex-shrink-0">
+			<wicket:svg href="bulb" class="icon"/> 
+			Enable build support by <a wicket:id="addFile" class="link-primary"></a>
+		</div>
+		<div wicket:id="blobContent" class="blob-content autofit flex-grow-1 d-flex flex-column"></div>
+		<div wicket:id="searchResult" class="search-result flex-shrink-0 flex-column overflow-hidden">
+			<div id="search-result-resize-handle" class="ui-resizable-handle ui-resizable-n flex-shrink-0"></div>
+			<div wicket:id="content" class="flex-grow-1 d-flex flex-column overflow-hidden"></div>
 		</div>
 	</div>
 </wicket:extend>

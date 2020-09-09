@@ -1,138 +1,51 @@
 .build-spec {
-    padding: 20px;
+    padding: 1.5rem;
 }
 .build-spec>.valid {
 	min-width: 800px;
 }
-.build-spec.not-defined {
-    font-style: italic;
-    font-size: 16px;
-    text-align: center;
-}
 .build-spec>.invalid>.title {
-    font-size: 20px;
+    font-size: 1.5rem;
     color: red;
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
 .build-spec>.invalid>.error-message {
 	white-space: pre-wrap;
     word-wrap: break-word;
-    font-size: 13px;
+    font-size: 1rem;
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 .build-spec>.valid>.head {
-	margin-bottom: 20px;
-	padding-bottom: 8px;
-	border-bottom: 1px solid #E8E8E8;
+	margin-bottom: 1.5rem;
+	padding-bottom: 0.6rem;
+	border-bottom: 1px solid var(--light-gray);
 }
 .build-spec>.valid>.head>a {
     font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 16px;
-    margin-right: 8px;
+    font-size: 1.2rem;
+    margin-bottom: 1.2rem;
+    margin-right: 0.6rem;
 }
 .build-spec>.valid>.head>a.active {
-	font-size: 20px;
-}
-.build-spec>.valid>.body>.not-defined {
-    font-size: 16px;
-    font-style: italic;
-}
-
-.build-spec>.valid>.body>.jobs {
-    position: relative;
+	font-size: 1.5rem;
+	color: var(--primary);
 }
 .build-spec>.valid>.body>.jobs>.side {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 240px;
+	min-width: 220px;
 }
-.build-spec>.valid>.body>.jobs>.contents {
-    margin-left: 260px;
-}
-
 .build-spec>.valid>.body>.jobs>.side>.navs:not(:empty) {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav {
-    position: relative;
-    background: #444;
-    border-radius: 4px;
-    margin-bottom: 8px;
-	display: block;
-}
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav a {
-    color: #BBB;
-}
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav .drag-indicator {
-    color: inherit;
-    margin-right: 4px;
-}
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav:hover a,
 .build-spec>.valid>.body>.jobs>.side>.navs>.nav.active a {
-    color: white;
-    font-weight: bold;
-}
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav.active {
-    background: #080808;
-}
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav:first-child:last-child {
-    border-radius: 4px;
-}
-
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav>.select {
-    padding: 8px 28px 8px 8px;
-    text-decoration: none;
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav>.delete, 
-.build-spec>.valid>.body>.jobs>.side>.navs>.nav>.run {
-    right: 0;
-    top: 0;
-    position: absolute;
-    border-left: 1px solid #EEE;
-    padding: 8px 8px;
-    display: block;
-}
-.build-spec>.valid>.body>.jobs>.side .add {
-	position: relative;
-}
-.build-spec>.valid>.body>.jobs>.side .create {
-	display: block;
-	margin-right: 38px;
-	border-radius: 4px 0 0 4px;
-}
-.build-spec>.valid>.body>.jobs>.side .create.no-suggestions {
-	margin-right: 0;
-	border-radius: 4px;
-}
-.build-spec>.valid>.body>.jobs>.side .suggestions {
-	position: absolute;
-	right: 0;
-	top: 0;
-	border-radius: 0 4px 4px 0;
-	border-left: none;
+	background: var(--gray-dark);
+	border-color: var(--gray-dark);
+	color: white;
 }
 .build-spec>.valid>.body>.jobs>.contents>.content {
-    border-radius: 4px;
-    border: 2px solid #DDD;
-    padding: 20px;
+    border-radius: 0.42rem;
+    border: 1px solid var(--light-gray);
+    padding: 1.5rem;
 }
-
-.build-spec>.valid>.body>.jobs>.content .bean-properties>table>tbody>tr>td.name {
-    width: 200px;
-}
-.build-spec>.valid>.body>.jobs>.content .bean-properties>table>tbody>tr.property-retry td.name {
-	width: 100px;
-}
-.build-spec>.valid>.body>.jobs>.content .bean-properties>table>tbody>tr>td.value .form-control {
-    height: 32px;
-    font-size: 13px;
-}
-.build-spec>.valid>.body>.jobs>.content .def-list table>tbody>tr>td:first-child>div>a {
-    margin-left: 0;
+.build-spec>.valid>.body>.properties>.bean-list {
+	flex-grow: 1;
 }

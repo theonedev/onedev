@@ -1,5 +1,5 @@
 <wicket:panel>
-    <table class="bean-list table table-condensed">
+    <table wicket:id="table" class="bean-list">
         <thead>
             <th wicket:id="headers">
                 <span wicket:id="header"></span>
@@ -12,12 +12,10 @@
                 </td>
             </tr>
         </tbody>
-        <wicket:enclosure child="noElements">
-		<tfoot>
+		<tfoot wicket:id="noRecords">
 			<tr>
-				<td wicket:id="noElements" class="no-elements"><div>No elements defined</div></td>
+				<td wicket:id="td">Not defined</td>
 			</tr>
 		</tfoot>
-        </wicket:enclosure>
     </table>
 </wicket:panel>

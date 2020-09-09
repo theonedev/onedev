@@ -15,7 +15,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
-import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.component.user.UserAvatar;
 
 @SuppressWarnings("serial")
 public class AvatarEditPanel extends GenericPanel<User> {

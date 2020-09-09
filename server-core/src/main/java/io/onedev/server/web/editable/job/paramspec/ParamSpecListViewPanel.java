@@ -31,10 +31,12 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
 class ParamSpecListViewPanel extends Panel {
@@ -111,7 +113,7 @@ class ParamSpecListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "text-right ellipsis";
 			}
 			
 		});		
@@ -131,7 +133,8 @@ class ParamSpecListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				add(new NoRecordsBehavior());
 			}
 			
 		});
@@ -162,18 +165,18 @@ class ParamSpecListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
+					new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
+						protected Component newTitle(String componentId) {
 							ParamSpec param = paramSpecs.get(index);
-							return "Parameter Spec (type: " + EditableUtils.getDisplayName(param.getClass()) + ")";
+							return new Label(componentId, "Parameter Spec (type: " + EditableUtils.getDisplayName(param.getClass()) + ")");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "param-spec input-spec def-detail"));
+							add(AttributeAppender.append("class", "param-spec input-spec"));
 						}
 
 						@Override

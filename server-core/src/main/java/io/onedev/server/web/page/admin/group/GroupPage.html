@@ -1,22 +1,11 @@
 <wicket:extend>
-	<div id="group">
-		<div wicket:id="groupSidebar"></div>
-		<div class="content">
+	<div class="card group-detail">
+		<div class="card-body">
+        	<ul wicket:id="groupTabs" class="tabs nav nav-bold nav-tabs nav-tabs-line font-weight-bold mb-4"></ul>
 			<wicket:child></wicket:child>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="sidebarHeadFrag">
-		<wicket:svg href="group" class="icon"></wicket:svg>
-		<span wicket:id="name"></span>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navContextFrag">
-		<a wicket:id="dropdown" class="dropdown group-dropdown">
-			<wicket:svg href="group" class="icon"></wicket:svg>
-			<span wicket:id="name" class="ellipsis-text"></span>
-			<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
-		</a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navContextDropdownFrag">
-		<ul wicket:id="menu" class="menu list-unstyled"></ul>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="groups">Groups</a> <span class="dot"></span> <span wicket:id="groupName" class="text-truncate"></span> 
 	</wicket:fragment>
 </wicket:extend>

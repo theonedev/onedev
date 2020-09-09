@@ -70,5 +70,5 @@ public class GroupAuthorizationsPage extends GroupPage {
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
 		add(form);
 	}
-	
+
 }

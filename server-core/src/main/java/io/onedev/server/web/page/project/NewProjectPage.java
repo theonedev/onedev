@@ -2,9 +2,9 @@ package io.onedev.server.web.page.project;
 
 import java.util.Collection;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -63,14 +63,13 @@ public class NewProjectPage extends LayoutPage {
 	}
 
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new ProjectResourceReference()));
+	protected boolean isPermitted() {
+		return SecurityUtils.canCreateProjects();
 	}
 
 	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.canCreateProjects();
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Create Project");
 	}
 	
 }

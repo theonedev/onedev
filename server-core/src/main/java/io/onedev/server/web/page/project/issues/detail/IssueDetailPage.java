@@ -11,10 +11,10 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -32,30 +32,31 @@ import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.script.identity.ScriptIdentity;
-import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmClickModifier;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
-public abstract class IssueDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
+public abstract class IssueDetailPage extends ProjectIssuesPage implements InputContext {
 
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -93,15 +94,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WorkflowChangeAlertPanel("workflowChangeAlert") {
-
-			@Override
-			protected void onCompleted(AjaxRequestTarget target) {
-				setResponsePage(getPageClass(), getPageParameters());
-			}
-			
-		});
-		add(new IssueTitlePanel("title", true) {
+		add(new IssueTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {
@@ -109,6 +102,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			}
 
 		});
+		
+		add(new SideInfoLink("moreInfo"));
 		
 		add(new IssueOperationsPanel("operations") {
 
@@ -142,15 +137,57 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		
-		add(new SideInfoPanel("moreInfo") {
+		add(new SideInfoPanel("side") {
 
 			@Override
-			protected Component newContent(String componentId) {
+			protected Component newBody(String componentId) {
 				return new IssueSidePanel(componentId) {
 
 					@Override
 					protected Issue getIssue() {
 						return IssueDetailPage.this.getIssue();
+					}
+
+					@Override
+					protected Component newDeleteLink(String componentId) {
+						return new Link<Void>(componentId) {
+
+							@Override
+							public void onClick() {
+								OneDev.getInstance(IssueManager.class).delete(getIssue());
+								Session.get().success("Issue #" + getIssue().getNumber() + " deleted");
+								
+								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);
+								if (redirectUrlAfterDelete != null)
+									throw new RedirectToUrlException(redirectUrlAfterDelete);
+								else
+									setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
+							}
+							
+						}.add(new ConfirmClickModifier("Do you really want to delete this issue?"));
+					}
+
+				};
+			}
+
+			@Override
+			protected Component newTitle(String componentId) {
+				return new EntityNavPanel<Issue>(componentId) {
+
+					@Override
+					protected EntityQuery<Issue> parse(String queryString, boolean inProject) {
+						return IssueQuery.parse(inProject?getProject():null, queryString, true, true, false, false, false);
+					}
+
+					@Override
+					protected Issue getEntity() {
+						return getIssue();
+					}
+
+					@Override
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
+						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+						return issueManager.query(inProject?getProject():null, query, offset, count, false);
 					}
 
 					@Override
@@ -169,28 +206,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							}
 							
 						};
-					}
-
-					@Override
-					protected Component newDeleteLink(String componentId) {
-						Link<Void> deleteLink = new Link<Void>(componentId) {
-
-							@Override
-							public void onClick() {
-								OneDev.getInstance(IssueManager.class).delete(getIssue());
-								Session.get().success("Issue #" + getIssue().getNumber() + " deleted");
-								
-								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Issue.class);
-								if (redirectUrlAfterDelete != null)
-									throw new RedirectToUrlException(redirectUrlAfterDelete);
-								else
-									setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
-							}
-							
-						};
-						deleteLink.add(new ConfirmClickModifier("Do you really want to delete this issue?"));
-						deleteLink.setVisible(SecurityUtils.canManageIssues(getIssue().getProject()));
-						return deleteLink;
 					}
 					
 				};
@@ -244,13 +259,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	}
 	
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new IssueDetailResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueDetail.onDomReady();"));
-	}
-
-	@Override
 	protected void onDetach() {
 		issueModel.detach();
 		super.onDetach();
@@ -275,11 +283,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	public FieldSpec getInputSpec(String inputName) {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
-	
-	@Override
-	public ScriptIdentity getScriptIdentity() {
-		return new SiteAdministrator();
-	}
 
 	private class IssueTab extends PageTab {
 
@@ -301,4 +304,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 	}
 	
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("issues", ProjectIssueListPage.class, 
+				ProjectIssueListPage.paramsOf(getProject())));
+		fragment.add(new Label("issueNumber", "#" + getIssue().getNumber()));
+		return fragment;
+	}
+
 }

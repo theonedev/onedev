@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -83,7 +84,7 @@ public class JobExecutorsPage extends AdministrationPage {
 				target.add(container);
 			}
 			
-		}.items("li.executor").handle(".panel-heading"));
+		}.items("li.executor").handle(".card-header"));
 		
 		container.add(newAddNewFrag());
 	}
@@ -120,6 +121,11 @@ public class JobExecutorsPage extends AdministrationPage {
 		});
 		fragment.setOutputMarkupId(true);
 		return fragment;
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Job Executors");
 	}
 
 }

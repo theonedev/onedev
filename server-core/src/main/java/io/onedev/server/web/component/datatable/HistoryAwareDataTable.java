@@ -15,7 +15,9 @@ import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.pagenavigator.HistoryAwarePagingNavigator;
 import io.onedev.server.web.util.PagingHistorySupport;
 
@@ -29,6 +31,9 @@ public class HistoryAwareDataTable<T, S> extends DataTable<T, S> {
 
 		if (pagingHistorySupport != null)
 			setCurrentPage(pagingHistorySupport.getCurrentPage());
+		
+		addTopToolbar(new AjaxFallbackHeadersToolbar<S>(this, dataProvider));
+		
 		addBottomToolbar(new NavigationToolbar(this) {
 
 			@Override
@@ -44,8 +49,13 @@ public class HistoryAwareDataTable<T, S> extends DataTable<T, S> {
 			}
 			
 		});
-		addTopToolbar(new AjaxFallbackHeadersToolbar<S>(this, dataProvider));
-		addBottomToolbar(new NoRecordsToolbar(this));
+		addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		add(new NoRecordsBehavior());
 	}
 
 	@Override

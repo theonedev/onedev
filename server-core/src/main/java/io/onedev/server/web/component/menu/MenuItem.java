@@ -17,6 +17,10 @@ public abstract class MenuItem implements Serializable {
 	
 	public abstract String getLabel();
 	
+	public boolean isSelected() {
+		return false;
+	}
+	
 	public abstract WebMarkupContainer newLink(String id);
 	
 	@Nullable

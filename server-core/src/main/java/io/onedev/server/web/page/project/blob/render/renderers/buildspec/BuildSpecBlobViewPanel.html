@@ -2,13 +2,13 @@
     <div wicket:id="content" class="build-spec build-spec-view"></div>
     <wicket:fragment wicket:id="validFrag">
         <div class="valid">
-              <div class="head">
-                  <a class="jobs">Jobs</a>
-                  <a class="properties">Properties</a>
-              </div>
+        	<div class="head">
+            	<a class="jobs">Jobs</a>
+            	<a class="properties">Properties</a>
+            </div>
             <div class="body">
                 <div wicket:id="jobs" class="jobs"></div>
-                <div wicket:id="properties" class="properties"></div>
+                <div wicket:id="properties" class="properties d-none"></div>
             </div>
         </div>
     </wicket:fragment>
@@ -19,14 +19,14 @@
         </div>
     </wicket:fragment>
     <wicket:fragment wicket:id="hasJobsFrag">
-        <div class="side">
+        <div class="side flex-shrink-0">
         	<div class="navs">
-        		<div wicket:id="navs" class="nav">
-            	<a class="select"><span wicket:id="jobName"></span></a>
-            	<a wicket:id="run" class="run" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+        		<div wicket:id="navs" class="nav btn-group btn-block mb-3">
+            	<a class="select btn btn-secondary justify-content-start"><span wicket:id="jobName"></span></a>
+            	<a wicket:id="run" class="run btn btn-secondary btn-icon flex-grow-0 flex-shrink-0" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
         	</div>
         </div></div>
-        <div class="contents">
+        <div class="contents ml-4 flex-grow-1">
             <div wicket:id="contents" class="content"></div>
         </div>
     </wicket:fragment>

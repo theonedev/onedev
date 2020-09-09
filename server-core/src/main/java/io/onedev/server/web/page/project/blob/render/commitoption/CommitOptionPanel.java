@@ -361,6 +361,7 @@ public abstract class CommitOptionPanel extends Panel {
 				context.onCommitted(target, refUpdated, position);
 				if (autosaveKey != null)
 					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
+				target.appendJavaScript("$(window).resize();");
 				return true;
 			} else {
 				newChangedContainer(target);

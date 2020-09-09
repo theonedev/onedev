@@ -34,5 +34,5 @@ public class UserPasswordPage extends UserPage {
 			add(new PasswordEditPanel("content", userModel));
 		}
 	}
-	
+
 }

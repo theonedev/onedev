@@ -14,50 +14,25 @@ onedev.server.markdown = {
 		    $input[0].dispatchEvent(evt);
 		}
 	},
-	autofit: function(containerId, width, height) {
-		var $container = $("#" + containerId);
-		var $head = $container.children(".head");
-		var $body = $container.children(".body");
-		var $edit = $body.children(".edit");
-		var $input = $edit.children("textarea");
-		var $preview = $body.children(".preview");
-		var $rendered = $preview.children(".markdown-rendered");
-
-		$container.outerWidth(width).outerHeight(height);
-
-		width = $container.width();
-		height = $container.height();
-		
-		height -= $head.outerHeight();
-		if ($container.hasClass("compact-mode")) {
-			height = height/2;
-		}
-		$input.outerHeight(height);
-		$edit.outerHeight($input.outerHeight());
-		$rendered.outerHeight($input.outerHeight());
-		$preview.outerHeight($rendered.outerHeight());
-	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
 			projectNamePattern, autosaveKey) {
 		var $container = $("#" + containerId);
+		$container.data("callback", callback);		
+		$container.data("autosaveKey", autosaveKey);
+		
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
 		var $editLink = $head.find(".edit");
 		var $previewLink = $head.find(".preview");
 		var $splitLink = $head.find(".split");
-		var $emojis = $head.children(".emojis");
-		var $help = $head.children(".help");
-		var $warning = $head.children(".warning");
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
 		var $preview = $body.children(".preview");
 		var $rendered = $preview.children(".markdown-rendered");
-		var $resizeHandles = $container.find(".ui-resizable-handle");
+		var $help = $head.children(".help");
 
-		$container.data("autosaveKey", autosaveKey);
-		
-		$head.find(".dropdown>button").dropdown();
+		$head.find(".dropdown>a").dropdown();
 		
 		$editLink.click(function() {
 			$container.removeClass("preview-mode").removeClass("split-mode").addClass("edit-mode");
@@ -65,7 +40,6 @@ onedev.server.markdown = {
 			$editLink.addClass("active");
 			$previewLink.removeClass("active");
 			$splitLink.removeClass("active");
-			onLayoutChange();
 			Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".split", false, {expires: Infinity});
 		});
 		$previewLink.click(function() {
@@ -85,11 +59,12 @@ onedev.server.markdown = {
 			$rendered.data("caret", caret);
 			$rendered.data("caretOffset", caretOffset);
 			
-			$rendered.html("<div class='message'>Loading...</div>");
+			onedev.server.perfectScrollbar.empty($rendered);
+			$rendered.prepend("<div class='message'>Loading...</div>");
+			
 			$editLink.removeClass("active");
 			$previewLink.addClass("active");
 			$splitLink.removeClass("active");
-			onLayoutChange();
 			callback("render", $input.val());
 		});
 		$splitLink.click(function() {
@@ -97,21 +72,17 @@ onedev.server.markdown = {
 			
 			$input.focus();
 			
-			$rendered.html("<div class='message'>Loading...</div>");
+			onedev.server.perfectScrollbar.empty($rendered);
+			$rendered.prepend("<div class='message'>Loading...</div>");
+			
 			$editLink.removeClass("active");
 			$previewLink.removeClass("active");
 			$splitLink.addClass("active");
-			onLayoutChange();
 			callback("render", $input.val());
 			Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".split", true, {expires: Infinity});
 		});
 		
-		function onLayoutChange() {
-			if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-				$rendered.outerHeight($input.outerHeight());
-				$preview.outerHeight($edit.outerHeight());
-			}
-		}
+		onedev.server.markdown.setupActionMenu($container, $head.find(".normal-mode"));
 
 		var previewTimeout = 500;
 		$input.doneEvents("input inserted.atwho", function() {
@@ -279,172 +250,48 @@ onedev.server.markdown = {
 			onedev.server.markdown.fireInputEvent($input);
 		});
 		
+		var minHeight = 75;
+		$body.resizable({
+			autoHide: false,
+			handles: {"s": $body.children(".ui-resizable-handle")},
+			minHeight: minHeight,
+			stop: function() {
+				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".bodyHeight", 
+						$body.height(), {expires: Infinity});
+			}
+		});
+		
 		$edit.resizable({
 			autoHide: false,
 			handles: {"s": $edit.children(".ui-resizable-handle")},
-			minHeight: 75,
-			resize: function(e, ui) {
-				$input.outerHeight($edit.height());
-				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-					$rendered.outerHeight($input.outerHeight());
-					$preview.outerHeight($edit.outerHeight());
-				}
-			},
-			stop: function(e, ui) {
-				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".inputHeight", 
-						$input.outerHeight(), {expires: Infinity});
-				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-					Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight", 
-							$rendered.outerHeight(), {expires: Infinity});
-				}
+			minHeight: minHeight,
+			stop: function() {
+				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".editHeight", 
+						$edit.height(), {expires: Infinity});
 			}
 		});
 		
 		$preview.resizable({
+			autoHide: false,
 			handles: {"s": $preview.children(".ui-resizable-handle")},
-			minHeight: 75,
-			resize: function(e, ui) {
-				$rendered.outerHeight($preview.height());
-				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-					$input.outerHeight($rendered.outerHeight());
-					$edit.outerHeight($preview.outerHeight());
-				}
-			},
-			stop: function(e, ui) {
-				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight", 
-						$rendered.outerHeight(), {expires: Infinity});
-				if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-					Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".inputHeight", 
-							$input.outerHeight(), {expires: Infinity});
-				}
+			minHeight: minHeight,
+			stop: function() {
+				Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".previewHeight", 
+						$preview.height(), {expires: Infinity});
 			}
 		});
 
-		$warning.on("closed.bs.alert", function () {
-			if (!$resizeHandles.is(":visible"))
-				onedev.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
-		})
-		
-		$container.on("autofit", function(e, width, height) {
-			$resizeHandles.hide();
-			onedev.server.markdown.autofit(containerId, width, height);
-		});
-
-		$head.find(".do-bold").click(function() {
-			var selected = $input.range();
-			if (selected.length != 0) {
-				$input.range("**" + selected.text + "**").range(selected.start+2, selected.end+2);
-			} else {
-				$input.range("**strong text**").range(selected.start+2, selected.end+2+"strong text".length);
-			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
-		$head.find(".do-italic").click(function() {
-			var selected = $input.range();
-			if (selected.length != 0) {
-				$input.range("_" + selected.text + "_").range(selected.start+1, selected.end+1);
-			} else {
-				$input.range("_emphasized text_").range(selected.start+1, selected.end+1+"emphasized text".length);
-			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
-		$head.find(".do-header").click(function() {
-			var selected = $input.range();
-			if (selected.length != 0) {
-				$input.range("### " + selected.text).range(selected.start+4, selected.end+4);
-			} else {
-				$input.range("### heading text").range(selected.start+4, selected.end+4+"heading text".length);
-			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
-		$head.find(".do-list, .do-orderlist, .do-tasklist").click(function() {
-			var leading;
-			if ($(this).hasClass("do-list"))
-				leading = "-";
-			else if ($(this).hasClass("do-orderlist"))
-				leading = "1.";
-			else
-				leading = "- [ ]";
-			var selected = $input.range();
-			if (selected.length != 0) {
-				var splitted = selected.text.split("\n");
-				var insert = "";
-				for (var i in splitted) {
-					if (i != 0) 
-						insert += "\n";
-					insert += leading + " " + splitted[i];
-				}
-				$input.range(insert).range(selected.start+leading.length+1, selected.start+leading.length+1+splitted[0].length);
-			} else {
-				var text;
-				if ($(this).hasClass("do-tasklist"))
-					text = " task text here";
-				else
-					text = " list text here";
-				$input.range(leading + text).range(selected.start+leading.length+1, selected.start+leading.length+1+text.length);
-			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
-		});
-
-		$head.find(".do-code").click(function() {
-			var langHint = "programming language";
-			var selected = $input.range();
-			if (selected.length != 0) {
-				$input.range("\n```" + langHint + "\n" + selected.text + "\n```\n").range(selected.start+4, selected.start+4+langHint.length);
-			} else {
-				$input.range("\n```" + langHint + "\ncode text here\n```\n").range(selected.start+4, selected.start+4+langHint.length);
-			}
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
-		$head.find(".do-quote").click(function() {
-			var selected = $input.range();
-			if (selected.length != 0)
-				$input.range("> " + selected.text).range(selected.start+2, selected.end+2);
-			else
-				$input.range("> quote here").range(selected.start+2, selected.start+2+"quote here".length);
-			$input.focus();
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
-		$head.find(".do-emoji").click(function() {
-			if (!$emojis.hasClass("loaded") && !$emojis.hasClass("loading")) {
-				$emojis.addClass("loading");
-				$emojis.html("Loading emojis...");
-				callback("loadEmojis");
-			}
-			$emojis.toggle();
-			$head.find(".do-emoji").toggleClass("active");
-			if (!$resizeHandles.is(":visible"))
-				onedev.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
-		});
-		
 		$head.find(".do-help").click(function() {
 			$(this).toggleClass("active");
 			$help.toggle();
-			if (!$resizeHandles.is(":visible"))
-				onedev.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 		});
 
-		function getReplacement() {
+		$head.find(".do-fullscreen").click(function() {
 			var $replacement = $container.closest("form");
 			if ($replacement.length == 0)
 				$replacement = $container;
-			return $replacement;
-		}
-		
-		$head.find(".do-fullscreen").click(function() {
-			var $replacement = getReplacement();
+			
 			if ($container.hasClass("fullscreen")) {
-				$("body").removeClass("fullscreen");
 				$container.removeClass("fullscreen");
 				var $placeholder = $("#" + containerId + "-placeholder");
 				
@@ -456,18 +303,8 @@ onedev.server.markdown = {
 					$container.removeClass("normal-mode");
 					$container.addClass("compact-mode");
 				} 
-				if ($container.data("resizeHandlesVisiblePreviously"))  
-					$resizeHandles.show();
-				
-				if ($resizeHandles.is(":visible")) {
-					$container.css("width", "inherit").css("height", "inherit");
-					onedev.server.markdown.restoreSizeFromCookie($container);
-				} else {
-					$(window).resize();
-				}
 			} else {
 				$container.addClass("fullscreen");
-				$container.data("resizeHandlesVisiblePreviously", $resizeHandles.is(":visible"));
 				if ($container.hasClass("compact-mode")) {
 					$container.removeClass("compact-mode");
 					$container.addClass("normal-mode");
@@ -475,60 +312,16 @@ onedev.server.markdown = {
 				} else {
 					$container.data("compactModePreviously", false);
 				}
-				$resizeHandles.hide();
 				var $placeholder = $("<div id='" + containerId + "-placeholder'></div>");
 				$placeholder.insertAfter($replacement);
-				$("body").append($replacement).addClass("fullscreen");
+				$("body").append($replacement);
 				$(this).addClass("active");
-				$(window).resize();
 			}
+			
 			if ($input.is(":visible"))
 				$input.focus();
 		});
-		
-		$(window).resize(function() {
-			if ($container.hasClass("fullscreen")) {
-				onedev.server.markdown.autofit(containerId, $(window).width(), $(window).height());
-			}
-		});
 
-		if (!canMentionUser)
-			$head.find(".do-mention").remove();
-		if (!canReferenceEntity)
-			$head.find(".do-reference, .reference.dropdown").remove();
-			
-		$head.find(".do-mention, .do-reference").click(function() {
-			if (!$edit.is(":visible")) 
-				return;
-
-			var atChar = $(this).hasClass("do-mention")? "@": "#";	
-			var prevChar;
-			var caret = $input.caret();
-			if (caret != 0) 
-				prevChar = $input.val().charAt(caret-1);
-			
-			var prefix = $(this).data("reference");
-			if (prefix === undefined)
-				prefix = "";
-			else 
-				prefix = prefix + " ";
-			
-			if (prevChar === undefined || prevChar === ' ' || prevChar === '\n') 
-				$input.caret(prefix + atChar);
-			else 
-				$input.caret(" " + prefix + atChar);
-			
-			$input.atwho("run");
-			onedev.server.markdown.fireInputEvent($input);
-		});
-		
-		$head.find(".do-image, .do-link").click(function() {
-	       	if ($(this).hasClass("do-image"))
-	       		callback("selectImage");
-	       	else
-	       		callback("selectLink");
-		});
-		
 		$input.on("keydown", function(e) {
 			if ($(".atwho-view").filter(":visible").length == 0) {
 				if ((e.ctrlKey|e.metaKey) && e.keyCode == 76) {
@@ -611,9 +404,9 @@ onedev.server.markdown = {
 		        },
 		        displayTpl: function() {
 	        		if (matchReference().type) 
-			    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
+			    		return "<li><span>#${referenceNumber}</span> - ${referenceTitle}</li>";
 	        		else
-                        return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
+                        return "<li><span>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
 		        },
 		        insertTpl: function() {
 	        		if (matchReference().type) 
@@ -780,45 +573,189 @@ onedev.server.markdown = {
 
 		$rendered.scrollTop(scrollTop);
     },
-    restoreSizeFromCookie: function($container) {
-    	var $body = $container.children(".body");
+	setupActionMenu: function($container, $actionMenu) {
+		var callback = $container.data("callback");		
+		
+		var $head = $container.children(".head");
+		var $body = $container.children(".body");
+		var $emojis = $head.children(".emojis");
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
-		var $preview = $body.children(".preview");
-		var $rendered = $preview.children(".markdown-rendered");
-
-		var defaultHeight = 200;
-		var inputHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".inputHeight");
-		if (inputHeight) {
-			$input.outerHeight(parseInt(inputHeight));
-		} else {
-			$input.outerHeight(defaultHeight);
+			
+		function closeMenu() {
+			var closeCallback = $actionMenu.closest(".floating").data("closeCallback");	
+			if (closeCallback)
+				closeCallback();
 		}
-		$edit.outerHeight($input.outerHeight());
 		
-		var renderedHeight;
-		if ($container.hasClass("normal-mode") && $container.hasClass("split-mode")) {
-			renderedHeight = $input.outerHeight();
-		} else {
-			renderedHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".renderedHeight");
-			if (!renderedHeight) 
-				renderedHeight  = defaultHeight;
-		}
-		$rendered.outerHeight(renderedHeight);
-		$preview.outerHeight($rendered.outerHeight());
-    },
-	onWindowLoad: function(containerId) {
+		$actionMenu.find(".do-bold").click(function() {
+			var selected = $input.range();
+			if (selected.length != 0) {
+				$input.range("**" + selected.text + "**").range(selected.start+2, selected.end+2);
+			} else {
+				$input.range("**strong text**").range(selected.start+2, selected.end+2+"strong text".length);
+			}
+			$input.focus();
+			onedev.server.markdown.fireInputEvent($input);
+			closeMenu();			
+		});
+		
+		$actionMenu.find(".do-italic").click(function() {
+			var selected = $input.range();
+			if (selected.length != 0) {
+				$input.range("_" + selected.text + "_").range(selected.start+1, selected.end+1);
+			} else {
+				$input.range("_emphasized text_").range(selected.start+1, selected.end+1+"emphasized text".length);
+			}
+			$input.focus();
+			onedev.server.markdown.fireInputEvent($input);
+			closeMenu();			
+		});
+		
+		$actionMenu.find(".do-header").click(function() {
+			var selected = $input.range();
+			if (selected.length != 0) {
+				$input.range("### " + selected.text).range(selected.start+4, selected.end+4);
+			} else {
+				$input.range("### heading text").range(selected.start+4, selected.end+4+"heading text".length);
+			}
+			$input.focus();
+			onedev.server.markdown.fireInputEvent($input);
+			closeMenu();			
+		});
+		
+		$actionMenu.find(".do-list, .do-orderlist, .do-tasklist").click(function() {
+			var leading;
+			if ($(this).hasClass("do-list"))
+				leading = "-";
+			else if ($(this).hasClass("do-orderlist"))
+				leading = "1.";
+			else
+				leading = "- [ ]";
+			var selected = $input.range();
+			if (selected.length != 0) {
+				var splitted = selected.text.split("\n");
+				var insert = "";
+				for (var i in splitted) {
+					if (i != 0) 
+						insert += "\n";
+					insert += leading + " " + splitted[i];
+				}
+				$input.range(insert).range(selected.start+leading.length+1, selected.start+leading.length+1+splitted[0].length);
+			} else {
+				var text;
+				if ($(this).hasClass("do-tasklist"))
+					text = " task text here";
+				else
+					text = " list text here";
+				$input.range(leading + text).range(selected.start+leading.length+1, selected.start+leading.length+1+text.length);
+			}
+			$input.focus();
+			onedev.server.markdown.fireInputEvent($input);
+			closeMenu();			
+		});
+
+		$actionMenu.find(".do-code").click(function() {
+			var langHint = "programming language";
+			var selected = $input.range();
+			if (selected.length != 0) {
+				$input.range("\n```" + langHint + "\n" + selected.text + "\n```\n").range(selected.start+4, selected.start+4+langHint.length);
+			} else {
+				$input.range("\n```" + langHint + "\ncode text here\n```\n").range(selected.start+4, selected.start+4+langHint.length);
+			}
+			$input.focus();
+			onedev.server.markdown.fireInputEvent($input);
+			closeMenu();			
+		});
+		
+		$actionMenu.find(".do-quote").click(function() {
+			var selected = $input.range();
+			if (selected.length != 0)
+				$input.range("> " + selected.text).range(selected.start+2, selected.end+2);
+			else
+				$input.range("> quote here").range(selected.start+2, selected.start+2+"quote here".length);
+			$input.focus();
+			onedev.server.markdown.fireInputEvent($input);
+			closeMenu();			
+		});
+		
+		$actionMenu.find(".do-emoji").click(function() {
+			if (!$emojis.hasClass("loaded") && !$emojis.hasClass("loading")) {
+				$emojis.addClass("loading");
+				$emojis.html("Loading emojis...");
+				callback("loadEmojis");
+			}
+			$emojis.toggle();
+			$actionMenu.find(".do-emoji").toggleClass("active");
+			closeMenu();			
+		});
+		
+		$actionMenu.find(".do-mention, .do-reference").click(function() {
+			closeMenu();			
+			
+			if (!$edit.is(":visible")) 
+				return;
+
+			var atChar = $(this).hasClass("do-mention")? "@": "#";	
+			var prevChar;
+			var caret = $input.caret();
+			if (caret != 0) 
+				prevChar = $input.val().charAt(caret-1);
+			
+			var prefix = $(this).data("reference");
+			if (prefix === undefined)
+				prefix = "";
+			else 
+				prefix = prefix + " ";
+			
+			if (prevChar === undefined || prevChar === ' ' || prevChar === '\n') 
+				$input.caret(prefix + atChar);
+			else 
+				$input.caret(" " + prefix + atChar);
+			
+			$input.atwho("run");
+			onedev.server.markdown.fireInputEvent($input);
+		});
+		
+		$actionMenu.find(".do-image, .do-link").click(function() {
+	       	if ($(this).hasClass("do-image"))
+	       		callback("selectImage");
+	       	else
+	       		callback("selectLink");
+			closeMenu();			
+		});
+	},
+	onLoad: function(containerId) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
 		var $warning = $head.children(".warning");
-		var $rendered = $body.find(">.preview>.markdown-rendered");
-		var $input = $body.find(">.edit>textarea");
-		var $resizeHandles = $container.find(".ui-resizable-handle");
+		var $edit = $body.children(".edit");
+		var $preview = $body.children(".preview");
+		var $input = $edit.children("textarea");
 
-		if ($resizeHandles.is(":visible")) {
-			onedev.server.markdown.restoreSizeFromCookie($container);
-		}
+		if ($body.find(".ui-resizable-handle:visible").length != 0) {
+			var defaultHeight = 200;
+			if ($container.hasClass("normal-mode")) {
+				var bodyHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".bodyHeight");
+				if (bodyHeight) 
+					$body.height(parseInt(bodyHeight));
+				else 
+					$body.height(defaultHeight);
+			} else {
+				var editHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".editHeight");
+				if (editHeight) 
+					$edit.height(parseInt(editHeight));
+				else
+					$edit.height(defaultHeight);
+					
+				var previewHeight = Cookies.get(onedev.server.markdown.getCookiePrefix($container)+".previewHeight");
+				if (previewHeight) 
+					$preview.height(parseInt(previewHeight));
+				else
+					$preview.height(defaultHeight);
+			}
+		} 
 		
 		var autosaveKey = $container.data("autosaveKey");
 		if (autosaveKey) {
@@ -827,8 +764,6 @@ onedev.server.markdown = {
 			if (autosaveValue && $input.val() != autosaveValue) {
 				$input.val(autosaveValue);
 				$warning.show();		
-				if (!$resizeHandles.is(":visible"))
-					onedev.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 				onedev.server.markdown.fireInputEvent($input);
 			}
 		}
@@ -847,7 +782,9 @@ onedev.server.markdown = {
 			existingImages[key] = elements;
 		});
 		
-		$rendered.html(html);
+		onedev.server.perfectScrollbar.empty($rendered);
+		$rendered.prepend(html);
+		
 		onedev.server.markdown.initRendered($rendered);
 
 		// Avoid loading existing image
@@ -868,7 +805,6 @@ onedev.server.markdown = {
 		$rendered.find("img").on("load", function() {
             onedev.server.markdown.syncPreviewScroll(containerId);
         });
-        
 	},
 	initRendered: function($rendered) {
 		$rendered.find("span.header-anchor").parent().addClass("header-anchor");
@@ -932,8 +868,11 @@ onedev.server.markdown = {
 		var $rendered = $container.find(".markdown-rendered");
 		
 		var content = $rendered.data("content");
-		if (content) 
-			$rendered.html(content).removeData("content");
+		
+		if (content) {
+			onedev.server.perfectScrollbar.empty($rendered);
+			$rendered.prepend(content).removeData("content");
+		}
 		
 		if (taskCallback) {
 			var $task = $container.find(".task-list-item");
@@ -985,8 +924,8 @@ onedev.server.markdown = {
 	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.append("" +
-				"<div class='content issue'>" +
-				"  <span class='state label'></span> <span class='title'></span>" +
+				"<div class='d-flex issue align-items-center'>" +
+				"  <span class='state badge mr-3'></span> <span class='title font-weight-bold'></span>" +
 				"</div>");
 		$tooltip.find(".state").css({
 			"color": stateFontColor,
@@ -998,41 +937,37 @@ onedev.server.markdown = {
 	renderPullRequestTooltip: function(title, status, statusCss) {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.append("" +
-				"<div class='content pull-request'>" +
-				"  <span class='label status'></span> <span class='title'></span>" +
+				"<div class='d-flex align-items-center'>" +
+				"  <span class='badge status mr-3'></span> <span class='title font-weight-bold'></span>" +
 				"</div>");
 		$tooltip.find(".status").addClass(statusCss).text(status);
 		$tooltip.find(".title").text(title);
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
-	renderBuildTooltip: function(title, status, statusCss) {
+	renderBuildTooltip: function(title, iconHref, iconCss) {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.append("" +
-				"<div class='content build'>" +
-				"  <span class='status'></span> <span class='title'></span>" +
+				"<div class='d-flex align-items-center'>" +
+				"  <svg class='mr-2 " + iconCss + "'><use xlink:href='" + iconHref + "'/></svg> <span class='title font-weight-bold'></span>" +
 				"</div>");
-		$tooltip.find(".status").addClass(statusCss).text(status);
 		$tooltip.find(".title").text(title);
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	renderUserTooltip: function(avatarUrl, name, email) {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.append("" +
-				"<div class='content user'>" +
-				"  <img class='avatar'></img><div class='name'></div><div class='email'></div>" +
+				"<div class='d-flex align-items-center'>" +
+				"  <img class='avatar mr-2'></img> <div class='name font-weight-bold'></div>" +
 				"</div>");
 		$tooltip.find(".avatar").attr("src", avatarUrl);
 		$tooltip.find(".name").text(name);
-		$tooltip.find(".email").text(email);
 		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	renderCommitTooltip: function(author, date, commitMessage) {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.append("" +
-				"<div class='content commit'>" +
-				"  <div class='head'><span class='author'></span> <span class='date'></span></div>" +
-				"  <pre class='body'></pre>" +
-				"</div>");
+				"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
+				"  <pre class='body mb-0'></pre>");
 		$tooltip.find(".author").text(author);
 		$tooltip.find(".date").text(date);
 		$tooltip.find(".body").text(commitMessage);
@@ -1045,14 +980,14 @@ onedev.server.markdown = {
 		var $edit = $body.children(".edit");
 		var $input = $edit.children("textarea");
 		var $emojis = $head.children(".emojis");
-		var $resizeHandles = $container.find(".ui-resizable-handle");
 		
 		var contentHtml = "";
 		for (var i in emojis) {
 			var emoji = emojis[i];
 			contentHtml += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
 		}
-		$emojis.html(contentHtml);
+		onedev.server.perfectScrollbar.empty($emojis);
+		$emojis.prepend(contentHtml);
 		$emojis.removeClass("loading");
 		$emojis.addClass("loaded");
 		$emojis.find(".emoji").click(function() {
@@ -1062,11 +997,8 @@ onedev.server.markdown = {
 			$input.caret(":" + $(this).attr("title") + ": ");
 			onedev.server.markdown.fireInputEvent($input);
 		});
-		if (!$resizeHandles.is(":visible"))
-			onedev.server.markdown.autofit(containerId, $container.outerWidth(), $container.outerHeight());
 	},
 	insertUrl: function(containerId, isImage, url, name, replaceMessage) {
-		var $head = $("#" + containerId + ">.head");
 		var $body = $("#" + containerId + ">.body");
 		var $input = $body.find(">.edit>textarea");
 

@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.admin.mailsetting;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -14,7 +16,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -65,7 +67,7 @@ public class MailSettingPage extends AdministrationPage {
 			}
 
 			@Override
-			protected String runTask(JobLogger logger) {
+			protected String runTask(SimpleLogger logger) {
 				User user = SecurityUtils.getUser();
 				
 				String body = "Great, your mail setting is working!";
@@ -96,6 +98,11 @@ public class MailSettingPage extends AdministrationPage {
 		form.add(testButton);
 		
 		add(form);
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Mail Setting");
 	}
 
 }

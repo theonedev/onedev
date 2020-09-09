@@ -2,6 +2,7 @@ package io.onedev.server.web.page.admin.serverinformation;
 
 import java.util.Date;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -75,4 +76,10 @@ public class ServerInformationPage extends AdministrationPage {
 			
 		});
 	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Server Information");
+	}
+	
 }

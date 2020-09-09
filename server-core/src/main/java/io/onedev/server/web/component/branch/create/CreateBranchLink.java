@@ -36,7 +36,7 @@ public abstract class CreateBranchLink extends ModalLink {
 			@Override
 			protected void onCreate(AjaxRequestTarget target, String branch) {
 				modal.close();
-				CreateBranchLink.this.onCreate(target, branch);
+				CreateBranchLink.this.onCreated(target, branch);
 			}
 
 			@Override
@@ -54,5 +54,5 @@ public abstract class CreateBranchLink extends ModalLink {
 		super.onDetach();
 	}
 
-	protected abstract void onCreate(AjaxRequestTarget target, String branch);
+	protected abstract void onCreated(AjaxRequestTarget target, String branch);
 }

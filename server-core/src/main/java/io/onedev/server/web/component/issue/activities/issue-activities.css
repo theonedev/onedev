@@ -1,23 +1,17 @@
-.issue-activity-options {
-	text-align: right;
-}
-.issue-activity-options>div {
-	padding-left: 12px;
-	display: inline-block;
-}
 .issue-activities>table {
 	table-layout: fixed;
 }
 .issue-activities tr.activity.new>.avatar {
-	border-left-color: #4667EE;
+	border-left-color: var(--primary);
 }
 
 .issue-activities>table>tbody>tr>td {
-	border-bottom: 1px solid #EEE;
-	padding: 16px 0;
+	border-top: 1px solid var(--light-gray);
+	padding: 1.25rem 0;
+	vertical-align: top;
 }
-.issue-activities>table>tbody>tr:last-child>td {
-	border-bottom: none;
+.issue-activities>table>tbody>tr:first-child>td {
+	border-top: none;
 }
 .issue-activities>table>tbody>tr>td.avatar {
 	width: 48px;
@@ -28,48 +22,14 @@
 	width: 40px;
 	height: 40px;
 }
+.issue-activities>table>tbody>tr>td.avatar .avatar.system-avatar {
+	width: 46px;
+	height: 46px;
+	margin-left: -3px;
+}
 .issue-activities>table>tbody>tr>td.content {
-	padding-left: 16px;
+	padding-left: 1.25rem;
 }
-.issue-activities .activity>.content>.head {
-	color: #888;
-}
-.issue-activities .activity.commit .body a.summary {
-	font-size: 14px;
-	margin-right: 4px;
-}
-
-.issue-activities .activity>.content>.body {
-	margin-top: 8px;
-}
-
-.issue-activities .activity>.content>.body>.actions {
-	margin-top: 8px;
-}
-.issue-activities .activity>.content>.body>.actions a {
-	color: #888;
-	margin-right: 0;
-}
-.issue-activities .activity>.content>.body .actions .middot {
-	margin: 0 4px;
-}
-.issue-activities .activity>.content>.body .field-change>.change {
-	margin-bottom: 12px;
-}
-
-.issue-activities .activity>.content>.head a {
-	color: #999;
-	margin-left: 8px;
-}
-.issue-activities .add-comment {
-	margin-top: 16px;
-}
-.issue-activities .login-to-comment {
-	border: 1px solid #EEE;
-	vertical-align: center;
-	text-align: center;
-	padding: 20px;
-	font-size: 20px;
-	background: #F9F9F9;
-	border-radius: 4px;	
+.issue-activities>table>tbody>tr>td.content>.body {
+    margin-top: 1rem;
 }

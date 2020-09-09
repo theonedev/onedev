@@ -7,16 +7,17 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   class="icon"
-   width="200px"
-   height="200.00px"
-   viewBox="0 0 1024 1024"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="arrow2.svg"
+   id="svg74"
    version="1.1"
-   id="svg12"
-   sodipodi:docname="arrow.svg"
-   inkscape:version="1.0 (4035a4f, 2020-05-01)">
+   viewBox="100 100 924 924"
+   height="200.00px"
+   width="200px"
+   class="icon">
+
   <metadata
-     id="metadata18">
+     id="metadata80">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -27,30 +28,28 @@
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs16" />
+     id="defs78" />
   <sodipodi:namedview
-     inkscape:document-rotation="0"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="971"
-     id="namedview14"
-     showgrid="false"
-     inkscape:zoom="4.135"
-     inkscape:cx="100"
-     inkscape:cy="101.37884"
-     inkscape:window-x="0"
-     inkscape:window-y="23"
+     inkscape:current-layer="svg74"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg12" />
+     inkscape:window-y="23"
+     inkscape:window-x="0"
+     inkscape:cy="112.36476"
+     inkscape:cx="100"
+     inkscape:zoom="3.235"
+     showgrid="false"
+     id="namedview76"
+     inkscape:window-height="791"
+     inkscape:window-width="1440"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
   <path
-     style="stroke-width:0.838545"
-     d="M 410.68781,820.33877 716.54798,505.18984 410.68781,190.04092 Z"
-     id="path10" />
+     id="path72"
+     d="m 439.69706,384.14179 166.4,166.4 -166.4,166.4 a 41.258667,41.258667 0 0 0 0,59.73333 41.258667,41.258667 0 0 0 59.73333,0 L 695.69706,580.40845 a 41.258667,41.258667 0 0 0 0,-59.73333 L 499.43039,324.40845 a 42.24,42.24 0 1 0 -59.73333,59.73334 z" />
 </svg>

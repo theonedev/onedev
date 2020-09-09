@@ -1,10 +1,10 @@
 .diff-stat-bar {
-	color: #ddd; 
+	color: var(--secondary); 
 }
 .diff-stat-bar>i {
-	font-size: 10px;
+	font-size: 16px;
 	font-style: normal; 
-	word-spacing: -2px;
+	word-spacing: -4px;
 }
 .diff-stat-bar .additions {
 	color: #35c335;

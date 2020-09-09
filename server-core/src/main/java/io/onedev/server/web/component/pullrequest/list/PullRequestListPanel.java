@@ -2,6 +2,7 @@ package io.onedev.server.web.component.pullrequest.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -45,9 +46,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -67,7 +67,7 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.asset.icon.IconScope;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -81,7 +81,6 @@ import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewerAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -218,7 +217,7 @@ public abstract class PullRequestListPanel extends Panel {
 				super.onComponentTag(tag);
 				configure();
 				if (!isEnabled()) 
-					tag.put("disabled", "disabled");
+					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
 					tag.put("title", "Query not submitted");
 				else if (queryModel.getObject() == null)
@@ -264,11 +263,7 @@ public abstract class PullRequestListPanel extends Panel {
 							query = new PullRequestQuery();
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
-						String queryString = query.toString();
-						if (queryString.length() != 0)
-							queryStringModel.setObject(queryString);
-						else
-							queryStringModel.setObject(null);
+						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
 						doQuery(target);
@@ -319,42 +314,21 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
-		if (getProject() == null || SecurityUtils.canReadCode(getProject()))
-			queryForm.add(AttributeAppender.append("class", "can-create-pull-requests"));
 		add(queryForm);
-
-		if (getProject() != null) {
-			add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
-					NewPullRequestPage.paramsOf(getProject())) {
-				
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(String.format(
-							"<svg class='icon'><use xlink:href='%s'/></svg> New", 
-							SpriteImage.getVersionedHref(IconScope.class, "plus")));
-				}
-				
-			}.setEscapeModelStrings(false));		
-		} else {
-			add(new DropdownLink("newRequest") {
-
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(String.format(
-							"<svg class='icon'><use xlink:href='%s'/></svg> New <svg class='icon rotate-90'><use xlink:href='%s'/></svg>", 
-							SpriteImage.getVersionedHref(IconScope.class, "plus"), SpriteImage.getVersionedHref(IconScope.class, "arrow")));
-				}
-				
+		
+		if (getProject() == null) {
+			add(new DropdownLink("newPullRequest") {
+	
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
 					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
-
+	
 						@Override
 						protected Collection<Project> load() {
 							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
 									.getPermittedProjects(new ReadCode()));
 							Collections.sort(projects, new Comparator<Project>() {
-
+	
 								@Override
 								public int compare(Project o1, Project o2) {
 									return o1.getName().compareTo(o2.getName());
@@ -365,16 +339,19 @@ public abstract class PullRequestListPanel extends Panel {
 						}
 						
 					}) {
-
+	
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Project project) {
 							setResponsePage(NewPullRequestPage.class, NewPullRequestPage.paramsOf(project));
 						}
-
+	
 					};
 				}
 				
-			}.setEscapeModelStrings(false));
+			});
+		} else {
+			add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
+					NewPullRequestPage.paramsOf(getProject())));		
 		}
 		
 		body = new WebMarkupContainer("body");
@@ -584,6 +561,7 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		requestsTable.addBottomToolbar(new NoRecordsToolbar(requestsTable));
+		requestsTable.add(new NoRecordsBehavior());
 		
 		setOutputMarkupId(true);
 	}

@@ -1,25 +1,14 @@
 <wicket:extend>
-	<div class="help-block">Define all custom issue states here. The first state will be used as 
-	initial state of created issues</div>
-	<div class="issue-states def-list list">
-		<div class="head clearfix">
-			<div class="float-left">
-				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New</a>
-			</div>
+	<div class="issue-states">
+		<div class="text-muted mb-4">
+			<wicket:svg href="bulb" class="icon"/> Define all custom issue states here. The first state will be used as 
+			initial state of created issues
 		</div>
-		<div class="body">
-			<table wicket:id="issueStates" class="table table-hover"></table>
-		</div>
+		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue state"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		<table wicket:id="issueStates" class="table"></table>
 	</div>
-	<wicket:fragment wicket:id="columnFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="viewStateFrag">
-		<div class="actions">
-			<a wicket:id="edit" class="btn btn-sm btn-outline-secondary"><wicket:svg href="edit" class="icon"></wicket:svg> Edit</a>
-			<a wicket:id="delete" class="btn btn-sm btn-outline-secondary"><wicket:svg href="trash" class="icon"></wicket:svg> Delete</a>
-		</div>
-		<div wicket:id="feedback"></div>
-		<div wicket:id="viewer"></div>
+	<wicket:fragment wicket:id="stateActionsFrag">
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit this state"><wicket:svg href="edit" class="icon align-middle"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this state"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

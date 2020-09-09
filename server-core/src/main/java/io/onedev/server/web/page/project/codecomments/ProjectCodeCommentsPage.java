@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -64,7 +65,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(savedQueries = new SavedQueriesPanel<NamedCodeCommentQuery>("side") {
+		add(savedQueries = new SavedQueriesPanel<NamedCodeCommentQuery>("savedQueries") {
 
 			@Override
 			protected NamedQueriesBean<NamedCodeCommentQuery> newNamedQueriesBean() {
@@ -100,7 +101,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 		});
 		
-		add(commentList = new CodeCommentListPanel("main", new IModel<String>() {
+		add(commentList = new CodeCommentListPanel("comments", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -232,6 +233,11 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			query = project.getNamedCodeCommentQueries().iterator().next().getQuery();
 		}
 		return paramsOf(project, query, page);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "<span class='text-truncate'>Code Comments</span>").setEscapeModelStrings(false);
 	}
 	
 }

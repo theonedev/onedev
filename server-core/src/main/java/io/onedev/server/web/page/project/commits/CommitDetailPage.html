@@ -1,55 +1,61 @@
 <wicket:extend>
-	<div id="commit-detail" class="resize-aware">
-		<div class="info">
-			<div class="message">
-				<div class="subject clearfix">
-					<div wicket:id="title" class="float-left"></div>
-					<div class="btn-group float-right">
-						<a wicket:id="browseCode" title="browse code" class="btn btn-outline-secondary btn-sm"><wicket:svg href="files" class="icon"></wicket:svg></a>
-						<a wicket:id="createBranch" title="Branch from this commit" class="btn btn-outline-secondary btn-sm"><wicket:svg href="branch" class="icon"></wicket:svg></a>
-						<a wicket:id="createTag" title="Tag this commit" class="btn btn-outline-secondary btn-sm"><wicket:svg href="tag" class="icon"></wicket:svg></a>
+	<div class="commit-detail m-5">
+		<div class="card info mb-5">
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item message">
+					<div class="subject d-flex flex-wrap align-items-center">
+						<h4 wicket:id="title" class="mr-3 mb-0"></h4>
+						<div class="ml-auto">
+							<a wicket:id="browseCode" title="browse code" class="btn btn-light btn-hover-primary btn-xs btn-icon"><wicket:svg href="files" class="icon"></wicket:svg></a>
+							<a wicket:id="createBranch" title="Branch from this commit" class="btn btn-light btn-hover-primary btn-xs btn-icon ml-1"><wicket:svg href="branch" class="icon"></wicket:svg></a>
+							<a wicket:id="createTag" title="Tag this commit" class="btn btn-light btn-hover-primary btn-xs btn-icon ml-1"><wicket:svg href="tag" class="icon"></wicket:svg></a>
+						</div>
 					</div>
-				</div>
-				<pre wicket:id="detail" class="detail"></pre>
-			</div>
-			<div wicket:id="refs" class="refs"></div>
-			<div class="contribution-and-parents clearfix">
-				<div class="contribution float-left">
-					<span wicket:id="contributorAvatars" class="avatars"></span>
-					<span wicket:id="contribution" class="name"></span>
-				</div>
-				<div class="commit float-left">
-					<span wicket:id="hash" class="hash"></span>
-					<a wicket:id="copyHash" class="copy"><wicket:svg href="copy" class="icon"></wicket:svg></a>
-				</div>
-				<div wicket:id="parents" class="parents float-left"></div>
-			</div>
-        </div>
-        <wicket:enclosure child="jobs">
-        <div class="jobs clearfix">
-            <div wicket:id="jobs" class="job float-left">
-				<span class="btn-group">
-					<a wicket:id="detail" class="btn btn-outline-secondary">
-						<span wicket:id="status" class="status"></span>
-						<b wicket:id="name" class="name"></b>
-						<wicket:svg href="arrow" class="icon rotate-90 icon-sm"></wicket:svg>
-					</a>					
-	                <a wicket:id="run" class="run btn btn-outline-secondary" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
-				</span>
-            </div>
-        </div>
-        </wicket:enclosure>
-		<div wicket:id="revisionDiff"></div>
+					<pre wicket:id="detail" class="detail mb-0 mt-3"></pre>
+				</li>
+			    <li wicket:id="refs" class="list-group-item refs"></li>
+			    <li class="list-group-item contribution-and-parents d-flex flex-wrap align-items-center">
+					<div class="contribution mr-5">
+						<span wicket:id="contributorAvatars" class="avatars mr-2"></span>
+						<span wicket:id="contribution" class="name"></span>
+					</div>
+					<div class="commit mr-4">
+						<span wicket:id="hash" class="hash"></span>
+						<a wicket:id="copyHash" class="copy"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+					</div>
+					<div wicket:id="parents" class="parents"></div>
+				</li>
+		        <wicket:enclosure child="jobs">
+			    <li class="list-group-item refs d-flex flex-wrap">
+		            <div wicket:id="jobs" class="job mr-3">
+						<span class="btn-group">
+							<a wicket:id="detail" class="btn btn-outline-secondary">
+								<svg wicket:id="status" class="status mr-2"></svg>
+								<b wicket:id="name" class="name"></b>
+								<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
+							</a>					
+			                <a wicket:id="run" class="run btn btn-outline-secondary btn-icon" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+						</span>
+		            </div>
+				</li>
+		        </wicket:enclosure>
+			</ul>
+		</div>
+	
+		<div class="card changes">
+			<li wicket:id="revisionDiff" class="list-group-item"></li>
+		</div>	
 	</div>
+	
 	<wicket:fragment wicket:id="refsFrag">
 		<span wicket:id="refs">
-			<a wicket:id="link"><svg wicket:id="icon" class="icon"/><span wicket:id="label"></span></a>
+			<a wicket:id="link" class="mr-2"><svg wicket:id="icon" class="icon mr-1"/><span wicket:id="label"></span></a>
 		</span>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="multiParentsFrag">
 		<div class="multiple">
-			<span wicket:id="count"></span>  
-			<div wicket:id="parents" class="parent btn-group">
+			<span wicket:id="count" class="mr-2"></span>  
+			<div wicket:id="parents" class="parent btn-group mr-2">
 				<a wicket:id="link" title="Show commit of this parent" class="commit btn btn-outline-secondary btn-sm"><span wicket:id="label"></span></a>
 				<a wicket:id="diff" title="Compare with this parent" class="diff btn btn-outline-secondary btn-sm"><wicket:svg href="diff" class="icon"></wicket:svg></a>
 			</div>
@@ -61,4 +67,9 @@
 			<a wicket:id="parent" class="parent hash"><span wicket:id="label"></span></a>
 		</div>
     </wicket:fragment>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<a wicket:id="commits">Commits</a>
+		<span class="dot"></span>
+		<span wicket:id="commitHash"></span>
+	</wicket:fragment>
 </wicket:extend>

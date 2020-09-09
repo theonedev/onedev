@@ -196,4 +196,9 @@ public class ActionAuthorizationsPage extends BuildSettingPage {
 		authorizationsTable.setOutputMarkupId(true);
 	}
 
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Action Authorizations");
+	}
+
 }

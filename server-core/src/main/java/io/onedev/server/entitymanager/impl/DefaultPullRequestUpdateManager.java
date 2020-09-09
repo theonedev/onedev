@@ -56,7 +56,8 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 				update.setRequest(request);
 				update.setHeadCommitHash(request.getSource().getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
-				request.addUpdate(update);
+				request.getUpdates().add(update);
+				request.setUpdates(request.getUpdates());
 				save(update);
 
 				request.writeHeadRef();

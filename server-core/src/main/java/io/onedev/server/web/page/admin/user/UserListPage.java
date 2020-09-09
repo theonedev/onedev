@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -43,7 +44,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
-import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
@@ -191,7 +192,7 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "d-none d-lg-table-cell";
 			}
 			
 			@Override
@@ -206,7 +207,7 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "d-none d-lg-table-cell";
 			}
 			
 			@Override
@@ -221,7 +222,7 @@ public class UserListPage extends AdministrationPage {
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "d-none d-lg-table-cell";
 			}
 			
 			@Override
@@ -231,11 +232,11 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<User, Void>(Model.of("Actions")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
+				Fragment fragment = new Fragment(componentId, "actionsFrag", UserListPage.this);
 				
 				fragment.add(new AjaxLink<Void>("delete") {
 
@@ -352,6 +353,11 @@ public class UserListPage extends AdministrationPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new UserCssResourceReference()));
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Users");
 	}
 
 }

@@ -1,32 +1,14 @@
-.project-selector {
-	padding: 20px;
+.project-selector input {
+	padding-right: 2rem;
 }
-.project-selector .btn {
-	margin-bottom: 12px;
+.project-selector input+.icon {
+	margin-left: -1.8rem;
 }
-.project-selector ul {
-	margin-top: 12px;
-}
-.project-selector ul li {
-	position: relative;
-}
-.project-selector ul a {
-	padding: 5px 20px !important;
-}
-
-.project-selector a svg {
-	display: none;
-	position: absolute;
-	left: 4px;
-	top: 16px;
+.project-selector .project>a>.icon {
 	width: 12px;
 	height: 12px;
+	visibility: hidden;
 }
-.project-selector a.current svg {
-	display: inline-block;
-}   
-
-.project-selector .no-projects {
-	margin-top: 12px;
-	font-style: italic;
+.project-selector .project>a.current>.icon {
+	visibility: visible;
 }

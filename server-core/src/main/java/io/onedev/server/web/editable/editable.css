@@ -1,110 +1,119 @@
-.editable>.bean-properties>table {
-	width: 100%;
-}
 .editable>.group {
-	margin-bottom: 12px;
+	margin-bottom: 1rem;
 }
 .editable>.group:last-child {
     margin-bottom: 0;
 }
 .editable>.group>a {
-    display: block;
-    text-decoration: none;
-    color: #444;
-    background: #F5F5F5;
-    padding: 4px 8px;
-    margin-bottom: 12px;
-    border-radius: 4px;
-    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    color: var(--info);
+    background: var(--light-info);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.42rem;
+}
+.editable>.group>a:hover, .editable>.group>a:focus {
+	color: white;
+	background: var(--info);
 }
 .editable>.group>a .icon {
     transform: rotate(90deg);
-	margin-left: 8px;
 }
 .editable>.group.expanded>a .icon {
     transform: rotate(-90deg);
 }
-.editable>.group>div, .editable>.group>table {
+.editable>.group>div {
+	margin-left: 2rem;
     display: none;
+}
+.editable>.group:first-child>div {
+	margin-left: 0;
 }
 .editable>.group.expanded>div {
     display: block;
 }
-.editable>.group.expanded>table {
-    display: table;
-}
-.editable>.bean-properties>table>tbody>tr>td {
-	vertical-align: top;
-	padding: 0 8px 16px 0;
-}
-.editable>.bean-properties>table>tbody>tr:last-child>td {
-    padding-bottom: 0;
-}
-.editable td.value>div:last-child>div:last-child>table>tbody>tr:last-child>td.value, 
-.editable td.value>div:last-child>div:last-child>div:last-child>div:last-child>table>tbody>tr:last-child>td.value {
-	padding-bottom: 0;
-	margin-bottom: 0;
-}
-.editable td.value>div>.checkbox, .editable td.value>div>.checkbox>label {
-	margin: 0;
-}
- 
-.editable>.bean-properties>table>tbody>tr>td.name {
-	font-weight: bold;
-	border-right: 1px solid #E0E0E0;
-	text-align: right; 
-	white-space: nowrap; 
-    width: 20%;
-    font-size: 12px;
-    line-height: 20px;
-}
-.editable>.bean-properties>table>tbody>tr>td.value {
-	padding-left: 8px;
-}
+
 .editable table {
-    margin-bottom: 0;
+	margin-bottom: 0;
+	width: 100%;
+	border-collapse: separate;
+}
+.editable table.norecords tfoot td {
+	border: none;
+	border-radius: 0.42rem;
+	background-color: var(--light);
+	opacity: 0.5;
+	background-image: none;
+	height: auto;
+}
+.editable table.norecords tfoot td>div {
+	display: block;
+}
+.editable table th, .editable table td {
+	padding: 0.8rem 1rem;
+}
+.editable table th {
+	font-size: 0.92rem;
+	font-weight: 500;
+	border-top: 1px dashed var(--secondary);
+	border-bottom: 1px dashed var(--secondary);
+}
+.editable table th:first-child {
+	border-left: 1px dashed var(--secondary); 
+	border-top-left-radius: 0.42rem;
+}
+.editable table th:last-child {
+	border-right: 1px dashed var(--secondary); 
+	border-top-right-radius: 0.42rem;
+}
+.editable table td {
+	border-bottom: 1px dashed var(--secondary);
+}
+.editable table td:first-child {
+	border-left: 1px dashed var(--secondary);
+}
+.editable table td:last-child {
+	border-right: 1px dashed var(--secondary);
+}
+.editable table tr:last-child td:first-child {
+	border-bottom-left-radius: 0.42rem;
+}
+.editable table tr:last-child td:last-child {
+	border-bottom-right-radius: 0.42rem;
 }
 
-.property-editor>.bean-list>table>*>tr>.actions {
-    font-size: 18px;
+.editable table>thead>tr>th.minimum, table>tbody>tr>td.minimum {
+    width: 1px;
+	white-space: nowrap;
+	padding-left: 0;
+	padding-right: 0;
+}
+.editable table>thead>tr>th.minimum:first-child, table>tbody>tr>td.minimum:first-child {
+	padding-left: 1rem;
+}
+.editable table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
+	padding-right: 1rem;
 }
 
-.editable>.polymorphic>.type-selector {
-	margin-bottom: 15px;
+.editable .polymorphic>.type-selector {
+	margin-bottom: 1rem;
 }
 
 .bean-editor>input.enable {
-	margin-bottom: 12px;
+	margin-bottom: 1rem;
 }
 
 .bean-editor .password-confirm {
-	margin-top: 12px;
+	margin-top: 1rem;
 }
 
-.property-editor>.bean-editor {
-	border-top: 1px dotted #BBB;
-	margin-top: 4px;
-	padding-top: 12px;
-	margin-bottom: 12px;
-}
-.bean-viewer .bean-properties>table>tbody>tr.name-omitted>td {
-	padding-left: 0;
-}
 .bean-viewer .type-selector {
 	font-style: italic;
 } 
 
 .editable ul.feedbackPanel {
-    margin: 10px 0;
+    margin: 0.8rem 0;
 }
-.bean-editor .bean-list>table>tbody>tr>td {
-    border-top: none;
-} 
+
 .bean-editor .select2-container {
 	width: 100%;
 }
-
-.form-group>.editable>.list>.head {
-	margin-top: 8px;
-}
-

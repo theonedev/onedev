@@ -1,8 +1,0 @@
-.groovy-script.def-detail td.name {
-	width: 120px !important;
-}
-@media(min-width: 768px) {
-.groovy-script.floating.side.def-detail {
-    width: 600px;
-}
-}

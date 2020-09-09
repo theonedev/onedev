@@ -1,1 +1,55 @@
-<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="icon" width="200px" height="200.00px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M512 16C238 16 16 238 16 512s222 496 496 496 496-222 496-496S786 16 512 16z m0 896c-221 0-400-179-400-400S291 112 512 112s400 179 400 400-179 400-400 400z m123.6-208.8l-169.8-123.4c-6.2-4.6-9.8-11.8-9.8-19.4V232c0-13.2 10.8-24 24-24h64c13.2 0 24 10.8 24 24v283.4l133.6 97.2c10.8 7.8 13 22.8 5.2 33.6L669.2 698c-7.8 10.6-22.8 13-33.6 5.2z" /></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="clock.svg"
+   id="svg12"
+   version="1.1"
+   viewBox="0 0 1024 1024"
+   height="200.00px"
+   width="200px"
+   class="icon">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     inkscape:current-layer="svg12"
+     inkscape:window-maximized="1"
+     inkscape:window-y="23"
+     inkscape:window-x="47"
+     inkscape:cy="100"
+     inkscape:cx="100"
+     inkscape:zoom="3.49"
+     showgrid="false"
+     id="namedview14"
+     inkscape:window-height="1035"
+     inkscape:window-width="1873"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <path
+     style="stroke-width:0.948238"
+     id="path10"
+     d="m 512,43.873926 c -260.22275,0 -471.060172,210.180794 -471.060172,469.593124 0,259.41232 210.837422,469.59312 471.060172,469.59312 260.22275,0 471.06017,-210.1808 471.06017,-469.59312 C 983.06017,254.05472 772.22275,43.873926 512,43.873926 Z m 0,848.297254 c -209.88769,0 -379.88723,-169.4701 -379.88723,-378.70413 0,-209.23403 169.99954,-378.70413 379.88723,-378.70413 209.88769,0 379.88723,169.4701 379.88723,378.70413 0,209.23403 -169.99954,378.70413 -379.88723,378.70413 z M 629.38515,694.48763 468.12303,577.6574 c -5.88826,-4.3551 -9.30724,-11.17178 -9.30724,-18.36715 v -310.9161 c 0,-12.49723 10.25696,-22.72224 22.79323,-22.72224 h 60.78196 c 12.53627,0 22.79323,10.22501 22.79323,22.72224 v 268.31189 l 126.88234,92.0251 c 10.25696,7.38473 12.34634,21.58613 4.93854,31.81115 l -35.7094,49.04218 c -7.4078,10.03566 -21.65358,12.30789 -31.91054,4.92316 z" />
+</svg>

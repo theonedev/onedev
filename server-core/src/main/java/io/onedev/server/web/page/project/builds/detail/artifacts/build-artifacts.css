@@ -1,20 +1,9 @@
 .build-artifacts>table th, .build-artifacts>table td {
-	padding: 8px;
-}
-.build-artifacts>table>thead>tr>th {
-    border-bottom: 2px solid #DDD;
-    border-top: none;
-}
-.build-artifacts>table>tbody>tr>td {
-    border-top: 1px solid #DDD;
+	padding: 0.6rem;
 }
 .build-artifacts>table th.tree {
-    padding-left: 18px;
+    padding-left: 1.2rem;
 }
 .build-artifacts>table td.tree {
     padding-left: 0px;
-}
-
-.build-artifacts>table td span.tree-content>a {
-	color: #1f3b7b;
 }

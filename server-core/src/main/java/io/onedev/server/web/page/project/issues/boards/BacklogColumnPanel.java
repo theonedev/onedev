@@ -12,7 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -22,8 +22,8 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -86,6 +86,11 @@ abstract class BacklogColumnPanel extends Panel {
 		super.onInitialize();
 
 		add(new ModalLink("addCard") {
+
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -181,10 +186,10 @@ abstract class BacklogColumnPanel extends Panel {
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
-				String script = String.format("onedev.server.issueBoards.onColumnLoad('%s', %s);", 
+				String script = String.format("onedev.server.issueBoards.onColumnDomReady('%s', %s);", 
 						getMarkupId(), getQuery()!=null?callback:"undefined");
 				// Use OnLoad instead of OnDomReady as otherwise perfect scrollbar is not shown unless resized 
-				response.render(OnLoadHeaderItem.forScript(script));
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 
 			@Override

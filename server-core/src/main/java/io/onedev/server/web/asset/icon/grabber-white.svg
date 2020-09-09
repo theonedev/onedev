@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="miscRowGrabber.svg"
+   id="svg22"
+   version="1.1"
+   viewBox="0 0 1024 1024"
+   height="200.00px"
+   width="200px"
+   class="icon">
+  <metadata
+     id="metadata28">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <path
+     id="path20"
+     fill="white"
+     d="M 910.22222,457.40965 V 571.18743 H 796.44444 V 457.40965 Z m -227.55555,0 V 571.18743 H 568.88889 V 457.40965 Z m -227.55556,0 V 571.18743 H 341.33333 V 457.40965 Z m -227.55555,0 V 571.18743 H 113.77778 V 457.40965 Z" />
+</svg>

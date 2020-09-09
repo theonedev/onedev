@@ -1,15 +1,15 @@
 <wicket:panel>
 	<div class="avatar-edit">
-		<div class="current">
-			<div class="title">Current avatar</div>
+		<div class="current border-bottom pb-5 mb-5">
+			<h6 class="title mb-4">Current avatar</h6>
 			<img wicket:id="avatar"/>
-			<a wicket:id="useDefault" class="btn btn-primary"><wicket:svg href="undo" class="icon"/> Use Default</a>
+			<a wicket:id="useDefault" class="btn btn-primary mt-4"><wicket:svg href="undo" class="icon mr-2"/> Use Default</a>
 		</div>
 		<div class="use-uploaded">
-			<div class="title">Upload avatar</div>
+			<h6 class="title mb-4">Upload avatar</h6>
 			<form wicket:id="form">
 				<div wicket:id="avatar"></div>
-				<button wicket:id="upload" type="submit" class="btn btn-primary"><wicket:svg href="upload" class="icon"/> Upload</button>
+				<button wicket:id="upload" type="submit" class="btn btn-primary mt-4"><wicket:svg href="upload" class="icon mr-2"/> Upload</button>
 			</form>
 		</div>
 	</div>

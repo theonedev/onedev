@@ -103,10 +103,10 @@ public abstract class RevisionPicker extends DropdownLink {
 		}
 		
 		return Model.of(String.format(""
-				+ "<span class='revision-picker'>"
+				+ "<span class='revision-picker text-nowrap'>"
 				+ "  %s"
 				+ "  <span>%s</span>"
-				+ "  <svg class='icon icon-sm rotate-90'><use xlink:href='%s'/></svg>"
+				+ "  <svg class='icon rotate-90'><use xlink:href='%s'/></svg>"
 				+ "</span>", 
 				icon.length()!=0?"<svg class='icon'><use xlink:href='" + SpriteImage.getVersionedHref(IconScope.class, icon) + "'/></svg>":"", 
 				label, 

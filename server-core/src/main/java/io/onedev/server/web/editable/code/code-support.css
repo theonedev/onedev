@@ -1,6 +1,6 @@
 .code-support {
-	border: 1px solid #E0E0E0;
-	border-radius: 4px;
+	border: 1px solid var(--light-gray);
+	border-radius: 0.42rem;
 	padding: 1px;
 }
 .is-invalid .code-support {

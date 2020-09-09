@@ -2,6 +2,7 @@ package io.onedev.server.web.page.admin.serverlog;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
@@ -39,6 +40,11 @@ public class ServerLogPage extends AdministrationPage {
 		}
 		
 		add(new Label("logContent", content));
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Server Log");
 	}
 
 }

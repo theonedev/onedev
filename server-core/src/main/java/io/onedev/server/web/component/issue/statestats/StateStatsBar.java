@@ -5,9 +5,8 @@ import java.util.stream.Collectors;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -37,8 +36,10 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 				if (count != null) { 
 					Link<Void> link = newStateLink(statesView.newChildId(), state.getName());
 					link.add(AttributeAppender.append("title", count + " " + state.getName().toLowerCase() + " issues"));
-					link.add(AttributeAppender.append("data-percent", count*1.0/totalCount));
-					link.add(AttributeAppender.append("style", "background-color: " + state.getColor()));
+					link.add(AttributeAppender.append("style", ""
+							+ "background-color: " + state.getColor() + ";" 
+							+ "width: " + count*100.0/totalCount + "%;"
+							+ "min-width: 4px;"));
 					statesView.add(link);
 				}
 			}
@@ -50,9 +51,11 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 				protected void onComponentTag(ComponentTag tag) {
 					super.onComponentTag(tag);
 					tag.setName("span");
+					tag.put("style", "width: 100%;");
 				}
 				
 			}.setEscapeModelStrings(false));
+			
 			add(AttributeAppender.append("title", "No issues in milestone"));
 		}
 		
@@ -64,9 +67,7 @@ public abstract class StateStatsBar extends GenericPanel<Map<String, Integer>> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new StateStatsResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript(
-				String.format("onedev.server.stateStats.onDomReady('%s');", getMarkupId())));
+		response.render(CssHeaderItem.forReference(new StateStatsCssResourceReference()));
 	}
 
 }

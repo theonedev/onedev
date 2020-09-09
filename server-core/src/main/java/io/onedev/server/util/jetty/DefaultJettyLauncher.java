@@ -10,7 +10,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
@@ -81,11 +83,16 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
          */
         servletContextHandler.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
 
+		ErrorPageErrorHandler errorHandler = new ErrorPageErrorHandler();
+	    errorHandler.addErrorPage(HttpServletResponse.SC_NOT_FOUND, "/errors/404");
+	    servletContextHandler.setErrorHandler(errorHandler);
+
         GzipHandler gzipHandler = new GzipHandler();
 		gzipHandler.setHandler(servletContextHandler);
+		gzipHandler.setIncludedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
 
         jettyServer.setHandler(gzipHandler);
-
+        
         for (ServerConfigurator configurator: serverConfiguratorsProvider.get()) 
         	configurator.configure(jettyServer);
         

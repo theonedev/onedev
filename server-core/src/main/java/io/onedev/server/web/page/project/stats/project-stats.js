@@ -12,7 +12,7 @@ onedev.server.stats = {
 	
 	contribs: {
 		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback) {
-			var $contribs = $("#project-contribs");
+			var $contribs = $(".project-contribs");
 			var $overall = $contribs.find(".overall");
 			if (Object.keys(overallContributions).length === 0) {
 				$overall.html("<div class='no-data'>No data</div>");
@@ -108,17 +108,21 @@ onedev.server.stats = {
 		            brushLink: 'all',
 		            outOfBrush: {
 		                colorAlpha: 0.1
-		            }
+		            },
+					brushStyle: {
+						color: 'rgba(225, 240, 255, 0.5)',
+						borderColor: 'rgba(54, 153, 255, 0.8)'
+					}
 		        },
 		        series: [ {
 					type: 'line',
 					symbol: 'none',
 					smooth: true,
-					color: "#19A519",
+					color: "#1BC5BD",
 					animation: false,
 					data: getOverallSeriesData(),
 					areaStyle: {
-						color: "#19A519"
+						color: "#1BC5BD"
 					}
 				} ]
 			};
@@ -179,13 +183,13 @@ onedev.server.stats = {
 							}
 							
 							function renderContributor($container, contributor, index) {
-								var $content = $("<div class='content'></div>");
-								$container.append($content);
-								var $head = $("<div class='head clearfix'></div>");
-								$content.append($head);
-								var $left = $("<div class='float-left'></div>");
+								var $contrib = $("<div class='card contrib mb-5'><div class='card-body'></div></div>");
+								$container.append($contrib);
+								var $head = $("<div class='head d-flex align-items-center'></div>");
+								$contrib.children().append($head);
+								var $left = $("<div class='mr-3 d-flex align-items-center'></div>");
 								$head.append($left);
-								$left.append("<a class='user'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
+								$left.append("<a class='user mr-2'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
 
 								var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 								$left.find("a.user").hover(function() {
@@ -198,17 +202,19 @@ onedev.server.stats = {
 									return $card;
 								}, alignment);
 								
-								var nameSpan = "<span class='name'>" + contributor.authorName + "</span>"; 
-								$left.append(nameSpan);
-								var $totalContribution = $("<div class='total-contribution'></div>");
-								$left.append($totalContribution);
-								$totalContribution.append("<span class='commits'>" + contributor.totalCommits + " commits</span>");
-								$totalContribution.append("<span class='additions'>" + contributor.totalAdditions + " ++</span>");
+								var $userInfo = $("<div></div>");
+								$left.append($userInfo);
+								
+								$userInfo.append("<div class='font-weight-bold'>" + contributor.authorName + "</div>");
+								var $totalContribution = $("<div class='total-contribution font-size-sm'></div>");
+								$userInfo.append($totalContribution);
+								$totalContribution.append("<span class='commits mr-2'>" + contributor.totalCommits + " commits</span>");
+								$totalContribution.append("<span class='additions mr-2'>" + contributor.totalAdditions + " ++</span>");
 								$totalContribution.append("<span class='deletions'>" + contributor.totalDeletions + " --</span>");
-								$head.append("<div class='float-right'>#" + (index + 1) + "</div>");
+								$head.append("<div class='ml-auto font-size-h6 font-weight-bold'>#" + (index + 1) + "</div>");
 								
 								var $body = $("<div class='body chart'></div>");
-								$content.append($body);
+								$contrib.children().append($body);
 								
 								var chart = echarts.init($body[0]);
 								$body.data("chart", chart);
@@ -252,13 +258,13 @@ onedev.server.stats = {
 									},
 							        series: [ {
 										type: 'line',
-										color: "#EEAD08",
+										color: "#FFA800",
 										symbol: 'none',
 										smooth: true,
 										sampling: 'average',
 										animation: false,
 										areaStyle: {
-											color: "#EEAD08"
+											color: "#FFA800"
 										},
 										data: seriesData,
 									} ]
@@ -269,7 +275,7 @@ onedev.server.stats = {
 							$topContributors.empty();
 							var rows = Math.trunc(topContributors.length/2);
 							for (var i=0; i<rows; i++) {
-								var $row = $("<div class='row'><div class='col-md-6 left'></div><div class='col-md-6 right'></div>");
+								var $row = $("<div class='row'><div class='col-xl-6 left'></div><div class='col-xl-6 right'></div>");
 								$topContributors.append($row);
 								renderContributor($row.children(".left"), topContributors[i*2], i*2);
 								renderContributor($row.children(".right"), topContributors[i*2+1], i*2+1);
@@ -314,7 +320,7 @@ onedev.server.stats = {
 		onDomReady: function(lineIncrements, defaultBranch) {
 			var numOfTopLanguages = 10;
 			
-			var $chart = $("#source-lines>.chart");
+			var $chart = $(".source-lines>div>.chart");
 			if (lineIncrements.length == 0) {
 				$chart.append("<div class='no-data'>No data</div>");
 				return;
@@ -444,7 +450,7 @@ onedev.server.stats = {
 			}
 			chart.setOption(option);	
 			
-			$(window).resize(function() {
+			$chart.on("resized", function() {
 				chart.resize();
 			});
 		}

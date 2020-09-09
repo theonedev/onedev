@@ -42,9 +42,9 @@ public class MilestoneChoiceProvider extends ChoiceProvider<Milestone> {
 		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getName()));
 		writer.key("statusName").value(choice.getStatusName());
 		if (choice.isClosed()) 
-			writer.key("statusClass").value("label-success");
+			writer.key("statusClass").value("badge-success");
 		else
-			writer.key("statusClass").value("label-warning");
+			writer.key("statusClass").value("badge-warning");
 	}
 
 	@Override

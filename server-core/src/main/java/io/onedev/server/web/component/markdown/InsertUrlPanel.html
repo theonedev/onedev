@@ -1,12 +1,12 @@
 <wicket:panel>
 	<div class="modal-header">
 		<h5 wicket:id="title" class="modal-title"></h5>
-		<button wicket:id="close" type="button" class="close">&times;</button>
+		<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 	</div>
 	<div wicket:id="content" class="modal-body insert-url"></div>
 	
 	<wicket:fragment wicket:id="tabbedFrag">
-		<ul wicket:id="tabs" class="tabs nav nav-tabs"></ul>
+		<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5"></ul>
 		<div wicket:id="content"></div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="inputUrlFrag">
@@ -15,7 +15,7 @@
 			<div class="form-group">
 				<label wicket:id="urlLabel" class="control-label"></label>
 				<input wicket:id="url" class="form-control url"></input>
-				<p wicket:id="urlHelp" class="help-block"></p>
+				<p wicket:id="urlHelp" class="form-text text-muted"></p>
 			</div>		
 			<div class="form-group">
 				<label wicket:id="textLabel" class="control-label"></label>
@@ -55,8 +55,8 @@
 		<form wicket:id="form" class="upload-attachment">
 			<div wicket:id="feedback" class="feedback"></div>
 			<div wicket:id="file"></div>
-			<div class="actions clearfix">
-				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary float-right">Insert</button>
+			<div class="text-right mt-4">
+				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary">Insert</button>
 			</div>
 		</form>
 	</wicket:fragment>
@@ -71,10 +71,10 @@
   				<div class="input-group">
 					<input wicket:id="directory" class="form-control"></input> 
 					<span class="input-group-append">
-						<a wicket:id="select" title="Select" class="btn btn-secondary"><wicket:svg href="folder-open" class="icon"></wicket:svg></a>
+						<a wicket:id="select" title="Select" class="btn btn-outline-secondary btn-icon"><wicket:svg href="folder-open" class="icon"></wicket:svg></a>
 					</span>
   				</div>
-				<p class="help-block">Optionally specify relative directory to put uploaded files</p>
+				<p class="form-text text-muted">Optionally specify relative directory to put uploaded files</p>
 			</div>			
 			<div class="form-group">
   				<label>Summary Commit Message</label>
@@ -84,9 +84,9 @@
   				<label>Detail Commit Message</label>
 				<textarea wicket:id="detailCommitMessage" class="form-control" rows="5"></textarea>
 			</div>	
-			<div class="actions clearfix">
-				<button wicket:id="insert" class="btn btn-primary float-right">Commit &amp; Insert</button>		    
-			</div>		
+			<div class="text-right">
+				<button wicket:id="insert" class="btn btn-primary">Commit &amp; Insert</button>		    
+			</div>
 		</form>
 	</wicket:fragment>
 </wicket:panel>

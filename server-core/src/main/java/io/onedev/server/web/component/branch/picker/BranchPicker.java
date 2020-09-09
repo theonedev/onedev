@@ -55,7 +55,7 @@ public abstract class BranchPicker extends DropdownLink {
 				+ "<span class='branch-picker'>"
 				+ "  <svg class='icon'><use xlink:href='%s'/></svg>"
 				+ "  <span>%s</span> "
-				+ "  <svg class='icon icon-sm rotate-90'><use xlink:href='%s'/></svg>"
+				+ "  <svg class='icon rotate-90'><use xlink:href='%s'/></svg>"
 				+ "</span>", 
 				SpriteImage.getVersionedHref(IconScope.class, "branch"),
 				branch!=null?HtmlEscape.escapeHtml5(branch):"<i>choose</i>", 

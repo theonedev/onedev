@@ -1,12 +1,12 @@
 <wicket:panel>
 	<!-- Make it no-autofocus as we will do focus with CodeMirror. Also this is necessary to fix the issue that 
 		file name input loses focus when add file via firefox in Linux -->
-	<div class="source-edit autofit blob-submit-aware no-autofocus">
-		<div class="warning alert alert-warning">
-			<button class="close" data-dismiss="alert"><span>&times;</span></button>
+	<div class="source-edit blob-submit-aware no-autofocus d-flex flex-grow-1 flex-column">
+		<div class="m-3 warning alert alert-light-warning d-shrink-0">
+			<button class="close" data-dismiss="alert"><span><wicket:svg href="times" class="icon"/></span></button>
 			<div class="message"><wicket:svg href="warning" class="icon"/> Below content is restored from an unsaved change</div>
 		</div>
-		<div class="code"></div>
-		<textarea wicket:id="input" class="input"></textarea>
+		<div class="code flex-grow-1 autofit overflow-hidden resize-aware"></div>
+		<textarea wicket:id="input" class="input d-none"></textarea>
 	</div>
 </wicket:panel>

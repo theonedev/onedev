@@ -20,6 +20,8 @@ import io.onedev.server.web.page.my.MyPage;
 @SuppressWarnings("serial")
 public class MySshKeysPage extends MyPage {
 	
+	private SshKeyListPanel keyList;
+	
 	public MySshKeysPage(PageParameters params) {
 		super(params);
 	}
@@ -28,15 +30,16 @@ public class MySshKeysPage extends MyPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		SshKeyListPanel keyList = new SshKeyListPanel("keyList", new LoadableDetachableModel<List<SshKey>>() {
-			
-		    @Override
-		    protected List<SshKey> load() {
-		        return new ArrayList<>(getLoginUser().getSshKeys());
-		    }
-		    
-		});
-		
+        add(new Label("sshKeyNote", "Your SSH keys are managed from " + getLoginUser().getAuthSource()) {
+        	
+        	@Override
+        	protected void onConfigure() {
+        		super.onConfigure();
+        		setVisible(getLoginUser().isSshKeyExternalManaged());
+        	}
+        	
+        });
+        
 		add(new ModalLink("newKey") {
             
             @Override
@@ -67,20 +70,23 @@ public class MySshKeysPage extends MyPage {
             	super.onConfigure();
             	setVisible(!getLoginUser().isSshKeyExternalManaged());
             }
+		});
             
-        });
-		
-        add(new Label("sshKeyNote", "Your SSH keys are managed from " + getLoginUser().getAuthSource()) {
-        	
-        	@Override
-        	protected void onConfigure() {
-        		super.onConfigure();
-        		setVisible(getLoginUser().isSshKeyExternalManaged());
-        	}
-        	
-        });
+		keyList = new SshKeyListPanel("keyList", new LoadableDetachableModel<List<SshKey>>() {
+			
+		    @Override
+		    protected List<SshKey> load() {
+		        return new ArrayList<>(getLoginUser().getSshKeys());
+		    }
+		    
+		});
 		
 		add(keyList.setOutputMarkupId(true));
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "My SSH Keys");
 	}
 	
 }

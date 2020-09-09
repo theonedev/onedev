@@ -1,13 +1,13 @@
 <wicket:panel>
-    <table class="job-params-view">
-        <tr wicket:id="params" class="job-param">
-            <td wicket:id="name" class="name"></td>
-            <td class="value">
+    <div class="job-params-view">
+        <div wicket:id="params" class="job-param mb-4">
+            <div wicket:id="name" class="name font-weight-bolder mb-2"></div>
+            <div class="value">
                 <div wicket:id="valuesProvider" class="values-provider"></div>
                 <div wicket:id="values" class="values"></div>
-            </td>
-        </tr>
-    </table>
+            </div>
+        </div>
+    </div>
     <wicket:fragment wicket:id="specifiedValuesFrag">
         <ul class="specified-values">
             <li wicket:id="values" class="specified-value">

@@ -1,8 +1,6 @@
 package io.onedev.server.web.page.project.builds.detail.log;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -25,12 +23,6 @@ public class BuildLogPage extends BuildDetailPage {
 		super.onInitialize();
 		
 		add(new BuildLogPanel("log", buildModel));
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onLogDomReady();"));
 	}
 
 	@Override

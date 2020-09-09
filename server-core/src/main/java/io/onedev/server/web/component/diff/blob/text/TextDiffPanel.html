@@ -1,12 +1,12 @@
 <wicket:panel>
 	<div class="text-diff cm-s-eclipse">
-		<div class="head clearfix">
-			<div wicket:id="diffStat" class="float-left"></div>
-			<div wicket:id="title" class="float-left"></div>
-			<div wicket:id="actions" class="btn-group float-right">
-				<a wicket:id="blameFile" class="btn btn-sm btn-outline-secondary">Blame</a>
-				<a wicket:id="viewFile" class="btn btn-sm btn-outline-secondary">View</a>
-				<a wicket:id="editFile" class="btn btn-sm btn-outline-secondary">Edit</a>
+		<div class="head d-flex align-items-center flex-wrap px-3 py-2 border">
+			<div wicket:id="diffStat" class="mr-2"></div>
+			<div wicket:id="title" class="mr-3 text-break"></div>
+			<div wicket:id="actions" class="ml-auto">
+				<a wicket:id="blameFile" title="Blame" class="btn btn-xs btn-icon btn-light btn-hover-secondary btn-active-primary"><wicket:svg href="commit" class="icon"/></a>
+				<a wicket:id="viewFile" title="View" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="eye" class="icon"/></a>
+				<a wicket:id="editFile" title="Edit" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="edit" class="icon"/></a>
 			</div>
 		</div>
 		<table class="body diff"><wicket:container wicket:id="diffLines"></wicket:container></table>

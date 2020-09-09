@@ -53,10 +53,9 @@ onedev.server.buildSpec = {
     	$head.children().removeClass("active");
     	$head.children(".jobs").addClass("active");
     	var $body = $valid.children(".body");
-    	$body.children().hide();
+    	$body.children().removeClass("d-flex");
         var $jobs = $body.children(".jobs");
-        $jobs.show();
-        $(window).resize();
+        $jobs.addClass("d-flex");
         onedev.server.focus.doFocus($jobs);
     },
     showJob: function(index) {
@@ -69,8 +68,10 @@ onedev.server.buildSpec = {
         $contents.children().hide();
         var $content = $contents.children().eq(index);
         $content.show();
-        $(window).resize();
         onedev.server.focus.doFocus($content);
+
+		// Fix the issue that add button and icon not aligned sometimes
+		$navs.next().hide().show(0);
     },
     showProperties: function() {
     	var $valid = $(".build-spec>.valid");
@@ -79,10 +80,9 @@ onedev.server.buildSpec = {
     	$head.children(".properties").addClass("active");
     	
     	var $body = $valid.children(".body");
-    	$body.children().hide();
+    	$body.children().removeClass("d-flex");
         var $properties = $body.children(".properties");
-        $properties.show();
-        $(window).resize();
+        $properties.addClass("d-flex");
         onedev.server.focus.doFocus($properties);
     },
     showSelection: function(selection) {
@@ -113,6 +113,7 @@ onedev.server.buildSpec = {
     		selection += "/" + $nav.data("name");
         if ($valid.data("selectCallback")) 
         	$valid.data("selectCallback")(selection);
+		$(window).resize();
     },
     selectJob: function() {
         var $nav = $(this).parent();
@@ -122,12 +123,14 @@ onedev.server.buildSpec = {
             if ($valid.data("selectCallback"))
                 $valid.data("selectCallback")("jobs/" + $nav.data("name"));
         }
+		$(window).resize();
     },
     selectProperties: function() {
         onedev.server.buildSpec.showProperties();
         var $valid = $(".build-spec>.valid");
         if ($valid.data("selectCallback"))
             $valid.data("selectCallback")("properties");
+		$(window).resize();
     },
     deleteJob: function() {
         var $nav = $(this).parent();
@@ -147,6 +150,10 @@ onedev.server.buildSpec = {
                 onedev.server.buildSpec.showJob(0);
             
             $valid.data("deleteCallback")(index);
+			// Fix the issue that add button and icon not aligned sometimes
+			$navs.next().hide().show(0);
+			
+			$(window).resize();
         }
     }, 
     swapJobs: function(index1, index2) {
@@ -159,6 +166,7 @@ onedev.server.buildSpec = {
             for (var i = 0; i < index1-index2; i++) 
                 $contents.children().eq(index1-i).after($contents.children().eq(index1-i-1));
         }
+		$(window).resize();
     },
     trackJobNameChange: function(index) {
         var $jobs = $(".build-spec>.valid>.body>.jobs");
@@ -167,7 +175,7 @@ onedev.server.buildSpec = {
         var $contents = $jobs.children(".contents");
         var $content = $contents.children().eq(index);
         
-        var $input = $content.find(">div>table>tbody>tr.property-name>td input");
+        var $input = $content.find(">div>div>.property-name input");
 
         function syncName() {
             var name = $input.val().trim();

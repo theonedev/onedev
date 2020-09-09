@@ -47,7 +47,7 @@ public class SecuritySetting implements Serializable {
 		return (boolean) EditContext.get().getInputValue("enableAnonymousAccess");
 	}
 
-	@Editable(order=200, description="User can self-register if this option is enabled")
+	@Editable(order=200, name="Enable Sign-Up", description="User can sign up if this option is enabled")
 	public boolean isEnableSelfRegister() {
 		return enableSelfRegister;
 	}

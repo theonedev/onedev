@@ -25,10 +25,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
 class JobReportListViewPanel extends Panel {
@@ -104,7 +106,7 @@ class JobReportListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "ellipsis text-right";
 			}
 			
 		});		
@@ -124,7 +126,8 @@ class JobReportListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				add(new NoRecordsBehavior());
 			}
 			
 		});
@@ -148,18 +151,18 @@ class JobReportListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
+					new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
+						protected Component newTitle(String componentId) {
 							JobReport report = reports.get(index);
-							return "Report (type: " + EditableUtils.getDisplayName(report.getClass()) + ")";
+							return new Label(componentId, "Report (type: " + EditableUtils.getDisplayName(report.getClass()) + ")");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-report def-detail"));
+							add(AttributeAppender.append("class", "job-report"));
 						}
 
 						@Override

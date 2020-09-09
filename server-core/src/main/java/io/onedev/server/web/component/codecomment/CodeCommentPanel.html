@@ -1,8 +1,9 @@
 <wicket:panel>
 	<div class="code-comment">
-		<a wicket:id="outdatedContext" class="outdated-context">
-			<wicket:svg href="warning" class="icon"></wicket:svg> comment context outdated, click to update
-		</a>
+		<div wicket:id="outdatedContext" class="outdated-context alert alert-light-warning my-2">
+			<wicket:svg href="warning" class="icon mr-1"></wicket:svg> Comment context outdated, 
+			<a wicket:id="link">click to update</a>
+		</div>
 		<div wicket:id="comment" class="comment section"></div>
 		<div wicket:id="replies" class="reply section"></div>
 		<div wicket:id="addReply" class="add-reply"></div>
@@ -10,9 +11,9 @@
 	<wicket:fragment wicket:id="viewFrag">
 		<div class="user-avatar"><a wicket:id="userAvatar"></a></div>
 		<div class="detail">
-			<div class="head clearfix">
-				<span wicket:id="userName" class="user-name float-left"></span>
-				<span class="reply float-right">
+			<div class="head d-flex align-items-center flex-wrap justify-content-between text-muted mb-1">
+				<span wicket:id="userName" class="user-name mr-3"></span>
+				<span>
 					<span wicket:id="action" class="action"></span>
 					<span wicket:id="date" class="date"></span>
 				</span>
@@ -20,11 +21,11 @@
 			<div class="body">
 				<div wicket:id="content"></div>
 			</div>
-			<div wicket:id="foot" class="foot">
-				<a wicket:id="edit">Edit</a>
+			<div wicket:id="foot" class="foot d-flex align-items-center mt-3">
+				<a wicket:id="edit" class="mr-2 text-muted text-hover-primary">Edit</a>
 				<wicket:enclosure child="delete">
-				<span class="middot"></span>
-				<a wicket:id="delete">Delete</a>
+				<span class="dot mr-2"></span>
+				<a wicket:id="delete" class="text-muted text-hover-primary">Delete</a>
 				</wicket:enclosure>
 			</div>
 		</div>
@@ -32,26 +33,22 @@
 	<wicket:fragment wicket:id="commentEditFrag">
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
-			<div class="form-group">
+			<div class="form-group mb-3">
 				<div wicket:id="content"></div>
 			</div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
-				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
-			</div>
+			<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware mr-1">Save</button>
+			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="replyEditFrag">
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
-			<div wicket:id="content"></div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary"><span wicket:id="label"></span></button>
-				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
-			</div>
+			<div wicket:id="content" class="mb-3"></div>
+			<button wicket:id="save" class="btn btn-sm btn-primary mr-1"><span wicket:id="label"></span></button>
+			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addReplyFrag">
-		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary"><wicket:svg href="reply" class="icon"></wicket:svg> Reply</a>
+		<a wicket:id="reply" class="btn btn-sm btn-outline-secondary"><wicket:svg href="reply" class="icon mr-2"></wicket:svg> Reply</a>
 	</wicket:fragment>
 </wicket:panel>

@@ -13,6 +13,7 @@ import io.onedev.server.web.mapper.DynamicPathPageMapper;
 import io.onedev.server.web.mapper.DynamicPathResourceMapper;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.authorization.GroupAuthorizationsPage;
@@ -23,13 +24,12 @@ import io.onedev.server.web.page.admin.issuesetting.defaultboard.DefaultBoardLis
 import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
-import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionsPage;
+import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
-import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.ssh.SshSettingPage;
@@ -46,7 +46,6 @@ import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
 import io.onedev.server.web.page.builds.BuildListPage;
-import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
@@ -94,17 +93,18 @@ import io.onedev.server.web.page.project.setting.branchprotection.BranchProtecti
 import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
-import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
-import io.onedev.server.web.page.security.ForgetPage;
-import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.page.security.LogoutPage;
-import io.onedev.server.web.page.security.RegisterPage;
+import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LogoutPage;
+import io.onedev.server.web.page.simple.security.PasswordResetPage;
+import io.onedev.server.web.page.simple.security.SignUpPage;
+import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
 import io.onedev.server.web.resource.ArchiveResourceReference;
 import io.onedev.server.web.resource.ArtifactResourceReference;
 import io.onedev.server.web.resource.AttachmentResourceReference;
@@ -134,6 +134,8 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		addSecurityPages();
 				
 		addResources();
+		
+		addErrorPages();
 	}
 
 	private void addMyPages() {
@@ -155,11 +157,15 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new BaseResourceMapper(SvgSpriteResourceReference.DEFAULT_MOUNT_PATH, new SvgSpriteResourceReference(IconScope.class)));
 	}
 	
+	private void addErrorPages() {
+		add(new DynamicPathPageMapper("/errors/404", PageNotFoundErrorPage.class));
+	}
+	
 	private void addSecurityPages() {
 		add(new DynamicPathPageMapper("login", LoginPage.class));
 		add(new DynamicPathPageMapper("logout", LogoutPage.class));
-		add(new DynamicPathPageMapper("register", RegisterPage.class));
-		add(new DynamicPathPageMapper("forget", ForgetPage.class));
+		add(new DynamicPathPageMapper("signup", SignUpPage.class));
+		add(new DynamicPathPageMapper("reset-password", PasswordResetPage.class));
 		add(new DynamicPathPageMapper(SsoProcessPage.MOUNT_PATH + "/${stage}/${connector}", SsoProcessPage.class));
 	}
  	
@@ -167,7 +173,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration", UserListPage.class));
 		add(new DynamicPathPageMapper("administration/users", UserListPage.class));
 		add(new DynamicPathPageMapper("administration/users/new", NewUserPage.class));
-		add(new DynamicPathPageMapper("administration/users/${user}", UserProfilePage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/profile", UserProfilePage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/groups", UserMembershipsPage.class));
 		add(new DynamicPathPageMapper("administration/users/${user}/authorizations", UserAuthorizationsPage.class));
@@ -182,16 +187,14 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		add(new DynamicPathPageMapper("administration/groups", GroupListPage.class));
 		add(new DynamicPathPageMapper("administration/groups/new", NewGroupPage.class));
-		add(new DynamicPathPageMapper("administration/groups/${group}", GroupProfilePage.class));
 		add(new DynamicPathPageMapper("administration/groups/${group}/profile", GroupProfilePage.class));
 		add(new DynamicPathPageMapper("administration/groups/${group}/members", GroupMembershipsPage.class));
 		add(new DynamicPathPageMapper("administration/groups/${group}/authorizations", GroupAuthorizationsPage.class));
 		
-		add(new DynamicPathPageMapper("administration/settings", SystemSettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/system", SystemSettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/mail", MailSettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/backup", DatabaseBackupPage.class));
-		add(new DynamicPathPageMapper("administration/settings/security", SecuritySettingPage.class));
+		add(new DynamicPathPageMapper("administration/settings/security", GeneralSecuritySettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 		add(new DynamicPathPageMapper("administration/settings/sso-connectors", SsoConnectorListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/ssh", SshSettingPage.class));
@@ -201,7 +204,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		
 		add(new DynamicPathPageMapper("administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-states", IssueStateListPage.class));
-		add(new DynamicPathPageMapper("administration/settings/state-transitions", StateTransitionsPage.class));
+		add(new DynamicPathPageMapper("administration/settings/state-transitions", StateTransitionListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-templates", IssueTemplateListPage.class));
 		
@@ -218,7 +221,6 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/commits", ProjectCommitsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/commits/${revision}", CommitDetailPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/compare", RevisionComparePage.class));
-		add(new DynamicPathPageMapper("projects/${project}/stats", ProjectContribsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/stats/contribs", ProjectContribsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/stats/lines", SourceLinesPage.class));
 
@@ -236,9 +238,9 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/merge-preview", MergePreviewPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/invalid", InvalidPullRequestPage.class));
 
-		add(new DynamicPathPageMapper("projects/${project}/boards", IssueBoardsPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/boards/${board}", IssueBoardsPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/issues", ProjectIssueListPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/issues/boards", IssueBoardsPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/issues/boards/${board}", IssueBoardsPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/issues/list", ProjectIssueListPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}", IssueActivitiesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/activities", IssueActivitiesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/commits", IssueCommitsPage.class));
@@ -258,8 +260,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/artifacts", BuildArtifactsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/invalid", InvalidBuildPage.class));
 		
-		add(new DynamicPathPageMapper("projects/${project}/settings", GeneralSettingPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/settings/general", GeneralSecuritySettingPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/avatar-edit", AvatarEditPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/branch-protection", BranchProtectionsPage.class));

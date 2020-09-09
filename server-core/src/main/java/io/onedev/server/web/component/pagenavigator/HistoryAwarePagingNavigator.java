@@ -3,6 +3,7 @@ package io.onedev.server.web.component.pagenavigator;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -13,12 +14,11 @@ import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigationIncrementLink;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigationLink;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class HistoryAwarePagingNavigator extends PagingNavigator {
+public class HistoryAwarePagingNavigator extends org.apache.wicket.markup.html.navigation.paging.PagingNavigator {
 
 	private final PagingHistorySupport pagingHistorySupport;
 
@@ -34,7 +34,7 @@ public class HistoryAwarePagingNavigator extends PagingNavigator {
 		get("first").remove();
 		get("last").remove();
 		
-		add(AttributeAppender.append("class", "pagination justify-content-center"));
+		add(AttributeAppender.append("class", "pagination justify-content-center align-items-center"));
 		
 		setOutputMarkupId(true);
 	}
@@ -117,12 +117,9 @@ public class HistoryAwarePagingNavigator extends PagingNavigator {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		String script = String.format(""
-				+ "var $nav = $('#%s');"
-				+ "$nav.find('a[disabled=disabled]').each(function() {"
-				+ "  $(this).parent().addClass('disabled');"
-				+ "});", 
-				getMarkupId());
+		response.render(JavaScriptHeaderItem.forReference(new PagingNavigatorResourceReference()));
+		
+		String script = String.format("onedev.server.pagingNavigator.onDomReady('%s');", getMarkupId());
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

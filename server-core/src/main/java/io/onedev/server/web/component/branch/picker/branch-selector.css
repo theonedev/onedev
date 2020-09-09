@@ -1,44 +1,14 @@
-div.branch-selector input.branch {
-	margin-bottom: 12px;
-	background: url(search.gif) no-repeat right 6px center;
-	padding-right: 26px;
+.branch-selector input {
+	padding-right: 2rem;
 }
-div.branch-selector .nav-tabs {
-	margin-bottom: 8px;
+.branch-selector input+.icon {
+	margin-left: -1.8rem;
 }
-div.branch-selector .nav-tabs>li>a {
-	padding: 2px 4px; 
-	color: #666; 
-	font-size: 12px;
-}
-div.branch-selector .nav-tabs>li.active>a {
-	color: #333; 
-	font-weight: bold;
-}
-div.branch-selector {
-	padding: 12px;
-}
-div.branch-selector ul.branches {
-	margin-bottom: 0;
-}
-div.branch-selector ul.branches>li {
-	position: relative;
-}
-div.branch-selector ul.branches>li>a {
-	padding-left: 20px;
-}
-div.branch-selector .feedback {
-	color: #F94949; 
-	margin-bottom: 12px;
-}
-div.branch-selector a svg {
-	display: none;
-	position: absolute;
-	left: 4px;
-	top: 14px;
+.branch-selector a svg {
+	visibility: hidden;
 	width: 12px;
 	height: 12px;
 }
-div.branch-selector a.current svg {
-	display: inline-block;
+.branch-selector a.current svg {
+	visibility: visible;
 }   

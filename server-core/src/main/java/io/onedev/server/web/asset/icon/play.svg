@@ -46,8 +46,7 @@
      gridtolerance="10"
      objecttolerance="10"
      borderopacity="1"
-     bordercolor="#666666"
-     pagecolor="#ffffff" />
+     />
   <path
      style="stroke-width:0.868552"
      id="path84"

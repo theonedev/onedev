@@ -22,7 +22,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.feedback.IFeedbackMessageFilter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -40,8 +39,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
@@ -257,7 +256,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		pushState(target, url.toString(), queryInput.getModelObject());
 		
 		target.add(body);
-		target.appendJavaScript("$(window).resize();");
 	}
 	
 	@Override
@@ -266,10 +264,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		
 		if (getBoard() != null) {
 			contentFrag = new Fragment("content", "hasBoardsFrag", this);
-
+			contentFrag.add(AttributeAppender.append("class", "mb-n5"));
+			
 			Form<?> form = new Form<Void>("query");
-			if (!SecurityUtils.canManageIssues(getProject()))
-				form.add(AttributeAppender.append("style", "margin-right: 0;"));
 			
 			form.add(new DropdownLink("board") {
 
@@ -314,6 +311,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 							link.add(new Label("name", item.getModelObject().getName()));
 							item.add(link);
+
+							item.add(new WebMarkupContainer("primary").setVisible(item.getIndex() == 0));
 							
 							WebMarkupContainer actions = new WebMarkupContainer("actions") {
 
@@ -446,7 +445,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							add(AttributeAppender.append("class", "btn-danger"));
 							add(AttributeAppender.replace("title", "Milestone is due"));
 						} else {
-							add(AttributeAppender.append("class", "btn-outline-secondary"));
+							add(AttributeAppender.append("class", "btn-outline-secondary btn-hover-primary"));
 						}
 					}
 
@@ -613,11 +612,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 					@Override
 					public IModel<?> getBody() {
-						return Model.of(String.format("<svg class='icon'><use xlink:href='%s'/></svg> Add Milestone", 
+						return Model.of(String.format("<svg class='icon mr-2'><use xlink:href='%s'/></svg>Add Milestone", 
 								SpriteImage.getVersionedHref(IconScope.class, "plus")));
 					}
 					
-				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-outline-secondary")));
+				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-outline-secondary btn-hover-primary")));
 			} else {
 				form.add(new WebMarkupContainer("milestone").setVisible(false));
 			}
@@ -712,12 +711,8 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							
 							if (backlog) {
 								backlogQueryString = query.toString();
-								if (backlogQueryString.length() == 0)
-									backlogQueryString = null;
 							} else {
 								queryString = query.toString();
-								if (queryString.length() == 0)
-									queryString = null;
 							}
 							
 							AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
@@ -743,15 +738,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			
 			contentFrag.add(form);
 			
-			body = new WebMarkupContainer("body") {
-
-				@Override
-				public void renderHead(IHeaderResponse response) {
-					super.renderHead(response);
-					response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueBoards.onBodyDomReady();"));
-				}
-
-			};
+			body = new WebMarkupContainer("body");
 			body.setOutputMarkupId(true);
 			body.add(new FencedFeedbackPanel("feedback", contentFrag));
 			contentFrag.add(body);
@@ -841,7 +828,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new IssueBoardsResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueBoards.onDomReady();"));
 	}
 	
 	@Override
@@ -855,7 +841,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 		
 		target.add(contentFrag);
-		target.appendJavaScript("$(window).resize();");
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board, 
@@ -980,7 +965,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			return new BoardEditPanel(id, boards, boardIndex) {
 
 				@Override
-				protected void onBoardSaved(AjaxRequestTarget target, BoardSpec board) {
+				protected void onSave(AjaxRequestTarget target, BoardSpec board) {
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
@@ -1013,4 +998,10 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		}
 		
 	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Issue Boards");
+	}
+	
 }

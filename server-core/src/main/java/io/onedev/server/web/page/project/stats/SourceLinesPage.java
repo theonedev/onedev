@@ -3,8 +3,10 @@ package io.onedev.server.web.page.project.stats;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,6 +41,11 @@ public class SourceLinesPage extends ProjectStatsPage {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Line Statistics");
 	}
 
 }

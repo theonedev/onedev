@@ -30,7 +30,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -48,7 +47,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -64,7 +62,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -104,6 +101,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.revisionpicker.RevisionSelector;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -383,7 +381,6 @@ public class RevisionDiffPanel extends Panel {
 					SourceAware sourceAware = getSourceAware(prevBlameFile);
 					sourceAware.onUnblame(target);
 				}
-				target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 			}
 			
 		};
@@ -412,15 +409,12 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new NoAntiCacheImage("icon", 
-						new PackageResourceReference(RevisionDiffPanel.class, "indexing.gif")));
-				
+
 				add(new WebSocketObserver() {
 					
 					@Override
 					public void onObservableChanged(IPartialPageRequestHandler handler) {
 						handler.add(component);
-						handler.appendJavaScript("$(window).resize();");
 					}
 					
 					@Override
@@ -475,13 +469,21 @@ public class RevisionDiffPanel extends Panel {
 					cookie.setPath("/");
 					response.addCookie(cookie);
 					target.add(RevisionDiffPanel.this);
+					((BasePage)getPage()).resizeWindow(target);
 				}
 				
 			}.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 				@Override
 				protected String load() {
-					return each==diffMode?" active":"";
+					if (diffMode == each) {
+						if (diffMode == DiffViewMode.SPLIT)
+							return "active need-width";
+						else
+							return "active";
+					} else {
+						return "";
+					}
 				}
 				
 			})));
@@ -502,11 +504,8 @@ public class RevisionDiffPanel extends Panel {
 						}
 
 						@Override
-						public String getIconHref() {
-							if (whitespaceOptionModel.getObject() == each)
-								return "tick";
-							else
-								return null;
+						public boolean isSelected() {
+							return whitespaceOptionModel.getObject() == each;
 						}
 
 						@Override
@@ -615,9 +614,7 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				
 				response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionDiff.onDomReady();"));
-				response.render(OnLoadHeaderItem.forScript("onedev.server.revisionDiff.onWindowLoad();"));
 			}
 			
 		};
@@ -633,7 +630,7 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			public String getObject() {
 				String icon = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
-						SpriteImage.getVersionedHref("arrow2"));
+						SpriteImage.getVersionedHref("arrow"));
 				return "Total " + changesAndCountModel.getObject().getChanges().size() + " files " + icon;
 			}
 			
@@ -673,7 +670,7 @@ public class RevisionDiffPanel extends Panel {
 				BlobChange change = item.getModelObject();
 				String icon;
 				if (change.getType() == null) {
-					icon = "file";
+					icon = "square";
 				} else if (change.getType() == ChangeType.ADD || change.getType() == ChangeType.COPY)
 					icon = "plus-square";
 				else if (change.getType() == ChangeType.DELETE)
@@ -689,7 +686,7 @@ public class RevisionDiffPanel extends Panel {
 				
 				WebMarkupContainer fileLink = new WebMarkupContainer("file");
 				fileLink.add(new Label("name", change.getPath()));
-				fileLink.add(AttributeModifier.replace("href", "#diff-" + change.getPath()));
+				fileLink.add(AttributeModifier.replace("href", "#diff-" + encodePath(change.getPath())));
 				item.add(fileLink);
 
 				item.add(new Label("additions", "+" + change.getAdditions()));
@@ -725,7 +722,7 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
-				item.setMarkupId("diff-" + change.getPath());
+				item.setMarkupId("diff-" + encodePath(change.getPath()));
 				if (commentSupport != null) {
 					item.add(new BlobDiffPanel(DIFF_ID, projectModel, requestModel, change, diffMode, 
 							getBlobBlameModel(change), new BlobCommentSupport() {
@@ -756,6 +753,7 @@ public class RevisionDiffPanel extends Panel {
 						@Override
 						public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
 							RevisionDiffPanel.this.onOpenComment(target, comment);
+							((BasePage)getPage()).resizeWindow(target);
 						}
 	
 						@Override
@@ -824,7 +822,6 @@ public class RevisionDiffPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									clearComment(target);
-									target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 									Mark mark = getMark();
 									if (mark != null) {
 										SourceAware sourceAware = getSourceAware(mark.getPath());
@@ -894,7 +891,6 @@ public class RevisionDiffPanel extends Panel {
 										sourceAware.onCommentAdded(target, comment);
 
 									((CommentSupport)commentSupport).onCommentOpened(target, comment);
-									target.appendJavaScript(String.format("onedev.server.revisionDiff.reposition();"));							
 								}
 
 							});
@@ -919,11 +915,11 @@ public class RevisionDiffPanel extends Panel {
 							}  
 							((CommentSupport)commentSupport).onAddComment(target, mark);
 							String script = String.format(""
-									+ "onedev.server.revisionDiff.reposition(); "
 									+ "setTimeout(function() {"
 									+ "  var $textarea = $('#%s textarea');"
 									+ "  $textarea.caret($textarea.val().length);"
-									+ "}, 100);", 
+									+ "}, 100);"
+									+ "$(window).resize();", 
 									commentContainer.getMarkupId());
 							target.appendJavaScript(script);		
 						}
@@ -1029,7 +1025,10 @@ public class RevisionDiffPanel extends Panel {
 				sourceAware.unmark(target);
 		}
 		commentSupport.onCommentOpened(target, comment);
-		target.appendJavaScript("onedev.server.revisionDiff.reposition();");
+	}
+	
+	private String encodePath(String path) {
+		return path.replace("/", "-").replace(" ", "-");
 	}
 	
 	private @Nullable IModel<Boolean> getBlobBlameModel(BlobChange change) {
@@ -1157,7 +1156,6 @@ public class RevisionDiffPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				CodeComment comment = getOpenComment();
 				clearComment(target);
-				target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 				if (comment != null) {
 					SourceAware sourceAware = getSourceAware(comment.getMark().getPath());
 					if (sourceAware != null) 
@@ -1299,7 +1297,6 @@ public class RevisionDiffPanel extends Panel {
 		if (sourceAware != null)
 			sourceAware.onCommentDeleted(target, comment);
 		((CommentSupport)commentSupport).onCommentClosed(target);
-		target.appendJavaScript("onedev.server.revisionDiff.reposition();");
 		Mark mark = getMark();
 		if (mark != null) {
 			sourceAware = getSourceAware(mark.getPath());
@@ -1312,6 +1309,7 @@ public class RevisionDiffPanel extends Panel {
 		commentContainer.replace(new WebMarkupContainer(BODY_ID));
 		commentContainer.setVisible(false);
 		target.add(commentContainer);
+		((BasePage)getPage()).resizeWindow(target);
 	}
 	
 	@Override

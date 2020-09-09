@@ -37,5 +37,6 @@ public abstract class AdministrationPage extends LayoutPage implements ScriptIde
 	public ScriptIdentity getScriptIdentity() {
 		return new SiteAdministrator();
 	}
-
+	
+	
 }

@@ -188,7 +188,10 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			builder.append("order by ");
 			builder.append(getSorts().stream().map(it->it.toString()).collect(Collectors.joining(" and ")));
 		}
-		return builder.toString().trim();
+		String toStringValue = builder.toString().trim();
+		if (toStringValue.length() == 0)
+			toStringValue = null;
+		return toStringValue;
 	}
 	
 	public static <T> Path<T> getPath(Path<?> root, String pathName) {

@@ -16,10 +16,10 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.list.LoopItem;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.IDataProvider;
@@ -29,7 +29,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
@@ -38,16 +37,18 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChanged;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
@@ -97,16 +98,9 @@ public class IssueFieldListPage extends IssueSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
 				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String html = String.format("<svg class='drag-indicator icon'><use xlink:href='%s'/></svg> %s", 
-								SpriteImage.getVersionedHref("grip"), HtmlEscape.escapeHtml5(field.getName()));
-						return new Label(componentId, html).setEscapeModelStrings(false);
-					}
-					
-				});
+				String html = String.format("<svg class='drag-indicator icon'><use xlink:href='%s'/></svg> %s", 
+						SpriteImage.getVersionedHref("grip"), HtmlEscape.escapeHtml5(field.getName()));
+				cellItem.add(new Label(componentId, html).setEscapeModelStrings(false));
 			}
 		});		
 		
@@ -115,14 +109,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
 				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, EditableUtils.getDisplayName(field.getClass()));
-					}
-					
-				});
+				cellItem.add(new Label(componentId, EditableUtils.getDisplayName(field.getClass())));
 			}
 		});		
 		
@@ -131,19 +118,12 @@ public class IssueFieldListPage extends IssueSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
 				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, TextUtils.describe(getSetting().getListFields().contains(field.getName())));
-					}
-					
-				});
+				cellItem.add(new Label(componentId, TextUtils.describe(getSetting().getListFields().contains(field.getName()))));
 			}
 
 			@Override
 			public String getCssClass() {
-				return "display-in-issue-list";
+				return "d-none d-lg-table-cell";
 			}
 			
 		});		
@@ -152,30 +132,107 @@ public class IssueFieldListPage extends IssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject()) {
+				Fragment fragment = new Fragment(componentId, "showDetailFrag", IssueFieldListPage.this);
+				fragment.add(new AjaxLink<Void>("link") {
 
 					@Override
-					protected Component newLabel(String componentId) {
-						return new SpriteImage(componentId, "ellipsis") {
+					public void onClick(AjaxRequestTarget target) {
+						new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
 
 							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								tag.setName("svg");
-								tag.put("class", "icon");
+							protected Component newTitle(String componentId) {
+								FieldSpec field = rowModel.getObject();
+								return new Label(componentId, field.getName() + " (type: " + EditableUtils.getDisplayName(field.getClass()) + ")");
 							}
-							
+
+							@Override
+							protected void onInitialize() {
+								super.onInitialize();
+								add(AttributeAppender.append("class", "field-spec input-spec"));
+							}
+
+							@Override
+							protected Component newBody(String id) {
+								FieldSpec field = rowModel.getObject();
+								Fragment fragment = new Fragment(id, "fieldDetailFrag", IssueFieldListPage.this);
+								fragment.add(BeanContext.view("viewer1", field, Sets.newHashSet("name"), true));
+								FieldBean bean = new FieldBean();
+								bean.setPromptUponIssueOpen(getSetting().getPromptFieldsUponIssueOpen().contains(field.getName()));
+								fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
+								
+								fragment.setOutputMarkupId(true);
+								
+								return fragment;
+							}
+
+							@Override
+							protected Component newFooter(String componentId) {
+								int fieldIndex = cellItem.findParent(LoopItem.class).getIndex();
+								Fragment fragment = new Fragment(componentId, "fieldActionsFrag", IssueFieldListPage.this);
+								fragment.add(new ModalLink("edit") {
+
+									@Override
+									protected Component newContent(String id, ModalPanel modal) {
+										close();
+										return new FieldEditPanel(id, fieldIndex) {
+
+											@Override
+											protected void onSave(AjaxRequestTarget target) {
+												target.add(fieldsTable);
+												modal.close();
+											}
+
+											@Override
+											protected void onCancel(AjaxRequestTarget target) {
+												modal.close();
+											}
+
+											@Override
+											protected GlobalIssueSetting getSetting() {
+												return IssueFieldListPage.this.getSetting();
+											}
+
+										};
+									}
+									
+								});
+								fragment.add(new AjaxLink<Void>("delete") {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this field?"));
+									}
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										getSetting().getFieldSpecs().remove(fieldIndex);
+										getSetting().setReconciled(false);
+										send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
+										OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+										target.add(fieldsTable);
+										close();
+									}
+									
+								});
+								
+								return fragment;
+							}
+
 						};
+						
 					}
 					
 				});
+				
+				cellItem.add(fragment);
 			}
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "text-right";
 			}
-			
+
 		});		
 		
 		IDataProvider<FieldSpec> dataProvider = new ListDataProvider<FieldSpec>() {
@@ -190,6 +247,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 		add(fieldsTable = new DataTable<FieldSpec, Void>("issueFields", columns, dataProvider, Integer.MAX_VALUE));
 		fieldsTable.addTopToolbar(new HeadersToolbar<Void>(fieldsTable, null));
 		fieldsTable.addBottomToolbar(new NoRecordsToolbar(fieldsTable));
+		fieldsTable.add(new NoRecordsBehavior());
 		fieldsTable.setOutputMarkupId(true);
 		
 		fieldsTable.add(new SortBehavior() {
@@ -219,117 +277,9 @@ public class IssueFieldListPage extends IssueSettingPage {
 		response.render(CssHeaderItem.forReference(new InputSpecCssResourceReference()));
 	}
 
-	private int getFieldSpecIndex(String fieldName) {
-		for (int i=0; i<getSetting().getFieldSpecs().size(); i++) {
-			if (getSetting().getFieldSpecs().get(i).getName().equals(fieldName))
-				return i;
-		}
-		return -1;
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Issue Custom Fields");
 	}
-	
-	private abstract class ColumnFragment extends Fragment {
 
-		private final FieldSpec field;
-		
-		public ColumnFragment(String id, FieldSpec field) {
-			super(id, "columnFrag", IssueFieldListPage.this);
-			this.field = field;
-		}
-		
-		protected abstract Component newLabel(String componentId);
-
-		@Override
-		protected void onInitialize() {
-			super.onInitialize();
-			
-			int index = getFieldSpecIndex(field.getName());
-			Preconditions.checkState(index != -1);
-			
-			AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
-
-						@Override
-						protected String getTitle() {
-							return field.getName() + " (type: " + EditableUtils.getDisplayName(field.getClass()) + ")";
-						}
-
-						@Override
-						protected void onInitialize() {
-							super.onInitialize();
-							add(AttributeAppender.append("class", "field-spec input-spec def-detail"));
-						}
-
-						@Override
-						protected Component newBody(String id) {
-							SideFloating sideFloating = this;
-							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldListPage.this);
-							fragment.add(BeanContext.view("viewer1", field, Sets.newHashSet("name"), true));
-							FieldBean bean = new FieldBean();
-							bean.setPromptUponIssueOpen(getSetting().getPromptFieldsUponIssueOpen().contains(field.getName()));
-							fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
-							fragment.add(new ModalLink("edit") {
-
-								@Override
-								protected Component newContent(String id, ModalPanel modal) {
-									sideFloating.close();
-									return new FieldEditPanel(id, index) {
-
-										@Override
-										protected void onSave(AjaxRequestTarget target) {
-											target.add(fieldsTable);
-											modal.close();
-										}
-
-										@Override
-										protected void onCancel(AjaxRequestTarget target) {
-											modal.close();
-										}
-
-										@Override
-										protected GlobalIssueSetting getSetting() {
-											return IssueFieldListPage.this.getSetting();
-										}
-
-									};
-								}
-								
-							});
-							fragment.add(new AjaxLink<Void>("delete") {
-
-								@Override
-								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this field?"));
-								}
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									getSetting().getFieldSpecs().remove(index);
-									getSetting().setReconciled(false);
-									send(getPage(), Broadcast.BREADTH, new WorkflowChanged(target));
-									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-									target.add(fieldsTable);
-									close();
-								}
-								
-							});
-							
-							fragment.setOutputMarkupId(true);
-							
-							return fragment;
-						}
-
-					};
-				}
-				
-			};
-			link.add(newLabel("label"));
-			add(link);
-		}
-		
-	}
-	
 }

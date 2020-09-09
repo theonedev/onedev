@@ -1,35 +1,18 @@
 .issue-operations>div {
-	margin-bottom: 20px;
-}
-.issue-operations>.state-and-actions {
-	margin-bottom: 12px;
-	padding-right: 30px;
-	position: relative;
+	margin-bottom: 1.5rem;
 }
 .issue-operations>.state-and-actions>.state {
-	margin-right: 16px;
-	padding-right: 16px;
+	margin-right: 1.2rem;
+	padding-right: 1.2rem;
 }
 .issue-operations>.state-and-actions>.state.with-separator {
-	border-right: 1px solid #E0E0E0;
+	border-right: 1px solid var(--light-gray);
 }
+
 .issue-operations>.state-and-actions>.state>.issue-state {
-	font-size: 17px;
-	padding: 7px 12px;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.925rem;
+	border: 1px solid transparent;
+    line-height: 1.35;
 	display: block;
-}
-.issue-operations>.state-and-actions>.btn.active {
-	background-color: #204C72;
-}
-.issue-operations>.state-and-actions>* {
-	margin-right: 10px;
-	margin-bottom: 8px;
-}
-.issue-operations>.state-and-actions>.more-info {
-	position: absolute;
-	right: 0;
-	top: -3px;
-	font-size: 24px;
-	margin: 0;
-	color: #666;
 }

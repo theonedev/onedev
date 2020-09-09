@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.my.accesstoken;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
@@ -26,6 +28,11 @@ public class MyAccessTokenPage extends MyPage {
 			
 		});
 		
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "My Access Token");
 	}
 
 }

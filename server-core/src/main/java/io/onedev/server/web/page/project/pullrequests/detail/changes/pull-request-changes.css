@@ -1,61 +1,14 @@
-#request-detail>.main>.changes>.head {
-	padding-bottom: 20px;
-	border-bottom: 1px dotted #BBB;
-	margin-bottom: 20px;
-	font-size: 16px;
-}
-#request-detail>.main>.changes>.head .btn {
-	font-size: 16px;
-}
-#request-detail>.main>.changes>.head .full-changes {
-	margin: 6px 0 0 20px;
-}
-#request-detail>.main>.changes>.head .full-changes a {
-	color: #666;
-}
-
-.commits-selector>.short-cuts {
-	padding: 8px;
-}
-.commits-selector>.short-cuts>a {
-	margin-right: 8px;
-	font-size: 16px;
-}
-.commits-selector>.head {
-	padding: 8px;
-	border-bottom: 1px solid #DDD;
-	background: #F5F5F5;	
-	font-size: 16px;
-}
-.commits-selector>.head>a {
-	margin-left: 8px;
-}
-.commits-selector ul {
-	margin-bottom: 0;
-	padding: 8px;
-	overflow-y: auto;
-}
-.commits-selector ul li.rebased a,
-.commits-selector ul li.rebased a span {
-	color: #aaa;
-}
 .commits-selector ul a {
 	text-decoration: none;
 	display: block;
-	color: #333;
-	padding: 4px 8px;
+	padding: 0.5rem 1rem;
 	white-space: nowrap;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 .commits-selector ul a:hover {
-	background: #F2F2F2;
+	background: var(--light);
+	color: var(--gray-dark);
 }
-.commits-selector ul a.selected {
-	background: #FDF2C5;	
-}
-.commits-selector ul a.selected:hover {
-	background: #FDF2C5;	
-}
-.commits-selector ul .hash, .commits-selector ul .icon {
-	color: #666;
+.commits-selector ul a.selected, .commits-selector ul a.selected:hover {
+	background: var(--light-warning);	
 }

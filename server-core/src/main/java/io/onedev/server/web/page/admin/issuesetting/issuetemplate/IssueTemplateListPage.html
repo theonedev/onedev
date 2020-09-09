@@ -1,25 +1,18 @@
 <wicket:extend>
-	<div class="help-block">Define issue templates here. When a new issue is created, the first 
-	template with criteria matching the issue will be used </div>
-	<div class="issue-templates def-list list">
-		<div class="head clearfix">
-			<div class="float-left">
-				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New</a>
-			</div>
-		</div>
-		<div class="body">
-			<table wicket:id="issueTemplates" class="table table-hover"></table>
-		</div>
+	<div class="text-muted mb-4">
+		<wicket:svg href="bulb" class="icon"/> Define issue templates here. 
+		When a new issue is created, the first template with criteria matching the issue will be used.
 	</div>
-	<wicket:fragment wicket:id="columnFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a>
+	<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue description template"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+	<table wicket:id="issueTemplates" class="table"></table>
+	
+	<wicket:fragment wicket:id="showDetailFrag">
+		<a wicket:id="link"><wicket:svg href="ellipsis" class="icon align-middle"/></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="viewTemplateFrag">
-		<div class="actions">
-			<a wicket:id="edit" class="btn btn-sm btn-outline-secondary"><wicket:svg href="edit" class="icon"></wicket:svg> Edit</a>
-			<a wicket:id="delete" class="btn btn-sm btn-outline-secondary"><wicket:svg href="trash" class="icon"></wicket:svg> Delete</a>
+	<wicket:fragment wicket:id="templateActionsFrag">
+		<div class="d-flex">
+			<a wicket:id="edit" class="btn btn-light-primary mr-1">Edit</a>
+			<a wicket:id="delete" class="btn btn-light-danger ml-auto">Delete</a>
 		</div>
-		<div wicket:id="feedback"></div>
-		<div wicket:id="viewer"></div>
 	</wicket:fragment>
 </wicket:extend>

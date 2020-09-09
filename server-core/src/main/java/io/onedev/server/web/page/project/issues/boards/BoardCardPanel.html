@@ -1,18 +1,18 @@
 <wicket:panel>
-	<div class="head clearfix">
+	<div class="head d-flex flex-wrap align-items-center mb-2">
 		<wicket:enclosure child="state">
-			<div class="state float-left">
+			<div class="state mb-2 mr-2">
 				<span wicket:id="state"></span>
 			</div>
 		</wicket:enclosure>
-		<div wicket:id="fields" class="field float-left"></div>
-		<a wicket:id="detail" class="detail float-left" title="Click to show issue details"><wicket:svg href="detail" class="icon"/></a>
-		<div class="float-right avatars">
-			<a wicket:id="avatars" class="avatar"></a>
+		<div wicket:id="fields" class="field"></div>
+		<div class="avatars ml-auto">
+			<a wicket:id="avatars" class="avatar ml-2 mb-2"></a>
 		</div>
 	</div>
-	<div class="body">
-		<a wicket:id="number"></a>
-		<span wicket:id="title"></span>
+	<div class="body font-weight-bold d-flex flex-wrap">
+		<a wicket:id="number" class="mr-2"></a>
+		<span wicket:id="title" class="mr-4"></span>
+		<a wicket:id="detail" class="ml-auto" title="Click to show issue details"><wicket:svg href="ellipsis" class="icon"/></a>
 	</div>
 </wicket:panel>

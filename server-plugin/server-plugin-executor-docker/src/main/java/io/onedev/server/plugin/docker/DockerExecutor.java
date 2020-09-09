@@ -53,7 +53,7 @@ import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.docker.DockerExecutor.TestData;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.concurrent.CapacityRunner;
@@ -133,7 +133,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			return new Commandline("docker");
 	}
 	
-	private String getImageOS(JobLogger jobLogger, String image) {
+	private String getImageOS(SimpleLogger jobLogger, String image) {
 		Commandline docker = newDocker();
 		docker.addArgs("image", "inspect", "-f", "{{.Os}}", image);
 		
@@ -167,7 +167,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		return new File(Bootstrap.getSiteDir(), "cache"); 
 	}
 
-	private String createNetwork(JobContext jobContext, boolean isWindows, JobLogger jobLogger) {
+	private String createNetwork(JobContext jobContext, boolean isWindows, SimpleLogger jobLogger) {
 		String network = getName() + "-" + jobContext.getProjectName() + "-" 
 				+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
 		
@@ -218,7 +218,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		return network;
 	}
 	
-	private void deleteNetwork(String network, JobLogger jobLogger) {
+	private void deleteNetwork(String network, SimpleLogger jobLogger) {
 		clearNetwork(network, jobLogger);
 		
 		Commandline docker = newDocker();
@@ -241,7 +241,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		}).checkReturnCode();
 	}
 	
-	private void clearNetwork(String network, JobLogger jobLogger) {
+	private void clearNetwork(String network, SimpleLogger jobLogger) {
 		Commandline docker = newDocker();
 		
 		List<String> containerIds = new ArrayList<>();
@@ -302,7 +302,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 	
 	@SuppressWarnings("resource")
-	private void startService(String network, JobService jobService, JobLogger jobLogger) {
+	private void startService(String network, JobService jobService, SimpleLogger jobLogger) {
 		jobLogger.log("Pulling service image...") ;
 		Commandline docker = newDocker();
 		docker.addArgs("pull", jobService.getImage());
@@ -449,7 +449,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	public void execute(String jobToken, JobContext jobContext) {
 		File hostBuildHome = FileUtils.createTempDir("onedev-build");
 		try {
-			JobLogger jobLogger = jobContext.getLogger();
+			SimpleLogger jobLogger = jobContext.getLogger();
 			getCapacityRunner().call(new Callable<Void>() {
 	
 				@SuppressWarnings("resource")
@@ -763,7 +763,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		}
 	}
 
-	private void login(JobLogger jobLogger) {
+	private void login(SimpleLogger jobLogger) {
 		for (RegistryLogin login: getRegistryLogins()) {
 			if (login.getRegistryUrl() != null)
 				jobLogger.log(String.format("Login to docker registry '%s'...", login.getRegistryUrl()));
@@ -885,7 +885,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 	
 	@Override
-	public void test(TestData testData, JobLogger jobLogger) {
+	public void test(TestData testData, SimpleLogger jobLogger) {
 		login(jobLogger);
 		
 		jobLogger.log("Pulling image...");

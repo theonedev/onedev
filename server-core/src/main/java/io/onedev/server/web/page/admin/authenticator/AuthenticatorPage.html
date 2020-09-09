@@ -1,23 +1,18 @@
 <wicket:extend>
-	<div id="authenticator">
-		<div class="page-title">
-			External Authentication
-			<div class="help-block">OneDev takes user login information and sends to specified external  
-			system for authentication at server side</div>
+	<div class="card">
+		<div class="card-body">
+			<form wicket:id="authenticator" class="authenticator leave-confirm">
+				<div wicket:id="editor" class="mb-5"></div>
+				<button wicket:id="save" class="btn btn-primary dirty-aware mr-3">Save Setting</button>
+				<input wicket:id="test" type="submit" class="btn btn-light-primary" value="Test setting">
+			</form>
 		</div>
-		<form wicket:id="authenticator" class="authenticator leave-confirm">
-			<div wicket:id="editor"></div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-primary dirty-aware">Save Setting</button>
-				<input wicket:id="test" type="submit" class="btn btn-primary" value="Test setting">
-			</div>
-		</form>
 	</div>
 	<wicket:fragment wicket:id="testFrag">
 		<form wicket:id="form" class="authenticator-test">
 			<div class="modal-header">
 				<h5 id="modal-title" class="modal-title">Authentication Test</h5>
-				<button wicket:id="close" type="button" class="close">&times;</button>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
 				<div wicket:id="editor"></div>

@@ -1,138 +1,53 @@
-body.ProjectBlobPage.additionalWidth1 {
-	min-width: 700px;
+.ProjectBlobPage .sidebar {
+	box-shadow: none;
+	border-right: 1px solid var(--light-gray);
 }
-body.ProjectBlobPage.additionalWidth2 {
-	min-width: 1000px;
+.ProjectBlobPage .topbar {
+	box-shadow: none;
+	border-bottom: 1px solid var(--light-gray);
 }
-body.ProjectBlobPage.additionalWidth3 {
-	min-width: 1300px;
-}
-#project-blob {
-	margin: -20px;
+.project-blob {
 	background: white;
 }
-#project-blob>.head {
-	border-bottom: 1px solid #E0E0E0;
-	height: 34px;
+
+.project-blob>.head {
+	border-bottom: 1px solid var(--light-gray);
+	min-height: 40px;
 }
 
-#project-blob>.head>.revision-picker {
-	padding: 0;
-	border-right: 1px solid #E0E0E0;
-}
-#project-blob>.head>.build-status a {
-	padding: 5px 6px 5px 6px;
-	border-right: 1px solid #E0E0E0;
-	color: #333;
-	text-decoration: none;
-	display: block;
-}
-#project-blob>.head>.build-status a:hover {
-	background: #EEE;
-}
-#project-blob>.head>.revision-picker:empty,
-#project-blob>.head>.build-status:empty {
-	display: none;
-}
-#project-blob>.head>a.revision-picker {
-	display: block;
-	color: #333;
-	text-decoration: none;
-	white-space: nowrap;
-}
-#project-blob>.head>a.revision-picker:hover {
-	background: #EEE;
-	clear: both;
-}
-#project-blob>.head>a.revision-picker, #project-blob>.head>.blob-navigator, #project-blob>.blob-navigator>div {
-	padding: 5px 8px;
-}
-#project-blob>.head>.blob-navigator {
-	padding: 5px 8px 0px 8px;
-}
-#project-blob>.blob-navigator>div {
-	padding: 0px 8px;
-}
-#project-blob>.head>.blob-navigator form.name input {
-	height: 33px;
-	border: 1px solid #E0E0E0;
-	border-top: none;
-	border-bottom: none;
-	border-radius: 0;
-	margin-top: -5px;
-	padding-left: 0px 8px;
-	width: 160px;
-}
-#project-blob>.blob-navigator {
-	border-bottom: 1px solid #E0E0E0;
-}
-#project-blob>.blob-navigator form.name input {
-	border-top: 1px solid #E0E0E0;
-	border-bottom: 1px solid #E0E0E0;
-	height: 26px;
-	margin-top: -1px;
-	border-radius: 3px;
-	width: 160px;
-}					
-	
-#project-blob>.head>.operations {
-	margin-top: 4px;
-}
-#project-blob>.head>.operations>a {
-	padding: 4px;
-	color: #333;	
+.project-blob .revision-indexing+.build-support-note {
+	padding-top: 0 !important;
 }
 
-#project-blob>.blob-navigator {
-	display: none;
-	padding: 2px 0 3px 0;
+.project-blob>.blob-content {
+	overflow: auto;
 }
-
-#project-blob>.revision-indexing {
-	padding: 8px 8px 9px 8px;
-	background: #fcf8e3;
-	border-top: 1px solid #F2E084;
-	border-bottom: 1px solid #F7EBAF;
-	color: #8a6d3b;
-	font-size: 13px;
-}
-#project-blob>.build-support-note {
-	padding: 8px;
-	border-top: 1px solid #68D056;
-	border-bottom: 1px solid #68D056;
-	background: #E5FBE5;
-	color: #399529; 
-}
-#project-blob>.search-result {
+.project-blob>.search-result {
 	height: 200px;
-	border-top: 1px solid #E0E0E0;
+	border-top: 1px solid var(--light-gray);
 	top: 0 !important;
 }
-#project-blob>.search-result>.ui-resizable-handle {
-	background: #F2F2F2 url(hgrabber.png) no-repeat scroll center center;
+.project-blob>.search-result>.ui-resizable-handle {
+	background: var(--light) url(/icon/grip2.svg) no-repeat scroll center center;
+	background-size: 20px 20px;
     cursor: n-resize;
-    height: 8px;
+    height: 4px;
     top: 0;
     position: relative;
 }
 
-.floating ul.contributors {
-	margin: 0;
-	padding: 8px 0;
+.floating.get-code {
+	max-width: 480px !important;
 }
-.floating ul.contributors>li>a {
-	display: block;
-	padding: 4px 8px;
-	text-decoration: none;
-	color: #666;
+.floating.get-code .download {
+	padding: 0 2.25rem 2rem 2.25rem; 
 }
-.floating ul.contributors>li>a:hover {
-	background: #EEE;
+.floating.get-code .card {
+	box-shadow: none;
 }
 
 .markdown-rendered a+.missing, img+.missing {
-	color: #333;
-	background: #FDB3B3;
+	background: var(--light-danger);
 	margin-left: 4px;
 	padding: 0 2px;
 }
@@ -141,28 +56,6 @@ body.ProjectBlobPage.additionalWidth3 {
 }
 
 .markdown-rendered .missing+.add-missing {
-	color: #05B305;
+	color: var(--success);
 	margin-left: 4px;
-}
-.clone-or-download {
-	max-width: 480px;
-	padding: 12px;
-}
-.clone-or-download>.clone input {
-	background: white;
-}
-.clone-or-download>.download {
-	margin-top: 20px;
-	display: table;
-	width: 100%;
-}
-.clone-or-download>.download>div {
-	display: table-cell;
-	width: 50%;
-}
-.clone-or-download>.download>:first-child {
-	padding-right: 10px;
-}
-.clone-or-download>.download>:last-child {
-	padding-left: 10px;
 }

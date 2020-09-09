@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -58,7 +59,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(savedQueries = new SavedQueriesPanel<NamedIssueQuery>("side") {
+		add(savedQueries = new SavedQueriesPanel<NamedIssueQuery>("savedQueries") {
 
 			@Override
 			protected NamedQueriesBean<NamedIssueQuery> newNamedQueriesBean() {
@@ -99,7 +100,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			
 		});
 		
-		add(issueList = new IssueListPanel("main", new IModel<String>() {
+		add(issueList = new IssueListPanel("issues", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -238,6 +239,11 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			query = project.getIssueSetting().getNamedQueries(true).iterator().next().getQuery();
 		}
 		return paramsOf(project, query, page);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Issues");
 	}
 	
 }

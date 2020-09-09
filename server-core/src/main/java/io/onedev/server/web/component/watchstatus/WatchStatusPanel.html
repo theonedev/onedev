@@ -1,19 +1,25 @@
 <wicket:panel>
-	<div class="watch-status">
-		<a wicket:id="default">
-			<wicket:svg href="tick" class="icon"/>
-			<div class="title">Watch if involved (default)</div>
-			<div class="description">Start to watch once I am involved</div>
+	<div class="watch-status py-3">
+		<a wicket:id="default" class="d-flex px-3 py-2 text-hover-gray-dark">
+			<wicket:svg href="tick" class="icon mr-2 mt-1"/>
+			<div>
+				<div class="font-weight-bold">Watch if involved (default)</div>
+				<div class="text-muted font-size-sm mt-1">Start to watch once I am involved</div>
+			</div>
 		</a>
-		<a wicket:id="watch">
-			<wicket:svg href="tick" class="icon"/>
-			<div class="title">Watch</div>
-			<div class="description">You will be notified of any activities</div>
+		<a wicket:id="watch" class="d-flex px-3 py-2 text-hover-gray-dark">
+			<wicket:svg href="tick" class="icon mr-2 mt-1"/>
+			<div>
+				<div class="font-weight-bold">Watch</div>
+				<div class="text-muted font-size-sm mt-1">You will be notified of any activities</div>
+			</div>
 		</a>
-		<a wicket:id="doNotWatch">
-			<wicket:svg href="tick" class="icon"/>
-			<div class="title">Do not watch</div>
-			<div class="description">Ignore activities irrelevant to me</div>
+		<a wicket:id="doNotWatch" class="d-flex px-3 py-2 text-hover-gray-dark">
+			<wicket:svg href="tick" class="icon mr-2 mt-1"/>
+			<div>
+				<div class="font-weight-bold">Do not watch</div>
+				<div class="text-muted font-size-sm mt-1">Ignore activities irrelevant to me</div>
+			</div>
 		</a>
 	</div>
 </wicket:panel>

@@ -25,9 +25,6 @@ onedev.server.blobEdit = {
 	    	}
         	$content.children(".save.submit").click();
 	    });
-
-	    if ($body.find(".autofit:visible").length != 0)
-	    	$body.css("overflow", "visible");
 	    
 	    $blobEdit.on("getViewState", function(e) {
         	var $content = $body.children(".content");
@@ -45,14 +42,6 @@ onedev.server.blobEdit = {
 			}
 		});
 		
-	    $blobEdit.on("autofit", function(e, width, height) {
-			$blobEdit.outerWidth(width);
-			$blobEdit.outerHeight(height);
-			height = $blobEdit.height()-$head.outerHeight();
-			$body.outerWidth(width).outerHeight(height);
-			$body.find(".autofit:visible").first().triggerHandler("autofit", [$body.width(), $body.height()]);
-		});
-        
         $container.mouseover(function() {
             /* 
              * While inputting file names of a new file, the blob content will be re-created to 
@@ -73,21 +62,16 @@ onedev.server.blobEdit = {
     	var $blobEdit = $tab.closest(".blob-edit");
     	var $body = $blobEdit.children(".body");
     	
-		$body.children().hide();
+		$body.children().removeClass("d-flex");
 
-		if ($body.find(".autofit:visible").length != 0)
-			$body.css("overflow", "visible");
-		else
-			$body.css("overflow", "auto");
-        
         var $content = $body.children(".content");
 		if ($tab.hasClass("edit") || $tab.hasClass("edit-plain")) {
-			$content.show();
+			$content.addClass("d-flex");
 		} else {
-			$body.children(".commit-options").show();
+			$body.children(".commit-options").addClass("d-flex");
         }
-
-        $(window).resize();
+		
+		$(window).resize();
         
         if (!$tab.hasClass("save"))
         	onedev.server.viewState.getFromHistoryAndSetToView();        	

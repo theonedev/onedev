@@ -1,82 +1,14 @@
-body.BuildDetailPage #layout>.body {
-	padding: 59px 0 0 0;
+.build-detail>.card-header>.card-title>.status>svg {
+	width: 20px;
+	height: 20px;
 }
-#build-detail>.main {
-	overflow: auto;
-	position: relative;
-	padding: 20px;
+.build-detail .issue-list .add-new {
+	display: none;
 }
-#build-detail>.main>div {
-    margin-bottom: 20px;
+.build-detail>.card-body>.main>.error-message {
+	max-height: 100px;
 }
-#build-detail>.main>div:last-child {
-	margin-bottom: 0;
-}
-#build-detail>.main>.summary {
-    position: relative;
-    font-size: 24px;
-}
-#build-detail>.main>.summary .status svg {
-	width: 24px;
-	height: 24px;
-	margin-right: 8px;
-}
-
-#build-detail>.main>.summary>* {
-    margin-right: 20px;
-}
-#build-detail>.main>.summary .btn {
-    margin-top: -4px;
-}
-#build-detail>.main>.summary .more-info {
-	position: absolute;
-	right: 0;
-	font-size: 24px;
-	margin: 0;
-	color: #666;
-	transform: rotate(-90deg);
-}
-
-#build-detail>.main>.error-message {
-    font-size: 13px;
-    max-height: 100px;
-    position: relative;
-}
-#build-detail .build-side>.nav {
-	padding-right: 20px;
-	border-right: 1px solid #D8D8D8;
-	margin-right: 30px;
-	display: block;
-}
-
-@media(min-height: 800px) {
-	#build-detail>.main>.commit-info {
-        display: block;
-	}
-	#build-detail .side-info .commit {
-        display: none;
-    }
-}
-@media(min-width: 1150px) {
-	#build-detail>.main {
-		margin-right: 360px;
-	}
-	#build-detail .side-info {
-		box-shadow: none;
-		border-left-width: 4px;
-		border-color: #EEE;
-		display: block !important;
-	}
-	#build-detail a.more-info, #build-detail .side-info>a.close {
-		display: none;
-	}
-	#build-detail .build-side .nav {
-		padding-right: 0;
-		border-right: none;
-		margin-right: 0;
-	}
-}
-
-#build-detail>.main>.changes .help-block {
-    margin-top: 16px;
+.build-detail>.card-body>.main>.error-message.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
+.build-detail>.card-body>.main>.error-message.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
+    background: var(--light-danger);
 }

@@ -1,8 +1,0 @@
-@media(min-width: 360px) {
-    #project-issues>ul.nav-tabs>li.collapsed {
-        display: none;
-    }
-    #project-issues>ul.nav-tabs>li.expanded {
-        display: block;
-    }
-}

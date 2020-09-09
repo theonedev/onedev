@@ -44,7 +44,7 @@ onedev.server.sourceView = {
 		}
 
 		if (blameInfos) {
-	    	onedev.server.sourceView.blame(blameInfos);
+		    onedev.server.sourceView.blame(blameInfos);
     	}
 		onedev.server.sourceView.highlightCommentTrigger();	
 
@@ -96,49 +96,18 @@ onedev.server.sourceView = {
 			}, 500);
 		});
 		
-		$sourceView.on("getViewState", function() {
+		$code.on("getViewState", function() {
 		    return onedev.server.codemirror.getViewState(cm);
 		});
-		$sourceView.on("setViewState", function(e, viewState) {
+		$code.on("setViewState", function(e, viewState) {
 		    return onedev.server.codemirror.setViewState(cm, viewState);
 		});
 		
-		$sourceView.on("autofit", function(event, width, height) {
-			if (cm.getOption("fullScreen"))
-				return;
-			
-			$sourceView.outerWidth(width);
-			$sourceView.outerHeight(height);
-			$code.outerHeight($sourceView.height());
-			
-			var $comment = $sourceView.children(".comment");
-			var paddingLeft;
-			if ($comment.is(":visible")) {
-				paddingLeft = $comment.outerWidth();
-				$comment.children(".ui-resizable-handle").outerHeight($sourceView.height());				
-
-				var $commentHead = $comment.find(">.content>.head");
-				var $commentBody = $comment.find(">.content>.body");
-				$commentBody.outerHeight($sourceView.height() - $commentHead.outerHeight());
-			} else {
-				paddingLeft = 0;
-			}
-			$sourceView.css("padding-left", paddingLeft);
-			
-			var $outline = $sourceView.children(".outline");
-			if ($outline.is(":visible")) {
-				$sourceView.css("padding-right", $outline.outerWidth());
-				$outline.css("left", $code.outerWidth() + paddingLeft);
-				$outline.children(".ui-resizable-handle").outerHeight($sourceView.height());				
-
-				var $outlineHead = $outline.find(">.content>.head");
-				var $outlineBody = $outline.find(">.content>.body");
-				$outlineBody.outerHeight($sourceView.height() - $outlineHead.outerHeight());
-			} else {
-				$sourceView.css("padding-right", "0");
-			}
-			
-			cm.setSize($code.width(), $code.height());
+		$code.on("resized", function() {
+			setTimeout(function() {
+				cm.setSize("100%", $code.height());
+			});
+			return false;
 		});
 	},
 	checkShortcutsBinding() {
@@ -164,7 +133,7 @@ onedev.server.sourceView = {
 				&& onedev.server.viewState.carryOver === undefined) {
 			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 			onedev.server.codemirror.scrollTo(cm, mark);
-		}		
+		}
 	},
 	initComment: function() {
 		var $sourceView = $(".source-view");
@@ -225,11 +194,9 @@ onedev.server.sourceView = {
 	syncOutline: function(symbolId) {
 		var $symbol = $("#" + symbolId);
 		var $body = $(".source-view>.outline>.content>.body");
-		$symbol.scrollIntoView(20);
+		$symbol.scrollIntoView();
 		$body.find(".tree-content").removeClass("active");
 		$symbol.addClass("active");
-		
-		$(window).resize();
 	},
 	restoreMark: function() {
 		var $sourceView = $(".source-view");
@@ -324,11 +291,11 @@ onedev.server.sourceView = {
 		
 		var $content;
 		if (unableCommentMessage) {
-			$content = $("<div><span class='invalid'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> " + unableCommentMessage + "</a>");
+			$content = $("<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> " + unableCommentMessage + "</a>");
 		} else {
-			$content = $("<div><a class='permanent'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
+			$content = $("<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
 			$content.children("a.permanent").attr("href", markUrl);
-			$content.append("<a class='copy-marked'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
+			$content.append("<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
 			var clipboard = new Clipboard(".copy-marked", {
 			    text: function(trigger) {
 			        return cm.getSelection("\n");
@@ -341,7 +308,7 @@ onedev.server.sourceView = {
 				$(".selection-popover").remove();
 			});
 			if (loggedIn) {
-				$content.append("<a class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
+				$content.append("<a class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
 				$content.children("a.comment").click(function() {
 					if ($(".source-view").find("form.dirty").length != 0 
 							&& !confirm("There are unsaved changes, discard and continue?")) {
@@ -352,7 +319,7 @@ onedev.server.sourceView = {
 					callback("addComment", mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
-				$content.append("<span class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</span>");
+				$content.append("<span class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</span>");
 			}			
 		}
 		
@@ -405,7 +372,6 @@ onedev.server.sourceView = {
 		}
 		onedev.server.sourceView.highlightCommentTrigger();				
 		$(window).resize();
-		
 		onedev.server.sourceView.clearMark();
 	},
 	onAddComment: function(mark) {
@@ -432,8 +398,8 @@ onedev.server.sourceView = {
 		$sourceView.data("openComment", comment);
 		$sourceView.data("mark", comment.mark);
 		onedev.server.sourceView.highlightCommentTrigger();
-		$(window).resize();
 
+		$(window).resize();
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		onedev.server.codemirror.scrollIntoView(cm, comment.mark);
 	},
@@ -446,8 +412,8 @@ onedev.server.sourceView = {
 	},
 	onToggleOutline: function() {
 		onedev.server.sourceView.exitFullScreen();
-		$(window).resize();
 		$(".outline-toggle").prop("checked", $(".source-view>.outline").is(":visible"));
+		$(window).resize();
 	},
 	highlightCommentTrigger: function() {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;
@@ -552,6 +518,7 @@ onedev.server.sourceView = {
             		}
         		}
     		} 
+			$(".CodeMirror-annotations").addClass("need-width");
 		} else {
 			cm.clearGutter("CodeMirror-annotations");
 			var gutters = cm.getOption("gutters").slice();
@@ -597,7 +564,7 @@ onedev.server.sourceView = {
 				var $prev = $selectables.eq(index);
 				$active.removeClass("active");
 				$prev.addClass("active");
-				$result.find("a.active").scrollIntoView(36);
+				$result.find("a.active").scrollIntoView();
 			}
 		};
 		
@@ -612,7 +579,7 @@ onedev.server.sourceView = {
 				var $next = $selectables.eq(index);
 				$active.removeClass("active");
 				$next.addClass("active");
-				$result.find("a.active").scrollIntoView(36);
+				$result.find("a.active").scrollIntoView();
 			}
 		};
 		

@@ -36,6 +36,7 @@ public class FieldSupply implements Serializable {
 	
 	private ValueProvider valueProvider = new SpecifiedValue();
 
+	@Editable
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -45,6 +46,7 @@ public class FieldSupply implements Serializable {
 		this.name = name;
 	}
 
+	@Editable
 	@NotNull
 	@Valid
 	public ValueProvider getValueProvider() {
@@ -55,6 +57,7 @@ public class FieldSupply implements Serializable {
 		this.valueProvider = valueProvider;
 	}
 
+	@Editable
 	public boolean isSecret() {
 		return secret;
 	}

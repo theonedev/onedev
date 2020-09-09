@@ -80,6 +80,7 @@ import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -93,6 +94,7 @@ import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
@@ -404,7 +406,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 		}));
 		searchField.add(new OnSearchingBehavior());
-
+		
 		add(new ModalLink("createBranch") {
 
 			private BranchBeanWithRevision helperBean = new BranchBeanWithRevision();
@@ -480,8 +482,8 @@ public class ProjectBranchesPage extends ProjectPage {
 				return fragment;
 			}
 			
-		});
-		
+		});		
+
 		List<IColumn<RefInfo, Void>> columns = new ArrayList<>();
 		
 		columns.add(new AbstractColumn<RefInfo, Void>(Model.of("")) {
@@ -510,23 +512,6 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				fragment.add(new AjaxLink<Void>("makeDefault") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getProject().setDefaultBranch(branch);
-						target.add(branchesTable);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()) 
-								&& !branch.equals(getProject().getDefaultBranch()));
-					}
-					
-				});
-				
 				fragment.add(new WebMarkupContainer("default") {
 
 					@Override
@@ -540,11 +525,19 @@ public class ProjectBranchesPage extends ProjectPage {
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
 				fragment.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent()));
 				
-				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
-				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);
-				link.add(new Label("message", lastCommit.getShortMessage()));
-				fragment.add(link);
-				
+				fragment.add(new Label("message", new LoadableDetachableModel<String>() {
+
+					@Override
+					protected String load() {
+						RevCommit lastCommit = getProject().getRevCommit(rowModel.getObject().getRef().getObjectId(), true);
+						PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name()); 
+						String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
+						ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
+						return transformer.apply(lastCommit.getShortMessage());
+					}
+					
+				}).setEscapeModelStrings(false));
+								
 				WebMarkupContainer actionsContainer = new WebMarkupContainer("actions");
 				fragment.add(actionsContainer.setOutputMarkupId(true));
 
@@ -557,9 +550,11 @@ public class ProjectBranchesPage extends ProjectPage {
 							PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(effectiveRequest)); 
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
+						requestLink.add(AttributeAppender.append("class", "btn-warning"));
 						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
 					} else {
 						requestLink.add(new Label("label", "Merged"));
+						requestLink.add(AttributeAppender.append("class", "btn-success"));
 						requestLink.add(AttributeAppender.append("title", 
 								"This change is squashed/rebased onto base branch via a pull request"));
 					}
@@ -569,6 +564,15 @@ public class ProjectBranchesPage extends ProjectPage {
 					requestLink.add(new WebMarkupContainer("label"));
 				}
 				actionsContainer.add(requestLink);
+				
+				actionsContainer.add(new ArchiveMenuLink("download", projectModel) {
+
+					@Override
+					protected String getRevision() {
+						return branch;
+					}
+					
+				});
 				
 				actionsContainer.add(new ModalLink("delete") {
 
@@ -652,7 +656,24 @@ public class ProjectBranchesPage extends ProjectPage {
 					}
 
 				});
-								
+				
+				actionsContainer.add(new AjaxLink<Void>("makeDefault") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						getProject().setDefaultBranch(branch);
+						target.add(branchesTable);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.canManage(getProject()) 
+								&& !branch.equals(getProject().getDefaultBranch()));
+					}
+					
+				});
+
 				cellItem.add(fragment);
 			}
 
@@ -675,7 +696,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 			@Override
 			public String getCssClass() {
-				return "behind behind-ahead";
+				return "behind behind-ahead d-none d-lg-table-cell";
 			}
 			
 		});
@@ -692,7 +713,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 			@Override
 			public String getCssClass() {
-				return "ahead behind-ahead";
+				return "ahead behind-ahead d-none d-lg-table-cell";
 			}
 			
 		});
@@ -849,6 +870,11 @@ public class ProjectBranchesPage extends ProjectPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject());
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Branches");
 	}
 
 }

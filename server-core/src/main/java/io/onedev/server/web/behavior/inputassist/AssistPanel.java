@@ -56,7 +56,7 @@ abstract class AssistPanel extends Panel {
 
 			@Override
 			protected String getItemSelector() {
-				return ">table>tbody>tr";
+				return ">li";
 			}
 
 			@Override
@@ -66,7 +66,7 @@ abstract class AssistPanel extends Panel {
 						InputCompletion suggestion = suggestions.get(i);
 						Component suggestionItem = newSuggestionItem(suggestionsView.newChildId(), suggestion);
 						suggestionsView.add(suggestionItem);
-						String script = String.format("$('#%s .suggestions>table>tbody').append('<tr id=\"%s\"></tr>');", 
+						String script = String.format("$('#%s .suggestions').append('<li id=\"%s\"></li>');", 
 								AssistPanel.this.getMarkupId(), suggestionItem.getMarkupId());
 						target.prependJavaScript(script);
 						target.add(suggestionItem);

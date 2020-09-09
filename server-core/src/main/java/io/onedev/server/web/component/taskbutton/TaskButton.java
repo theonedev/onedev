@@ -36,7 +36,7 @@ import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -78,8 +78,8 @@ public abstract class TaskButton extends AjaxButton {
 				String result;
 				try {
 					result = String.format(
-						"<div class='task-result alert alert-success'>%s</div>", 
-						HtmlEscape.escapeHtml5(runTask(new JobLogger() {
+						"<div class='task-result alert alert-light-success'>%s</div>", 
+						HtmlEscape.escapeHtml5(runTask(new SimpleLogger() {
 
 							@Override
 							public void log(String message) {
@@ -99,7 +99,7 @@ public abstract class TaskButton extends AjaxButton {
 					else
 						result = "Error " + title;
 					result = String.format(
-							"<div class='task-result alert alert-danger'>%s</div>", 
+							"<div class='task-result alert alert-light-danger'>%s</div>", 
 							HtmlEscape.escapeHtml5(result));					
 				} 
 				result = StringUtils.replace(result, "\n", "<br>");
@@ -166,7 +166,7 @@ public abstract class TaskButton extends AjaxButton {
 		submitTask(target);
 	}
 	
-	protected abstract String runTask(JobLogger logger);
+	protected abstract String runTask(SimpleLogger logger);
 
 	@Singleton
 	public static class TaskFutureManager implements SchedulableTask {

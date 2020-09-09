@@ -188,7 +188,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	}
 	
 	@Override
-	protected WebMarkupContainer newOptions(String id) {
+	protected WebMarkupContainer newFormats(String id) {
 		sourceFormat = new SourceFormatPanel(id, null, new OptionChangeCallback() {
 			
 			@Override
@@ -210,7 +210,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	}
 
 	@Override
-	public WebMarkupContainer newAdditionalActions(String id) {
+	public WebMarkupContainer newExtraOptions(String id) {
 		WebMarkupContainer actions = new Fragment(id, "actionsFrag", this);
 		if (hasOutline()) {
 			actions.add(new CheckBox("outline", Model.of(isOutlineVisibleInitially())).add(new OnChangeAjaxBehavior() {

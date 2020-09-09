@@ -1,8 +1,12 @@
 .blob-view>.body>div>.markdown-viewer {
-	padding: 20px;
+	padding: 1.6rem;
 	max-width: 900px;
 	margin-left: auto;
 	margin-right: auto;
+}
+
+.blob-edit .markdown-editor .ui-resizable-handle {
+	display: none;
 }
 
 .blob-edit .markdown-editor>.head {
@@ -12,15 +16,3 @@
 .blob-edit .markdown-editor>.body>.preview>.markdown-rendered {
 	border-radius: 0 !important;
 } 
-.blob-edit .markdown-editor.edit-mode>.body>.edit>textarea, 
-.blob-edit .markdown-editor.preview-mode>.body>.preview>.markdown-rendered, 
-.blob-edit .markdown-editor.split-mode>.body>.preview>.markdown-rendered {
-	border-bottom: none;
-	border-left: none;
-	border-right: none;
-}
-.blob-edit .markdown-editor.split-mode>.body>.edit>textarea, 
-.blob-edit .markdown-editor>.body>.preview>.markdown-rendered {
-	border-bottom: none;
-	border-left: none;
-}

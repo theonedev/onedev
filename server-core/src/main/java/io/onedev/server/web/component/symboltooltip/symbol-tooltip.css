@@ -1,13 +1,13 @@
 .symbol-tooltip {
-	background-color: #FBFCC5; 
-	border: 1px solid black;
-	border-radius: 4px; 
-	color: black; 
+	background-color: var(--light-info); 
+	border-radius: 0.42rem; 
+	color: var(--info);
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; 
-	font-size: 10pt; 
-	padding: 4px 8px; 
+	font-size: 12px; 
+	padding: 1rem; 
 	z-index: 10000; 
-	font-weight: bold;
+	box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
+	max-width: 720px;
 }
 .symbol-tooltip ul.declarations li {
 	vertical-align: top; 
@@ -15,5 +15,8 @@
 	white-space: nowrap;
 }
 .symbol-tooltip ul.declarations .scope {
-	color: #666;
+	color: var(--gray);
+}
+.symbol-tooltip a.find-occurrences[disabled] {
+	opacity: 100%;
 }

@@ -15,6 +15,8 @@
     $.fn.align = function(alignment) {
     	this.each(function() {
     		var $this = jQuery(this);
+			$this.addClass("autosuit");
+
         	var $parent = $this.parent();
         	if ($parent.css("position") != "relative") {
         		$parent.css("position", "relative");
@@ -23,19 +25,19 @@
         		$this.css("position", "absolute");
         	}
 
-        	var $autoSize = $this.find(".autosize");
-        	if ($autoSize.length == 0)
-        		$autoSize = $this;
+        	var $autosuit = $this.find(".autosuit:visible:not(:has('.autosuit:visible'))");
+        	if ($autosuit.length == 0)
+        		$autosuit = $this;
         	
-        	var scrollTop = $autoSize.scrollTop();
-        	var scrollLeft = $autoSize.scrollLeft();
+        	var scrollTop = $autosuit.scrollTop();
+        	var scrollLeft = $autosuit.scrollLeft();
         	
         	// reset width and height as otherwise the dimension will not change
         	// even if enclosed content changes
-        	$autoSize.css("width", "auto");
-        	$autoSize.css("height", "auto");
-        	$autoSize.css("overflow", "auto");
-        	
+        	$this.find(".autosuit").addBack(this).css("width", "auto").css("height", "auto").css("overflow", "hidden");
+
+        	$autosuit.css("overflow", "auto");
+
         	var borderTop = jQuery(window).scrollTop() + pageMargin;
         	var borderBottom = borderTop + jQuery(window).height() - 2*pageMargin;
         	var borderLeft = jQuery(window).scrollLeft() + pageMargin;
@@ -43,6 +45,7 @@
 
         	var thisWidth = $this.outerWidth();
         	var thisHeight = $this.outerHeight();
+
         	var width = thisWidth;
         	var height = thisHeight;
         	
@@ -193,17 +196,17 @@
         	$this.css({left:left-$parent.offset().left, top:top-$parent.offset().top});	
         	
         	if (height < thisHeight)
-        		$autoSize.outerHeight($autoSize.outerHeight()+height-thisHeight);
-        	$autoSize.outerHeight($autoSize.outerHeight()+2);
+        		$autosuit.outerHeight($autosuit.outerHeight()+height-thisHeight);
+        	$autosuit.outerHeight($autosuit.outerHeight()+2);
         	
         	if (width < thisWidth)
-        		$autoSize.outerWidth($autoSize.outerWidth()+width-thisWidth);
+        		$autosuit.outerWidth($autosuit.outerWidth()+width-thisWidth);
 
-        	if ($autoSize.height() < $autoSize[0].scrollHeight)
-        		$autoSize.outerWidth($autoSize.outerWidth()+scrollbarWidth);
+        	if ($autosuit.height() < $autosuit[0].scrollHeight)
+        		$autosuit.outerWidth($autosuit.outerWidth()+scrollbarWidth);
         	
-        	$autoSize.scrollTop(scrollTop);
-        	$autoSize.scrollLeft(scrollLeft);    		
+        	$autosuit.scrollTop(scrollTop);
+        	$autosuit.scrollLeft(scrollLeft);    		
     	});
     	return this;
     };

@@ -1,33 +1,6 @@
-.job-list {
-    padding: 12px;
-}
-.job-list>.note {
-	font-size: 12px;
-	color: #666;
-}
-.job-list>.job {
-	margin-bottom: 8px;
-}
 .job-list>.job>.head {
-    padding: 4px 0;
-    white-space: nowrap;
+    border-bottom: 1px solid var(--light-gray);
 }
-.job-list>.job>.head .show-in-list {
-    color: #666;
-    margin-left: 8px;
-}
-.job-list>.job>.head .run {
-    color: #666;
-    margin-left: 4px;
-}
-
-.job-list>.job>.body {
-    border-top: 1px solid #D8D8D8;
-    padding-top: 8px;
-}
-.job-list>.job>.body .simple-build-list {
-	padding: 0;
-}
-.job-list>.job>.body .no-builds {
-	padding: 0;
+.job-list .no-builds {
+	margin: 0.5rem 1rem !important;
 }

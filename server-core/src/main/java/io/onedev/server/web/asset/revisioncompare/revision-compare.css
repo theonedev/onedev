@@ -1,38 +1,64 @@
-table.revision-compare {
-	width: auto;
+.revision-compare {
+	display: flex;
+	min-height: fit-content;
 }
-table.revision-compare td {
-	vertical-align: top;
-	background: #FAFAFA; 
-	border: 2px solid #E0E0E0;
-    padding: 20px;
+.revision-compare>.revision {
+	flex: 1;
 }
-table.revision-compare td.action {
-	text-align: center;
-	background: white;
-	padding-top: 50px;
-	border-top: none;
-	border-bottom: none;
+.revision-compare>.base {
+	margin-right: 2rem;
 }
-table.revision-compare .revision .title .checkbox {
-	margin: 0 0 0 16px;
+.revision-compare>.swap {
+	display: flex;
+	align-items: center;
+	margin-right: 2rem;
+	justify-content: center;
 }
-table.revision-compare .revision .title label {
-	font-size: 16px;
-	font-weight: normal;
+@media(max-width: 767px) {
+	.revision-compare {
+		flex-wrap: wrap;
+	}
+	.revision-compare>* {
+		flex: 0 0 100%;
+	}
+	.revision-compare>.base {
+		margin-right: 0;
+		margin-bottom: 2rem;
+	}
+	.revision-compare>.compare {
+		margin-top: 2rem;
+	}
+	.revision-compare>.swap .icon {
+		transform: rotate(90deg);
+	}
 }
-table.revision-compare .revision .title span {
-	color: #888;
-	margin-left: 4px;
+
+.revision-compare .head {
+	display: flex;
+	align-items: center;
+	margin-bottom: 1rem;
 }
-table.revision-compare .revision .title a {
-	color: #666;
-	margin-left: 4px;
+.revision-compare .title {
+	font-weight: 600;
+	font-size: 1.1rem;
+	margin-bottom: 1rem;
 }
-table.revision-compare .revision .message {
-	margin-top: 8px;
+.revision-compare .head .title {
+	margin-bottom: 0;
 }
-table.revision-compare .revision .message a {
-	font-size: 13px;
-	color: #888;
+.revision-compare .checkbox {
+	margin-left: 1.5rem;
+}
+.revision-compare .help {
+	margin-left: 0.5rem;
+	color: var(--gray);
+}
+.revision-compare .selector {
+	margin-bottom: 1rem;
+}
+.revision-compare .message {
+	color: var(--muted);	
+}
+.revision-compare .message:hover, .revision-compare .message:focus {
+	color: var(--primary);
 }

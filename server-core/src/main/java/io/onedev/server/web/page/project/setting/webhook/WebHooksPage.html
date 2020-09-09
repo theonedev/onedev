@@ -1,15 +1,15 @@
 <wicket:extend>
-	<div class="page-title">Web Hooks</div>
-	<div class="help-block">
+	<div class="alert alert-info mb-5">
+		<wicket:svg href="bulb" class="icon mr-1"/>
 		OneDev will post event data in JSON format to specified URLs when subscribed events happen
 	</div>
-	<div class="web-hook-list list">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="feedback"></div>
-			<div wicket:id="editor"></div>		
-			<div class="actions">
-				<input type="submit" value="Save" class="dirty-aware btn btn-primary">
-			</div>
-		</form>
+	<div class="card">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="feedback" class="mb-4"></div>
+				<div wicket:id="editor"></div>		
+				<input type="submit" value="Save" class="dirty-aware btn btn-primary mt-4">
+			</form>
+		</div>
 	</div>
 </wicket:extend>

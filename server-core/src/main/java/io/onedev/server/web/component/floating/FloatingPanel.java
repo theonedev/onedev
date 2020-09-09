@@ -65,6 +65,8 @@ public abstract class FloatingPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				FloatingPanel.this.remove();
+				String script = String.format("onedev.server.floating.close('%s');", getMarkupId(true));
+				target.appendJavaScript(script);
 				onClosed();
 			}
 			
@@ -103,7 +105,7 @@ public abstract class FloatingPanel extends Panel {
 	public final void close() {
 		AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 		if (target != null) {
-			String script = String.format("onedev.server.floating.close($('#%s'), false);", getMarkupId(true));
+			String script = String.format("onedev.server.floating.close('%s');", getMarkupId(true));
 			target.appendJavaScript(script);
 		} 
 		if (getParent() != null)

@@ -2,7 +2,9 @@ package io.onedev.server.web.page.project.setting.webhook;
 
 import java.io.Serializable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -43,6 +45,11 @@ public class WebHooksPage extends ProjectSettingPage {
 		form.add(new FencedFeedbackPanel("feedback", form));
 		form.add(editor);
 		add(form);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Web Hooks");
 	}
 
 }

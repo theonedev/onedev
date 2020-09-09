@@ -1,14 +1,14 @@
 <wicket:panel>
 	<div class="input-assist">
-		<div wicket:id="suggestions" class="suggestions autosize">
-			<table>
-				<tr wicket:id="suggestions" class="suggestion">
-					<td wicket:id="content" class="content"></td>
-					<td wicket:id="description" class="description"></td>
-				</tr>
-			</table>
-		</div>
-		<ul class="help list-unstyled">
+		<ul wicket:id="suggestions" class="suggestions overflow-auto list-unstyled">
+			 <li wicket:id="suggestions" class="suggestion selectable">
+				<a class="d-flex align-items-center">
+					<span wicket:id="content" class="content text-nowrap font-size-sm mr-auto"></span>
+					<span wicket:id="description" class="ml-4 description text-muted"></span>
+				</a>
+			</li>
+		</ul>
+		<ul class="help list-unstyled rounded mt-3 mb-0 text-muted bg-light px-3 py-2">
 			<li wicket:id="hints"></li>
 			<li><span class='complete'></span> &uarr;&darr; to select item. Esc to <a wicket:id="close">close</a></li>
 		</ul>

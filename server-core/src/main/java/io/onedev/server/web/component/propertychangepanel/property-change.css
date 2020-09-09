@@ -1,12 +1,15 @@
 .property-change {
 	width: auto;
-	border: 1px dotted #BBB;
-	font-size: 13px;
+	border: 1px dashed var(--secondary);
+	font-size: 1rem;
 }
 .property-change td.name {
 	white-space: nowrap;
 }
+.property-change th {
+	font-weight: 600;
+}
 .property-change th, .property-change td {
-	padding: 4px 8px;
-	border-bottom: 1px dotted #BBB;
+	padding: 0.4rem 0.6rem;
+	border-bottom: 1px dashed var(--secondary);
 }

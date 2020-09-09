@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -47,6 +47,6 @@ public abstract class JobReport implements Serializable {
 		return patternSet;
 	}
 	
-	public abstract void process(Build build, File workspace, JobLogger logger);
+	public abstract void process(Build build, File workspace, SimpleLogger logger);
 
 }

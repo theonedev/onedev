@@ -1,0 +1,22 @@
+.floating.off-canvas {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	border: none;
+	width: 360px;
+	border-radius: 0;
+}
+
+.floating.off-canvas>.content {
+	height: 100%;
+}
+.floating.off-canvas-left {
+	left: 0;
+}
+.floating.off-canvas-right {
+	right: 0;
+}
+.floating.off-canvas>.content>.card {
+	box-shadow: none;
+	border-radius: 0;
+}

@@ -1,32 +1,28 @@
 <wicket:panel>
-	<div class="search-result">
-		<div class="head clearfix">
-			<div class="title float-left">Search Result</div>
-			<div class="actions float-left">
-				<a wicket:id="prevMatch" title="Show previous match"><wicket:svg href="arrow3" class="icon rotate-90"></wicket:svg></a>
-				<a wicket:id="nextMatch" title="Show next match"><wicket:svg href="arrow3" class="icon rotate-90"></wicket:svg></a>
-				<a wicket:id="expandAll" title="Expand all"><wicket:svg href="plus-square" class="icon"></wicket:svg></a>
+	<div class="search-result d-flex flex-column flex-grow-1 overflow-hidden">
+		<div class="head d-flex align-items-center px-3 py-2 flex-shrink-0">
+			<h6 class="title mr-4 mb-0">Search Result</h6>
+			<div class="actions text-nowrap mr-2">
+				<a wicket:id="prevMatch" title="Show previous match" class="mr-1"><wicket:svg href="arrow2" class="icon rotate-270"></wicket:svg></a>
+				<a wicket:id="nextMatch" title="Show next match" class="mr-1"><wicket:svg href="arrow2" class="icon rotate-90"></wicket:svg></a>
+				<a wicket:id="expandAll" title="Expand all" class="mr-2"><wicket:svg href="plus-square" class="icon"></wicket:svg></a>
 				<a wicket:id="collapseAll" title="Collapse all"><wicket:svg href="minus-square" class="icon"></wicket:svg></a>
 			</div>
-			<wicket:enclosure child="hasMoreMessage">
-				<div class="warning float-left">
-					(<span wicket:id="hasMoreMessage"></span>)
-				</div>
-			</wicket:enclosure>
-			<div class="float-right">
-				<a wicket:id="close" class="close" title="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
+			<div wicket:id="hasMoreMessage" class="warning mr-2 d-none d-md-inline text-muted"></div>
+			<div class="ml-auto">
+				<a wicket:id="close" class="text-muted text-hover-primary" title="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
 			</div>
 		</div>
-		<ul class="body list-unstyled">
-			<li wicket:id="blobs" class="blob">
-				<a wicket:id="expandLink" class="expand"><svg wicket:id="icon" class="icon icon-sm"></svg></a> 
-				<a wicket:id="blobLink" class="blob selectable">
+		<ul class="body list-unstyled mb-0 px-3 py-2 overflow-auto flex-grow-1">
+			<li wicket:id="blobs" class="blob text-nowrap border-0">
+				<a wicket:id="expandLink" class="expand"><svg wicket:id="icon" class="icon"></svg></a> 
+				<a wicket:id="blobLink" class="blob selectable d-inline-block">
 					<wicket:svg href="file" class="icon"></wicket:svg>
 					<span wicket:id="label"></span>
 				</a> 
 				<ul wicket:id="hits" class="list-unstyled">
 					<li wicket:id="hits" class="hit">
-						<a wicket:id="hitLink" class="hit selectable">
+						<a wicket:id="hitLink" class="hit selectable d-inline-block">
 							<img wicket:id="icon"></img>
 							<span wicket:id="lineNo" class="line-no"></span>
 							<span wicket:id="label"></span>
@@ -39,8 +35,8 @@
 					</li>
 				</ul>
 			</li>
-			<li wicket:id="noMatchingResult" class="no-matching-result">
-				<wicket:svg href="warning" class="icon"/> Sorry, I am unable to find anything matching your query
+			<li wicket:id="noMatchingResult" class="no-matching-result my-2 alert alert-light-warning">
+				<wicket:svg href="warning" class="icon mr-1"/> Nothing matching your query
 			</li>
 		</ul>
 	</div>

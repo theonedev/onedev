@@ -1,12 +1,11 @@
 <wicket:extend>
-	<div class="page-title">SSH Keys</div>
-	<div class="my-ssh-key-list list">
-		<div class="head">
-			<a class="add-new btn btn-success" wicket:id="newKey"><wicket:svg href="plus" class="icon"></wicket:svg> New SSH Key</a>
-			<div wicket:id="sshKeyNote" class="alert alert-info"></div>
-		</div>
-		<div class="body">
-			<div wicket:id="keyList"></div>
+	<div class="p-5">
+		<div wicket:id="sshKeyNote" class="alert alert-info mb-5"></div>
+		<div class="card">
+			<div class="card-body">
+				<a wicket:id="newKey" class="btn btn-primary btn-icon mb-4" title="Add SSH Key"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+				<div wicket:id="keyList"></div>
+			</div>
 		</div>
 	</div>
 </wicket:extend>

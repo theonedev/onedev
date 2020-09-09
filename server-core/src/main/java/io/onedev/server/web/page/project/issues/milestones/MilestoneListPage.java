@@ -17,8 +17,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -54,12 +52,12 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class MilestoneListPage extends ProjectIssuesPage {
+public class MilestoneListPage extends ProjectPage {
 
 	private static final String PARAM_STATE = "state";
 	
@@ -183,7 +181,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 
 			@Override
 			public String getCssClass() {
-				return "name";
+				return "name align-middle";
 			}
 			
 			@Override
@@ -213,7 +211,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 
 			@Override
 			public String getCssClass() {
-				return "due-date";
+				return "due-date d-none d-lg-table-cell align-middle";
 			}
 			
 			@Override
@@ -228,7 +226,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 
 			@Override
 			public String getCssClass() {
-				return "issue-stats";
+				return "issue-stats align-middle";
 			}
 			
 			@Override
@@ -284,7 +282,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 
 				@Override
 				public String getCssClass() {
-					return "expanded actions";
+					return "d-none d-lg-table-cell actions align-middle";
 				}
 
 				@Override
@@ -363,12 +361,6 @@ public class MilestoneListPage extends ProjectIssuesPage {
 		super.onDetach();
 	}
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MilestonesResourceReference()));
-	}
-
 	public static PageParameters paramsOf(Project project, boolean closed, @Nullable MilestoneSort sort) {
 		PageParameters params = paramsOf(project);
 		if (closed)
@@ -380,5 +372,10 @@ public class MilestoneListPage extends ProjectIssuesPage {
 			params.add(PARAM_SORT, sort.name().toLowerCase());
 		return params;
 	}
-	
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Milestones");
+	}
+
 }

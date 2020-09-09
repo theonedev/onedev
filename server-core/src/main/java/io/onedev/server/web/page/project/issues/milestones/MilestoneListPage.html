@@ -1,20 +1,16 @@
 <wicket:extend>
-	<div id="milestone-list">
-		<div class="head clearfix">
-			<div class="float-left">
-				<span class="btn-group">
+	<div class="card m-5 milestone-list">
+		<div class="card-body">
+			<div class="d-flex align-items-center flex-wrap">
+				<span class="btn-group mr-4 mb-4">
 					<a wicket:id="open" class="btn btn-outline-secondary">Open</a>
 					<a wicket:id="closed" class="btn btn-outline-secondary">Closed</a>
 				</span>
+				<div class="mr-4 mb-4">
+					<a wicket:id="sort" class="btn btn-outline-secondary">Sort <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
+				</div>
+				<a wicket:id="newMilestone" class="btn btn-primary btn-icon mb-4"><wicket:svg href="plus" class="icon mr-1"></wicket:svg></a>
 			</div>
-			<div class="float-left">
-				<a wicket:id="sort" class="btn btn-outline-secondary">Sort <wicket:svg href="arrow" class="icon rotate-90"></wicket:svg></a>
-			</div>
-			<div class="float-right">
-				<a wicket:id="newMilestone" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> New</a>
-			</div>
-		</div>
-		<div class="body">
 			<table wicket:id="milestones" class="table"></table>
 		</div>
 	</div>

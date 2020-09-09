@@ -1,11 +1,13 @@
 <wicket:extend>
-	<div class="page-title">New Role</div>
-	<div class="new-role">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="editor"></div>
-			<div class="actions clearfix">
-				<input class="btn btn-primary dirty-aware float-left" value="Save" type="submit">
-			</div>
-		</form>
+	<div class="new-role card">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor"></div>
+				<input class="btn btn-primary dirty-aware mt-3" value="Save" type="submit">
+			</form>
+		</div>
 	</div>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="roles">Roles</a> <span class="dot"></span> <span class="text-truncate">Create New</span> 
+	</wicket:fragment>
 </wicket:extend>

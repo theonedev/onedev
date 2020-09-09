@@ -2,10 +2,12 @@ package io.onedev.server.web.page.project.builds.detail;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -96,9 +98,12 @@ public class InvalidBuildPage extends ProjectPage {
 	}
 	
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new InvalidBuildResourceReference()));
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("builds", ProjectBuildsPage.class, 
+				ProjectBuildsPage.paramsOf(getProject())));
+		fragment.add(new Label("buildNumber", "#" + getBuild().getNumber()));
+		return fragment;
 	}
 
 }

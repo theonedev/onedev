@@ -1,23 +1,20 @@
 <wicket:extend>
-	<div class="page-title">User Administration</div>
-	<div class="user-list list">
-		<div class="head clearfix">
-			<div class="float-left clearable-wrapper">
-				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter users">
+	<div class="card user-list">
+		<div class="card-body">
+			<div class="d-flex align-items-center mb-4">
+				<div class="clearable-wrapper flex-grow-1 mr-3">
+					<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name">
+				</div>
+				<a wicket:id="addNew" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</div>
-			<div class="float-left">
-				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New User</a>
-			</div>
-		</div>
-		<div class="body">
-			<table wicket:id="users" class="users table table-hover"></table>
+			<table wicket:id="users" class="users table"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
 		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="impersonate" title="Impersonate this user"><wicket:svg href="user-tick" class="icon"/></a>
-		<a wicket:id="delete" title="Delete this user"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+	<wicket:fragment wicket:id="actionsFrag">
+		<a wicket:id="impersonate" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-2" title="Impersonate this user"><wicket:svg href="user-tick" class="icon align-middle"/></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this user"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

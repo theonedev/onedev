@@ -49,13 +49,7 @@ public abstract class AjaxActionTab extends ActionTab {
 	@Override
 	protected final void onSelect(Component tabLink) {
 		AjaxRequestTarget target = Preconditions.checkNotNull(RequestCycle.get().find(AjaxRequestTarget.class));
-		Tabbable tabbable = tabLink.findParent(Tabbable.class);
-		if (tabbable == null) {
-			Tabbable.TabsFragment tabs = Preconditions.checkNotNull(tabLink.findParent(Tabbable.TabsFragment.class));
-			tabs.getDropdown().close();
-			tabbable = tabs.getTabbable();
-		}
-		target.add(tabbable);
+		target.add(tabLink.findParent(Tabbable.class));
 		onSelect(target, tabLink);
 	}
 

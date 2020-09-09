@@ -1,24 +1,5 @@
-#issue-setting .issue-states table>tbody>tr>td:first-child a span {
-	border-radius: 3px;
-	padding: 2px 6px;
-	margin-right: 8px;
-}
-#issue-setting .issue-states table .color span {
-	display: block;
+.issue-setting .issue-states table .color div {
 	width: 24px;
 	height: 24px;
-	border-radius: 3px;
-}
-#issue-setting .default-queries th.property-name {
-	width: 30%;
-}
-.field-spec-edit .property-nameOfEmptyValue .control-label {
-	font-weight: normal;
-}
-
-@media(max-width: 991px) {
-	#issue-setting .display-in-issue-list, .field-spec .property-displayInIssueList, 
-	.field-spec-edit .property-displayInIssueList {
-		display: none;
-	}
+	border-radius: 0.42rem;
 }

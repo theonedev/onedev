@@ -1,114 +1,102 @@
 <wicket:extend>
-	<div id="new-pull-request" class="resize-aware">
-		<div class="page-title">New Pull Request</div>
-		<div class="page-content">
-			<table class="branches revision-compare">
-				<tr>
-					<td class="target branch revision">
-						<div class="title clearfix">
-							<label class="float-left">Target</label>
-						</div>
-						<div wicket:id="target" class="selector"></div>
-						<div class="message">
-							<a wicket:id="targetCommitLink"><span wicket:id="message"></span></a>
-						</div>
-					</td>
-					<td class="action">
-						<a wicket:id="swap" class="swap btn btn-outline-secondary" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
-					</td>
-					<td class="source branch revision">
-						<div class="title">
-							<label>Source</label>
-						</div>
-						<div wicket:id="source" class="selector"></div>
-						<div class="message">
-							<a wicket:id="sourceCommitLink"><span wicket:id="message"></span></a>
-						</div>
-					</td>
-				</tr>
-			</table>
-			<div wicket:id="status" class="status"></div>
-			<ul wicket:id="tabs" class="nav nav-tabs"></ul>
-			<div wicket:id="tabPanel" class="tab-panel"></div>
+	<div class="p-5 new-pull-request">
+		<div class="revision-compare mb-5">
+			<div class="base revision card">
+				<div class="card-body">
+					<div class="title">Target</div>
+					<div wicket:id="target" class="selector"></div>
+					<a wicket:id="targetCommitLink" class="message"><span wicket:id="message"></span></a>
+				</div>
+			</div>
+			<div class="swap">
+				<a wicket:id="swap" class="btn btn-primary btn-icon" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
+			</div>
+			<div class="compare revision card">
+				<div class="card-body">
+					<div class="title">Source</div>
+					<div wicket:id="source" class="selector"></div>
+					<a wicket:id="sourceCommitLink" class="message"><span wicket:id="message"></span></a>
+				</div>
+			</div>
 		</div>
+		<div wicket:id="status" class="status"></div>
+		<wicket:enclosure child="tabs">
+		<div class="card">
+			<div class="card-body">
+				<ul wicket:id="tabs" class="nav nav-tabs nav-tabs-line nav-bolder mb-5"></ul>
+				<div wicket:id="tabPanel" class="tab-panel"></div>
+			</div>
+		</div>
+		</wicket:enclosure>
 	</div>
 	<wicket:fragment wicket:id="effectiveFrag">
-		<div class="alert alert-info">
-			<span wicket:id="description"></span> <a wicket:id="link"><b wicket:id="label"></b></a>
+		<div class="alert alert-info mb-5">
+			<span wicket:id="description"></span> <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sameBranchFrag">
-		<div class="alert alert-warning">
+		<div class="alert alert-warning mb-5">
 			<div class="summary">
-				<span>Please select different branches to merge.</span>
+				<span>Please select different branches</span>
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="mergedFrag">
-		<div class="alert alert-success">
+		<div class="alert alert-success mb-5">
 			<div class="summary">
-				<a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
-				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
+				Branch <a wicket:id="targetBranch" class="alert-link"></a> is up to date with all commits from <a wicket:id="sourceBranch" class="alert-link"></a>.
+				Try <a wicket:id="swapBranches" class="alert-link">swap source and target</a> for the comparison.
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="unrelatedHistoryFrag">
-		<div class="alert alert-warning">
+		<div class="alert alert-warning mb-5">
 			<div class="summary">
 				<span>History of target branch and source branch is unrelated</span>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="branchNotSpecifiedFrag">
-		<div class="alert alert-warning">
+		<div class="alert alert-warning mb-5">
 			<div class="summary">
 				<span>Please select branches to create pull request</span>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="canSendFrag">
-		<div class="can-send">
-			<form wicket:id="form" class="leave-confirm">
-				<table>
-					<tr class="title">
-						<td class="name">Title <span class="required"></span></td>
-						<td wicket:id="title" class="value">
-							<input wicket:id="title" type="text" class="form-control" placeholder="Input title here">
-							<div wicket:id="feedback"></div>
-						</td>
-					</tr>
-					<tr class="description">
-						<td class="name">Description</td>
-						<td class="value"><div wicket:id="comment"></div></td>
-					</tr>
-					<tr class="merge-strategy">
-						<td class="name">Merge Strategy</td>
-						<td wicket:id="mergeStrategy" class="merge-strategy value">
+		<div class="card can-send mb-5">
+			<div class="card-body">
+				<form wicket:id="form" class="leave-confirm">
+					<div class="form-group">
+						<label>Title <span class="text-danger"></span></label>
+						<input wicket:id="title" type="text" class="form-control" placeholder="Input title here">
+						<div wicket:id="titleFeedback" class="mt-2"></div>
+					</div>
+					<div class="form-group">
+						<label>Description</label>
+						<div wicket:id="comment"></div>						
+					</div>
+					<div class="form-group merge-strategy">
+						<label>Merge Strategy</label>
+						<div wicket:id="mergeStrategy">
 							<select wicket:id="select" class="form-control"></select>
-							<div wicket:id="help" class="help-block"></div>	
+							<div wicket:id="help" class="form-text text-muted"></div>	
 							<div wicket:id="status" class="status"></div>						
-						</td>
-					</tr>
-					<tr class="reviewers">
-						<td class="name">Reviewers</td>
-						<td class="value">
-							<div wicket:id="reviewers"></div>
-							<div class="help-block">Pull request can only be merged after getting approvals from all reviewers</div>
-						</td>
-					</tr>
-					<tr class="assignees">
-						<td class="name">Assignees</td>
-						<td class="value">
-							<div wicket:id="assignees"></div>
-							<div class="help-block">Assignees have code write permission and will be responsible 
-							for merging the pull request</div>
-						</td>
-					</tr>
-				</table>
-				<div class="clearfix">
-					<input wicket:id="send" type="submit" class="btn btn-primary float-left" value="Create Pull Request">
-				</div>
-			</form>
+						</div>						
+					</div>
+					<div class="form-group">
+						<label>Reviewers</label>
+						<div wicket:id="reviewers"></div>
+						<div class="text-muted form-text">Pull request can only be merged after getting approvals from all reviewers</div>
+					</div>
+					<div class="form-group">
+						<label>Assignees</label>
+						<div wicket:id="assignees"></div>
+						<div class="text-muted form-text">Assignees have code write permission and will be responsible for merging the pull request</div>
+					</div>
+					<button wicket:id="send" type="submit" class="btn btn-primary">Send Pull Request</button>
+				</form>
+			</div>
 		</div>	
 	</wicket:fragment>
 </wicket:extend>

@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.menu;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -27,19 +28,19 @@ abstract class MenuPanel extends Panel {
 		setOutputMarkupId(true);
 
 		List<MenuItem> menuItems = getMenuItems();
-		boolean hasIcons = false;
-		boolean hasShortcuts = false;
+		AtomicBoolean hasIcons = new AtomicBoolean(false);
+		AtomicBoolean hasShortcuts = new AtomicBoolean(false);
+		AtomicBoolean hasSelections = new AtomicBoolean(false);
 		for (MenuItem menuItem: menuItems) {
-			if (menuItem.getIconHref() != null)
-				hasIcons = true;
-			if (menuItem.getShortcut() != null)
-				hasShortcuts = true;
+			if (menuItem != null) {
+				if (menuItem.getIconHref() != null)
+					hasIcons.set(true);
+				if (menuItem.getShortcut() != null)
+					hasShortcuts.set(true);
+				if (menuItem.isSelected())
+					hasSelections.set(true);
+			}
 		}
-		
-		if (hasIcons)
-			add(AttributeAppender.append("class", "has-icons"));
-		if (hasShortcuts)
-			add(AttributeAppender.append("class", "has-shortcuts"));
 		
 		add(new ListView<MenuItem>("items", new LoadableDetachableModel<List<MenuItem>>() {
 
@@ -56,9 +57,28 @@ abstract class MenuPanel extends Panel {
 				if (menuItem != null) {
 					Fragment fragment = new Fragment("content", "contentFrag", MenuPanel.this);
 					WebMarkupContainer link = menuItem.newLink("link");
-					link.add(new SpriteImage("icon", menuItem.getIconHref()));
+					if (menuItem.isSelected())
+						link.add(new SpriteImage("tick", "tick"));
+					else if (hasSelections.get())
+						link.add(new SpriteImage("tick"));
+					else
+						link.add(new WebMarkupContainer("tick").setVisible(false));
+					
+					if (menuItem.getIconHref() != null) 
+						link.add(new SpriteImage("icon", menuItem.getIconHref()));
+					else if (hasIcons.get()) 
+						link.add(new SpriteImage("icon"));
+					else 
+						link.add(new WebMarkupContainer("icon").setVisible(false));
+					
 					link.add(new Label("label", menuItem.getLabel()));
-					link.add(new Label("shortcut", menuItem.getShortcut()));
+					
+					if (menuItem.getShortcut() != null)
+						link.add(new Label("shortcut", menuItem.getShortcut()));
+					else if (hasShortcuts.get())
+						link.add(new Label("shortcut", " "));
+					else
+						link.add(new WebMarkupContainer("shortcut").setVisible(false));
 					fragment.add(link);
 					item.add(fragment);
 				} else {

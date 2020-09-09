@@ -1,8 +1,0 @@
-#project-pull-requests>.main {
-	min-width: 330px;
-}
-.invalid-pullrequest>.head {
-	font-size: 18px;
-	font-weight: bold;
-	margin-bottom: 20px;
-}

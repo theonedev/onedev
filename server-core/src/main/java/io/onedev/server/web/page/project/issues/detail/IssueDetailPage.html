@@ -1,12 +1,21 @@
 <wicket:extend>
-	<div id="issue-detail">
-		<div class="main">
-			<div wicket:id="workflowChangeAlert"></div>
-			<div wicket:id="title"></div>
-			<div wicket:id="operations"></div>
-			<ul wicket:id="issueTabs" class="tabs nav nav-tabs"></ul>
-			<wicket:child></wicket:child>
+	<div class="card position-relative overflow-hidden issue-detail">
+		<div class="card-header d-flex align-items-center flex-nowrap">
+			<div wicket:id="title" class="card-title flex-grow-1 mx-0"></div>
+			<a wicket:id="moreInfo" class="more-info side-info flex-shrink-0" title="More info"><wicket:svg href="ellipsis" class="icon"></wicket:svg></a>
 		</div>
-		<div wicket:id="moreInfo"></div>
+		<div class="card-body d-flex position-relative overflow-hidden">
+			<div class="main flex-grow-1">
+				<div wicket:id="operations"></div>
+				<ul wicket:id="issueTabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5"></ul>
+				<wicket:child></wicket:child>
+			</div>
+			<div wicket:id="side"></div>
+		</div>
 	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<a wicket:id="issues">Issues</a>
+		<span class="dot"></span>
+		<span wicket:id="issueNumber"></span>
+	</wicket:fragment>
 </wicket:extend>

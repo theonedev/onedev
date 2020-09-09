@@ -1,55 +1,52 @@
 <wicket:extend>
-	<div id="revision-compare" class="resize-aware">
-		<div class="page-title">Revision Compare</div>
-		<div class="page-content">
-			<table class="revision-compare">
-				<tr>
-					<td class="left revision">
-						<div class="title clearfix">
-							<label class="float-left">Base</label>
-							<wicket:enclosure child="compareWithMergeBase">
-							<div class="float-left checkbox">
-								<label>
-									<input wicket:id="compareWithMergeBase" type="checkbox">
-									common ancestor
-									<span wicket:id="mergeBaseTooltip"><wicket:svg href="question-circle" class="icon"></wicket:svg></span>
-								</label>
-							</div>
-							</wicket:enclosure>
-						</div>
-						<div wicket:id="leftRevSelector" class="selector"></div>
-						<div class="message">
-							<a wicket:id="leftCommitLink"><span wicket:id="message"></span></a>
-						</div>
-					</td>
-					<td class="action">
-						<a wicket:id="swap" class="swap btn btn-outline-secondary" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
-					</td>
-					<td class="right revision">
-						<div class="title">
-							<label>Compare</label>
-						</div>
-						<div wicket:id="rightRevSelector" class="selector"></div>
-						<div class="message">
-							<a wicket:id="rightCommitLink"><span wicket:id="message"></span></a>
-						</div>
-					</td>
-				</tr>
-			</table>
-			<div wicket:id="effectiveRequest" class="alert alert-info">
-				<span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
+	<div class="p-5">
+		<div class="revision-compare mb-5">
+			<div class="base revision card">
+				<div class="card-body">
+					<div class="head">
+						<div class="title">Base</div>
+						<wicket:enclosure child="compareWithMergeBase">
+						<label class="checkbox">
+							<input wicket:id="compareWithMergeBase" type="checkbox">
+							common ancestor
+						</label>
+						<span wicket:id="mergeBaseTooltip" class="help"><wicket:svg href="question-o" class="icon"></wicket:svg></span>
+						</wicket:enclosure>
+					</div>
+					<div wicket:id="leftRevSelector" class="selector"></div>
+					<a wicket:id="leftCommitLink" class="message"><span wicket:id="message"></span></a>
+				</div>
 			</div>
-			<div>
-				<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
+			<div class="swap">
+				<a wicket:id="swap" class="btn btn-primary btn-icon" title="Swap"><wicket:svg href="swap" class="icon"></wicket:svg></a>
 			</div>
-			<div wicket:id="revisionNotSpecified" class="alert alert-warning">
-				<span>Please select revisions to compare</span>
+			<div class="compare revision card">
+				<div class="card-body">
+					<div class="title">Compare</div>
+					<div wicket:id="rightRevSelector" class="selector"></div>
+					<a wicket:id="rightCommitLink" class="message"><span wicket:id="message"></span></a>
+				</div>
 			</div>
-			<div wicket:id="unrelatedHistory" class="alert alert-warning">
-				<span>History of comparing revisions is unrelated</span>
-			</div>
-			<ul wicket:id="tabs" class="nav nav-tabs"></ul>
-			<div wicket:id="tabPanel" class="tab-panel"></div>
 		</div>
+		<div wicket:id="effectiveRequest" class="alert alert-info mb-5">
+			<span wicket:id="description"></span> <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a>
+		</div>
+		<div>
+			<a wicket:id="createRequest" class="btn btn-primary btn-block mb-5"><wicket:svg href="plus" class="icon mr-2"/> Create Pull Request for This Change</a>
+		</div>
+		<div wicket:id="revisionNotSpecified" class="alert alert-warning mb-5">
+			<span>Please select revisions to compare</span>
+		</div>
+		<div wicket:id="unrelatedHistory" class="alert alert-warning mb-5">
+			<span>History of comparing revisions is unrelated</span>
+		</div>
+		<wicket:enclosure child="tabs">
+		<div class="card compare-result">
+			<div class="card-body">
+				<ul wicket:id="tabs" class="nav nav-tabs nav-tabs-line nav-bolder mb-5"></ul>
+				<div wicket:id="tabPanel" class="tab-panel"></div>
+			</div>
+		</div>
+		</wicket:enclosure>
 	</div>
 </wicket:extend>

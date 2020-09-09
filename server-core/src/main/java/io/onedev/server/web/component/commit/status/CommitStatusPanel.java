@@ -98,7 +98,7 @@ public abstract class CommitStatusPanel extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				String cssClasses = "commit-status ";
+				String cssClasses = "commit-status text-nowrap ";
 				String title;
 				Build.Status status = statusModel.getObject();
 				if (status != null) {

@@ -1,75 +1,39 @@
-.source-view {
-	position: relative;
-}
 .source-view>.code {
 	background: none;
 	border: none;
-	border-radius: none;
+	border-radius: 0;
 	padding: 0;
 	margin: 0;
 	font-family: inherit;
 	font-size: inherit;
 }
-.source-view>.comment {
-	background: white; 
-	position: absolute;
-	padding-right: 4px;
-	top: 0;
-	left: 0;
-}
-.source-view>.comment>.content>.head>a {
-	margin-right: 8px;
-}
-
 .source-view>.comment>.ui-resizable-handle {
-	position: absolute;
-	border-right: 1px solid #E0E0E0;
-	background: #F2F2F2 url(vgrabber.png) no-repeat scroll center center;
+	border-right: 1px solid var(--light-gray);
+	background: var(--light) url(/icon/grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
     cursor: e-resize;
-    width: 8px;
-    right: 0;
-    top: 0;
-}
-.source-view>.comment>.content>.head {
-	font-weight: bold;
-	padding: 8px 12px;
-	background: #F2F2F2;
-}
-.source-view>.comment>.content>.body {
-	overflow: auto; 
-}
-.source-view>.comment>.content>.body>* {
-	margin: 12px;
-}
-
-.source-view>.outline {
-	background: white; 
-	position: absolute;
-	padding-left: 4px;
-	top: 0;
+    width: 4px;
+	position: relative;
 	right: 0;
 }
+.source-view>.outline {
+	left: 0 !important;
+}
 .source-view>.outline>.ui-resizable-handle {
-	position: absolute;
-	border-left: 1px solid #E0E0E0;
-	background: #F2F2F2 url(vgrabber.png) no-repeat scroll center center;
+	border-left: 1px solid var(--light-gray);
+	background: var(--light) url(/icon/grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
     cursor: w-resize;
-    width: 8px;
-    left: 0;
-    top: 0;
-}
-.source-view>.outline .tree-node {
-	line-height: 1.8;
-}
-.source-view>.outline>.content>.head {
-	font-size: 16px;
-	padding: 4px 8px 4px 12px;
-	background: #F2F2F2;
+    width: 4px;
+	position: relative;
+	left: 0;
 }
 .source-view>.outline>.content>.body {
-	font-size: 13px;
-	padding: 4px 4px 4px 8px;
-	overflow: auto; 
+	padding: 0.5rem 1rem;
+}
+.source-view>.outline>.content>.body .tree-content {
+	border-radius: 4px;
+	padding: 1px 4px 1px 3px;
 }
 .source-view>.outline>.content>.body .tree-content.active {
 	background: #FCF5DA;
@@ -82,19 +46,19 @@
 	padding-left: 4px;
 }
 .CodeMirror-comment a {
-	color: #999 !important;
+	color: var(--gray) !important;
 }
 .CodeMirror-comment a:hover {
-	color: #333 !important;
+	color: var(--dark) !important;
 }
 .comment-popover a {
 	display: block;
-	color: #999;
+	color: var(--gray);
 	text-decoration: none;
 	white-space: nowrap;
 }
 .comment-popover a:hover, .comment-trigger.active {
-	color: #333;
+	color: var(--dark) !important;
 }
 .CodeMirror-comment .comment-trigger.active {
 	line-height: 14px;
@@ -117,14 +81,12 @@
 }
 .CodeMirror-annotation .same-as-above {
 	margin-left: 100px;
-	color: #666;
+	color: var(--gray);
 }
 .CodeMirror-activeline .CodeMirror-annotation {
 	background: #E8F2FE;	
 }
 
 .outline-search .result {
-	margin-top: 20px;
 	height: 400px;
-	overflow: auto;
 }

@@ -46,7 +46,7 @@ onedev.server.sourceEdit = {
 			if (doneTimer) 
 				clearTimeout(doneTimer);
 			doneTimer = setTimeout(function() {
-				var cm = onedev.server.sourceEdit.getCodeMirror(containerId);
+				var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
 				var content = cm.doc.getValue();
 				if (content.trim().length != 0)
 					localStorage.setItem(autosaveKey, content);
@@ -54,44 +54,38 @@ onedev.server.sourceEdit = {
 			}, 500);
 		});
 		
-		$sourceEdit.on("getViewState", function(e) {
+		$code.on("getViewState", function(e) {
 			return onedev.server.codemirror.getViewState(cm);
 	    });
-		$sourceEdit.on("setViewState", function(e, viewState) {
+		$code.on("setViewState", function(e, viewState) {
 			onedev.server.codemirror.setViewState(cm, viewState);
 	    });
 	    
-		$sourceEdit.on("autofit", function(e, width, height) {
-			if (cm.getOption("fullScreen"))
-				return;
-			
-			$sourceEdit.outerWidth(width);
-			$sourceEdit.outerHeight(height);
-			if ($warning.is(":visible"))
-				cm.setSize($sourceEdit.width(), $sourceEdit.height()-$warning.outerHeight());
-			else
-				cm.setSize($sourceEdit.width(), $sourceEdit.height());
+		$code.on("resized", function() {
+			setTimeout(function() {
+				cm.setSize("100%", $code.height());
+			});
+			return false;
         });
         
         $sourceEdit.on("beforeSubmit", function() {
-            var cm = onedev.server.sourceEdit.getCodeMirror(containerId);	
+			var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
             $sourceEdit.children("textarea").val(cm.getValue());
         });
 
 		$warning.on("closed.bs.alert", function () {
 			$(window).resize();
-		})
+		});
 	},
 	onWindowLoad: function(containerId, mark, autosaveKey) {
 		var $container = $("#" + containerId);
 		var $warning = $container.find(">.source-edit>.warning");
-		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);
+		var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
 		onedev.server.form.registerAutosaveKey($container.closest("form.leave-confirm"), autosaveKey);
 		var autosaveValue = localStorage.getItem(autosaveKey);
 		if (autosaveValue) {
 			cm.doc.setValue(autosaveValue);
 			$warning.show();	
-			$(window).resize();
 		}
 		
 		if (mark && onedev.server.viewState.getFromHistory() === undefined 
@@ -99,8 +93,8 @@ onedev.server.sourceEdit = {
 			onedev.server.codemirror.scrollTo(cm, mark);					
 		}
 	},
-	mark: function(containerId, mark) {
-		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);		
+	mark: function(mark) {
+		cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
 		if (mark) {
 			if (cm.oldDocValue) {
 				var dmp = new diff_match_patch();
@@ -173,19 +167,16 @@ onedev.server.sourceEdit = {
 			onedev.server.codemirror.clearMark(cm);
 		}
 	},
-	getCodeMirror: function(containerId) {
-		return $("#" + containerId + ">.source-edit>.code>.CodeMirror")[0].CodeMirror;		
-	},
-	onIndentTypeChange: function(containerId, indentType) {
-		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);		
+	onIndentTypeChange: function(indentType) {
+		var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
 		cm.setOption("indentWithTabs", indentType == "Tabs");
 	},
-	onLineWrapModeChange: function(containerId, lineWrapMode) {
-		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);		
+	onLineWrapModeChange: function(lineWrapMode) {
+		var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
 		cm.setOption("lineWrapping", lineWrapMode == "Soft wrap");
 	},
-	onTabSizeChange: function(containerId, tabSize) {
-		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);		
+	onTabSizeChange: function(tabSize) {
+		var cm = $(".source-edit>.code>.CodeMirror")[0].CodeMirror;
 		cm.setOption("tabSize", tabSize);
 	}
 };

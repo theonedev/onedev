@@ -88,6 +88,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		PullRequest request = review.getRequest();
 		User reviewer = review.getUser();
 		request.getReviews().remove(review);
+		request.setReviews(request.getReviews());
 		
 		pullRequestManager.checkQuality(request, unpreferableReviewers);
 		
@@ -117,6 +118,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		
 		PullRequest request = review.getRequest();
 		request.getReviews().add(review);
+		request.setReviews(request.getReviews());
 		
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());

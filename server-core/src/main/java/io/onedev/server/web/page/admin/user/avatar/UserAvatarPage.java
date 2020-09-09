@@ -17,5 +17,5 @@ public class UserAvatarPage extends UserPage {
 		super.onInitialize();
 		add(new AvatarEditPanel("content", userModel));
 	}
-	
+
 }

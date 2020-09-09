@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -109,15 +110,33 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyRequired() {
+		Size size;
 		return getPropertyGetter().getReturnType().isPrimitive()
-				|| getPropertyGetter().getAnnotation(NotNull.class) != null 
-				|| getPropertyGetter().getAnnotation(NotEmpty.class) != null
-				|| getPropertyGetter().getAnnotation(Size.class) != null && getPropertyGetter().getAnnotation(Size.class).min()>=1;
+				|| findAnnotation(NotNull.class) != null 
+				|| findAnnotation(NotEmpty.class) != null
+				|| (size = findAnnotation(Size.class)) != null && size.min()>=1;
+	}
+
+	@Nullable
+	private <T extends Annotation> T findAnnotation(Class<T> annotationClass) {
+		Class<?> current = beanClass;
+		while (current != null) {
+			Method method;
+			try {
+				method = current.getMethod(getPropertyGetter().getName());
+				T annotation = method.getAnnotation(annotationClass);
+				if (annotation != null)
+					return annotation;
+			} catch (NoSuchMethodException | SecurityException e) {
+			}
+			current = current.getSuperclass();
+		}
+		return null;
 	}
 	
 	@Nullable
 	public String getNameOfEmptyValue() {
-		NameOfEmptyValue annotation = getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
+		NameOfEmptyValue annotation = findAnnotation(NameOfEmptyValue.class);
 		if (annotation != null)
 			return annotation.value();
 		else

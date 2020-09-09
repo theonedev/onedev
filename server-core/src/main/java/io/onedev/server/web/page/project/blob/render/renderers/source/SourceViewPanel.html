@@ -1,25 +1,25 @@
 <wicket:extend>
-	<div class="source-view autofit">
-		<div wicket:id="comment" class="comment">
-			<div class="ui-resizable-handle ui-resizable-e"></div>
-			<div class="content">
-				<div wicket:id="head" class="head clearfix">
-					<a wicket:id="context" class="float-left context close" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
-					<a wicket:id="locate" class="float-left locate close" title="Locate marked text of this comment"><wicket:svg href="hand" class="icon"></wicket:svg></a>
-					<a wicket:id="close" class="float-left close" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
+	<div class="source-view flex-grow-1 d-flex">
+		<div wicket:id="comment" class="comment need-width d-flex overflow-hidden flex-shrink-0">
+			<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
+				<div wicket:id="head" class="head d-flex align-items-center px-3 py-2 flex-shrink-0 border-bottom">
+					<a wicket:id="context" class="context btn btn-light btn-icon btn-xs btn-hover-primary mr-2" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+					<a wicket:id="locate" class="locate btn btn-light btn-icon btn-xs btn-hover-primary mr-auto" title="Locate marked text of this comment"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+					<a wicket:id="close" class="ml-3" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 				</div>
-				<div wicket:id="body" class="body"></div>
+				<div wicket:id="body" class="body overflow-auto flex-grow-1 p-3"></div>
 			</div>
+			<div class="ui-resizable-handle ui-resizable-e flex-shrink-0"></div>
 		</div>
-		<div class="code"></div>
-		<div wicket:id="outline" class="outline">
-			<div class="ui-resizable-handle ui-resizable-w"></div>
-			<div class="content">
-				<div class="head clearfix">
-					<span class="float-left">Outline</span>
-					<a wicket:id="close" class="float-right close" title="Hide outline"><wicket:svg href="times" class="icon"/></a>
+		<div class="code flex-grow-1 autofit overflow-hidden d-flex flex-column resize-aware"></div>
+		<div wicket:id="outline" class="outline need-width d-flex overflow-hidden flex-shrink-0">
+			<div class="ui-resizable-handle ui-resizable-w flex-shrink-0"></div>
+			<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
+				<div class="head d-flex align-items-center justify-content-between px-3 py-2 flex-shrink-0 border-bottom">
+					<h6 class="mb-0">Outline</h6>
+					<a wicket:id="close" class="text-muted text-hover-primary" title="Close"><wicket:svg href="times" class="icon"></wicket:svg></a>
 				</div>
-				<div wicket:id="body" class="body"></div>
+				<div wicket:id="body" class="body overflow-auto flex-grow-1"></div>
 			</div>
 		</div>
 	</div>
@@ -31,11 +31,11 @@
 	<div class="outline-search">
 		<div class="modal-header">
 			<h5 class="modal-title">Outline Search</h5>
-			<button wicket:id="close" type="button" class="close">&times;</button>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
 			<input wicket:id="input" class="form-control">
-			<div wicket:id="result" class="result"></div>
+			<div wicket:id="result" class="result ps ps-scroll mt-3"></div>
 		</div>
 	</div>
 	</wicket:fragment>
@@ -45,16 +45,14 @@
 	<wicket:fragment wicket:id="newCommentFrag">
 		<form wicket:id="form" class="new-comment leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
-			<div class="form-group">
+			<div class="form-group mb-3">
 				<div wicket:id="content"></div>
 			</div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
-				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
-			</div>
+			<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware mr-1">Save</button>
+			<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
-		<wicket:enclosure child="outline"><label><input type="checkbox" wicket:id="outline" class="outline-toggle"> Outline</label></wicket:enclosure>
+		<wicket:enclosure child="outline"><label class="checkbox"><input type="checkbox" wicket:id="outline" class="outline-toggle"> Outline</label></wicket:enclosure>
 	</wicket:fragment>
 </wicket:extend>

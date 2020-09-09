@@ -1,6 +1,5 @@
 <wicket:panel>
 	<div class="build-side">
-        <div wicket:id="buildNav" class="nav"></div>
         <div wicket:id="general" class="general properties">
         	<div>
         		<div class="name">Commit</div>
@@ -26,7 +25,7 @@
             </div>
             <wicket:enclosure>
             <div>
-                <div class="reason">Submit Reason</div>
+                <div class="name">Submit Reason</div>
                 <div class="value"><span wicket:id="submitReason"></span></div>
             </div>
             </wicket:enclosure>
@@ -59,11 +58,11 @@
         </div>
         <wicket:enclosure child="pullRequests">
         <div class="pull-requests">
-	        <div class="head">Verifying Pull Requests</div>
+	        <div class="font-weight-bolder mb-3">Verifying Pull Requests</div>
 	        <div class="body">
-	            <div wicket:id="pullRequests" class="pull-request">
-	            	<a wicket:id="title" class="title"><span wicket:id="label"></span></a>
-	                <div wicket:id="status" class="status"></div>
+	            <div wicket:id="pullRequests" class="pull-request d-flex align-items-center mb-3">
+	            	<a wicket:id="title" class="title mr-4"><span wicket:id="label"></span></a>
+	                <div wicket:id="status" class="ml-auto status"></div>
 	            </div>
 	        </div>
         </div>
@@ -87,7 +86,7 @@
         </div>
 		<wicket:enclosure child="delete">
 		<div class="actions">
-			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><wicket:svg href="trash" class="icon"></wicket:svg> Delete</a>
+			<a wicket:id="delete" class="delete btn btn-light-danger">Delete</a>
 		</div>
 		</wicket:enclosure>
 	</div>

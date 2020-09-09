@@ -1,7 +1,5 @@
 package io.onedev.server.plugin.sso.openid;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
@@ -21,14 +19,8 @@ public class CallbackUrlPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new Label("label", callbackUrl));
+		add(new Label("url", callbackUrl));
 		add(new CopyToClipboardLink("copy", Model.of(callbackUrl)));
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CallbackUrlCssResourceReference()));
 	}
 
 }

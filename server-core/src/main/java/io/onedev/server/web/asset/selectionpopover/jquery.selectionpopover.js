@@ -2,7 +2,6 @@
     $.fn.selectionPopover = function(action, options) {
 
     	var $container = jQuery(this);
-    	$container.css("position", "relative");
     	function popover(options) {
 			var $popover = $container.children(".selection-popover");
 			if (options === "close") {
@@ -21,20 +20,17 @@
     			$content.append(options.content);
             	var left = options.position.left - $popover.outerWidth()/2;
             	var top = options.position.top - $popover.outerHeight();
-            	if (left < $(window).scrollLeft())
-            		left = $(window).scrollLeft();
-            	if (left + $popover.outerWidth() > $(window).width() + $(window).scrollLeft())
-            		left = $(window).width() + $(window).scrollLeft() - $popover.outerWidth();
-            	if (top < $(window).scrollTop())
-            		top = $(window).scrollTop();
-            	if (top + $popover.outerHeight() > $(window).height() + $(window).scrollTop())
-            		top = $(window).height() + $(window).scrollTop() - $popover.outerHeight();
+            	if (left < 0)
+            		left = 0;
+            	if (left + $popover.outerWidth() > $(window).width())
+            		left = $(window).width() - $popover.outerWidth();
+            	if (top < 0)
+            		top = 0;
+            	if (top + $popover.outerHeight() > $(window).height())
+            		top = $(window).height() - $popover.outerHeight();
             	if (top + $popover.outerHeight() > options.position.top+10)
             		$popover.children(".triangle").hide();
-            	$popover.css({
-            		left: left-$container.offset().left,
-            		top: top-$container.offset().top
-            	});
+            	$popover.css({left: left, top});
     		}
     	}
 

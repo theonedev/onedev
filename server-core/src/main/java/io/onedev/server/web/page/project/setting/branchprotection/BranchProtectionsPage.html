@@ -1,23 +1,36 @@
 <wicket:extend>
-	<div class="page-title">Branch Protection</div>
-	<div class="help-block">
-	Define branch protection rules  
-	</div>
-	<div wicket:id="branchProtectionSetting" class="card-list">
-		<ul class="list-unstyled protections">
-			<li wicket:id="protections" class="protection"><div wicket:id="protection"></div></li>
-		</ul>
-		<div wicket:id="newProtection"></div>
+	<div class="branch-protections">
+		<div class="alert alert-info mb-5">
+			<wicket:svg href="bulb" class="icon"></wicket:svg>
+			Define branch protection rules. The first matching rule will take effect
+		</div>
+		
+		<div class="body">
+			<div wicket:id="branchProtectionSetting">
+				<ul class="list-unstyled">
+					<li wicket:id="protections" class="protection mb-5"><div wicket:id="protection"></div></li>
+				</ul>
+				<div wicket:id="newProtection"></div>
+			</div>
+		</div>
 	</div>
 	<wicket:fragment wicket:id="editNewFrag">
 		<div class="protection card">
-			<div class="card-header">Edit Rule</div>
+			<div class="card-header">
+				<div class="card-title">Edit Rule</div>
+			</div>
 			<div class="card-body">
 				<div wicket:id="editor"></div>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addNewLinkFrag">
-		<a wicket:id="link" class="add-new"><wicket:svg href="plus-circle-o" class="icon"></wicket:svg> Add Rule</a>
+		<div class="card">
+			<div class="card-header">
+				<div class="card-title">
+					<a wicket:id="link" class="add-new"><wicket:svg href="plus-circle-o" class="icon align-middle mr-1"></wicket:svg> <span>Add Rule</span></a>
+				</div>
+			</div>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

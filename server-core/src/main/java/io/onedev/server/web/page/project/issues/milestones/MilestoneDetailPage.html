@@ -1,13 +1,22 @@
 <wicket:extend>
-	<div id="milestone-detail">
-		<h4 class="title clearfix">
-			<div wicket:id="name" class="name float-left"></div>
-			<div wicket:id="status" class="status float-left"></div>
-			<div wicket:id="due" class="due float-left"></div>
-			<div wicket:id="issueStats" class="issue-stats float-left"></div>
-			<div wicket:id="actions" class="actions float-left"></div>
-		</h4>
-		<div wicket:id="description" class="description"></div>
+	<div class="p-5">
+		<div class="card mb-5">
+			<div class="card-body">
+				<div class="d-flex align-items-center flex-wrap">
+					<div wicket:id="name" class="name mr-4 mb-4 font-weight-bold font-size-h6"></div>
+					<div wicket:id="status" class="status mr-4 mb-4"></div>
+					<div wicket:id="due" class="due mr-4 mb-4"></div>
+					<div wicket:id="actions" class="actions mb-4"></div>
+				</div>
+				<div wicket:id="issueStats" class="issue-stats"></div>
+				<div wicket:id="description" class="mt-4"></div>
+			</div>
+		</div>
 		<div wicket:id="issues" class="issues"></div>
 	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<a wicket:id="milestones">Milestones</a>
+		<span class="dot"></span>
+		<span wicket:id="milestoneName" class="text-truncated"></span>
+	</wicket:fragment>
 </wicket:extend>

@@ -1,20 +1,16 @@
 <wicket:panel>
-	<div class="commit-option">
-		<div class="head">
-			Commit Your Change
-		</div>
+	<div class="commit-option p-4">
+		<h5 class="mb-4">Commit Your Change</h5>
 		<div class="body">
 			<form wicket:id="form">			
 				<div wicket:id="feedback"></div>
 				<div wicket:id="changed" class="changed"> 
-					<div class="alert alert-warning">Someone made below change since you started editing</div>
+					<div class="alert alert-light-warning">Someone made below change since you started editing</div>
 					<div wicket:id="changes" class="changes"></div>
 				</div>
-				<div wicket:id="commitMessage" class="no-autosize"></div>
-				<div class="actions">
-					<input wicket:id="save" type="submit" class="btn btn-primary" value="Commit">
-					<input wicket:id="cancel" type="button" class="btn btn-secondary" value="Cancel">
-				</div>
+				<div wicket:id="commitMessage" class="no-autosize mb-4"></div>
+				<input wicket:id="save" type="submit" class="btn btn-primary mr-1" value="Commit">
+				<input wicket:id="cancel" type="button" class="btn btn-secondary" value="Cancel">
 			</form>
 		</div>
 	</div>

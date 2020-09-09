@@ -15,7 +15,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -43,10 +42,10 @@ import io.onedev.server.buildspec.job.paramsupply.ValuesProvider;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -379,7 +378,6 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ParamListCssResourceReference()));
 		validate();
 		if (!getModelObject().equals(getConvertedInput())) {
 			String script = String.format("onedev.server.form.markDirty($('#%s').closest('form'));", getMarkupId());

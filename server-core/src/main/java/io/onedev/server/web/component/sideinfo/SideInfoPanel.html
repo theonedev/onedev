@@ -1,4 +1,7 @@
 <wicket:panel>
-    <a wicket:id="close" class="close" title="Hide"><wicket:svg href="times" class="icon"/></a>
-    <div wicket:id="content" class="content"></div>
+	<div class="header d-flex align-items-center flex-shrink-0 border-bottom">
+		<div wicket:id="title" class="title flex-grow-1"></div>
+		<a wicket:id="close" title="Hide" class="flex-shrink-0 ml-4 close align-items-center"><wicket:svg href="times" class="icon"/></a>
+	</div>
+	<div wicket:id="body" class="body flex-grow-1"></div>
 </wicket:panel>

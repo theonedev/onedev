@@ -18,9 +18,11 @@ import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -59,6 +61,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
@@ -66,7 +69,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.activity
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestOpenedActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdatedActivity;
-import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 
@@ -197,9 +200,18 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		WebMarkupContainer row = new WebMarkupContainer(id);
 		row.setOutputMarkupId(true);
 		
-		row.add(new WebMarkupContainer("avatar"));
+		String avatarHtml = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", SpriteImage.getVersionedHref("diff"));
+		row.add(new Label("avatar", avatarHtml) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.setName("div");
+			}
+			
+		}.setEscapeModelStrings(false));
+		
 		WebMarkupContainer contentColumn = new Fragment("content", "sinceChangesRowContentFrag", this);
-		contentColumn.add(AttributeAppender.append("colspan", "2"));
 		contentColumn.add(new SinceChangesLink("sinceChanges", requestModel, sinceDate));
 		row.add(contentColumn);
 		
@@ -239,12 +251,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 					
 				List<PullRequestActivity> oldActivities = new ArrayList<>();
 				List<PullRequestActivity> newActivities = new ArrayList<>();
+				
 				for (PullRequestActivity activity: activities) {
-					if (request.isVisitedAfter(activity.getDate())) {
+					if (request.isVisitedAfter(activity.getDate())) 
 						oldActivities.add(activity);
-					} else {
+					else 
 						newActivities.add(activity);
-					}
 				}
 
 				for (PullRequestActivity activity: oldActivities) {
@@ -253,14 +265,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 				if (!oldActivities.isEmpty() && !newActivities.isEmpty()) {
 					Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusSeconds(1).toDate();
-					Component row = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
-					for (PullRequestActivity activity: newActivities) {
-						if (activity instanceof PullRequestUpdatedActivity) {
-							row.add(AttributeAppender.append("class", "visible"));
-							break;
-						}
-					}
-					activitiesView.add(row);
+					if (newActivities.stream().anyMatch(it -> it instanceof PullRequestUpdatedActivity))
+						activitiesView.add(newSinceChangesRow(activitiesView.newChildId(), sinceDate));
 				}
 				
 				for (PullRequestActivity activity: newActivities) {
@@ -390,7 +396,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 					}
 				}
 
-				if (sinceChangesRow == null && !newActivities.isEmpty()) {
+				if (sinceChangesRow == null && !newActivities.isEmpty() 
+						&& newActivities.stream().anyMatch(it -> it instanceof PullRequestUpdatedActivity)) {
 					Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusSeconds(1).toDate();
 					sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
 					activitiesView.add(sinceChangesRow);
@@ -438,7 +445,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 	public Component renderOptions(String componentId) {
 		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
-		
 		fragment.add(new AjaxLink<Void>("showComments") {
 
 			@Override

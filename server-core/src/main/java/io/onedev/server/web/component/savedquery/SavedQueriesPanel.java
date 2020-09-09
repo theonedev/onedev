@@ -19,7 +19,6 @@ import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -48,6 +47,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
@@ -116,6 +116,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		if (event.getPayload() instanceof SavedQueriesOpened) {
 			SavedQueriesOpened savedQueriesOpened = (SavedQueriesOpened) event.getPayload();
 			toggle(savedQueriesOpened.getHandler());
+			((BasePage) getPage()).resizeWindow(savedQueriesOpened.getHandler());
 		}
 	}
 	
@@ -150,6 +151,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				toggle(target);
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesClosed(target));
+				((BasePage) getPage()).resizeWindow(target);
 			}
 			
 		});
@@ -215,7 +217,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				List<Tab> tabs = new ArrayList<>();
 
 				ArrayList<T> userQueries = getUserQueries();
-				tabs.add(new AjaxActionTab(Model.of("For Mine")) {
+				tabs.add(new AjaxActionTab(Model.of("Mine")) {
 
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -234,7 +236,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
 				
 				if (SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManage(Project.get())) {
-					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
+					tabs.add(new AjaxActionTab(Model.of("All Users")) {
 
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -445,16 +447,6 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			}
 			
 		});		
-		
-		add(new WebMarkupContainer("watchHint") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getQuerySetting() != null && getQuerySetting().getQueryWatchSupport() != null);
-			}
-			
-		});
 		
 		setOutputMarkupPlaceholderTag(true);
 	}

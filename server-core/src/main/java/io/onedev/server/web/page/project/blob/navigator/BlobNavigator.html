@@ -1,10 +1,10 @@
 <wicket:panel>
-	<div class="blob-navigator clearfix">
-		<div wicket:id="treeSegments" class="float-left clearfix">
-			<a wicket:id="link" class="float-left"><span wicket:id="label"></span></a>
+	<div class="blob-navigator d-flex align-items-center flex-wrap">
+		<div wicket:id="treeSegments" class="d-flex align-items-center mr-1">
+			<a wicket:id="link" class="mr-1"><span wicket:id="label"></span></a>
 			<!-- below separator makes slash appearing in path when the path is copied -->
 			<span style="position:absolute; top: -10000px;">/</span>
-			<a wicket:id="subtreeDropdownTrigger" class="subtree-dropdown-trigger float-left"></a>
+			<a wicket:id="subtreeDropdownTrigger" class="subtree-dropdown-trigger d-flex align-items-center justify-content-center"><span></span></a>
 		</div>
 		<div wicket:id="lastSegment" class="float-left last-segment"></div>
 	</div>
@@ -13,10 +13,10 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="nameEditFrag">
 		<form wicket:id="form" class="leave-confirm name">
-			<input wicket:id="input" type="text" placeholder="Name your file" class="form-control input-sm"></input>		
+			<input wicket:id="input" type="text" placeholder="Name your file" class="form-control form-control-sm form-control-solid"></input>		
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="treeNodeFrag">
-		<a wicket:id="link"><svg wicket:id="icon" class="icon"></svg> <span wicket:id="label"></span></a>
+		<a wicket:id="link"><svg wicket:id="icon" class="icon mr-1"></svg> <span wicket:id="label"></span></a>
 	</wicket:fragment>
 </wicket:panel>

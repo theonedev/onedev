@@ -1,12 +1,16 @@
 <wicket:panel>
-	<div class="revision-selector">
-		<input wicket:id="revision" class="form-control input-sm revision" placeholder="Input revision"></input><wicket:svg href="magnify" class="icon icon-magnify"></wicket:svg>
-		<div wicket:id="feedback" class="feedback"></div>
-		<ul wicket:id="tabs" class="nav nav-tabs"></ul>
-		<ul wicket:id="items" class="items autosize list-unstyled">
+	<div class="revision-selector p-4">
+		<div class="d-flex align-items-center">
+			<input wicket:id="revision" class="form-control form-control-sm revision" placeholder="Input revision"></input>
+			<wicket:svg href="magnify" class="icon text-muted icon-magnify"></wicket:svg>
+		</div>
+		<div wicket:id="feedback" class="feedback text-danger mt-2"></div>
+		<ul wicket:id="tabs" class="nav nav-tabs nav-tabs-line mb-3"></ul>
+		<ul wicket:id="items" class="items autosuit list-unstyled">
 			<li wicket:id="items" class="selectable">
-				<a wicket:id="link"><svg wicket:id="icon" class="icon"></svg><span wicket:id="label"></span></a>
+				<a wicket:id="link" class="d-flex align-items-center"><svg wicket:id="icon" class="icon mr-2"></svg><span wicket:id="label" class="text-nowrap"></span></a>
 			</li>			
+			<li wicket:id="noItems" class="alert alert-light-warning mb-0"></li>
 		</ul>
 	</div>
 </wicket:panel>

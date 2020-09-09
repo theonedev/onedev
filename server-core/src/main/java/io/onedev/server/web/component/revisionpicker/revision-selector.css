@@ -1,35 +1,10 @@
-div.revision-selector {
-	padding: 12px;
-	position: relative;
+.revision-selector {
+	min-width: 240px;
 }
-div.revision-selector ul.nav-tabs>li.collapsed {
-	display: none !important;
+.revision-selector input+.icon {
+	margin-left: -1.8rem;
 }
-div.revision-selector ul.nav-tabs>li.expanded {
-	display: block !important;
-}
-div.revision-selector input.revision {
-	margin-bottom: 12px;
-	padding-right: 26px;
-}
-div.revision-selector .icon-magnify {
-	position: absolute;
-	top: 26px;
-	right: 14px;
-}
-div.revision-selector .nav-tabs {
-	margin-bottom: 8px;
-}
-div.revision-selector .nav-tabs>li>a {
-	padding: 2px 4px; 
-	color: #666; 
-	font-size: 12px;
-}
-div.revision-selector .nav-tabs>li.active>a {
-	color: #333; 
-	font-weight: bold;
-}
-div.revision-selector ul.items {
+.revision-selector .items {
 	margin-bottom: 0;
 	/* 
 	 * Configure max height to make sure scroll bar appears if there are many refs as we initially only 
@@ -37,29 +12,8 @@ div.revision-selector ul.items {
 	 */
 	max-height: 600px; 
 }
-div.revision-selector ul.items>li {
-	position: relative;
-}
-div.revision-selector ul.items>li>a {
-	padding-left: 20px;
-}
-div.revision-selector ul.items>li.loading-indicator {
-	padding-left: 20px;
-}
-div.revision-selector .feedback {
-	color: #F94949; 
-	margin-bottom: 12px;
-}
-div.revision-selector a .icon {
-	position: absolute;
-	color: #333;
-	left: 4px;
-	top: 14px;
+
+.revision-selector .items .icon {
 	width: 12px;
 	height: 12px;
-}   
-div.revision-selector ul.items>li>a .revision {
-	font-size: 13px;
-	margin-top: 2px;
-	color: #666;
 }

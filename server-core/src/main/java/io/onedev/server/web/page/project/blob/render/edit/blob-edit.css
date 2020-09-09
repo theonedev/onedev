@@ -1,54 +1,21 @@
-@media(max-width: 767px) {
-	.blob-edit>.head .expanded {
-		display: none;
-	}
-}
 .blob-edit>.head {
-	border-bottom: 1px solid #BDBDBD;
-	height: 41px;
+	border-bottom: 1px solid var(--light-gray);
+	height: 3rem;
 }
 .blob-edit>.head .tab a {
-	margin-top: 7px;
-	border-radius: 4px 4px 0 0;	
-	padding: 4px 12px;
-	display: block;
-	color: #666;
-	text-decoration: none;
+	border-bottom: 1px solid transparent;
+	margin-bottom: -1px;
 }
-.blob-edit>.head .edit {
-	margin-left: 12px;
-}
-.blob-edit>.head .edit-plain, .blob-edit>.head .save {
-	margin-left: 2px;
-}
-.blob-edit>.head .options {
-	margin-top: 4px;
-	margin-right: -8px;
-}
-.blob-edit>.head .tab:hover a {
-	background: #EEE;
+.blob-edit>.head .active.tab a, .blob-edit>.head .tab a:focus, .blob-edit>.head .tab a:hover {
+	border-color: var(--primary);
 }
 .blob-edit>.head .active.tab a {
-	background: white;
-	border: 1px solid #BDBDBD;
-	border-bottom: 1px solid white;
-	font-weight: bold;
-	color: #333;
-}
-.blob-edit>.head .cancel {
-	margin: 11px 0 0 12px;
-}
-.blob-edit>.body {
-	margin-top: 1px;
-	overflow: auto;
-}
-.blob-edit>.body>.content>.submit, 
-.blob-edit>.body>.content>.plain-editor, 
-.blob-edit>.body>.commit-options, 
-.blob-edit>.body>.dirty-check {
-	display: none;
+	color: var(--primary);
 }
 
 .blob-edit>.body>form>.feedback>ul {
-    margin: 20px 20px 0 20px;
+	margin-bottom: 0;
+}
+.blob-edit>.body>form>.feedback>ul>li {
+	border-radius: 0;
 }

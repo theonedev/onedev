@@ -1,4 +1,17 @@
 .sp-replacer {
-	border-radius: 4px;
-	padding: 5px;
+	border-radius: 0.42rem;
+	background: white;
+	border-color: #e4e6ef;
+    height: calc(1.5em + 1.3rem + 2px);
+    padding: 0.65rem 1rem;	
+}
+.sp-replacer:hover {
+	border-color: #e4e6ef;
+}
+.sp-replacer.sp-active {
+    border-color: #69b3ff;
+    color: var(--gray-dark);
+}
+.sp-replacer .sp-dd {
+	color: var(--gray-dark);
 }

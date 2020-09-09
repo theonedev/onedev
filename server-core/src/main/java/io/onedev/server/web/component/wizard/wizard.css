@@ -1,12 +1,15 @@
 .wizard>.head {
-	margin-bottom: 20px;
+	margin-bottom: 1.5rem;
 }
 .wizard>.head>.title {
-	font-size: 16px;
+	font-size: 1.25rem;
 }
 .wizard>.body {
-	margin-bottom: 20px;
+	margin-bottom: 1.5rem;
 }
 .wizard>.foot>* {
-	margin-right: 8px;
+	margin-right: 1rem;
+}
+.wizard>.foot>:last-child {
+	margin-right: 0;
 }

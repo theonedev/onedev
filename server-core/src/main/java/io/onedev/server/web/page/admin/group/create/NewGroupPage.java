@@ -1,9 +1,12 @@
 package io.onedev.server.web.page.admin.group.create;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -16,6 +19,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.group.GroupCssResourceReference;
+import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.membership.GroupMembershipsPage;
 
 @SuppressWarnings("serial")
@@ -67,5 +71,12 @@ public class NewGroupPage extends AdministrationPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new GroupCssResourceReference()));
 	}
-	
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("groups", GroupListPage.class));
+		return fragment;
+	}
+
 }

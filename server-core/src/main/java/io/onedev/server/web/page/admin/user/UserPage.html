@@ -1,22 +1,11 @@
 <wicket:extend>
-	<div id="user">
-		<div wicket:id="userSidebar"></div>
-		<div class="content">
+	<div class="card user-detail">
+		<div class="card-body">
+        	<ul wicket:id="userTabs" class="tabs nav nav-bold nav-tabs nav-tabs-line text-weight-bold mb-4"></ul>
 			<wicket:child></wicket:child>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="sidebarHeadFrag">
-		<img wicket:id="avatar" class="mr-2">
-		<span wicket:id="name"></span>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navContextFrag">
-		<a wicket:id="dropdown" class="dropdown user-dropdown">
-			<img wicket:id="avatar">
-			<span wicket:id="name" class="ellipsis-text"></span>
-			<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
-		</a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navContextDropdownFrag">
-		<ul wicket:id="menu" class="menu list-unstyled"></ul>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="users">Users</a> <span class="dot"></span> <span wicket:id="userName"></span> 
 	</wicket:fragment>
 </wicket:extend>

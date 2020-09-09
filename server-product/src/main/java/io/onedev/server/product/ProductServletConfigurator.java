@@ -25,8 +25,9 @@ import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.jetty.ClasspathAssetServlet;
 import io.onedev.server.util.jetty.FileAssetServlet;
 import io.onedev.server.util.jetty.ServletConfigurator;
+import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.component.markdown.AttachmentUploadServlet;
-import io.onedev.server.web.img.Img;
+import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 public class ProductServletConfigurator implements ServletConfigurator {
@@ -89,7 +90,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		context.addServlet(new ServletHolder(attachmentUploadServlet), "/attachment_upload");
 		
-		context.addServlet(new ServletHolder(new ClasspathAssetServlet(Img.class)), "/img/*");
+		context.addServlet(new ServletHolder(new ClasspathAssetServlet(ImageScope.class)), "/img/*");
+		context.addServlet(new ServletHolder(new ClasspathAssetServlet(IconScope.class)), "/icon/*");
 		
 		context.getSessionHandler().addEventListener(new HttpSessionListener() {
 
@@ -112,7 +114,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.addServlet(fileServletHolder, "/site/*");
 		context.addServlet(fileServletHolder, "/robots.txt");
 		
-		context.addServlet(new ServletHolder(jerseyServlet), "/rest/*");
+		context.addServlet(new ServletHolder(jerseyServlet), "/rest/*");		
 	}
-
+	
 }

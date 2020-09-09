@@ -1,43 +1,39 @@
 <wicket:panel>
-	<div class="blob-view autofit">
-		<div class="head clearfix">
-			<div class="float-left info expanded">
+	<div class="blob-view d-flex flex-column flex-grow-1">
+		<div class="head d-flex align-items-center px-3 py-2 justify-content-between flex-shrink-0">
+			<div class="info d-none d-xl-block mr-4 text-gray">
 				<wicket:enclosure child="lines">
 				<span wicket:id="lines"></span>
-				<span class="separator">|</span>
+				<span class="text-muted">|</span>
 				<span wicket:id="charset"></span>
-				<span class="separator">|</span>
+				<span class="text-muted">|</span>
 				</wicket:enclosure>
 				<span wicket:id="size"></span>
 			</div>
-			<div class="actions-and-options float-right clearfix">
-				<div wicket:id="options" class="float-left options expanded"></div>
-				<div class="float-left actions">
+			<div class="tools d-flex align-items-center">
+				<div class="actions d-flex align-items-center">
 					<wicket:container wicket:id="changeActions">
-					<a wicket:id="edit">
+					<span wicket:id="edit">
+					<a wicket:id="link" class="btn btn-xs btn-light btn-hover-primary btn-icon" title="Edit">
 						<wicket:svg href="edit" class="icon"></wicket:svg>
-						Edit
 					</a>
-					<a wicket:id="delete">
+					</span>
+					<span wicket:id="delete">
+					<a wicket:id="link" class="btn btn-xs btn-light btn-hover-danger btn-icon" title="Delete">
 						<wicket:svg href="trash" class="icon"></wicket:svg>
-						Delete
 					</a>
+					</span>
 					</wicket:container>
-                    <a wicket:id="raw">
+                    <a wicket:id="raw" class="btn btn-xs btn-light btn-hover-primary btn-icon" title="Raw">
 						<wicket:svg href="file" class="icon"></wicket:svg>
-						Raw
 					</a>
-                    <wicket:enclosure child="viewPlain">
-					<label><input type="checkbox" wicket:id="viewPlain"> View Source</label>
-                    </wicket:enclosure>
-                    <wicket:enclosure child="blame">
-					<label><input type="checkbox" wicket:id="blame"> Blame</label>
-                    </wicket:enclosure>
-					<wicket:container wicket:id="extraActions"></wicket:container>
 				</div>
+				<!-- Put all options in a single line to make :empty selector working -->
+				<div class="options d-flex align-items-center"><wicket:enclosure child="viewPlain"><label class="checkbox"><input type="checkbox" wicket:id="viewPlain"> View Source</label></wicket:enclosure><wicket:enclosure child="blame"><label class="checkbox"><input type="checkbox" wicket:id="blame"> Blame</label></wicket:enclosure><wicket:container wicket:id="extraOptions"></wicket:container></div>
+				<div wicket:id="formats" class="formats d-none d-sm-block"></div>
 			</div>
 		</div>
-		<div class="body">
+		<div class="body autofit flex-grow-1 d-flex flex-column">
 			<wicket:child></wicket:child>
 		</div>
 	</div>

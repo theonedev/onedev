@@ -15,8 +15,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -36,14 +34,16 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
@@ -86,6 +86,11 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 				};
 			}
+
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
 			
 		});
 		
@@ -95,16 +100,9 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(LoopItem.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String html = String.format("<svg class='drag-indicator icon'><use xlink:href='%s'/></svg> %s", 
-								SpriteImage.getVersionedHref("grip"), HtmlEscape.escapeHtml5(rowModel.getObject().getName()));
-						return new Label(componentId, html).setEscapeModelStrings(false);
-					}
-					
-				});
+				String html = String.format("<svg class='drag-indicator icon'><use xlink:href='%s'/></svg> %s", 
+						SpriteImage.getVersionedHref("grip"), HtmlEscape.escapeHtml5(rowModel.getObject().getName()));
+				cellItem.add(new Label(componentId, html).setEscapeModelStrings(false));
 			}
 		});		
 		
@@ -112,15 +110,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				GroovyScript script = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(LoopItem.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, TextUtils.describe(script.isCanBeUsedByBuildJobs()));
-					}
-					
-				});
+				cellItem.add(new Label(componentId, TextUtils.describe(rowModel.getObject().isCanBeUsedByBuildJobs())));
 			}
 			
 		});		
@@ -129,31 +119,100 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, 0) {
+				int scriptIndex = cellItem.findParent(LoopItem.class).getIndex();
+				
+				Fragment fragment = new Fragment(componentId, "showDetailFrag", GroovyScriptListPage.this);
+				fragment.add(new AjaxLink<Void>("link") {
 
 					@Override
-					protected Component newLabel(String componentId) {
-						return new SpriteImage(componentId, "ellipsis") {
+					public void onClick(AjaxRequestTarget target) {
+						new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
 
 							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								tag.setName("svg");
-								tag.put("class", "icon");
+							protected Component newTitle(String componentId) {
+								return new Label(componentId, scripts.get(scriptIndex).getName());
+							}
+
+							@Override
+							protected void onInitialize() {
+								super.onInitialize();
+								add(AttributeAppender.append("class", "groovy-script"));
+							}
+
+							@Override
+							protected Component newBody(String componentId) {
+								return BeanContext.view(componentId, scripts.get(scriptIndex), Sets.newHashSet("name"), true);
 							}
 							
-						};
+							@Override
+							protected Component newFooter(String componentId) {
+								Fragment fragment = new Fragment(componentId, "scriptActionsFrag", GroovyScriptListPage.this);
+								fragment.add(new ModalLink("edit") {
+
+									@Override
+									protected Component newContent(String id, ModalPanel modal) {
+										close();
+										return new GroovyScriptEditPanel(id, scriptIndex) {
+
+											@Override
+											protected void onSave(AjaxRequestTarget target) {
+												target.add(scriptsTable);
+												modal.close();
+											}
+
+											@Override
+											protected void onCancel(AjaxRequestTarget target) {
+												modal.close();
+											}
+
+											@Override
+											protected List<GroovyScript> getScripts() {
+												return scripts;
+											}
+
+										};
+									}
+									
+									@Override
+									protected String getModalCssClass() {
+										return "modal-lg";
+									}
+									
+								});
+								fragment.add(new AjaxLink<Void>("delete") {
+
+									@Override
+									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+										super.updateAjaxAttributes(attributes);
+										attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this script?"));
+									}
+
+									@Override
+									public void onClick(AjaxRequestTarget target) {
+										scripts.remove(scriptIndex);
+										OneDev.getInstance(SettingManager.class).saveGroovyScripts(scripts);
+										target.add(scriptsTable);
+										close();
+									}
+									
+								});
+								
+								return fragment;
+							}
+
+						};		
 					}
 					
-				});
+				});			
 				
+				cellItem.add(fragment);
 			}
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "text-right";
 			}
-			
+
 		});		
 		
 		IDataProvider<GroovyScript> dataProvider = new ListDataProvider<GroovyScript>() {
@@ -168,6 +227,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 		add(scriptsTable = new DataTable<GroovyScript, Void>("scripts", columns, dataProvider, Integer.MAX_VALUE));
 		scriptsTable.addTopToolbar(new HeadersToolbar<Void>(scriptsTable, null));
 		scriptsTable.addBottomToolbar(new NoRecordsToolbar(scriptsTable));
+		scriptsTable.add(new NoRecordsBehavior());
 		scriptsTable.setOutputMarkupId(true);
 		
 		scriptsTable.add(new SortBehavior() {
@@ -196,105 +256,10 @@ public class GroovyScriptListPage extends AdministrationPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new GroovyScriptResourceReference()));
 	}
-	
-	private abstract class ColumnFragment extends Fragment {
 
-		private final int scriptIndex;
-		
-		public ColumnFragment(String id, int scriptIndex) {
-			super(id, "columnFrag", GroovyScriptListPage.this);
-			this.scriptIndex = scriptIndex;
-		}
-
-		protected abstract Component newLabel(String componentId);
-		
-		@Override
-		protected void onInitialize() {
-			super.onInitialize();
-			AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
-
-						private GroovyScript getScript() {
-							return scripts.get(scriptIndex);
-						}
-						
-						@Override
-						protected String getTitle() {
-							return getScript().getName();
-						}
-
-						@Override
-						protected void onInitialize() {
-							super.onInitialize();
-							add(AttributeAppender.append("class", "groovy-script def-detail"));
-						}
-
-						@Override
-						protected Component newBody(String id) {
-							SideFloating sideFloating = this;
-							Fragment fragment = new Fragment(id, "viewScriptFrag", GroovyScriptListPage.this);
-							fragment.add(BeanContext.view("viewer", getScript(), Sets.newHashSet("name"), true));
-							fragment.add(new ModalLink("edit") {
-
-								@Override
-								protected Component newContent(String id, ModalPanel modal) {
-									sideFloating.close();
-									return new GroovyScriptEditPanel(id, scriptIndex) {
-
-										@Override
-										protected void onSave(AjaxRequestTarget target) {
-											target.add(scriptsTable);
-											modal.close();
-										}
-
-										@Override
-										protected void onCancel(AjaxRequestTarget target) {
-											modal.close();
-										}
-
-										@Override
-										protected List<GroovyScript> getScripts() {
-											return scripts;
-										}
-
-									};
-								}
-								
-							});
-							fragment.add(new AjaxLink<Void>("delete") {
-
-								@Override
-								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-									super.updateAjaxAttributes(attributes);
-									attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this script?"));
-								}
-
-								@Override
-								public void onClick(AjaxRequestTarget target) {
-									scripts.remove(scriptIndex);
-									OneDev.getInstance(SettingManager.class).saveGroovyScripts(scripts);
-									target.add(scriptsTable);
-									close();
-								}
-								
-							});
-							
-							fragment.add(new FencedFeedbackPanel("feedback", fragment));
-							fragment.setOutputMarkupId(true);
-							
-							return fragment;
-						}
-
-					};		
-				}
-				
-			};
-			link.add(newLabel("label"));
-			add(link);
-		}
-		
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Groovy Scripts");
 	}
+	
 }

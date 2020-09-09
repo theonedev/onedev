@@ -1,10 +1,9 @@
 .entity-watches>.head {
-	font-weight: bold;
-	margin-bottom: 16px;
-}
-.entity-watches .body>* {
-	margin-bottom: 16px;
+	font-weight: 600;
+	margin-bottom: 0.8rem;
 }
 .entity-watches>.body a.avatar {
-	margin-right: 8px;
+	margin-right: 0.8rem;
+	margin-bottom: 0.8rem;
+	display: inline-block;
 }

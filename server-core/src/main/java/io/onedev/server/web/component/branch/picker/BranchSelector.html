@@ -1,10 +1,14 @@
 <wicket:panel>
-	<div class="branch-selector">
-		<input wicket:id="branch" class="form-control input-sm branch" placeholder="Search branch"></input>
-		<ul wicket:id="branches" class="branches autosize list-unstyled">
+	<div class="branch-selector p-4">
+		<div class="d-flex align-items-center">
+			<input wicket:id="branch" class="form-control form-control-sm branch" placeholder="Search branch"></input>
+			<wicket:svg href="magnify" class="icon text-muted icon-magnify"></wicket:svg>
+		</div>
+		<ul wicket:id="branches" class="branches list-unstyled mb-0 mt-3">
 			<li wicket:id="branches" class="selectable">
-				<a wicket:id="link"><wicket:svg href="tick" class="icon"/> <span wicket:id="label"></span></a>
+				<a wicket:id="link"><wicket:svg href="tick" class="icon mr-2"/> <span wicket:id="label"></span></a>
 			</li>			
 		</ul>
+		<div wicket:id="noBranches" class="no-branches alert alert-light-warning mb-0 mt-4">No branches Found</div>
 	</div>
 </wicket:panel>

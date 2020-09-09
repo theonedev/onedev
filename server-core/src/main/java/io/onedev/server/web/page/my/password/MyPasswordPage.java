@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.my.password;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -42,5 +43,10 @@ public class MyPasswordPage extends MyPage {
 			}));
 		}
 	}
-	
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Change My Password");
+	}
+
 }

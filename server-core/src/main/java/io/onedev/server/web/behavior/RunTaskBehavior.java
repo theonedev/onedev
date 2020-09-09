@@ -10,7 +10,7 @@ public abstract class RunTaskBehavior extends AbstractPostAjaxBehavior {
 		target.prependJavaScript(String.format(""
 				+ "var $button = $('#%s');"
 				+ "if ($button.length != 0) {"
-				+ "$button.removeAttr('disabled');"
+				+ "$button.removeClass('disabled');"
 				+ "$button.val($button[0].prevValue);"
 				+ "$button.html($button[0].prevHtml);"
 				+ "}",
@@ -22,7 +22,7 @@ public abstract class RunTaskBehavior extends AbstractPostAjaxBehavior {
 		target.appendJavaScript(String.format(""
 				+ "var $button = $('#%s');"
 				+ "if ($button.length != 0) {"
-				+ "$button.attr('disabled', 'disabled');"
+				+ "$button.addClass('disabled');"
 				+ "$button[0].prevValue = $button.val();"
 				+ "$button[0].prevHtml = $button.html();"
 				+ "$button.val($button.val() + ' in progress...');"

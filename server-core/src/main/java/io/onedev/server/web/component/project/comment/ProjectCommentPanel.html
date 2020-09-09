@@ -2,11 +2,11 @@
 	<div wicket:id="comment" class="project-comment"></div>
 	<wicket:fragment wicket:id="viewFrag">
 		<div wicket:id="content"></div>
-		<div wicket:id="actions" class="actions">
-			<a wicket:id="edit">Edit</a>
+		<div wicket:id="actions" class="mt-3 d-flex align-items-center">
+			<a wicket:id="edit" class="text-muted text-hover-primary mr-2">Edit</a>
 			<wicket:enclosure child="delete">
-			<span class="middot"></span>
-			<a wicket:id="delete">Delete</a>
+			<span class="dot mr-2"></span>
+			<a wicket:id="delete" class="text-muted text-hover-primary">Delete</a>
 			</wicket:enclosure>
 		</div>
 	</wicket:fragment>
@@ -14,8 +14,8 @@
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback" class="feedback"></div>
 			<div wicket:id="input"></div>
-			<div class="actions">
-				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware">Save</button>
+			<div class="mt-3">
+				<button wicket:id="save" class="btn btn-sm btn-primary dirty-aware mr-1">Save</button>
 				<button wicket:id="cancel" class="btn btn-sm btn-secondary">Cancel</button>
 			</div>
 		</form>

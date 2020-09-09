@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 
 public interface LogManager {
 	
-	JobLogger getLogger(Build build, Collection<String> jobSecrets);
+	SimpleLogger getLogger(Build build, Collection<String> jobSecrets);
 	
 	/**
 	 * Read specified number of log entries from specified build, starting from specified index 

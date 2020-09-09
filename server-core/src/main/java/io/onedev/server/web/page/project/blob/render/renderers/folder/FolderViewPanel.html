@@ -1,28 +1,26 @@
 <wicket:panel>
-	<div class="folder-view autofit">
-		<table class="files">
+	<div class="folder-view">
+		<table class="files table">
 			<tr wicket:id="parent" class="parent">
-				<td colspan="3">
-					<a wicket:id="link"><wicket:svg href="level-up" class="icon"/> <span>..</span></a>
+				<td colspan="4">
+					<a wicket:id="link"><wicket:svg href="level-up" class="icon mr-1"/> <span>..</span></a>
 				</td>
 			</tr>
 			<tr wicket:id="children" class="child">
-				<td class="path">
-					<a wicket:id="pathLink"><svg wicket:id="icon" class="icon"></svg> <span wicket:id="label"></span></a>
+				<td class="path text-break">
+					<a wicket:id="pathLink"><svg wicket:id="icon" class="icon mr-1"></svg> <span wicket:id="label"></span></a>
 				</td>
-				<td wicket:id="lastCommit" class="last-commit author expanded"></td>
-				<td class="last-commit message"></td>
-				<td class="last-commit when expanded"></td>
+				<td wicket:id="lastCommit" class="last-commit author"></td>
+				<td class="last-commit message d-none d-lg-table-cell"></td>
+				<td class="last-commit when text-gray d-none d-lg-table-cell"></td>
 			</tr>
 		</table>
 		<div wicket:id="readme" class="readme">
 			<div class="head">
-				<span wicket:id="title" class="title"></span>
-				<span class="actions">
-					<a wicket:id="edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-				</span>
+				<b wicket:id="title" class="title mr-2"></b>
+				<a wicket:id="edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
 			</div>
-			<div wicket:id="body" class="body"></div>
+			<div wicket:id="body" class="body p-4"></div>
 		</div>
 	</div>
 	<div wicket:id="userCard" class="user-card-content"></div>

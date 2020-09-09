@@ -1,64 +1,6 @@
-@media(max-width: 767px) {
-	#user>.sidebar {
-		display: none;
-	}
-	#user>.sidebar+.content {
-		padding-left: 0;
-	}	
-	.user-list.list .expanded {
-		display: none;
-	}
-}
-.nav-context .user-dropdown .avatar {
-	width: 24px;
-	height: 24px;
-}
-#user>.sidebar {
-	background: white;
-	border-left: none;
-	/* make it absolute as we do not want to make it stay fixed to occupy screen space on mobile screen */
-	position: absolute; 
-	z-index: 0;
-	/* use hacks below to make the sidebar extend to the screen bottom even if body does not reach to the bottom */
-	margin-bottom: -10000px;
-	padding-bottom: 10000px;
-}
-#user>.sidebar>.head {
-	border-bottom: 4px solid #EEE;
-	padding: 10px;
-	font-size: 16px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	height: 54px;
-}
-#user>.sidebar>.head img {
-	width: 32px;
-	height: 32px;
-}
-#user>.sidebar>.tabs {
-	top: 54px;
-}
-#user>.sidebar>.tabs>li>a {
-	padding: 12px 14px;
-	border-left: none;
-}
-#administration>.minimized.sidebar+.content>#user>.sidebar {
-	left: 44px;
-}
-
-#user .membership-list .head .select2-container,
-#user .authorization-list .select2-container {
+.user-detail .membership-list .head .select2-container {
 	width: 240px;
 } 
-#user .authorization-list .property-roleNames .select2-container {
-	width: 360px;
-} 
-
-.new-user .actions .btn {
-	margin-right: 20px;
-}
-
-#user-profile>a, #my-profile>a {
-	margin-top: 20px;
+.user-detail .authorization-list .select2-container {
+	width: 100%;
 }

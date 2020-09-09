@@ -22,22 +22,11 @@ public class IssueTemplate implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String issueDescription;
-	
 	private String issueQuery;
 
-	@Editable(order=100)
-	@Markdown
-	@NotEmpty
-	public String getIssueDescription() {
-		return issueDescription;
-	}
-
-	public void setIssueDescription(String issueDescription) {
-		this.issueDescription = issueDescription;
-	}
-
-	@Editable(order=200, name="Applicable Issues", description="Optionally specify issues applicable for this template. "
+	private String issueDescription;
+	
+	@Editable(order=100, name="Applicable Issues", description="Optionally specify issues applicable for this template. "
 			+ "Leave empty for all")
 	@IssueQuery(withCurrentBuildCriteria = false, withCurrentCommitCriteria = false, 
 			withCurrentPullRequestCriteria = false, withCurrentUserCriteria = false, 
@@ -51,6 +40,17 @@ public class IssueTemplate implements Serializable {
 		this.issueQuery = issueQuery;
 	}
 	
+	@Editable(order=200)
+	@Markdown
+	@NotEmpty
+	public String getIssueDescription() {
+		return issueDescription;
+	}
+
+	public void setIssueDescription(String issueDescription) {
+		this.issueDescription = issueDescription;
+	}
+
 	public Set<String> getUndefinedStates() {
 		Set<String> undefinedStates = new HashSet<>();
 		if (issueQuery != null) {

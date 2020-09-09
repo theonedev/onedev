@@ -1,26 +1,17 @@
 <wicket:extend>
-	<div class="page-title">Groovy Scripts</div>
-	<div class="help-block">All Groovy scripts used across the system should be defined here and reviewed 
-	by the site administrator for security reasons</div>
-	<div class="groovy-script-list def-list list">
-		<div class="head clearfix">
-			<div class="float-left">
-				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New</a>
-			</div>
-		</div>
-		<div class="body">
-			<table wicket:id="scripts" class="table table-hover"></table>
+	<div class="card">
+		<div class="card-body">
+			<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add groovy script"><wicket:svg href="plus" class="icon"></wicket:svg></a>	
+			<table wicket:id="scripts" class="table"></table>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="columnFrag">
-		<a wicket:id="link"><span wicket:id="label"></span> </a>
+	<wicket:fragment wicket:id="showDetailFrag">
+		<a wicket:id="link"><wicket:svg href="ellipsis" class="icon align-middle"/></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="viewScriptFrag">
-		<div class="actions">
-			<a wicket:id="edit" class="btn btn-sm btn-secondary"><wicket:svg href="edit" class="icon"></wicket:svg> Edit</a>
-			<a wicket:id="delete" class="btn btn-sm btn-secondary"><wicket:svg href="trash" class="icon"></wicket:svg> Delete</a>
+	<wicket:fragment wicket:id="scriptActionsFrag">
+		<div class="d-flex">
+			<a wicket:id="edit" class="btn btn-light-primary mr-1">Edit</a>
+			<a wicket:id="delete" class="btn btn-light-danger ml-auto">Delete</a>
 		</div>
-		<div wicket:id="feedback"></div>
-		<div wicket:id="viewer"></div>
 	</wicket:fragment>
 </wicket:extend>

@@ -35,7 +35,7 @@ public class JobPrivilege implements Serializable {
 	private String accessibleReports;
 	
 	@Editable(order=100, description="Specify space-separated jobs. Use '*' or '?' for wildcard match. "
-			+ "Prefix with '-' to exclude. <b class='red'>NOTE: </b> Permission to access build artifacts "
+			+ "Prefix with '-' to exclude. <b class='text-danger'>NOTE: </b> Permission to access build artifacts "
 			+ "will be granted implicitly in matched jobs even if no other permissions are specified here")
 	@Patterns(suggester = "suggestJobNames")
 	@NotEmpty

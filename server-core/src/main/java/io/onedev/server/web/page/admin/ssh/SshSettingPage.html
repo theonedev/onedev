@@ -1,12 +1,11 @@
 <wicket:extend>
-	<div id="ssh-setting">
-		<div class="page-title">SSH Setting</div>
-		<form wicket:id="form" class="leave-confirm no-autosize">
-			<div wicket:id="editor"></div>
-			<div class="actions">
-				<a wicket:id="rekey" class="btn btn-primary">Regenerate Private Key</a>
-				<input type="submit" class="btn btn-primary dirty-aware" value="Save Setting">
-			</div>
-		</form>
+	<div class="card ssh-setting">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor" class="mb-4"></div>
+				<input type="submit" class="btn btn-primary dirty-aware mr-1" value="Save Setting">
+				<a wicket:id="rekey" class="btn btn-light-primary">Regenerate Private Key</a>
+			</form>
+		</div>
 	</div>
 </wicket:extend>

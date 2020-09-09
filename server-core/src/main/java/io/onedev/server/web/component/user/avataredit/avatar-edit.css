@@ -1,21 +1,5 @@
-.avatar-edit .title {
-	margin-bottom: 20px;
-	font-size: 18px; 
-	font-weight: bold;
-}
-.avatar-edit>.current {
-	margin-bottom: 20px;
-	padding-bottom: 20px;
-	border-bottom: 1px solid #E8E8E8;
-}
 .avatar-edit .current img {
 	height: 240px;
 	width: 240px;
 	display: block;
-}
-.avatar-edit .current a {
-	margin-top: 20px;
-}
-.avatar-edit form>button {
-	margin-top: 20px;
 }

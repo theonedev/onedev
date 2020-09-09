@@ -18,7 +18,7 @@ public class TestPage extends BasePage {
 	protected void onInitialize() {
 		super.onInitialize();
 	}
-	
+	 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

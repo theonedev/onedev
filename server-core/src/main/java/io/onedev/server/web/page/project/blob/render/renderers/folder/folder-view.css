@@ -1,54 +1,19 @@
-@media(max-width: 767px) {
-	.folder-view .expanded {
-		display: none;
-	}
-}
-.folder-view {
-	overflow: auto;
-}
 .folder-view>table>tbody>tr>td {
-	padding: 6px 12px; 
-	border-top: 1px solid #EEE; 
+	padding: 0.6rem 1.2rem; 
+	border-top: 1px solid var(--light); 
 }
 
-.folder-view>table>tbody>tr>td.path, .folder-view>table>tbody>tr>td.last-commit.author, 
-.folder-view>table>tbody>tr>td.last-commit.when {
-	white-space: nowrap;
-}
-.folder-view>table>tbody>tr>td.last-commit, .folder-view>table>tbody>tr>td.last-commit a {
-	font-size: 13px;
-}
-.folder-view>table>tbody>tr>td.last-commit.when {
-	color: #888;
-}
 .folder-view>table>tbody>tr:first-child>td {
 	border-top: none;
 }
-.folder-view>table tr.parent td {
-	padding: 3px 12px;
-}
-.folder-view>table tr.parent td a i {
-	margin-right: 2px;
-}
-.folder-view>table tr.parent td a span {
-	font-size: 18px;
-}
 .folder-view>.readme>.head {
-	padding: 6px 12px;
-	background: #F9F9F9;
-	font-weight: bold;	
-	border-top: 1px solid #E0E0E0;
-	border-bottom: 1px solid #EEE;
-}
-.folder-view>.readme>.head>.title {
-	margin-right: 4px;
+	padding: 0.5rem 1rem;
+	background: var(--light);
+	border-top: 1px solid var(--light-gray);
+	border-bottom: 1px solid var(--light-gray);
 }
 .folder-view>.readme>.body {
-	padding: 20px;
 	max-width: 900px;
 	margin-left: auto;
 	margin-right: auto;
-}
-.folder-view a.user {
-	text-decoration: none;
 }

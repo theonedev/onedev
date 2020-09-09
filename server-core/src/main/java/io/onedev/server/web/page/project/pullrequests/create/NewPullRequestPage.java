@@ -17,9 +17,8 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
@@ -89,7 +88,7 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
@@ -225,7 +224,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
-				request.addUpdate(update);
+				request.getUpdates().add(update);
+				request.setUpdates(request.getUpdates());
 				update.setRequest(request);
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
@@ -288,8 +288,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		setOutputMarkupId(true);
-		
 		add(new AffinalBranchPicker("target", target.getProjectId(), target.getBranch()) {
 
 			@Override
@@ -382,6 +380,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 					Component panel = newCommitsPanel();
 					getPage().replace(panel);
 					target.add(panel);
+					resizeWindow(target);
 				}
 				
 			});
@@ -393,6 +392,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 					Component panel = newRevisionDiffPanel();
 					getPage().replace(panel);
 					target.add(panel);
+					resizeWindow(target);
 				}
 				
 			});
@@ -412,6 +412,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			add(new WebMarkupContainer(TABS_ID).setVisible(false));
 			add(new WebMarkupContainer(TAB_PANEL_ID).setVisible(false));
 		}
+		
+		setOutputMarkupId(true);
 	}
 	
 	private Component newCommitsPanel() {
@@ -536,9 +538,9 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public String getObject() {
 				if (requestModel.getObject().isOpen())
-					return "This change is already opened for merge by pull request";
+					return "This change is already opened for merge by ";
 				else 
-					return "This change is squashed/rebased onto base branch via pull request";
+					return "This change is squashed/rebased onto base branch via ";
 			}
 			
 		}).setEscapeModelStrings(false));
@@ -552,7 +554,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 					@Override
 					public String getObject() {
-						return "#" + getPullRequest().getNumber();
+						return "pull request #" + getPullRequest().getNumber();
 					}
 					
 				}));
@@ -635,8 +637,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			}
 		});
 		
-		WebMarkupContainer titleContainer = new WebMarkupContainer("title");
-		form.add(titleContainer);
 		TextField<String> titleInput = new TextField<String>("title", new IModel<String>() {
 
 			@Override
@@ -663,11 +663,10 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			
 		});
 		titleInput.setRequired(true).setLabel(Model.of("Title"));
-		titleContainer.add(titleInput);
 		
-		titleContainer.add(new FencedFeedbackPanel("feedback", titleInput));
+		form.add(new FencedFeedbackPanel("titleFeedback", titleInput));
 		
-		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+		titleInput.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -675,6 +674,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			}
 			
 		}));
+		
+		form.add(titleInput);
 
 		form.add(new CommentInput("comment", new IModel<String>() {
 
@@ -793,14 +794,14 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				request.setLastMergePreview(mergePreview);
 				
 				if (merged != null) {
-					String html = String.format("<svg class='icon'><use xlink:href='%s'/></svg> Able to merge without conflicts", 
+					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> Able to merge without conflicts", 
 							SpriteImage.getVersionedHref("tick-circle-o"));
 					Component result = new Label(componentId, html);
 					result.add(AttributeAppender.append("class", "no-conflict"));
 					result.setEscapeModelStrings(false);
 					return result;
 				} else { 
-					String html = String.format("<svg class='icon'><use xlink:href='%s'/></svg> There are merge conflicts. "
+					String html = String.format("<svg class='icon mt-n1 mr-1'><use xlink:href='%s'/></svg> There are merge conflicts. "
 							+ "You can still create the pull request though", SpriteImage.getVersionedHref("warning-o"));
 					Component result = new Label(componentId, html);
 					result.add(AttributeAppender.append("class", "conflict"));
@@ -811,7 +812,9 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			public Component getLoadingComponent(String markupId) {
-				Component component = new Label(markupId, "<img src='/img/ajax-indicator-big.gif'></img> Calculating merge preview...");
+				String html = String.format("<svg class='icon spin mt-n1 mr-1'><use xlink:href='%s'/></svg> Calculating merge preview...", 
+						SpriteImage.getVersionedHref("loading"));
+				Component component = new Label(markupId, html);
 				component.add(AttributeAppender.append("class", "calculating"));
 				component.setEscapeModelStrings(false);
 				return component;
@@ -827,8 +830,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new NewPullRequestResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.newPullRequest.onDomReady();"));
+		response.render(CssHeaderItem.forReference(new NewPullRequestCssResourceReference()));
 	}
 
 	@Override
@@ -910,6 +912,11 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(target.getProject()) && SecurityUtils.canReadCode(source.getProject());
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "<span class='text-nowrap'>Create Pull Request</span>").setEscapeModelStrings(false);
 	}
 	
 }

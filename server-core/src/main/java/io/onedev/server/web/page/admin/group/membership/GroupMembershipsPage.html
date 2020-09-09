@@ -1,18 +1,17 @@
 <wicket:extend>
-	<div class="page-title">Group Memberships</div>
-	<div class="membership-list list">
-		<div class="head clearfix">
-			<div class="float-left clearable-wrapper">
-				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by user name">
+	<div class="membership-list">
+		<div class="head d-flex flex-wrap">
+			<div class="clearable-wrapper mr-3 mb-4">
+				<input wicket:id="filterUsers" class="form-control search" placeholder="Filter by name...">
 			</div>
-			<div class="float-left">
+			<div class="mr-3 mb-4">
 				<input wicket:id="addNew" type="hidden" class="form-control">
 			</div>
-			<div class="float-left">
-				<a wicket:id="deleteSelected" class="btn btn-secondary"><wicket:svg href="trash" class="icon"></wicket:svg> Delete Selected</a>
+			<div class="mb-4">
+				<a wicket:id="deleteSelected" class="btn btn-danger">Delete Selected</a>
 			</div>
 		</div>
-		<table wicket:id="memberships" class="memberships table table-hover"></table>
+		<table wicket:id="memberships" class="memberships table"></table>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
 		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>

@@ -1,11 +1,11 @@
 <wicket:panel>
 	<div class="issue-operations">
-		<div class="state-and-actions clearfix">
-			<div wicket:id="state" class="float-left state">
+		<div class="state-and-actions d-flex flex-wrap">
+			<div wicket:id="state" class="state">
 				<div wicket:id="state"></div>
 			</div>
-			<a wicket:id="transitions" class="btn btn-primary btn-sm float-left"><span wicket:id="label"></span></a>
-			<a wicket:id="moreInfo" class="more-info" title="More info"><wicket:svg href="ellipsis" class="icon rotate-90"></wicket:svg></a>
+			<a wicket:id="transitions" class="btn btn-primary btn-sm mr-3"><span wicket:id="label"></span></a>
+			<a wicket:id="newIssue" class="new-issue btn btn-primary btn-sm btn-icon ml-auto" title="Create new issue"><wicket:svg href="plus" class="icon"/></a>
 		</div>
 		<div wicket:id="actionOptions" class="action-options"></div>
 	</div>
@@ -13,8 +13,8 @@
 		<form wicket:id="form" class="state-transition leave-confirm">
 			<div wicket:id="fields"></div>
 			<div wicket:id="comment"></div>
-			<div class="actions">
-				<button wicket:id="save" type="submit" class="btn btn-primary">Ok</button>
+			<div class="mt-3">
+				<button wicket:id="save" type="submit" class="btn btn-primary mr-1">Ok</button>
 				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
 			</div>
 		</form>

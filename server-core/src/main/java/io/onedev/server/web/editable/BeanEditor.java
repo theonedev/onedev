@@ -22,7 +22,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -38,9 +37,7 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Named;
-import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class BeanEditor extends ValueEditor<Serializable> {
@@ -50,8 +47,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	private final BeanDescriptor descriptor;
 	
 	private final Map<String, List<PropertyContext<Serializable>>> propertyContexts = new LinkedHashMap<>();
-	
-	private final boolean vertical;
 	
 	private RepeatingView groupsView;
 	
@@ -66,14 +61,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			propertyContexts.put(entry.getKey(), 
 					entry.getValue().stream().map(it->PropertyContext.of(it)).collect(Collectors.toList()));
 		}
-		
-		Class<?> beanClass = descriptor.getBeanClass();
-		if (beanClass.getAnnotation(Vertical.class) != null)
-			vertical = true;
-		else if (beanClass.getAnnotation(Horizontal.class) != null)
-			vertical = false;
-		else 
-			vertical = true;
 	}
 
 	private boolean hasTransitiveDependency(String dependentPropertyName, String dependencyPropertyName, 
@@ -99,7 +86,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			event.stop();
 			PropertyUpdating propertyUpdating = (PropertyUpdating) event.getPayload();
 			for (Component groupContainer: groupsView) {
-				RepeatingView propertiesView = (RepeatingView) groupContainer.get("content").get("properties");
+				RepeatingView propertiesView = (RepeatingView) groupContainer.get("properties");
 				for (Component propertyContainer: propertiesView) {
 					@SuppressWarnings("unchecked")
 					PropertyContext<Serializable> propertyContext = 
@@ -144,27 +131,12 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				
 				setOutputMarkupPlaceholderTag(true);
 				
-				WebMarkupContainer nameContainer;
-				WebMarkupContainer valueContainer;
-				if (!vertical) {
-					add(nameContainer = new WebMarkupContainer("name"));
-					add(valueContainer = new WebMarkupContainer("value"));
-				} else {
-					nameContainer = this;
-					valueContainer = this;
-				}
 				Label nameLabel = new Label("name", property.getDescriptor().getDisplayName());
-				nameContainer.add(nameLabel);
+				add(nameLabel);
 				
 				OmitName omitName = property.getPropertyGetter().getAnnotation(OmitName.class);
-				if (omitName != null && omitName.value() != OmitName.Place.VIEWER) {
-					if (!vertical) {
-						nameContainer.setVisible(false);
-						valueContainer.add(AttributeAppender.replace("colspan", "2"));
-					} else {
-						nameLabel.setVisible(false);
-					}
-				}
+				if (omitName != null && omitName.value() != OmitName.Place.VIEWER) 
+					nameLabel.setVisible(false);
 
 				String required;
 				if (property.isPropertyRequired() 
@@ -175,7 +147,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					required = "&nbsp;";
 				}
 				
-				nameContainer.add(new Label("required", required).setEscapeModelStrings(false));
+				add(new Label("required", required).setEscapeModelStrings(false));
 
 				Serializable propertyValue;		
 				
@@ -188,14 +160,14 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					ComponentContext.pop();
 				}
 				PropertyEditor<Serializable> propertyEditor = property.renderForEdit("value", Model.of(propertyValue)); 
-				valueContainer.add(propertyEditor);
+				add(propertyEditor);
 				
 				Label descriptionLabel = new Label("description", property.getDescriptor().getDescription());
 				descriptionLabel.setEscapeModelStrings(false);
 				descriptionLabel.setOutputMarkupPlaceholderTag(true);
-				valueContainer.add(descriptionLabel);
+				add(descriptionLabel);
 				
-				valueContainer.add(new FencedFeedbackPanel("feedback", propertyEditor));
+				add(new FencedFeedbackPanel("feedback", propertyEditor));
 			}
 
 			@Override
@@ -267,24 +239,14 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			toggleLink.add(new Label("groupName", entry.getKey()));
 			groupContainer.add(toggleLink);
 			
-			Fragment contentFrag;
-			if (vertical) {
-				contentFrag = new Fragment("content", "verticalPropertiesFrag", this);
-				contentFrag.add(AttributeAppender.append("class", " vertical"));
-			} else {
-				contentFrag = new Fragment("content", "horizontalPropertiesFrag", this);
-				contentFrag.add(AttributeAppender.append("class", " horizontal"));
-			}
 			RepeatingView propertiesView = new RepeatingView("properties");
-			contentFrag.add(propertiesView);
+			groupContainer.add(propertiesView);
 			
 			for (PropertyContext<Serializable> property: entry.getValue()) {
 				PropertyContainer propertyContainer = newPropertyContainer(propertiesView.newChildId(), property);
 				propertiesView.add(propertyContainer);
 				componentContexts.put(property.getPropertyName(), new ComponentContext(propertyContainer));
 			}
-			
-			groupContainer.add(contentFrag);
 			
 			if (entry.getKey().length() == 0) {
 				toggleLink.setVisible(false);
@@ -310,11 +272,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		});
 		
 		add(AttributeAppender.append("class", "bean-editor editable"));
-		
-		if (vertical)
-			add(AttributeAppender.append("class", "vertical"));
-		else
-			add(AttributeAppender.append("class", "horizontal"));
 		
 		setOutputMarkupId(true);
 	}
@@ -373,7 +330,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			public ComponentContext getChildContext(String childName) {
 				for (Component groupContainer: groupsView) {
-					RepeatingView propertiesView = (RepeatingView) groupContainer.get("content").get("properties");
+					RepeatingView propertiesView = (RepeatingView) groupContainer.get("properties");
 					for (Component item: propertiesView) {
 						@SuppressWarnings("unchecked")
 						PropertyContext<Serializable> propertyContext = (PropertyContext<Serializable>) item.getDefaultModelObject(); 
@@ -391,14 +348,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 		public PropertyContainer(String id, PropertyContext<Serializable> property) {
 			super(id, Model.of(property));
-		}
-
-		@Override
-		public void renderHead(IHeaderResponse response) {
-			super.renderHead(response);
-			
-			String script = String.format("onedev.server.editable.onBeanEditorPropertyContainerDomReady('%s');", getMarkupId());
-			response.render(OnDomReadyHeaderItem.forScript(script));
 		}
 
 	}

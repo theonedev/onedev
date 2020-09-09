@@ -7,29 +7,31 @@
         		<a class="properties">Properties</a>
         	</div>
             <div class="body position-aware">
-                <div class="jobs">
-                    <div class="side">
+                <div class="jobs d-flex d-none flex-nowrap">
+                    <div class="side flex-shrink-0">
                         <!-- do not leave white space between navs and nav element as we are using .navs:not(:empty)
                         in css -->
-                        <div class="navs"><div wicket:id="navs" class="nav">
-                            <a class="select">
-                                <span class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>
+                        <div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
+                            <a class="select btn btn-secondary justify-content-start">
+                                <wicket:svg href="grip" class="icon drag-indicator flex-shrink-0 mr-1"/>
                                 <span class="name"></span>
                             </a>
-                            <a title="Delete job" class="delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+                            <a title="Delete job" class="delete btn btn-secondary btn-hover-danger btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
                         </div></div>
-                        <div class="add">
-	                        <a wicket:id="create" class="create btn btn-success">
-	                            <wicket:svg href="plus" class="icon"></wicket:svg> Add Job
+                        <div class="add btn-group btn-block">
+	                        <a wicket:id="create" class="create btn btn-primary justify-content-start">
+	                            <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add Job
 	                        </a>
-	                        <a wicket:id="suggestions" class="suggestions btn btn-success" title="Job suggestions"><wicket:svg href="wand" class="icon"/></a>
+	                        <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Job suggestions">
+								<wicket:svg href="wand" class="icon"/>
+							</a>
                         </div>
                     </div>
-                    <div class="contents">
+                    <div class="contents flex-grow-1 ml-4">
                         <div wicket:id="contents" class="content"></div>
                     </div>
                 </div>
-	            <div wicket:id="properties" class="properties"></div>
+	            <div wicket:id="properties" class="properties d-flex d-none"></div>
             </div>
         </div>
     </wicket:fragment>

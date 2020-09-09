@@ -50,8 +50,8 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 
 			@Override
 			public void onOptioneChange(AjaxRequestTarget target) {
-				String script = String.format("onedev.server.sourceEdit.onIndentTypeChange('%s', '%s');", 
-						getEditor().getMarkupId(), sourceFormat.getIndentType());
+				String script = String.format("onedev.server.sourceEdit.onIndentTypeChange('%s');", 
+						sourceFormat.getIndentType());
 				target.appendJavaScript(script);
 			}
 			
@@ -59,8 +59,8 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 
 			@Override
 			public void onOptioneChange(AjaxRequestTarget target) {
-				String script = String.format("onedev.server.sourceEdit.onTabSizeChange('%s', %s);", 
-						getEditor().getMarkupId(), sourceFormat.getTabSize());
+				String script = String.format("onedev.server.sourceEdit.onTabSizeChange(%s);", 
+						sourceFormat.getTabSize());
 				target.appendJavaScript(script);
 			}
 			
@@ -68,8 +68,8 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 			
 			@Override
 			public void onOptioneChange(AjaxRequestTarget target) {
-				String script = String.format("onedev.server.sourceEdit.onLineWrapModeChange('%s', '%s');", 
-						getEditor().getMarkupId(), sourceFormat.getLineWrapMode());
+				String script = String.format("onedev.server.sourceEdit.onLineWrapModeChange('%s');", 
+						sourceFormat.getLineWrapMode());
 				target.appendJavaScript(script);
 			}
 			
@@ -102,13 +102,10 @@ public class SourceEditPanel extends BlobEditPanel implements Positionable {
 	public void position(AjaxRequestTarget target, String position) {
 		String script;
 		PlanarRange mark = SourceRendererProvider.getRange(position);
-		if (mark != null) {
-			script = String.format("onedev.server.sourceEdit.mark('%s', %s);", 
-					getEditor().getMarkupId(), getJson(mark));
-		} else {
-			script = String.format("onedev.server.sourceEdit.mark('%s', undefined);", 
-					getEditor().getMarkupId());
-		}
+		if (mark != null) 
+			script = String.format("onedev.server.sourceEdit.mark(%s);", getJson(mark));
+		else 
+			script = String.format("onedev.server.sourceEdit.mark();");
 		target.appendJavaScript(script);
 	}
 

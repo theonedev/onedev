@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.tika.mime.MimeTypes;
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -73,6 +75,11 @@ public class DatabaseBackupPage extends AdministrationPage {
 		}));
 
 		add(form);
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Database Backup");
 	}
 
 }

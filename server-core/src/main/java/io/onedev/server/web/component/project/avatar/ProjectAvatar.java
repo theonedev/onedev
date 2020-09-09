@@ -1,8 +1,6 @@
 package io.onedev.server.web.component.project.avatar;
 
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebComponent;
 
 import io.onedev.server.OneDev;
@@ -31,17 +29,11 @@ public class ProjectAvatar extends WebComponent {
 	}
 
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectAvatarResourceReference()));
-	}
-
-	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		
 		tag.setName("img");
-		tag.append("class", "project-avatar", " ");
+		tag.append("class", "avatar", " ");
 		tag.put("src", url);
 	}
 

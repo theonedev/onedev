@@ -40,7 +40,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.lib.FileMode;
@@ -56,7 +55,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
@@ -235,13 +233,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		add(revisionIndexing = new WebMarkupContainer("revisionIndexing") {
 
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new NoAntiCacheImage("icon", new PackageResourceReference(ProjectBlobPage.class, "indexing.gif")));
-				setOutputMarkupPlaceholderTag(true);
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 
@@ -259,7 +250,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				}
 			}
 			
-		});
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		revisionIndexing.add(new WebSocketObserver() {
 			
 			@Override
@@ -603,7 +595,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class, 
 				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)));
 		
-		blobOperations.add(new DropdownLink("cloneOrDownload") {
+		blobOperations.add(new DropdownLink("getCode") {
 
 			@Override
 			protected void onConfigure() {
@@ -612,8 +604,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			}
 
 			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", "get-code"));
+			}
+
+			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new CloneOrDownloadPanel(id, this) {
+				return new GetCodePanel(id, this) {
 					
 					@Override
 					protected Project getProject() {
@@ -748,7 +746,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				
 			};
 		} else {
-			commitStatus = new WebMarkupContainer("buildStatus");
+			commitStatus = new WebMarkupContainer("buildStatus").add(AttributeAppender.append("class", "d-none"));
 		}
 		
 		commitStatus.setOutputMarkupPlaceholderTag(true);
@@ -905,7 +903,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		newBlobOperations(target);
 		newBuildSupportNote(target);
 		newBlobContent(target);
-		resizeWindow(target);
 	}
 	
 	@Override
@@ -983,13 +980,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			};
 			if (target != null) {
 				target.appendJavaScript(""
-						+ "$('#project-blob>.search-result').show(); "
-						+ "$('#project-blob .search-result>.body').focus();");
+						+ "$('.project-blob>.search-result').css('display', 'flex'); "
+						+ "$('.project-blob .search-result>.body').focus();");
 			}
 		} else {
 			content = new WebMarkupContainer("content").setOutputMarkupId(true);
 			if (target != null) 
-				target.appendJavaScript("$('#project-blob>.search-result').hide();");
+				target.appendJavaScript("$('.project-blob>.search-result').hide();");
 			else 
 				searchResult.add(AttributeAppender.replace("style", "display: none;"));
 		}
@@ -1016,12 +1013,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			newBlobOperations(target);
 			newBuildSupportNote(target);
 			newBlobContent(target);
-			resizeWindow(target);
 		}
-	}
-	
-	private void resizeWindow(IPartialPageRequestHandler partialPageRequestHandler) {
-		partialPageRequestHandler.appendJavaScript("$(window).resize();");
 	}
 	
 	@Override
@@ -1091,6 +1083,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state.requestId = null;
 			newSearchResult(target, null);
 			onResolvedRevisionChange(target);
+			resizeWindow(target);
 		} else if (!Objects.equal(state.blobIdent.path, blobIdent.path)) {
 			state.blobIdent.path = blobIdent.path;
 			state.blobIdent.mode = blobIdent.mode;
@@ -1481,6 +1474,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			return new JobIdentity(getProject(), getCommit().copy());
 		else // when we add file to an empty project
 			return new JobIdentity(getProject(), null);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Files");
 	}
 
 }

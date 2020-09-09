@@ -1,29 +1,27 @@
 <wicket:panel>
-	<div class="order-edit">
-		<table wicket:id="selected" class="selected">
-			<tr wicket:id="selectedItems" class="clearfix">
-				<td class="drag-indicator">
-					<wicket:svg href="grip" class="icon"/>
-				</td>
-				<td class="index"><span wicket:id="index"></span></td>
-				<td class="name"><span wicket:id="name"></span></td>
-				<td class="checkbox">
-					<label>
-						<input wicket:id="descending" type="checkbox"> descending 
-					</label>
-				</td>
-				<td class="actions">
-					<a wicket:id="remove" title="Remove"><wicket:svg href="times" class="icon"/></a>
-				</td>
-			</tr>
-		</table>
-		<ul wicket:id="available" class="available list-unstyled">
-			<li wicket:id="availableItems">
-				<a wicket:id="add" title="Add">
-					<wicket:svg href="plus" class="icon"></wicket:svg>
-					<span wicket:id="name"></span>
-				</a>
-			</li>
-		</ul>
-	</div>
+	<table wicket:id="selected" class="selected table table-borderless mb-0">
+		<tr wicket:id="selectedItems" class="clearfix">
+			<td class="drag-indicator">
+				<wicket:svg href="grip" class="icon"/>
+			</td>
+			<td class="index"><span wicket:id="index"></span></td>
+			<td class="name"><span wicket:id="name"></span></td>
+			<td class="checkbox">
+				<label class="checkbox">
+					<input wicket:id="descending" type="checkbox"> descending 
+				</label>
+			</td>
+			<td class="actions">
+				<a wicket:id="remove" title="Remove"><wicket:svg href="times" class="icon"/></a>
+			</td>
+		</tr>
+	</table>
+	<ul wicket:id="available" class="available list-unstyled mb-0">
+		<li wicket:id="availableItems">
+			<a wicket:id="add" title="Add" class="d-flex align-items-center text-hover-gray-dark">
+				<wicket:svg href="plus" class="icon"></wicket:svg>
+				<span wicket:id="name"></span>
+			</a>
+		</li>
+	</ul>
 </wicket:panel>

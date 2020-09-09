@@ -1,17 +1,10 @@
 .quick-search .result {
-	margin-top: 16px;
 	height: 400px;
-	overflow: auto;
-}
-.quick-search .result ul {
-	margin-bottom: 0;
 }
 .quick-search .result li.hit .scope {
-	color: #666; 
+	color: var(--gray); 
 	font-size: 12px;
 }
-.quick-search .no-matches, .quick-search .help {
-	font-size: 16px;
-	color: #666;
+.quick-search .more-matches a[disabled] {
+	opacity: 100%;
 }
-

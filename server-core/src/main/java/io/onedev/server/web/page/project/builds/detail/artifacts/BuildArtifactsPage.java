@@ -36,6 +36,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.resource.ArtifactResource;
@@ -136,7 +137,9 @@ public class BuildArtifactsPage extends BuildDetailPage {
 				protected void onInitialize() {
 					super.onInitialize();
 				    getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
-				    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));		
+				    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));	
+					getTable().add(new NoRecordsBehavior());
+				    getTable().add(AttributeAppender.append("class", "table"));
 				    add(new HumanTheme());
 					expand(getBuild().getArtifactsDir());
 				}

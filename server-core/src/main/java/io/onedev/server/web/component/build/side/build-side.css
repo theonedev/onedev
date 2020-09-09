@@ -1,7 +1,7 @@
 .build-side>* {
-	margin-bottom: 20px;
-	border-top: 1px solid #E8E8E8;
-	padding-top: 20px;
+	margin-bottom: 1.5rem;
+	border-top: 1px dashed var(--secondary);
+	padding-top: 1.5rem;
 }
 .build-side>div:first-child {
 	border-top: none;
@@ -14,28 +14,16 @@
 .build-side>.properties>div {
     display: table-row;
 }
-.build-side>.properties>div>div {
-    display: table-cell;
-    padding: 8px 0;
-}
 .build-side>.properties>div>div.name {
-    padding-right: 12px;
-    width: 50%;
+    display: table-cell;
+	padding: 0 1rem 1.5rem 0;
+	width: 40%;
+	font-weight: 500;
 }
-.build-side>.pull-requests>.head {
-    font-weight: bold;
-    margin-bottom: 8px;
+.build-side>.properties>div>div.value {
+    display: table-cell;
+	padding: 0 0 1.5rem 1rem;
 }
-.build-side>.pull-requests>.body .pull-request {
-    margin-bottom: 8px;
-    position: relative;
-    padding-right: 55px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.build-side>.pull-requests>.body .pull-request>.status {
-	position: absolute;
-	right: 0;
-	top: 3px;
+.build-side>.properties>div:last-child>div {
+	padding-bottom: 0;
 }

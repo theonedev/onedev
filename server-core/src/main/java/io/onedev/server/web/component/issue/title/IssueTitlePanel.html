@@ -1,25 +1,19 @@
 <wicket:panel>
-	<div wicket:id="content" class="issue-title"></div>
+	<div wicket:id="content" class="issue-title d-flex align-items-center justify-content-start flex-nowrap flex-grow-1"></div>
 	<wicket:fragment wicket:id="titleEditFrag">
-		<form wicket:id="form">
-			<div wicket:id="feedback"></div>
-			<div class="clearable-wrapper">
+		<form wicket:id="form" class="flex-grow-1 d-flex align-items-center">
+			<div class="clearable-wrapper flex-grow-1 mr-3">
 				<input wicket:id="title" type="text" placeholder="Input title" class="form-control">
 			</div>
-			<div class="actions">
-				<button wicket:id="save" title="Save" value="Save" class="btn btn-success" type="submit"><wicket:svg href="tick" class="icon"/></button>
-				<a wicket:id="cancel" title="Cancel" type="button" value="Cancel" class="btn btn-danger"><wicket:svg href="times" class="icon"/></a>
+			<div class="flex-shrink-0 text-nowrap">
+				<button wicket:id="save" title="Save" value="Save" class="btn btn-primary btn-icon mr-1" type="submit"><wicket:svg href="tick" class="icon"/></button>
+				<a wicket:id="cancel" title="Cancel" type="button" value="Cancel" class="btn btn-danger btn-icon"><wicket:svg href="times" class="icon"/></a>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="titleViewFrag">
-		<div class="view clearfix">
-			<span class="float-left">
-				<span wicket:id="title"></span>
-				<a wicket:id="copy" title="Copy issue number and title" class="copy"><wicket:svg href="copy" class="icon"></wicket:svg></a>
-				<a wicket:id="edit" title="Edit issue title" class="edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-			</span>
-			<a wicket:id="create" class="create btn btn-success btn-sm float-right"><wicket:svg href="plus" class="icon"></wicket:svg> New</a>
-		</div>
+		<span wicket:id="title" class="mr-3"></span>
+		<a wicket:id="copy" class="btn btn-xs btn-icon btn-light btn-hover-primary copy flex-shrink-0 mr-3" title="Copy issue number and title"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary edit flex-shrink-0 mr-3" title="Edit issue title"><wicket:svg href="edit" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:panel>

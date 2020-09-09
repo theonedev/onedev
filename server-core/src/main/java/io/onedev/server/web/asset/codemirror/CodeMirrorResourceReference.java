@@ -19,7 +19,7 @@ public class CodeMirrorResourceReference extends BaseDependentResourceReference 
 	private static final long serialVersionUID = 1L;
 
 	public CodeMirrorResourceReference() {
-		super(CodeMirrorResourceReference.class, "codemirror-int.js");
+		super(CodeMirrorResourceReference.class, "codemirror-integration.js");
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class CodeMirrorResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(CodeMirrorResourceReference.class, "lib/codemirror.css")));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(CodeMirrorResourceReference.class, "theme/eclipse.css")));
+		dependencies.add(CssHeaderItem.forReference(new CodeThemeCssResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(CodeMirrorResourceReference.class, "addon/dialog/dialog.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(CodeMirrorResourceReference.class, "addon/fold/foldgutter.css")));
 		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(CodeMirrorResourceReference.class, "addon/scroll/simplescrollbars.css")));

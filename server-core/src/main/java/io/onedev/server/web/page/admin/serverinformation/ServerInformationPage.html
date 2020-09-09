@@ -1,42 +1,43 @@
 <wicket:extend>
-	<div class="server-information">
-		<div class="page-title">Server Information</div>
-		<table class="table">
-			<tbody>
-				<tr>
-					<td class="name">System Date and Time</td>
-					<td wicket:id="systemDateTime" class="value"></td>
-				</tr>
-				<tr>
-					<td class="name">Operating System</td>
-					<td wicket:id="os" class="value"></td>
-				</tr>
-				<tr>
-					<td class="name">JVM</td>
-					<td wicket:id="jvm" class="value"></td>
-				</tr>
-				<tr>
-					<td class="name">Total Heap Memory</td>
-					<td wicket:id="totalMemory" class="value"></td>
-				</tr>
-				<tr>
-					<td class="name">Used Heap Memory</td>
-					<td wicket:id="usedMemory" class="value"></td>
-				</tr>
-				<tr>
-					<td class="name">Heap Memory Usage</td>
-					<td class="value">
-						<div class="progress mb-3">
-						  <div wicket:id="memoryUsage" class="progress-bar"></div>
-						</div>					
-						<button wicket:id="gc" class="btn btn-outline-secondary btn-sm gc">Force Garbage Collection</button>
-					</td>
-				</tr>
-				<tr>
-					<td class="name">OS User Name</td>
-					<td wicket:id="osUserName" class="value"></td>
-				</tr>
-			</tbody>
-		</table>
+	<div class="server-information card">
+		<div class="card-body">
+			<table class="table table-borderless">
+				<tbody>
+					<tr>
+						<td class="name font-weight-bold">System Date and Time</td>
+						<td wicket:id="systemDateTime" class="value"></td>
+					</tr>
+					<tr>
+						<td class="name font-weight-bold">Operating System</td>
+						<td wicket:id="os" class="value"></td>
+					</tr>
+					<tr>
+						<td class="name font-weight-bold">JVM</td>
+						<td wicket:id="jvm" class="value"></td>
+					</tr>
+					<tr>
+						<td class="name font-weight-bold">Total Heap Memory</td>
+						<td wicket:id="totalMemory" class="value"></td>
+					</tr>
+					<tr>
+						<td class="name font-weight-bold">Used Heap Memory</td>
+						<td wicket:id="usedMemory" class="value"></td>
+					</tr>
+					<tr>
+						<td class="name font-weight-bold">Heap Memory Usage</td>
+						<td class="value">
+							<div class="progress mb-3">
+							  <div wicket:id="memoryUsage" class="progress-bar"></div>
+							</div>					
+							<button wicket:id="gc" class="btn btn-outline-primary btn-sm gc">Force Garbage Collection</button>
+						</td>
+					</tr>
+					<tr>
+						<td class="name font-weight-bold">OS User Name</td>
+						<td wicket:id="osUserName" class="value"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	</div>
 </wicket:extend>

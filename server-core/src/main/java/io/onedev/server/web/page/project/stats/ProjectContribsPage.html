@@ -1,16 +1,20 @@
 <wicket:extend>
-	<div id="project-contribs">
-		<div class="options clearfix">
-			<span class="date-range float-left clearfix"></span>
-			<select class="contrib-type float-right form-control">
-				<option>Commits</option>
-				<option>Additions</option>
-				<option>Deletions</option>
-			</select>
+	<div class="project-contribs p-5">
+		<div wicket:id="note" class="alert alert-info mb-5"></div>
+		<div class="card mb-5">
+			<div class="card-body">
+				<div class="d-flex align-items-center">
+					<span class="date-range mr-3 font-size-h5"></span>
+					<select class="contrib-type custom-select form-control ml-auto">
+						<option>Commits</option>
+						<option>Additions</option>
+						<option>Deletions</option>
+					</select>
+				</div>
+				<div class="overall chart"></div>
+			</div>
 		</div>
-		<div wicket:id="note" class="note"></div>
-		<div class="overall chart"></div>
-		<div class="top-contributors container-fluid"></div>
+		<div class="top-contributors"></div>
 	</div>
 	<div wicket:id="userCard" class="user-card-content"></div>
 </wicket:extend>

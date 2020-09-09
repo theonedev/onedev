@@ -49,7 +49,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				Fragment validFrag = new Fragment("content", "validFrag", this);			
 				if (!buildSpec.getJobs().isEmpty()) {
 					Fragment hasJobsFrag = new Fragment("jobs", "hasJobsFrag", this);
-					
+					hasJobsFrag.add(AttributeAppender.append("class", "d-flex d-none"));
 					RepeatingView navsView = new RepeatingView("navs");
 					RepeatingView jobsView = new RepeatingView("contents");
 					for (Job job: buildSpec.getJobs()) {
@@ -72,17 +72,17 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 					
 					validFrag.add(hasJobsFrag);
 				} else {
-					validFrag.add(new Label("jobs", "No jobs defined").add(AttributeAppender.append("class", "not-defined")));
+					validFrag.add(new Label("jobs", "No jobs defined").add(AttributeAppender.append("class", "not-defined alert alert-light-warning font-weight-bold d-flex d-none")));
 				}
 				
 				if (!buildSpec.getProperties().isEmpty())
 					validFrag.add(PropertyContext.view("properties", buildSpec, "properties"));
 				else
-					validFrag.add(new Label("properties", "No properties defined").add(AttributeAppender.append("class", "not-defined")));
+					validFrag.add(new Label("properties", "No properties defined").add(AttributeAppender.append("class", "not-defined alert alert-light-warning font-weight-bold d-flex d-none")));
 					
 				add(validFrag);
 			} else {
-				add(new Label("content", "Build spec not defined").add(AttributeAppender.append("class", "not-defined")));
+				add(new Label("content", "Build spec not defined").add(AttributeAppender.append("class", "not-defined m-4 alert alert-light-warning font-weight-bold")));
 			}
 		} catch (Exception e) {
 			Fragment invalidFrag = new Fragment("content", "invalidFrag", this);

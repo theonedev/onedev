@@ -27,10 +27,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.buildspec.job.ProjectDependency;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel.Placement;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.page.layout.SideFloating.Placement;
 
 @SuppressWarnings("serial")
 class ProjectDependencyListViewPanel extends Panel {
@@ -106,7 +107,7 @@ class ProjectDependencyListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "ellipsis text-right";
 			}
 			
 		});		
@@ -126,7 +127,8 @@ class ProjectDependencyListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				add(new NoRecordsBehavior());
 			}
 			
 		});
@@ -150,17 +152,17 @@ class ProjectDependencyListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, Placement.RIGHT) {
+					new OffCanvasCardPanel(target, Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
-							return "Project Dependency";
+						protected Component newTitle(String componentId) {
+							return new Label(componentId, "Project Dependency");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "project-dependency def-detail"));
+							add(AttributeAppender.append("class", "project-dependency"));
 						}
 
 						@Override

@@ -1,11 +1,15 @@
 <wicket:extend>
-	<div class="page-title">New Group</div>
-	<div class="new-group">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="editor"></div>
-			<div class="actions clearfix">
-				<input class="btn btn-primary dirty-aware float-left" value="Save" type="submit">
-			</div>
-		</form>
+	<div class="new-group card">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor"></div>
+				<div class="actions clearfix">
+					<input class="btn btn-primary dirty-aware float-left" value="Save" type="submit">
+				</div>
+			</form>
+		</div>
 	</div>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="groups">Groups</a> <span class="dot"></span> <span class="text-truncate">Create Group</span> 
+	</wicket:fragment>
 </wicket:extend>

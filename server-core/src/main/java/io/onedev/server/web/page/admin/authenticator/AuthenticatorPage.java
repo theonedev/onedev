@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -21,7 +22,7 @@ import com.google.common.base.Joiner;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
@@ -135,7 +136,7 @@ public class AuthenticatorPage extends AdministrationPage {
 			}
 
 			@Override
-			protected String runTask(JobLogger logger) {
+			protected String runTask(SimpleLogger logger) {
 				Authenticated authenticated = bean.getAuthenticator().authenticate(
 						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 				StringBuilder retrievedInfoBuilder = new StringBuilder();
@@ -189,6 +190,11 @@ public class AuthenticatorPage extends AdministrationPage {
 		form.add(testButton);
 		
 		add(form);
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "External Authenticator");
 	}
 
 }

@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="card">
+		<div class="card-body">
+			<div class="alert alert-light-info">
+				<wicket:svg href="bulb" class="icon"/> <span wicket:id="help"></span>
+			</div>
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor" class="mb-4"></div>
+				<div class="d-flex">
+					<input class="btn btn-primary dirty-aware mr-1" value="Update" type="submit">
+					<a wicket:id="delete" class="delete btn btn-danger ml-auto">Delete</a>
+				</div>
+			</form>
+		</div>
+	</div>
+</wicket:extend>

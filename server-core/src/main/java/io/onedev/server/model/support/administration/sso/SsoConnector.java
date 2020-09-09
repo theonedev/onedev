@@ -56,7 +56,7 @@ public abstract class SsoConnector implements Serializable {
 		return usage;
 	}
 	
-	public Component renderSubHeader(String componentId) {
+	public Component renderAdditionalInfo(String componentId) {
 		return new WebMarkupContainer(componentId).setVisible(false);
 	}
 	

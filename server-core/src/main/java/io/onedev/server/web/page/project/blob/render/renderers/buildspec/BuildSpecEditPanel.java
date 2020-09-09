@@ -343,6 +343,5 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		}
 		
 	}
-
 	
 }

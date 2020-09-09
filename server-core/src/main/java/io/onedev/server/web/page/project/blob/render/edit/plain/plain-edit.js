@@ -34,19 +34,16 @@ onedev.server.plainEdit = {
         });
         
 		onedev.server.codemirror.bindShortcuts(cm);
-		
-		$plainEdit.on("autofit", function(e, width, height) {
-			if (cm.getOption("fullScreen"))
-				return;
-			
-			$plainEdit.outerWidth(width);
-			$plainEdit.outerHeight(height);
-            cm.setSize($plainEdit.width(), $plainEdit.height());
-            cm.refresh();
-        });
 
         $plainEdit.on("beforeSubmit", function() {
             $plainEdit.children("textarea").val($plainEdit.find(">.source>.CodeMirror")[0].CodeMirror.getValue());
         });
+
+		$source.on("resized", function() {
+			setTimeout(function() {
+				cm.setSize("100%", $source.height());
+			});
+			return false;
+		});
 	}
 };

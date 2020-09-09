@@ -1,23 +1,36 @@
 <wicket:extend>
-	<div class="page-title">Job Executors</div>
-	<div class="help-block">
-       For a given build job, the first matching job executor will be used
-	</div>
-	<div wicket:id="jobExecutorSetting" class="card-list">
-		<ul class="list-unstyled job-executors">
-			<li wicket:id="executors" class="job-executor"><div wicket:id="executor"></div></li>
-		</ul>
-		<div wicket:id="newExecutor"></div>
+	<div class="job-executors">
+		<div class="alert alert-info mb-5">
+			<wicket:svg href="bulb" class="icon"></wicket:svg>
+			For a given build job, the first matching executor will be used
+		</div>
+		
+		<div class="body">
+			<div wicket:id="jobExecutorSetting">
+				<ul class="list-unstyled">
+					<li wicket:id="executors" class="executor mb-5"><div wicket:id="executor"></div></li>
+				</ul>
+				<div wicket:id="newExecutor"></div>
+			</div>
+		</div>
 	</div>
 	<wicket:fragment wicket:id="editNewFrag">
 		<div class="executor card">
-			<div class="card-header">Edit Executor</div>
+			<div class="card-header">
+				<div class="card-title">Edit Executor</div>
+			</div>
 			<div class="card-body">
 				<div wicket:id="editor"></div>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="addNewLinkFrag">
-		<a wicket:id="link" class="add-new"><wicket:svg href="plus-circle-o" class="icon"></wicket:svg> Add Executor</a>
+		<div class="card">
+			<div class="card-header">
+				<div class="card-title">
+					<a wicket:id="link" class="add-new"><wicket:svg href="plus-circle-o" class="icon align-middle mr-1"></wicket:svg> <span>Add Executor</span></a>
+				</div>
+			</div>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

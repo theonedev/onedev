@@ -74,27 +74,27 @@ public class GlobalIssueSetting implements Serializable {
 		List<Choice> choices = new ArrayList<>(); 
 		Choice newFeature = new Choice();
 		newFeature.setValue("New Feature");
-		newFeature.setColor("#93c47d");
+		newFeature.setColor("#1bc5bd");
 		choices.add(newFeature);
 		
 		Choice improvement = new Choice();
 		improvement.setValue("Improvement");
-		improvement.setColor("#93c47d");
+		improvement.setColor("#1bc5bd");
 		choices.add(improvement);
 
 		Choice bug = new Choice();
 		bug.setValue("Bug");
-		bug.setColor("#ea9999");
+		bug.setColor("#F64E60");
 		choices.add(bug);
 
 		Choice task = new Choice();
 		task.setValue("Task");
-		task.setColor("#8e7cc3");
+		task.setColor("#8950FC");
 		choices.add(task);
 
 		Choice buildFailure = new Choice();
 		buildFailure.setValue("Build Failure");
-		buildFailure.setColor("#cc0000");
+		buildFailure.setColor("#F64E60");
 		choices.add(buildFailure);
 		
 		specifiedChoices.setChoices(choices);
@@ -114,22 +114,22 @@ public class GlobalIssueSetting implements Serializable {
 		
 		Choice minor = new Choice();
 		minor.setValue("Minor");
-		minor.setColor("#CCCCCC");
+		minor.setColor("#E4E6EF");
 		choices.add(minor);
 
 		Choice normal = new Choice();
 		normal.setValue("Normal");
-		normal.setColor("#6fa8dc");
+		normal.setColor("#3699FF");
 		choices.add(normal);
 
 		Choice major = new Choice();
 		major.setValue("Major");
-		major.setColor("#ff9900");
+		major.setColor("#FFA800");
 		choices.add(major);
 		
 		Choice critical = new Choice();
 		critical.setValue("Critical");
-		critical.setColor("#cc0000");
+		critical.setColor("#F64E60");
 		choices.add(critical);
 		
 		specifiedChoices.setChoices(choices);
@@ -165,18 +165,18 @@ public class GlobalIssueSetting implements Serializable {
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
-		open.setColor("#f0ad4e");
+		open.setColor("#FFA800");
 		
 		stateSpecs.add(open);
 		
 		StateSpec closed = new StateSpec();
-		closed.setColor("#674EA7");
+		closed.setColor("#8950FC");
 		closed.setName("Closed");
 		
 		stateSpecs.add(closed);
 		
 		StateSpec released = new StateSpec();
-		released.setColor("#3EB650");
+		released.setColor("#1BC5BD");
 		released.setName("Released");
 		
 		stateSpecs.add(released);

@@ -58,7 +58,7 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 

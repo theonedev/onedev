@@ -48,7 +48,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
@@ -88,13 +88,13 @@ public class DefaultLogManager implements LogManager {
 	}
 	
 	@Override
-	public JobLogger getLogger(Build build, Collection<String> jobSecretsToMask) {
+	public SimpleLogger getLogger(Build build, Collection<String> jobSecretsToMask) {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
 		Collection<String> secretValuesToMask = build.getSecretValuesToMask();
 		secretValuesToMask.addAll(jobSecretsToMask);
-		return new JobLogger() {
+		return new SimpleLogger() {
 			
 			private void doLog(String message) {
 				for (String maskSecret: secretValuesToMask)

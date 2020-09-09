@@ -1,37 +1,37 @@
 <wicket:panel>
-	<div class="blob-edit autofit">
-		<div class="head clearfix">
-			<div class="float-left active tab edit">
-				<a>
-					<wicket:svg href="edit" class="icon"></wicket:svg>
+	<div class="blob-edit d-flex flex-column flex-grow-1">
+		<div class="head d-flex align-items-stretch px-3 flex-shrink-0 border-bottom">
+			<div class="active tab edit mr-4 d-flex align-items-stretch">
+				<a class="d-flex align-items-center font-weight-bold">
+					<wicket:svg href="edit" class="icon mr-1"></wicket:svg>
 					Edit
 				</a>
 			</div>
-			<div wicket:id="editPlainTab" class="float-left tab edit-plain">
-				<a>
-					<wicket:svg href="edit-file" class="icon"></wicket:svg>
+			<div wicket:id="editPlainTab" class="tab edit-plain mr-4 d-flex align-items-stretch">
+				<a class="d-flex align-items-center font-weight-bold">
+					<wicket:svg href="edit-file" class="icon mr-1"></wicket:svg>
 					Edit Source
 				</a>
 			</div>
-			<div wicket:id="saveTab" class="float-left save tab">
-				<a>
-					<wicket:svg href="save" class="icon"></wicket:svg>
+			<div wicket:id="saveTab" class="save tab mr-4 d-flex align-items-stretch">
+				<a class="d-flex align-items-center font-weight-bold">
+					<wicket:svg href="save" class="icon mr-1"></wicket:svg>
 					Save
 				</a>
 			</div>
-			<div class="float-left cancel"><a wicket:id="cancelLink" tabindex="-1">Cancel</a></div>
-			<div wicket:id="editOptions" class="options float-right expanded"></div>
+			<div class="cancel mr-4 d-flex align-items-center"><a wicket:id="cancelLink" tabindex="-1">Cancel</a></div>
+			<div wicket:id="editOptions" class="options ml-auto d-none d-sm-flex align-items-center"></div>
 		</div>
-		<div class="body">
-            <form wicket:id="content" class="content leave-confirm" onsubmit="return false;">
-                <div wicket:id="feedback" class="feedback"></div>
-				<div wicket:id="editor" class="editor"></div>
+		<div class="body flex-grow-1 d-flex flex-column">
+            <form wicket:id="content" class="content leave-confirm d-flex d-none flex-grow-1 flex-column" onsubmit="return false;">
+                <div wicket:id="feedback" class="feedback flex-shrink-0"></div>
+				<div wicket:id="editor" class="editor d-flex flex-column flex-grow-1 autofit"></div>
 				<input wicket:id="position" type="hidden" class="position">
-                <a wicket:id="edit" class="edit submit">submit</a>
-                <a wicket:id="editPlain" class="edit-plain submit">submit</a>
-                <a wicket:id="save" class="save submit">submit</a>
+                <a wicket:id="edit" class="edit submit d-none">submit</a>
+                <a wicket:id="editPlain" class="edit-plain submit d-none">submit</a>
+                <a wicket:id="save" class="save submit d-none">submit</a>
 			</form>
-			<div wicket:id="commitOptions" class="commit-options"></div>
+			<div wicket:id="commitOptions" class="commit-options flex-grow-1 d-none flex-column autofit"></div>
 		</div>
 	</div>
 </wicket:panel>

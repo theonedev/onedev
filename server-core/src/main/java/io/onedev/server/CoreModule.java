@@ -220,11 +220,11 @@ import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.BearerAuthenticationFilter;
 import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.DefaultFilterChainResolver;
 import io.onedev.server.security.DefaultPasswordService;
 import io.onedev.server.security.DefaultRememberMeManager;
 import io.onedev.server.security.DefaultWebSecurityManager;
+import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.realm.AbstractAuthorizingRealm;
 import io.onedev.server.ssh.DefaultKeyPairProvider;
@@ -266,8 +266,8 @@ import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
 import io.onedev.server.web.ExpectedExceptionContribution;
-import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.ResourcePackScopeContribution;
+import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.avatar.DefaultAvatarManager;
@@ -281,13 +281,7 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
-import io.onedev.server.web.page.DashboardPage;
-import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.layout.BuildListTab;
-import io.onedev.server.web.page.layout.IssueListTab;
-import io.onedev.server.web.page.layout.MainTab;
-import io.onedev.server.web.page.layout.ProjectListTab;
-import io.onedev.server.web.page.layout.PullRequestListTab;
+import io.onedev.server.web.page.layout.DefaultUICustomization;
 import io.onedev.server.web.page.layout.UICustomization;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.test.TestPage;
@@ -621,21 +615,7 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(TaskButton.TaskFutureManager.class);
 		
-		bind(UICustomization.class).toInstance(new UICustomization() {
-			
-			@Override
-			public Class<? extends BasePage> getHomePage() {
-				return DashboardPage.class;
-			}
-			
-			@Override
-			public List<MainTab> getMainTabs() {
-				return Lists.newArrayList(
-						new ProjectListTab(), new IssueListTab(), 
-						new PullRequestListTab(), new BuildListTab());
-			}
-
-		});
+		bind(UICustomization.class).toInstance(new DefaultUICustomization());
 	}
 	
 	private void configureBuild() {

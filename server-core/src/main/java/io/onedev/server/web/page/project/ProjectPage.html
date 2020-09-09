@@ -1,38 +1,12 @@
 <wicket:extend>
-	<div id="project">
-		<div wicket:id="sidebar"></div>
-		<div class="content">
-			<wicket:child></wicket:child>
-		</div>
+	<div class="project flex-grow-1 d-flex flex-column">
+		<wicket:child></wicket:child>
 	</div>
-	<wicket:fragment wicket:id="sidebarHeadFrag">
-		<a wicket:id="link">
-			<img wicket:id="avatar">
-			<span wicket:id="name"></span>
-			<wicket:svg href="ellipsis" class="icon"></wicket:svg>
-		</a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navContextFrag">
-		<a wicket:id="dropdown" class="dropdown">
-			<img wicket:id="avatar">
-			<span wicket:id="name" class="ellipsis-text"></span>
-			<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
-		</a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navContextDropdownFrag">
-		<div wicket:id="info" class="info"></div>
-		<ul class="menu list-unstyled">
-			<li wicket:id="items">
-				<wicket:container wicket:id="item"></wicket:container>
-			</li>
-			<li wicket:id="setting" class="setting">
-				<a onclick="$(this).parent().toggleClass('expanded'); var $floating = $(this).closest('.floating'); $floating.align($floating.data('alignment'));">
-					<wicket:svg href="gear" class="icon"></wicket:svg>
-					Settings
-					<wicket:svg href="arrow" class="icon rotate-90"></wicket:svg>
-				</a>
-				<ul wicket:id="menu" class="menu list-unstyled"></ul>
-			</li>
-		</ul>
+	<wicket:fragment wicket:id="topbarTitleFrag">
+		<a wicket:id="projects" class="d-none d-sm-inline">Projects</a>
+		<span class="dot d-none d-sm-inline"></span>
+		<a wicket:id="projectLink" class="text-truncate"><span wicket:id="label"></span></a>
+		<span class="dot"></span>
+		<wicket:container wicket:id="projectTitle"></wicket:container>
 	</wicket:fragment>
 </wicket:extend>

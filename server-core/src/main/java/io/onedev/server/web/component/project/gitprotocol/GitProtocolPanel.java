@@ -5,8 +5,6 @@ import javax.servlet.http.Cookie;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -52,9 +50,9 @@ public abstract class GitProtocolPanel extends Panel {
 			@Override
 			protected String load() {
 				if (useSsh)
-					return "Showing SSH url";
+					return "Showing SSH URL";
 				else
-					return "Showing HTTP(S) url";
+					return "Showing HTTP(S) URL";
 			}
 			
 		}));
@@ -116,12 +114,6 @@ public abstract class GitProtocolPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new GitProtocolCssResourceReference()));
-	}
-
 	private void switchProtocol(AjaxRequestTarget target, boolean useSsh) {
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		

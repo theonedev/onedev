@@ -9,21 +9,15 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -32,7 +26,6 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
@@ -99,24 +92,14 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			CommitDetailPage.State commitState = new CommitDetailPage.State();
 			commitState.revision = preview.getTargetHeadCommitHash();
 			PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
-			Link<Void> hashLink = new ViewStateAwarePageLink<Void>("targetHead", CommitDetailPage.class, params);
-			fragment.add(hashLink);
-			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getTargetHeadCommitHash())));
-			fragment.add(new CopyToClipboardLink("copyTargetHead", Model.of(preview.getTargetHeadCommitHash())));
+			fragment.add(new ViewStateAwarePageLink<Void>("targetHead", CommitDetailPage.class, params));
 			
 			commitState = new CommitDetailPage.State();
 			commitState.revision = preview.getMergeCommitHash();
 			params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
-			hashLink = new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params);
-			fragment.add(hashLink);
-			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMergeCommitHash())));
-			fragment.add(new CopyToClipboardLink("copyMergedCommit", Model.of(preview.getMergeCommitHash())));
+			fragment.add(new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params));
+			
 			fragment.add(new CommitStatusPanel("buildStatus", ObjectId.fromString(preview.getMergeCommitHash())) {
-
-				@Override
-				protected String getCssClasses() {
-					return "btn btn-outline-secondary btn-sm";
-				}
 
 				@Override
 				protected Project getProject() {
@@ -263,12 +246,6 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MergePreviewResourceReference()));
-	}
-
 	@Override
 	public PageParameters getParamsBeforeEdit() {
 		return paramsOf(getPullRequest(), state);

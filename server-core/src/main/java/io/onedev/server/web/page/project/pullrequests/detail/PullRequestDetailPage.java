@@ -168,7 +168,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 	
 	private WebMarkupContainer newRequestHead() {
-		WebMarkupContainer requestHead = new WebMarkupContainer("requestHead");
+		WebMarkupContainer requestHead = new WebMarkupContainer("requestHeader");
 		requestHead.setOutputMarkupId(true);
 		add(requestHead);
 		
@@ -209,17 +209,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 			
 		});
-		
-		requestHead.add(new BookmarkablePageLink<Void>("create", 
-				NewPullRequestPage.class, NewPullRequestPage.paramsOf(getProject())) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!isEditingTitle);
-			}
-			
-		});
 
 		Form<?> form = new Form<Void>("editForm") {
 
@@ -230,6 +219,17 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 			
 		};
+		form.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (form.hasError())
+					return "is-invalid";	
+				else
+					return "";
+			}
+			
+		}));
 		requestHead.add(form);
 		
 		title = getPullRequest().getTitle();
@@ -249,7 +249,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				title = object;
 			}
 			
-		}).add(new ReferenceInputBehavior(false) {
+		}).setRequired(true).add(new ReferenceInputBehavior(false) {
 
 			@Override
 			protected Project getProject() {
@@ -264,13 +264,17 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				if (StringUtils.isNotBlank(title)) {
-					OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title);
-					isEditingTitle = false;
-				}
+				OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title);
+				isEditingTitle = false;
 
 				target.add(requestHead);
-				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
+				resizeWindow(target);
+			}
+
+			@Override
+			protected void onError(AjaxRequestTarget target, Form<?> form) {
+				super.onError(target, form);
+				target.add(requestHead);
 			}
 			
 		});
@@ -281,10 +285,12 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			public void onClick(AjaxRequestTarget target) {
 				isEditingTitle = false;
 				target.add(requestHead);
-				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
+				resizeWindow(target);
 			}
 			
 		});
+		
+		requestHead.add(new SideInfoLink("moreInfo"));
 		
 		return requestHead;
 	}
@@ -295,15 +301,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		add(newRequestHead());
 		add(newStatusAndBranchesContainer());
-		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary") {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.pullRequestDetail.onSummaryDomReady();"));
-			}
-			
-		};
+		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary");
 		
 		summaryContainer.add(new WebSocketObserver() {
 
@@ -315,7 +313,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler) {
 				handler.add(component);
-				handler.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 		});
@@ -560,7 +557,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new RequestTab("Activities", PullRequestActivitiesPage.class) {
+		tabs.add(new PullRequestTab("Activities", PullRequestActivitiesPage.class) {
 
 			@Override
 			protected Component renderOptions(String componentId) {
@@ -569,10 +566,10 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 			
 		});
-		tabs.add(new RequestTab("File Changes", PullRequestChangesPage.class));
-		tabs.add(new RequestTab("Code Comments", PullRequestCodeCommentsPage.class));
+		tabs.add(new PullRequestTab("File Changes", PullRequestChangesPage.class));
+		tabs.add(new PullRequestTab("Code Comments", PullRequestCodeCommentsPage.class));
 		if (getPullRequest().isOpen())
-			tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
+			tabs.add(new PullRequestTab("Merge Preview", MergePreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
 		
@@ -634,45 +631,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return new SideInfoPanel("moreInfo") {
 
 			@Override
-			protected Component newContent(String componentId) {
+			protected Component newBody(String componentId) {
 				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this);
-				fragment.add(new EntityNavPanel<PullRequest>("requestNav") {
-
-					@Override
-					protected EntityQuery<PullRequest> parse(String queryString, boolean inProject) {
-						return PullRequestQuery.parse(inProject?getProject():null, queryString);
-					}
-
-					@Override
-					protected PullRequest getEntity() {
-						return getPullRequest();
-					}
-
-					@Override
-					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, boolean inProject) {
-						return getPullRequestManager().query(inProject?getProject():null, query, offset, count, false, false);
-					}
-
-					@Override
-					protected CursorSupport<PullRequest> getCursorSupport() {
-						return new CursorSupport<PullRequest>() {
-
-							@Override
-							public Cursor getCursor() {
-								return WebSession.get().getPullRequestCursor();
-							}
-
-							@Override
-							public void navTo(AjaxRequestTarget target, PullRequest entity, Cursor cursor) {
-								WebSession.get().setPullRequestCursor(cursor);
-								setResponsePage(getPageClass(), paramsOf(entity));
-							}
-							
-						};
-					}
-					
-				});
-				
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews") {
 
@@ -780,7 +740,46 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 				});
 				
-				fragment.add(newManageContainer());
+				WebMarkupContainer actions = new WebMarkupContainer("actions");
+				fragment.add(actions);
+				if (SecurityUtils.canManage(getPullRequest().getTargetProject())) {
+					actions.add(new Link<Void>("synchronize") {
+	
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(getPullRequest().isOpen());
+						}
+	
+						@Override
+						public void onClick() {
+							getPullRequestManager().check(getPullRequest());
+							if (getPullRequest().getCheckError() == null) 
+								Session.get().success("Pull request is synchronized");
+						}
+						
+					});
+					actions.add(new Link<Void>("delete") {
+	
+						@Override
+						public void onClick() {
+							PullRequest request = getPullRequest();
+							getPullRequestManager().delete(request);
+							Session.get().success("Pull request #" + request.getNumber() + " deleted");
+							
+							String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
+							if (redirectUrlAfterDelete != null)
+								throw new RedirectToUrlException(redirectUrlAfterDelete);
+							else
+								setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
+						}
+						
+					}.add(new ConfirmClickModifier("Do you really want to delete this pull request?")));
+				} else {
+					actions.add(new WebMarkupContainer("synchronize"));
+					actions.add(new WebMarkupContainer("delete"));
+					fragment.add(actions);
+				}				
 				
 				fragment.add(new WebSocketObserver() {
 
@@ -800,45 +799,47 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return fragment;
 			}
 
+			@Override
+			protected Component newTitle(String componentId) {
+				return new EntityNavPanel<PullRequest>(componentId) {
+
+					@Override
+					protected EntityQuery<PullRequest> parse(String queryString, boolean inProject) {
+						return PullRequestQuery.parse(inProject?getProject():null, queryString);
+					}
+
+					@Override
+					protected PullRequest getEntity() {
+						return getPullRequest();
+					}
+
+					@Override
+					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, boolean inProject) {
+						return getPullRequestManager().query(inProject?getProject():null, query, offset, count, false, false);
+					}
+
+					@Override
+					protected CursorSupport<PullRequest> getCursorSupport() {
+						return new CursorSupport<PullRequest>() {
+
+							@Override
+							public Cursor getCursor() {
+								return WebSession.get().getPullRequestCursor();
+							}
+
+							@Override
+							public void navTo(AjaxRequestTarget target, PullRequest entity, Cursor cursor) {
+								WebSession.get().setPullRequestCursor(cursor);
+								setResponsePage(getPageClass(), paramsOf(entity));
+							}
+							
+						};
+					}
+					
+				};
+			}
+
 		};
-	}
-	
-	private WebMarkupContainer newManageContainer() {
-		WebMarkupContainer container = new WebMarkupContainer("manage");
-		container.setVisible(SecurityUtils.canManage(getPullRequest().getTargetProject()));
-		container.add(new Link<Void>("synchronize") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen());
-			}
-
-			@Override
-			public void onClick() {
-				getPullRequestManager().check(getPullRequest());
-				if (getPullRequest().getCheckError() == null) 
-					Session.get().success("Pull request is synchronized");
-			}
-			
-		});
-		container.add(new Link<Void>("delete") {
-
-			@Override
-			public void onClick() {
-				PullRequest request = getPullRequest();
-				getPullRequestManager().delete(request);
-				Session.get().success("Pull request #" + request.getNumber() + " deleted");
-				
-				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
-				if (redirectUrlAfterDelete != null)
-					throw new RedirectToUrlException(redirectUrlAfterDelete);
-				else
-					setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
-			}
-			
-		}.add(new ConfirmClickModifier("Do you really want to delete this pull request?")));
-		return container;
 	}
 	
 	private WebMarkupContainer newMergeStrategyContainer() {
@@ -984,7 +985,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			});
 		}
 		
-		statusAndBranchesContainer.add(new SideInfoLink("moreInfo"));
+		statusAndBranchesContainer.add(new BookmarkablePageLink<Void>("newPullRequest", NewPullRequestPage.class, 
+				NewPullRequestPage.paramsOf(getProject())));		
 		
 		return statusAndBranchesContainer;
 	}
@@ -1383,7 +1385,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
 		response.render(JavaScriptHeaderItem.forReference(new PullRequestDetailResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.pullRequestDetail.onDomReady();"));
 	}
@@ -1393,9 +1394,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return SecurityUtils.canReadCode(getProject());
 	}
 	
-	private class RequestTab extends PageTab {
+	private class PullRequestTab extends PageTab {
 
-		public RequestTab(String title, Class<? extends Page> pageClass) {
+		public PullRequestTab(String title, Class<? extends Page> pageClass) {
 			super(Model.of(title), pageClass);
 		}
 		
@@ -1447,6 +1448,15 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			}
 		}
 		
+	}
+	
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("pullRequests", ProjectPullRequestsPage.class, 
+				ProjectPullRequestsPage.paramsOf(getProject())));
+		fragment.add(new Label("pullRequestNumber", "#" + getPullRequest().getNumber()));
+		return fragment;
 	}
 	
 }

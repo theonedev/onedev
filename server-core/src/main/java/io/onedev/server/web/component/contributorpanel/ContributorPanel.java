@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.contributorpanel;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -36,12 +34,6 @@ public class ContributorPanel extends Panel {
 			add(new PersonIdentPanel("committer", committer, "Committer", Mode.NAME));
 		}
 		add(new Label("date", DateUtils.formatAge(committer.getWhen())));
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ContributorResourceReference()));
 	}
 
 }

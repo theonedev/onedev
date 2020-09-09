@@ -38,7 +38,7 @@ public class MilestoneStatusLabel extends Label {
 
 			@Override
 			public String getObject() {
-				return "label label-" + (milestoneModel.getObject().isClosed()? "success": "warning");
+				return "badge badge-" + (milestoneModel.getObject().isClosed()? "success": "warning");
 			}
 			
 		}));		

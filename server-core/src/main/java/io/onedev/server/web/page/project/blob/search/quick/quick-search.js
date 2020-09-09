@@ -26,7 +26,7 @@ onedev.server.onQuickSearchDomReady = function(containerId, callback) {
 			$active.removeClass("active");
 			$prev.addClass("active");
 		} 
-		$result.find("li.hit.active").scrollIntoView(36);
+		$result.find("li.hit.active").scrollIntoView();
 	};
 	
 	function onKeydown(e) {
@@ -38,7 +38,7 @@ onedev.server.onQuickSearchDomReady = function(containerId, callback) {
 			$active.removeClass("active");
 			$next.addClass("active");
 		} 
-		$result.find("li.hit.active").scrollIntoView(36);
+		$result.find("li.hit.active").scrollIntoView();
 	};
 	
 	$body.children().bind("keydown", "return", onReturn);

@@ -17,11 +17,9 @@
 	<div wicket:id="sessionFeedback" id="session-feedback"></div>
 	<div id="ajax-loading-indicator"><div>Please wait...</div></div>
 	
-	<!-- Two divs are used here in order to make overlay works in IE. -->
-	<div id="ajax-loading-overlay"><div></div></div>
 	<div wicket:id="keepSessionAlive" style="display:none;"></div>
-	<div class="websocket-error websocket-server-error">
-		<wicket:svg href="warning" class="icon"/> Page is in error, reload to recover
+	<div class="websocket-error">
+		Page is in error, reload to recover
 	</div>
 	<div wicket:id="rootComponents"></div>
 </body>

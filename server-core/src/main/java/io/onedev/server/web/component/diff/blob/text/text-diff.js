@@ -562,8 +562,6 @@ onedev.server.textDiff = {
 		}
 		
 		onedev.server.textDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
-		
-		$(window).resize();
 	},
 	getMarkInfo: function($container, mark) {
 		var oldOrNew = mark.leftSide?"old":"new";

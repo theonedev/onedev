@@ -11,7 +11,7 @@
 }
 .CodeMirror-gutters {
 	background: white;
-	border-right-color: #E0E0E0;
+	border-right-color: var(--secondary);
 }
 .CodeMirror-selected {
 	background-color: #3399FF !important;
@@ -19,15 +19,9 @@
 .CodeMirror-selectedtext {
 	color: white !important;
 }
-.CodeMirror-simplescroll-horizontal {
-	height: 12px;
-}
-.CodeMirror-simplescroll-vertical {
-	width: 12px;
-}
 .CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div {
-	background: none repeat scroll 0 0 #bbb; 
-	border: 1px solid #aaa;
+	background: none repeat scroll 0 0 var(--light-dark); 
+	border: 1px solid var(--light-dark);
 }
 .CodeMirror-search-match {
   background: gold;

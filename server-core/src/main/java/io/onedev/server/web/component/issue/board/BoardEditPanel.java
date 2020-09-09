@@ -82,7 +82,7 @@ public abstract class BoardEditPanel extends Panel {
 					} else {
 						boards.add(board);
 					}
-					onBoardSaved(target, board);
+					onSave(target, board);
 				} else {
 					target.add(form);
 				}
@@ -129,7 +129,7 @@ public abstract class BoardEditPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 
-	protected abstract void onBoardSaved(AjaxRequestTarget target, BoardSpec board);
+	protected abstract void onSave(AjaxRequestTarget target, BoardSpec board);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 	

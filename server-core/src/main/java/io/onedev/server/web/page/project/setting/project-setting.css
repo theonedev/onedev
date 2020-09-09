@@ -1,92 +1,23 @@
-body.BranchProtectionsPage, body.TagProtectionsPage, body.WebHooksPage {
-	min-width: 768px;
-}
-@media(max-width: 767px) {
-	#project-setting>.sidebar {
-		display: none;
-	}
-	#project-setting>.sidebar+.content {
-		padding-left: 0 !important;
-	}
-}
-@media(max-width: 991px) {
-    #project-setting .issue-setting ul.nav-tabs>li.collapsed {
-        display: block;
-    }
-    #project-setting .issue-setting ul.nav-tabs>li.expanded {
-        display: none;
-    }
-}
-#project-setting>.sidebar {
-	left: 240px;
-	background: white;
-	border-left: none;
-	/* make it absolute as we do not want to make it stay fixed to occupy screen space on mobile screen */
-	position: absolute; 
-	z-index: 0;
-	/* use hacks below to make the sidebar extend to the screen bottom even if body does not reach to the bottom */
-	margin-bottom: -10000px;
-	padding-bottom: 10000px;
-	width: 260px;
-}
-#project-setting>.sidebar>.tabs>li>a {
-	border-left: none;
-	padding: 12px 14px;
-}
-#project>.minimized.sidebar+.content>#project-setting>.sidebar {
-	left: 44px;
-}
-#project-setting>.sidebar+.content {
-	padding-left: 260px;
-}
-#project-setting .general-setting form .delete {
-	margin-right: 0;
-}
-
-#project-setting .authorization-list .head .select2-container {
-	width: 240px;
-} 
-#project-setting .avatar-edit .title {
-	font-size: 18px;
-	font-weight: bold;
-	margin-bottom: 20px;
-}
-#project-setting .avatar-edit>.current {
-	margin-bottom: 20px;
-	padding-bottom: 20px;
-	border-bottom: 1px solid #E8E8E8;
-}
-#project-setting .avatar-edit .current img {
+.project-setting .avatar-edit .current img {
 	height: 240px;
 	width: 240px;
 	display: block;
 }
-#project-setting .avatar-edit .current a {
-	margin-top: 20px;
-}
-#project-setting .avatar-edit form>button {
-	margin-top: 20px;
-}
-#project-setting .authorization-list .select2-container,
-#project-setting .authorization-list .property-roleName .select2-container {
-	width: 360px;
+
+.project-setting .authorization-list .select2-container {
+	width: 100%;
 } 
 
-#project-setting .web-hook-list table thead th {
+.project-setting .web-hook-list table thead th {
 	font-weight: bold !important;
 }
-#project-setting .web-hook-list table thead th.property-eventTypes {
+.project-setting .web-hook-list table thead th.property-eventTypes {
 	width: 25%;
 }
-#project-setting .web-hook-list table .select2-container {
+.project-setting .web-hook-list table .select2-container {
     width: 100%;
-}
-
-body.SecretListPage .help-block {
-	margin: 0 0 16px 0;
 }
 
 .job-secret-edit textarea {
     font-family: monospace;
-    height: 200px !important;
 }

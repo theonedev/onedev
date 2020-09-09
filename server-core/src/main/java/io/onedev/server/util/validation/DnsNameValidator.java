@@ -12,7 +12,7 @@ import io.onedev.server.util.validation.annotation.DnsName;
 
 public class DnsNameValidator implements ConstraintValidator<DnsName, String> {
 
-	private static final Pattern PATTERN = Pattern.compile("[a-z0-9]([-a-z0-9]*[a-z0-9])?");
+	private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?");
 	
 	private boolean interpolative;
 	

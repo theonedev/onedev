@@ -37,18 +37,16 @@ public class SpriteImage extends WebComponent {
 		super(id, Model.of(href));
 	}
 	
+	public SpriteImage(String id) {
+		this(id, (String)null);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		setEscapeModelStrings(false);
 	}
 	
-	@Override
-	protected void onConfigure() {
-		super.onConfigure();
-		setVisible(StringUtils.isNotBlank(getDefaultModelObjectAsString()));
-	}
-
 	private void listResourceMappers(IRequestMapper rootMapper, List<BaseResourceMapper> resourceMappers) {
 		if (rootMapper instanceof CompoundRequestMapper) {
 			for (IRequestMapper mapper: (CompoundRequestMapper)rootMapper)

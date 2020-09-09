@@ -134,7 +134,7 @@ public abstract class SearchResultPanel extends Panel {
 		String script = String.format(""
 				+ "$('#%s').find('.selectable').removeClass('active');"
 				+ "$('#%s').addClass('active');"
-				+ "$('#%s>.search-result>.body a.selectable.active').scrollIntoView(25);", 
+				+ "$('#%s>.search-result>.body a.selectable.active').scrollIntoView();", 
 				getMarkupId(), activeLinkId, getMarkupId());
 		target.appendJavaScript(script);
 		
@@ -249,7 +249,7 @@ public abstract class SearchResultPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String message = "too many matches, displaying " + MAX_QUERY_ENTRIES + " of them";
+		String message = "(too many matches, displaying " + MAX_QUERY_ENTRIES + " of them)";
 		add(new Label("hasMoreMessage", message).setVisible(hasMore));
 		
 		add(prevMatchLink = new AjaxLink<Void>("prevMatch") {
@@ -324,7 +324,6 @@ public abstract class SearchResultPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				RequestCycle.get().setMetaData(ExpandStatusKey.INSTANCE, ExpandStatus.EXPAND_ALL);
 				target.add(SearchResultPanel.this);
-				target.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -349,7 +348,6 @@ public abstract class SearchResultPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				RequestCycle.get().setMetaData(ExpandStatusKey.INSTANCE, ExpandStatus.COLLAPSE_ALL);
 				target.add(SearchResultPanel.this);
-				target.appendJavaScript("$(window).resize();");
 			}
 
 			@Override

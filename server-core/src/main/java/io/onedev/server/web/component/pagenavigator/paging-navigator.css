@@ -1,0 +1,4 @@
+.pagination>li.active>a.btn {
+	color: white;
+	background-color: var(--primary);
+}

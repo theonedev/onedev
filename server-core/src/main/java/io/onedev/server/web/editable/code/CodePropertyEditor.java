@@ -9,7 +9,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
@@ -139,7 +139,7 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 				input.getMarkupId(), 
 				getCode().language(), 
 				behavior.getCallbackFunction(matchWith, line, start, end));
-		response.render(OnLoadHeaderItem.forScript(script));
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 }

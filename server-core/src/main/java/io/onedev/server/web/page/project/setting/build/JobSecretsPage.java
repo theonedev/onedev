@@ -29,6 +29,7 @@ import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
 public class JobSecretsPage extends BuildSettingPage {
@@ -43,8 +44,10 @@ public class JobSecretsPage extends BuildSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		String note = String.format("Define job secrets to be used in build spec. Secret value less "
-				+ "than %d characters will not be masked in build log", SecretInput.MASK.length());
+		String note = String.format("<svg class='icon mr-1'><use xlink:href='%s'/></svg> "
+				+ "Define job secrets to be used in build spec. Secret value less "
+				+ "than %d characters will not be masked in build log", 
+				SpriteImage.getVersionedHref("bulb"), SecretInput.MASK.length());
 		add(new Label("secretsNote", note).setEscapeModelStrings(false));
 
 		add(new AjaxLink<Void>("addNew") {
@@ -208,6 +211,11 @@ public class JobSecretsPage extends BuildSettingPage {
 		add(secretsTable = new HistoryAwareDataTable<>("secrets", columns, dataProvider, 
 				Integer.MAX_VALUE, null));		
 		secretsTable.setOutputMarkupId(true);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Job Secrets");
 	}
 
 }

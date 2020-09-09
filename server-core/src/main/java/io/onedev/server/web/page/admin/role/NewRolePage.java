@@ -1,9 +1,10 @@
 package io.onedev.server.web.page.admin.role;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -61,9 +62,10 @@ public class NewRolePage extends AdministrationPage {
 	}
 	
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new RoleCssResourceReference()));
+	protected Component newTopbarTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("roles", RoleListPage.class));
+		return fragment;
 	}
 	
 }

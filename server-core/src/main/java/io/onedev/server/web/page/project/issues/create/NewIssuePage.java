@@ -2,8 +2,10 @@ package io.onedev.server.web.page.project.issues.create;
 
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -27,7 +29,7 @@ import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 
 @SuppressWarnings("serial")
 public class NewIssuePage extends ProjectPage implements InputContext, ScriptIdentityAware {
@@ -130,6 +132,11 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 		if (template != null)
 			params.add(PARAM_TEMPLATE, template);
 		return params;
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "<span class='text-nowrap'>Create Issue</span>").setEscapeModelStrings(false);
 	}
 	
 }

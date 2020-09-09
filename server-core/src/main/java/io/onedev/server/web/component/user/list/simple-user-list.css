@@ -1,7 +1,7 @@
 .floating>.content>.simple-user-list {
-	padding: 12px 0;
-	min-width: 120px;
+	padding: 1rem 0;
+	min-width: 10rem;
 }
 .floating>.content>.simple-user-list>div {
-	padding: 8px 12px;
+	padding: 0.6rem 1rem;
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
@@ -44,7 +44,7 @@ public class CodePropertyViewer extends Panel {
 		
 		String script = String.format("onedev.server.codeSupport.onViewerDomReady('%s', '%s');", 
 				input.getMarkupId(), language);
-		response.render(OnLoadHeaderItem.forScript(script));
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 }

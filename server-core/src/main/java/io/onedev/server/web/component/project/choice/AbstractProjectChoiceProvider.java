@@ -11,6 +11,7 @@ import org.unbescape.html.HtmlEscape;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 
 @SuppressWarnings("serial")
@@ -21,6 +22,8 @@ public abstract class AbstractProjectChoiceProvider extends ChoiceProvider<Proje
 		writer.key("id").value(choice.getId());
 		writer.key("name");
 		writer.value(HtmlEscape.escapeHtml5(choice.getName()));
+		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(choice);
+		writer.key("avatar").value(avatarUrl);
 	}
 	
 	@Override

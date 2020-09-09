@@ -41,6 +41,8 @@ import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.asset.lozad.LozadResourceReference;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
@@ -162,13 +164,13 @@ public class MarkdownViewer extends GenericPanel<String> {
 						CloseInfo closeInfo = request.getCloseInfo();
 						if (closeInfo == null) {
 							status = PullRequest.STATE_OPEN;
-							statusCss = "label-warning";
+							statusCss = "badge-warning";
 						} else {
 							status = closeInfo.getStatus().toString();
 							if (closeInfo.getStatus() == CloseInfo.Status.DISCARDED)
-								statusCss = "label-danger";
+								statusCss = "badge-danger";
 							else
-								statusCss = "label-success";
+								statusCss = "badge-success";
 						}
 						
 						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s')", 
@@ -180,14 +182,14 @@ public class MarkdownViewer extends GenericPanel<String> {
 					Build build = OneDev.getInstance(BuildManager.class).find(referenceId);
 					// check permission here as build project may not be the same as current project
 					if (build != null && SecurityUtils.canAccess(build)) {
-						String statusCss = "fa build-status build-status-" + build.getStatus().name().toLowerCase();
-						String statusTitle = build.getStatus().getDisplayName();
+						String iconHref = SpriteImage.getVersionedHref(BuildStatusIcon.getIconHref(build.getStatus()));
+						String iconCss = BuildStatusIcon.getIconClass(build.getStatus());
 						
 						String title = build.getJobName();
 						if (build.getVersion() != null)
 							title += " : " + build.getVersion();
 						String script = String.format("onedev.server.markdown.renderBuildTooltip('%s', '%s', '%s')", 
-								JavaScriptEscape.escapeJavaScript(title), statusTitle, statusCss);
+								JavaScriptEscape.escapeJavaScript(title), iconHref, iconCss);
 						target.appendJavaScript(script);
 					}
 					break;

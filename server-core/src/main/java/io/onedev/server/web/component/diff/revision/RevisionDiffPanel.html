@@ -1,65 +1,65 @@
 <wicket:panel>
-	<div class="revision-diff resize-aware scroll-aware">
-		<div wicket:id="revisionsIndexing" class="revisions-indexing">
-			<img wicket:id="icon">
-			<span>Revisions indexing in progress... (symbol navigation in revisions will be accurate after indexed)</span>
+	<div class="revision-diff">
+		<div wicket:id="revisionsIndexing" class="alert alert-light-warning revision-indexing">
+			<wicket:svg href="loading" class="icon spin"/>
+			Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)
 		</div>
 		<!-- disable auto focus here as otherwise we have problems jumping to marked code blocks -->
-		<table class="head no-autofocus">
-			<tr>
-				<td class="view-mode">
-					<span class="btn-group">
-						<a wicket:id="unified" class="btn btn-outline-secondary">Unified</a>
-						<a wicket:id="split" class="btn btn-outline-secondary">Split</a>
-					</span>
-				</td>
-				<td class="whitespace-option">
-					<span wicket:id="whitespaceOption" class="btn btn-outline-secondary dropdown-toggle" title="White space options">White space</span>
-				</td>
-				<td class="path-filter">				
-					<form wicket:id="pathFilter">
-						<div class="clearable-wrapper">
-							<div class="input-group">
-	                            <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by path">
-								<span class="input-group-append">
-									<button wicket:id="submit" title="Filter" class="btn btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
-								</span>
-							</div>
+		<div class="head no-autofocus d-flex align-items-center flex-wrap">
+			<div class="view-mode mr-3 mb-4 flex-shrink-0">
+				<span class="btn-group">
+					<a wicket:id="unified" class="btn btn-outline-secondary">Unified</a>
+					<a wicket:id="split" class="btn btn-outline-secondary">Split</a>
+				</span>
+			</div>
+			<div class="whitespace-option mr-3 mb-4 flex-shrink-0">
+				<span wicket:id="whitespaceOption" class="btn btn-outline-secondary dropdown-toggle" title="White space options">White space</span>
+			</div>
+			<div class="path-filter mb-4 flex-grow-1">				
+				<form wicket:id="pathFilter">
+					<div class="clearable-wrapper">
+						<div class="input-group">
+                            <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by path">
+							<span class="input-group-append">
+								<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							</span>
 						</div>
-					</form>
-				</td>
-            </tr>
-		</table>
+					</div>
+				</form>
+			</div>
+		</div>
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
 			<div class="title"><a wicket:id="totalFiles" class="total-files"></a></div>
-			<div wicket:id="tooManyFiles" class="alert alert-warning">Sorry we are unable to display all files as there are too many</div>
+			<div wicket:id="tooManyFiles" class="alert alert-light-warning">Sorry we are unable to display all files as there are too many</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
-				<li wicket:id="diffStats" class="diff-stat clearfix">
-					<svg wicket:id="icon" class="icon float-left"></svg>
-					<a wicket:id="file" class="file float-left"><span wicket:id="name"></span></a>
-					<span wicket:id="hasComments" title="There are comments on this file"><wicket:svg href="comments" class="icon"></wicket:svg></span>
+				<li wicket:id="diffStats" class="diff-stat d-flex align-items-center flex-wrap mb-2">
+					<svg wicket:id="icon" class="icon mr-2"></svg>
+					<a wicket:id="file" class="file mr-2 text-break"><span wicket:id="name"></span></a>
+					<span wicket:id="hasComments" class="mr-2 text-gray" title="There are comments on this file"><wicket:svg href="comments" class="icon"></wicket:svg></span>
 					<wicket:enclosure child="bar">
-					<span wicket:id="bar" class="bar float-right"></span>
-					<span wicket:id="deletions" class="deletions float-right"></span>
-					<span wicket:id="additions" class="additions float-right"></span>
+					<span class="text-nowrap ml-auto">
+						<span wicket:id="additions" class="additions"></span>
+						<span wicket:id="deletions" class="deletions"></span>
+						<span wicket:id="bar" class="bar"></span>
+					</span>
 					</wicket:enclosure>
 				</li>
 			</ul>
-			<div class="detail">
-				<div wicket:id="comment" class="comment">
-					<div class="ui-resizable-handle ui-resizable-e"></div>
-					<div class="content">
-						<div wicket:id="head" class="head clearfix">
-							<a wicket:id="context" class="float-left context close" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
-							<a wicket:id="locate" class="float-left locate close"><wicket:svg href="hand" class="icon"></wicket:svg></a>
-							<a wicket:id="close" class="float-left close" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
+			<div class="detail d-flex align-items-stretch">
+				<div wicket:id="comment" class="comment need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-4">
+					<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
+						<div wicket:id="head" class="head d-flex align-items-center px-3 py-2 border-bottom">
+							<a wicket:id="context" class="btn btn-xs btn-icon btn-hover-primary btn-light mr-2 context" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
+							<a wicket:id="locate" class="btn btn-xs btn-icon btn-hover-primary btn-light locate mr-auto"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+							<a wicket:id="close" class="ml-3" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 						</div>
-						<div wicket:id="body" class="body"></div>
+						<div wicket:id="body" class="body overflow-auto flex-grow-1 p-3"></div>
 					</div>
+					<div class="ui-resizable-handle ui-resizable-e flex-shrink-0"></div>
 				</div>
-				<ul class="diffs list-unstyled">
-					<li wicket:id="diffs" class="diff">
+				<ul class="diffs list-unstyled flex-grow-1 mb-0">
+					<li wicket:id="diffs" class="diff mb-4">
 						<div wicket:id="diff"></div>
 					</li>
 				</ul>

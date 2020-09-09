@@ -21,8 +21,9 @@ onedev.server.floating = {
 					
 		    if (!$floating.is(e.target) && $floating.has(e.target).length === 0 && !contains) {
 		    	var $trigger = $floating.data("trigger");
-			    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) 
-			    	onedev.server.floating.close($floating, true);
+			    if (!$trigger || !$trigger.is(e.target) && $trigger.has(e.target).length === 0) {
+					$floating.data("closeCallback")();
+				}
 		    }
 		});
 		$(document).on("mouseup touchstart", $floating.data("mouseUpOrTouchStart"));
@@ -30,7 +31,7 @@ onedev.server.floating = {
 		$floating.data("keydown", function(e) {
 			if (e.keyCode == 27 && $(".select2-drop:visible").length == 0 
 					&& $(".flatpickr-calendar.open").length == 0) {
-				onedev.server.floating.close($floating, true);
+				$floating.data("closeCallback")();
 			}
 		});
 		
@@ -48,10 +49,12 @@ onedev.server.floating = {
 			var alignment = $floating.data("alignment");
 			if (alignment && alignment.target && alignment.target.element 
 					&& !document.body.contains(alignment.target.element)) {
-				onedev.server.floating.close($floating, true);
+				$floating.data("closeCallback")();
 			} else {
-				if (alignment)
+				if (alignment) {
 					$floating.align(alignment);
+					$floating.trigger("resized");
+				}
 				if (!openTriggered) {
 					$floating.trigger("open");
 					openTriggered = true;
@@ -61,11 +64,10 @@ onedev.server.floating = {
 		$(document).on("afterElementReplace", $floating.data("afterElementReplace"));
 	}, 
 	
-	close: function($floating, callCloseCallback) {
-		if ($floating.length != 0) { // floating might already been closed
-			if (callCloseCallback)
-				$floating.data("closeCallback")();
-			
+	close: function(floatingId) {
+		var $floating = $("#" + floatingId);
+		
+		if ($floating.length != 0) {
 			var alignment = $floating.data("alignment");
 			
 			if (alignment && alignment.target.element)
@@ -83,10 +85,7 @@ onedev.server.floating = {
 					$floating.remove();
 				});
 			} else {
-				// remove floating later, otherwise, closeCallback attached to floating will not execute
-				setTimeout(function() {
-					$floating.remove();
-				}, 0);
+				$floating.remove();
 			}
 		}
 	}

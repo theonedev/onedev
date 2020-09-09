@@ -16,7 +16,7 @@ import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.DashboardPage;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.page.simple.security.LoginPage;
 
 @SuppressWarnings("serial")
 public class SsoProcessPage extends BasePage {

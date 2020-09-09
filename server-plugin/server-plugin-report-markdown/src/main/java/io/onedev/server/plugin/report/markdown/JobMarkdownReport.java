@@ -13,7 +13,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.validation.annotation.PathSegment;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -62,7 +62,7 @@ public class JobMarkdownReport extends JobReport {
 	}
 
 	@Override
-	public void process(Build build, File workspace, JobLogger logger) {
+	public void process(Build build, File workspace, SimpleLogger logger) {
 		File reportDir = new File(build.getReportDir(DIR), getReportName());
 		FileUtils.createDir(reportDir);
 

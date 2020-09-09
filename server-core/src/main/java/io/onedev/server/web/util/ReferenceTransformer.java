@@ -45,7 +45,7 @@ public class ReferenceTransformer implements Function<String, String> {
 
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
-				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+				return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 						IssueActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
@@ -55,7 +55,7 @@ public class ReferenceTransformer implements Function<String, String> {
 
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
-				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
+				return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
 						PullRequestActivitiesPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 
@@ -65,7 +65,7 @@ public class ReferenceTransformer implements Function<String, String> {
 
 			@Override
 			protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
-				return "<a class='embedded-reference' href='" + RequestCycle.get().urlFor(BuildDashboardPage.class, 
+				return "<a class='embedded-reference link-info' href='" + RequestCycle.get().urlFor(BuildDashboardPage.class, 
 						BuildDashboardPage.paramsOf(referenceable)) + "'>" + referenceText + "</a>";
 			}
 

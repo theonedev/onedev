@@ -1,15 +1,15 @@
 <wicket:panel>
 	<div class="issue-activities">
-		<table>
+		<table class="w-100">
 			<tr wicket:id="activities" class="activity">
 				<td class="avatar"><a wicket:id="avatar"></a></td>
 				<td wicket:id="content" class="content"></td>
 			</tr>
 		</table>
-		<div wicket:id="addComment"></div>
+		<div wicket:id="addComment" class="mt-4"></div>
 	</div>
 	<wicket:fragment wicket:id="loginToCommentFrag">
-		<div class="login-to-comment">
+		<div class="login-to-comment alert alert-light-info text-center font-size-h6">
 			<a wicket:id="login">Login to comment</a>
 		</div>
 	</wicket:fragment>
@@ -17,17 +17,15 @@
 		<form wicket:id="form" class="add-comment leave-confirm no-autofocus">
 			<div wicket:id="feedback"></div>
 			<div wicket:id="comment" placeholder="Leave a comment"></div>
-			<div class="actions">
+			<div class="mt-3">
 				<button wicket:id="save" class="btn btn-primary dirty-aware">Comment</button>
 			</div>
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="optionsFrag">
 		<div class="issue-activity-options">
-			<span class="btn-group btn-group-toggle">
-				<a wicket:id="showComments" class="btn btn-sm btn-outline-secondary" title="Show comments"><wicket:svg href="comments" class="icon"></wicket:svg></a>
-				<a wicket:id="showChangeHistory" class="btn btn-sm btn-outline-secondary" title="Show change history"><wicket:svg href="history" class="icon"></wicket:svg></a>
-			</span>
+			<a wicket:id="showComments" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Show comments"><wicket:svg href="comments" class="icon"></wicket:svg></a>
+			<a wicket:id="showChangeHistory" class="btn btn-xs text-muted btn-active-secondary btn-icon" title="Show change history"><wicket:svg href="history" class="icon"></wicket:svg></a>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

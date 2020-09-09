@@ -1,58 +1,54 @@
 <wicket:panel>
-	<div class="issue-list">
-		<div class="head">
-			<form wicket:id="query" class="clearable-wrapper">
-				<div class="input-group">
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order issues here">
-					<span class="input-group-append">
-						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
-					</span>
-				</div>
-			</form>
-			<a wicket:id="newIssue" class="open-new btn btn-success"></a>
-			<div class="operations">
-				<a wicket:id="showSavedQueries" class="show-saved-queries">
-					<wicket:svg href="eye" class="icon"></wicket:svg>
-					Show Saved Queries
+	<div class="issue-list card">
+		<div class="card-body">
+			<div class="d-flex mb-4">
+				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order issues here">
+						<span class="input-group-append">
+							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+					</div>
+				</form>
+				<a wicket:id="newIssue" class="add-new btn btn-primary btn-icon flex-shrink-0 ml-3" title="Create new issue"><wicket:svg href="plus" class="icon"/></a>
+			</div>
+			<div class="mb-5">
+				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray mr-4">
+					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
 				</a>
-				<a wicket:id="saveQuery" class="save-query">
-					<wicket:svg href="save" class="icon"></wicket:svg>
-					Save Query
+				<a wicket:id="saveQuery" class="save-query text-gray mr-4">
+					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
 				</a>
-				<a wicket:id="batchEditSelected">
-					<wicket:svg href="edit-selected" class="icon"></wicket:svg>
-					Batch Edit Selected
+				<a wicket:id="batchEditSelected" class="text-gray mr-4">
+					<wicket:svg href="edit-selected" class="icon"></wicket:svg> Batch Edit Selected
 				</a>
-				<a wicket:id="batchEditAll">
-					<wicket:svg href="edit-all" class="icon"></wicket:svg>
-					Batch Edit All
+				<a wicket:id="batchEditAll" class="text-gray mr-4">
+					<wicket:svg href="edit" class="icon"></wicket:svg> Batch Edit All
 				</a>
-				<a wicket:id="listFields" class="list-fields">
-					<wicket:svg href="select" class="icon"></wicket:svg>
-					Display Fields
+				<a wicket:id="listFields" class="list-fields text-gray mr-4">
+					<wicket:svg href="select" class="icon"></wicket:svg> Display Fields
 				</a>
-				<a wicket:id="orderBy" class="order-by">
-					<wicket:svg href="sort" class="icon"></wicket:svg>
-					Order By
+				<a wicket:id="orderBy" class="order-by text-gray">
+					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
 			</div>
-		</div>
-		<div wicket:id="body" class="body">
-			<div wicket:id="feedback"></div>
-			<table wicket:id="issues" class="table"></table>
+			<div wicket:id="body" class="body">
+				<div wicket:id="feedback"></div>
+				<table wicket:id="issues" class="table"></table>
+			</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="contentFrag">
-		<div class="primary clearfix">
-			<div class="float-left">
-				<a wicket:id="number" class="number"></a> 
-				<span wicket:id="title" class="title"></span> 
+		<div class="primary d-flex mb-3">
+			<div class="mr-4 flex-grow-1">
+				<a wicket:id="number" class="number h6 mr-2"></a> 
+				<span wicket:id="title" class="title h6 mr-1"></span> 
 				<a wicket:id="copy" title="Copy issue number and title" class="copy">
 					<wicket:svg href="copy" class="icon"></wicket:svg>
 				</a>
 			</div>
-			<div class="float-right">
-				<span class="votes" title="Votes">
+			<div class="flex-shrink-0 d-none d-lg-block text-muted">
+				<span class="votes mr-2" title="Votes">
 					<wicket:svg href="thumb-up" class="icon"></wicket:svg> <span wicket:id="votes"></span>
 				</span>
 				<span class="comments" title="Comments">
@@ -60,12 +56,12 @@
 				</span>
 			</div>
 		</div>
-		<div class="secondary clearfix">
-			<div class="float-left clearfix">
-				<div wicket:id="fields" class="field float-left"></div>
+		<div class="secondary d-flex flex-wrap">
+			<div class="flex-grow-1 d-flex flex-wrap">
+				<div wicket:id="fields" class="field"></div>
 			</div>
-			<div class="last-update float-right">
-				<a wicket:id="user"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
+			<div class="last-update flex-shrink-0 d-none d-lg-block text-muted font-size-sm">
+				<a wicket:id="user" class="text-muted"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
 			</div>
 		</div>
 	</wicket:fragment>
@@ -77,7 +73,7 @@
 			<form wicket:id="form">
 				<div class="modal-header">
 					<h5 id="modal-title" class="modal-title">Fields to Display</h5>
-					<button wicket:id="close" type="button" class="close">&times;</button>
+					<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 				</div>
 				<div class="modal-body">
 					<input wicket:id="fields" type="hidden" class="form-control">

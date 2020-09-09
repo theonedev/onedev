@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.k8shelper.CloneInfo;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 
 public abstract class JobContext {
@@ -49,7 +49,7 @@ public abstract class JobContext {
 	
 	private final int retried;
 	
-	private final JobLogger logger;	
+	private final SimpleLogger logger;	
 	
 	private final Collection<String> allocatedCaches = new HashSet<>();
 	
@@ -60,7 +60,7 @@ public abstract class JobContext {
 			boolean retrieveSource, Integer cloneDepth, CloneInfo cloneInfo, 
 			String cpuRequirement, String memoryRequirement, ObjectId commitId, 
 			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
-			int retried, List<JobService> services, JobLogger logger) {
+			int retried, List<JobService> services, SimpleLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
@@ -137,7 +137,7 @@ public abstract class JobContext {
 		return collectFiles;
 	}
 
-	public JobLogger getLogger() {
+	public SimpleLogger getLogger() {
 		return logger;
 	}
 	

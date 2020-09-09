@@ -32,6 +32,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -59,6 +60,8 @@ import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.validation.ProjectNameValidator;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -160,6 +163,59 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		container.add(edit);
 		
 		container.add(AttributeAppender.append("class", compactMode?"compact-mode":"normal-mode"));
+		
+		container.add(new DropdownLink("doReference") {
+
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new Fragment(id, "referenceMenuFrag", MarkdownEditor.this) {
+
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						String script = String.format("onedev.server.markdown.setupActionMenu($('#%s'), $('#%s'));", 
+								container.getMarkupId(), getMarkupId());
+						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+					
+				}.setOutputMarkupId(true);
+			}
+			
+		}.setVisible(getReferenceSupport() != null));
+		
+		container.add(new DropdownLink("actionMenuTrigger") {
+
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				return new Fragment(id, "actionMenuFrag", MarkdownEditor.this) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
+						
+						if (getReferenceSupport() != null) 
+							add(new Fragment("doReference", "referenceMenuFrag", MarkdownEditor.this));
+						else 
+							add(new WebMarkupContainer("doReference").setVisible(false));
+					}
+
+					@Override
+					public void renderHead(IHeaderResponse response) {
+						super.renderHead(response);
+						String script = String.format("onedev.server.markdown.setupActionMenu($('#%s'), $('#%s'));", 
+								container.getMarkupId(), getMarkupId());
+						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+					
+				}.setOutputMarkupId(true);
+			}
+			
+		});
+		
+		container.add(new WebMarkupContainer("doMention").setVisible(getUserMentionSupport() != null));
 			
 		edit.add(input = new TextArea<String>("input", Model.of(getModelObject())));
 		for (AttributeModifier modifier: getInputModifiers()) 
@@ -450,7 +506,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
-		script = String.format("onedev.server.markdown.onWindowLoad('%s');", container.getMarkupId());
+		script = String.format("onedev.server.markdown.onLoad('%s');", container.getMarkupId());
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 

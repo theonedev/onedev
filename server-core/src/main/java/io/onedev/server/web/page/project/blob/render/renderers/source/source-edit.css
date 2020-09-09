@@ -1,25 +1,12 @@
-.blob-edit>.head .source-format {
-	margin: 2px 12px 0 0;
-}
-.blob-edit .source-edit .input {
-	display: none;
-}
-.blob-edit .source-edit .warning {
-	border-radius: 0;
-	margin: 0;
-	border-left: none;
-	border-top: none;
-	border-right: none;
-	padding-top: 8px;
-	padding-bottom: 8px;
-	display: none;
-}
 .source-edit>.code {
 	background: none;
 	border: none;
-	border-radius: none;
+	border-radius: 0;
 	padding: 0;
 	margin: 0;
 	font-family: inherit;
 	font-size: inherit;
+}
+.source-edit>.warning {
+	display: none;
 }

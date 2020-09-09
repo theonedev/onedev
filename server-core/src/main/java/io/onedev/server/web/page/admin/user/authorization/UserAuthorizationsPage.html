@@ -1,10 +1,7 @@
 <wicket:extend>
-	<div class="page-title">Project Authorizations</div>
-	<form wicket:id="form" class="authorization-list list">
-		<div wicket:id="feedback"></div>
+	<form wicket:id="form" class="authorization-list leave-confirm">
+		<div wicket:id="feedback" class="mb-4"></div>
 		<div wicket:id="editor"></div>
-		<div class="actions">
-			<input type="submit" class="btn btn-primary" value="Save">
-		</div>
+		<input type="submit" class="btn btn-primary dirty-aware mt-4" value="Save">
 	</form>
 </wicket:extend>

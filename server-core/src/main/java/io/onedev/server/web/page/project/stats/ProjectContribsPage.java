@@ -97,4 +97,9 @@ public class ProjectContribsPage extends ProjectStatsPage {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Contribution Statistics");
+	}
+
 }

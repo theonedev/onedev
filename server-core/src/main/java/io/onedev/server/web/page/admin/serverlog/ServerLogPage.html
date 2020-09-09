@@ -1,11 +1,8 @@
 <wicket:extend>
-	<div class="page-title">Server Log</div>
-	<div class="server-log">
-		<div class="head">
-			<a wicket:id="download" class="btn btn-outline-secondary"><wicket:svg href="download" class="icon"/> Download Full Log</a>
-		</div>
-		<div class="body">
-			<div wicket:id="warning" class="alert alert-warning"></div>
+	<div wicket:id="warning" class="alert alert-warning mb-4"></div>
+	<div class="card server-log">
+		<div class="card-body">
+			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-block mb-4" title="Download log"><wicket:svg href="download" class="icon mr-2"/> Download</a>
 			<pre wicket:id="logContent"></pre>
 		</div>
 	</div>

@@ -5,9 +5,8 @@
     display: none;
     margin-top: 18px;
     background: white;
-    color: black;
-    border: 1px solid #DDD;
-    border-radius: 3px;
+    border: 1px solid var(--secondary);
+    border-radius: 0.42rem;
     box-shadow: 0 0 5px rgba(0,0,0,0.1);
     min-width: 120px;
     max-height: 200px;
@@ -16,14 +15,14 @@
 }
 
 .atwho-view .cur {
-    background: #3366FF;
+    background: #3699FF;
     color: white;
 }
 .atwho-view .cur small {
     color: white;
 }
 .atwho-view strong {
-    color: #3366FF;
+    color: #3699FF;
 }
 .atwho-view .cur strong {
     color: white;
@@ -38,12 +37,15 @@
 .atwho-view ul li {
     display: block;
     padding: 5px 10px;
-    border-bottom: 1px solid #DDD;
+    border-bottom: 1px solid var(--light-gray);
     cursor: pointer;
     /* border-top: 1px solid #C8C8C8; */
 }
+.atwho-view ul li:last-child {
+	border-bottom: 0;
+}
 .atwho-view small {
     font-size: smaller;
-    color: #777;
+    color: var(--gray);
     font-weight: normal;
 }

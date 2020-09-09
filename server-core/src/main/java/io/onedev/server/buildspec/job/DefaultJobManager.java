@@ -95,7 +95,7 @@ import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
@@ -348,7 +348,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			
 			JobExecutor executor = getJobExecutor(build);
 			if (executor != null) {
-				JobLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
+				SimpleLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
 				
 				ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 				Long buildId = build.getId();
@@ -562,7 +562,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private void log(Throwable e, JobLogger logger) {
+	private void log(Throwable e, SimpleLogger logger) {
 		if (e instanceof GeneralException)
 			logger.log(e.getMessage());
 		else

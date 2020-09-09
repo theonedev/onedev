@@ -1,17 +1,6 @@
-.commit-option {
-	padding: 20px;
-}
-.commit-option>.head {
-	font-weight: bold;
-	font-size: 16px;
-	margin-bottom: 20px;
-}
 .commit-option>.body .changed>.changes {
 	margin-bottom: 20px;
 }  
-.commit-option>.body .text-diff>.head>.actions {
-	display: none;
-}
 .commit-option>.body .text-diff>.head>.actions {
 	display: none;
 }

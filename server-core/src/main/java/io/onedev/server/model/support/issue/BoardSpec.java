@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
@@ -125,6 +126,21 @@ public class BoardSpec implements Serializable {
 
 	public void setEditColumns(List<String> editColumns) {
 		this.editColumns = editColumns;
+	}
+	
+	public List<String> getDisplayColumns() {
+		List<String> displayColumns = new ArrayList<>();
+		for (String column: getColumns()) {
+			if (column == null) {
+				GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+				FieldSpec field = issueSetting.getFieldSpec(getIdentifyField());
+				if (field != null)
+					displayColumns.add("<" + HtmlEscape.escapeHtml5(field.getNameOfEmptyValue()) + ">");
+			} else {
+				displayColumns.add(column);
+			}
+		}
+		return displayColumns;
 	}
 
 	@Editable(order=500, description="Specify fields to display in board card except issue number and title")

@@ -1,32 +1,29 @@
 <wicket:panel>
-	<div class="code-comments">
-		<div class="head">
-			<form wicket:id="query" class="clearable-wrapper">
+	<div class="code-comment-list card">
+		<div class="card-body">
+			<form wicket:id="query" class="clearable-wrapper mb-4">
 				<div class="input-group">
 					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order comments here">
 					<span class="input-group-append">
-						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						<button wicket:id="submit" type="submit" class="btn btn-icon btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 					</span>
 				</div>
 			</form>
-			<div class="operations">
-				<a wicket:id="showSavedQueries" class="show-saved-queries">
-					<wicket:svg href="eye" class="icon"></wicket:svg>
-					Show Saved Queries
+			<div class="mb-4">
+				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray mr-4">
+					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
 				</a>
-				<a wicket:id="saveQuery" class="save-query">
-					<wicket:svg href="save" class="icon"></wicket:svg>
-					Save Query
+				<a wicket:id="saveQuery" class="save-query text-gray mr-4">
+					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
 				</a>
-				<a wicket:id="orderBy" class="order-by">
-					<wicket:svg href="sort" class="icon"></wicket:svg>
-					Order By
+				<a wicket:id="orderBy" class="order-by text-gray">
+					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
 			</div>
-		</div>
-		<div wicket:id="body" class="body">
-			<div wicket:id="feedback"></div>
-			<table wicket:id="comments" class="table"></table>
+			<div wicket:id="body" class="body">
+				<div wicket:id="feedback"></div>
+				<table wicket:id="comments" class="table"></table>
+			</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="fileFrag">

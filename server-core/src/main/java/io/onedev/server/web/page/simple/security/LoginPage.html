@@ -1,0 +1,31 @@
+<wicket:extend>	
+	<form wicket:id="form" method="post">
+		<div wicket:id="feedback"></div>
+		<div class="form-group">
+			<input wicket:id="userName" autocomplete="username" type="text" class="form-control" placeholder="Login name">
+		</div>
+		<div class="form-group">
+			<input wicket:id="password" autocomplete="current-password" type="password" class="form-control" placeholder="Password">
+		</div>
+		<div class="form-group d-flex flex-wrap justify-content-between">
+			<div class="checkbox-inline">
+				<label class="checkbox text-muted">
+					<input wicket:id="rememberMe" id="rememberMe" type="checkbox" class="form-check-input">
+					Remember Me
+				</label>
+			</div>
+			<a wicket:id="forgetPassword" class="text-muted text-hover-primary">Forgot Password?</a>
+		</div>
+		<button class="btn btn-primary font-weight-bold" type="submit">Sign in</button>
+	</form>
+	<wicket:enclosure child="registerUser">
+		<div class="signup">
+			<span class="opacity-50 mr-3">Don't have an account yet?</span> <a wicket:id="registerUser" class="text-muted text-hover-primary font-weight-bold">Sign Up!</a>
+		</div>
+	</wicket:enclosure>
+	<wicket:enclosure child="ssoButtons">
+	<div class="sso">
+		<a wicket:id="ssoButtons" class="btn btn-light btn-block mb-3"><img wicket:id="image" class="mr-3"> <span wicket:id="label"></span></a>
+	</div>
+	</wicket:enclosure>
+</wicket:extend>

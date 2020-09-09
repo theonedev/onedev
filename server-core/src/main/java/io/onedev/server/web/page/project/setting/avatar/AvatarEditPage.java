@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.setting.avatar;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -78,6 +80,11 @@ public class AvatarEditPage extends ProjectSettingPage {
 		form.add(uploadButton);
 		
 		add(form);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Edit Avatar");
 	}
 	
 }

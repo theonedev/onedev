@@ -3,8 +3,6 @@ package io.onedev.server.web.component.issue.fieldvalues;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -157,8 +155,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							try {
 								String backgroundColor = choiceProvider.getChoices(false).get(value);
 								if (backgroundColor == null)
-									backgroundColor = "#E8E8E8";
-								String fontColor = ColorUtils.isLight(backgroundColor)?"#333":"#f9f9f9"; 
+									backgroundColor = "#E4E6EF";
+								String fontColor = ColorUtils.isLight(backgroundColor)?"#3F4254":"white"; 
 								String style = String.format(
 										"background-color: %s; color: %s;", 
 										backgroundColor, fontColor);
@@ -212,10 +210,4 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	@Nullable
 	protected abstract Input getField();
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new FieldValuesCssResourceReference()));
-	}
-	
 }

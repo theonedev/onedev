@@ -37,7 +37,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -50,8 +50,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -76,8 +76,8 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateLabel;
@@ -93,7 +93,6 @@ import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
@@ -148,6 +147,7 @@ public abstract class IssueListPanel extends Panel {
 		super.onDetach();
 	}
 	
+	@Nullable
 	protected abstract Project getProject();
 
 	protected IssueQuery getBaseQuery() {
@@ -237,7 +237,7 @@ public abstract class IssueListPanel extends Panel {
 				super.onComponentTag(tag);
 				configure();
 				if (!isEnabled()) 
-					tag.put("disabled", "disabled");
+					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
 					tag.put("title", "Query not submitted");
 				else if (queryModel.getObject() == null)
@@ -287,11 +287,7 @@ public abstract class IssueListPanel extends Panel {
 							query = new IssueQuery();
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
-						String queryString = query.toString();
-						if (queryString.length() != 0)
-							queryStringModel.setObject(queryString);
-						else
-							queryStringModel.setObject(null);
+						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
 						doQuery(target);
@@ -344,6 +340,47 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		add(queryForm);
+		
+		if (getProject() == null) {
+			add(new DropdownLink("newIssue") {
+
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+	
+						@Override
+						protected Collection<Project> load() {
+							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
+									.getPermittedProjects(new AccessProject()));
+							
+							Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagementEnabled();
+							CollectionUtils.filter(projects, issueManagementEnabledPredicate);							
+							
+							Collections.sort(projects, new Comparator<Project>() {
+	
+								@Override
+								public int compare(Project o1, Project o2) {
+									return o1.getName().compareTo(o2.getName());
+								}
+								
+							});
+							return projects;
+						}
+						
+					}) {
+	
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Project project) {
+							setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(project));
+						}
+	
+					};
+				}
+			
+			});	
+		} else {
+			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
+		}
 		
 		add(new ModalLink("listFields") {
 
@@ -443,74 +480,14 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
-
-		if (getProject() != null) {
-			add(new Link<Void>("newIssue") {
-
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(String.format(
-							"<svg class='icon'><use xlink:href='%s'/></svg> New", 
-							SpriteImage.getVersionedHref(IconScope.class, "plus")));
-				}
-				
-				@Override
-				public void onClick() {
-					IssueQuery query = queryModel.getObject();
-					String template = query!=null && query.getCriteria()!=null? query.getCriteria().toString(): null;
-					setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(getProject(), template));
-				}
-				
-			}.setEscapeModelStrings(false));
-		} else {
-			add(new DropdownLink("newIssue") {
-
-				@Override
-				public IModel<?> getBody() {
-					return Model.of(String.format(
-							"<svg class='icon'><use xlink:href='%s'/></svg> New <svg class='icon rotate-90'><use xlink:href='%s'/></svg>", 
-							SpriteImage.getVersionedHref(IconScope.class, "plus"), SpriteImage.getVersionedHref(IconScope.class, "arrow")));
-				}
-				
-				@Override
-				protected Component newContent(String id, FloatingPanel dropdown) {
-					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
-
-						@Override
-						protected Collection<Project> load() {
-							List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
-									.getPermittedProjects(new AccessProject()));
-							
-							Predicate<Project> issueManagementEnabledPredicate = item -> item.isIssueManagementEnabled();
-							CollectionUtils.filter(projects, issueManagementEnabledPredicate);							
-							
-							Collections.sort(projects, new Comparator<Project>() {
-
-								@Override
-								public int compare(Project o1, Project o2) {
-									return o1.getName().compareTo(o2.getName());
-								}
-								
-							});
-							return projects;
-						}
-						
-					}) {
-
-						@Override
-						protected void onSelect(AjaxRequestTarget target, Project project) {
-							setResponsePage(NewIssuePage.class, 
-									NewIssuePage.paramsOf(project, queryStringModel.getObject()));
-						}
-
-					};
-				}
-				
-			}.setEscapeModelStrings(false));
-		}
 		
 		ModalLink batchEditSelectedLink;
 		add(batchEditSelectedLink = new ModalLink("batchEditSelected") {
+
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -567,6 +544,11 @@ public abstract class IssueListPanel extends Panel {
 
 		add(new ModalLink("batchEditAll") {
 
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new BatchEditPanel(id) {
@@ -817,6 +799,7 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		issuesTable.addBottomToolbar(new NoRecordsToolbar(issuesTable));
+		issuesTable.add(new NoRecordsBehavior());
 		
 		setOutputMarkupId(true);
 	}

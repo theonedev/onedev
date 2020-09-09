@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -41,7 +39,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -54,7 +51,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -62,7 +58,6 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.statestats.StateStatsBar;
@@ -75,8 +70,7 @@ import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
-import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.util.CursorSupport;
+import io.onedev.server.web.page.simple.security.LoginPage;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {
@@ -89,30 +83,6 @@ public abstract class IssueSidePanel extends Panel {
 
 	@Override
 	protected void onBeforeRender() {
-		addOrReplace(new EntityNavPanel<Issue>("issueNav") {
-
-			@Override
-			protected EntityQuery<Issue> parse(String queryString, boolean inProject) {
-				return IssueQuery.parse(inProject?getProject():null, queryString, true, true, false, false, false);
-			}
-
-			@Override
-			protected Issue getEntity() {
-				return getIssue();
-			}
-
-			@Override
-			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
-				return getIssueManager().query(inProject?getProject():null, query, offset, count, false);
-			}
-
-			@Override
-			protected CursorSupport<Issue> getCursorSupport() {
-				return IssueSidePanel.this.getCursorSupport();
-			}
-			
-		});
-		
 		addOrReplace(newFieldsContainer());
 		addOrReplace(newMilestoneContainer());
 		addOrReplace(newVotesContainer());
@@ -136,7 +106,10 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		addOrReplace(newDeleteLink("delete"));		
+		if (SecurityUtils.canManageIssues(getProject()))
+			addOrReplace(newDeleteLink("delete"));		
+		else
+			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
 		
 		super.onBeforeRender();
 	}
@@ -542,10 +515,6 @@ public abstract class IssueSidePanel extends Panel {
 	private IssueChangeManager getIssueChangeManager() {
 		return OneDev.getInstance(IssueChangeManager.class);
 	}
-
-	private IssueManager getIssueManager() {
-		return OneDev.getInstance(IssueManager.class);
-	}
 	
 	@Override
 	public void renderHead(IHeaderResponse response) {
@@ -555,8 +524,6 @@ public abstract class IssueSidePanel extends Panel {
 
 	protected abstract Issue getIssue();
 
-	@Nullable
-	protected abstract CursorSupport<Issue> getCursorSupport();
-	
 	protected abstract Component newDeleteLink(String componentId);
+	
 }

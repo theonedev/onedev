@@ -383,10 +383,10 @@ public abstract class RevisionSelector extends Panel {
 		} else if (itemValue.startsWith(ADD_FLAG)) {
 			String label;
 			if (branchesActive)
-				label = "<div class='name'>Create branch <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
+				label = "Create branch <b>" + HtmlEscape.escapeHtml5(ref) + "</b>";
 			else
-				label = "<div class='name'>Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b></div>";
-			label += "<div class='revision'>from " + HtmlEscape.escapeHtml5(revision) + "</div>";
+				label = "Create tag <b>" + HtmlEscape.escapeHtml5(ref) + "</b>";
+			label += " from " + HtmlEscape.escapeHtml5(revision);
 			link.add(new Label("label", label).setEscapeModelStrings(false));
 			icon = "plus";
 		} else if (ref.equals(revision)) {
@@ -399,7 +399,7 @@ public abstract class RevisionSelector extends Panel {
 		if (icon != null)
 			link.add(new SpriteImage("icon", icon));
 		else
-			link.add(new WebMarkupContainer("icon").setVisible(false));
+			link.add(new WebMarkupContainer("icon"));
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		item.setOutputMarkupId(true);
 		item.add(AttributeAppender.append("data-value", HtmlEscape.escapeHtml5(itemValue)));
@@ -420,6 +420,16 @@ public abstract class RevisionSelector extends Panel {
 				item.add(AttributeAppender.append("class", "active"));
 			itemsView.add(item);
 		}
+		itemsContainer.add(new Label("noItems", branchesActive? "No branches found": "No tags found") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(itemsView.size() == 0);
+			}
+			
+		});
+		
 		itemsContainer.add(new InfiniteScrollBehavior(PAGE_SIZE) {
 
 			@Override

@@ -1,91 +1,46 @@
-.commit-list>.head {
+.commit-list>div>.body {
 	position: relative;
-}
-.commit-list>.head>* {
-	margin-bottom: 20px;
-}
-.commit-list>.head>.operations>* {
-	margin-right: 16px;
-	color: #444;
-	white-space: nowrap;
-}
-.commit-list>.head>.operations>*:last-child {
-	margin-right: 0;
 }
 
-.commit-list>.body {
-	position: relative;
-}
-.commit-list>.body .no-commits {
-	font-size: 16px;
-}
-.commit-list>.body>ul>li {
-	padding: 4px 8px;
-	position: relative;
-}
-.commit-list>.body li.commit>.avatar {
-	left: 8px;
-	top: 8px;
-	position: absolute;
-}
-.commit-list>.body .label {
-	margin-right: 8px;
-}
-.commit-list>.body .summary a {
-	font-weight: bold;
-	font-size: 15px;
-	line-height: 12px;
-}
-.commit-list>.body .commit>.detail {
-	padding-left: 48px; 
-	padding-right: 200px;
-	word-break: break-all;
-}
-.commit-list>.body .commit.with-status>.detail {
-	padding-right: 270px;
-}
-.commit-list>.body .commit>.actions {
-	position: absolute;
-	right: 8px;
-	top: 8px;
+.commit-list li.date {
+	border-bottom: 1px solid var(--light-gray);
+	font-size: 1.5rem;
+	padding-bottom: 0.5rem;
+	margin-bottom: 0.5rem;
+	margin-top: 1.8rem;
+	align-items: center !important;
 }
 
-.commit-list>.body li.commit:hover, .commit-list>.body li.commit.hover {
-	background: #F7ECB9;
+.commit-list li.commit {
+	padding: 0.4rem 0;
+	border-radius: 0.42rem;
 }
-.commit-list>.body .commit-message .highlight {
+
+.commit-list .commit-message>.summary {
+	font-weight: 600;
+	font-size: 1.1rem;
+}
+
+.commit-lis .commit-message .highlight {
 	background: yellow;
 }
-.commit-list>.body li.commit .contribution {
-	font-size: 12px;
+
+@media(max-width: 991px) {
+	.commit-list .commit-graph, .commit-list li.commit .actions {
+		display: none !important;
+	}
+	.commit-list ul.list {
+		margin-left: 0 !important;
+	}
 }
-.commit-list>.body .message-and-labels {
-	margin-bottom: 4px;
-}
-.commit-list>.body .message-and-labels .commit-message {
-	margin-right: 8px;
-}
-.commit-list>.body .message-and-labels .badge {
-	margin-right: 4px;
-}
-.commit-list>.body .commit>.actions>span {
-    margin-left: 4px;
-}
-.commit-list>.body>.list {
-	margin-bottom: 0;
-}
-.commit-list>.foot {
-	text-align: center;
-}
-.commit-list>.foot>.alert, .commit-list>.foot>.btn {
-	margin-top: 12px;
-	margin-bottom: 0;
-}
-.commit-list li.date {
-	font-size: 18px;
-	margin-top: 12px;
-	text-align: left;
-	border-bottom: 1px solid #EEE;
+@media(min-width: 992px) {
+	.commit-list li.commit {
+		padding-left: 0.6rem;
+		padding-right: 0.6rem;
+	}
+	.commit-list li.commit:hover, .commit-list li.commit.hover {
+		background: var(--light);
+	}
 }
 
 .commit-graph {
@@ -198,14 +153,9 @@
 	stroke: #9b0f7b;
 }
 
-@media(max-width: 991px) {
-	.commit-list li.commit .hash, .commit-list li.commit .browse {
-		display: none;
-	}
-	.commit-list>.body .commit>.detail {
-		padding-right: 0;
-	}
-	.commit-list>.body .commit.with-status>.detail {
-		padding-right: 60px;
-	}
+.commit-list .no-commits {
+	background: url(/icon/empty.svg) no-repeat scroll center center;
+	background-size: 240px 240px;
+	border-top: none;
+	height: 240px;
 }

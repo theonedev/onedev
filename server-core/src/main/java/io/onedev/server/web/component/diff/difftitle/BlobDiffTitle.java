@@ -33,7 +33,7 @@ public class BlobDiffTitle extends Panel {
 		if (change.getOldBlobIdent().mode != null && change.getNewBlobIdent().mode != null
 				&& !change.getOldBlobIdent().mode.equals(change.getNewBlobIdent().mode)) {
 			modeChange = Integer.toString(change.getOldBlobIdent().mode, 8) 
-					+ " " + SpriteImage.getVersionedHref(IconScope.class, "arrow3") + " " 
+					+ " " + SpriteImage.getVersionedHref(IconScope.class, "arrow2") + " " 
 					+ Integer.toString(change.getNewBlobIdent().mode, 8);
 		} else {
 			modeChange = null;

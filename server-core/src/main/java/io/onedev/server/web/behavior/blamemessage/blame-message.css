@@ -1,16 +1,18 @@
 .blame-message {
-	white-space: pre-wrap;
-	word-wrap: break-word;
+	background-color: var(--light-info); 
+	border-radius: 0.42rem; 
+	color: var(--info);
 	position: absolute;
 	z-index: 10000;
-	font-size: 13px;
-	background-color: #FBFCC5; 
-	border: 1px solid black;
-	border-radius: 4px; 
-	color: black; 
-	padding: 8px;
+	font-size: 12px; 
+	padding: 1rem; 
+	z-index: 10000; 
+	box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
+	max-width: 720px;
+	white-space: pre-wrap; 
+	word-wrap: break-word;
 }
 .blame-message>.authoring {
-	margin-bottom: 12px;
+	margin-bottom: 1rem;
 	font-weight: bold;	
 }

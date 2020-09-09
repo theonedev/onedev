@@ -1,11 +1,13 @@
 <wicket:panel>
-	<div class="content">
-		<div class="head clearfix">
-			<span class="float-left">Backlog</span>
-			<span wicket:id="count" class="float-left badge badge-secondary"></span>
-			<a wicket:id="addCard" title="Add new card to this column" class="add-card float-right"><wicket:svg href="plus" class="icon"></wicket:svg></a>
-			<a wicket:id="viewAsList" title="Show issues in list" class="view-list float-right"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+	<div class="content d-flex flex-column flex-grow-1 overflow-hidden">
+		<div class="head d-flex align-items-center">
+			<span class="mr-2">Backlog</span>
+			<span wicket:id="count" class="badge badge-secondary badge-sm mr-2"></span>
+			<div class="ml-auto">
+				<a wicket:id="addCard" title="Add new card to this column" class="add-card"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+				<a wicket:id="viewAsList" title="Show issues in list" class="view-list ml-1"><wicket:svg href="unordered-list" class="icon"></wicket:svg></a>
+			</div>
 		</div>
-		<div wicket:id="body" class="body"></div>
+		<div wicket:id="body" class="body flex-grow-1 d-flex flex-column ps ps-scroll px-4 pt-4"></div>
 	</div>
 </wicket:panel>

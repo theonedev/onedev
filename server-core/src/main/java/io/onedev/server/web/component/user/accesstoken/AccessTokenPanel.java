@@ -2,8 +2,6 @@ package io.onedev.server.web.component.user.accesstoken;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -61,10 +59,4 @@ public abstract class AccessTokenPanel extends Panel {
 		}.add(new ConfirmClickModifier("This will invalidate current token and generate a new one, do you want to continue?")));
 	}
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new AccessTokenCssResourceReference()));
-	}
-	
 }

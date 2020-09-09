@@ -1,12 +1,17 @@
 <wicket:panel>
 	<div class="branch-protection card">
 		<div class="card-header">
-			<span class="drag-indicator"><wicket:svg href="grip" class="icon"/></span>
-			<a wicket:id="edit" title="Edit this rule"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-			<a wicket:id="delete" title="Delete this rule"><wicket:svg href="trash" class="icon"></wicket:svg></a>
-			<div class="form-check-inline">
-				<input wicket:id="enable" type="checkbox" class="form-check-input"> 
-				<label wicket:id="enableLabel" class="form-check-label">Enable</label>
+			<div class="card-title">
+				<span class="drag-indicator"><wicket:svg href="grip" class="icon mr-4"/></span>
+				<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-2" title="Edit this rule"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+				<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger mr-4" title="Delete this rule"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+			</div>
+			<div class="card-toolbar">
+				<span class="switch switch-sm switch-primary">
+					<label>
+						<input wicket:id="enable" type="checkbox"> 
+					</label>
+				</span>
 			</div>
 		</div>
 		<div class="card-body">

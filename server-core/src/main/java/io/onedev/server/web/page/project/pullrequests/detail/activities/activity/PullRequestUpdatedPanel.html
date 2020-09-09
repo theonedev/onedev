@@ -3,21 +3,21 @@
 		New commits added <span wicket:id="age"></span>
 	</div>
 	<div class="body">
-		<div wicket:id="tooManyCommits" class="alert alert-warning"></div>
-		<div wicket:id="commits">
-			<wicket:svg href="commit" class="icon"></wicket:svg>
-			<div class="author"><span wicket:id="author"></span></div> 
-			<div class="message">
+		<div wicket:id="tooManyCommits" class="alert alert-light-warning"></div>
+		<div wicket:id="commits" class="commit d-flex align-items-center">
+			<wicket:svg href="commit" class="icon flex-shrink-0 mr-2"></wicket:svg>
+			<div class="author flex-shrink-0 mr-2"><span wicket:id="author"></span></div> 
+			<div class="message mr-3">
 				<div wicket:id="message"></div> 
 			</div>
-			<div class="actions">
-				<span wicket:id="buildStatus" class="build-status"></span>
-				<span class="btn-group hash">
+			<div class="actions flex-shrink-0 ml-auto d-none d-lg-block">
+				<span wicket:id="buildStatus" class="build-status mr-1"></span>
+				<span class="btn-group hash mr-1">
 					<a wicket:id="hashLink" class="hash btn btn-sm btn-outline-secondary"><span wicket:id="hash"></span></a>
-                    <a wicket:id="copyHash" class="btn btn-sm btn-outline-secondary"><wicket:svg href="copy" class="icon"></wicket:svg></a>
+                    <a wicket:id="copyHash" class="btn btn-sm btn-outline-secondary btn-icon"><wicket:svg href="copy" class="icon"></wicket:svg></a>
 				</span>
 				<span class="btn-group browse">
-					<a wicket:id="browseCode" title="Browse code" class="btn btn-outline-secondary btn-sm"><wicket:svg href="files" class="icon"></wicket:svg></a>
+					<a wicket:id="browseCode" title="Browse code" class="btn btn-outline-secondary btn-sm btn-icon"><wicket:svg href="files" class="icon"></wicket:svg></a>
 				</span>
 			</div>
 		</div>

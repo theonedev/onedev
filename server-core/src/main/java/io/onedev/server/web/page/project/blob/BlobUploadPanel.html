@@ -2,7 +2,7 @@
 	<form wicket:id="form" class="upload-blobs">
 		<div class="modal-header">
 			<h5 class="modal-title">Upload Files</h5>
-			<button wicket:id="close" type="button" class="close">&times;</button>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
 			<div wicket:id="feedback"></div>
@@ -12,7 +12,7 @@
 			<div class="form-group">
   				<label>Directory</label>
 				<input wicket:id="directory" class="form-control"></input>
-				<p class="help-block">Optionally specify relative directory to put uploaded files</p>
+				<p class="form-text text-muted">Optionally specify relative directory to put uploaded files</p>
 			</div>			
 			<div class="form-group">
   				<label>Summary Commit Message</label>

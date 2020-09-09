@@ -13,6 +13,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,6 +30,7 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Indexed;
 import io.onedev.server.util.PathNode.Named;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -48,7 +50,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	
 	private RepeatingView rows;
 	
-	private WebMarkupContainer noElements;
+	private WebMarkupContainer noRecords;
 	
 	public BeanListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
@@ -102,7 +104,19 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		if (list == null)
 			list = newList(); 
 		
-		add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
+		WebMarkupContainer table = new WebMarkupContainer("table") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (rows.size() == 0) 
+					NoRecordsBehavior.decorate(tag);
+			}
+			
+		};
+		add(table);
+		
+		table.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
@@ -130,7 +144,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		});
 		
 		rows = new RepeatingView("elements");
-		add(rows);
+		table.add(rows);
 		
 		for (Serializable element: list)
 			addRow(element);
@@ -158,19 +172,23 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				
 				target.prependJavaScript(script);
 				target.add(newRow);
-				target.add(noElements);
+				target.add(noRecords);
+				if (rows.size() == 1) {
+					target.appendJavaScript(String.format("$('#%s>div>table').removeClass('%s');", 
+							BeanListPropertyEditor.this.getMarkupId(), NoRecordsBehavior.CSS_CLASS));
+				}
 
 				onPropertyUpdating(target);
 			}
 
 		}.setDefaultFormProcessing(false));
 		
-		add(noElements = new WebMarkupContainer("noElements") {
+		table.add(noRecords = new WebMarkupContainer("noRecords") {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new WebMarkupContainer("td").add(AttributeAppender.append("colspan", propertyContexts.size()+2)));
+				add(new WebMarkupContainer("td").add(AttributeAppender.append("colspan", propertyContexts.size()+1)));
 				setOutputMarkupPlaceholderTag(true);
 			}
 
@@ -258,7 +276,13 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				markFormDirty(target);
 				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
 				rows.remove(row);
-				target.add(noElements);
+				target.add(noRecords);
+
+				if (rows.size() == 0) {
+					target.appendJavaScript(String.format("$('#%s>div>table').addClass('%s');", 
+							BeanListPropertyEditor.this.getMarkupId(), NoRecordsBehavior.CSS_CLASS));
+				}
+				
 				onPropertyUpdating(target);
 			}
 

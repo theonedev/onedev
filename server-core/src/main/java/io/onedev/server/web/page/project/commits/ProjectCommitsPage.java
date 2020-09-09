@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -66,7 +67,7 @@ public class ProjectCommitsPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(savedQueries = new SavedQueriesPanel<NamedCommitQuery>("side") {
+		add(savedQueries = new SavedQueriesPanel<NamedCommitQuery>("savedQueries") {
 
 			@Override
 			protected NamedQueriesBean<NamedCommitQuery> newNamedQueriesBean() {
@@ -102,7 +103,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(commitList = new CommitListPanel("main", new IModel<String>() {
+		add(commitList = new CommitListPanel("commits", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -226,6 +227,11 @@ public class ProjectCommitsPage extends ProjectPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canReadCode(getProject());
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Commits");
 	}
 	
 }

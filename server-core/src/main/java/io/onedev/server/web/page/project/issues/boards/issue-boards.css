@@ -1,221 +1,59 @@
-/* Make sure we have enough room for query input in mobile devices */
-.IssueBoardsPage {
-	min-width: 570px;
-}
-#issue-boards>.head {
-	margin-bottom: 20px;
-}
-#issue-boards .no-boards {
-	font-size: 16px;
-}
-#issue-boards .no-boards a {
-	margin-left: 12px;
-}
-
-.board-menu {
-	padding: 20px;
-}
-.milestone-menu {
-	padding: 8px 12px;
-}
-.board-menu table {
+.issue-boards>.body>.feedback>.feedbackPanel {
 	margin-bottom: 0;
 }
-.board-menu table td, .milestone-menu table td {
-	padding: 4px 0;
-	white-space: nowrap;
+.issue-boards>.body>.columns>.column {
+	flex: 1;
 }
-.board-menu table td.actions, .milestone-menu table td.actions, 
-.milestone-menu table td.status, .milestone-menu table td.due-date {
-	padding-left: 12px;
+.issue-boards>.body>.feedback>.feedbackPanel {
+	margin-bottom: 0;
+	margin-top: 1rem;
 }
-
-.administrative .board-menu, .administrative .milestone-menu {
+.issue-boards>.body>.columns>.column>.content {
+	border: 1px solid var(--secondary);
+	border-radius: 0.42rem;
+	background: white;
+}
+.issue-boards>.body>.columns>.column>.content>.head {
+	font-weight: 600;
+	padding: 0.5rem 1rem;
+	font-size: 1.1rem;
+	border-bottom: 1px solid var(--light-gray);
+	border-top: 3px solid var(--secondary);
+}
+.issue-boards>.body>.columns>.column {
+	margin-left: 2rem;
 	min-width: 300px;
-	padding: 20px;
 }
-
-.board-menu>a, .milestone-menu>a {
-	margin-top: 10px !important;
+.issue-boards>.body>.columns .column:first-child {
+	margin-left: 0;
 }
-.milestone-menu .actions a {
-	color: #1f3b7b;
-}
-
-#issue-boards>.body>.columns {
-	position: relative;
-	margin: 0 -20px;
-	/* hack to makes all column of same width and same space */
-	padding: 0 0 20px 20px; 
-	display: flex;
-}
-#issue-boards>.body>.columns>.column {
-	flex: 1 1 0;
-	min-width: 360px;
-	height: 100%;
-	/* hack to makes all column of same width and same space */
-	padding-right: 20px;
-}
-#issue-boards>.body>.columns>.column>.content {
-	border: 1px solid #E0E0E0;
-	border-radius: 4px;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	background: #F9F9F9;
-}
-#issue-boards>.body>.columns>.column>.content>.head {
-	font-weight: bold;
-	padding: 6px 12px;
-	font-size: 15px;
-	border-bottom: 1px solid #E0E0E0;
-	border-top: 3px solid #E0E0E0;
-}
-#issue-boards>.body>.columns>.column>.content>.head .badge {
-	margin-left: 8px;
-	margin-top: 3px;
-}
-#issue-boards>.body>.columns>.column>.content>.head a {
-	color: #666;
-	margin-left: 8px;
-}
-
-#issue-boards>.body>.columns>.column>.content>.body {
-	position: relative;
-	padding: 16px 16px 0 16px;
-	height: 100%;
-	overflow: auto;
-} 
-#issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-active {
+.issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-active {
 	background: #FDF2C5;
 } 
-#issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-hover {
+.issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-hover {
 	background: #FAE280;
-} 
-#issue-boards>.body>.columns>.column>.content>.body>.loading-indicator {
-	margin-top: 8px;
 }
-#issue-boards>.body>.columns>.column>.content>.body>.card {
-	margin-bottom: 16px;
-} 
 
-#issue-boards>.body .card {
-	border-radius: 4px;
-	padding: 8px;
-	background: white;
-	position: relative;
-	box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);	
+.floating>.content>.milestone-menu>table>tbody>tr:first-child>td {
+	border-top: none;
 }
-#issue-boards>.body .card.issue-dragging {
+
+.issue-boards>.body .board-card {
+    box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.15);
+	position: relative;
+}
+.issue-boards>.body .board-card.issue-dragging {
 	visibility: hidden;
 }
-#issue-boards>.body .card.ui-draggable-dragging {
-	box-shadow: 2px 2px 6px 2px rgba(0, 0, 0, 0.3);	
-	border-width: 1px;
-	font-weight: normal;
-	white-space: normal;
+.issue-boards>.body .board-card.ui-draggable-dragging {
+	box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.3);	
 }
 
-#issue-boards>.body .card {
-	font-size: 13px;
-}
-#issue-boards>.body .card .head>* {
-	margin: 0 8px 8px 0;
-}
-#issue-boards>.body .card .head .issue-state {
-	font-size: 11px;
-}
-#issue-boards>.body .card .head .field-values .value span {
-	background: #EEE;
-	padding: .2em .6em .3em;
-	border-radius: .25em;
-	font-size: 11px;
-	line-height: 1;
-	white-space: nowrap;
-	vertical-align: baseline;
+.board-card-detail .modal-header h5 {
+	width: 100%;
+	margin-right: 36px;
 }
 
-#issue-boards>.body .card .head>.avatars {
-	margin-right: 0;
-}
-#issue-boards>.body .card .avatars>.avatar {
-	margin-right: 6px;
-}
-#issue-boards>.body .card .avatars>.avatar:last-child {
-	margin-right: 0;
-}
-#issue-boards>.body .card a {
-	color: #666;
-}
-#issue-boards>.body .card .field-values>.value:last-child {
-	margin-right: 0;
-}
-#issue-boards>.body .card .field-values>.value {
-	display: inline-block;
-	margin-right: 8px;
-}
-#issue-boards>.body .card .field-values>.value:last-child {
-	margin-right: 0;
-}
-#issue-boards>.body .card .state, 
-#issue-boards>.body .card .field-values, 
-#issue-boards>.body .card .field-values a {
-	font-size: 12px;
-}
-#issue-boards>.body>.columns>.column>.content>.body .loading-indicator {
-	margin-bottom: 16px;
-}
-#issue-boards>.body .card .detail {
-	color: #666;
-	text-decoration: none;
-}
-#issue-boards>.body .card .detail svg {
-	width: 16px;
-	height: 16px;
-}
-.board-card-detail>.modal-header {
-	padding-right: 30px;
-	position: relative;
-}
-.board-card-detail>.modal-header>.close {
-	position: absolute;
-	right: 10px;
-	top: 20px;
-}
-.board-card-detail>.body {
-	position: relative;
-	min-height: 600px;
-}
-.board-card-detail>.body>.main {
-	padding: 20px;
-}
-.board-card-detail>.body>.main>div {
-	margin-bottom: 20px;
-}
-.board-card-detail>.body>.main>div:last-child {
-	margin-bottom: 0;
-}
-.board-card-detail>.body>.main .commits {
-	margin-bottom: 20px;
-}
-.board-card-detail>.body>.side-info {
-	position: absolute;
-	top: 0;
-	width: 320px;
-	border-radius: 0 0 4px 0;
-}
-.board-card-detail>.body .issue-side>.nav {
-	padding-right: 20px;
-	border-right: 1px solid #D8D8D8;
-	margin-right: 30px;
-	display: block;
-}
-
-@media (max-width: 992px) {
-	.board-card-detail>.body>.main {
-		margin-right: 0;
-	}
-	.board-card-detail>.body>.side {
-		display: none;
-	}	
+.board-card-detail .issue-operations .new-issue {
+	display: none;
 }

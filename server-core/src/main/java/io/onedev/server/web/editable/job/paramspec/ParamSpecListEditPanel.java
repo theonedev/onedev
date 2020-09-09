@@ -29,6 +29,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -165,7 +166,7 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public String getCssClass() {
-				return "actions";
+				return "actions text-right";
 			}
 			
 		});		
@@ -182,7 +183,8 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<ParamSpec, Void> dataTable;
 		add(dataTable = new DataTable<ParamSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.add(new NoRecordsBehavior());
 		
 		dataTable.add(new SortBehavior() {
 

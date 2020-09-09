@@ -1,56 +1,55 @@
 <wicket:panel>
-	<div class="pull-request-list">
-		<div class="head">
-			<form wicket:id="query" class="clearable-wrapper">
-				<div class="input-group">
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order pull requests here">
-					<span class="input-group-append">
-						<button wicket:id="submit" type="submit" class="btn btn-outline-secondary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
-					</span>
-				</div>
-			</form>
-			<a wicket:id="newRequest" class="open-new btn btn-success"></a>
-			<div class="operations">
-				<a wicket:id="showSavedQueries" class="show-saved-queries">
-					<wicket:svg href="eye" class="icon"></wicket:svg>
-					Show Saved Queries
+	<div class="pull-request-list card">
+		<div class="card-body">
+			<div class="d-flex mb-4">
+				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order pull requests here">
+						<span class="input-group-append">
+							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+					</div>
+				</form>
+				<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-3" title="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
+			</div>
+			<div class="operations mb-5">
+				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray mr-4">
+					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
 				</a>
-				<a wicket:id="saveQuery" class="save-query">
-					<wicket:svg href="save" class="icon"></wicket:svg>
-					Save Query
+				<a wicket:id="saveQuery" class="save-query text-gray mr-4">
+					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
 				</a>
-				<a wicket:id="orderBy" class="order-by">
-					<wicket:svg href="sort" class="icon"></wicket:svg>
-					Order By
+				<a wicket:id="orderBy" class="order-by text-gray">
+					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
 			</div>
-		</div>
-		<div wicket:id="body" class="body">
-			<div wicket:id="feedback"></div>
-			<table wicket:id="requests" class="table"></table>
+			<div wicket:id="body" class="body">
+				<div wicket:id="feedback"></div>
+				<table wicket:id="requests" class="table"></table>
+			</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="contentFrag">
-		<div class="primary clearfix">
-			<div class="float-left">
-				<a wicket:id="number" class="number"></a> 
-				<span wicket:id="title" class="title"></span> 
+		<div class="primary d-flex flex-wrap mb-3">
+			<div class="flex-grow-1 mr-4">
+				<a wicket:id="number" class="number h6 mr-2"></a> 
+				<span wicket:id="title" class="title h6"></span> 
 			</div>
-			<div class="float-right comments extra-info" title="Comments">
+			<div class="flex-shrink-0 comments d-none d-lg-block text-muted" title="Comments">
 				<wicket:svg href="comments" class="icon"></wicket:svg> <span wicket:id="comments"></span>
 			</div>
 		</div>
-		<div class="secondary clearfix">
-			<div class="status float-left"><span wicket:id="status"></span></div>
-			<div class="float-left review" wicket:id="reviews"></div>
-			<div class="float-left jobs" wicket:id="jobs"></div>
-			<div class="branches float-left extra-info">
+		<div class="secondary d-flex flex-wrap">
+			<div class="status flex-shrink-0 mr-3"><span wicket:id="status"></span></div>
+			<div class="review flex-shrink-0 mr-3" wicket:id="reviews"></div>
+			<div class="jobs flex-shrink-0 mr-3" wicket:id="jobs"></div>
+			<div class="branches flex-shrink-0 d-none d-lg-block mr-3">
 				<a wicket:id="target" title="Target"></a>
-				<wicket:svg href="arrow3" class="icon rotate-180"/>
+				<wicket:svg href="arrow2" class="text-gray icon rotate-180"/>
 				<a wicket:id="source" title="Source"></a>
 			</div>
-			<div class="last-update float-right extra-info">
-				<a wicket:id="user"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
+			<div class="last-update ml-auto d-none d-lg-block text-muted font-size-sm">
+				<a wicket:id="user" class="text-muted"></a> <span wicket:id="activity"></span> <span wicket:id="date"></span>
 			</div>
 		</div>
 	</wicket:fragment>

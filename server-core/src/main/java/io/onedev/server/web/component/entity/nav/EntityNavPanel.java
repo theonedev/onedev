@@ -7,8 +7,6 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -33,12 +31,6 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 		entityName = WordUtils.uncamel(typeArguments.get(0).getSimpleName()).toLowerCase();
 	}
 
-	@Override
-	protected void onConfigure() {
-		super.onConfigure();
-		setVisible(getCursor() != null);
-	}
-	
 	private Cursor getCursor() {
 		if (getCursorSupport() != null)
 			return getCursorSupport().getCursor();
@@ -54,13 +46,13 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(getCursor().getOffset()>0);
+				setEnabled(getCursor() != null && getCursor().getOffset() > 0);
 			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				if (getCursor().getOffset() <= 0)
+				if (getCursor() == null || getCursor().getOffset() <= 0)
 					tag.put("disabled", "disabled");
 				tag.put("title", "Next " + entityName);
 			}
@@ -87,13 +79,13 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(getCursor().getOffset()<getCursor().getCount()-1);
+				setEnabled(getCursor() != null && getCursor().getOffset()<getCursor().getCount()-1);
 			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				if (getCursor().getOffset() >= getCursor().getCount()-1)
+				if (getCursor() == null || getCursor().getOffset() >= getCursor().getCount()-1)
 					tag.put("disabled", "disabled");
 				tag.put("title", "Previous " + entityName);
 			}
@@ -123,16 +115,13 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 
 			@Override
 			public String getObject() {
-				return entityName + " " + (getCursor().getCount()-getCursor().getOffset()) + " of " + getCursor().getCount();				
+				if (getCursor() != null)
+					return entityName + " " + (getCursor().getCount()-getCursor().getOffset()) + " of " + getCursor().getCount();				
+				else
+					return entityName + " 1 of 1";
 			}
 			
 		}));
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new EntityNavCssResourceReference()));
 	}
 
 	protected abstract EntityQuery<T> parse(String queryString, boolean inProject);

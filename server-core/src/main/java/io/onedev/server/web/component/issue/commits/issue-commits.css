@@ -1,49 +1,11 @@
 .issue-commits>.commit {
-	color: #888;
-	position: relative;
-	padding: 8px 8px;
-	border-top: 1px solid #DDD;
+	border-top: 1px solid var(--light-gray);
 }
 .issue-commits>.commit:first-child {
 	border-top: none;
 }
 
-.issue-commits>.commit>.avatar {
-	left: 8px;
-	top: 12px;
-	position: absolute;
-}
-.issue-commits>.commit>.detail .summary a {
-	font-weight: bold;
-	font-size: 15px;
-	line-height: 12px;
-}
-.issue-commits>.commit>.detail {
-	padding-left: 48px; 
-	padding-right: 180px;
-	word-break: break-all;
-}
-.issue-commits>.commit>.detail>.message {
-	margin-bottom: 4px;
-}
-.issue-commits>.commit.with-status>.detail {
-	padding-right: 240px;
-}
-.issue-commits>.commit>.actions {
-	position: absolute;
-	right: 8px;
-	top: 12px;
-}
-
-@media(max-width: 991px) {
-	.issue-commits>.commit>.actions>.browse, 
-	.issue-commits>.commit>.actions>.hash {
-		display: none;
-	}
-	.issue-commits>.commit>.detail {
-		padding-right: 0;
-	} 
-	.issue-commits>.commit.with-status>.detail {
-		padding-right: 60px;
-	} 
+.issue-commits>.commit .commit-message>.summary {
+    font-weight: 600;
+    font-size: 1.1rem;
 }

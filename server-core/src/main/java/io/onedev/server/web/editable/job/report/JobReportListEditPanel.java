@@ -30,6 +30,7 @@ import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -185,7 +186,7 @@ class JobReportListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public String getCssClass() {
-				return "actions";
+				return "actions minimum";
 			}
 			
 		});		
@@ -202,7 +203,8 @@ class JobReportListEditPanel extends PropertyEditor<List<Serializable>> {
 		DataTable<JobReport, Void> dataTable;
 		add(dataTable = new DataTable<JobReport, Void>("reports", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.add(new NoRecordsBehavior());
 		
 		dataTable.add(new SortBehavior() {
 

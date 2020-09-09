@@ -1,10 +1,10 @@
 <wicket:panel>
 	<form wicket:id="form" class="leave-confirm">
+        <div wicket:id="feedback" class="mb-4"></div>
         <div wicket:id="editor"></div>
-        <div wicket:id="feedback"></div>
-		<div class="actions clearfix">
-			<input class="btn btn-primary dirty-aware float-left" value="Save" type="submit">
-			<a wicket:id="delete" class="btn btn-danger float-right">Delete</a>
+		<div class="d-flex mt-5">
+			<input class="btn btn-primary dirty-aware mr-1" value="Save" type="submit">
+			<a wicket:id="delete" class="btn btn-danger ml-auto">Delete</a>
 		</div>
 	</form>
 </wicket:panel>

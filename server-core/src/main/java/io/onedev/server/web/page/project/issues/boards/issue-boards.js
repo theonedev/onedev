@@ -1,39 +1,11 @@
 onedev.server.issueBoards = {
-	onDomReady: function() {
-		$("body").css("overflow-y", "hidden");
-	}, 
-	onBodyDomReady: function() {
-		var $columns = $("#issue-boards>.body>.columns");
-		if ($columns.length != 0) {
-			// Do not use perfect scroll on Device as it may cause scroll issue
-			if (onedev.server.util.isDevice()) {
-				$columns.addClass("resize-aware").on("resized", function() {
-					$columns.outerHeight($(window).height()-$columns.offset().top);
-				});
-			} else {
-				var ps = new PerfectScrollbar($columns[0]);
-				$columns.addClass("resize-aware").on("resized", function() {
-					$columns.outerHeight($(window).height()-$columns.offset().top);
-					ps.update();
-				});
-			}
-		}
-	},
-	onColumnLoad: function(containerId, callback) {
+	onColumnDomReady: function(containerId, callback) {
 		var $body = $("#" + containerId);
-		
-		// Do not use perfect scroll on Device as it may cause scroll issue
-		if (!onedev.server.util.isDevice()) {
-			var ps = new PerfectScrollbar($body[0]);
-			$body.addClass("resize-aware").on("resized", function() {
-				ps.update();
-			});
-		}
 
 		if (callback) {
 			$body.droppable({
 				accept: function($draggable) {
-					return $draggable.is("#issue-boards .card") && !$draggable.is("#"+containerId + " .card");
+					return $draggable.is(".issue-boards .board-card") && !$draggable.is("#"+containerId + " .board-card");
 				}, 
 				drop: function(event, ui) {
 					if ($body.hasClass("issue-droppable")) {
@@ -48,7 +20,6 @@ onedev.server.issueBoards = {
 	}, 
 	onCardDomReady: function(cardId, callback) {
 		var $card = $("#" + cardId);
-        var $body = $card.closest(".body");
         var $container = $card.closest(".columns");
 		var containerContentWidth;
 		if (callback) {
@@ -105,13 +76,13 @@ onedev.server.issueBoards = {
 						onedev.server.ajaxRequests.count--;		
 					}
 					$card.removeData("droppedTo");
-					$("#issue-boards .body .body").removeClass("issue-droppable");
+					$(".issue-boards .body .body").removeClass("issue-droppable");
 				}
 			});
 		}
 	}, 
 	markAccepted: function(issueId, accepted) {
-		var $card = $("#issue-boards .column .body .ui-draggable.issue-dragging[data-issue='" + issueId + "']");
+		var $card = $(".issue-boards .column .body .ui-draggable.issue-dragging[data-issue='" + issueId + "']");
 		$card.data("accepted", accepted);
 	} 
 }

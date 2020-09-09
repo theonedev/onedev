@@ -34,7 +34,7 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -126,7 +126,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected String getModalCssClass() {
-				return "modal-lg";
+				return "modal-xl";
 			}
 			
 			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, Cursor cursor) {

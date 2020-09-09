@@ -25,6 +25,7 @@ import io.onedev.server.util.Provider;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -122,6 +123,7 @@ public abstract class BlobEditPanel extends Panel {
 					protected void onError(AjaxRequestTarget target, Form<?> form) {
 						super.onError(target, form);
 						target.add(form);
+						((BasePage)getPage()).resizeWindow(target);
 					}
 
 					@Override

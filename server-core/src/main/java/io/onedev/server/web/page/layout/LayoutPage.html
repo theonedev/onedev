@@ -1,149 +1,99 @@
 <wicket:extend>
-	<div id="layout">
-		<nav class="navbar navbar-expand-md fixed-top navbar-dark bg-dark">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
-        			<span class="navbar-toggler-icon"></span>
-      			</button>					
-      			<a wicket:id="brandLink" class="navbar-brand">
-					<wicket:svg alt="OneDev" href="logo" class="icon"></wicket:svg>
-				</a>
-				<div wicket:id="navContext" class="nav-context"></div>
+	<div wicket:id="sidebar" class="sidebar">
+		<div class="sidebar-header">
+			<a wicket:id="brandLink" class="sidebar-brand">
+				<wicket:svg href="logo" class="icon"></wicket:svg>
+				ONEDEV			
+			</a>
+			<a href="javascript:void(0);" class="sidebar-mini-toggle d-none d-lg-inline"><wicket:svg href="expand3" class="icon"></wicket:svg></a>
+			<a href="javascript:void(0);" class="sidebar-close d-lg-none"><wicket:svg href="times" class="icon"></wicket:svg></a>
+		</div>
+		<div class="sidebar-body ps ps-scroll">
+			<div wicket:id="menus" class="sidebar-menu">
+				<div wicket:id="header" class="menu-header"></div>
+				<div wicket:id="body" class="menu-body"></div>
 			</div>
-			<div class="collapse navbar-collapse" id="navbar-collapse">
-  				<ul class="navbar-nav">
-					<li wicket:id="navTabs" class="nav-item"><a wicket:id="tab" class="nav-link"></a></li>
-    				<li wicket:id="navAdministration" class="nav-item dropdown">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administration</a>
-      					<div class="dropdown-menu administration-menu">
-							<a wicket:id="userManagement" class="dropdown-item">
-								<wicket:svg href="user" class="icon"></wicket:svg>
-								User Management
-							</a>
-							<a wicket:id="roleManagement" class="dropdown-item">
-								<wicket:svg href="role" class="icon"></wicket:svg>
-								Role Management
-							</a>
-							<a wicket:id="groupManagement" class="dropdown-item">
-								<wicket:svg href="group" class="icon"></wicket:svg>
-								Group Management
-							</a>
-							<a wicket:id="securitySetting" class="dropdown-item">
-								<wicket:svg href="lock" class="icon"></wicket:svg>
-								Security Setting
-							</a>
-							<a wicket:id="externalAuthentication" class="dropdown-item">
-								<wicket:svg href="key" class="icon"></wicket:svg>
-								External Authentication
-							</a>
-							<a wicket:id="sso" class="dropdown-item">
-								<wicket:svg href="login" class="icon"></wicket:svg>
-								Single Sign On Providers
-							</a>
-							<a wicket:id="sshSetting" class="dropdown-item">
-								<wicket:svg href="shield" class="icon"></wicket:svg>
-								SSH Setting
-							</a>
-							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="systemSetting" class="dropdown-item">
-								<wicket:svg href="sliders" class="icon"></wicket:svg>
-								System Setting
-							</a>
-							<a wicket:id="issueSetting" class="dropdown-item">
-								<wicket:svg href="bug" class="icon"></wicket:svg>
-								Issue Setting
-							</a>
-							<a wicket:id="mailSetting" class="dropdown-item">
-								<wicket:svg href="mail" class="icon"></wicket:svg>
-								Mail Setting
-							</a>
-							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="jobExecutors" class="dropdown-item">
-								<wicket:svg href="run" class="icon"></wicket:svg>
-								Job Executors
-							</a>
-							<a wicket:id="groovyScripts" class="dropdown-item">
-								<wicket:svg href="script" class="icon"></wicket:svg>
-								Groovy Scripts
-							</a>
-							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="databaseBackup" class="dropdown-item">
-								<wicket:svg href="database" class="icon"></wicket:svg>
-								Database Backup
-							</a>
-							<a wicket:id="serverLog" class="dropdown-item">
-								<wicket:svg href="log" class="icon"></wicket:svg>
-								Server Log
-							</a>
-							<a wicket:id="serverInformation" class="dropdown-item">
-								<wicket:svg href="computer" class="icon"></wicket:svg>
-								Server Information
-							</a>
-			          	</div>        				
-			  		</li>
-				</ul>
-				<ul class="navbar-nav ml-auto">
-					<li class="nav-item github">
-						<a href="https://github.com/theonedev/onedev" class="nav-link" target="_blank">
-							<wicket:svg href="github-o" class="icon"></wicket:svg>
-							<span class="name">GitHub</span>
-						</a>
-					</li>
-    				<li class="nav-item dropdown help">
-						<a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-							<wicket:svg href="question-circle" class="icon"></wicket:svg>
-							<span class="name">Help</span>
-						</a>
-      					<div class="dropdown-menu dropdown-menu-right">
-							<div wicket:id="productVersion" class="dropdown-item-text"></div>          					
-							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="docLink" class="dropdown-item" target="_blank">Documentation</a>
-							<a href="https://github.com/theonedev/onedev/issues" class="dropdown-item" target="_blank">Support &amp; Bug Report</a>
-			          	</div>        				
-					</li>	
-			  		<wicket:container wicket:id="notSignedIn">
-			  		<li class="nav-item"><a wicket:id="signIn" class="nav-link">Sign in</a></li>
-			  		<wicket:enclosure child="signUp">				  	
-			  		<li class="nav-item"><a wicket:id="signUp" class="nav-link">Sign Up</a></li>
-			  		</wicket:enclosure>
-			  		</wicket:container>
-    				<li wicket:id="navSignedIn" class="nav-item dropdown signed-in">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a>
-      					<div class="dropdown-menu dropdown-menu-right my-menu">
-							<div wicket:id="header" class="dropdown-item-text"></div>          					
-							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="myProfile" class="dropdown-item">
-								<wicket:svg href="profile" class="icon"></wicket:svg>
-								My Profile
-							</a>
-							<a wicket:id="myAvatar" class="dropdown-item">
-								<wicket:svg href="avatar" class="icon"></wicket:svg>
-								Edit Avatar
-							</a>
-							<a wicket:id="myPassword" class="dropdown-item">
-								<wicket:svg href="password" class="icon"></wicket:svg>
-								Change Password
-							</a>
-							<a wicket:id="mySshKeys" class="dropdown-item">
-								<wicket:svg href="key" class="icon"></wicket:svg>
-								SSH Keys
-							</a>
-							<a wicket:id="myAccessToken" class="dropdown-item">
-								<wicket:svg href="token" class="icon"></wicket:svg>
-								Access Token
-							</a>
-							<div role="separator" class="dropdown-divider"></div>
-							<a wicket:id="signOut" class="dropdown-item">
-								<wicket:svg href="logout" class="icon"></wicket:svg>
-								<span wicket:id="label"></span>
-							</a>
-			          	</div>        				
-			  		</li>
-    			</ul>					
-		    </div>		    	
-		</nav>	
-		<div class="body">
-			<wicket:child></wicket:child>
+		</div>
+		<div class="sidebar-footer">
+			<div wicket:id="productVersion" class="sidebar-version"></div>
+			<div class="dropdown sidebar-help">
+				<a href="#" class="dropdown-toggle no-dropdown-caret" data-toggle="dropdown">
+					<wicket:svg href="question-o" class="icon"></wicket:svg>
+				</a>
+				<div class="dropdown-menu">
+					<a wicket:id="docLink" class="dropdown-item" target="_blank">Documentation</a>
+					<a href="https://code.onedev.io/projects/onedev-server/issues?query=%22State%22+is+%22Open%22" class="dropdown-item" target="_blank">Support &amp; Bug Report</a>
+	          	</div>  					
+			</div>
 		</div>
 	</div>
+	<div wicket:id="topbar" class="topbar">
+		<div class="topbar-left">
+			<a wicket:id="brandLink" class="topbar-brand">
+				<wicket:svg href="logo" class="icon"></wicket:svg>
+			</a>
+			<a class="sidebar-toggle topbar-link d-lg-none">
+				<wicket:svg href="menu" class="icon"></wicket:svg>
+			</a>
+			<div wicket:id="title" class="topbar-title"></div>
+		</div>
+		<div class="topbar-right text-nowrap">
+			<a href="https://github.com/theonedev/onedev" class="github topbar-link d-none d-sm-inline" target="_blank">
+				<wicket:svg href="github" class="icon"></wicket:svg>
+			</a>
+	  		<a wicket:id="signIn" class="topbar-link"><wicket:svg href="login" class="icon"/> <span class="d-none d-sm-inline">Sign In</span></a>
+			<div wicket:id="userInfo" class="dropdown user-info">
+				<a href="#" class="dropdown-toggle user-info no-dropdown-caret topbar-link" data-toggle="dropdown">
+					<img wicket:id="avatar"> 
+					<span wicket:id="name" class="ml-2 d-none d-lg-inline"></span>
+				</a>
+				<div class="dropdown-menu">
+					<a wicket:id="myProfile" class="dropdown-item">
+						<wicket:svg href="profile" class="icon mr-2"></wicket:svg>
+						My Profile
+					</a>
+					<a wicket:id="myAvatar" class="dropdown-item">
+						<wicket:svg href="avatar" class="icon mr-2"></wicket:svg>
+						Edit Avatar
+					</a>
+					<a wicket:id="myPassword" class="dropdown-item">
+						<wicket:svg href="password" class="icon mr-2"></wicket:svg>
+						Change Password
+					</a>
+					<a wicket:id="mySshKeys" class="dropdown-item">
+						<wicket:svg href="key" class="icon mr-2"></wicket:svg>
+						SSH Keys
+					</a>
+					<a wicket:id="myAccessToken" class="dropdown-item">
+						<wicket:svg href="token" class="icon mr-2"></wicket:svg>
+						Access Token
+					</a>
+					<a wicket:id="signOut" class="dropdown-item">
+						<wicket:svg href="logout" class="icon mr-2"></wicket:svg>
+						<span wicket:id="label"></span>
+					</a>
+	          	</div>        				
+			</div>
+		</div>
+	</div>
+	<div class="main autofit d-flex flex-column resize-aware">
+		<wicket:child></wicket:child>
+	</div>
+	
+	<wicket:fragment wicket:id="menuHeaderFrag">
+		<img wicket:id="icon" class="menu-header-icon"></img>
+		<span wicket:id="label" class="menu-header-text"></span>
+		<a wicket:id="moreInfo" class="mehu-header-ellipsis" title="More info"><wicket:svg href="ellipsis" class="icon"/></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="menuBodyFrag">
+		<div wicket:id="items" class="menu-item">
+			<a wicket:id="link" class="menu-link">
+				<svg wicket:id="icon" class="icon menu-icon"></svg>
+				<span wicket:id="bullet" class="menu-bullet"></span>
+				<span wicket:id="label" class="menu-text"></span>
+				<svg wicket:id="arrow" class="icon menu-arrow"></svg>
+			</a>
+			<div wicket:id="subMenu" class="menu-body"></div>
+		</div>
+	</wicket:fragment>
 </wicket:extend>

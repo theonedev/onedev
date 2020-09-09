@@ -1,5 +1,5 @@
-@media(min-width: 768px) {
-.issue-template.floating.side.def-detail {
+@media(min-width: 992px) {
+.floating.off-canvas.issue-template {
     width: 600px;
 }
 }

@@ -15,8 +15,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolb
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -27,10 +25,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.buildspec.job.JobService;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel.Placement;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.page.layout.SideFloating.Placement;
 
 @SuppressWarnings("serial")
 class JobServiceListViewPanel extends Panel {
@@ -105,7 +104,7 @@ class JobServiceListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "ellipsis text-right";
 			}
 			
 		});		
@@ -125,16 +124,11 @@ class JobServiceListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				add(new NoRecordsBehavior());
 			}
 			
 		});
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new JobServiceCssResourceReference()));
 	}
 	
 	private abstract class ColumnFragment extends Fragment {
@@ -155,17 +149,17 @@ class JobServiceListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, Placement.RIGHT) {
+					new OffCanvasCardPanel(target, Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
-							return "Service";
+						protected Component newTitle(String componentId) {
+							return new Label(componentId, "Service");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-service def-detail"));
+							add(AttributeAppender.append("class", "job-service"));
 						}
 
 						@Override

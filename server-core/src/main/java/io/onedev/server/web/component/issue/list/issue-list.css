@@ -1,74 +1,19 @@
-@media(max-width: 991px) {
-	.issue-list>.body .float-right {
-		display: none;
-	}
-}
-
-.issue-list>.head {
-	position: relative;
-}
-.issue-list>.head>* {
-	margin-bottom: 20px;
-}
-.issue-list>.head>form {
-	margin-right: 120px;
-}
-.issue-list>.head>.open-new {
-	width: 100px;
-	position: absolute;
-	right: 0;
-	top: 0;
-}
-.issue-list>.head>.operations>* {
-	margin-right: 16px;
-	color: #444;
-	white-space: nowrap;
-}
-.issue-list>.head>.operations>*:last-child {
-	margin-right: 0;
-}
-.issue-list>.body td a.number, .issue-list>.body td .title>a {
-	margin-right: 4px;
-	font-weight: bold;
-	font-size: 15px;
-}
-
-.issue-list>.body td .issue-state {
-	margin-right: 4px;
-}
-.issue-list>.body td .secondary>.float-left>div {
-	margin-right: 12px;
-	margin-top: 8px;
-}
-.issue-list>.body td .secondary>.float-right {
-	margin-top: 8px;
-}
-.issue-list>.body td .last-update, .issue-list>.body td .comments, .issue-list>.body td .votes {
-	color: #888;
-	font-size: 13px;
+.issue-list>div>.body table>tbody>tr>td {
+	padding: 1.2rem 0.8rem 0.7rem 0.8rem;
 }
 
 .issue-list .field.undefined {
 	display: none;
 }
-.issue-list>.body td .votes {
-	margin-right: 8px;	
+.issue-list .field .issue-state {
+	margin-bottom: 0.5rem;
+	margin-right: 0.5rem;
 }
 
-.issue-list>.body .new-indicator {
+.issue-list>div>.body .new-indicator {
 	width: 4px;
 	padding: 0;
 }
-.issue-list>.body tr.issue.new td.new-indicator {
-	background: #4667EE;
-}
-.issue-batch-edit form .modal-body>div {
-	margin-bottom: 20px;
-}
-.issue-batch-edit .alert {
-	margin-top: 10px;
-	margin-bottom: 5px;
-}
-.issue-batch-edit .select-fields>.checkboxes>* {
-	margin-right: 10px;
+.issue-list>div>.body tr.issue.new td.new-indicator {
+	background: var(--primary);
 }

@@ -2,10 +2,12 @@ package io.onedev.server.web.page.project.pullrequests;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -53,10 +55,9 @@ public class InvalidPullRequestPage extends ProjectPage {
 
 			@Override
 			public void onClick() {
-				PullRequest request = requestModel.getObject();
-				OneDev.getInstance(PullRequestManager.class).delete(request);
+				OneDev.getInstance(PullRequestManager.class).delete(getPullRequest());
 				
-				Session.get().success("Pull request #" + request.getNumber() + " deleted");
+				Session.get().success("Pull request #" + getPullRequest().getNumber() + " deleted");
 				
 				String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(PullRequest.class);
 				if (redirectUrlAfterDelete != null)
@@ -68,16 +69,20 @@ public class InvalidPullRequestPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(requestModel.getObject().getTargetProject()));
+				setVisible(SecurityUtils.canManage(getPullRequest().getTargetProject()));
 			}
 			
-		}.add(new ConfirmClickModifier("Do you really want to delete pull request #" + requestModel.getObject().getNumber() + "?")));
+		}.add(new ConfirmClickModifier("Do you really want to delete pull request #" + getPullRequest().getNumber() + "?")));
 	}
 
 	public static PageParameters paramsOf(PullRequest request) {
 		PageParameters params = ProjectPage.paramsOf(request.getTarget().getProject());
 		params.add(PARAM_REQUEST, request.getNumber());
 		return params;
+	}
+	
+	private PullRequest getPullRequest() {
+		return requestModel.getObject();
 	}
 	
 	@Override
@@ -92,9 +97,12 @@ public class InvalidPullRequestPage extends ProjectPage {
 	}
 	
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectPullRequestsCssResourceReference()));
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("pullRequests", ProjectPullRequestsPage.class, 
+				ProjectPullRequestsPage.paramsOf(getProject())));
+		fragment.add(new Label("pullRequestNumber", "#" + getPullRequest().getNumber()));
+		return fragment;
 	}
 
 }

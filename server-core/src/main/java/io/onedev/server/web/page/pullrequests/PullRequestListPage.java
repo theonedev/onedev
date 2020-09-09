@@ -7,8 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -61,7 +60,7 @@ public class PullRequestListPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(savedQueries = new SavedQueriesPanel<NamedPullRequestQuery>("side") {
+		add(savedQueries = new SavedQueriesPanel<NamedPullRequestQuery>("savedQueries") {
 
 			@Override
 			protected NamedQueriesBean<NamedPullRequestQuery> newNamedQueriesBean() {
@@ -99,8 +98,8 @@ public class PullRequestListPage extends LayoutPage {
 			}
 
 		});
-		
-		add(requestList = new PullRequestListPanel("main", new IModel<String>() {
+
+		add(requestList = new PullRequestListPanel("pullRequests", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -219,12 +218,6 @@ public class PullRequestListPage extends LayoutPage {
 		target.add(requestList);
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new PullRequestListCssResourceReference()));
-	}
-	
 	public static PageParameters paramsOf(@Nullable String query, int page) {
 		PageParameters params = new PageParameters();
 		if (query != null)
@@ -243,4 +236,10 @@ public class PullRequestListPage extends LayoutPage {
 			query = getPullRequestSetting().getNamedQueries().iterator().next().getQuery();
 		return paramsOf(query, page);
 	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Pull Requests");
+	}
+	
 }

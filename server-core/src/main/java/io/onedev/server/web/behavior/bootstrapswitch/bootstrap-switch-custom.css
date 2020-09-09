@@ -1,0 +1,79 @@
+.bootstrap-switch {
+    border-color: var(--secondary);
+    display: inline-block;
+}
+.bootstrap-switch .bootstrap-switch-label {
+    color: var(--gray-dark);
+    background: white;
+}
+.bootstrap-switch.bootstrap-switch-focused {
+    box-shadow: none;
+    border-color: var(--secondary);
+}
+.bootstrap-switch .bootstrap-switch-handle-on, 
+.bootstrap-switch .bootstrap-switch-handle-off, 
+.bootstrap-switch .bootstrap-switch-label {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.1rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+.bootstrap-switch.bootstrap-switch-extra-small .bootstrap-switch-handle-off, 
+.bootstrap-switch.bootstrap-switch-extra-small .bootstrap-switch-handle-on, 
+.bootstrap-switch.bootstrap-switch-extra-small .bootstrap-switch-label {
+    padding: 4px 6px;
+    font-size: 11px;
+    line-height: 1.2;
+}
+.bootstrap-switch.bootstrap-switch-disabled, 
+.bootstrap-switch.bootstrap-switch-readonly, 
+.bootstrap-switch.bootstrap-switch-indeterminate {
+    cursor: default !important;
+}
+
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-secondary, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-secondary {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+    color: var(--gray-dark);
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-primary, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-success, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-success {
+    background-color: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-warning, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-warning {
+    background-color: var(--warning);
+    border-color: var(--warning);
+    color: white;
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-danger, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-danger {
+    background-color: var(--danger);
+    border-color: var(--danger);
+    color: white;
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-info, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-info {
+    background-color: var(--info);
+    border-color: var(--info);
+    color: white;
+}
+.bootstrap-switch .bootstrap-switch-handle-on.bootstrap-switch-dark, 
+.bootstrap-switch .bootstrap-switch-handle-off.bootstrap-switch-dark {
+    background-color: var(--dark);
+    border-color: var(--dark);
+    color: white;
+}

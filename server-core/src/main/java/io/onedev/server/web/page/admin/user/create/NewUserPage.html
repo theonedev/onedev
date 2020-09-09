@@ -1,15 +1,18 @@
 <wicket:extend>
-	<div class="page-title">New User</div>
-	<div class="new-user">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="editor"></div>
-			<div class="actions clearfix">
-				<input class="btn btn-primary dirty-aware float-left" value="Create" type="submit">
-				<div class="form-check form-inline pt-1">
-					<input wicket:id="continueToAdd" id="continueToAdd" type="checkbox" class="form-check-input">
-					<label class="form-check-label" for="continueToAdd">Continue to add other user after create</label>
-				</div>				
-			</div>
-		</form>
+	<div class="card">
+		<div class="card-body">
+			<form wicket:id="form" class="leave-confirm">
+				<div wicket:id="editor" class="mb-4"></div>
+				<div class="d-flex align-items-center">
+					<input class="btn btn-primary dirty-aware mr-4" value="Create" type="submit">
+					<div class="checkbox-inline">
+						<label class="checkbox">
+							<input wicket:id="continueToAdd" type="checkbox" class="form-check-input">
+							Continue to add other user after create
+						</label>
+					</div>				
+				</div>
+			</form>
+		</div>
 	</div>
 </wicket:extend>

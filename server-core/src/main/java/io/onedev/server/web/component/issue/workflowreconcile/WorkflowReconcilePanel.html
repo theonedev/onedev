@@ -4,10 +4,10 @@
 		<form wicket:id="form" class="fix-states leave-confirm">
 			<div class="modal-header">
 				<h5 id="modal-title" class="modal-title">Fix Undefined States</h5>
-				<button wicket:id="close" type="button" class="close">&times;</button>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
-				<div class="alert alert-warning">
+				<div class="alert alert-light-warning">
 					Please resolve undefined states below. Note that if you select to delete an undefined state, 
 					all issues with that state will be deleted 
 				</div>
@@ -37,7 +37,7 @@
 		<form wicket:id="form" class="fix-fields leave-confirm">
 			<div class="modal-header">
 				<h5 id="modal-title" class="modal-title">Fix Undefined Fields</h5>
-				<button wicket:id="close" type="button" class="close">&times;</button>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-warning">
@@ -69,7 +69,7 @@
 		<form wicket:id="form" class="fix-field-values leave-confirm">
 			<div class="modal-header">
 				<h5 id="modal-title" class="modal-title">Fix Undefined Field Values</h5>
-				<button wicket:id="close" type="button" class="close">&times;</button>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
 				<div class="alert alert-warning">
@@ -99,13 +99,5 @@
 				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
 			</div>
 		</form>	
-	</wicket:fragment>
-	<wicket:fragment wicket:id="completedFrag">
-		<div class="message-box">
-			<div class="content">Workflow Reconciliation Completed</div>
-			<div class="actions">
-				<a wicket:id="ok" class="btn btn-secondary">Ok</a>
-			</div>
-		</div>
 	</wicket:fragment>
 </wicket:panel>

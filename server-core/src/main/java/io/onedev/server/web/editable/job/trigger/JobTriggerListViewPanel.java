@@ -25,10 +25,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
 class JobTriggerListViewPanel extends Panel {
@@ -107,7 +109,7 @@ class JobTriggerListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "ellipsis text-right";
 			}
 			
 		});		
@@ -127,7 +129,8 @@ class JobTriggerListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				add(new NoRecordsBehavior());
 			}
 			
 		});
@@ -151,17 +154,17 @@ class JobTriggerListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
+					new OffCanvasCardPanel(target, OffCanvasPanel.Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
-							return "Trigger (type: " + EditableUtils.getDisplayName(triggers.get(index).getClass()) + ")";
+						protected Component newTitle(String componentId) {
+							return new Label(componentId, "Trigger (type: " + EditableUtils.getDisplayName(triggers.get(index).getClass()) + ")");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-trigger def-detail"));
+							add(AttributeAppender.append("class", "job-trigger"));
 						}
 
 						@Override

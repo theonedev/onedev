@@ -87,7 +87,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		
 		nextOffset = snippet.offset + snippet.entries.size();
 		
-		String script = String.format("onedev.server.buildLog.onDomReady('%s', %s, %d);", 
+		String script = String.format("onedev.server.buildLog.appendLogEntries('%s', %s, %d);", 
 				getMarkupId(), asJSON(snippet.entries), MAX_LOG_ENTRIES);
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));

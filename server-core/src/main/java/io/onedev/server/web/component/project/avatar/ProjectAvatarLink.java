@@ -1,8 +1,6 @@
 package io.onedev.server.web.component.project.avatar;
 
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -39,7 +37,7 @@ public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {
 
 	@Override
 	public IModel<?> getBody() {
-		return Model.of("<img src='" + url + "' class='project-avatar'></img>");
+		return Model.of("<img src='" + url + "' class='avatar'></img>");
 	}
 	
 	@Override
@@ -49,12 +47,6 @@ public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {
 		if (!isEnabled())
 			tag.setName("span");
 		tag.put("title", tooltip);
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectAvatarResourceReference()));
 	}
 	
 	@Override

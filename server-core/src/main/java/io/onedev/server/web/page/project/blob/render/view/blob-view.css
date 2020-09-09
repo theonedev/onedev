@@ -1,38 +1,30 @@
-@media(max-width: 767px) {
-	.blob-view>.head .expanded {
-		display: none;
-	}
-}
 .blob-view>.head {
-	border-bottom: 1px solid #E0E0E0; 
-	padding: 4px 8px;
+	border-bottom: 1px solid var(--light-gray);
 }
-.blob-view>.body {
-	overflow: auto;
+.blob-view>.head>.tools>* {
+	margin-left: 1.2rem;
 }
-.blob-view>.head>.info {
-	color: #666;
+.blob-view>.head>.tools>.options {
+	padding-left: 1.2rem;
+	border-left: 1px solid var(--light-gray);
 }
-.blob-view>.head>.info .separator {
-	color: #E0E0E0;	
+.blob-view>.head>.tools>.options:empty {
+	display: none !important;
 }
-.blob-view>.head .actions {
-	white-space: nowrap;
+
+.blob-view>.head>.tools>:first-child {
+	margin-left: 0;
 }
-.blob-view>.head .actions>* {
-	color: #333;
-	margin-left: 12px;
+.blob-view>.head>.tools>.actions>* {
+	margin-right: 0.6rem;
+}
+.blob-view>.head>.tools>.actions>:last-child {
 	margin-right: 0;
 }
-.blob-view>.head .actions>input {
-	vertical-align: top;
+
+.blob-view>.head>.tools>.options>* {
+	margin-right: 1.4rem;
 }
-.blob-view>.head .actions label {
-	font-weight: normal;
-	margin-bottom: 0;
-	display: inline-block;
-}
-.blob-view>.head .actions input[type=checkbox] {
-	position: relative;
-	top: 2px;
+.blob-view>.head>.tools>.options>:last-child {
+	margin-right: 0;
 }

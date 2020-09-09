@@ -1,12 +1,12 @@
 <wicket:panel>
-	<div class="param-spec-list list">
-		<table wicket:id="paramSpecs" class="table table-condensed table-hover"></table>
-		<div class="foot">
-			<a wicket:id="addNew" title="Add new" class="btn btn-success btn-sm"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+	<div class="param-spec-list">
+		<table wicket:id="paramSpecs"></table>
+		<div class="foot mt-3">
+			<a wicket:id="addNew" title="Add new" class="btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="actionColumnFrag">
-		<a wicket:id="edit" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-		<a wicket:id="delete" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-light btn-hover-primary btn-icon btn-xs mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-light btn-hover-danger btn-icon btn-xs" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
   </wicket:fragment>
 </wicket:panel>

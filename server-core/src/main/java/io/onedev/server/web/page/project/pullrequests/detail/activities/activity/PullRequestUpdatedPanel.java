@@ -119,20 +119,6 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				browseState.requestId = getUpdate().getRequest().getId();
 				params = ProjectBlobPage.paramsOf(project, browseState);
 				item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
-				
-				item.add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-					@Override
-					protected String load() {
-						commitStatus.configure();
-						if (commitStatus.isVisible())
-							return "commit with-status";
-						else
-							return "commit";
-					}
-					
-				}));
-				
 			}
 			
 		});

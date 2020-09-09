@@ -1,69 +1,8 @@
-.saved-queries>.head {
-	white-space: nowrap;
-}
-.saved-queries>.head>* {
-	display: inline-block;
-}
-.saved-queries>.head>.actions {
-	margin: 8px 0 0 12px;
-}
-.saved-queries>.head>.actions>a {
-	color: #444;
-	opacity: 100;
-	margin-right: 0;
-}
-
-.saved-queries>.body>* {
-	margin-bottom: 20px;
-}
-.saved-queries>.body>:last-child {
-	margin-bottom: 0;
-}
-.saved-queries>.body .btn-group {
-	white-space: nowrap;
-}
-.saved-queries>.body .btn-group .btn {
-	float: none;
-	display: inline-block;
-}
-.saved-queries>.body .watch-status:after, 
-.saved-queries>.body .subscription-status:after {
+.saved-queries>.card-body .watch-status:after, 
+.saved-queries>.card-body .subscription-status:after {
 	display: none;
 }
-.edit-saved-queries th {
-	font-weight: bold !important;
-}
-.edit-saved-queries th.property-name {
-	width: 30%;
-}
-.edit-saved-queries>.property {
-	border: 1px solid #E8E8E8;
-	background: #F9F9F9;
-	border-radius: 4px;
-	padding: 10px;
-}
-.edit-saved-queries .editable .bean.list>thead>tr>th {
-	border-bottom: none;
-	padding-bottom: 4px;
-}
-
-.query-save-support {
-	display: table;
-	width: 100%;
-}
-.query-save-support>div {
-	display: table-cell;
-}
-.query-save-support>.side {
-	border: 2px solid #E0E0E0;
-	padding: 20px; 
-	border-radius: 4px;
-	width: 1%;
-}
-.query-save-support>.main {
-	vertical-align: top;
-	min-width: 330px;
-}
-.query-save-support>.side+.main {
-	padding-left: 20px;
+.edit-saved-queries .modal-footer {
+	margin: -1.75rem;
+	margin-top: 0;
 }

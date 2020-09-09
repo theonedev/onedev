@@ -1,12 +1,11 @@
 <wicket:extend>
-	<div class="page-title">Group Profile</div>
-	<div class="profile">
+	<div class="group-profile">
 		<form wicket:id="form" class="leave-confirm">
+			<div wicket:id="feedback" class="mb-4"></div>
 			<div wicket:id="editor"></div>
-			<div wicket:id="feedback"></div>
-			<div class="actions clearfix">
-				<input class="btn btn-primary dirty-aware float-left" value="Save" type="submit">
-				<a wicket:id="delete" class="btn btn-danger float-right">Delete</a>
+			<div class="mt-5 d-flex">
+				<input class="btn btn-primary dirty-aware mr-1" value="Save" type="submit">
+				<a wicket:id="delete" class="btn btn-danger ml-auto">Delete</a>
 			</div>
 		</form>
 	</div>

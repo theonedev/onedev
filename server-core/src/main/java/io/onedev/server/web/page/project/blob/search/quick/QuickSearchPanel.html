@@ -2,13 +2,13 @@
 	<div class="quick-search">
 		<div class="modal-header">
 			<h5 class="modal-title">File and Symbol Search</h5>
-			<button wicket:id="close" type="button" class="close">&times;</button>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
 		<div class="modal-body">
 			<input wicket:id="input" class="form-control"></input>
-			<div wicket:id="result" class="result">
+			<div wicket:id="result" class="result mt-3 overflow-auto">
 				<wicket:enclosure child="symbolHits">
-				<ul class="list-unstyled">
+				<ul class="list-unstyled mb-0">
 					<li wicket:id="symbolHits" class="hit selectable">
 						<a wicket:id="link">
 							<span class="icon"><img wicket:id="icon"></img></span>
@@ -23,14 +23,13 @@
 					<wicket:enclosure child="moreSymbolHits">
 					<li class="hit selectable more-matches">
 						<a wicket:id="moreSymbolHits">
-							<span class="icon"><wicket:link><img src="point.png"></img></wicket:link></span>						
-							<em class="text">Show more</em>
+							<wicket:svg href="hand" class="icon"></wicket:svg> Show more
 						</a>
 					</li>
 					</wicket:enclosure>
 				</ul>
 				</wicket:enclosure>
-				<div wicket:id="noMatches" class="no-matches"><wicket:svg href="info-circle" class="icon"/> No any matches</div>
+				<div wicket:id="noMatches" class="no-matches alert alert-light-warning"><wicket:svg href="info-circle" class="icon"/> No any matches</div>
 			</div>
 		</div>
 	</div>

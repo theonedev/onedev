@@ -30,7 +30,7 @@ onedev.server.folderView = {
 							$row.children(".last-commit.when").append("<span>" + lastCommit.when + "</span>");
 							var $message = $row.children(".last-commit.message");
 							$message.append(lastCommit.html);
-
+							
 							var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 							$row.find("a.user").hover(function() {
 								var $card = $("<div id='user-card' class='floating'></div>");
@@ -43,25 +43,10 @@ onedev.server.folderView = {
 							}, alignment);
 						}
 					});
+					onedev.server.viewState.getFromHistoryAndSetToView();
 				}
 			}
-		});
-		
-		$folderView.on("getViewState", function(e) {
-			return {scroll:{left: $folderView.scrollLeft(), top: $folderView.scrollTop()}};			
-		});
-		
-		$folderView.on("setViewState", function(e, viewState) {
-			if (viewState.scroll) {
-				$folderView.scrollLeft(viewState.scroll.left);
-				$folderView.scrollTop(viewState.scroll.top);
-			}
-		});
-		
-		$folderView.on("autofit", function(e, width, height) {
-			$folderView.outerWidth(width);
-			$folderView.outerHeight(height);
-		});
+		});		
 	}, 
 
 	onUserCardAvailable: function() {

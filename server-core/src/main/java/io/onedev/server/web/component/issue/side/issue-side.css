@@ -1,45 +1,28 @@
-.issue-side>div>.head {
-	font-weight: bold;
-	margin-bottom: 16px;
-}
-.issue-side>div .body>* {
-	margin-bottom: 16px;
-}
-.issue-side>div>.body a.avatar {
-	margin-right: 8px;
-}
-.issue-side>div>.body .field-values a.avatar {
-	margin-right: 0;
-}
 .issue-side>* {
-	margin-bottom: 20px;
-	border-top: 1px solid #E8E8E8;
-	padding-top: 20px;
+	margin-bottom: 1.5rem;
+	border-top: 1px dashed var(--secondary);
+	padding-top: 1.5rem;
 }
 .issue-side>div:first-child {
 	border-top: none;
 	padding-top: 0;
 }
-
-.issue-side .fields td {
-	padding-bottom: 12px;
+.issue-side>div>.head {
+	font-weight: 600;
+	margin-bottom: 0.8rem;
+}
+.issue-side>.fields>.body>table {
+	width: 100%;
+}
+.issue-side>.fields>.body>table>tbody>tr>td.name {
+	padding: 0 0.6rem 1.2rem 0;
+	vertical-align: top;
+	font-weight: 600;
+}
+.issue-side>.fields>.body>table>tbody>tr>td.values {
+	padding-bottom: 0.6rem;
 	vertical-align: top;
 }
-.issue-side .fields tr:last-child td {
+.issue-side>.fields>.body>table>tbody>tr:last-child>td {
 	padding-bottom: 0;
-}
-.issue-side .fields td.name {
-	white-space: nowrap;
-	padding-right: 20px;
-}
-.issue-side a.action {
-	margin-top: 0;
-	margin-left: 8px;
-	color: #666;
-}
-.issue-side .milestone .status {
-	margin-left: 4px;
-}
-.issue-side .milestone>.body>.progress {
-	margin-top: 20px;
 }

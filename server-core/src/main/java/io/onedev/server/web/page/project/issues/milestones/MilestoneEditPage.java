@@ -1,9 +1,12 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -16,10 +19,10 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
-public class MilestoneEditPage extends ProjectIssuesPage {
+public class MilestoneEditPage extends ProjectPage {
 
 	private static final String PARAM_MILESTONE = "milestone";
 	
@@ -39,11 +42,15 @@ public class MilestoneEditPage extends ProjectIssuesPage {
 		};
 	}
 
+	private Milestone getMilestone() {
+		return milestoneModel.getObject();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Milestone milestone = milestoneModel.getObject();
+		Milestone milestone = getMilestone();
 		BeanEditor editor = BeanContext.edit("editor", milestone);
 		Form<?> form = new Form<Void>("form") {
 
@@ -58,10 +65,10 @@ public class MilestoneEditPage extends ProjectIssuesPage {
 							"This name has already been used by another milestone in the project");
 				} 
 				if (editor.isValid()){
-					editor.getDescriptor().copyProperties(milestone, milestoneModel.getObject());
-					milestoneManager.save(milestoneModel.getObject());
+					editor.getDescriptor().copyProperties(milestone, getMilestone());
+					milestoneManager.save(getMilestone());
 					Session.get().success("Milestone saved");
-					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(milestoneModel.getObject(), null));
+					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone(), null));
 				}
 				
 			}
@@ -77,12 +84,6 @@ public class MilestoneEditPage extends ProjectIssuesPage {
 		super.onDetach();
 	}
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MilestonesResourceReference()));
-	}
-
 	public static PageParameters paramsOf(Milestone milestone) {
 		PageParameters params = paramsOf(milestone.getProject());
 		params.add(PARAM_MILESTONE, milestone.getId());
@@ -92,6 +93,18 @@ public class MilestoneEditPage extends ProjectIssuesPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManageIssues(getProject());
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("milestones", MilestoneListPage.class, 
+				MilestoneListPage.paramsOf(getProject())));
+		Link<Void> link = new BookmarkablePageLink<Void>("milestone", MilestoneDetailPage.class, 
+				MilestoneDetailPage.paramsOf(getMilestone(), null));
+		link.add(new Label("name", getMilestone().getName()));
+		fragment.add(link);
+		return fragment;
 	}
 	
 }

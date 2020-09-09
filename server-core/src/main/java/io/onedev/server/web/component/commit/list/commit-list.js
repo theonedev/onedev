@@ -1,4 +1,13 @@
 onedev.server.commitList = {
+	onDomReady: function(containerId, commits) {
+		$("#" + containerId).on("resized", function() {
+			$(".commit-graph").each(function() {
+				onedev.server.commitList.drawGraph($(this));
+			});
+			return false;
+		});
+		onedev.server.commitList.renderGraph(containerId, commits);	
+	},
 	renderGraph: function(containerId, commits) {
         var $commitList = $("#" + containerId + ">ul");
         
@@ -426,13 +435,3 @@ onedev.server.commitList = {
 		
 	}
 };
-$(function() {
-	$(window).resize(function(e) {
-		if ($(".commit-graph").length == 0)
-			return;
-		e.stopPropagation();
-		$(".commit-graph").each(function() {
-			onedev.server.commitList.drawGraph($(this));
-		});
-	});		
-});

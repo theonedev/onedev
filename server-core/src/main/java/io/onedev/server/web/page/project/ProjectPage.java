@@ -7,39 +7,30 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.OneDev;
+import com.google.common.collect.Lists;
+
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.project.avatar.ProjectAvatar;
-import io.onedev.server.web.component.sidebar.SideBar;
-import io.onedev.server.web.component.tabbable.Tab;
-import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.project.info.ProjectInfoPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
+import io.onedev.server.web.page.layout.SidebarMenu;
+import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
@@ -49,27 +40,29 @@ import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.info.ProjectInfoPanel;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
+import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
+import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
-import io.onedev.server.web.page.project.setting.ProjectSettingPage;
-import io.onedev.server.web.page.project.setting.ProjectSettingTab;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
-import io.onedev.server.web.page.project.setting.build.BuildSettingPage;
+import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
-import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
+import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
-import io.onedev.server.web.page.project.stats.ProjectStatsPage;
+import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.util.ProjectAware;
 
@@ -129,51 +122,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
-		add(new SideBar("sidebar", "project.miniSidebar") {
-			
-			@Override
-			protected List<? extends Tab> newTabs() {
-				List<ProjectTab> tabs = ProjectPage.this.newTabs();
-				if (SecurityUtils.canManage(getProject()))
-					tabs.add(new ProjectTab(Model.of("Setting"), "gear", 0, GeneralSettingPage.class, ProjectSettingPage.class));
-				return tabs;
-			}
-
-			@Override
-			protected Component newHead(String componentId) {
-				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", ProjectPage.this);
-				Project project = getProject();
-				AlignPlacement placement = new AlignPlacement(0, 100, 0, 0);
-				AjaxLink<Void> link = new DropdownLink("link", placement) {
-
-					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new ProjectInfoPanel(id, projectModel) {
-							
-							@Override
-							protected void onPromptForkOption(AjaxRequestTarget target) {
-								dropdown.close();
-							}
-						};
-					}
-					
-				};
-				link.add(new ProjectAvatar("avatar", getProject()));
-				link.add(new Label("name", project.getName()));
-				fragment.add(link);
-				
-				return fragment;
-			}
-			
-		});
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-
-		response.render(CssHeaderItem.forReference(new ProjectResourceReference()));
 	}
 
 	@Override
@@ -186,181 +134,132 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		return projectModel.getObject();
 	}
 	
-	private List<ProjectTab> newTabs() {
-		List<ProjectTab> tabs = new ArrayList<>();
-		if (SecurityUtils.canReadCode(getProject())) {
-			tabs.add(new ProjectTab(Model.of("Files"), "files", 0, ProjectBlobPage.class));
-			tabs.add(new ProjectTab(Model.of("Commits"), "commit", 0,
-					ProjectCommitsPage.class, CommitDetailPage.class) {
-				
-				@Override
-				public Component render(String componentId) {
-					return new ProjectTabHead(componentId, this) {
-						@Override
-						
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, 
-									pageClass, ProjectCommitsPage.paramsOf(getProject(), null));
-						}
-						
-					};
-				}
-				
-			});
-			tabs.add(new ProjectTab(Model.of("Branches"), "branch", 
-					0, ProjectBranchesPage.class));
-			tabs.add(new ProjectTab(Model.of("Tags"), "tag", 
-					0, ProjectTagsPage.class));
-			
-			tabs.add(new ProjectTab(Model.of("Pull Requests"), "pull-request", 
-					0, ProjectPullRequestsPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, 
-					InvalidPullRequestPage.class) {
-				
-				@Override
-				public Component render(String componentId) {
-					return new ProjectTabHead(componentId, this) {
-						
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, 
-									pageClass, ProjectPullRequestsPage.paramsOf(getProject(), 0));
-						}
-						
-					};
-				}
-				
-			});
-		}
-		
-		if (getProject().isIssueManagementEnabled()) {
-			tabs.add(new ProjectTab(Model.of("Issues"), "bug", 0, ProjectIssueListPage.class,
-					ProjectIssuesPage.class, IssueDetailPage.class, NewIssuePage.class) {
-				
-				@Override
-				public Component render(String componentId) {
-					return new ProjectTabHead(componentId, this) {
-						
-						@Override
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId,
-									pageClass, ProjectIssueListPage.paramsOf(getProject(), 0));
-						}
-						
-					};
-				}
-				
-			});
-		}
-		
-		tabs.add(new ProjectTab(Model.of("Builds"), "play-circle", 0, ProjectBuildsPage.class, 
-				BuildDetailPage.class, InvalidBuildPage.class) {
-
-			@Override
-			public Component render(String componentId) {
-				return new ProjectTabHead(componentId, this) {
-					
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, 
-								pageClass, ProjectBuildsPage.paramsOf(getProject(), 0));
-					}
-					
-				};
-			}
-			
-		});
-		
-		if (SecurityUtils.canReadCode(getProject())) {
-			tabs.add(new ProjectTab(Model.of("Code Comments"), "comments", 0, ProjectCodeCommentsPage.class) {
-
-				@Override
-				public Component render(String componentId) {
-					return new ProjectTabHead(componentId, this) {
-						
-						@Override
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, 
-									pageClass, ProjectCodeCommentsPage.paramsOf(getProject(), 0));
-						}
-						
-					};
-				}
-				
-			});
-			tabs.add(new ProjectTab(Model.of("Compare"), "compare", 0, RevisionComparePage.class));
-			tabs.add(new ProjectTab(Model.of("Statistics"), "statistics", 0, ProjectContribsPage.class, 
-					ProjectStatsPage.class));
-		}
-		
-		return tabs;		
-	}
-	
 	@Override
-	protected Component newNavContext(String componentId) {
-		Fragment fragment = new Fragment(componentId, "navContextFrag", this);
-		DropdownLink link = new DropdownLink("dropdown", AlignPlacement.bottom(15)) {
+	protected List<SidebarMenu> getSidebarMenus() {
+		List<SidebarMenu> menus = super.getSidebarMenus();
+		
+		List<SidebarMenuItem> menuItems = new ArrayList<>();
+		
+		if (SecurityUtils.canReadCode(getProject())) {
+			List<SidebarMenuItem> codeMenuItems = new ArrayList<>();
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Files", 
+					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject())));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Commits", 
+					ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject(), null), 
+					Lists.newArrayList(CommitDetailPage.class)));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Branches", 
+					ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Tags", 
+					ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Comments", 
+					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
+			codeMenuItems.add(new SidebarMenuItem.Page(null, "Compare", 
+					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
 
+			menuItems.add(new SidebarMenuItem.SubMenu("code", "Code", codeMenuItems));
+			
+			menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests", 
+					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0), 
+					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
+		}		
+		if (getProject().isIssueManagementEnabled()) {
+			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
+			issueMenuItems.add(new SidebarMenuItem.Page(null, "List", 
+					ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0), 
+					Lists.newArrayList(NewIssuePage.class, IssueDetailPage.class)));
+			issueMenuItems.add(new SidebarMenuItem.Page(null, "Boards", 
+					IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject())));
+			
+			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
+			
+			menuItems.add(new SidebarMenuItem.Page("milestone", "Milestones", 
+					MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null), 
+					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
+			
+		}
+		menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
+				ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
+				Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
+		
+		if (SecurityUtils.canReadCode(getProject())) {
+			List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
+			statsMenuItems.add(new SidebarMenuItem.Page(null, "Contributions", 
+					ProjectContribsPage.class, ProjectContribsPage.paramsOf(getProject())));
+			statsMenuItems.add(new SidebarMenuItem.Page(null, "Source Lines", 
+					SourceLinesPage.class, SourceLinesPage.paramsOf(getProject())));
+			
+			menuItems.add(new SidebarMenuItem.SubMenu("statistics", "Statistics", statsMenuItems));
+		}
+		
+		if (SecurityUtils.canManage(getProject())) {
+			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "General Setting", 
+					GeneralProjectSettingPage.class, GeneralProjectSettingPage.paramsOf(getProject())));
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "Edit Avatar", 
+					AvatarEditPage.class, AvatarEditPage.paramsOf(getProject())));
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "Authorizations", 
+					ProjectAuthorizationsPage.class, ProjectAuthorizationsPage.paramsOf(getProject())));
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "Branch Protection", 
+					BranchProtectionsPage.class, BranchProtectionsPage.paramsOf(getProject())));
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "Tag Protection", 
+					TagProtectionsPage.class, TagProtectionsPage.paramsOf(getProject())));
+			
+			List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
+			
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Job Secrets", 
+					JobSecretsPage.class, JobSecretsPage.paramsOf(getProject())));
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Action Authorizations", 
+					ActionAuthorizationsPage.class, ActionAuthorizationsPage.paramsOf(getProject())));
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Build Preserve Rules", 
+					BuildPreservationsPage.class, BuildPreservationsPage.paramsOf(getProject())));
+			
+			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build Setting", buildSettingMenuItems));
+			settingMenuItems.add(new SidebarMenuItem.Page(null, "Web Hooks", 
+					WebHooksPage.class, WebHooksPage.paramsOf(getProject())));
+			menuItems.add(new SidebarMenuItem.SubMenu("sliders", "Settings", settingMenuItems));
+		}
+		
+		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(getProject());
+		SidebarMenu.Header menuHeader = new SidebarMenu.Header(avatarUrl, "CURRENT PROJECT") {
+			
 			@Override
-			protected void onInitialize(FloatingPanel dropdown) {
-				super.onInitialize(dropdown);
-				dropdown.add(AttributeAppender.append("class", "nav-context-dropdown project-nav-context-dropdown"));
-			}
+			protected Component newMoreInfo(String componentId, FloatingPanel dropdown) {
+				return new ProjectInfoPanel(componentId, projectModel) {
 
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				Fragment fragment = new Fragment(id, "navContextDropdownFrag", ProjectPage.this);
-				fragment.add(new ProjectInfoPanel("info", projectModel) {
-					
 					@Override
 					protected void onPromptForkOption(AjaxRequestTarget target) {
 						dropdown.close();
 					}
 					
-				});
-				fragment.add(new ListView<ProjectTab>("items", newTabs()) {
-
-					@Override
-					protected void populateItem(ListItem<ProjectTab> item) {
-						ProjectTab tab = item.getModelObject();
-						item.add(tab.render("item"));
-						if (tab.isActive(getPage()))
-							item.add(AttributeAppender.append("class", "active"));
-					}
-					
-				});
-				WebMarkupContainer settingItem = new WebMarkupContainer("setting");
-				settingItem.setVisible(SecurityUtils.canManage(getProject()));
-				settingItem.add(new Tabbable("menu", newSettingTabs()));
-				if (getPage() instanceof ProjectSettingPage) 
-					settingItem.add(AttributeAppender.append("class", "active expanded"));
-				fragment.add(settingItem);
-				return fragment;
+				};
 			}
 			
 		};
-		link.add(new ProjectAvatar("avatar", getProject()));
-		link.add(new Label("name", getProject().getName()));
-		fragment.add(link);
-		
-		return fragment;
+		menus.add(new SidebarMenu(menuHeader, menuItems));
+		return menus;
 	}
-	
-	protected List<ProjectSettingTab> newSettingTabs() {
-		List<ProjectSettingTab> tabs = new ArrayList<>();
-		tabs.add(new ProjectSettingTab("General Setting", "sliders", GeneralSettingPage.class));
-		tabs.add(new ProjectSettingTab("Edit Avatar", "avatar", AvatarEditPage.class));
-		tabs.add(new ProjectSettingTab("Authorizations", "user", ProjectAuthorizationsPage.class));
-		tabs.add(new ProjectSettingTab("Branch Protection", "branch-lock", BranchProtectionsPage.class));
-		tabs.add(new ProjectSettingTab("Tag Protection", "tag-lock", TagProtectionsPage.class));
-		tabs.add(new ProjectSettingTab("Build Setting", "gear-run", 
-				JobSecretsPage.class, BuildSettingPage.class));
-		tabs.add(new ProjectSettingTab("Web Hooks", "webhook", WebHooksPage.class));
-		return tabs;
-	}
- 
+
 	@Override
 	protected void onDetach() {
 		projectModel.detach();
 		super.onDetach();
 	}
 
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("projects", ProjectListPage.class));
+		
+		ViewStateAwarePageLink<?> link = new ViewStateAwarePageLink<Void>("projectLink", 
+				ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
+		link.add(new Label("label", getProject().getName()));
+		
+		fragment.add(link);
+		
+		fragment.add(newProjectTitle("projectTitle"));
+		return fragment;
+	}
+
+	protected abstract Component newProjectTitle(String componentId);
+	
 }

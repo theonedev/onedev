@@ -1,19 +1,16 @@
 <wicket:extend>
-	<div class="page-title">Belonging Groups</div>
-	<div class="membership-list list">
-		<div class="head clearfix">
-			<div wicket:id="externalManagedNote" class="alert alert-info"></div>
-			<div class="float-left clearable-wrapper">
-				<input wicket:id="filterGroups" class="form-control search" placeholder="Filter by group name">
-			</div>
-			<div class="float-left">
-				<input wicket:id="addNew" type="hidden" class="form-control">
-			</div>
-			<div class="float-left">
-				<a wicket:id="deleteSelected" class="btn btn-secondary"><wicket:svg href="trash" class="icon"></wicket:svg> Delete Selected</a>
+	<div class="membership-list">
+		<div class="head">
+			<div wicket:id="externalManagedNote" class="alert alert-light-info mb-4"></div>
+			<div class="d-flex align-items-center flex-wrap">
+				<div class="clearable-wrapper mr-3 mb-4">
+					<input wicket:id="filterGroups" class="form-control search" placeholder="Filter by name...">
+				</div>
+				<input wicket:id="addNew" type="hidden" class="form-control mr-3 mb-4">
+				<a wicket:id="deleteSelected" class="btn btn-danger mb-4">Delete Selected</a>
 			</div>
 		</div>
-		<table wicket:id="memberships" class="memberships table table-hover"></table>
+		<table wicket:id="memberships" class="memberships table"></table>
 	</div>
 	<wicket:fragment wicket:id="groupFrag">
 		<a wicket:id="group"></a>

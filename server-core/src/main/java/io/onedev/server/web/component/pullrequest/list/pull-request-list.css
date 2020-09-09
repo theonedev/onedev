@@ -1,68 +1,12 @@
-@media(max-width: 991px) {
-	.pull-request-list>.body .extra-info {
-		display: none;
-	}
+.pull-request-list>div>.body table>tbody>tr>td {
+	padding: 1.2rem 0.8rem;
 }
-.pull-request-list>.head {
-	position: relative;
-}
-.pull-request-list>.head>* {
-	margin-bottom: 20px;
-}
-.pull-request-list>.head>form.can-create-pull-requests {
-	margin-right: 120px;
-}
-.pull-request-list>.head>.open-new {
-	position: absolute;
-	width: 100px;
-	right: 0;
-	top: 0;
-}
-.pull-request-list>.head>.operations>* {
-	margin-right: 16px;
-	color: #444;
-	white-space: nowrap;
-}
-.pull-request-list>.head>.operations>*:last-child {
-	margin-right: 0;
-}
-
-.pull-request-list>.body td a.number, .pull-request-list>.body td .title>a {
-	margin-right: 4px;
-	font-weight: bold;
-	font-size: 15px;
-}
-
-.pull-request-list>.body td .primary {
-	margin-bottom: 8px;
-}
-.pull-request-list>.body td .primary>.float-left {
-	margin-right: 12px;
-}
-
-.pull-request-list>.body td .secondary {
-	line-height: 24px;
-}
-.pull-request-list>.body td .secondary .status, 
-.pull-request-list>.body td .secondary .review {
-	margin-top: -2px;
-}
-.pull-request-list>.body td .secondary>.float-left {
-	margin-right: 12px;
-}
-.pull-request-list>.body td .branches svg {
-	margin: -2px 4px;
-}
-.pull-request-list>.body td .last-update, 
-.pull-request-list>.body td .comments {
-	color: #888;
-}
-
-.pull-request-list>.body .new-indicator {
+.pull-request-list>div>.body .new-indicator {
 	width: 4px;
 	padding: 0;
 }
-.pull-request-list>.body tr.request.new td.new-indicator {
-	background: #4667EE;
+.pull-request-list>div>.body tr.request.new td.new-indicator {
+	background: var(--primary);
 }
+
 

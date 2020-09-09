@@ -1,11 +1,14 @@
 <wicket:panel>
-	<div class="no-commits alert alert-warning">
-		<div class="title">Project does not have any code yet</div>
-		<div class="content">You may initialize code of the project by <a wicket:id="addFiles">adding files</a>, 
-		or <a wicket:id="pushInstructions">pushing an existing repository</a></div>
+	<div class="m-4 no-commits text-center">
+		<img src="/img/sleeping-panda.png" class="text-center mb-5">
+	    <h3 class="alert-heading mb-3">Project does not have any code yet</h3>
+		<div class="mb-4">
+			You may initialize code of the project by <a wicket:id="addFiles" class="link-primary">adding files</a>, 
+			or <a wicket:id="pushInstructions" class="link-primary">pushing an existing repository</a>
+		</div>
 	</div>
 	<wicket:fragment wicket:id="pushInstructionsFrag">
-		<div class="title">Run below commands from within your git repository:</div>
+		<div class="mb-3">Run below commands from within your git repository:</div>
 		<div class="code">
 			<div>git remote add origin <span wicket:id="url"></span></div>
 			<div>git push -u origin master</div>

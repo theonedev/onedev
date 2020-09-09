@@ -1,22 +1,19 @@
 <wicket:extend>
-	<div class="page-title">Group Administration</div>
-	<div class="group-list list">
-		<div class="head clearfix">
-			<div class="float-left clearable-wrapper">
-				<input wicket:id="filterGroups" class="form-control search" placeholder="Filter groups">
+	<div class="card">
+		<div class="card-body">
+			<div class="d-flex align-items-center mb-4">
+				<div class="clearable-wrapper mr-3 flex-grow-1">
+					<input wicket:id="filterGroups" class="form-control search" placeholder="Filter by name">
+				</div>
+				<a wicket:id="addNew" class="btn btn-icon btn-primary flex-shrink-0"><wicket:svg href="plus" class="icon"></wicket:svg></a>
 			</div>
-			<div class="float-left">
-				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New Group</a>
-			</div>
-        </div>        
-		<div class="body">
-			<table wicket:id="groups" class="groups table table-hover"></table>
+			<table wicket:id="groups" class="groups table"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="nameFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="delete" title="Delete this group"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete this group"><wicket:svg href="trash" class="icon align-middle"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

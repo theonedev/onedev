@@ -171,7 +171,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				super.onComponentTag(tag);
 				configure();
 				if (!isEnabled()) 
-					tag.put("disabled", "disabled");
+					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
 					tag.put("title", "Query not submitted");
 				else if (queryModel.getObject() == null)
@@ -216,11 +216,7 @@ public abstract class CodeCommentListPanel extends Panel {
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
 						queryModel.setObject(query);
-						String queryString = query.toString();
-						if (queryString.length() != 0)
-							queryStringModel.setObject(queryString);
-						else
-							queryStringModel.setObject(null);
+						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
 						doQuery(target);
@@ -379,6 +375,11 @@ public abstract class CodeCommentListPanel extends Panel {
 				cellItem.add(fragment);
 			}
 
+			@Override
+			public String getCssClass() {
+				return "text-break";
+			}
+			
 		});
 		
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Last Update")) {
@@ -404,7 +405,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "last-update expanded";
+				return "text-gray d-none d-md-table-cell";
 			}
 
 		});

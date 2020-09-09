@@ -1,18 +1,15 @@
 <wicket:extend>
-	<div class="action-authorization-list list">
-		<div class="help-block">Define rules to authorize build actions. A build action will be allowed 
-		as long as one rule allows it</div>
-		<div class="head clearfix">
-			<div class="float-left">
-				<a wicket:id="addNew" class="btn btn-success"><wicket:svg href="plus" class="icon"></wicket:svg> Add New</a>
-			</div>
-		</div>
-		<div class="body">
-			<table wicket:id="authorizations" class="authorizations table table-hover"></table>
+	<div class="alert alert-info mb-5">
+		<wicket:svg href="bulb" class="icon mr-1"/> Define rules to authorize build actions. A build action will be allowed as long as one rule allows it
+	</div>
+	<div class="card">
+		<div class="card-body">
+			<a wicket:id="addNew" class="btn btn-primary btn-icon mb-4" title="Add new action authorzation"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+			<table wicket:id="authorizations" class="authorizations table"></table>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="edit" title="Edit this authorization"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-		<a wicket:id="delete" title="Delete this authorization"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Edit this authorization"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Delete this authorization"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 	</wicket:fragment>
 </wicket:extend>

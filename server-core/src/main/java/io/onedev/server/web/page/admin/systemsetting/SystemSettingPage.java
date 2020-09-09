@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -47,6 +49,11 @@ public class SystemSettingPage extends AdministrationPage {
 		form.add(BeanContext.edit("editor", systemSetting, excludedProps, true));
 		
 		add(form);
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "System Setting");
 	}
 
 }

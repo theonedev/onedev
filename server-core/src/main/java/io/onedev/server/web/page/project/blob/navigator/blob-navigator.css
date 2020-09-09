@@ -1,18 +1,32 @@
 .subtree-dropdown-trigger {
-	background: url(arrow-right.png) no-repeat center top 5px;
-	width: 16px; 
-	height: 20px; 
-	display: block;
+	width: 16px;
+	height: 16px;
+	background: white;
+	border-radius: 2px;
 }
+.subtree-dropdown-trigger>span {
+	display: block;
+	width: 0; 
+	height: 0; 
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+	border-left: 4px solid var(--gray-dark);
+}
+
 .subtree-dropdown-trigger:hover, .subtree-dropdown-trigger.dropdown-open {
-	background-image: url(arrow-down.png);
+	background: var(--primary);
+	padding-top: 6px;
+}
+.subtree-dropdown-trigger:hover>span, .subtree-dropdown-trigger.dropdown-open>span {
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 4px solid white;
 }	
 .subtree-dropdown {
-	padding: 8px 24px 8px 4px; 
+	padding: 1rem; 
 	max-width: 800px; 
 }
-.blob-navigator .add {
-	font-size: 18px;
-	line-height: 20px;
-	vertical-align: middle;
+
+.blob-navigator .name .form-control {
+	width: 200px;
 }

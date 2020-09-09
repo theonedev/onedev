@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.dashboard;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.security.SecurityUtils;
@@ -19,6 +21,11 @@ public class ProjectDashboardPage extends ProjectPage {
 		else 
 			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
 		
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Dashboard");
 	}
 
 }

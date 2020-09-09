@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -177,7 +178,7 @@ public class GroupListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Is Administrator")) {
+		columns.add(new AbstractColumn<Group, Void>(Model.of("Is Admin")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
@@ -194,10 +195,15 @@ public class GroupListPage extends AdministrationPage {
 					IModel<Group> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().isCreateProjects()));
 			}
+
+			@Override
+			public String getCssClass() {
+				return "d-none d-lg-table-cell";
+			}
 			
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<Group, Void>(Model.of("Actions")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
@@ -298,5 +304,10 @@ public class GroupListPage extends AdministrationPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new GroupCssResourceReference()));
 	}
-	
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Groups");
+	}
+
 }

@@ -1,10 +1,11 @@
 <wicket:extend>
-	<div class="page-title">Mail Setting</div>
-	<form wicket:id="mailSetting" class="mail-setting leave-confirm">
-		<div wicket:id="editor"></div>
-		<div class="actions">
-			<input wicket:id="save" type="submit" class="btn btn-primary dirty-aware" value="Save Setting">
-			<input wicket:id="sendingTestMail" type="submit" class="btn btn-primary" value="Send Test Mail">
+	<div class="card mail-setting">
+		<div class="card-body">
+			<form wicket:id="mailSetting" class="leave-confirm">
+				<div wicket:id="editor" class="mb-4"></div>
+				<input wicket:id="save" type="submit" class="btn btn-primary dirty-aware mr-1" value="Save Setting">
+				<input wicket:id="sendingTestMail" type="submit" class="btn btn-light-primary" value="Send Test Mail">
+			</form>
 		</div>
-	</form>
+	</div>
 </wicket:extend>

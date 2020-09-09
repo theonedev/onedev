@@ -210,10 +210,6 @@ onedev.server = {
 	},
 	
 	setupAjaxLoadingIndicator: function() {
-		$("#ajax-loading-overlay").click(function(e) {
-			e.stopPropagation();
-		});
-
 		var ongoingAjaxRequests = 0;
 		Wicket.Event.subscribe('/ajax/call/beforeSend', function(e, attributes) {
 			if (ongoingAjaxRequests == 0) {
@@ -377,7 +373,9 @@ onedev.server = {
 				if (messagesToSent.indexOf(message) == -1)
 					messagesToSent.push(message);				
 			} else if (message == "ErrorMessage") {
-				$(".websocket-server-error").show();
+				var $websocketError = $(".websocket-error");
+		        $websocketError.css("left", ($(window).width()-$websocketError.outerWidth()) / 2);
+				$websocketError.slideDown("slow");
 			}
 		});
 	},
@@ -389,27 +387,28 @@ onedev.server = {
 	 * a source code)
 	 */
 	viewState: {
-		getInnerMostAutoFit: function() {
-			var $innerMost;
-			var $autofits = $(".autofit").filter(":visible");
-			while ($autofits.length != 0) {
-				$innerMost = $autofits.first();
-				$autofits = $innerMost.find(".autofit").filter(":visible");
-			}
-			return $innerMost;
-		},
 		getFromView: function() {
-			var $innerMost = onedev.server.viewState.getInnerMostAutoFit();
-			if ($innerMost) {
-				return $innerMost.triggerHandler("getViewState");
+			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
+			if ($autofit.length != 0) {
+				var events = jQuery._data($autofit[0], 'events');
+				if (events && events["getViewState"]) 
+					return $autofit.triggerHandler("getViewState");
+				else 
+					return {scroll:{left: $autofit.scrollLeft(), top: $autofit.scrollTop()}};			
 			} else {
 				return undefined;
 			}
 		},
 		setToView: function(viewState) {
-			var $innerMost = onedev.server.viewState.getInnerMostAutoFit();
-			if ($innerMost) {
-				$innerMost.triggerHandler("setViewState", viewState);
+			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
+			if ($autofit) {
+				var events = jQuery._data($autofit[0], 'events');
+				if (events && events["setViewState"]) { 
+					$autofit.triggerHandler("setViewState", viewState);
+				} else if (viewState.scroll) {
+					$autofit.scrollLeft(viewState.scroll.left);
+					$autofit.scrollTop(viewState.scroll.top);
+				}
 			}
 		},
 		getFromHistory: function() {
@@ -449,7 +448,7 @@ onedev.server = {
 			else
 				return url;
 		},
-		init: function(callback) {
+		init: function(popStateCallback) {
 			// Use a timeout here solve the problem that Safari (and previous versions of Chrome) 
 			// fires event "onpopstate" on initial page load and this causes the page to reload 
 			// infinitely  
@@ -461,7 +460,7 @@ onedev.server = {
 							if (!event.state || !event.state.data) {
 								location.reload();
 							} else {
-								callback(event.state.data);
+								popStateCallback(event.state.data);
 								onedev.server.history.current = {
 									state: event.state,
 									url: window.location.href
@@ -610,6 +609,100 @@ onedev.server = {
 		installListener($(document));
 	},
 	
+	setupDropdownToggle: function() {
+		function doSetup($container) {
+			$container.find(".dropdown-toggle:not('.no-dropdown-caret')").addBack(".dropdown-toggle:not('.no-dropdown-caret')").each(function() {
+				if ($(this).find(".dropdown-caret").length == 0) {
+					$(this).append("<svg class='dropdown-caret icon rotate-90'><use xlink:href='" + onedev.server.icons + "#arrow'/></svg>");
+				}
+			});
+		}	
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doSetup($("#" + componentId));
+		});
+		doSetup($(document));
+	},
+	
+	setupCheckbox: function() {
+		function doSetup($container) {
+			$container.find(".checkbox").addBack(".checkbox").each(function() {
+				if ($(this).find(">input+span:empty").length == 0) {
+					$(this).find(">input").after("<span></span>");
+				}
+			});
+		}	
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doSetup($("#" + componentId));
+		});
+		doSetup($(document));
+	},
+	
+	setupRadio: function() {
+		function doSetup($container) {
+			$container.find(".radio").addBack(".radio").each(function() {
+				if ($(this).find(">input+span:empty").length == 0) {
+					$(this).find(">input").after("<span></span>");
+				}
+			});
+		}	
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doSetup($("#" + componentId));
+		});
+		doSetup($(document));
+	},
+	
+	setupSwitch: function() {
+		function doSetup($container) {
+			$container.find(".switch").addBack(".switch").each(function() {
+				if ($(this).find(">label>input+span:empty").length == 0) {
+					$(this).find(">label>input").after("<span></span>");
+				}
+				if ($(this).find(">input+span:empty").length == 0) {
+					$(this).find(">input").after("<span></span>");
+				}
+			});
+		}	
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doSetup($("#" + componentId));
+		});
+		doSetup($(document));
+	},
+	perfectScrollbar: {
+		setup: function() {
+			function doSetup($container, afterElementReplace) {
+				$container.find(".ps.ps-scroll").addBack(".ps.ps-scroll").each(function() {
+					if (onedev.server.util.isDevice()) {
+						$(this).addClass("overflow-auto");
+					} else {
+				        var ps = new PerfectScrollbar(this);
+						$(this).addClass("resize-aware").on("resized", function() {
+							ps.update();
+							return false;
+						});
+						setTimeout(function() {
+							ps.update();
+						}, 0);
+						$(this).data("ps", ps);
+					}
+				});
+				if (afterElementReplace) {
+					setTimeout(function() {
+						$container.parent().closest(".ps-scroll").trigger("resized");
+					}, 0);
+				}
+			}	
+			$(document).on("afterElementReplace", function(event, componentId) {
+				doSetup($("#" + componentId), true);
+			});
+			doSetup($(document));
+		},
+		empty: function(element) {
+			$(element).contents().each(function() {
+				if (!$(this).hasClass("ps__rail-x") && !$(this).hasClass("ps__rail-y"))
+					$(this).remove();
+			});
+		}
+	},
 	setupInputClear: function() {
 		function installClearer($container) {
 			var selector = ".clearable-wrapper";
@@ -621,7 +714,7 @@ onedev.server = {
                 var $input = $wrapper.find("input[type=text], input:not([type])");
 				if (!$input.hasClass("clearable")) {
 					$input.addClass("clearable");
-					var $clear = $("<a class='input-clear'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#times'/></svg></a>");
+					var $clear = $("<a class='input-clear'><svg class='icon align-middle'><use xlink:href='" + onedev.server.icons + "#times'/></svg></a>");
 					$wrapper.append($clear);
 					if ($input.next().hasClass("input-group-append")) {
 						$clear.addClass("input-group-clear input-group-clear-" + $input.next().children("button").length);
@@ -655,13 +748,13 @@ onedev.server = {
 		});		
 	},
 	
-	onDomReady: function(icons) {
+	onDomReady: function(icons, popStateCallback) {
 		onedev.server.icons = icons;
+		
 		$(window).resize(function() {
+			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
+			$autofit.css("overflow", "auto").parents(":not('html'):not('body')").css("overflow", "hidden");
 			$(document).find(".resize-aware").trigger("resized");
-		});
-		$(window).scroll(function() {
-			$(document).find(".scroll-aware").trigger("scrolled");
 		});
 		
 		onedev.server.setupAjaxLoadingIndicator();
@@ -672,6 +765,12 @@ onedev.server = {
 		onedev.server.setupInputClear();
 		onedev.server.setupAlertClose();
 		onedev.server.setupModalOverlays();
+		onedev.server.setupDropdownToggle();
+		onedev.server.setupCheckbox();
+		onedev.server.setupRadio();
+		onedev.server.setupSwitch();
+		onedev.server.history.init(popStateCallback);
+		onedev.server.perfectScrollbar.setup();
 
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27)
@@ -686,12 +785,7 @@ onedev.server = {
 	onWindowLoad: function() {
 		onedev.server.setupAutoSize();
 		onedev.server.focus.setupAutoFocus();
-		
-		/*
-		 * Browser will also issue resize event after window is loaded, but that is too late, 
-		 * as getFromHistoryAndSetToView() must be happened after view size has been adjusted
-		 */
-		$(window).resize(); 
+
 		onedev.server.viewState.getFromHistoryAndSetToView();
 
 		// Let others have a chance to do something before marking the page as visited
@@ -708,6 +802,8 @@ onedev.server = {
 			onedev.server.viewState.getFromViewAndSetToHistory();	
 		});
 		*/
+		
+		$(window).resize();
 		
 		if (location.hash && !onedev.server.viewState.getFromHistory()) {
 			// Scroll anchors into view (for instance the markdown headline)

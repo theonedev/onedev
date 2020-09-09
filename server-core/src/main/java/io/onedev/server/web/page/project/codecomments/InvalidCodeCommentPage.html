@@ -1,19 +1,29 @@
 <wicket:extend>
-	<div class="invalid-code-comment alert alert-danger">
-		<div class="head">
-			Unable to show code comment as associated commit no longer exists in the underlying git repository
-		</div>
-		<div class="body">
-			This might happen for two reasons:
-			<ul>
-				<li> The project points to a wrong git repository. In this case, you will need to copy over the correct repository, 
-				or make sure that the correct global storage directory is specified.</li>
-				<li> The commit is no longer needed and has been garbage collected. 
-				<wicket:enclosure child="delete">
-				In this case, you may also <a wicket:id="delete">delete the code comment</a>
-				</wicket:enclosure>
-				</li>
-			</ul>		
+	<div class="card m-5">
+		<div class="card-body">
+			<div class="d-flex">
+				<wicket:svg href="sad-panda" class="icon icon-hero flex-shrink-0 ml-n4"/>		
+				<div>
+					<h4 class="mb-3">
+						Unable to show code comment as associated commit no longer exists in the underlying git repository
+					</h4>
+					This might happen for two reasons:
+					<ul>
+						<li> The project points to a wrong git repository. In this case, you will need to copy over the correct repository, 
+						or make sure that the correct global storage directory is specified.</li>
+						<li> The commit is no longer needed and has been garbage collected. 
+						<wicket:enclosure child="delete">
+						In this case, you may also <a wicket:id="delete" class="link-primary">delete the code comment</a>
+						</wicket:enclosure>
+						</li>
+					</ul>		
+				</div>
+			</div>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="projectTitleFrag">
+		<a wicket:id="codeComments" class="text-nowrap">Code Comments</a> 
+		<span class="dot"></span>
+		<span wicket:id="codeCommentNumber"></span>
+	</wicket:fragment>
 </wicket:extend>

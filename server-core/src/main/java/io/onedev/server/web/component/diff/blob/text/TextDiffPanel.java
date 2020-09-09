@@ -78,6 +78,7 @@ import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -198,6 +199,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				}
 				target.add(TextDiffPanel.this);
 				blameModel.setObject(blameInfo != null);
+				((BasePage)getPage()).resizeWindow(target);
 			}
 			
 		}.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
@@ -430,6 +432,15 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			
 		};
 		add(symbolTooltip);
+		
+		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return blameInfo!=null? "need-width": "";
+			}
+			
+		}));
 		
 		setOutputMarkupId(true);
 	}
@@ -1034,7 +1045,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		
 		String expandSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
 				SpriteImage.getVersionedHref(IconScope.class, "expand2"));
-		String ellipsisSvg = String.format("<svg class='icon icon-sm'><use xlink:href='%s'/></svg>", 
+		String ellipsisSvg = String.format("<svg class='icon'><use xlink:href='%s'/></svg>", 
 				SpriteImage.getVersionedHref(IconScope.class, "ellipsis"));
 		
 		String script = String.format("javascript:$('#%s').data('callback')('expand', %d);", getMarkupId(), blockIndex);

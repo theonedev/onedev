@@ -1,56 +1,54 @@
 <wicket:panel>
-	<div class="saved-queries">
-		<div class="head">
-			<h4 class="title">Saved Queries</h4>
-			<div class="actions">
-				<a wicket:id="edit" class="edit-saved-queries" title="Edit saved queries">
+	<div class="saved-queries card">
+		<div class="card-header">
+			<h3 class="card-title mr-4">Saved Queries</h3>
+			<div class="card-toolbar">
+				<a wicket:id="edit" class="edit-saved-queries mr-2 btn btn-light btn-xs btn-icon btn-hover-primary text-muted" title="Edit saved queries">
 					<wicket:svg href="edit" class="icon"></wicket:svg>
 				</a>
-				<a wicket:id="close" class="close-saved-queries" title="Hide saved queries">
+				<a wicket:id="close" class="close-saved-queries btn btn-light btn-xs btn-icon btn-hover-danger text-muted" title="Hide saved queries">
 					<wicket:svg href="times" class="icon"></wicket:svg>
 				</a>
 			</div>
 		</div>
-		<hr>
-		<div class="body">
+		<div class="card-body">
 			<wicket:enclosure child="userQueries">
-			<div wicket:id="userQueries">
+			<div wicket:id="userQueries" class="mb-4">
 				<span class="btn-group">
-					<a wicket:id="link" class="btn btn-sm btn-outline-secondary"><span wicket:id="label"></span></a><a wicket:id="subscriptionStatus" class="subscription-status btn btn-outline-secondary btn-sm"></a><a wicket:id="watchStatus" class="watch-status btn btn-outline-secondary btn-sm"></a>
+					<a wicket:id="subscriptionStatus" class="subscription-status btn btn-outline-secondary btn-sm btn-icon"></a><a wicket:id="watchStatus" class="watch-status btn btn-outline-secondary btn-icon btn-sm"></a>
+					<a wicket:id="link" class="btn btn-sm btn-outline-secondary"><span wicket:id="label"></span></a>					
 				</span>
 			</div>
-			<hr/>
 			</wicket:enclosure>
-			<div wicket:id="queries">
+			<div wicket:id="queries" class="mb-4">
 				<span class="btn-group">
-					<a wicket:id="link" class="btn btn-sm btn-outline-secondary"><span wicket:id="label"></span></a><a wicket:id="subscriptionStatus" class="subscription-status btn btn-outline-secondary btn-sm"></a><a wicket:id="watchStatus" class="watch-status btn btn-outline-secondary btn-sm"></a>
+					<a wicket:id="subscriptionStatus" class="subscription-status btn btn-outline-secondary btn-sm btn-icon"></a><a wicket:id="watchStatus" class="watch-status btn btn-outline-secondary btn-icon btn-sm"></a>
+					<a wicket:id="link" class="btn btn-sm btn-outline-secondary"><span wicket:id="label"></span></a>
 				</span>
-			</div>
-			<div wicket:id="watchHint" class="help-block">
-				<b><wicket:svg href="bulb" class="icon"/> Tips:</b> You may watch/unwatch specified queries above. 
-				The first matching query will take effect
 			</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="editSavedQueriesFrag">
-		<div class="modal-header">
-			<h5 class="modal-title">Edit Saved Queries</h5>
-			<button wicket:id="close" type="button" class="close">&times;</button>
-		</div>
-		<div class="modal-body">
-			<ul wicket:id="tab" class="nav nav-tabs"></ul>
-			<div wicket:id="tabPanel"></div>
+		<div class="edit-saved-queries">
+			<div class="modal-header">
+				<h5 class="modal-title">Edit Saved Queries</h5>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+			</div>
+			<div class="modal-body">
+				<ul wicket:id="tab" class="nav nav-tabs mb-3"></ul>
+				<div wicket:id="tabPanel"></div>
+			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="editSavedQueriesContentFrag">
-		<form wicket:id="form" class="leave-confirm edit-saved-queries">
+		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="feedback"></div>
 			<div wicket:id="editor"></div>
-			<div class="actions">
+			<div class="modal-footer">
 				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
-				<a wicket:id="useDefault" class="btn btn-primary">Use Default</a>
+				<a wicket:id="useDefault" class="btn btn-light-primary">Use Default</a>
 				<a wicket:id="cancel" class="btn btn-secondary">Cancel</a>
 			</div>
 		</form>
-	</wicket:fragment>
+	</wicket:fragment>	
 </wicket:panel>

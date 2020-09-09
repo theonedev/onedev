@@ -1,235 +1,71 @@
-@media(max-width: 1270px) {
-    #request-detail>.main ul.nav-tabs>li.collapsed {
-        display: block;
-    }
-    #request-detail>.main ul.nav-tabs>li.expanded {
-        display: none;
-    }
+.pull-request-detail>.card-body>.main>.summary {
+	border: 2px dashed var(--light-gray);
+	padding: 1.2rem 1.5rem;
+	border-radius: 0.42rem;
 }
-
-body.PullRequestDetailPage #layout>.body {
-	padding: 59px 0 0 0;
+.pull-request-detail>.card-body>.main>.summary>div {
+	margin-bottom: 1rem;
 }
-#request-detail>.main {
-	overflow: auto;
-	position: relative;
-	padding: 20px;
-}
-
-#request-detail>.main>div {
-	margin-bottom: 20px;
-}
-#request-detail>.main>.title {
-	font-size: 20px;
-	font-weight: bold;
-	position: relative;
-}
-#request-detail>.main>.title .create {
-	margin-left: 8px;
-}
-#request-detail>.main>.title form {
-	position: relative;
-	padding-right: 100px;
-}
-#request-detail>.main>.title form .actions {
-	position: absolute;
-	top: 0;
-	right: 0;
-	margin: 0;
-}
-#request-detail>.main>.title form .actions>:first-child {
-	margin-right: 0;
-}
-
-#request-detail>.main>.title a.edit {
-	color: #666;
-	margin-left: 8px;
-}
-#request-detail>.main>.title input[type=text] {
-	font-weight: normal;
-}
-#request-detail>.main>.title .alert {
-	font-weight: normal;
-	font-size: 14px;
-}
-#request-detail>.main>.status-and-branches {
-	position: relative;
-	font-size: 16px;
-	line-height: 20px;
-	margin-bottom: 12px;
-	padding-right: 30px;
-}
-#request-detail>.main>.status-and-branches>* {
-	margin-bottom: 8px;
-}
-#request-detail>.main>.status-and-branches>.status {
-	width: 100px;
-	padding: 6px 8px;
-	text-overflow: ellipsis;
-	overflow: hidden;
-	font-size: 16px;
-	margin-right: 8px;
-	margin-top: -4px;
-}
-
-#request-detail>.main>.status-and-branches>.more-info {
-	position: absolute;
-	right: 0;
-	top: -3px;
-	font-size: 24px;
-	margin: 0;
-	color: #666;
-}
-
-#request-detail>.main>.summary .alert {
+.pull-request-detail>.card-body>.main>.summary>div:last-child {
 	margin-bottom: 0;
-	border-radius: 0;
-	border-bottom: 1px dotted #888;
 }
-#request-detail>.main>.summary .alert svg {
-	margin-right: 8px;
+.pull-request-detail>.card-body>.main>.operations>a {
+	margin-bottom: 1.2rem;
+	margin-right: 0.5rem;
 }
-#request-detail>.main>.summary>.alert:first-child  {
-	border-radius: 4px 4px 0 0;
+.pull-request-detail>.card-body>.main>.summary .icon {
+	width: 20px;
+	height: 20px;
+	margin-right: 6px;
+	flex-shrink: 0;
 }
-#request-detail>.main>.summary>.alert:last-child  {
-	border-radius: 0 0 4px 4px;
-	border-bottom: none;
-}
-#request-detail>.main>.summary>.alert:first-child:last-child  {
-	border-radius: 4px;
-}
-
-#request-detail>.main>.summary>.calculating-merge-preview img {
-	width: 18px;
-	height: 18px;
-	margin: -4px 8px 0 0;
-}
-#request-detail>.main>.summary .more-info.not-link {
-	color: inherit;
-	cursor: inherit; 
-}
-#request-detail>.main>.summary .more-info.not-link:hover {
-	text-decoration: inherit;
-}
-
-#request-detail>.main>.operations { 
-	margin-bottom: 12px;
-}
-#request-detail>.main>.operations>a { 
-	margin-right: 8px;
-	margin-bottom: 8px;
-} 
-
-ul>li>a.code-comments .icon {
-	display: none;
-	fill: #4667EE;
-	margin: 0 0 0 4px;
-	width: 12px;
-	height: 12px;
+.pull-request-detail>.card-body>.main>.summary .icon.spin {
+	width: 24px;
+	height: 24px;
+	margin-left: -2px;
+	margin-right: 4px;
 }
 ul>li>a.code-comments.new .icon {
-	display: inline;
-}
-
-#request-detail>.side-info>.content>.nav {
-	font-size: 16px;
-	position: relative;
-	text-align: center;
-	padding-right: 20px;
-	border-right: 1px solid #D8D8D8;
-	margin-right: 30px;
-	display: block;
-}
-#request-detail>.side-info>.content>.nav a {
-	position: absolute;
-	color: #666;
-	top: 0;
-}
-
-#request-detail>.side-info>.content>.nav .prev {
-	left: 0;
-}
-#request-detail>.side-info>.content>.nav .next {
-	right: 0;
-}
-
-#request-detail>.side-info>.content>div>.head {
-	font-weight: bold;
-	margin-bottom: 12px;
-}
-#request-detail>.side-info>.content>div>.head>.warning {
-	color: #D09022;
-}
-#request-detail>.side-info .pull-request-jobs>.job {
-	margin-right: 12px;
-	line-height: 24px;
-}
-
-#request-detail>.side-info {
-	width: 360px;
-	padding: 20px;
-	background: #F9F9F9;
-}
-#request-detail>.side-info>.content>* {
-	margin-bottom: 20px;
-	border-top: 1px solid #E8E8E8;
-	padding-top: 20px;
-}
-#request-detail>.side-info>.content>div:first-child {
-	border-top: none;
-	padding-top: 0;
-}
-#request-detail>.side-info>.content .manage .synchronize>.help {
-	margin-left: 4px;
-	font-size: 16px;
+	width: 0.9rem;
+	height: 0.9rem;
+	fill: var(--primary);
+	display: inline-block !important;
 }
 
 .conflict-resolve-instruction {
-	padding: 12px;
+	max-width: 480px;
 }
-.conflict-resolve-instruction .title {
-	font-weight: bold;
-	font-size: 16px;
-	text-align: center;
-	margin-bottom: 8px;
-}
-.conflict-resolve-instruction .body>ul {
-	padding-left: 20px;
-	margin-bottom: 0;
-}
-.conflict-resolve-instruction .body>ul>li {
+.conflict-resolve-instruction ul {
+	padding-left: 0.9rem;
 	list-style: decimal;
-	margin-bottom: 12px;
-}
-.conflict-resolve-instruction .body>ul>li:last-child {
 	margin-bottom: 0;
 }
 
-.conflict-resolve-instruction .body>ul>li>.code {
-	margin-top: 8px;
+@media(min-width: 1200px) {
+	.pull-request-detail>.card-body>.main>.summary .more-info,
+	.pull-request-detail>.card-body>.main>.summary .more-info:hover,
+	.pull-request-detail>.card-body>.main>.summary .more-info:focus {
+		color: inherit !important;
+		cursor: inherit !important;
+	}
 }
 
-@media(min-width: 1150px) {
-	#request-detail>.main {
-		margin-right: 360px;
-	}
-	#request-detail .side-info {
-		box-shadow: none;
-		border-left-width: 4px;
-		border-color: #EEE;
-		display: block !important;
-	}
-	#request-detail .side-info.closed {
-		display: block;
-	}
-	#request-detail .status-and-branches a.more-info, #request-detail .side-info>a.close {
-		display: none;
-	}
-	#request-detail>.side-info>.content>.nav {
-		padding-right: 0;
-		border-right: none;
-		margin-right: 0;
-	}
+.pull-request-detail>.card-body>.more-info>.body>* {
+	margin-bottom: 1.5rem;
+	border-top: 1px dashed var(--secondary);
+	padding-top: 1.5rem;
+}
+.pull-request-detail>.card-body>.more-info>.body>:first-child {
+	border-top: none;
+	padding-top: 0;
+}
+
+.pull-request-detail>.card-body>.more-info>.body>*>.head {
+	font-weight: 600;
+	margin-bottom: 0.8rem;
+}
+.pull-request-detail>.card-body>.more-info>.body>.reviews>.body>.reviews,
+.pull-request-detail>.card-body>.more-info>.body>.assignments>.body>.assignments {
+	width: 100%;
 }
 

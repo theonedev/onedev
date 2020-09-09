@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.my.avatar;
 
+import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -26,5 +28,10 @@ public class MyAvatarPage extends MyPage {
 			
 		}));
 	}
-	
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		return new Label(componentId, "Edit My Avatar");
+	}
+
 }

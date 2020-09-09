@@ -7,8 +7,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -115,6 +113,42 @@ public class NoCommitsPanel extends Panel {
 				}
 				
 			});		
+			
+			add(new DropdownLink("pushInstructions") {
+
+				@Override
+				protected void onInitialize(FloatingPanel dropdown) {
+					super.onInitialize(dropdown);
+					dropdown.add(AttributeAppender.append("style", "max-width:480px;"));
+				}
+
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new GitProtocolPanel(id) {
+						
+						@Override
+						protected Component newContent(String componentId) {
+							Fragment fragment = new Fragment(id, "pushInstructionsFrag", NoCommitsPanel.this);
+							fragment.add(new Label("url", new LoadableDetachableModel<String>() {
+
+								@Override
+								protected String load() {
+									return getProtocolUrl();
+								}
+								
+							}));
+							return fragment;
+						}
+						
+						@Override
+						protected Project getProject() {
+							return context.getProject();
+						}
+						
+					};
+				}
+				
+			});
 		} else {
 			add(new WebMarkupContainer("addFiles") {
 
@@ -125,50 +159,18 @@ public class NoCommitsPanel extends Panel {
 				}
 				
 			});
+			add(new WebMarkupContainer("pushInstructions") {
+				
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("span");
+				}
+				
+			});
 		}
 
-		add(new DropdownLink("pushInstructions") {
-
-			@Override
-			protected void onInitialize(FloatingPanel dropdown) {
-				super.onInitialize(dropdown);
-				dropdown.add(AttributeAppender.append("class", "push-instructions"));
-			}
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new GitProtocolPanel(id) {
-					
-					@Override
-					protected Component newContent(String componentId) {
-						Fragment fragment = new Fragment(id, "pushInstructionsFrag", NoCommitsPanel.this);
-						fragment.add(new Label("url", new LoadableDetachableModel<String>() {
-
-							@Override
-							protected String load() {
-								return getProtocolUrl();
-							}
-							
-						}));
-						return fragment;
-					}
-					
-					@Override
-					protected Project getProject() {
-						return context.getProject();
-					}
-					
-				};
-			}
-			
-		});
 		setOutputMarkupId(true);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new NoCommitsCssResourceReference()));
 	}
 
 }

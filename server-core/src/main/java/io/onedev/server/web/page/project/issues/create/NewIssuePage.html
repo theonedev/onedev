@@ -1,10 +1,13 @@
 <wicket:extend>
-	<div wicket:id="workflowChangeAlert"></div>
-	<div class="page-title">New Issue</div>
-	<div id="new-issue">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="newIssue"></div>
-			<button type="submit" class="btn btn-primary dirty-aware">Save</button>
-		</form>
+	<div class="p-5">
+		<div wicket:id="workflowChangeAlert" class="mb-5"></div>
+		<div class="card">
+			<div class="card-body">
+				<form wicket:id="form" class="leave-confirm">
+					<div wicket:id="newIssue"></div>
+					<button type="submit" class="btn btn-primary dirty-aware">Save</button>
+				</form>
+			</div>
+		</div>
 	</div>
 </wicket:extend>

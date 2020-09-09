@@ -6,14 +6,17 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -29,6 +32,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.ajaxlistener.SelfDisableListener;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValueResolution.FixType;
 import io.onedev.server.web.editable.BeanContext;
 
@@ -49,7 +53,15 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	}
 	
 	private Component newLoadingComponent(String id, String loadingMessage) {
-		return new Label(id, loadingMessage).add(AttributeAppender.append("class", "reconcile-checking"));
+		return new Label(id, loadingMessage) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.setName("h5");
+			}
+			
+		}.add(AttributeAppender.append("class", "p-4 m-0"));
 	}
 	
 	private IssueManager getIssueManager() {
@@ -346,41 +358,43 @@ public abstract class WorkflowReconcilePanel extends Panel {
 	}
 	
 	private Component checkFieldValueOrders(String markupId) {
-		return new AjaxLazyLoadPanel(markupId) {
+		return new Label(markupId, "Checking field value orders...") {
 
+			private AbstractPostAjaxBehavior behavior;
+			
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
-			}
-
-			@Override
-			public Component getLazyLoadComponent(String markupId) {
-				getIssueManager().fixFieldValueOrders();
-				
-				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-				GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
-				issueSetting.setReconciled(true);
-				settingManager.saveIssueSetting(issueSetting);
-				
-				Fragment fragment = new Fragment(markupId, "completedFrag", WorkflowReconcilePanel.this);
-				fragment.add(new AjaxLink<Void>("ok") {
-
+			protected void onInitialize() {
+				super.onInitialize();
+				add(behavior = new AbstractPostAjaxBehavior() {
+					
 					@Override
-					public void onClick(AjaxRequestTarget target) {
+					protected void respond(AjaxRequestTarget target) {
+						getIssueManager().fixFieldValueOrders();
+						
+						SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+						GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
+						issueSetting.setReconciled(true);
+						settingManager.saveIssueSetting(issueSetting);
+						Session.get().success("Workflow reconciliation completed");
 						onCompleted(target);
 					}
 					
 				});
-				return fragment;
 			}
 
 			@Override
-			public Component getLoadingComponent(String markupId) {
-				return newLoadingComponent(markupId, "Checking field value orders...");
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.setName("h5");
+			}
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript(behavior.getCallbackScript()));
 			}
 			
-		};
+		}.add(AttributeAppender.append("class", "p-4 m-0"));
 	}
 	
 	@Override

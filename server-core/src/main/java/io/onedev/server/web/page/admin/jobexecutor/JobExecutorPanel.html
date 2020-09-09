@@ -1,13 +1,22 @@
 <wicket:panel>
 	<div class="job-executor card">
 		<div class="card-header">
-			<span class="drag-indicator"><wicket:svg href="grip" class="icon"></wicket:svg></span>
-			<span wicket:id="name" class="name"></span>
-			<a wicket:id="edit" title="Edit this executor"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-			<a wicket:id="delete" title="Delete this executor"><wicket:svg href="trash" class="icon"></wicket:svg></a>
-			<div class="form-check-inline">
-				<input wicket:id="enable" type="checkbox" class="form-check-input">
-				<label wicket:id="enableLabel" class="form-check-label">Enable</label>
+			<div class="card-title">
+				<span class="drag-indicator mr-2"><wicket:svg href="grip" class="icon"></wicket:svg></span>
+				<span wicket:id="name" class="name mr-3"></span>
+				<a wicket:id="edit" title="Edit this executor" class="btn btn-light btn-xs btn-icon btn-hover-primary text-muted mr-2">
+					<wicket:svg href="edit" class="icon"/>
+				</a>
+				<a wicket:id="delete" title="Delete this executor" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
+					<wicket:svg href="trash" class="icon"/>
+				</a>
+			</div>
+			<div class="card-toolbar">
+				<span class="switch switch-sm switch-primary mb-n2">
+					<label>
+						<input wicket:id="enable" type="checkbox">
+					</label>
+				</span>
 			</div>
 		</div>
 		<div class="card-body">

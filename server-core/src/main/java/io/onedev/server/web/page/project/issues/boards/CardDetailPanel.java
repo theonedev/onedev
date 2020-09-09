@@ -26,18 +26,22 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.FixedIssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
+import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -80,7 +84,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new IssueTitlePanel("title", false) {
+		add(new IssueTitlePanel("title") {
 
 			@Override
 			protected Issue getIssue() {
@@ -88,6 +92,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			}
 
 		});
+		
+		add(new SideInfoLink("moreInfoTrigger"));
 		
 		add(new IssueOperationsPanel("operations") {
 
@@ -179,7 +185,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		add(new SideInfoPanel("moreInfo") {
 
 			@Override
-			protected Component newContent(String componentId) {
+			protected Component newBody(String componentId) {
 				return new IssueSidePanel(componentId) {
 					
 					@Override
@@ -188,13 +194,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					}
 
 					@Override
-					protected CursorSupport<Issue> getCursorSupport() {
-						return CardDetailPanel.this.getCursorSupport();
-					}
-
-					@Override
 					protected Component newDeleteLink(String componentId) {
-						AjaxLink<Void> deleteLink = new AjaxLink<Void>(componentId) {
+						return new AjaxLink<Void>(componentId) {
 
 							@Override
 							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -209,14 +210,42 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 							}
 							
 						};
-						deleteLink.setVisible(SecurityUtils.canManageIssues(getIssue().getProject()));
-						return deleteLink;
+					}
+
+				};
+			}
+
+			@Override
+			protected Component newTitle(String componentId) {
+				return new EntityNavPanel<Issue>(componentId) {
+
+					@Override
+					protected EntityQuery<Issue> parse(String queryString, boolean inProject) {
+						return IssueQuery.parse(inProject?getProject():null, queryString, true, true, false, false, false);
+					}
+
+					@Override
+					protected Issue getEntity() {
+						return getIssue();
+					}
+
+					@Override
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
+						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+						return issueManager.query(inProject?getProject():null, query, offset, count, false);
+					}
+
+					@Override
+					protected CursorSupport<Issue> getCursorSupport() {
+						return CardDetailPanel.this.getCursorSupport();
 					}
 					
 				};
+				
 			}
 			
 		});
+		
 		add(activities = newActivitiesPanel());
 		
 		add(new AjaxLink<Void>("close") {
@@ -279,7 +308,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		
 		setOutputMarkupId(true);
 	}
-	
+
+	@Override
 	public List<String> getInputNames() {
 		throw new UnsupportedOperationException();
 	}

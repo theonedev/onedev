@@ -133,7 +133,7 @@ public class BlobNavigator extends Panel {
 					else
 						link.add(new Label("label", blobIdent.path));
 				} else {
-					link.add(new Label("label", context.getProject().getName()));
+					link.add(new Label("label", "ROOT"));
 				}
 				
 				item.add(link);
@@ -182,7 +182,7 @@ public class BlobNavigator extends Panel {
 							@Override
 							protected void onInitialize() {
 								super.onInitialize();
-								add(new HumanTheme());				
+								add(new HumanTheme());
 							}
 
 							@Override

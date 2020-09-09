@@ -88,7 +88,7 @@ public class CommitQuery implements Serializable {
 				} else if (criteria.revisionCriteria() != null) {
 					String value;
 					Revision.Scope scope;
-					if (criteria.revisionCriteria().DefaultBranch() != null)
+					if (criteria.revisionCriteria().DefaultBranch() != null) 
 						value = project.getDefaultBranch();
 					else 
 						value = getValue(criteria.revisionCriteria().Value());
@@ -112,7 +112,8 @@ public class CommitQuery implements Serializable {
 						scope = Revision.Scope.UNTIL;
 					else
 						scope = null;
-					revisions.add(new Revision(value, scope, criteria.revisionCriteria().getText()));
+					if (value != null)
+						revisions.add(new Revision(value, scope, criteria.revisionCriteria().getText()));
 				}
 			}
 			

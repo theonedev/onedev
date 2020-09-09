@@ -18,12 +18,13 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -46,6 +47,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.script.identity.JobIdentity;
@@ -56,6 +59,7 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -86,8 +90,6 @@ public abstract class BuildDetailPage extends ProjectPage
 		implements InputContext, ScriptIdentityAware, BuildAware {
 
 	public static final String PARAM_BUILD = "build";
-	
-	private static final int MAX_TABS_BEFORE_COLLAPSE = 10;
 	
 	protected final IModel<Build> buildModel;
 	
@@ -354,12 +356,6 @@ public abstract class BuildDetailPage extends ProjectPage
 			}
 
 			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onErrorMessageDomReady();"));
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getBuild().isFinished() && getBuild().getErrorMessage() != null);
@@ -426,7 +422,7 @@ public abstract class BuildDetailPage extends ProjectPage
 				return tabs;
 			}
 			
-		}, MAX_TABS_BEFORE_COLLAPSE) {
+		}) {
 
 			@Override
 			public void onInitialize() {
@@ -440,12 +436,55 @@ public abstract class BuildDetailPage extends ProjectPage
 		add(new SideInfoPanel("side") {
 
 			@Override
-			protected Component newContent(String componentId) {
+			protected Component newBody(String componentId) {
 				return new BuildSidePanel(componentId) {
 
 					@Override
 					protected Build getBuild() {
 						return BuildDetailPage.this.getBuild();
+					}
+
+					@Override
+					protected Component newDeleteLink(String componentId) {
+						return new Link<Void>(componentId) {
+
+							@Override
+							public void onClick() {
+								OneDev.getInstance(BuildManager.class).delete(getBuild());
+								
+								Session.get().success("Build #" + getBuild().getNumber() + " deleted");
+								
+								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
+								if (redirectUrlAfterDelete != null)
+									throw new RedirectToUrlException(redirectUrlAfterDelete);
+								else
+									setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject()));
+							}
+							
+						}.add(new ConfirmClickModifier("Do you really want to delete this build?"));
+					}
+					
+				};
+			}
+
+			@Override
+			protected Component newTitle(String componentId) {
+				return new EntityNavPanel<Build>(componentId) {
+
+					@Override
+					protected EntityQuery<Build> parse(String queryString, boolean inProject) {
+						return BuildQuery.parse(inProject?getProject():null, queryString, true, true);
+					}
+
+					@Override
+					protected Build getEntity() {
+						return getBuild();
+					}
+
+					@Override
+					protected List<Build> query(EntityQuery<Build> query, int offset, int count, boolean inProject) {
+						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+						return buildManager.query(inProject?getProject():null, query, offset, count);
 					}
 
 					@Override
@@ -465,31 +504,8 @@ public abstract class BuildDetailPage extends ProjectPage
 							
 						};
 					}
-
-					@Override
-					protected Component newDeleteLink(String componentId) {
-						Link<Void> deleteLink = new Link<Void>(componentId) {
-
-							@Override
-							public void onClick() {
-								OneDev.getInstance(BuildManager.class).delete(getBuild());
-								
-								Session.get().success("Build #" + getBuild().getNumber() + " deleted");
-								
-								String redirectUrlAfterDelete = WebSession.get().getRedirectUrlAfterDelete(Build.class);
-								if (redirectUrlAfterDelete != null)
-									throw new RedirectToUrlException(redirectUrlAfterDelete);
-								else
-									setResponsePage(ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject()));
-							}
-							
-						};
-						deleteLink.add(new ConfirmClickModifier("Do you really want to delete this build?"));
-						deleteLink.setVisible(SecurityUtils.canManage(getBuild()));
-						return deleteLink;
-					}
 					
-				};
+				};				
 			}
 			
 		});
@@ -499,8 +515,7 @@ public abstract class BuildDetailPage extends ProjectPage
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new BuildDetailResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onDomReady();"));
+		response.render(CssHeaderItem.forReference(new BuildDetailCssResourceReference()));
 	}
 
 	@Override
@@ -532,6 +547,15 @@ public abstract class BuildDetailPage extends ProjectPage
 	@Override
 	public ScriptIdentity getScriptIdentity() {
 		return new JobIdentity(getBuild().getProject(), getBuild().getCommitId());
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("builds", ProjectBuildsPage.class, 
+				ProjectBuildsPage.paramsOf(getProject())));
+		fragment.add(new Label("buildNumber", "#" + getBuild().getNumber()));
+		return fragment;
 	}
 
 }

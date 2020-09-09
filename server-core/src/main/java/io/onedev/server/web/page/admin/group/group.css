@@ -1,46 +1,6 @@
-@media(max-width: 767px) {
-	#group>.sidebar {
-		display: none;
-	}
-	#group>.sidebar+.content {
-		padding-left: 0;
-	}	
-}
-#group>.sidebar {
-	background: white;
-	border-left: none;
-	/* make it absolute as we do not want to make it stay fixed to occupy screen space on mobile screen */
-	position: absolute; 
-	z-index: 0;
-	/* use hacks below to make the sidebar extend to the screen bottom even if body does not reach to the bottom */
-	margin-bottom: -10000px;
-	padding-bottom: 10000px;
-}
-#group>.sidebar>.head {
-	border-bottom: 4px solid #EEE;
-	font-size: 16px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	height: 40px;
-	padding: 8px 14px;
-}
-
-#group>.sidebar>.tabs {
-	top: 40px;
-}
-#group>.sidebar>.tabs>li>a {
-	border-left: none;
-	padding: 12px 14px;
-}
-#administration>.minimized.sidebar+.content>#group>.sidebar {
-	left: 44px;
-}
-
-#group .authorization-list.list .select2-container,
-#group .membership-list.list .head .select2-container {
+.group-detail .membership-list .head .select2-container {
 	width: 240px;
 } 
-#group .authorization-list.list .property-roleName .select2-container {
-	width: 360px;
+.group-detail .authorization-list .select2-container {
+	width: 100%;
 } 

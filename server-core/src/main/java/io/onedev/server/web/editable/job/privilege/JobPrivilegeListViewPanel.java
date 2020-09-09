@@ -25,10 +25,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
+import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
+import io.onedev.server.web.component.offcanvas.OffCanvasPanel.Placement;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.page.layout.SideFloating.Placement;
 
 @SuppressWarnings("serial")
 class JobPrivilegeListViewPanel extends Panel {
@@ -88,7 +89,7 @@ class JobPrivilegeListViewPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "ellipsis";
+				return "ellipsis text-right";
 			}
 			
 		});		
@@ -108,7 +109,8 @@ class JobPrivilegeListViewPanel extends Panel {
 			protected void onInitialize() {
 				super.onInitialize();
 				addTopToolbar(new HeadersToolbar<Void>(this, null));
-				addBottomToolbar(new NoRecordsToolbar(this));
+				addBottomToolbar(new NoRecordsToolbar(this, Model.of("Not defined")));
+				add(new NoRecordsBehavior());
 			}
 			
 		});
@@ -132,17 +134,17 @@ class JobPrivilegeListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, Placement.RIGHT) {
+					new OffCanvasCardPanel(target, Placement.RIGHT, null) {
 
 						@Override
-						protected String getTitle() {
-							return "Job Privilege";
+						protected Component newTitle(String componentId) {
+							return new Label(componentId, "Job Privilege");
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-privilege def-detail"));
+							add(AttributeAppender.append("class", "job-privilege"));
 						}
 
 						@Override

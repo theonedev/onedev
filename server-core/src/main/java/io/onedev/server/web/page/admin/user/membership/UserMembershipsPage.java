@@ -272,5 +272,5 @@ public class UserMembershipsPage extends UserPage {
 		add(membershipsTable = new HistoryAwareDataTable<Membership, Void>("memberships", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
-	
+
 }

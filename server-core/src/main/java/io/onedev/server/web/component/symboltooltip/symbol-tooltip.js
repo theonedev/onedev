@@ -53,11 +53,12 @@ onedev.server.symboltooltip = {
 						onedev.server.symboltooltip.removeTooltip(container);
 				}
 
-				var $tooltip = $("<div class='symbol-tooltip' id='" + containerId 
+				var $tooltip = $("<div class='symbol-tooltip ps ps-scroll' id='" + containerId 
 						+ "-symbol-tooltip'><img src=" + ajaxIndicatorUrl + "></img></div>");
 				container.tooltip = $tooltip[0];
 				container.tooltip.symbolEl = symbolEl;
 				document.body.appendChild(container.tooltip);
+				$tooltip.data("ps", new PerfectScrollbar(container.tooltip));
 				
 				$tooltip.mouseover(function() {
 					cancelHide();
@@ -83,8 +84,8 @@ onedev.server.symboltooltip = {
 		var $container = $content.parent();
 		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
 		if ($tooltip.length != 0) {
-			$tooltip.empty().append($content.children());
-			$tooltip.align($tooltip.data("alignment"));
+			onedev.server.perfectScrollbar.empty($tooltip);
+			$tooltip.prepend($content.children()).align($tooltip.data("alignment")).data("ps").update();
 		}
 	},
 	

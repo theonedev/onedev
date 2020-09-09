@@ -1,57 +1,15 @@
-.revision-diff {
-	min-width: 600px;
-}
-.revision-diff.additionalWidth1 {
-	min-width: 900px;
-}
-.revision-diff.additionalWidth2 {
-	min-width: 1200px;
-}
-.revision-diff.additionalWidth3 {
-	min-width: 1500px;
-}
-
-.revision-diff>.revisions-indexing {
-	padding: 8px 8px 9px 8px;
-	background: #fcf8e3;
-	border: 1px solid #faebcc;
-	border-radius: 4px;
-	color: #8a6d3b;
-	font-size: 13px;
-	margin-bottom: 20px;
-}
-.revision-diff>.head {
-	margin-bottom: 16px;
-}
-.revision-diff>.head td.view-mode {
-	width: 140px;
-}
-.revision-diff>.head td.whitespace-option {
-	width: 140px;
-}
 .revision-diff>.body>.title {
-	font-size: 16px;
-	margin-bottom: 16px;	
+	font-size: 1.2rem;
+	margin-bottom: 1.2rem;	
 }
 .revision-diff>.body>.alert {
-	margin-bottom: 16px;
+	margin-bottom: 1.2rem;
 }
 .revision-diff>.body>.title>a .icon {
 	transform: rotate(90deg);
 }
 .revision-diff>.body>.title>a.expanded .icon {
 	transform: rotate(-90deg);
-}
-.revision-diff>.body>.diff-stats>.diff-stat {
-	font-size: 13px;
-}
-.revision-diff>.body>.diff-stats>.diff-stat>.icon {
-	width: 16px;
-	height: 16px;
-	margin-top: 2px;
-}
-.revision-diff>.body>.diff-stats>.diff-stat .has-comments {
-	color: #999;
 }
 
 .revision-diff>.body>.diff-stats>.diff-stat .dot-square, 
@@ -64,74 +22,34 @@
 .revision-diff>.body>.diff-stats>.diff-stat .minus-square {
 	fill: #C33535;
 }
-.revision-diff>.body>.diff-stats {
-	margin-top: -10px;
-}
-.revision-diff>.body>.diff-stats>.diff-stat {
-	padding: 6px 0;
-	border-bottom: 1px solid #F2F2F2;
-}
-.revision-diff>.body>.diff-stats>.diff-stat:last-child {
-	border-bottom: none;
-}
-.revision-diff>.body>.diff-stats>.diff-stat a.file {
-	padding: 0 6px;
-}
-.revision-diff>.body>.diff-stats>.diff-stat>.additions {
+.revision-diff>.body>.diff-stats>.diff-stat>span>.additions {
 	color: #35C335;
 }
-.revision-diff>.body>.diff-stats>.diff-stat>.deletions {
+.revision-diff>.body>.diff-stats>.diff-stat>span>.deletions {
 	color: #C33535;
 }
-.revision-diff>.body>.diff-stats>.diff-stat>.additions, 
-.revision-diff>.body>.diff-stats>.diff-stat>.deletions {
-	font-size: 12px;
+.revision-diff>.body>.diff-stats>.diff-stat>span>.additions, 
+.revision-diff>.body>.diff-stats>.diff-stat>span>.deletions {
+	font-size: 1rem;
 	font-weight: bold;
-	margin-right: 4px;
-	margin-top: 2px;
+	margin-right: 0.3rem;
 }
-.revision-diff>.body>.detail>.diffs {
-	margin-bottom: 0;
-}
-.revision-diff>.body>.detail>.diffs>.diff {
-	margin-bottom: 20px;
-	background: white;
-}
-.revision-diff>.body>.detail {
-	position: relative;
-}
+
 .revision-diff>.body>.detail>.comment {
-	border: 1px solid #E0E0E0;
-	margin-right: 12px;
-	padding-right: 3px;	
-	background: white;
-	position: fixed;
-	z-index: 100;
+	top: 2rem;
+	max-height: calc(100vh - 2rem - var(--topbar-height));
 }
-.revision-diff>.body>.detail>.comment>.content>.head>a {
-	margin-right: 8px;
-}
+
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
-	position: absolute;
-	background: #F2F2F2 url(vgrabber.png) no-repeat scroll center center;
+	border-right: 1px solid var(--light-gray);
+	background: var(--light) url(/icon/grip3.svg) no-repeat scroll center center;
+	background-size: 18px 18px;
     cursor: e-resize;
-    width: 8px;
-    right: 0;
-    top: 0;
+    width: 4px;
+	position: relative;
+	right: 0;
 }
-.revision-diff>.body>.detail>.comment>.content>.head {
-	font-weight: bold;
-	padding: 8px 12px;
-	background: #F2F2F2;
-}
-.revision-diff>.body>.detail>.comment>.content>.head .title {
-	margin-bottom: 8px;
-}
-.revision-diff>.body>.detail>.comment>.content>.body {
-	overflow: auto; 
-	border-left: 3px solid #F2F2F2;
-	border-bottom: 3px solid #F2F2F2;
-}
-.revision-diff>.body>.detail>.comment>.content>.body>* {
-	margin: 12px;
+
+.revision-diff>.body>.detail>.diffs>.diff:last-child {
+	margin-bottom: 0 !important;
 }

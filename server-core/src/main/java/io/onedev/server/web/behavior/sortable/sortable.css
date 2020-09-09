@@ -1,6 +1,6 @@
 tr.ui-sortable-helper {
 	display: table;
 	background: #F5F5F5;
-	border-top: 1px solid #E0E0E0;
-	border-bottom: 1px solid #E0E0E0;
+	border-top: 1px solid var(--secondary);
+	border-bottom: 1px solid var(--secondary);
 }

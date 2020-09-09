@@ -79,7 +79,7 @@ abstract class CardListPanel extends Panel {
 
 			@Override
 			protected String getItemSelector() {
-				return ">.card";
+				return ">.board-card";
 			}
 
 			@Override

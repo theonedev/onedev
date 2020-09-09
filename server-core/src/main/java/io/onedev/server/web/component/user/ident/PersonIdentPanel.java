@@ -11,7 +11,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
-import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.PersonCardPanel;
 
 @SuppressWarnings("serial")

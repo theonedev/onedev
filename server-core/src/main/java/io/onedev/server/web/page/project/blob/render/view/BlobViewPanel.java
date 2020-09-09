@@ -7,11 +7,10 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -54,13 +53,13 @@ public abstract class BlobViewPanel extends Panel {
 	
 	protected abstract boolean isViewPlainSupported();
 	
-	protected WebMarkupContainer newOptions(String id) {
+	protected WebMarkupContainer newFormats(String id) {
 		WebMarkupContainer options = new WebMarkupContainer(id);
 		options.setVisible(false);
 		return options;
 	}
 	
-	protected WebMarkupContainer newAdditionalActions(String id) {
+	protected WebMarkupContainer newExtraOptions(String id) {
 		return new WebMarkupContainer(id);
 	}
 
@@ -75,15 +74,21 @@ public abstract class BlobViewPanel extends Panel {
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);
 			boolean buildRequired = project.isBuildRequiredForModification(user, revision, path);
 
+			WebMarkupContainer edit = new WebMarkupContainer("edit");
+			changeActions.add(edit);
 			if (isEditSupported()) {
-				AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {
+				String title;
+				if (reviewRequired) 
+					title = "Review required for this change. Submit pull request instead";
+				else if (buildRequired) 
+					title = "Build required for this change. Submit pull request instead";
+				else 
+					title = "Edit on branch " + context.getBlobIdent().revision;
+				
+				edit.add(AttributeAppender.append("title", title));
+				
+				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link", true) {
 
-					@Override
-					protected void disableLink(ComponentTag tag) {
-						super.disableLink(tag);
-						
-					}
-					
 					@Override
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
@@ -91,48 +96,36 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						if (reviewRequired) {
-							tag.append("class", "disabled", " ");
-							tag.put("title", "Review required for this change. Submit pull request instead");
-						} else if (buildRequired) {
-							tag.append("class", "disabled", " ");
-							tag.put("title", "Build required for this change. Submit pull request instead");
-						} else {
-							tag.put("title", "Edit on branch " + context.getBlobIdent().revision);
-						}
-					}
-
-					@Override
 					public void onClick(AjaxRequestTarget target) {
 						context.onModeChange(target, Mode.EDIT, null);
 					}
 					
 				};
-				editLink.setEnabled(!reviewRequired && !buildRequired);
-				
-				changeActions.add(editLink);
-			} else {
-				changeActions.add(new WebMarkupContainer("edit").setVisible(false));
-			}
-			
-			AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("delete") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					if (reviewRequired) {
-						tag.append("class", "disabled", " ");
-						tag.put("title", "Review required for this change. Submit pull request instead");
-					} else if (buildRequired) {
-						tag.append("class", "disabled", " ");
-						tag.put("title", "Build required for this change. Submit pull request instead");
-					} else {
-						tag.put("title", "Delete from branch " + context.getBlobIdent().revision);
-					}
+				if (reviewRequired || buildRequired) {
+					link.add(AttributeAppender.append("class", "disabled"));
+					link.setEnabled(false);
 				}
 				
+				edit.add(link);
+			} else {
+				edit.add(new WebMarkupContainer("link").setVisible(false));
+			}
+			
+			WebMarkupContainer delete = new WebMarkupContainer("delete");
+			changeActions.add(delete);
+			
+			String title;
+			if (reviewRequired) 
+				title = "Review required for this change. Submit pull request instead";
+			else if (buildRequired) 
+				title = "Build required for this change. Submit pull request instead";
+			else 
+				title = "Delete from branch " + context.getBlobIdent().revision;
+			
+			delete.add(AttributeAppender.append("title", title));
+			
+			AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
+
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
@@ -146,14 +139,23 @@ public abstract class BlobViewPanel extends Panel {
 
 			};
 
-			deleteLink.setEnabled(!reviewRequired && !buildRequired);
+			if (reviewRequired || buildRequired) {
+				link.add(AttributeAppender.append("class", "disabled"));
+				link.setEnabled(false);
+			}
 			
-			changeActions.add(deleteLink);
+			delete.add(link);
 			
 		} else {
 			changeActions.setVisible(false);
-			changeActions.add(new WebMarkupContainer("edit"));
-			changeActions.add(new WebMarkupContainer("delete"));
+			
+			WebMarkupContainer edit = new WebMarkupContainer("edit");
+			edit.add(new WebMarkupContainer("link"));
+			changeActions.add(edit);
+			
+			WebMarkupContainer delete = new WebMarkupContainer("delete");
+			delete.add(new WebMarkupContainer("link"));
+			changeActions.add(delete);
 		}
 		
 		changeActions.setOutputMarkupId(true);
@@ -208,7 +210,7 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getProject().getBlob(context.getBlobIdent(), true).getSize())));
 		
-		add(newOptions("options"));
+		add(newFormats("formats"));
 		
 		add(new ResourceLink<Void>("raw", new RawBlobResourceReference(), 
 				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent())));
@@ -265,7 +267,7 @@ public abstract class BlobViewPanel extends Panel {
 			
 		}));
 		
-		add(newAdditionalActions("extraActions"));
+		add(newExtraOptions("extraOptions"));
 		newChangeActions(null);
 		
 		setOutputMarkupId(true);
@@ -274,10 +276,7 @@ public abstract class BlobViewPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
-		response.render(JavaScriptHeaderItem.forReference(new BlobViewResourceReference()));
-		
-		response.render(OnDomReadyHeaderItem.forScript(String.format("onedev.server.blobView.onDomReady('%s');", getMarkupId())));
+		response.render(CssHeaderItem.forReference(new BlobViewCssResourceReference()));
 	}
 
 	public BlobRenderContext getContext() {

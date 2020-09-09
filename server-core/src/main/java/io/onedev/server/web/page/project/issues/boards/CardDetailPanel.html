@@ -1,13 +1,14 @@
 <wicket:panel>
 	<div class="board-card-detail">
-		<div class="modal-header">
+		<div class="modal-header d-flex align-items-center">
 			<h5 wicket:id="title"></h5>
-			<button wicket:id="close" type="button" class="close">&times</button>
+			<a wicket:id="moreInfoTrigger" class="more-info side-info flex-shrink-0 ml-auto mr-5" title="More info"><wicket:svg href="ellipsis" class="icon"></wicket:svg></a>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 		</div>
-		<div class="body">
-			<div class="main">
+		<div class="modal-body d-flex position-relative overflow-hidden">
+			<div class="main flex-grow-1">
 				<div wicket:id="operations"></div>
-				<ul wicket:id="tabs" class="tabs nav nav-tabs"></ul>
+				<ul wicket:id="tabs" class="tabs nav nav-tabs nav-tabs-line nav-bold mb-5"></ul>
 				<div wicket:id="tabContent"></div>
 			</div>
 			<div wicket:id="moreInfo"></div>
@@ -15,6 +16,6 @@
 	</div>
 	<wicket:fragment wicket:id="commitsFrag">
 		<div wicket:id="commits" class="commits"></div>
-		<div class="help-block"><wicket:svg href="info-circle" class="icon"/> This page lists recent commits fixing the issue</div>
+		<div class="font-size-sm text-muted"><wicket:svg href="info-circle" class="icon"/> This page lists recent commits fixing the issue</div>
 	</wicket:fragment>
 </wicket:panel>

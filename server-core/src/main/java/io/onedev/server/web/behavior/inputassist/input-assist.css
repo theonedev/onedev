@@ -1,43 +1,18 @@
 .floating>.content>.input-assist {
-	padding: 8px;
+	padding: 1rem;
 }
 .input-assist .suggestions {
 	max-height: 400px;
 }
-.input-assist td {
-	color: #333;
-	padding: 4px 8px;
-	cursor: pointer;
-}
-.input-assist tr:hover td {
-	background-color: #E0F0FC;
-}
-.input-assist tr.active td {
-	background-color: #CBE8FB;
-	border-color: #8BC8F9;
-}
-.input-assist tr.suggestion td.content {
-	padding-right: 12px;
+.input-assist li.suggestion .content {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-	font-size: 12px;
-	white-space: nowrap;
-}
-.input-assist td.description {
-	text-align: right;
-	font-size: 12px;
-	color: #999;
 }
 .input-assist .help {
-	margin-top: 8px;
-	margin-bottom: 0;
-	background: #F0F0F0;
-	padding: 2px 4px;
-	border: 1px dashed #CCC;
-	color: #666;
+	border: 1px dashed var(--secondary);
 }
 .input-assist .help li {
 	list-style: disc;
-	margin-left: 18px;
+	margin-left: 1.5rem;
 }
 .input-error-mark {
     background: url(wave.png) repeat-x bottom;

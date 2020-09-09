@@ -1,0 +1,19 @@
+<wicket:extend>
+	<div class="state-transitions">
+		<div class="text-muted mb-4">
+			<wicket:svg href="bulb" class="icon"/> Define default issue transitions for all projects here. 
+			A certain project can override this setting to define its own issue transitions.
+		</div>
+		<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add issue state transition"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		<table wicket:id="stateTransitions" class="table"></table>
+	</div>
+	<wicket:fragment wicket:id="showDetailFrag">
+		<a wicket:id="link"><wicket:svg href="ellipsis" class="icon align-middle"/></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="transitionActionsFrag">
+		<div class="d-flex">
+			<a wicket:id="edit" class="btn btn-light-primary mr-1">Edit</a>
+			<a wicket:id="delete" class="btn btn-light-danger ml-auto">Delete</a>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

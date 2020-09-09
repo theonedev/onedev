@@ -1,155 +1,78 @@
-.request-activity-options {
-	text-align: right;
+.pull-request-detail>.card-body>.main>.activities .activity.new>.avatar {
+	border-left-color: var(--primary);
 }
-.request-activity-options>div {
-	padding-left: 12px;
-	display: inline-block;
-}
-#request-detail>.main>.activities .activity.new>.avatar {
-	border-left-color: #4667EE;
-}
-#request-detail>.main>.activities>table {
+.pull-request-detail>.card-body>.main>.activities>table {
 	table-layout: fixed;
 }
 
-#request-detail>.main>.activities .activity>td {
-	border-bottom: 1px solid #EEE;
-	padding: 16px 0;
+.pull-request-detail>.card-body>.main>.activities .activity>td {
+	border-top: 1px solid var(--light-gray);
+	padding: 1.25rem 0;
+	vertical-align: top;
 }
-#request-detail>.main>.activities .activity:last-child>td {
-	border-bottom: none;
+.pull-request-detail>.card-body>.main>.activities .activity:first-child>td {
+	border-top: none;
 }
-#request-detail>.main>.activities .activity>td.avatar {
+.pull-request-detail>.card-body>.main>.activities .activity>td.avatar {
 	width: 48px;
 	border-left: 4px solid white;
 	padding-left: 8px;
 }
-#request-detail>.main>.activities .activity>td.avatar .avatar {
+.pull-request-detail>.card-body>.main>.activities .activity>td.avatar .avatar {
 	width: 40px;
 	height: 40px;
 }
-#request-detail>.main>.activities .activity>td.content {
-	padding-left: 16px;
+.pull-request-detail>.card-body>.main>.activities .activity>td.content {
+	padding-left: 1.25rem;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content .alert {
-	margin: 16px 0;
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased,
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased a,
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased span,
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased:before {
+	color: var(--muted);
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased,
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased a,
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased span,
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased:before {
-	color: #aaa;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased img {
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.rebased img {
 	opacity: 36%;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit {
-	position: relative;
-	margin: 8px 0;
-	padding: 4px;
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content {
+	padding-top: 0;
+	padding-bottom: 0;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit:hover {
-	background: #F7ECB9;
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit {
+	padding: 0.5rem 0;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.author {
-	position: absolute;
-	left:32px;
-	top: 2px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.message {
-	padding: 0 130px 0 60px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.with-status>.message {
-	padding-right: 175px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.actions {
-	position: absolute;
-	top: 4px;
-	right: 4px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.icon {
-	position: absolute;
-	left: 4px;
-	top: 10px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content {
-	padding: 0 0 0 10px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.head {
+
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.head {
 	display: none;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body {
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity>td.content>.body {
 	margin: 0;
 }
-
-#request-detail>.main>.activities .activity>td>.content {
-	padding-top: 8px;
-} 
-#request-detail>.main>.activities .activity>td>.head,
-#request-detail>.main>.activities .activity>td>.content {
-	color: #999;
-}
-#request-detail>.main>.activities .activity>td>.head a,
-#request-detail>.main>.activities .activity>td>.content a {
-	color: #666;
-}
-#request-detail>.main>.activities .activity>td>.head a.changes,
-#request-detail>.main>.activities .activity>td>.content a.changes {
-	margin-left: 8px;
-	color: #999;
-}
-#request-detail>.main>.activities .activity>td>.body {
-	margin-top: 8px;
-}
-#request-detail>.main>.activities .activity>td.no-body>.head {
-	margin-top: 10px;
+.pull-request-detail>.card-body>.main>.activities .PullRequestUpdatedActivity+.PullRequestUpdatedActivity td {
+	border-top: none;
 }
 
-#request-detail>.main>.activities .add-comment {
-	margin-top: 16px;
+.pull-request-detail>.card-body>.main>.activities .activity>td>.body {
+	margin-top: 1rem;
 }
-#request-detail>.main>.activities .login-to-comment {
-	border: 1px solid #EEE;
-	vertical-align: center;
-	text-align: center;
-	padding: 20px;
-	font-size: 20px;
-	background: #F9F9F9;
-	border-radius: 4px;	
+.pull-request-detail>.card-body>.main>.activities .activity>td.no-body {
+	vertical-align: middle;
 }
 
-#request-detail>.main>.activities .activity.since-changes, 
-#request-detail>.main>.activities .activity.since-changes>.avatar {
-	display: none;
+.pull-request-detail>.card-body>.main>.activities .activity.since-changes .avatar div {
+	border-radius: 20px;
+	background: var(--primary);
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
-#request-detail>.main>.activities .activity.since-changes.visible {
-	display: table-row;
-}
-#request-detail>.main>.activities .activity.since-changes td.content {
-	font-size: 16px;
-}
-#request-detail>.main>.activities .activity.since-changes .icon {
-	border-radius: 13px;
-	background: #5CA7F8;
-	width: 26px;
-	height: 26px;
+.pull-request-detail>.card-body>.main>.activities .activity.since-changes .avatar .icon {
+	width: 20px;
+	height: 20px;
 	color: white;
-	padding: 6px;
-	margin-right: 4px;
 }
-#request-detail>.main>.activities .activity>td.content .plain.diff {
-	margin-bottom: 12px;
-}
-
-@media(max-width: 991px) {
-	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit .hash,
-	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit .browse {
-		display: none;
-	}
-	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit>.message {
-		padding-right: 0;
-	}
-	#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content>.body>.commit.with-status>.message {
-		padding-right: 45px;
-	}
+.pull-request-detail>.card-body>.main>.activities .activity.since-changes td {
+	vertical-align: middle;
 }

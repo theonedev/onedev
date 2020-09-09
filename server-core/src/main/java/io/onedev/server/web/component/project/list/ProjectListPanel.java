@@ -12,7 +12,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -37,8 +36,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -141,11 +140,6 @@ public class ProjectListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (SecurityUtils.canCreateProjects()) 
-			add(new BookmarkablePageLink<Void>("newProject", NewProjectPage.class));
-		else
-			add(new WebMarkupContainer("newProject").setVisible(false));
-		
 		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
@@ -183,7 +177,7 @@ public class ProjectListPanel extends Panel {
 				super.onComponentTag(tag);
 				configure();
 				if (!isEnabled()) 
-					tag.put("disabled", "disabled");
+					tag.append("class", "disabled", " ");
 				if (!querySubmitted)
 					tag.put("title", "Query not submitted");
 				else if (queryModel.getObject() == null)
@@ -227,11 +221,7 @@ public class ProjectListPanel extends Panel {
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
 						queryModel.setObject(query);
-						String queryString = query.toString();
-						if (queryString.length() != 0)
-							queryStringModel.setObject(queryString);
-						else
-							queryStringModel.setObject(null);
+						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
 						doQuery(target);
@@ -276,9 +266,9 @@ public class ProjectListPanel extends Panel {
 			}
 			
 		});
-		if (SecurityUtils.canCreateProjects())
-			queryForm.add(AttributeAppender.append("class", "can-create-projects"));
 		add(queryForm);
+		
+		add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class).setVisible(SecurityUtils.canCreateProjects()));
 		
 		SortableDataProvider<Project, Void> dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
 
@@ -372,7 +362,7 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "last-update expanded";
+				return "d-none d-sm-table-cell";
 			}
 			
 		});
@@ -382,11 +372,11 @@ public class ProjectListPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-		
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectListResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectCssResourceReference()));
 	}
-	
+		
 }

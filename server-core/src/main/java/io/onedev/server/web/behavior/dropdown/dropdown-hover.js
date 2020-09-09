@@ -5,7 +5,7 @@ onedev.server.dropdownHover = {
 		
 		$trigger.data("hide", function() {
 			if ($trigger.data("dropdown"))
-				onedev.server.floating.close($trigger.data("dropdown"), true);
+				$trigger.data("dropdown").data("closeCallback")();
 			$trigger.data("hideTimer", null);
 		});
 		$trigger.data("prepareToHide", function() {

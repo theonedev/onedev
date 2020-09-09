@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project.issues.milestones;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -16,10 +16,9 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 
 @SuppressWarnings("serial")
-public class NewMilestonePage extends ProjectIssuesPage {
+public class NewMilestonePage extends ProjectPage {
 
 	public NewMilestonePage(PageParameters params) {
 		super(params);
@@ -58,12 +57,6 @@ public class NewMilestonePage extends ProjectIssuesPage {
 		add(form);
 	}
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MilestonesResourceReference()));
-	}
-
 	public static PageParameters paramsOf(Project project) {
 		return ProjectPage.paramsOf(project);
 	}
@@ -71,6 +64,11 @@ public class NewMilestonePage extends ProjectIssuesPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.canManageIssues(getProject());
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Create Milestone");
 	}
 
 }

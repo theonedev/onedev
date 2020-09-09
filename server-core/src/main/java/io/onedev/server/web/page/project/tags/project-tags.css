@@ -1,42 +1,21 @@
-#project-tags>.list>.body>table>thead {
+.project-tags .body>table>thead {
 	display: none;
 }
-#project-tags .tag {
-	padding: 8px;
+.project-tags .body>table td {
+	padding-left: 0;
+	padding-right: 0;
 }
-#project-tags .tag .title>a.name {
+.project-tags .body>table td.tag>.title>.name {
 	font-weight: bold;
+	font-size: 1.1rem;
 }
-#project-tags .tag .title>* {
-	margin-right: 8px;
-}
-#project-tags .tag .title svg {
-	margin: 0;
-}
-
-#project-tags .tag .actions a {
-	color: #444;
-}
-#project-tags .annotated {
-	color: #999;
-	font-size: 12px;
-	margin-left: 8px;
-}
-#project-tags .annotated .ellipsis-expander {
-	margin-left: 4px;
-}
-#project-tags .annotated .message {
-	display: none;
-	border: none;
-	font-size: 12px;
-	background: none;
-}
-#project-tags .annotated>pre {
-	margin-bottom: 0;
-	padding-bottom: 0
-}
-
-#project-tags .tag>div {
-	margin: 8px 0;
+.project-tags .annotated .message {
+	display: none; 
+    font-size: 0.9rem;
+	border-left: 4px solid var(--secondary);
+    margin: 1rem 0;
+    padding: 0 0 0 1rem;
+    border-radius: 0;
+	white-space: pre-wrap;
 }
 

@@ -21,7 +21,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -181,7 +181,7 @@ abstract class JobExecutorEditPanel extends Panel {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			protected String runTask(JobLogger logger) {
+			protected String runTask(SimpleLogger logger) {
 				((Testable)bean.getExecutor()).test(testData, logger);
 				return "Job executor tested successfully";
 			}

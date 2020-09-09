@@ -11,9 +11,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -46,6 +45,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
@@ -506,6 +506,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 					state.tabPanel = TabPanel.COMMITS;
 					newTabPanel(target);
 					pushState(target);
+					resizeWindow(target);
 				}
 				
 			});
@@ -522,6 +523,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 					state.tabPanel = TabPanel.FILE_CHANGES;
 					newTabPanel(target);
 					pushState(target);
+					resizeWindow(target);
 				}
 				
 			});
@@ -540,8 +542,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new RevisionCompareResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.revisionCompare.onDomReady();"));
+		response.render(CssHeaderItem.forReference(new RevisionCompareCssResourceReference()));
 	}
 
 	private void newTabPanel(@Nullable AjaxRequestTarget target) {
@@ -841,6 +842,11 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 	@Override
 	public PageParameters getParamsAfterEdit() {
 		return paramsOf(getProject(), state);
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Code Compare");
 	}
 
 }

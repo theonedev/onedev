@@ -3,12 +3,13 @@ package io.onedev.server.web.page.admin.role;
 import java.io.Serializable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
@@ -141,12 +142,6 @@ public class RoleDetailPage extends AdministrationPage {
 		super.onDetach();
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new RoleCssResourceReference()));
-	}
-	
 	public Role getRole() {
 		return roleModel.getObject();
 	}
@@ -160,6 +155,14 @@ public class RoleDetailPage extends AdministrationPage {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_ROLE, role.getId());
 		return params;
+	}
+
+	@Override
+	protected Component newTopbarTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("roles", RoleListPage.class));
+		fragment.add(new Label("roleName", getRole().getName()));
+		return fragment;
 	}
 
 }

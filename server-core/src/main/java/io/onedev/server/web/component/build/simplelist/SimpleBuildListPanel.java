@@ -3,8 +3,7 @@ package io.onedev.server.web.component.build.simplelist;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -38,9 +37,8 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Fragment fragment;
 		if (!getBuilds().isEmpty()) {
-			fragment = new Fragment("content", "hasBuildsFrag", this);
+			Fragment fragment = new Fragment("content", "hasBuildsFrag", this);
 			fragment.add(newListLink("showInList"));
 			
 			fragment.add(new ListView<Build>("builds", getModel()) {
@@ -70,20 +68,14 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 				}
 				
 			});
+			add(fragment);
 		} else {
-			fragment = new Fragment("content", "noBuildsFrag", this);
+			add(new Label("content", "No builds").add(AttributeAppender.append("class", "no-builds font-italic mx-5 my-4")));
 		}
-		add(fragment);
 	}
 
 	protected Component newListLink(String componentId) {
 		return new WebMarkupContainer(componentId).setVisible(false);
 	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new SimpleBuildListCssResourceReference()));
-	}
-	
+
 }

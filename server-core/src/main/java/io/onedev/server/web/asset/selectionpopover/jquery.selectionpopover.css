@@ -1,23 +1,22 @@
 .selection-popover {
 	z-index: 10000;
-	position: absolute;
+	position: fixed;
 }
 .selection-popover>.content {
-	background: #333;
-	border-radius: 6px;
-	padding: 12px;
+	background: var(--dark);
+	border-radius: 0.42rem;
+	padding: 1rem 0;
 }
 .selection-popover>.content a, .selection-popover>.content span {
 	color: white;
 	display: block;
 	white-space: nowrap;
+	padding: 0.3rem 1rem;
 }
-.selection-popover>.content a+a, 
-.selection-popover>.content a+span, 
-.selection-popover>.content span+span, 
-.selection-popover>.content span+a {
-	margin-top: 8px;
+.selection-popover>.content a:hover, .selection-popover>.content a:focus {
+	background-color: var(--gray-dark);
 }
+
 .selection-popover>.triangle {
 	position: relative;
 	left: 50%;
@@ -25,5 +24,5 @@
 	height: 0; 
 	border-left: 6px solid transparent;
 	border-right: 6px solid transparent;
-	border-top: 6px solid #333;
+	border-top: 6px solid var(--dark);
 }

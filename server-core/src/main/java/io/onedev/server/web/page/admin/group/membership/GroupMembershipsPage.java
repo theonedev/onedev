@@ -48,7 +48,7 @@ import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
-import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 import io.onedev.server.web.page.admin.group.GroupPage;
@@ -272,5 +272,5 @@ public class GroupMembershipsPage extends GroupPage {
 		add(membershipsTable = new HistoryAwareDataTable<Membership, Void>("memberships", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
-	
+
 }

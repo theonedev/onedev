@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -107,4 +109,10 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 		form.add(PropertyContext.edit("editor", authorizationsBean, "authorizations"));
 		add(form);
 	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Project Authorizations");
+	}
+	
 }

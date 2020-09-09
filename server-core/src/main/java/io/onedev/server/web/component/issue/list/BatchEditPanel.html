@@ -3,38 +3,24 @@
 		<form wicket:id="form">
 			<div class="modal-header">
 				<h5 wicket:id="title" class="modal-title"></h5>
-				<button wicket:id="close" type="button" class="close">&times;</button>
+				<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
 			</div>
 			<div class="modal-body">
-				<div class="select-fields">
-					<label class="control-label">Fields to Change</label>
-					<div class="checkboxes clearfix">
-						<div wicket:id="feedback"></div>
-						<div class="float-left">
-							<div class="checkbox">
-			    				<label>
-			      					<input wicket:id="stateCheck" type="checkbox"> State
-			    				</label>
-			  				</div>					
-						</div>
-						<div class="float-left">
-							<div class="checkbox">
-			    				<label>
-			      					<input wicket:id="milestoneCheck" type="checkbox"> Milestone
-			    				</label>
-			  				</div>					
-						</div>
-						<div wicket:id="customFields" class="float-left">
-							<div class="checkbox">
-			    				<label>
-			      					<input wicket:id="customFieldCheck" type="checkbox"> <span wicket:id="name"></span>
-			    				</label>
-			  				</div>					
-						</div>
-					</div>
+				<div class="mb-3 font-size-lg">Fields to Change</div>
+				<div wicket:id="feedback"></div>
+				<div class="d-flex flex-wrap mb-4">
+					<label class="checkbox flex-shrink-0 mr-3">
+	      				<input wicket:id="stateCheck" type="checkbox"> State
+	  				</label>					
+					<label class="checkbox flex-shrink-0 mr-3">
+	      				<input wicket:id="milestoneCheck" type="checkbox"> Milestone
+	  				</label>					
+					<label wicket:id="customFields" class="checkbox flex-shrink-0 mr-3">
+		      			<input wicket:id="customFieldCheck" type="checkbox"> <wicket:container wicket:id="name"></wicket:container>
+					</label>
 				</div>
-				<div wicket:id="builtInFieldsEditor"></div>
-				<div wicket:id="customFieldsEditor"></div>
+				<div wicket:id="builtInFieldsEditor" class="mb-4"></div>
+				<div wicket:id="customFieldsEditor" class="mb-4"></div>
 				<div wicket:id="comment" placeholder="Leave a comment"></div>
 			</div>				
 			<div class="modal-footer">

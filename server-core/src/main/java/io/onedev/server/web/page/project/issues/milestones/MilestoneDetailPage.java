@@ -7,12 +7,13 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -27,6 +28,9 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -34,11 +38,11 @@ import io.onedev.server.web.component.issue.statestats.StateStatsBar;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
+import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class MilestoneDetailPage extends ProjectIssuesPage {
+public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAware {
 
 	private static final String PARAM_MILESTONE = "milestone";
 	
@@ -207,17 +211,25 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 	}
 
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MilestonesResourceReference()));
+	public ScriptIdentity getScriptIdentity() {
+		return new SiteAdministrator();
 	}
-
+	
 	public static PageParameters paramsOf(Milestone milestone, @Nullable String query) {
 		PageParameters params = paramsOf(milestone.getProject());
 		params.add(PARAM_MILESTONE, milestone.getId());
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		return params;
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
+		fragment.add(new BookmarkablePageLink<Void>("milestones", MilestoneListPage.class, 
+				MilestoneListPage.paramsOf(getProject())));
+		fragment.add(new Label("milestoneName", getMilestone().getName()));
+		return fragment;
 	}
 	
 }

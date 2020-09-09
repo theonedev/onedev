@@ -1,7 +1,3 @@
-.reconcile-checking {
-	padding: 20px;
-	font-size: 18px;
-}
 .fix-states .undefined {
 	width: 50%;
 }
@@ -14,6 +10,3 @@
 	width: 50%;
 }
 
-.workflow-reconciliation .completed .modal-footer {
-	text-align: center;
-}

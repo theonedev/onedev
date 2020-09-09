@@ -290,7 +290,7 @@ public class OpenIdConnector extends SsoConnector {
 	}
 
 	@Override
-	public Component renderSubHeader(String componentId) {
+	public Component renderAdditionalInfo(String componentId) {
 		return new CallbackUrlPanel(componentId, getCallbackUri().toString());
 	}
 
