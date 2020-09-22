@@ -12,7 +12,7 @@ jobs:
   - mvn test
   triggers:
   - !BranchUpdateTrigger
-    branches: master
+    branches: main
   - !PullRequestTrigger {}
   retrieveSource: true
   cloneDepth: 1
@@ -95,15 +95,15 @@ jobs:
     milestoneName: '@build_version@'
   defaultFixedIssuesFilter: '"State" is "Released" order by "Type" asc and "Priority"
     desc'
-- name: Sync Master (GitHub)
+- name: Sync Main (GitHub)
   image: alpine/git:1.0.7
   commands:
   - git config --global --unset http.extraHeader
   - git push -f https://robinshine:@secrets:github-token@\@github.com/theonedev/server
-    HEAD:master
+    HEAD:main
   triggers:
   - !BranchUpdateTrigger
-    branches: master
+    branches: main
     projects: onedev-server
   retrieveSource: true
   cloneCredential: !DefaultCredential {}
