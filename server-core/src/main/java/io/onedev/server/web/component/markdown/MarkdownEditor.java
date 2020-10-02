@@ -432,6 +432,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		} else {
 			encodedAttachmentSupport = "undefined";
 		}
+		
 		String callback = ajaxBehavior.getCallbackFunction(explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3")).toString();
 		

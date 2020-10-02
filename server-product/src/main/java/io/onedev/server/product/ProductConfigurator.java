@@ -26,7 +26,9 @@ public class ProductConfigurator implements ServerConfigurator {
 		if (serverConfig.getHttpPort() != 0) {
 			ServerConnector connector = new ServerConnector(server);
 			connector.setPort(serverConfig.getHttpPort());
-			connector.addConnectionFactory(new HttpConnectionFactory());
+			HttpConfiguration configuration = new HttpConfiguration();
+			configuration.setRequestHeaderSize(16*1024);
+			connector.addConnectionFactory(new HttpConnectionFactory(configuration));
 			server.addConnector(connector);
 		}
 
@@ -40,6 +42,7 @@ public class ProductConfigurator implements ServerConfigurator {
 			connector.setPort(serverConfig.getHttpsPort());
 			
 			HttpConfiguration configuration = new HttpConfiguration();
+			configuration.setRequestHeaderSize(16*1024);
 			configuration.addCustomizer(new SecureRequestCustomizer());
 			connector.addConnectionFactory(new HttpConnectionFactory(configuration));
 			

@@ -290,7 +290,6 @@ public class ServletWebResponse extends WebResponse
 				
 				String script = String.format(""
 						+ "<script type='application/javascript'>"
-						+ "  console.log('shit');"
 						+ "  function getKey(url) {"
 						+ "    var key = url;"
 						+ "    if (key.indexOf('#') != -1)"

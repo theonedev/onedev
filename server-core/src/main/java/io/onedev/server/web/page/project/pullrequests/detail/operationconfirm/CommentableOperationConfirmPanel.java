@@ -41,14 +41,8 @@ public abstract class CommentableOperationConfirmPanel extends OperationConfirmP
 			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getProject(), getLatestUpdate().getRequest().getUUID()) {
-
-					@Override
-					public boolean canDeleteAttachment() {
-						return SecurityUtils.canManagePullRequests(getProject());
-					}
-					
-				};
+				return new ProjectAttachmentSupport(getProject(), getLatestUpdate().getRequest().getUUID(), 
+						SecurityUtils.canManagePullRequests(getProject()));
 			}
 
 			@Override

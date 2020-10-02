@@ -695,14 +695,8 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(target.getProject(), getPullRequest().getUUID()) {
-
-					@Override
-					public boolean canDeleteAttachment() {
-						return SecurityUtils.canManagePullRequests(target.getProject());
-					}
-					
-				};
+				return new ProjectAttachmentSupport(target.getProject(), getPullRequest().getUUID(), 
+						SecurityUtils.canManagePullRequests(target.getProject()));
 			}
 
 			@Override

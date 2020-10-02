@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import io.onedev.server.model.User;
 
-@JsonTypeInfo(property="@class", use = Id.CLASS)
+@JsonTypeInfo(property="@class", use=Id.CLASS)
 public abstract class Event {
 	
 	private final User user;
