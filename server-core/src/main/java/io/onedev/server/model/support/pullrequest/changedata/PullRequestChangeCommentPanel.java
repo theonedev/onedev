@@ -47,14 +47,8 @@ public abstract class PullRequestChangeCommentPanel extends ProjectCommentPanel 
 
 	@Override
 	protected AttachmentSupport getAttachmentSupport() {
-		return new ProjectAttachmentSupport(getProject(), getChange().getRequest().getUUID()) {
-			
-			@Override
-			public boolean canDeleteAttachment() {
-				return SecurityUtils.canManagePullRequests(getProject());
-			}
-			
-		};
+		return new ProjectAttachmentSupport(getProject(), getChange().getRequest().getUUID(), 
+				SecurityUtils.canManagePullRequests(getProject()));
 	}
 
 	@Override

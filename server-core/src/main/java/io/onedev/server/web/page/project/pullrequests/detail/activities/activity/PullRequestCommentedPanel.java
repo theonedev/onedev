@@ -70,14 +70,9 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getProject(), PullRequestCommentedPanel.this.getComment().getRequest().getUUID()) {
-					
-					@Override
-					public boolean canDeleteAttachment() {
-						return SecurityUtils.canManagePullRequests(getProject());
-					}
-					
-				};
+				return new ProjectAttachmentSupport(getProject(), 
+						PullRequestCommentedPanel.this.getComment().getRequest().getUUID(), 
+						SecurityUtils.canManagePullRequests(getProject()));
 			}
 
 			@Override

@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExceptionUtils;
@@ -25,7 +27,8 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.resource.AttachmentResource;
 import io.onedev.server.web.resource.AttachmentResourceReference;
 
-public abstract class ProjectAttachmentSupport implements AttachmentSupport {
+@JsonTypeInfo(use=Id.CLASS)
+public class ProjectAttachmentSupport implements AttachmentSupport {
 
 	private static final long serialVersionUID = 1L;
 
@@ -37,9 +40,12 @@ public abstract class ProjectAttachmentSupport implements AttachmentSupport {
 	
 	private final String attachmentDirUUID;
 	
-	public ProjectAttachmentSupport(Project project, String attachmentDirUUID) {
+	private final boolean canDeleteAttachment;
+	
+	public ProjectAttachmentSupport(Project project, String attachmentDirUUID, boolean canDeleteAttachment) {
 		projectId = project.getId();
 		this.attachmentDirUUID = attachmentDirUUID;
+		this.canDeleteAttachment = canDeleteAttachment;
 	}
 	
 	@Override
@@ -74,7 +80,7 @@ public abstract class ProjectAttachmentSupport implements AttachmentSupport {
 		return MAX_FILE_SIZE;
 	}
 
-	private Project getProject() {
+	protected Project getProject() {
 		SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
 		sessionManager.openSession();
 		try {
@@ -128,4 +134,10 @@ public abstract class ProjectAttachmentSupport implements AttachmentSupport {
 			return file.getName();
 		}
 	}
+
+	@Override
+	public boolean canDeleteAttachment() {
+		return canDeleteAttachment;
+	}
+	
 }

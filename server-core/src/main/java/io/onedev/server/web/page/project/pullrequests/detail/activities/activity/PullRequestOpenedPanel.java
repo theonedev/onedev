@@ -60,14 +60,8 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 			
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID()) {
-					
-					@Override
-					public boolean canDeleteAttachment() {
-						return SecurityUtils.canManagePullRequests(getProject());
-					}
-					
-				};
+				return new ProjectAttachmentSupport(getProject(), getPullRequest().getUUID(), 
+						SecurityUtils.canManagePullRequests(getProject()));
 			}
 
 			@Override

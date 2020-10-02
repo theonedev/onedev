@@ -190,14 +190,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(getProject(), uuid) {
-					
-					@Override
-					public boolean canDeleteAttachment() {
-						return SecurityUtils.canManageIssues(getProject());
-					}
-					
-				};
+				return new ProjectAttachmentSupport(getProject(), uuid, 
+						SecurityUtils.canManageIssues(getProject()));
 			}
 
 			@Override
