@@ -41,6 +41,12 @@
 	border-color: var(--gray-dark);
 	color: white;
 }
+.build-spec>.valid>.body>.jobs>.side>.navs>.nav.active a.run:hover,
+.build-spec>.valid>.body>.jobs>.side>.navs>.nav.active a.delete:hover {
+	background: #5c5e81;
+	border-color: #5c5e81;
+	color: white;
+}
 .build-spec>.valid>.body>.jobs>.contents>.content {
     border-radius: 0.42rem;
     border: 1px solid var(--light-gray);
