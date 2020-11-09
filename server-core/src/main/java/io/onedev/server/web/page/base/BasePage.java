@@ -146,7 +146,7 @@ public abstract class BasePage extends WebPage {
 			clazz = clazz.getSuperclass();
 		}
 		
-		String script = String.format("$('body').addClass('%s');", builder.toString());
+		String script = String.format("$('html').addClass('%s');", builder.toString());
 		add(new Label("script", script).setEscapeModelStrings(false));
 		
 		sessionFeedback = new SessionFeedbackPanel("sessionFeedback");

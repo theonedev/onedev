@@ -5,7 +5,7 @@
 	--transition-duration: 0.3s;
 	--brand-size: 30px;
 }
-body {
+.LayoutPage>body {
 	position: static !important;
 }
 .sidebar {
@@ -28,7 +28,8 @@ body {
 .sidebar a {
 	color: #5c5e81;
 }
-.sidebar a:hover, .sidebar a:focus, .sidebar a.open, .sidebar a.active {
+.sidebar a:hover, .sidebar a:focus, 
+.sidebar a.open, .sidebar a.active {
 	color: var(--primary) !important;
 }
 
@@ -250,7 +251,7 @@ body {
     background: rgba(77, 89, 149, 0.06);
 }
 
-body>.main {
+.LayoutPage>body>.main {
 	transition: all var(--transition-duration) ease;
 	position: absolute;
 	top: var(--topbar-height);
@@ -318,10 +319,10 @@ body>.main {
 	.sidebar-minimized ~ .topbar .topbar-brand {
 		display: inline;
 	}
-	body>.main {
+	.LayoutPage>body>.main {
 		left: var(--sidebar-width);
 	}
-	.sidebar-minimized ~ .main {
+	.LayoutPage>body>.sidebar-minimized ~ .main {
 		left: var(--sidebar-mini-width);
 	}
 	

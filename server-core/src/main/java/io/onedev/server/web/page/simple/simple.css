@@ -1,67 +1,66 @@
-html {
+.SimplePage {
 	background: url(/img/mesh.jpg) no-repeat left top fixed;
 	background-size: cover;
 }
-body {
+.SimplePage>body {
 	background: transparent;
 	display: flex;
 }
-.main {
+.SimplePage .main {
 	padding: 1.75rem;
-	max-width: 500px;
-	width: 100%;
+	width: 400px;
 	margin: auto;
 }
-.GeneralErrorPage .main {
-	max-width: 900px;
+.SimplePage.GeneralErrorPage .main {
+	width: 900px;
 }
 
-.main .logo.icon {
+.SimplePage .main .logo.icon {
 	color: var(--primary);
 	margin-bottom: 3rem;
 }
-.main .title {
+.SimplePage .main .title {
 	margin-bottom: 5rem;
 }
-.main .btn {
+.SimplePage .main .btn:not(.btn-block) {
 	padding: 1rem 2.25rem;
 	margin: 0.75rem 1rem;
 }
-.main .signup {
+.SimplePage .main .signup {
 	margin-top: 2.5rem;
 }
-.main .sso {
+.SimplePage .main .sso {
 	margin-top: 6rem;
 }
-.main .sso img {
+.SimplePage .main .sso img {
 	width: 24px;
 	height: 24px;
 }
-.main .feedbackPanel {
+.SimplePage .main .feedbackPanel {
 	text-align: left;
 	margin-bottom: 1.5rem;
 }
-.main .form-group {
+.SimplePage .main .form-group {
 	margin-bottom: 1.5rem;
 	text-align: left;
 }
-.main .form-control {
+.SimplePage .main .form-control {
 	padding: 1rem 2rem;
 	background-color: var(--light);
     border-color: var(--light);
     color: var(--gray-dark);
 	height: auto;
 }
-.main .form-control:focus {
+.SimplePage .main .form-control:focus {
     background-color: var(--light-gray);
     border-color: var(--light-gray);
 }
-.main .wizard .title {
+.SimplePage .main .wizard .title {
 	margin-top: -6rem;
 	color: var(--muted);
 }
 
-.main .error-detail {
+.SimplePage .main .error-detail {
 	margin-top: 2rem;
 	text-align: left;
 	white-space: pre-wrap;
