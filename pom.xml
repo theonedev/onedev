@@ -108,7 +108,7 @@
 			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
-				<version>2.0.4</version>
+				<version>2.0.5</version>
 				<executions>
 					<execution>
 						<id>populate-resources</id>
@@ -573,8 +573,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.20</commons.version>
-		<k8shelper.version>1.0.19</k8shelper.version>
+		<commons.version>1.1.21</commons.version>
+		<k8shelper.version>1.0.20</k8shelper.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>
