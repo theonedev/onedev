@@ -1966,7 +1966,7 @@ h6, .h6 {
     color: var(--gray-dark);
     border: 0 solid rgba(0, 0, 0, 0.15);
     border-radius: 0.42rem;
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 }
 .dropdown-item {
     padding: 0.75rem 1.25rem;
@@ -2178,7 +2178,7 @@ h6, .h6 {
 }
 
 .shadow {
-	box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2) !important;
+	box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1) !important;
 }
 
 .popover {
@@ -2187,7 +2187,7 @@ h6, .h6 {
     background-color: white;
     border: 1px solid white;
     border-radius: 0.42rem;
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 }
 .bs-popover-auto[x-placement^=right]>.arrow::before, .bs-popover-right>.arrow::before {
     border-right-color: white;

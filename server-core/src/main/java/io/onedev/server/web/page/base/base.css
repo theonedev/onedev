@@ -261,7 +261,7 @@ img.avatar {
     position: absolute;
     border-radius: 0.42rem;
 	z-index: 2000;
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 }
 
 /* wicket default ajax lazyload style */ 

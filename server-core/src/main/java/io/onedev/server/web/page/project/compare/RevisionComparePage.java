@@ -436,9 +436,9 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 					@Override
 					public String getObject() {
 						if (requestModel.getObject().isOpen())
-							return "This change is already opened for merge by pull request ";
+							return "This change is already opened for merge by ";
 						else 
-							return "This change is squashed/rebased onto base branch via pull request ";
+							return "This change is squashed/rebased onto base branch via ";
 					}
 					
 				}).setEscapeModelStrings(false));
@@ -452,8 +452,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport, 
 
 							@Override
 							public String getObject() {
-								PullRequest request = requestModel.getObject();
-								return "#" + request.getNumber() + " - " + request.getTitle();
+								return "pull request #" + requestModel.getObject().getNumber();
 							}
 							
 						}));

@@ -30,34 +30,34 @@
 		</wicket:enclosure>
 	</div>
 	<wicket:fragment wicket:id="effectiveFrag">
-		<div class="alert alert-info mb-5">
-			<span wicket:id="description"></span> <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a>
+		<div class="alert alert-custom alert-notice alert-light-success shadow mb-5">
+			<span wicket:id="description" class="mr-2"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sameBranchFrag">
-		<div class="alert alert-warning mb-5">
+		<div class="alert alert-custom alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
 				<span>Please select different branches</span>
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="mergedFrag">
-		<div class="alert alert-success mb-5">
+		<div class="alert alert-custom alert-notice alert-light-success shadow mb-5">
 			<div class="summary">
-				Branch <a wicket:id="targetBranch" class="alert-link"></a> is up to date with all commits from <a wicket:id="sourceBranch" class="alert-link"></a>.
-				Try <a wicket:id="swapBranches" class="alert-link">swap source and target</a> for the comparison.
+				Branch <a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
+				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="unrelatedHistoryFrag">
-		<div class="alert alert-warning mb-5">
+		<div class="alert alert-custom alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
 				<span>History of target branch and source branch is unrelated</span>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="branchNotSpecifiedFrag">
-		<div class="alert alert-warning mb-5">
+		<div class="alert alert-custom alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
 				<span>Please select branches to create pull request</span>
 			</div>

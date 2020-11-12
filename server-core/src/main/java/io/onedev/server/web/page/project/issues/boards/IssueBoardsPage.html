@@ -29,10 +29,10 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">
-		<div class="alert alert-info no-boards">
+		<div class="alert alert-notice alert-custom alert-light-success shadow no-boards">
 			<span class="mr-3">No issue boards defined</span> 
-			<a wicket:id="newBoard" class="alert-link mr-3"><wicket:svg href="plus" class="icon mr-1"></wicket:svg>Add New</a>
-			<a wicket:id="useDefault" class="alert-link"><wicket:svg href="undo" class="icon mr-1"></wicket:svg>Use Default</a>
+			<a wicket:id="newBoard" class="mr-3"><wicket:svg href="plus" class="icon mr-1"></wicket:svg>Add New</a>
+			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon mr-1"></wicket:svg>Use Default</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="hasMilestoneFrag">
@@ -53,13 +53,13 @@
 						<span wicket:id="primary" class="badge badge-sm badge-light-info ml-2">Primary</span>
 					</td>
 					<td wicket:id="actions" class="actions text-right">
-						<a wicket:id="edit" title="Edit"><wicket:svg href="edit" class="icon mr-2"></wicket:svg></a>
-						<a wicket:id="delete" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+						<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+						<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 					</td>
 				</tr>
 			</table>
-			<a wicket:id="newBoard" class="btn btn-outline-secondary btn-sm btn-block new-board"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Board</a>
-			<a wicket:id="useDefault" class="btn btn-outline-secondary btn-sm btn-block use-global"><wicket:svg href="undo" class="icon mr-2"></wicket:svg> Use Default Boards</a>
+			<a wicket:id="newBoard" class="btn btn-light btn-hover-primary btn-sm btn-block new-board"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Board</a>
+			<a wicket:id="useDefault" class="btn btn-light btn-hover-primary btn-sm btn-block use-global"><wicket:svg href="undo" class="icon mr-2"></wicket:svg> Use Default Boards</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneMenuFrag">
@@ -83,8 +83,8 @@
 					</td>
 				</tr>
 			</table>
-			<a wicket:id="showClosed" class="show-closed btn btn-block btn-outline-secondary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> Show Closed</a>
-			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-outline-secondary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Milestone</a>
+			<a wicket:id="showClosed" class="show-closed btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> Show Closed</a>
+			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Milestone</a>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

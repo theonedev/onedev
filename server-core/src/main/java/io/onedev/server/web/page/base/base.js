@@ -753,7 +753,9 @@ onedev.server = {
 		
 		$(window).resize(function() {
 			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
-			$autofit.css("overflow", "auto").parents(":not('html'):not('body')").css("overflow", "hidden");
+			// Do not use parents(":not('html'):not('body')") here as it will select $autofit self in 
+			// safari. Very odd 
+			$autofit.css("overflow", "auto").parents().not("html").not("body").css("overflow", "hidden");
 			$(document).find(".resize-aware").trigger("resized");
 		});
 		

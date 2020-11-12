@@ -44,7 +44,7 @@ public class JobSecretsPage extends BuildSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		String note = String.format("<svg class='icon mr-1'><use xlink:href='%s'/></svg> "
+		String note = String.format("<svg class='icon mr-2'><use xlink:href='%s'/></svg> "
 				+ "Define job secrets to be used in build spec. Secret value less "
 				+ "than %d characters will not be masked in build log", 
 				SpriteImage.getVersionedHref("bulb"), SecretInput.MASK.length());

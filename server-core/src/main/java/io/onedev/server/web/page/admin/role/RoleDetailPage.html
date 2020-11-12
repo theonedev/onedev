@@ -1,19 +1,23 @@
 <wicket:extend>
-	<div class="card">
-		<div wicket:id="content" class="card-body"></div>
-	</div>
+	<wicket:container wicket:id="content"></wicket:container>
 	<wicket:fragment wicket:id="ownerFrag">
-		<div class="alert alert-info"><b>Project Owner</b> is a built-in role with full permission over projects</div>	
+		<div class="alert alert-custom alert-notice bg-white shadow">
+			<b class="mr-2">Owner</b> is a built-in role with full permission over projects	
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="nonOwnerFrag">
-		<form wicket:id="form" class="leave-confirm">
-			<div wicket:id="feedback" class="mb-4"></div>
-			<div wicket:id="editor"></div>
-			<div class="mt-5 d-flex">
-				<input class="btn btn-primary dirty-aware mr-1" value="Save" type="submit">
-				<a wicket:id="delete" class="btn btn-danger ml-auto">Delete</a>
+		<div class="card">
+			<div class="card-body">
+				<form wicket:id="form" class="leave-confirm">
+					<div wicket:id="feedback" class="mb-4"></div>
+					<div wicket:id="editor"></div>
+					<div class="mt-5 d-flex">
+						<input class="btn btn-primary dirty-aware mr-1" value="Save" type="submit">
+						<a wicket:id="delete" class="btn btn-danger ml-auto">Delete</a>
+					</div>
+				</form>
 			</div>
-		</form>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="topbarTitleFrag">
 		<a wicket:id="roles">Roles</a> <span class="dot"></span> <span wicket:id="roleName" class="text-truncate"></span> 

@@ -53,27 +53,20 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 		String description = null;
 		MergeStrategy mergeStrategy = getPullRequest().getMergeStrategy();
 		MergePreview mergePreview = getPullRequest().getMergePreview();
-		boolean needMergeCommit = false;
-		if (mergeStrategy == CREATE_MERGE_COMMIT) { 
+		if (mergeStrategy == CREATE_MERGE_COMMIT) 
 			bean.setSummary("Merge pull request " + request.getNumberAndTitle());
-			needMergeCommit = true;
-		} else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) {
+		else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) 
 			bean.setSummary("Pull request " + request.getNumberAndTitle());
-			needMergeCommit = true;
-		} else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) {
+		else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) 
 			description = "Source branch commits will be rebased onto target branch";
-			needMergeCommit = false;
-		} else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) {
+		else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) 
 			description = "Source branch commits will be fast-forwarded to target branch";
-			needMergeCommit = false;
-		} else {
+		else 
 			bean.setSummary("Merge pull request " + request.getNumberAndTitle());
-			needMergeCommit = true;
-		}
 		
 		getForm().add(new Label("description", description).setVisible(description != null));
 		
-		getForm().add(BeanContext.edit("commitMessage", bean).setVisible(needMergeCommit));
+		getForm().add(BeanContext.edit("commitMessage", bean).setVisible(description == null));
 	}
 
 	private PullRequest getPullRequest() {

@@ -28,16 +28,16 @@
 				</div>
 			</div>
 		</div>
-		<div wicket:id="effectiveRequest" class="alert alert-info mb-5">
-			<span wicket:id="description"></span> <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a>
+		<div wicket:id="effectiveRequest" class="alert alert-custom alert-notice alert-light-success mb-5">
+			<span wicket:id="description" class="mr-2"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
 		</div>
 		<div>
 			<a wicket:id="createRequest" class="btn btn-primary btn-block mb-5"><wicket:svg href="plus" class="icon mr-2"/> Create Pull Request for This Change</a>
 		</div>
-		<div wicket:id="revisionNotSpecified" class="alert alert-warning mb-5">
+		<div wicket:id="revisionNotSpecified" class="alert alert-custom alert-notice alert-light-warning mb-5">
 			<span>Please select revisions to compare</span>
 		</div>
-		<div wicket:id="unrelatedHistory" class="alert alert-warning mb-5">
+		<div wicket:id="unrelatedHistory" class="alert alert-custom alert-notice alert-light-warning mb-5">
 			<span>History of comparing revisions is unrelated</span>
 		</div>
 		<wicket:enclosure child="tabs">

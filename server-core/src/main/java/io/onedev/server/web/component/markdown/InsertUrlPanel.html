@@ -39,15 +39,9 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="pickAttachedFileFrag">
 		<ul class="attachments list-unstyled">
-			<li wicket:id="attachments" class="attachment file">
-				<div class="row">
-					<div class="col-md-9">
-						<a wicket:id="select" title="Insert link to this file" class="insert btn btn-block btn-secondary"><span wicket:id="file"></span></a>
-					</div>
-					<div class="col-md-3">
-						<a wicket:id="delete" title="Remove this file" class="delete btn btn-danger"><wicket:svg href="trash" class="icon"></wicket:svg> Remove</a>
-					</div>
-				</div>
+			<li wicket:id="attachments" class="attachment file d-flex">
+				<a wicket:id="select" title="Insert link to this file" class="insert btn btn-block btn-light btn-hover-primary flex-grow-1 mr-2"><span wicket:id="file"></span></a>
+				<a wicket:id="delete" title="Remove this file" class="delete btn btn-light btn-icon btn-hover-danger flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
 			</li>
 		</ul>
 	</wicket:fragment>

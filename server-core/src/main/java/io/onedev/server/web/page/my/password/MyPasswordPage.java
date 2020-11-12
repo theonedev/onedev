@@ -31,7 +31,7 @@ public class MyPasswordPage extends MyPage {
 				message = "You are currently authenticated via external system, "
 						+ "please change password there instead";
 			}
-			add(new Label("content", message).add(AttributeAppender.append("class", "alert alert-warning")));
+			add(new Label("content", message).add(AttributeAppender.append("class", "alert alert-light-warning alert-custom alert-notice mb-0")));
 		} else {
 			add(new PasswordEditPanel("content", new AbstractReadOnlyModel<User>() {
 

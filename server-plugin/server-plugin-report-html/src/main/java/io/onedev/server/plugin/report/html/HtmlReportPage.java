@@ -75,7 +75,7 @@ public class HtmlReportPage extends BuildDetailPage {
 					tag.setName("div");
 				}
 				
-			}.add(AttributeAppender.append("class", "alert alert-warning")));
+			}.add(AttributeAppender.append("class", "alert alert-custom alert-notice alert-light-warning mb-0")));
 		}
 	}
 

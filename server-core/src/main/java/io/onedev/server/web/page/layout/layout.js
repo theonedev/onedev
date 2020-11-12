@@ -76,7 +76,7 @@ onedev.server.layout = {
 						$rightmost.show().css({
 							"position": "fixed", 
 							"background": "white",
-							"box-shadow": "0px 0px 8px 0px rgba(0,0,0,0.2)", 
+							"box-shadow": "0px 0px 8px 0px rgba(0,0,0,0.1)", 
 							"max-height": ($(window).height() - 50) + "px",
 							"border-radius": "0.42rem", 
 							"padding": "0.5rem 0"

@@ -5,15 +5,14 @@
     margin-bottom: 0;
 }
 .editable>.group>a {
-    color: var(--info);
-    background: var(--light-info);
+    background: var(--light);
     padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 0.42rem;
 }
-.editable>.group>a:hover, .editable>.group>a:focus {
+.editable>.group>a:hover, .editable>.group>a:focus, .editable>.group.expanded>a {
 	color: white;
-	background: var(--info);
+	background: var(--primary);
 }
 .editable>.group>a .icon {
     transform: rotate(90deg);
