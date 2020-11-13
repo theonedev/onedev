@@ -6,9 +6,8 @@ import java.util.concurrent.Callable;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -60,12 +59,10 @@ public class HtmlReportPage extends BuildDetailPage {
 				@Override
 				public void renderHead(IHeaderResponse response) {
 					super.renderHead(response);
-					response.render(JavaScriptHeaderItem.forReference(new HtmlReportResourceReference()));
-					String script = String.format("onedev.server.htmlReport.onWindowLoad('%s');", getMarkupId(true));
-					response.render(OnLoadHeaderItem.forScript(script));
+					response.render(CssHeaderItem.forReference(new HtmlReportCssResourceReference()));
 				}
 
-			}.add(AttributeAppender.append("src", startPageUrl.toString())));
+			}.add(AttributeAppender.append("src", startPageUrl.toString())).add(AttributeAppender.append("class", "d-flex flex-grow-1")));
 		} else {
 			add(new Label("htmlReport", "No html report published") {
 
@@ -75,7 +72,7 @@ public class HtmlReportPage extends BuildDetailPage {
 					tag.setName("div");
 				}
 				
-			}.add(AttributeAppender.append("class", "alert alert-custom alert-notice alert-light-warning mb-0")));
+			}.add(AttributeAppender.append("class", "alert alert-notice alert-light-warning mb-0")));
 		}
 	}
 

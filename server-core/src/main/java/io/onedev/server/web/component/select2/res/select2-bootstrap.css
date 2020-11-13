@@ -87,7 +87,7 @@
 }
 
 .select2-container-multi .select2-choices .select2-search-field input {
-	height: calc(1.5em + 1.3rem + 2px);
+	height: calc(1.5em + 1.3rem);
     line-height: 1.42857;
 }
 
@@ -283,6 +283,12 @@
 .select2-drop.select2-drop-above.select2-drop-active {
   border-top-color: #66afe9;
 }
+.is-invalid .select2-drop-auto-width,
+.is-invalid .select2-drop.select2-drop-above.select2-drop-active,
+.is-invalid.select2-drop-auto-width,
+.is-invalid.select2-drop.select2-drop-above.select2-drop-active {
+  border-top-color: #dc3545;
+}
 
 /**
  * Select2 widgets in Bootstrap Input Groups
@@ -320,6 +326,8 @@
 .select2-dropdown-open.select2-drop-above [class^="select2-choice"] {
   border-top-right-radius: 0 !important;
   border-top-left-radius: 0 !important;
+  border-bottom-right-radius: 0.42rem !important;
+  border-bottom-left-radius: 0.42rem !important;
 }
 
 /**
@@ -440,4 +448,12 @@
   /* 4 */
   background-position: right 4px center;
   /* 5 */
+}
+
+.select2-container.form-control.select2-drop-above .select2-choice {
+	border-bottom-color: #80bdff;
+}
+.is-invalid .select2-container.form-control.select2-drop-above .select2-choice,
+.is-invalid.select2-container.form-control.select2-drop-above .select2-choice {
+	border-bottom-color: #dc3545;
 }

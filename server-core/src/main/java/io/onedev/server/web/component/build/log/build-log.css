@@ -1,4 +1,7 @@
-.build-log.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
-.build-log.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
-    background: var(--muted);
+.build-log {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
 }

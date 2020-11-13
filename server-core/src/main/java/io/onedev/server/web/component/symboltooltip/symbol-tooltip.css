@@ -6,7 +6,7 @@
 	font-size: 12px; 
 	padding: 1rem; 
 	z-index: 10000; 
-	box-shadow: 0px 10px 30px 0px rgba(82, 63, 105, 0.08);
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 	max-width: 720px;
 }
 .symbol-tooltip ul.declarations li {

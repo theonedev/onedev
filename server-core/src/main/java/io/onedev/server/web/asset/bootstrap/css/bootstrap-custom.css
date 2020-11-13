@@ -1995,7 +1995,7 @@ h6, .h6 {
     background-color: var(--primary);
 }
 .alert {
-    padding: 0.75rem 1.25rem;
+    padding: 1rem 1.2rem;
     border: 1px solid transparent;
     border-radius: 0.42rem;
 }
@@ -2098,83 +2098,46 @@ h6, .h6 {
     color: var(--gray);
 }
 
-.alert.alert-custom {
-    display: flex;
-    align-items: stretch;
-    padding: 1.5rem 2rem;
-}
-.alert.alert-custom .alert-icon {
-    display: flex;
-    align-items: center;
-    margin: 0 1.25rem 0 0;
-	width: 24px;
-	height: 24px;
-}
-.alert.alert-custom .alert-text {
-    align-self: center;
-    flex-grow: 1;
-}
-.alert.alert-custom .alert-close {
-    padding: 0 0 0 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    line-height: 0;
-}
-.alert.alert-custom .alert-close .close {
-    text-shadow: none !important;
-    cursor: pointer;
-    line-height: 0;
-	color: inherit;
-}
-
-.alert.alert-custom.alert-outline-primary {
+.alert.alert-outline-primary {
     border-color: var(--primary);
 	color: var(--primary);
 }
-.alert.alert-custom.alert-outline-secondary {
+.alert.alert-outline-secondary {
     border-color: var(--secondary);
 	color: var(--secondary);
 }
-.alert.alert-custom.alert-outline-success {
+.alert.alert-outline-success {
     border-color: var(--success);
 	color: var(--success);
 }
-.alert.alert-custom.alert-outline-warning {
+.alert.alert-outline-warning {
     border-color: var(--warning);
 	color: var(--warning);
 }
-.alert.alert-custom.alert-outline-danger {
+.alert.alert-outline-danger {
     border-color: var(--danger);
 	color: var(--danger);
 }
-.alert.alert-custom.alert-outline-info {
+.alert.alert-outline-info {
     border-color: var(--info);
 	color: var(--info);
 }
-.alert.alert-custom.alert-outline-dark {
+.alert.alert-outline-dark {
     border-color: var(--dark);
 	color: var(--dark);
 }
-.alert.alert-custom.alert-outline-2x {
+.alert.alert-outline-2x {
     border-width: 2px;
 }
-.alert.alert-custom.alert-outline-2x .close .icon {
-	stroke: currentColor;
-	stroke-width: 20px;
-}
-.alert.alert-custom.alert-notice {
+.alert.alert-notice {
 	border: 0;
     border-left: 4px solid;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
 }
-.alert.alert-custom.alert-white {
+.alert.alert-white {
     background-color: white;
     border-color: white;
-}
-.alert.alert-custom.alert-shadow {
-    box-shadow: 0px 0px 30px 0px rgba(82, 63, 105, 0.05);
 }
 
 .shadow {

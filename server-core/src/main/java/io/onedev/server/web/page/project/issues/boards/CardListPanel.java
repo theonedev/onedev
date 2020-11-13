@@ -16,8 +16,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -44,7 +44,8 @@ abstract class CardListPanel extends Panel {
 		RepeatingView cardsView = new RepeatingView("cards");
 		int index = 0;
 		try {
-			for (Issue issue: queryIssues(0, WebConstants.PAGE_SIZE)) {
+			List<Issue> issues = queryIssues(0, WebConstants.PAGE_SIZE);
+			for (Issue issue: issues) {
 				Long issueId = issue.getId();
 				IModel<Issue> model = new LoadableDetachableModel<Issue>() {
 	

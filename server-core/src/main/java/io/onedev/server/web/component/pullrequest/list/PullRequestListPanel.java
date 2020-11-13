@@ -345,7 +345,7 @@ public abstract class PullRequestListPanel extends Panel {
 							setResponsePage(NewPullRequestPage.class, NewPullRequestPage.paramsOf(project));
 						}
 	
-					};
+					}.add(AttributeAppender.append("class", "no-current"));
 				}
 				
 			});

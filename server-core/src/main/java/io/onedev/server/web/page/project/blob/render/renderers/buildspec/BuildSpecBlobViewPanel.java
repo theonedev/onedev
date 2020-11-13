@@ -72,17 +72,17 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 					
 					validFrag.add(hasJobsFrag);
 				} else {
-					validFrag.add(new Label("jobs", "No jobs defined").add(AttributeAppender.append("class", "not-defined alert alert-light-warning font-weight-bold d-flex d-none")));
+					validFrag.add(new Label("jobs", "No jobs defined").add(AttributeAppender.append("class", "not-defined alert alert-notice alert-light-warning d-flex d-none")));
 				}
 				
 				if (!buildSpec.getProperties().isEmpty())
 					validFrag.add(PropertyContext.view("properties", buildSpec, "properties"));
 				else
-					validFrag.add(new Label("properties", "No properties defined").add(AttributeAppender.append("class", "not-defined alert alert-light-warning font-weight-bold d-flex d-none")));
+					validFrag.add(new Label("properties", "No properties defined").add(AttributeAppender.append("class", "not-defined alert alert-notice alert-light-warning d-flex d-none")));
 					
 				add(validFrag);
 			} else {
-				add(new Label("content", "Build spec not defined").add(AttributeAppender.append("class", "not-defined m-4 alert alert-light-warning font-weight-bold")));
+				add(new Label("content", "Build spec not defined").add(AttributeAppender.append("class", "not-defined m-4 alert alert-notice alert-light-warning")));
 			}
 		} catch (Exception e) {
 			Fragment invalidFrag = new Fragment("content", "invalidFrag", this);

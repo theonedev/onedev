@@ -1,42 +1,44 @@
 <wicket:extend>
 	<div wicket:id="content" class="issue-boards flex-grow-1 d-flex flex-column"></div>
 	<wicket:fragment wicket:id="hasBoardsFrag">
-		<div class="head flex-shrink-0 bg-white rounded">
-			<form wicket:id="query" class="clearable-wrapper">
-				<div class="input-group">
-					<span class="input-group-prepend">
-						<a wicket:id="board" title="Board" class="board-selector btn btn-outline-secondary btn-hover-primary">
-							<wicket:svg href="split" class="icon mr-2"></wicket:svg>
-							<span wicket:id="label"></span>
-							<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
-						</a>
-						<a wicket:id="backlog" class="backlog btn btn-outline-secondary btn-hover-primary"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
-						<a wicket:id="milestone"></a>
-					</span>
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control">
-					<span class="input-group-append">
-						<button wicket:id="submit" type="submit" class="btn btn-icon btn-outline-secondary btn-hover-primary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
-						<button wicket:id="orderBy" class="btn btn-icon btn-outline-secondary btn-hover-primary" title="Order by"><wicket:svg href="sort" class="icon"></wicket:svg></button>
-					</span>
+		<div class="head flex-shrink-0">
+			<form wicket:id="query" class="d-flex flex-wrap flex-md-nowrap">
+				<span class="btn-group flex-shrink-0 mr-0 mr-md-4 mb-3 mb-md-0">
+					<a wicket:id="board" title="Board" class="board-selector btn btn-outline-secondary btn-hover-primary text-nowrap bg-white">
+						<wicket:svg href="split" class="icon mr-2"></wicket:svg>
+						<span wicket:id="label"></span>
+						<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>
+					</a>
+					<a wicket:id="backlog" class="bg-white backlog btn btn-outline-secondary btn-hover-primary text-nowrap"><wicket:svg href="inbox" class="icon mr-2"></wicket:svg> Backlog</a>
+					<a wicket:id="milestone"></a>
+				</span>
+				<div class="clearable-wrapper w-100 w-auto-md flex-grow-1">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control">
+						<span class="input-group-append text-nowrap">
+							<button wicket:id="submit" type="submit" class="bg-white btn btn-icon btn-outline-secondary btn-hover-primary" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							<button wicket:id="orderBy" class="bg-white btn btn-icon btn-outline-secondary btn-hover-primary" title="Order by"><wicket:svg href="sort" class="icon"></wicket:svg></button>
+						</span>
+					</div>
 				</div>
 			</form>
 		</div>
 		<div wicket:id="body" class="body flex-grow-1 d-flex flex-column">
 			<div wicket:id="feedback" class="feedback flex-shrink-0"></div>
-			<div class="columns flex-grow-1 d-flex mt-5 autofit ps ps-scroll pb-5">
+			<div class="columns flex-grow-1 d-flex mt-5 autofit overflow-auto pb-5">
 				<div wicket:id="columns" class="column d-flex flex-column overflow-hidden"></div>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">
-		<div class="alert alert-notice alert-custom alert-light-success shadow no-boards">
+		<div class="alert alert-notice alert-light-success shadow no-boards">
 			<span class="mr-3">No issue boards defined</span> 
 			<a wicket:id="newBoard" class="mr-3"><wicket:svg href="plus" class="icon mr-1"></wicket:svg>Add New</a>
 			<a wicket:id="useDefault"><wicket:svg href="undo" class="icon mr-1"></wicket:svg>Use Default</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="hasMilestoneFrag">
-		<a wicket:id="link" title="Milestone" class="milestone-selector btn">
+		<a wicket:id="link" title="Milestone" class="milestone-selector btn text-nowrap bg-white">
 			<wicket:svg href="milestone" class="icon mr-2"></wicket:svg>
 			<span wicket:id="label"></span>
 			<wicket:svg href="arrow" class="icon rotate-90 ml-1"></wicket:svg>

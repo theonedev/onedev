@@ -1,33 +1,6 @@
-table.reviews>tbody>tr>td {
-	padding: 0.5rem 1rem;
-	vertical-align: middle;
+.reviews>li+li {
+	margin-top: 1rem;
 }
-table.reviews>tbody>tr>td.status {
-	width: 1.2rem;
-	padding-right: 0;
-}
-table.reviews>tbody>tr>td.status .icon {
-	margin: 0;
-}
-table.reviews>tbody>tr>td:first-child {
-	padding-left: 0;
-}
-table.reviews>tbody>tr>td:last-child {
-	padding-right: 0;
-}
-table.reviews>tbody>tr:first-child>td {
-	padding-top: 0;
-}
-table.reviews>tbody>tr:last-child>td {
-	padding-bottom: 0;
-}
-table.reviews>tbody>tr>td.actions {
-	text-align: right;
-}
-table.reviews>tbody>tr>td.status span {
-	cursor: default;
-}
-
 .reviewer-avatar {
 	position: relative;
 }

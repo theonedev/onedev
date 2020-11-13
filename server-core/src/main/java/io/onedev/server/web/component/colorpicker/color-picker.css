@@ -4,6 +4,7 @@
 	border-color: #e4e6ef;
     height: calc(1.5em + 1.3rem + 2px);
     padding: 0.65rem 1rem;	
+	display: inline-flex;
 }
 .sp-replacer:hover {
 	border-color: #e4e6ef;

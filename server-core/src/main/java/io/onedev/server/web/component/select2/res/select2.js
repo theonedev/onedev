@@ -1036,6 +1036,7 @@ the specific language governing permissions and limitations under the Apache Lic
             }, evaluate(this.opts.dropdownCss));
 
             this.dropdown.css(css);
+			this.dropdown.css("width", this.container.outerWidth(false));
         },
 
         // abstract
@@ -1077,6 +1078,7 @@ the specific language governing permissions and limitations under the Apache Lic
          */
         // abstract
         opening: function() {
+			$(":focus").blur();
             var cid = this.containerId,
                 scroll = "scroll." + cid,
                 resize = "resize."+cid,

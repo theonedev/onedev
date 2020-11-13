@@ -1,24 +1,14 @@
 <wicket:panel>
-	<table class="reviews">
-		<tr wicket:id="reviews">
-			<wicket:enclosure>
-			<td class="status">
-				<span wicket:id="status"></span>
-			</td>
-			</wicket:enclosure>
-			<td class="user">
-				<a wicket:id="user"></a> 
-			</td>
-			<td class="actions">
-				<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Remove this reviewer"><wicket:svg href="trash" class="icon"></wicket:svg></a>
-			</td>
-		</tr>
+	<ul class="reviews list-unstyled mb-0">
+		<li wicket:id="reviews" class="d-flex flex-nowrap align-items-center">
+			<span wicket:id="status" class="status mr-2"></span>
+			<a wicket:id="user" class="user mr-3"></a> 
+			<a wicket:id="delete" class="delete btn btn-xs btn-icon btn-light btn-hover-danger flex-shrink-0" title="Remove this reviewer"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		</li>
 		<wicket:enclosure child="addReviewer">
-		<tr>
-			<td class="add-reviewer" colspan="3">
-				<input wicket:id="addReviewer" type="hidden" class="form-control">
-			</td>
-		</tr>
+		<li class="add-reviewer">
+			<input wicket:id="addReviewer" type="hidden" class="form-control">
+		</li>
 		</wicket:enclosure>
-	</table>
+	</ul>
 </wicket:panel>

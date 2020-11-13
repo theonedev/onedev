@@ -38,7 +38,7 @@ public class OrderEditPanel extends GenericPanel<List<EntitySort>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		getParent().add(AttributeAppender.append("class", "order-edit ps ps-scroll"));
+		getParent().add(AttributeAppender.append("class", "order-edit"));
 		
 		WebMarkupContainer selectedContainer = new WebMarkupContainer("selected") {
 

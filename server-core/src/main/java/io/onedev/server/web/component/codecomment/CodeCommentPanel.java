@@ -373,11 +373,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				replyContainer.remove();
 				OneDev.getInstance(CodeCommentReplyManager.class).delete(getReply(replyId));
-				String script = String.format(""
-						+ "$('#%s').remove();"
-						+ "$('#%s').closest('.ps-scroll').trigger('resized');", 
-						replyContainer.getMarkupId(), CodeCommentPanel.this.getMarkupId());
-				target.appendJavaScript(script);
+				target.appendJavaScript(String.format("$('#%s').remove();", replyContainer.getMarkupId()));
 			}
 			
 		});

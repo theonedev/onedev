@@ -189,7 +189,7 @@ onedev.server.stats = {
 								$contrib.children().append($head);
 								var $left = $("<div class='mr-3 d-flex align-items-center'></div>");
 								$head.append($left);
-								$left.append("<a class='user mr-2'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
+								$left.append("<a class='user mr-3'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
 
 								var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 								$left.find("a.user").hover(function() {

@@ -58,7 +58,6 @@ import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.NumberCriteria;
 import io.onedev.server.search.entity.issue.TitleCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -431,10 +430,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 							@Override
 							public String getObject() {
-								String label = getMilestone().getName();
-								if (getMilestone().getDueDate() != null)
-									label += " (" + DateUtils.formatDate(getMilestone().getDueDate()) + ")";
-								return label;
+								return getMilestone().getName();
 							}
 							
 						}));
@@ -654,9 +650,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			});
 			
 			if (backlog)
-				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter backlog issues..."));
 			else
-				queryInput.add(AttributeAppender.append("placeholder", "Filter issues"));
+				queryInput.add(AttributeAppender.append("placeholder", "Filter issues..."));
 				
 			form.add(queryInput);
 

@@ -1,6 +1,3 @@
-.commit-option>.body .changed>.changes {
-	margin-bottom: 20px;
-}  
 .commit-option>.body .text-diff>.head>.actions {
 	display: none;
 }

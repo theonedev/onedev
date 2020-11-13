@@ -319,7 +319,8 @@ onedev.server.sourceView = {
 					callback("addComment", mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
-				$content.append("<span class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</span>");
+				var loginHref = $(".sign-in").attr("href");
+				$content.append("<a href='" + loginHref + "' class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</a>");
 			}			
 		}
 		

@@ -12,3 +12,6 @@
 .project-selector .project>a.current>.icon {
 	visibility: visible;
 }
+.no-current .project-selector .project>a>.icon {
+	display: none;
+}

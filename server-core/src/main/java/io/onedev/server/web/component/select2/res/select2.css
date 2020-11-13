@@ -40,9 +40,9 @@ Version: 3.3.2 Timestamp: Mon Mar 25 12:14:18 PDT 2013
     color: #444;
     text-decoration: none;
 
-    -webkit-border-radius: 4px;
-       -moz-border-radius: 4px;
-            border-radius: 4px;
+    -webkit-border-radius: 0.42rem;
+       -moz-border-radius: 0.42rem;
+            border-radius: 0.42rem;
 
     -webkit-background-clip: padding-box;
        -moz-background-clip: padding;
@@ -68,9 +68,9 @@ Version: 3.3.2 Timestamp: Mon Mar 25 12:14:18 PDT 2013
 .select2-container.select2-drop-above .select2-choice {
     border-bottom-color: #aaa;
 
-    -webkit-border-radius:0 0 4px 4px;
-       -moz-border-radius:0 0 4px 4px;
-            border-radius:0 0 4px 4px;
+    -webkit-border-radius:0 0 0.42rem 0.42rem;
+       -moz-border-radius:0 0 0.42rem 0.42rem;
+            border-radius:0 0 0.42rem 0.42rem;
 
     background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #eeeeee), color-stop(0.9, white));
     background-image: -webkit-linear-gradient(center bottom, #eeeeee 0%, white 90%);
@@ -138,9 +138,9 @@ Version: 3.3.2 Timestamp: Mon Mar 25 12:14:18 PDT 2013
     border: 1px solid #aaa;
     border-top: 0;
 
-    -webkit-border-radius: 0 0 4px 4px;
-       -moz-border-radius: 0 0 4px 4px;
-            border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 0.42rem 0.42rem;
+       -moz-border-radius: 0 0 0.42rem 0.42rem;
+            border-radius: 0 0 0.42rem 0.42rem;
 }
 
 .select2-drop.select2-drop-above {
@@ -148,9 +148,9 @@ Version: 3.3.2 Timestamp: Mon Mar 25 12:14:18 PDT 2013
     border-top: 1px solid #aaa;
     border-bottom: 0;
 
-    -webkit-border-radius: 4px 4px 0 0;
-       -moz-border-radius: 4px 4px 0 0;
-            border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 0.42rem 0.42rem 0 0;
+       -moz-border-radius: 0.42rem 0.42rem 0 0;
+            border-radius: 0.42rem 0.42rem 0 0;
 }
 
 .select2-container .select2-choice div {
@@ -162,9 +162,9 @@ Version: 3.3.2 Timestamp: Mon Mar 25 12:14:18 PDT 2013
     top: 0;
 
     border-left: 1px solid #aaa;
-    -webkit-border-radius: 0 4px 4px 0;
-       -moz-border-radius: 0 4px 4px 0;
-            border-radius: 0 4px 4px 0;
+    -webkit-border-radius: 0 0.42rem 0.42rem 0;
+       -moz-border-radius: 0 0.42rem 0.42rem 0;
+            border-radius: 0 0.42rem 0.42rem 0;
 
     -webkit-background-clip: padding-box;
        -moz-background-clip: padding;

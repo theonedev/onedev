@@ -470,11 +470,11 @@ onedev.server.textDiff = {
 		var $container = $("#" + containerId);
 		
 		if (!markUrl) {
-			$content = $("<div><span class='invalid'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Unable to comment here</a>");
+			$content = $("<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Unable to comment here</a>");
 		} else {
-			var $content = $("<div><a class='permanent'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
+			var $content = $("<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
 			$content.children("a.permanent").attr("href", markUrl);
-			$content.append("<a class='copy-marked'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
+			$content.append("<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
 			var clipboard = new Clipboard(".copy-marked", {
 			    text: function(trigger) {
 			        return markedText;
@@ -484,7 +484,7 @@ onedev.server.textDiff = {
 				clipboard.destroy();
 			});
 			if (loggedIn) {
-				$content.append("<a class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
+				$content.append("<a class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
 				$content.children("a.comment").click(function() {
 					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
 							&& !confirm("There are unsaved changes, discard and continue?")) {
@@ -494,7 +494,8 @@ onedev.server.textDiff = {
 							mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
-				$content.append("<span class='comment'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</span>");
+				var loginHref = $(".sign-in").attr("href");
+				$content.append("<a class='comment' href='" + loginHref + "'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</a>");
 			}			
 		}		
 		

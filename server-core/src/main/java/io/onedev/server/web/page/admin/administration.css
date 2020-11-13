@@ -1,3 +1,8 @@
 .ssh-setting textarea {
 	font-family: monospace;
 }
+
+.user-authorizations .bean-list td.property-projectName, 
+.group-authorizations .bean-list td.property-projectName {
+	width: 50%;
+}

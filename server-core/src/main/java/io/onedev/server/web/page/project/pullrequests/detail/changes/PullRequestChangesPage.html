@@ -2,13 +2,13 @@
 	<div class="changes">
 		<div wicket:id="changesHead" class="head">
 			<div class="btn-group btn-block mb-4">
-				<button wicket:id="prevCommitLink" class="btn btn-light-info btn-icon flex-grow-0 flex-shrink-0" title="Previous commit"><wicket:svg href="arrow" class="icon rotate-180"></wicket:svg></button>
-				<button wicket:id="comparingCommits" class="btn btn-light-info"><span wicket:id="label"></span> <wicket:svg href="arrow" class="ml-1 icon rotate-90"></wicket:svg></button>
-				<button wicket:id="nextCommitLink" class="btn btn-light-info btn-icon flex-grow-0 flex-shrink-0" title="Next commit"><wicket:svg href="arrow" class="icon"></wicket:svg></button>
+				<button wicket:id="prevCommitLink" class="btn btn-light btn-hover-primary btn-icon flex-grow-0 flex-shrink-0" title="Previous commit"><wicket:svg href="arrow" class="icon rotate-180"></wicket:svg></button>
+				<button wicket:id="comparingCommits" class="btn btn-light btn-hover-primary"><span wicket:id="label"></span> <wicket:svg href="arrow" class="ml-1 icon rotate-90"></wicket:svg></button>
+				<button wicket:id="nextCommitLink" class="btn btn-light btn-hover-primary btn-icon flex-grow-0 flex-shrink-0" title="Next commit"><wicket:svg href="arrow" class="icon"></wicket:svg></button>
 			</div>
 			<wicket:enclosure child="fullChanges">
-				<div class="alert alert-light-info mb-4">
-					You are viewing a subset of all changes. <a wicket:id="fullChanges">show all changes</a>
+				<div class="alert alert-notice alert-light-warning mb-4">
+					You are viewing a subset of all changes. <a wicket:id="fullChanges" class="link-primary ml-2">show all changes</a>
 				</div>
 			</wicket:enclosure>
 		</div>

@@ -60,7 +60,7 @@ onedev.server.markdown = {
 			$rendered.data("caretOffset", caretOffset);
 			
 			onedev.server.perfectScrollbar.empty($rendered);
-			$rendered.prepend("<div class='message'>Loading...</div>");
+			$rendered.html("<div class='message'>Loading...</div>");
 			
 			$editLink.removeClass("active");
 			$previewLink.addClass("active");
@@ -72,8 +72,7 @@ onedev.server.markdown = {
 			
 			$input.focus();
 			
-			onedev.server.perfectScrollbar.empty($rendered);
-			$rendered.prepend("<div class='message'>Loading...</div>");
+			$rendered.html("<div class='message'>Loading...</div>");
 			
 			$editLink.removeClass("active");
 			$previewLink.removeClass("active");
@@ -782,8 +781,7 @@ onedev.server.markdown = {
 			existingImages[key] = elements;
 		});
 		
-		onedev.server.perfectScrollbar.empty($rendered);
-		$rendered.prepend(html);
+		$rendered.html(html);
 		
 		onedev.server.markdown.initRendered($rendered);
 
@@ -869,10 +867,8 @@ onedev.server.markdown = {
 		
 		var content = $rendered.data("content");
 		
-		if (content) {
-			onedev.server.perfectScrollbar.empty($rendered);
-			$rendered.prepend(content).removeData("content");
-		}
+		if (content) 
+			$rendered.html(content).removeData("content");
 		
 		if (taskCallback) {
 			var $task = $container.find(".task-list-item");
@@ -986,8 +982,7 @@ onedev.server.markdown = {
 			var emoji = emojis[i];
 			contentHtml += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
 		}
-		onedev.server.perfectScrollbar.empty($emojis);
-		$emojis.prepend(contentHtml);
+		$emojis.html(contentHtml);
 		$emojis.removeClass("loading");
 		$emojis.addClass("loaded");
 		$emojis.find(".emoji").click(function() {

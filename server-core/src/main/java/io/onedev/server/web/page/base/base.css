@@ -557,3 +557,7 @@ table.norecords tfoot td>div {
 .form-text a:hover, .form-text a:focus {
 	color: #0073e9 !important;
 }
+
+.fit-content {
+	min-height: fit-content;
+}

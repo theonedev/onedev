@@ -301,7 +301,15 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 		add(newRequestHead());
 		add(newStatusAndBranchesContainer());
-		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary");
+		WebMarkupContainer summaryContainer = new WebMarkupContainer("requestSummary") {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				response.render(OnDomReadyHeaderItem.forScript("onedev.server.pullRequestDetail.onSummaryDomReady();"));
+			}
+			
+		};
 		
 		summaryContainer.add(new WebSocketObserver() {
 
@@ -778,6 +786,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				} else {
 					actions.add(new WebMarkupContainer("synchronize"));
 					actions.add(new WebMarkupContainer("delete"));
+					actions.setVisible(false);
 					fragment.add(actions);
 				}				
 				
@@ -1386,7 +1395,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new PullRequestDetailResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.pullRequestDetail.onDomReady();"));
 	}
 	
 	@Override

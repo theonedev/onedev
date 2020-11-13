@@ -1,6 +1,6 @@
 (function ( $ ) {
  
-	var pageMargin = 0;
+	var pageMargin = 8;
 	var scrollbarWidth = 20;
 	var textHeight = 25;
 	

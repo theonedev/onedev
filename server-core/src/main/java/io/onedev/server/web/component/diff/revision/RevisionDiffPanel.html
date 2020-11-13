@@ -1,7 +1,7 @@
 <wicket:panel>
 	<div class="revision-diff">
-		<div wicket:id="revisionsIndexing" class="alert alert-light-warning revision-indexing">
-			<wicket:svg href="loading" class="icon spin"/>
+		<div wicket:id="revisionsIndexing" class="alert alert-notice alert-light-warning revision-indexing">
+			<wicket:svg href="loading" class="icon spin mr-1"/>
 			Revision indexing in progress... (symbol navigation in revisions will be accurate after indexed)
 		</div>
 		<!-- disable auto focus here as otherwise we have problems jumping to marked code blocks -->
@@ -31,7 +31,7 @@
 		<div wicket:id="body" class="body">
 			<div wicket:id="feedback"></div>
 			<div class="title"><a wicket:id="totalFiles" class="total-files"></a></div>
-			<div wicket:id="tooManyFiles" class="alert alert-light-warning">Sorry we are unable to display all files as there are too many</div>
+			<div wicket:id="tooManyFiles" class="alert alert-notice alert-light-warning">Sorry we are unable to display all files as there are too many</div>
 			<ul wicket:id="diffStats" class="diff-stats list-unstyled">
 				<li wicket:id="diffStats" class="diff-stat d-flex align-items-center flex-wrap mb-2">
 					<svg wicket:id="icon" class="icon mr-2"></svg>

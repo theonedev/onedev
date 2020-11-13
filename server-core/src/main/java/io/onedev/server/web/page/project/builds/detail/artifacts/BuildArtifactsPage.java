@@ -193,7 +193,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 				
 			});
 		} else {
-			add(new Label("artifacts", "No artifacts published").add(AttributeAppender.append("class", "alert alert-light-warning alert-custom alert-notice mb-0")));
+			add(new Label("artifacts", "No artifacts published").add(AttributeAppender.append("class", "alert alert-light-warning alert-notice mb-0")));
 		}
 	}
 

@@ -1,3 +1,6 @@
+.pull-request-detail>.card-body {
+	min-height: fit-content;
+}
 .pull-request-detail>.card-body>.main>.summary {
 	border: 2px dashed var(--light-gray);
 	padding: 1.2rem 1.5rem;
@@ -64,8 +67,7 @@ ul>li>a.code-comments.new .icon {
 	font-weight: 600;
 	margin-bottom: 0.8rem;
 }
-.pull-request-detail>.card-body>.more-info>.body>.reviews>.body>.reviews,
-.pull-request-detail>.card-body>.more-info>.body>.assignments>.body>.assignments {
-	width: 100%;
+.pull-request-detail .more-info .reviews a.delete, 
+.pull-request-detail .more-info .assignments a.delete {
+	margin-left: auto;
 }
-

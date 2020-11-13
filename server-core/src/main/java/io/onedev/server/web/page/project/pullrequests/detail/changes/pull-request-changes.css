@@ -7,7 +7,7 @@
 }
 .commits-selector ul a:hover {
 	background: var(--light);
-	color: var(--gray-dark);
+	color: var(--gray-dark) !important;
 }
 .commits-selector ul a.selected, .commits-selector ul a.selected:hover {
 	background: var(--light-warning);	

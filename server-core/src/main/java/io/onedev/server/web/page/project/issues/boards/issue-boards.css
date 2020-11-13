@@ -7,6 +7,7 @@
 .issue-boards>.body>.feedback>.feedbackPanel {
 	margin-bottom: 0;
 	margin-top: 1rem;
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 }
 .issue-boards>.body>.columns>.column>.content {
 	border: 1px solid var(--secondary);
@@ -32,6 +33,10 @@
 } 
 .issue-boards>.body>.columns>.column>.content>.body.issue-droppable.ui-droppable-hover {
 	background: #FAE280;
+}
+.issue-boards>.body>.columns>.column {
+	margin-left: 2rem;
+	min-width: 256px;
 }
 
 .floating>.content>.milestone-menu>table>tbody>tr:first-child>td {

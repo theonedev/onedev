@@ -4,10 +4,7 @@
 		<div class="body">
 			<form wicket:id="form">			
 				<div wicket:id="feedback"></div>
-				<div wicket:id="changed" class="changed"> 
-					<div class="alert alert-light-warning">Someone made below change since you started editing</div>
-					<div wicket:id="changes" class="changes"></div>
-				</div>
+				<div wicket:id="changesOfOthers" class="mb-4"></div>
 				<div wicket:id="commitMessage" class="no-autosize mb-4"></div>
 				<input wicket:id="save" type="submit" class="btn btn-primary mr-1" value="Commit">
 				<input wicket:id="cancel" type="button" class="btn btn-secondary" value="Cancel">

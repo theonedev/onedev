@@ -8,7 +8,3 @@
 .build-detail>.card-body>.main>.error-message {
 	max-height: 100px;
 }
-.build-detail>.card-body>.main>.error-message.ps.ps-scroll>.ps__rail-x>.ps__thumb-x, 
-.build-detail>.card-body>.main>.error-message.ps.ps-scroll>.ps__rail-y>.ps__thumb-y {
-    background: var(--light-danger);
-}

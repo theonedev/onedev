@@ -1,8 +1,7 @@
 onedev.server.pullRequestDetail = {
-	onDomReady: function() {
-		var $main = $(".pull-request-detail>.card-body>.main");
-		$main.find(">.summary .more-info").click(function() {
-			$main.find(">.status-and-branches .side-info").click();
+	onSummaryDomReady: function() {
+		$(".pull-request-detail .card-body .main .more-info").click(function() {
+			$(".pull-request-detail .card-header .side-info").click();
 		});
 	}
 }

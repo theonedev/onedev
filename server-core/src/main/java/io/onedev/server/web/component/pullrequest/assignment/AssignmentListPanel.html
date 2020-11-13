@@ -1,19 +1,13 @@
 <wicket:panel>
-	<table class="assignments">
-		<tr wicket:id="assignments">
-			<td class="user float-left">
-				<a wicket:id="user"></a> 
-			</td>
-			<td class="actions">
-				<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Remove this assignee"><wicket:svg href="trash" class="icon"></wicket:svg></a>
-			</td>
-		</tr>
+	<ul class="assignments list-unstyled mb-0">
+		<li wicket:id="assignments" class="d-flex align-items-center flex-nowrap">
+			<a wicket:id="user" class="mr-3"></a> 
+			<a wicket:id="delete" class="delete btn btn-icon btn-xs btn-light btn-hover-danger flex-shrink-0" title="Remove this assignee"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+		</li>
 		<wicket:enclosure>
-		<tr class="add-assignee">
-			<td colspan="2">
-				<input wicket:id="addAssignee" type="hidden" class="form-control">
-			</td>
-		</tr>
+		<li class="add-assignee">
+			<input wicket:id="addAssignee" type="hidden" class="form-control">
+		</li>
 		</wicket:enclosure>
-	</table>
+	</ul>
 </wicket:panel>

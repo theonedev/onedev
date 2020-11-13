@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
@@ -75,7 +76,7 @@ public abstract class CommitOptionPanel extends Panel {
 	
 	private CommitMessageBean commitMessageBean = new CommitMessageBean();
 	
-	private BlobChange change;
+	private BlobChange changesOfOthers;
 	
 	private boolean contentModified;
 	
@@ -140,31 +141,30 @@ public abstract class CommitOptionPanel extends Panel {
 			
 	}
 	
-	private void newChangedContainer(@Nullable AjaxRequestTarget target) {
-		WebMarkupContainer changedContainer = new WebMarkupContainer("changed");
-		changedContainer.setVisible(change != null);
-		if (change != null) {
-			changedContainer.add(new BlobDiffPanel("changes", new AbstractReadOnlyModel<Project>() {
+	private void newChangesOfOthersContainer(@Nullable AjaxRequestTarget target) {
+		Component changesOfOthersContainer;
+		if (changesOfOthers != null) {
+			changesOfOthersContainer = new BlobDiffPanel("changesOfOthers", new AbstractReadOnlyModel<Project>() {
 
 				@Override
 				public Project getObject() {
 					return context.getProject();
 				}
 				
-			}, new Model<PullRequest>(null), change, DiffViewMode.UNIFIED, null, null));
+			}, new Model<PullRequest>(null), changesOfOthers, DiffViewMode.UNIFIED, null, null);
 		} else {
-			changedContainer.add(new WebMarkupContainer("changes"));
+			changesOfOthersContainer = new WebMarkupContainer("changesOfOthers").setVisible(false);
 		}
 		if (target != null) {
-			form.replace(changedContainer);
+			form.replace(changesOfOthersContainer);
 			target.add(form);
-			if (change != null) {
+			if (changesOfOthers != null) {
 				String script = String.format("$('#%s .commit-option input[type=submit]').val('Commit and overwrite');", 
 						getMarkupId());
 				target.appendJavaScript(script);
 			}
 		} else {
-			form.add(changedContainer);		
+			form.add(changesOfOthersContainer);		
 		}
 	}
 	
@@ -177,7 +177,7 @@ public abstract class CommitOptionPanel extends Panel {
 		add(form);
 
 		form.add(new FencedFeedbackPanel("feedback", form));
-		newChangedContainer(null);
+		newChangesOfOthersContainer(null);
 		commitMessageBean.setSummary(getDefaultCommitMessage());
 		form.add(BeanContext.edit("commitMessage", commitMessageBean));
 
@@ -252,7 +252,7 @@ public abstract class CommitOptionPanel extends Panel {
 	}
 	
 	private boolean save(AjaxRequestTarget target, @Nullable String position) {
-		change = null;
+		changesOfOthers = null;
 		
 		if (newContentProvider != null && StringUtils.isBlank(context.getNewPath())) {
 			form.error("Please specify file name.");
@@ -340,13 +340,15 @@ public abstract class CommitOptionPanel extends Panel {
 								if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
 									if (newContentProvider != null) {
 										oldPaths.clear();
-										change = getChange(treeWalk, lastPrevCommit, prevCommit);
+										changesOfOthers = getChange(treeWalk, lastPrevCommit, prevCommit);
+										form.warn("Someone made below change since you started editing");
 										break;
 									} else {
 										newCommitId = e.getOldCommitId();
 									}
 								} else {
-									change = getChange(treeWalk, lastPrevCommit, prevCommit);
+									changesOfOthers = getChange(treeWalk, lastPrevCommit, prevCommit);
+									form.warn("Someone made below change since you started editing");
 									break;
 								}
 							} 
@@ -364,7 +366,7 @@ public abstract class CommitOptionPanel extends Panel {
 				target.appendJavaScript("$(window).resize();");
 				return true;
 			} else {
-				newChangedContainer(target);
+				newChangesOfOthersContainer(target);
 				return false;
 			}
 		}

@@ -53,12 +53,11 @@ onedev.server.symboltooltip = {
 						onedev.server.symboltooltip.removeTooltip(container);
 				}
 
-				var $tooltip = $("<div class='symbol-tooltip ps ps-scroll' id='" + containerId 
+				var $tooltip = $("<div class='symbol-tooltip overflow-auto' id='" + containerId 
 						+ "-symbol-tooltip'><img src=" + ajaxIndicatorUrl + "></img></div>");
 				container.tooltip = $tooltip[0];
 				container.tooltip.symbolEl = symbolEl;
 				document.body.appendChild(container.tooltip);
-				$tooltip.data("ps", new PerfectScrollbar(container.tooltip));
 				
 				$tooltip.mouseover(function() {
 					cancelHide();
@@ -83,10 +82,8 @@ onedev.server.symboltooltip = {
 		var $content = $("#" + contentId);
 		var $container = $content.parent();
 		var $tooltip = $("#" + $container.attr("id") + "-symbol-tooltip");
-		if ($tooltip.length != 0) {
-			onedev.server.perfectScrollbar.empty($tooltip);
-			$tooltip.prepend($content.children()).align($tooltip.data("alignment")).data("ps").update();
-		}
+		if ($tooltip.length != 0) 
+			$tooltip.html($content.children()).align($tooltip.data("alignment"));
 	},
 	
 	// this is public API which can be called from other components using this component

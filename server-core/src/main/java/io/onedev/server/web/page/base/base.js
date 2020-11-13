@@ -9,7 +9,7 @@ String.prototype.escapeHtml = function() {
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
- };
+};
  
 onedev.server = {
 	day: {
@@ -257,22 +257,26 @@ onedev.server = {
 			setTimeout(function() {
 				// do not use :visible selector directly for performance reason 
 				var focusibleSelector = "input[type=text], input[type=password], input:not([type]), textarea, .CodeMirror";
-				var inErrorSelector = ".is-invalid";
-                var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector).filter(":visible:first");
-                if ($inError.length == 0) {
-				    inErrorSelector = ".feedbackPanelERROR";
-                    $inError = $containers.find(inErrorSelector).addBack(inErrorSelector).filter(":visible:first");
+				var attentionSelector = ".is-invalid";
+                var $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
+                if ($attention.length == 0) {
+				    attentionSelector = ".feedbackPanelERROR";
+                    $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
+                }
+                if ($attention.length == 0) {
+				    attentionSelector = ".feedbackPanelWARNING";
+                    $attention = $containers.find(attentionSelector).addBack(attentionSelector).filter(":visible:first");
                 }
 
-				if ($inError.length != 0) {
-					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector).filter(":visible");
+				if ($attention.length != 0) {
+					var $focusable = $attention.find(focusibleSelector).addBack(focusibleSelector).filter(":visible");
 					if ($focusable.hasClass("CodeMirror") && $focusable[0].CodeMirror.options.readOnly == false) {
 						$focusable[0].CodeMirror.focus();					
                     } else if ($focusable.length != 0 && !$focusable.hasClass("select2-input") 
 							&& $focusable.closest(".no-autofocus").length == 0) {						
 						$focusable.focus();
 					} else {
-						$inError[0].scrollIntoView({behavior: "smooth", block: "center"});
+						$attention[0].scrollIntoView({behavior: "smooth", block: "center"});
 					}
 				} else {
 					$containers.find(focusibleSelector).addBack(focusibleSelector).filter(":visible").each(function() {
@@ -289,7 +293,7 @@ onedev.server = {
                         }
 					});
 				}
-			}, 0);
+			}, 100);
 		},
 		
 		setupAutoFocus: function() {
@@ -753,9 +757,16 @@ onedev.server = {
 		
 		$(window).resize(function() {
 			var $autofit = $(".autofit:visible:not(:has('.autofit:visible'))");
-			// Do not use parents(":not('html'):not('body')") here as it will select $autofit self in 
-			// safari. Very odd 
-			$autofit.css("overflow", "auto").parents().not("html").not("body").css("overflow", "hidden");
+			/* 
+			 * 1. Do not use parents(":not('html'):not('body')") here as it will select $autofit self in 
+			 * safari. Very odd
+			 * 2. We remove fit-content class from parents of autofit as otherwise dimension calculation 
+		     * of elements embedded inside it will be based on content instead of viewport, and this 
+             * causes issues when view/edit code in a autofit container. Note that removing fit-content 
+             * will not break safari in this case as only the innermost autofit can have scrollbars
+			 */ 
+			$autofit.css("overflow", "auto").parents().not("html").not("body")
+					.css("overflow", "hidden").removeClass("fit-content");
 			$(document).find(".resize-aware").trigger("resized");
 		});
 		

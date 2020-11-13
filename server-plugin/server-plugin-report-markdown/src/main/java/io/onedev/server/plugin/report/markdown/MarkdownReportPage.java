@@ -86,7 +86,7 @@ public class MarkdownReportPage extends BuildDetailPage {
 					tag.setName("div");
 				}
 				
-			}.add(AttributeAppender.append("class", "alert alert-custom alert-notice alert-light-warning mb-0")));
+			}.add(AttributeAppender.append("class", "alert alert-notice alert-light-warning mb-0")));
 		}
 	}
 

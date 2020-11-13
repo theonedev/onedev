@@ -61,7 +61,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 			}
 			
 		});
-
+		
 		setOutputMarkupId(true);
 	}
 

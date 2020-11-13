@@ -54,7 +54,7 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 		if (StringUtils.isNotBlank(term)) {
 			matched = new ArrayList<>();
 			for (Map.Entry<String, String> entry: choicesModel.getObject().entrySet()) {
-				if (entry.getValue().toLowerCase().contains(term)) 
+				if (entry.getValue().toLowerCase().contains(term.toLowerCase())) 
 					matched.add(entry.getKey());
 			}
 		} else {

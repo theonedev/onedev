@@ -30,19 +30,19 @@
 		</wicket:enclosure>
 	</div>
 	<wicket:fragment wicket:id="effectiveFrag">
-		<div class="alert alert-custom alert-notice alert-light-success shadow mb-5">
-			<span wicket:id="description" class="mr-2"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
+		<div class="alert alert-notice alert-light-success shadow mb-5">
+			<span wicket:id="description"></span> <a wicket:id="link"><span wicket:id="label"></span></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sameBranchFrag">
-		<div class="alert alert-custom alert-notice alert-light-warning shadow mb-5">
+		<div class="alert alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
 				<span>Please select different branches</span>
 			</div>
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="mergedFrag">
-		<div class="alert alert-custom alert-notice alert-light-success shadow mb-5">
+		<div class="alert alert-notice alert-light-success shadow mb-5">
 			<div class="summary">
 				Branch <a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
 				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
@@ -50,14 +50,14 @@
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="unrelatedHistoryFrag">
-		<div class="alert alert-custom alert-notice alert-light-warning shadow mb-5">
+		<div class="alert alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
 				<span>History of target branch and source branch is unrelated</span>
 			</div>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="branchNotSpecifiedFrag">
-		<div class="alert alert-custom alert-notice alert-light-warning shadow mb-5">
+		<div class="alert alert-notice alert-light-warning shadow mb-5">
 			<div class="summary">
 				<span>Please select branches to create pull request</span>
 			</div>
@@ -79,7 +79,7 @@
 					<div class="form-group merge-strategy">
 						<label>Merge Strategy</label>
 						<div wicket:id="mergeStrategy">
-							<select wicket:id="select" class="form-control"></select>
+							<select wicket:id="select" class="form-control custom-select"></select>
 							<div wicket:id="help" class="form-text text-muted"></div>	
 							<div wicket:id="status" class="status"></div>						
 						</div>						

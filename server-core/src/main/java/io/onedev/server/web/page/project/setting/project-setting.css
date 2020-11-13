@@ -4,20 +4,16 @@
 	display: block;
 }
 
-.project-setting .authorization-list .select2-container {
-	width: 100%;
-} 
-
-.project-setting .web-hook-list table thead th {
-	font-weight: bold !important;
+.project-setting .job-secrets .job-secret-edit textarea {
+    font-family: monospace;
 }
-.project-setting .web-hook-list table thead th.property-eventTypes {
+
+.project-setting .web-hooks .bean-list td.property-eventTypes {
 	width: 25%;
 }
-.project-setting .web-hook-list table .select2-container {
-    width: 100%;
+.project-setting .branch-protections .bean-list td.property-jobNames {
+	width: 30%;
 }
-
-.job-secret-edit textarea {
-    font-family: monospace;
+.project-setting .project-authorizations .bean-list td.property-userName {
+	width: 50%;
 }

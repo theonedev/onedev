@@ -1,5 +1,9 @@
 <wicket:extend>
-	<div class="project flex-grow-1 d-flex flex-column">
+	<!-- fit-content is added here to fix the issue that the project div can not 
+	cover its content if content is too long to cause scroll bars to apear in parent
+	div. This happens in safari only
+	-->
+	<div class="project flex-grow-1 d-flex flex-column fit-content">
 		<wicket:child></wicket:child>
 	</div>
 	<wicket:fragment wicket:id="topbarTitleFrag">

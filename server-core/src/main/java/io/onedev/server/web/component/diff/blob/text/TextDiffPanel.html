@@ -1,15 +1,17 @@
 <wicket:panel>
-	<div class="text-diff cm-s-eclipse">
-		<div class="head d-flex align-items-center flex-wrap px-3 py-2 border">
-			<div wicket:id="diffStat" class="mr-2"></div>
-			<div wicket:id="title" class="mr-3 text-break"></div>
-			<div wicket:id="actions" class="ml-auto">
-				<a wicket:id="blameFile" title="Blame" class="btn btn-xs btn-icon btn-light btn-hover-secondary btn-active-primary"><wicket:svg href="commit" class="icon"/></a>
-				<a wicket:id="viewFile" title="View" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="eye" class="icon"/></a>
-				<a wicket:id="editFile" title="Edit" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="edit" class="icon"/></a>
+	<table class="text-diff cm-s-eclipse">
+		<caption class="p-0">
+			<div class="d-flex align-items-center px-3 py-2 border">
+				<div wicket:id="diffStat" class="mr-2 text-nowrap"></div>
+				<div wicket:id="title" class="mr-3 text-break"></div>
+				<div wicket:id="actions" class="ml-auto text-nowrap">
+					<a wicket:id="blameFile" title="Blame" class="btn btn-xs btn-icon btn-light btn-hover-secondary btn-active-primary"><wicket:svg href="commit" class="icon"/></a>
+					<a wicket:id="viewFile" title="View" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="eye" class="icon"/></a>
+					<a wicket:id="editFile" title="Edit" class="btn btn-xs btn-icon btn-light btn-hover-secondary ml-1"><wicket:svg href="edit" class="icon"/></a>
+				</div>
 			</div>
-		</div>
-		<table class="body diff"><wicket:container wicket:id="diffLines"></wicket:container></table>
-	</div>
+		</caption>
+		<wicket:container wicket:id="diffLines"></wicket:container>
+	</table>
 	<div wicket:id="symbolTooltip"></div>
 </wicket:panel>
