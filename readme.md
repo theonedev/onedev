@@ -75,7 +75,7 @@ Perform sophisticated queries against projects, commits, builds, issues, pull re
 
 Configure issues to transit to desired state upon commit, build or pull request events. See commit and pull request events in issue activities. Query fixed issues between builds. Find builds or pull requests fixing particular issues or commits
 
-![Issue Query](doc/images/issue-query.gif)
+![Issue Query](doc/images/issue-code-build-integration.gif)
 
 ### Fine Grained Permission Control
 
