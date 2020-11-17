@@ -14,12 +14,6 @@
 	list-style: disc;
 	margin-left: 1.5rem;
 }
-.input-assist .help li a {
-	color: var(--primary);
-}
-.input-assist .help li a:hover, .input-assist .help li a:focus {
-	color: #0073e9;
-}
 .input-error-mark {
     background: url(wave.png) repeat-x bottom;
 	position: absolute;

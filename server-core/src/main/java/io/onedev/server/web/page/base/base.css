@@ -551,13 +551,6 @@ table.norecords tfoot td>div {
 	padding: 2rem 2.25rem;	
 }
 
-.form-text a {
-	color: var(--primary);
-}
-.form-text a:hover, .form-text a:focus {
-	color: #0073e9 !important;
-}
-
 .fit-content {
 	min-height: fit-content;
 }

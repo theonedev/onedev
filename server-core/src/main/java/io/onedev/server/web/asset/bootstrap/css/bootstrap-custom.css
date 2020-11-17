@@ -28,12 +28,13 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
 	background: #EEF0F8;
 	height: 100%;
+	color: var(--gray-dark);
 }
 a {
 	transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;	
 }
 a, a:not([href]):not([class]) {
-	color: var(--gray-dark);
+	color: #1f3b7b;
 }
 a:hover, a:focus, a:not([href]):not([class]):hover, a:not([href]):not([class]):focus {
 	text-decoration: none;
