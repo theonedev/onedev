@@ -619,7 +619,7 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "date d-none d-xl-table-cell";
+				return "date d-none d-xl-table-cell text-muted";
 			}
 
 			@Override
