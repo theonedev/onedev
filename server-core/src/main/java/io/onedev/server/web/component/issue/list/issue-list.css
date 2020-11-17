@@ -1,6 +1,3 @@
-.issue-list>div>.body table {
-	display: block;
-}
 .issue-list>div>.body table>tbody>tr>td {
 	padding: 1.2rem 0.8rem 0.7rem 0.8rem;
 }
