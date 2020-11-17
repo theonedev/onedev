@@ -402,7 +402,10 @@ pre {
 }
 .checkbox>input {
     position: absolute;
+    /* 
+    Comment below as otherwise pages containing this checkboxes in table will not show scroll bar in Safari 
     z-index: -1;
+    */
     opacity: 0;
 }
 input[type="radio"], input[type="checkbox"] {
