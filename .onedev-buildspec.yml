@@ -54,7 +54,6 @@ jobs:
   - docker push 1dev/server:latest
   - ''
   - cd $projectDir/server-product/k8s
-  - sleep 3600
   - ./build.sh
   - ''
   - cd $projectDir
