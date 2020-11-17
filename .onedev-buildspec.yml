@@ -1,7 +1,7 @@
 version: 1
 jobs:
 - name: CI
-  image: 1dev/build-environment:1.1
+  image: 1dev/build-environment:1.2
   commands:
   - set -e
   - echo "Detecting project version (may require some time while downloading maven
