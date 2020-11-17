@@ -17,6 +17,7 @@
     --light: #F3F6F9;
     --dark: #181C32;
 	--light-dark: #D1D3E0;
+	--dark-blue: #1f3b7b;
 }
 
 html, body {
@@ -34,7 +35,7 @@ a {
 	transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;	
 }
 a, a:not([href]):not([class]) {
-	color: #1f3b7b;
+	color: var(--dark-blue);
 }
 a:hover, a:focus, a:not([href]):not([class]):hover, a:not([href]):not([class]):focus {
 	text-decoration: none;

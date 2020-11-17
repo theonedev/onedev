@@ -141,36 +141,25 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		List<SidebarMenuItem> menuItems = new ArrayList<>();
 		
 		if (SecurityUtils.canReadCode(getProject())) {
-			List<SidebarMenuItem> codeMenuItems = new ArrayList<>();
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Files", 
+			menuItems.add(new SidebarMenuItem.Page("files", "Files", 
 					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Commits", 
+			menuItems.add(new SidebarMenuItem.Page("commit", "Commits", 
 					ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject(), null), 
 					Lists.newArrayList(CommitDetailPage.class)));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Branches", 
+			menuItems.add(new SidebarMenuItem.Page("branch", "Branches", 
 					ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Tags", 
+			menuItems.add(new SidebarMenuItem.Page("tag", "Tags", 
 					ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Comments", 
-					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
-			codeMenuItems.add(new SidebarMenuItem.Page(null, "Compare", 
-					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
-
-			menuItems.add(new SidebarMenuItem.SubMenu("code", "Code", codeMenuItems));
-			
 			menuItems.add(new SidebarMenuItem.Page("pull-request", "Pull Requests", 
 					ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject(), 0), 
 					Lists.newArrayList(NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class)));
 		}		
 		if (getProject().isIssueManagementEnabled()) {
-			List<SidebarMenuItem> issueMenuItems = new ArrayList<>();
-			issueMenuItems.add(new SidebarMenuItem.Page(null, "List", 
+			menuItems.add(new SidebarMenuItem.Page("bug", "Issues", 
 					ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), 0), 
 					Lists.newArrayList(NewIssuePage.class, IssueDetailPage.class)));
-			issueMenuItems.add(new SidebarMenuItem.Page(null, "Boards", 
+			menuItems.add(new SidebarMenuItem.Page("split", "Boards", 
 					IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject())));
-			
-			menuItems.add(new SidebarMenuItem.SubMenu("bug", "Issues", issueMenuItems));
 			
 			menuItems.add(new SidebarMenuItem.Page("milestone", "Milestones", 
 					MilestoneListPage.class, MilestoneListPage.paramsOf(getProject(), false, null), 
@@ -182,6 +171,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
 		
 		if (SecurityUtils.canReadCode(getProject())) {
+			menuItems.add(new SidebarMenuItem.Page("comments", "Code Comments", 
+					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
+			menuItems.add(new SidebarMenuItem.Page("diff", "Code Compare", 
+					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
 			List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 			statsMenuItems.add(new SidebarMenuItem.Page(null, "Contributions", 
 					ProjectContribsPage.class, ProjectContribsPage.paramsOf(getProject())));

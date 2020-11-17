@@ -405,7 +405,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "text-gray d-none d-md-table-cell";
+				return "d-none d-md-table-cell";
 			}
 
 		});

@@ -7,7 +7,7 @@
 .user-card>.info {
     padding: 8px 12px 12px 80px;
 }
-.user-card img {
+.user-card img.avatar {
     position: absolute;
     width: 64px;
     height: 64px;

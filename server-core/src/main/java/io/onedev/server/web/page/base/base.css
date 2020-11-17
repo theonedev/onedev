@@ -413,7 +413,7 @@ a.disabled:not(.btn), a[disabled]:not(.btn) {
     margin-left: 0.4rem !important;
 }
 .tree-theme-human span.tree-content a {
-	color: var(--gray-dark) !important;
+	color: var(--dark-blue) !important;
 	text-decoration: none !important;
 }
 .tree-theme-human span.tree-content a:not(.selectable):hover {
