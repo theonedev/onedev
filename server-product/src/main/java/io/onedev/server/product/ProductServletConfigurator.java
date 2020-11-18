@@ -26,7 +26,6 @@ import io.onedev.server.util.jetty.ClasspathAssetServlet;
 import io.onedev.server.util.jetty.FileAssetServlet;
 import io.onedev.server.util.jetty.ServletConfigurator;
 import io.onedev.server.web.asset.icon.IconScope;
-import io.onedev.server.web.component.markdown.AttachmentUploadServlet;
 import io.onedev.server.web.img.ImageScope;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -44,8 +43,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
 	private final WicketServlet wicketServlet;
 	
-	private final AttachmentUploadServlet attachmentUploadServlet;
-	
 	private final ServletContainer jerseyServlet;
 
 	private final WebSocketManager webSocketManager;
@@ -53,8 +50,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	@Inject
 	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, GitFilter gitFilter, 
 			GitPreReceiveCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet, 
-			WicketServlet wicketServlet, WebSocketManager webSocketManager, 
-			AttachmentUploadServlet attachmentUploadServlet, ServletContainer jerseyServlet) {
+			WicketServlet wicketServlet, WebSocketManager webSocketManager, ServletContainer jerseyServlet) {
 		this.serverConfig = serverConfig;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -63,7 +59,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.wicketServlet = wicketServlet;
 		this.webSocketManager = webSocketManager;
 		this.jerseyServlet = jerseyServlet;
-		this.attachmentUploadServlet = attachmentUploadServlet;
 	}
 	
 	@Override
@@ -87,8 +82,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		 * match a path pattern
 		 */
 		context.addServlet(new ServletHolder(wicketServlet), "/");
-		
-		context.addServlet(new ServletHolder(attachmentUploadServlet), "/attachment_upload");
 		
 		context.addServlet(new ServletHolder(new ClasspathAssetServlet(ImageScope.class)), "/img/*");
 		context.addServlet(new ServletHolder(new ClasspathAssetServlet(IconScope.class)), "/icon/*");

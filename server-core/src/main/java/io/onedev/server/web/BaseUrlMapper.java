@@ -93,6 +93,7 @@ import io.onedev.server.web.page.project.setting.branchprotection.BranchProtecti
 import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
+import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -260,7 +261,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/artifacts", BuildArtifactsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/builds/${build}/invalid", InvalidBuildPage.class));
 		
-		add(new DynamicPathPageMapper("projects/${project}/settings/general", GeneralSecuritySettingPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/settings/general", GeneralProjectSettingPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/avatar-edit", AvatarEditPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/branch-protection", BranchProtectionsPage.class));

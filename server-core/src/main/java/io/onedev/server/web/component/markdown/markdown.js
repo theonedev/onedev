@@ -14,7 +14,7 @@ onedev.server.markdown = {
 		    $input[0].dispatchEvent(evt);
 		}
 	},
-	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, 
+	onDomReady: function(containerId, callback, atWhoLimit, attachmentUploadUrl, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
 			projectNamePattern, autosaveKey) {
 		var $container = $("#" + containerId);
@@ -417,7 +417,7 @@ onedev.server.markdown = {
 		    });		
 	    }
 	    
-	    if (attachmentSupport) {
+	    if (attachmentUploadUrl) {
 	    	var inputEl = $input[0];
 	    	
 			inputEl.addEventListener("paste", function(e) {
@@ -482,20 +482,27 @@ onedev.server.markdown = {
 					}
 					
 					xhr.onload = function() {
+						var response = xhr.responseText;
+						var index = response.indexOf("<?xml");
+						if (index != -1)
+							response = response.substring(0, index);
 						if (xhr.status == 200) { 
-							callback("insertUrl", xhr.responseText, xhr.replaceMessage);
+							callback("insertUrl", response, xhr.replaceMessage);
 						} else { 
 							onedev.server.markdown.updateUploadMessage($input, 
-									"!!" + xhr.responseText + "!!", xhr.replaceMessage);
+									"!!" + response + "!!", xhr.replaceMessage);
 						}
 					};
 					xhr.onerror = function() {
 						onedev.server.markdown.updateUploadMessage($input, 
 								"!!Unable to connect to server!!", xhr.replaceMessage);
 					};
-					xhr.open("POST", "/attachment_upload", true);
+					
+					xhr.open("POST", attachmentUploadUrl, true);
 					xhr.setRequestHeader("File-Name", encodeURIComponent(file.name));
-					xhr.setRequestHeader("Attachment-Support", attachmentSupport);
+					xhr.setRequestHeader("Wicket-Ajax", "true");
+					xhr.setRequestHeader("Wicket-Ajax-BaseURL", Wicket.Ajax.baseUrl);
+					
 					xhr.send(file);
 				}
 			}
