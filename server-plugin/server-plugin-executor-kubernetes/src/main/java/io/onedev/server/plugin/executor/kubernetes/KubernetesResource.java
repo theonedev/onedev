@@ -25,6 +25,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.SerializationUtils;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.TarUtils;
@@ -73,20 +74,19 @@ public class KubernetesResource {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
     @POST
-    public byte[] allocateJobCaches(byte[] cacheAllocationRequestBytes) {
-		CacheAllocationRequest allocationRequest = (CacheAllocationRequest) SerializationUtils
-				.deserialize(cacheAllocationRequestBytes);
+    public byte[] allocateJobCaches(String cacheAllocationRequestString) {
+		CacheAllocationRequest cacheAllocationRequest = CacheAllocationRequest.fromString(cacheAllocationRequestString);
 		return SerializationUtils.serialize((Serializable) jobManager.allocateJobCaches(
-				getJobToken(), allocationRequest.getCurrentTime(), allocationRequest.getInstances()));
+				getJobToken(), cacheAllocationRequest.getCurrentTime(), cacheAllocationRequest.getInstances()));
     }
 	
 	@Path("/report-job-caches")
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
-	public void reportJobCaches(byte[] cacheInstanceBytes) {
-		@SuppressWarnings("unchecked")
-		Collection<CacheInstance> cacheInstances = (Collection<CacheInstance>) SerializationUtils
-				.deserialize(cacheInstanceBytes);
+	public void reportJobCaches(String cacheInstancesString) {
+		Collection<CacheInstance> cacheInstances = new ArrayList<>();
+		for (String field: Splitter.on(';').omitEmptyStrings().split(cacheInstancesString))
+			cacheInstances.add(CacheInstance.fromString(field));
 		jobManager.reportJobCaches(getJobToken(), cacheInstances);
 	}
 	

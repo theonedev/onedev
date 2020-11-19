@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.1</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.authenticator.ldap.LdapModule</moduleClass>
