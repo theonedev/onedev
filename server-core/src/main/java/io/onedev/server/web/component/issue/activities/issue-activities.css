@@ -33,3 +33,7 @@
 .issue-activities>table>tbody>tr>td.content>.body {
     margin-top: 1rem;
 }
+
+.issue-activities .field-change>.comment {
+	margin-top: 0.8rem;
+}
