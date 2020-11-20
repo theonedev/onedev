@@ -46,6 +46,7 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
+import io.onedev.server.security.CipherUtils;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -89,7 +90,7 @@ public abstract class BasePage extends WebPage {
 				String encodedData = params.getParameterValue("data").toString();
 				
 				byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
-				Serializable data = (Serializable) SerializationUtils.deserialize(bytes);
+				Serializable data = (Serializable) SerializationUtils.deserialize(CipherUtils.decrypt(bytes));
 				onPopState(target, data);
 				resizeWindow(target);
 				target.appendJavaScript("onedev.server.viewState.getFromHistoryAndSetToView();");
@@ -192,13 +193,13 @@ public abstract class BasePage extends WebPage {
 	}
 
 	public void pushState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
-		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
+		String encodedData = new String(Base64.encodeBase64(CipherUtils.encrypt(SerializationUtils.serialize(data))));
 		String script = String.format("onedev.server.history.pushState('%s', '%s');", url, encodedData);
 		partialPageRequestHandler.prependJavaScript(script);
 	}
 	
 	public void replaceState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
-		String encodedData = new String(Base64.encodeBase64(SerializationUtils.serialize(data)));
+		String encodedData = new String(Base64.encodeBase64(CipherUtils.encrypt(SerializationUtils.serialize(data))));
 		String script = String.format("onedev.server.history.replaceState('%s', '%s');", url, encodedData);
 		partialPageRequestHandler.prependJavaScript(script);
 	}
