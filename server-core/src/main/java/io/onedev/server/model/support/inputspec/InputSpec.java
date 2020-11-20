@@ -105,7 +105,7 @@ public abstract class InputSpec implements Serializable {
 		return Lists.newArrayList();
 	}
 
-	protected String escape(String string) {
+	public static String escape(String string) {
 		String escaped = JavaEscape.escapeJava(string);
 		// escape $ character since it has special meaning in groovy string
 		escaped = escaped.replace("$", "\\$");
