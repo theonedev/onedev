@@ -85,6 +85,7 @@ import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
@@ -1413,7 +1414,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		BlobIdent blobIdent = getBlobIdent();
 		
 		for (FileUpload upload: uploads) {
-			String blobPath = upload.getClientFileName();
+			String blobPath = FilenameUtils.sanitizeFilename(upload.getClientFileName());
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			

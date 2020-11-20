@@ -53,6 +53,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
@@ -402,7 +403,8 @@ abstract class InsertUrlPanel extends Panel {
 					String attachmentName;
 					FileUpload upload = uploads.iterator().next();
 					try (InputStream is = upload.getInputStream()) {
-						attachmentName = attachmentSupport.saveAttachment(upload.getClientFileName(), is);
+						attachmentName = attachmentSupport.saveAttachment(
+								FilenameUtils.sanitizeFilename(upload.getClientFileName()), is);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

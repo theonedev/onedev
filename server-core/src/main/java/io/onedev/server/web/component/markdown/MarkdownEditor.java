@@ -60,6 +60,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.validation.ProjectNameValidator;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -477,7 +478,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
 				HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
 				try {
-					String fileName = URLDecoder.decode(request.getHeader("File-Name"), StandardCharsets.UTF_8.name());
+					String fileName = FilenameUtils.sanitizeFilename(
+							URLDecoder.decode(request.getHeader("File-Name"), StandardCharsets.UTF_8.name()));
 					String attachmentName = getAttachmentSupport().saveAttachment(fileName, request.getInputStream());
 					response.getWriter().print(URLEncoder.encode(attachmentName, StandardCharsets.UTF_8.name()));
 					response.setStatus(HttpServletResponse.SC_OK);
