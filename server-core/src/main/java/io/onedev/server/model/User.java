@@ -112,6 +112,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private String fullName;
 	
+	@JsonView(DefaultView.class)
 	@Embedded
 	private SsoInfo ssoInfo = new SsoInfo();
 	
@@ -119,6 +120,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String email;
 	
 	@Column(unique=true, nullable=false)
+	@JsonView(DefaultView.class)
 	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
