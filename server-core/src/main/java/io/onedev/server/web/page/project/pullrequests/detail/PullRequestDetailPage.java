@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityNotFoundException;
 
+import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -728,6 +729,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 					
 				});
+				
+				fragment.add(new ReferencePanel("reference", getPullRequest()));
 				
 				fragment.add(new EntityWatchesPanel("watches") {
 

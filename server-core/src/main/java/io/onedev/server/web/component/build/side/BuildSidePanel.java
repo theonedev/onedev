@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
@@ -279,6 +280,8 @@ public abstract class BuildSidePanel extends Panel {
 			add(newDeleteLink("delete"));
 		else
 			add(new WebMarkupContainer("delete").setVisible(false));
+		
+		addOrReplace(new ReferencePanel("reference", getBuild()));
 		
 		setOutputMarkupId(true);
 	}

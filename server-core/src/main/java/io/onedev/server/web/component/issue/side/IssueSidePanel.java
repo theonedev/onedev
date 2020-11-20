@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -110,6 +111,8 @@ public abstract class IssueSidePanel extends Panel {
 			addOrReplace(newDeleteLink("delete"));		
 		else
 			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
+		
+		addOrReplace(new ReferencePanel("reference", getIssue()));
 		
 		super.onBeforeRender();
 	}
