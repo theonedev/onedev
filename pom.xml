@@ -9,7 +9,7 @@
 		<version>1.0.5</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>4.0.1</version>
+	<version>4.0.2</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -573,8 +573,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.21</commons.version>
-		<k8shelper.version>1.0.21</k8shelper.version>
+		<commons.version>2.0.0</commons.version>
+		<k8shelper.version>1.0.22</k8shelper.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>
