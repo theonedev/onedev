@@ -31,6 +31,8 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.persistence.SessionManager;
 
+import java.io.IOException;
+
 /**
  * An {@link org.apache.wicket.protocol.ws.api.IWebSocketProcessor processor} that integrates with
  * Jetty 9.x {@link Session web socket} implementation.
@@ -122,7 +124,11 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 
 	@Override
 	public void onWebSocketError(Throwable throwable) {
-		logger.error("An error occurred when using WebSocket.", throwable);
+		if (throwable instanceof IOException && throwable.getMessage().equals("Broken pipe")) {
+			logger.debug("WebSocket closed", throwable);
+		} else {
+			logger.error("An error occurred when using WebSocket.", throwable);	
+		}
 	}
 
 	@Override
