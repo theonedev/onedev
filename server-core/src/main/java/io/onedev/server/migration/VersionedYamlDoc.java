@@ -38,8 +38,8 @@ import org.yaml.snakeyaml.serializer.Serializer;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.launcher.loader.ImplementationRegistry;
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -56,7 +56,6 @@ public class VersionedYamlDoc extends MappingNode {
 	@SuppressWarnings("unchecked")
 	public <T> T toBean(Class<T> beanClass) {
         setTag(new Tag(beanClass));
-        
 		if (getVersion() != null) {
 			try {
 				MigrationHelper.migrate(getVersion(), beanClass.newInstance(), this);
@@ -131,17 +130,26 @@ public class VersionedYamlDoc extends MappingNode {
 
 		@Override
 		protected Class<?> getClassForNode(Node node) {
-			Class<?> type = node.getType();
-			if (type.getAnnotation(Editable.class) != null && !ClassUtils.isConcrete(type)) {
-				ImplementationRegistry registry = OneDev.getInstance(ImplementationRegistry.class);
-				for (Class<?> implementationClass: registry.getImplementations(node.getType())) {
-					String implementationTag = new Tag("!" + implementationClass.getSimpleName()).getValue();
-					if (implementationTag.equals(node.getTag().getValue()))
-						return implementationClass;
+			if (node instanceof VersionedYamlDoc) {
+				return super.getClassForNode(node);
+			} else {
+				Class<?> type = node.getType();
+				if (type.getAnnotation(Editable.class) == null) {
+					// Do not deserialize unknown classes to avoid security vulnerabilities
+					throw new IllegalStateException(String.format("Unexpected yaml node (type: %s, tag: %s)", 
+							type, node.getTag()));
+				} else {
+					if (!ClassUtils.isConcrete(type)) {
+						ImplementationRegistry registry = OneDev.getInstance(ImplementationRegistry.class);
+						for (Class<?> implementationClass: registry.getImplementations(node.getType())) {
+							String implementationTag = new Tag("!" + implementationClass.getSimpleName()).getValue();
+							if (implementationTag.equals(node.getTag().getValue()))
+								return implementationClass;
+						}
+					}
+					return super.getClassForNode(node);
 				}
 			}
-			
-			return super.getClassForNode(node);
 		}
 		
 	}
