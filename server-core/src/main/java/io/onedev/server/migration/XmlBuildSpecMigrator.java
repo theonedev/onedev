@@ -10,6 +10,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.xml.sax.SAXException;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
@@ -662,8 +663,11 @@ public class XmlBuildSpecMigrator {
 	public static String migrate(String xml) {
 		Document xmlDoc;
 		try {
-			xmlDoc = new SAXReader().read(new StringReader(xml));
-		} catch (DocumentException e) {
+			SAXReader reader = new SAXReader();
+			// Prevent XXE attack as the xml might be provided by malicious users
+			reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+			xmlDoc = reader.read(new StringReader(xml));
+		} catch (DocumentException | SAXException e) {
 			throw new RuntimeException(e);
 		}
 		
