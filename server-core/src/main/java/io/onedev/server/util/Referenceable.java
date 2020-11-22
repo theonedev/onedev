@@ -9,5 +9,10 @@ public interface Referenceable {
 	long getNumber();
 	
 	String getPrefix();
+
+	public static String asReference(Referenceable referenceable) {
+		return String.format("%s %s#%d", referenceable.getPrefix(), 
+				referenceable.getProject().getName(), referenceable.getNumber());
+	}
 	
 }

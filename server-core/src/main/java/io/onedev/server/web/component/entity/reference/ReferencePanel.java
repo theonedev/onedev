@@ -6,23 +6,22 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
-public class ReferencePanel extends Panel {
+@SuppressWarnings("serial")
+public abstract class ReferencePanel extends Panel {
 	
-	private Referenceable entity;
-	
-	public ReferencePanel(String id, Referenceable entity) {
+	public ReferencePanel(String id) {
 		super(id);
-		this.entity = entity;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String displayReference = String.format("%s#%d", entity.getProject(), entity.getNumber());
-		String reference = entity.getPrefix() + " " + displayReference;
+		String reference = Referenceable.asReference(getReferenceable());
 		
-		add(new Label("reference", displayReference));
+		add(new Label("reference", reference));
 		add(new CopyToClipboardLink("copy", Model.of(reference)));
 	}
+	
+	protected abstract Referenceable getReferenceable();
 }

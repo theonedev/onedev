@@ -27,3 +27,8 @@
 .build-side>.properties>div:last-child>div {
 	padding-bottom: 0;
 }
+
+.build-side>div>.head {
+	font-weight: 600;
+	margin-bottom: 1rem;
+}

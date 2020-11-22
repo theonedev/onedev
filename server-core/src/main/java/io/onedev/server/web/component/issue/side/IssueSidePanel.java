@@ -57,6 +57,7 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.Referenceable;
 import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
@@ -107,12 +108,19 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
+		addOrReplace(new ReferencePanel("reference") {
+
+			@Override
+			protected Referenceable getReferenceable() {
+				return getIssue();
+			}
+			
+		});
+		
 		if (SecurityUtils.canManageIssues(getProject()))
 			addOrReplace(newDeleteLink("delete"));		
 		else
 			addOrReplace(new WebMarkupContainer("delete").setVisible(false));
-		
-		addOrReplace(new ReferencePanel("reference", getIssue()));
 		
 		super.onBeforeRender();
 	}

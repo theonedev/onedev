@@ -75,6 +75,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.Referenceable;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -730,7 +731,14 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					
 				});
 				
-				fragment.add(new ReferencePanel("reference", getPullRequest()));
+				fragment.add(new ReferencePanel("reference") {
+
+					@Override
+					protected Referenceable getReferenceable() {
+						return getPullRequest();
+					}
+					
+				});
 				
 				fragment.add(new EntityWatchesPanel("watches") {
 
