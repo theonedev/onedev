@@ -12,6 +12,7 @@ import com.google.common.base.Throwables;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -39,9 +40,10 @@ public class GeneralErrorPage extends SimplePage {
 					break;
 			}
 		}
-		if (title == null)
+		if (title == null) {
 			title = "An unexpected exception occurred";
-		detailMessage = Throwables.getStackTraceAsString(exception);
+			detailMessage = Throwables.getStackTraceAsString(exception);
+		}
 	}
 	
 	@Override
@@ -63,7 +65,8 @@ public class GeneralErrorPage extends SimplePage {
 				setVisible(false);
 			}
 
-		});
+		}.setVisible(SecurityUtils.isAdministrator() && detailMessage != null));
+		
 		container.add(new WebMarkupContainer("errorDetail").setVisible(false));
 	}
 	
