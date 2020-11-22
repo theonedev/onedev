@@ -23,9 +23,10 @@
 	height: 40px;
 }
 .issue-activities>table>tbody>tr>td.avatar .avatar.system-avatar {
-	width: 46px;
-	height: 46px;
-	margin-left: -3px;
+	width: 44px;
+	height: 44px;
+	margin-left: -2px;
+	opacity: 75%;
 }
 .issue-activities>table>tbody>tr>td.content {
 	padding-left: 1.25rem;
