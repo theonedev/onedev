@@ -1065,6 +1065,8 @@ the specific language governing permissions and limitations under the Apache Lic
          */
         // abstract
         open: function () {
+			// Fix the issue that select2 dropdown position is incorrect in Safari in new pull reqeust page
+			$(":focus").blur();
 
             if (!this.shouldOpen()) return false;
 
@@ -1078,7 +1080,6 @@ the specific language governing permissions and limitations under the Apache Lic
          */
         // abstract
         opening: function() {
-			$(":focus").blur();
             var cid = this.containerId,
                 scroll = "scroll." + cid,
                 resize = "resize."+cid,
@@ -1128,7 +1129,7 @@ the specific language governing permissions and limitations under the Apache Lic
             mask.css(_makeMaskCss());
             mask.show();
             this.dropdown.show();
-            this.positionDropdown();
+			this.positionDropdown();
 
 			if (this.container.closest(".is-invalid").length != 0 || this.container.hasClass("is-invalid"))
 				this.dropdown.addClass("is-invalid");
