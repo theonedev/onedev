@@ -22,8 +22,8 @@
 					<div wicket:id="status" class="badge status mr-3 font-size-h6"></div>
 					<div class="branches font-size-lg mr-3 d-flex align-items-center">
 						<div class="text-muted">
-							<a wicket:id="user" class="link-gray"></a> wants to merge into <a wicket:id="target" class="branch link-primary"></a> 
-							from <a wicket:id="source" class="branch link-primary"></a> <span wicket:id="date"></span>
+							<a wicket:id="user" class="link-gray"></a> wants to merge into <a wicket:id="target" class="branch link-gray"></a> 
+							from <a wicket:id="source" class="branch link-gray"></a> <span wicket:id="date"></span>
 						</div>
 					</div>
 					<a wicket:id="newPullRequest" class="btn btn-primary btn-icon flex-shrink-0 ml-auto" title="Open new pull request"><wicket:svg href="plus" class="icon"/></a>
@@ -44,7 +44,7 @@
 						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch
 					</div>
 					<div wicket:id="mergedOutside" class="merged-outside text-success">
-						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch by someone outside of this pull request
+						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were merged into target branch outside of this pull request
 					</div>
 					<div wicket:id="squashed" class="squashed text-success">
 						<wicket:svg href="tick-circle" class="icon"></wicket:svg> Commits were squashed into a single commit on target branch

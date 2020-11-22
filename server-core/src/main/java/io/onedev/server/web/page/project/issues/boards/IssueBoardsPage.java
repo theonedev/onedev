@@ -263,7 +263,6 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		
 		if (getBoard() != null) {
 			contentFrag = new Fragment("content", "hasBoardsFrag", this);
-			contentFrag.add(AttributeAppender.append("class", "mb-n5"));
 			
 			Form<?> form = new Form<Void>("query");
 			

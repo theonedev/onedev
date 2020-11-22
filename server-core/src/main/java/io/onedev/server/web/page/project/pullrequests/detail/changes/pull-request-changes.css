@@ -4,6 +4,7 @@
 	padding: 0.5rem 1rem;
 	white-space: nowrap;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	color: var(--gray-dark);
 }
 .commits-selector ul a:hover {
 	background: var(--light);

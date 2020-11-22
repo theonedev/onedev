@@ -436,7 +436,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		String reason;
 		if (dueToMerged)
-			reason = "closed pull request as source branch is merged into target branch";
+			reason = "merged pull request";
 		else
 			reason = null;
 		

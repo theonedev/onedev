@@ -8,7 +8,7 @@ onedev.server.requestChanges = {
 		var toIndexToApply = toIndex;
 		
 		function onIndexChanged() {
-			var $apply = $(".commits-selector>.head a.selected-changes"); 
+			var $apply = $(".commits-selector>.links a.selected-changes"); 
 			if (fromIndexToApply != fromIndex || toIndexToApply != toIndex) {
 				$apply.removeClass("disabled").off("click").click(function() {
 					var oldCommit;

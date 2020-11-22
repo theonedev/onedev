@@ -60,6 +60,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
+import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
@@ -329,7 +330,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Com
 			
 		});
 		
-		DropdownLink selectedCommitsLink = new DropdownLink("comparingCommits") {
+		DropdownLink selectedCommitsLink = new DropdownLink("comparingCommits", new AlignPlacement(50, 100, 50, 0)) {
 			
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {

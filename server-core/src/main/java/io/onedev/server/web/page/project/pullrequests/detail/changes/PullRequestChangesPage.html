@@ -16,23 +16,23 @@
 	</div>
 	<wicket:fragment wicket:id="commitsFrag">
 		<div class="commits-selector noselect p-4">
-			<div class="head">
-				<h6 class="mb-4">Click to select a commit, or shift-click to select multiple commits</h6>
-				<div class="links mb-4">
-					<a wicket:id="allChanges" class="btn btn-light btn-sm mr-2">All changes</a>
-					<a wicket:id="changesSinceLastReview" class="btn btn-light btn-sm mr-2">Changes since last review</a>
-					<a class="btn btn-light btn-sm selected-changes disabled">Show selected changes</a>
-				</div>
+			<div class="links mb-3">
+				<a wicket:id="allChanges" class="btn btn-light btn-sm mr-2">All changes</a>
+				<a wicket:id="changesSinceLastReview" class="btn btn-light btn-sm mr-2">Changes since last review</a>
+				<a class="btn btn-light btn-sm selected-changes disabled">Show selected changes</a>
 			</div>
-			<ul class="body list-unstyled autosuit mb-0">
+			<ul class="list-unstyled autosuit mb-0">
 				<li wicket:id="commits">
-					<a unselectable="on">
-						<wicket:svg href="commit" class="icon" unselectable="on"></wicket:svg> 
-						<span wicket:id="hash" class="hash" unselectable="on"></span>
+					<a unselectable="on" class="d-flex align-items-center">
+						<wicket:svg href="commit" class="icon mr-2" unselectable="on"></wicket:svg> 
+						<span wicket:id="hash" class="hash mr-2" unselectable="on"></span>
 						<span wicket:id="subject" class="subject" unselectable="on"></span>
 					</a>
 				</li>
 			</ul>
+			<div class="mt-3 text-muted d-flex align-items-center">
+				<wicket:svg href="bulb" class="icon mr-2"/> Click to select a commit, or shift-click to select multiple commit
+			</div>
 		</div>
 	</wicket:fragment>
 </wicket:extend>
