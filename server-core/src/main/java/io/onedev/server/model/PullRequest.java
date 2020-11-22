@@ -1071,6 +1071,16 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return getTargetProject();
 	}
 	
+	@Override
+	public Project getProject() {
+		return getTargetProject();
+	}
+	
+	@Override
+	public String getPrefix() {
+		return "pull request";
+	}
+	
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getTargetProject(), getNumber());
 	}

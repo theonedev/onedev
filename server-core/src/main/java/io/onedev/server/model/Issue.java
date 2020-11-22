@@ -267,6 +267,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.numberScope = numberScope;
 	}
 
+	@Override
 	public Project getProject() {
 		return project;
 	}
@@ -287,7 +288,12 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public long getNumber() {
 		return number;
 	}
-
+	
+	@Override
+	public String getPrefix() {
+		return "issue";
+	}
+	
 	public void setNumber(long number) {
 		this.number = number;
 	}

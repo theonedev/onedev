@@ -330,10 +330,16 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.numberScope = numberScope;
 	}
 
+	@Override
 	public Project getProject() {
 		return project;
 	}
-
+	
+	@Override
+	public String getPrefix() {
+		return "build";
+	}
+	
 	public void setProject(Project project) {
 		this.project = project;
 	}
