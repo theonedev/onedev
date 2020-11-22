@@ -173,7 +173,7 @@ onedev.server.inputassist = {
 		$dropdown.click(function() {
 			$input.focus();
 		});
-		var $item = $dropdown.find("li");
+		var $item = $dropdown.find(".suggestion");
 		$item.click(function() {
 			var $this = $(this);
 			$input.data("update")($this);

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -86,14 +85,6 @@ abstract class AssistPanel extends Panel {
 		for (String hint: hints) 
 			hintsView.add(new Label(hintsView.newChildId(), hint).setEscapeModelStrings(false));
 		
-		add(new AjaxLink<Void>("close") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				onClose(target);
-			}
-			
-		});
 		setOutputMarkupId(true);
 	}
 	
