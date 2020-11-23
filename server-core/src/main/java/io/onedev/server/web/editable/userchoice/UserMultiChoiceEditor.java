@@ -51,7 +51,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
 				choices.addAll(OneDev.getInstance(UserManager.class).query());
-				choices.sort(Comparator.comparing(User::getName));
+				choices.sort(Comparator.comparing(User::getDisplayName));
 			}
 		} finally {
 			ComponentContext.pop();

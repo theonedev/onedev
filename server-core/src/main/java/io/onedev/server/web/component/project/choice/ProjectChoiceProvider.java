@@ -1,8 +1,9 @@
 package io.onedev.server.web.component.project.choice;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.List;
+
+import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.MatchScoreProvider;
@@ -15,16 +16,21 @@ public class ProjectChoiceProvider extends AbstractProjectChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final List<Project> choices;
+	private final IModel<Collection<Project>> choicesModel;
 	
-	public ProjectChoiceProvider(List<Project> choices) {
-		this.choices = new ArrayList<>(choices);
-		this.choices.sort(Comparator.comparing(Project::getName));
+	public ProjectChoiceProvider(IModel<Collection<Project>> choicesModel) {
+		this.choicesModel = choicesModel;
 	}
 	
 	@Override
+	public void detach() {
+		choicesModel.detach();
+		super.detach();
+	}
+
+	@Override
 	public void query(String term, int page, Response<Project> response) {
-		List<Project> matched = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<Project>() {
+		List<Project> matched = MatchScoreUtils.filterAndSort(choicesModel.getObject(), new MatchScoreProvider<Project>() {
 
 			@Override
 			public double getMatchScore(Project object) {

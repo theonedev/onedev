@@ -1,6 +1,6 @@
 package io.onedev.server.web.editable.project.choice;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -20,8 +20,6 @@ import io.onedev.server.web.editable.PropertyEditor;
 @SuppressWarnings("serial")
 public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 
-	private final List<Project> choices = new ArrayList<>();
-	
 	private ProjectSingleChoice input;
 	
 	public ProjectSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
@@ -33,7 +31,8 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		choices.addAll(OneDev.getInstance(ProjectManager.class).query());
+		List<Project> projects = OneDev.getInstance(ProjectManager.class).query();
+		projects.sort(Comparator.comparing(Project::getName));
 		
 		Project project;
 		if (getModelObject() != null)
@@ -42,12 +41,12 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 			project = null;
 		
 		Project selection;
-		if (project != null && choices.contains(project))
+		if (project != null && projects.contains(project))
 			selection = project;
 		else
 			selection = null;
 		
-    	input = new ProjectSingleChoice("input", Model.of(selection), new ProjectChoiceProvider(choices)) {
+    	input = new ProjectSingleChoice("input", Model.of(selection), new ProjectChoiceProvider(Model.of(projects))) {
 
 			@Override
 			protected void onInitialize() {

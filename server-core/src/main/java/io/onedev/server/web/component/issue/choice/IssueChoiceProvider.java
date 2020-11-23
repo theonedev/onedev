@@ -58,7 +58,7 @@ public class IssueChoiceProvider extends ChoiceProvider<Issue> {
 
 	@Override
 	public void query(String term, int page, Response<Issue> response) {
-		int count = (page+1) * WebConstants.PAGE_SIZE;
+		int count = (page+1) * WebConstants.PAGE_SIZE + 1;
 		Project project = projectModel.getObject();
 		List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, term, count);		
 		new ResponseFiller<>(response).fill(issues, page, WebConstants.PAGE_SIZE);

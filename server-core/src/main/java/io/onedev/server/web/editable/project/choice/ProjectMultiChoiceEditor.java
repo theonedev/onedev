@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -21,7 +22,14 @@ import io.onedev.server.web.editable.PropertyEditor;
 @SuppressWarnings("serial")
 public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
-	private final List<Project> choices = new ArrayList<>();
+	private final IModel<Collection<Project>> choicesModel = new LoadableDetachableModel<Collection<Project>>() {
+
+		@Override
+		protected Collection<Project> load() {
+			return OneDev.getInstance(ProjectManager.class).query();
+		}
+		
+	};
 	
 	private ProjectMultiChoice input;
 	
@@ -31,22 +39,26 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 	}
 
 	@Override
+	protected void onDetach() {
+		choicesModel.detach();
+		super.onDetach();
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		choices.addAll(OneDev.getInstance(ProjectManager.class).query());
-
 		List<Project> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 			for (String projectName: getModelObject()) {
 				Project project = projectManager.find(projectName);
-				if (project != null && choices.contains(project))
+				if (project != null && choicesModel.getObject().contains(project))
 					selections.add(project);
 			}
 		} 
 		
-		input = new ProjectMultiChoice("input", Model.of(selections), new ProjectChoiceProvider(choices)) {
+		input = new ProjectMultiChoice("input", Model.of(selections), new ProjectChoiceProvider(choicesModel)) {
 
 			@Override
 			protected void onInitialize() {
