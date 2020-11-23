@@ -1036,7 +1036,6 @@ the specific language governing permissions and limitations under the Apache Lic
             }, evaluate(this.opts.dropdownCss));
 
             this.dropdown.css(css);
-			this.dropdown.css("width", this.container.outerWidth(false));
         },
 
         // abstract
@@ -1064,10 +1063,7 @@ the specific language governing permissions and limitations under the Apache Lic
          * the dropdown is already open, or if the 'open' event listener on the element called preventDefault().
          */
         // abstract
-        open: function () {
-			// Fix the issue that select2 dropdown position is incorrect in Safari in new pull reqeust page
-			$(":focus").blur();
-
+        open: function () {			
             if (!this.shouldOpen()) return false;
 
             window.setTimeout(this.bind(this.opening), 1);
@@ -1145,6 +1141,7 @@ the specific language governing permissions and limitations under the Apache Lic
             this.container.parents().add(window).each(function () {
                 $(this).bind(resize+" "+scroll+" "+orient, function (e) {
                     $("#select2-drop-mask").css(_makeMaskCss());
+                    that.positionDropdown();
                     that.positionDropdown();
                 });
             });
@@ -1339,6 +1336,7 @@ the specific language governing permissions and limitations under the Apache Lic
                         more.remove();
                     }
                     self.positionDropdown();
+                    self.positionDropdown();
                     self.resultsPage = page;
                     self.context = data.context;
                 })});
@@ -1379,6 +1377,7 @@ the specific language governing permissions and limitations under the Apache Lic
             function postRender() {
                 results.scrollTop(0);
                 search.removeClass("select2-active");
+                self.positionDropdown();
                 self.positionDropdown();
             }
 
@@ -1760,6 +1759,9 @@ the specific language governing permissions and limitations under the Apache Lic
             }));
 
             selection.bind("mousedown", this.bind(function (e) {
+				// Fix the issue that select2 dropdown position is incorrect in Safari in new pull reqeust page
+				$(":focus").blur();
+				
                 clickingInside = true;
 
                 if (this.opened()) {
@@ -2376,6 +2378,7 @@ the specific language governing permissions and limitations under the Apache Lic
                         // are replaced with the max selection reached message
                         this.updateResults(true);
                     }
+                    this.positionDropdown();
                     this.positionDropdown();
                 } else {
                     // if nothing left to select close
