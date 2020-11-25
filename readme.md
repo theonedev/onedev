@@ -19,7 +19,7 @@ Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. N
 
 ### Create Build Spec in a Breeze
 
-No complex yaml grammars to remember. Create build spec for your projects with GUI and auto-completion instantly without learning.
+Build spec is defined in a yaml file together with your code, and OneDev provides a GUI to create the build spec without any learning curve.
 
 ![Cispec](doc/images/cispec.gif)
 
