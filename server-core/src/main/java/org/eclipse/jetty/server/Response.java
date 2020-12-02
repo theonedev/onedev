@@ -1,6 +1,6 @@
 //
 //  ========================================================================
-//  Copyright (c) 1995-2019 Mort Bay Consulting Pty. Ltd.
+//  Copyright (c) 1995-2020 Mort Bay Consulting Pty Ltd and others.
 //  ------------------------------------------------------------------------
 //  All rights reserved. This program and the accompanying materials
 //  are made available under the terms of the Eclipse Public License v1.0
@@ -69,6 +69,8 @@ public class Response implements HttpServletResponse
 {
     private static final int __MIN_BUFFER_SIZE = 1;
     private static final HttpField __EXPIRES_01JAN1970 = new PreEncodedHttpField(HttpHeader.EXPIRES, DateGenerator.__01Jan1970);
+    public static final int NO_CONTENT_LENGTH = -1;
+    public static final int USE_KNOWN_CONTENT_LENGTH = -2;
 
     public enum OutputType
     {
@@ -119,17 +121,21 @@ public class Response implements HttpServletResponse
 
     protected void recycle()
     {
+        // _channel need not be recycled
+        _fields.clear();
+        _errorSentAndIncludes.set(0);
+        _out.recycle();
         _status = HttpStatus.OK_200;
         _reason = null;
         _locale = null;
         _mimeType = null;
         _characterEncoding = null;
+        _encodingFrom = EncodingFrom.NOT_SET;
         _contentType = null;
         _outputType = OutputType.NONE;
+        // _writer does not need to be recycled
         _contentLength = -1;
-        _out.recycle();
-        _fields.clear();
-        _encodingFrom = EncodingFrom.NOT_SET;
+        _trailers = null;
     }
 
     public HttpOutput getHttpOutput()
@@ -139,14 +145,16 @@ public class Response implements HttpServletResponse
 
     public void reopen()
     {
+        // Make the response mutable and reopen output.
         setErrorSent(false);
         _out.reopen();
     }
 
-    public void closedBySendError()
+    public void errorClose()
     {
+        // Make the response immutable and soft close the output.
         setErrorSent(true);
-        _out.closedBySendError();
+        _out.softClose();
     }
 
     /**
@@ -186,12 +194,41 @@ public class Response implements HttpServletResponse
     {
         if (StringUtil.isBlank(cookie.getName()))
             throw new IllegalArgumentException("Cookie.name cannot be blank/null");
-
+     
         // add the set cookie
-        _fields.add(new SetCookieHttpField(cookie, getHttpChannel().getHttpConfiguration().getResponseCookieCompliance()));
+        _fields.add(new SetCookieHttpField(checkSameSite(cookie), getHttpChannel().getHttpConfiguration().getResponseCookieCompliance()));
 
         // Expire responses with set-cookie headers so they do not get cached.
         _fields.put(__EXPIRES_01JAN1970);
+    }
+    
+    /**
+     * Check that samesite is set on the cookie. If not, use a 
+     * context default value, if one has been set.
+     * 
+     * @param cookie the cookie to check
+     * @return either the original cookie, or a new one that has the samesit default set
+     */
+    private HttpCookie checkSameSite(HttpCookie cookie)
+    {
+        if (cookie == null || cookie.getSameSite() != null)
+            return cookie;
+
+        //sameSite is not set, use the default configured for the context, if one exists
+        SameSite contextDefault = HttpCookie.getSameSiteDefault(_channel.getRequest().getServletContext());
+        if (contextDefault == null)
+            return cookie; //no default set
+
+        return new HttpCookie(cookie.getName(),
+            cookie.getValue(),
+            cookie.getDomain(),
+            cookie.getPath(),
+            cookie.getMaxAge(),
+            cookie.isHttpOnly(),
+            cookie.isSecure(),
+            cookie.getComment(),
+            cookie.getVersion(),
+            contextDefault);
     }
 
     /**
@@ -235,7 +272,7 @@ public class Response implements HttpServletResponse
                 else if (!cookie.getPath().equals(oldCookie.getPath()))
                     continue;
 
-                i.set(new SetCookieHttpField(cookie, compliance));
+                i.set(new SetCookieHttpField(checkSameSite(cookie), compliance));
                 return;
             }
         }
@@ -246,27 +283,31 @@ public class Response implements HttpServletResponse
 
     @Override
     public void addCookie(Cookie cookie)
-    {
-        if (StringUtil.isBlank(cookie.getName()))
-            throw new IllegalArgumentException("Cookie.name cannot be blank/null");
+    { 
+        //Servlet Spec 9.3 Include method: cannot set a cookie if handling an include
+        if (isMutable())
+        {
+            if (StringUtil.isBlank(cookie.getName()))
+                throw new IllegalArgumentException("Cookie.name cannot be blank/null");
 
-        String comment = cookie.getComment();
-        // HttpOnly was supported as a comment in cookie flags before the java.net.HttpCookie implementation so need to check that
-        boolean httpOnly = cookie.isHttpOnly() || HttpCookie.isHttpOnlyInComment(comment);
-        SameSite sameSite = HttpCookie.getSameSiteFromComment(comment);
-        comment = HttpCookie.getCommentWithoutAttributes(comment);
+            String comment = cookie.getComment();
+            // HttpOnly was supported as a comment in cookie flags before the java.net.HttpCookie implementation so need to check that
+            boolean httpOnly = cookie.isHttpOnly() || HttpCookie.isHttpOnlyInComment(comment);
+            SameSite sameSite = HttpCookie.getSameSiteFromComment(comment);
+            comment = HttpCookie.getCommentWithoutAttributes(comment);
 
-        addCookie(new HttpCookie(
-            cookie.getName(),
-            cookie.getValue(),
-            cookie.getDomain(),
-            cookie.getPath(),
-            (long)cookie.getMaxAge(),
-            httpOnly,
-            cookie.getSecure(),
-            comment,
-            cookie.getVersion(),
-            sameSite));
+            addCookie(new HttpCookie(
+                cookie.getName(),
+                cookie.getValue(),
+                cookie.getDomain(),
+                cookie.getPath(),
+                (long)cookie.getMaxAge(),
+                httpOnly,
+                cookie.getSecure(),
+                comment,
+                cookie.getVersion(),
+                sameSite));
+        }
     }
 
     @Override
@@ -457,7 +498,37 @@ public class Response implements HttpServletResponse
      */
     public void sendRedirect(int code, String location) throws IOException
     {
-        if ((code < HttpServletResponse.SC_MULTIPLE_CHOICES) || (code >= HttpServletResponse.SC_BAD_REQUEST))
+        sendRedirect(code, location, false);
+    }
+
+    /**
+     * Sends a response with a HTTP version appropriate 30x redirection.
+     *
+     * @param location the location to send in {@code Location} headers
+     * @param consumeAll if True, consume any HTTP/1 request input before doing the redirection. If the input cannot
+     * be consumed without blocking, then add a `Connection: close` header to the response.
+     * @throws IOException if unable to send the redirect
+     */
+    public void sendRedirect(String location, boolean consumeAll) throws IOException
+    {
+        sendRedirect(getHttpChannel().getRequest().getHttpVersion().getVersion() < HttpVersion.HTTP_1_1.getVersion()
+            ? HttpServletResponse.SC_MOVED_TEMPORARILY : HttpServletResponse.SC_SEE_OTHER, location, consumeAll);
+    }
+
+    /**
+     * Sends a response with a given redirection code.
+     *
+     * @param code the redirect status code
+     * @param location the location to send in {@code Location} headers
+     * @param consumeAll if True, consume any HTTP/1 request input before doing the redirection. If the input cannot
+     * be consumed without blocking, then add a `Connection: close` header to the response.
+     * @throws IOException if unable to send the redirect
+     */
+    public void sendRedirect(int code, String location, boolean consumeAll) throws IOException
+    {
+        if (consumeAll)
+            getHttpChannel().ensureConsumeAllOrNotPersistent();
+        if (!HttpStatus.isRedirection(code))
             throw new IllegalArgumentException("Not a 3xx redirect code");
 
         if (!isMutable())
@@ -476,7 +547,9 @@ public class Response implements HttpServletResponse
         /*
         if (!URIUtil.hasScheme(location))
         {
-            StringBuilder buf = _channel.getRequest().getRootURL();
+            StringBuilder buf = _channel.getHttpConfiguration().isRelativeRedirectAllowed()
+                ? new StringBuilder()
+                : _channel.getRequest().getRootURL();
             if (location.startsWith("/"))
             {
                 // absolute in context
@@ -498,7 +571,8 @@ public class Response implements HttpServletResponse
 
             location = buf.toString();
         }
-         */
+        */
+
         resetBuffer();
         setHeader(HttpHeader.LOCATION, location);
         setStatus(code);
@@ -836,13 +910,27 @@ public class Response implements HttpServletResponse
     {
         if (_outputType == OutputType.WRITER)
             _writer.close();
-        if (!_out.isClosed())
+        else
             _out.close();
     }
 
-    public void closeOutput(Callback callback)
+    /**
+     * close the output
+     *
+     * @deprecated Use {@link #closeOutput()}
+     */
+    @Deprecated
+    public void completeOutput() throws IOException
     {
-        _out.close((_outputType == OutputType.WRITER) ? _writer : _out, callback);
+        closeOutput();
+    }
+
+    public void completeOutput(Callback callback)
+    {
+        if (_outputType == OutputType.WRITER)
+            _writer.complete(callback);
+        else
+            _out.complete(callback);
     }
 
     public long getLongContentLength()
@@ -1041,6 +1129,7 @@ public class Response implements HttpServletResponse
         _mimeType = null;
         _characterEncoding = null;
         _encodingFrom = EncodingFrom.NOT_SET;
+        _trailers = null;
 
         // Clear all response headers
         _fields.clear();
@@ -1242,12 +1331,12 @@ public class Response implements HttpServletResponse
         if (lm != null)
             _fields.put(lm);
 
-        if (contentLength == 0)
+        if (contentLength == USE_KNOWN_CONTENT_LENGTH)
         {
             _fields.put(content.getContentLength());
             _contentLength = content.getContentLengthValue();
         }
-        else if (contentLength > 0)
+        else if (contentLength > NO_CONTENT_LENGTH)
         {
             _fields.putLongField(HttpHeader.CONTENT_LENGTH, contentLength);
             _contentLength = contentLength;
@@ -1290,9 +1379,9 @@ public class Response implements HttpServletResponse
         if (lml >= 0)
             response.setDateHeader(HttpHeader.LAST_MODIFIED.asString(), lml);
 
-        if (contentLength == 0)
+        if (contentLength == USE_KNOWN_CONTENT_LENGTH)
             contentLength = content.getContentLengthValue();
-        if (contentLength >= 0)
+        if (contentLength > NO_CONTENT_LENGTH)
         {
             if (contentLength < Integer.MAX_VALUE)
                 response.setContentLength((int)contentLength);
