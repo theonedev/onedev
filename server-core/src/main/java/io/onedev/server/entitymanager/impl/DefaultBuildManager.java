@@ -60,9 +60,11 @@ import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.PullRequestVerification2;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.persistence.SessionManager;
@@ -250,13 +252,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName) {
-		return query(project, commitId, jobName, null, new HashMap<>());
+		return query(project, commitId, jobName, null, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName, 
-			String refName, Map<String, List<String>> params) {
+			String refName, PullRequest request, Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -268,6 +270,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
 		if (refName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
+
+		if (request != null)
+			predicates.add(builder.equal(root.get(Build.PROP_VERIFICATIONS2).get(PullRequestVerification2.PROP_REQUEST), request));
 			
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {

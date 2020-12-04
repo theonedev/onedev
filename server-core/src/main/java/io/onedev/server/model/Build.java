@@ -6,12 +6,12 @@ import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_JOB;
 import static io.onedev.server.model.Build.PROP_NUMBER;
 import static io.onedev.server.model.Build.PROP_PENDING_DATE;
+import static io.onedev.server.model.Build.PROP_REF_NAME;
 import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
 import static io.onedev.server.model.Build.PROP_STATUS;
 import static io.onedev.server.model.Build.PROP_SUBMITTER_NAME;
 import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Build.PROP_VERSION;
-import static io.onedev.server.model.Build.PROP_REF_NAME;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -62,8 +63,8 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -74,6 +75,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.model.support.PullRequestVerification2;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -103,7 +105,7 @@ import io.onedev.server.web.util.WicketUtils;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS),
-				@Index(columnList=PROP_REF_NAME),
+				@Index(columnList=PROP_REF_NAME), @Index(columnList=PullRequestVerification2.COLUMN_PULL_REQUEST),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
 				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
 				@Index(columnList="o_project_id, " + PROP_COMMIT)},
@@ -187,6 +189,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	public static final String NAME_DEPENDENTS = "Dependents";
 	
 	public static final String PROP_DEPENDENTS = "dependents";
+	
+	public static final String PROP_VERIFICATIONS2 = "verifications2";
 	
 	public static final String PROP_VERIFICATIONS = "verifications";
 	
@@ -313,6 +317,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestVerification> verifications = new ArrayList<>();
+	
+	@Embedded
+	private PullRequestVerification2 verification2;
 	
 	private transient Map<String, List<String>> paramMap;
 	
@@ -569,6 +576,15 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.verifications = verifications;
 	}
 	
+	@Nullable
+	public PullRequestVerification2 getVerification2() {
+		return verification2;
+	}
+
+	public void setVerification2(PullRequestVerification2 verification2) {
+		this.verification2 = verification2;
+	}
+
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();

@@ -50,8 +50,8 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CloneInfo;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
@@ -79,10 +79,10 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.PullRequestVerification2;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.SessionManager;
@@ -95,8 +95,8 @@ import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.CommitAware;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -212,10 +212,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 			// Set up verifications in order to be authorized to access secret value 
 			if (reason.getPullRequest() != null) {
-				PullRequestVerification verification = new PullRequestVerification();
-				verification.setBuild(build);
+				PullRequestVerification2 verification = new PullRequestVerification2();
 				verification.setRequest(reason.getPullRequest());
-				build.getVerifications().add(verification);
+				build.setVerification2(verification);
 			}
 			
 			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
@@ -232,7 +231,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 	
 			Collection<Build> builds = buildManager.query(project, commitId, jobName, 
-					reason.getRefName(), paramMapToQuery);
+					reason.getRefName(), reason.getPullRequest(), paramMapToQuery);
 			
 			if (builds.isEmpty()) {
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {

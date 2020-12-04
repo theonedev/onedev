@@ -74,6 +74,17 @@ public enum JobVariable {
 			return build.getVersion();
 		}
 		
+	},
+	PULL_REQUEST_NUMBER {
+
+		@Override
+		public String getValue(Build build) {
+			if (build.getVerification2() != null)
+				return String.valueOf(build.getVerification2().getRequest().getNumber());
+			else
+				return null;
+		}
+		
 	}; 
 	
 	public abstract String getValue(Build build);
