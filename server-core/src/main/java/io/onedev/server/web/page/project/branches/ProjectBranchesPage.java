@@ -503,11 +503,16 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				fragment.add(link);
 				
-				fragment.add(new CommitStatusPanel("buildStatus", ref.getRef().getObjectId()) {
+				fragment.add(new CommitStatusPanel("buildStatus", ref.getRef().getObjectId(), ref.getRef().getName()) {
 
 					@Override
 					protected Project getProject() {
 						return ProjectBranchesPage.this.getProject();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return null;
 					}
 					
 				});

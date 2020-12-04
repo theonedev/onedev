@@ -107,7 +107,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	private String userName;
 
-	@Column(nullable=false, length=16384)
+	@Column(nullable=false, length=14000)
 	private String content;
 	
 	@Column(nullable=false)

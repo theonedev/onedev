@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -32,7 +33,9 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<Long> queryNumbersOfStreamPrevious(Build build, @Nullable Build.Status status, int limit);
 	
-	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, Map<String, List<String>> params); 
+	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
+			@Nullable String refName, @Nullable PullRequest request, @Nullable String triggerId, 
+			Map<String, List<String>> params); 
 	
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName); 
 	
@@ -61,4 +64,7 @@ public interface BuildManager extends EntityManager<Build> {
 	List<String> queryVersions(Project project, String matchWith, int count);
 
 	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project);
+	
+	void populateBuilds(Collection<PullRequest> requests);
+	
 }

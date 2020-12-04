@@ -76,6 +76,11 @@
 					<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
 						<wicket:svg href="clock-o" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">required builds</a> are not finished yet
 					</div>
+					<wicket:enclosure child="untriggeredJobs">
+					<div class="untriggered-builds text-warning">
+						<wicket:svg href="warning" class="icon"></wicket:svg> <span wicket:id="untriggeredJobs"></span>
+					</div>
+					</wicket:enclosure>
 					<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers text-info">
 						<wicket:svg href="info-circle-o" class="icon"></wicket:svg> Pull request can only be merged by users with code write permission
 					</div>
@@ -115,7 +120,7 @@
 				</span>
 			</div> 
 			<div wicket:id="jobs" class="body"></div>
-			<div wicket:id="jobsHelp" class="font-size-sm text-muted form-text">Jobs marked with &lowast; are required to be successful</div>
+			<div wicket:id="jobsHelp" class="font-size-sm text-muted form-text">Jobs marked with <span class="text-danger">*</span> are required to be successful</div>
 		</div>
 		</wicket:enclosure>
 		<wicket:enclosure child="assignments">

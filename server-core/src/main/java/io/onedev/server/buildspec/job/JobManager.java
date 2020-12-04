@@ -13,7 +13,7 @@ import io.onedev.server.model.Project;
 
 public interface JobManager {
 	
-	Build submit(Project project, ObjectId commitId, String jobName, 
+	Build submit(Project project, ObjectId commitId, String jobName, String triggerId, 
 			Map<String, List<String>> paramMap, SubmitReason reason);
 	
 	void resubmit(Build build, Map<String, List<String>> paramMap);

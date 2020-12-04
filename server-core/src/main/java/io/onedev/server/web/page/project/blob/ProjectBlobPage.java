@@ -738,11 +738,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	private void newCommitStatus(@Nullable AjaxRequestTarget target) {
 		Component commitStatus;
 		if (resolvedRevision != null) {
-			commitStatus = new CommitStatusPanel("buildStatus", resolvedRevision) {
+			commitStatus = new CommitStatusPanel("buildStatus", resolvedRevision, getRefName()) {
 
 				@Override
 				protected Project getProject() {
 					return ProjectBlobPage.this.getProject();
+				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return ProjectBlobPage.this.getPullRequest();
 				}
 				
 			};
@@ -1157,6 +1162,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		return state.blobIdent.revision == null || getProject().getBranchRef(state.blobIdent.revision) != null;
 	}
 
+	@Override
+	public String getRefName() {
+		if (state.blobIdent.revision != null)
+			return getProject().getRefName(state.blobIdent.revision);
+		else
+			return null;
+	}
+	
 	@Override
 	public RevCommit getCommit() {
 		if (resolvedRevision != null)

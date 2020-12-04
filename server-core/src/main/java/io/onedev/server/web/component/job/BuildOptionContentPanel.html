@@ -1,0 +1,27 @@
+<wicket:panel>
+	<form wicket:id="form" class="job-option-edit">
+		<div class="modal-header">
+			<h5 class="modal-title">Specify Build Options</h5>
+			<button wicket:id="close" type="button" class="close"><wicket:svg href="times" class="icon"/></button>
+		</div>
+		<div class="modal-body">
+			<wicket:enclosure child="refNames">
+			<div class="form-group">
+				<label class="control-label">Build On Behalf Of</label>
+				<div class="d-flex flex-wrap mb-3">
+					<label wicket:id="refNames" class="checkbox flex-shrink-0 mr-3 mb-2">
+		      			<input wicket:id="check" type="checkbox"> <wicket:container wicket:id="label"></wicket:container>
+					</label>
+					<div class="form-text text-muted">For each selected branch/tag, a separate build will be 
+					generated with branch/tag set to corresponding value</div>
+				</div>
+			</div>
+			</wicket:enclosure>
+            <div wicket:id="paramEditor"></div>
+		</div>
+		<div class="modal-footer">
+			<button wicket:id="ok" class="btn btn-primary">Ok</button>
+			<button wicket:id="cancel" class="btn btn-secondary">Cancel</button>
+		</div>
+	</form>
+</wicket:panel>

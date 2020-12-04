@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityNotFoundException;
 
-import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
@@ -60,10 +59,10 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
@@ -81,6 +80,7 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
+import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -545,18 +545,47 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				Stream<PullRequestVerification> stream = getPullRequest().getVerifications().stream();
+				Stream<Build> stream = getPullRequest().getCurrentBuilds().stream();
 				setVisible(getPullRequest().isOpen() && !hasUnsuccessfulRequiredBuilds() 
-						&& stream.anyMatch(it-> it.isRequired() && !it.getBuild().isFinished()));
+						&& stream.anyMatch(it-> getPullRequest().getRequiredJobs().contains(it.getJobName()) && !it.isFinished()));
 			}
 			
 		});
+		
+		summaryContainer.add(new Label("untriggeredJobs", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				Collection<String> requiredJobs = new ArrayList<>(getPullRequest().getRequiredJobs());
+				requiredJobs.removeAll(getPullRequest().getCurrentBuilds().stream().map(it->it.getJobName()).collect(Collectors.toSet()));
+				if (requiredJobs.size() > 1) {
+					return "Jobs \"" + StringUtils.join(requiredJobs, ", ") + "\" are required to be successful, "
+							+ "however no applicable pull request trigger is defined for these jobs in build spec";
+				} else if (requiredJobs.size() == 1) {
+					return "Job '" + requiredJobs.iterator().next() + "' is required to be successful, "
+							+ "however no applicable pull request trigger is defined for this job in build spec";
+				} else {
+					return null;
+				}
+			}
+			
+		}) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen() && getDefaultModelObject() != null);
+			}
+			
+		});
+		
 		summaryContainer.add(new WebMarkupContainer("mergeableByCodeWriters") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getPullRequest().isOpen() && !SecurityUtils.canWriteCode(getProject()) 
+						&& getPullRequest().getMergePreview() != null && getPullRequest().getMergePreview().getMergeCommitHash() != null
 						&& getPullRequest().isAllReviewsApproved() && getPullRequest().isRequiredBuildsSuccessful());
 			}
 			
@@ -633,8 +662,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 	
 	private boolean hasUnsuccessfulRequiredBuilds() {
-		return getPullRequest().getVerifications().stream().anyMatch(
-				it-> it.isRequired() && it.getBuild().isFinished() && !it.getBuild().isSuccessful());		
+		return getPullRequest().getCurrentBuilds().stream().anyMatch(
+				it-> getPullRequest().getRequiredJobs().contains(it.getJobName()) && it.isFinished() && !it.isSuccessful());		
 	}
 	
 	private WebMarkupContainer newMoreInfoContainer() {
@@ -668,8 +697,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						super.onConfigure();
 						
 						boolean hasHiddenJobs = false;
-						for (String jobName: getPullRequest().getVerifications().stream()
-								.map(it->it.getBuild().getJobName()).collect(Collectors.toSet())) {
+						for (String jobName: getPullRequest().getCurrentBuilds().stream()
+								.map(it->it.getJobName()).collect(Collectors.toSet())) {
 							if (!SecurityUtils.canAccess(getProject(), jobName)) {
 								hasHiddenJobs = true;
 								break;
@@ -689,7 +718,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!getPullRequest().getVerifications().isEmpty());
+						setVisible(!getPullRequest().getCurrentBuilds().isEmpty());
 					}
 
 				});
@@ -700,11 +729,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						super.onConfigure();
 
 						boolean hasVisibleRequiredJobs = false;
-						for (String jobName: getPullRequest().getVerifications().stream()
-								.filter(it->it.isRequired())
-								.map(it->it.getBuild().getJobName())
-								.collect(Collectors.toSet())) {
-							if (SecurityUtils.canAccess(getProject(), jobName)) {
+						for (Build build: getPullRequest().getCurrentBuilds()) {
+							if (getPullRequest().getRequiredJobs().contains(build.getJobName()) 
+									&& SecurityUtils.canAccess(getProject(), build.getJobName())) {
 								hasVisibleRequiredJobs = true;
 								break;
 							}
@@ -1158,11 +1185,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				MergePreview preview = request.getMergePreview();
 				return request.isOpen()
-						&& request.isAllReviewsApproved() 
-						&& request.isRequiredBuildsSuccessful()
 						&& request.getCheckError() == null 
 						&& preview != null 
 						&& preview.getMergeCommitHash() != null
+						&& request.isAllReviewsApproved() 
+						&& request.isRequiredBuildsSuccessful()
 						&& SecurityUtils.canWriteCode(request.getTargetProject());
 			}
 			

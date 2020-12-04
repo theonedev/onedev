@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -50,16 +49,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void merge(PullRequest request, @Nullable String commitMessage);
     
-	/**
-     * Preview merge of this pull request.
-     * 
-     * @param request
-     * 			pull request to preview merge of
-     * @return
-     * 			merge preview, or <tt>null</tt> if preview is being calculating
-     */
-    MergePreview previewMerge(PullRequest request);
-    
     void open(PullRequest request);
     
     void delete(PullRequest request);
@@ -70,10 +59,10 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	int countOpen(Project targetProject);
 
-	void checkQuality(PullRequest request, List<User> unpreferableReviewers);
+	void checkReviews(PullRequest request, List<User> unpreferableReviewers);
 	
 	List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
-			int firstResult, int maxResults, boolean loadReviews, boolean loadVerifications);
+			int firstResult, int maxResults, boolean loadReviews, boolean loadBuilds);
 	
 	int count(@Nullable Project targetProject, EntityCriteria<PullRequest> requestCriteria);
 	

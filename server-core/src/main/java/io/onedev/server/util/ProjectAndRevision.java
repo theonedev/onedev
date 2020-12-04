@@ -86,6 +86,7 @@ public class ProjectAndRevision implements Serializable {
 		return getCommit(true);
 	}
 
+	@Nullable
 	public String getObjectName(boolean mustExist) {
 		ObjectId objectId = getObjectId(mustExist);
 		return objectId!=null?objectId.name():null;

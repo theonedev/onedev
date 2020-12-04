@@ -100,7 +100,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 				return new SubmitReason() {
 
 					@Override
-					public String getUpdatedRef() {
+					public String getRefName() {
 						return refUpdated.getRefName();
 					}
 

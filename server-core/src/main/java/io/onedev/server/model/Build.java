@@ -6,6 +6,8 @@ import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_JOB;
 import static io.onedev.server.model.Build.PROP_NUMBER;
 import static io.onedev.server.model.Build.PROP_PENDING_DATE;
+import static io.onedev.server.model.Build.PROP_REF_NAME;
+import static io.onedev.server.model.Build.PROP_TRIGGER_ID;
 import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
 import static io.onedev.server.model.Build.PROP_STATUS;
 import static io.onedev.server.model.Build.PROP_SUBMITTER_NAME;
@@ -61,8 +63,8 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -100,8 +102,10 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
+				@Index(columnList="o_request_id"),
 				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
-				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS), 
+				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS),
+				@Index(columnList=PROP_REF_NAME), @Index(columnList=PROP_TRIGGER_ID), 
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
 				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
 				@Index(columnList="o_project_id, " + PROP_COMMIT)},
@@ -168,6 +172,12 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String NAME_COMMIT = "Commit";
 	
+	public static final String NAME_BRANCH = "Branch";
+	
+	public static final String NAME_TAG = "Tag";
+	
+	public static final String PROP_REF_NAME = "refName";
+	
 	public static final String PROP_COMMIT = "commitHash";
 	
 	public static final String PROP_PARAMS = "params";
@@ -180,21 +190,25 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_DEPENDENTS = "dependents";
 	
-	public static final String PROP_VERIFICATIONS = "verifications";
+	public static final String NAME_PULL_REQUEST = "Pull Request";
+	
+	public static final String PROP_PULL_REQUEST = "request";
 	
 	public static final String NAME_ERROR_MESSAGE = "Error Message";
 	
 	public static final String NAME_LOG = "Log";
 	
+	public static final String PROP_TRIGGER_ID = "triggerId";
+	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
 			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE, 
-			NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, NAME_DEPENDENTS, NAME_ERROR_MESSAGE, 
-			NAME_LOG, NAME_IMAGE);
+			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, 
+			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, NAME_IMAGE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_VERSION, NAME_COMMIT, NAME_SUBMIT_DATE, 
-			NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
+			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
+			NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_JOB, PROP_JOB,
@@ -216,11 +230,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	};
 	
-	public static final String STATUS = "status";
-	
 	public static final String ARTIFACTS_DIR = "artifacts";
 	
-	private static final int MAX_ERROR_MESSAGE_LEN = 16380;
+	private static final int MAX_ERROR_MESSAGE_LEN = 12000;
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
@@ -262,6 +274,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String jobName;
 	
+	private String refName;
+	
 	private String version;
 	
 	private long number;
@@ -283,13 +297,14 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private Date retryDate;
 	
-	private String updatedRef;
-	
 	@Column(nullable=false, length=1000)
 	private String submitReason;
 	
 	@Column(length=MAX_ERROR_MESSAGE_LEN)
 	private String errorMessage;
+
+	@Column(nullable=false)
+	private String triggerId;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -303,8 +318,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
-	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVerification> verifications = new ArrayList<>();
+	@ManyToOne(fetch=FetchType.LAZY)
+	private PullRequest request;
 	
 	private transient Map<String, List<String>> paramMap;
 	
@@ -545,22 +560,48 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 
 	@Nullable
-	public String getUpdatedRef() {
-		return updatedRef;
+	public String getTriggerId() {
+		return triggerId;
 	}
 
-	public void setUpdatedRef(String updatedRef) {
-		this.updatedRef = updatedRef;
+	public void setTriggerId(String triggerId) {
+		this.triggerId = triggerId;
 	}
 
-	public Collection<PullRequestVerification> getVerifications() {
-		return verifications;
+	@Nullable
+	public String getRefName() {
+		return refName;
 	}
 
-	public void setVerifications(Collection<PullRequestVerification> verifications) {
-		this.verifications = verifications;
+	public void setRefName(String refName) {
+		this.refName = refName;
 	}
 	
+	@Nullable
+	public String getBranch() {
+		if (refName != null)
+			return GitUtils.ref2branch(refName);
+		else
+			return null;
+	}
+
+	@Nullable
+	public String getTag() {
+		if (refName != null)
+			return GitUtils.ref2tag(refName);
+		else
+			return null;
+	}
+	
+	@Nullable
+	public PullRequest getRequest() {
+		return request;
+	}
+
+	public void setRequest(PullRequest request) {
+		this.request = request;
+	}
+
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
@@ -986,18 +1027,14 @@ public class Build extends AbstractEntity implements Referenceable {
 			branches = "**";
 		if (project.isCommitOnBranches(getCommitId(), branches)) {
 			return true;
-		} else {
+		} else if (getRequest() != null) {
 			PatternSet patternSet = PatternSet.parse(branches);
 			PathMatcher matcher = new PathMatcher();
-			for (PullRequestVerification verification: getVerifications()) {
-				PullRequest request = verification.getRequest();
-				if (project.equals(request.getSourceProject()) 
-						&& patternSet.matches(matcher, request.getTargetBranch())
-						&& request.getSourceBranch() != null 
-						&& patternSet.matches(matcher, request.getSourceBranch())) {
-					return true;
-				}
-			}
+			return project.equals(getRequest().getSourceProject()) 
+					&& patternSet.matches(matcher, getRequest().getTargetBranch())
+					&& getRequest().getSourceBranch() != null 
+					&& patternSet.matches(matcher, getRequest().getSourceBranch());
+		} else {
 			return false;
 		}
 	}

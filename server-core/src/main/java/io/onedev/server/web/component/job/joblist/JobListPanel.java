@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -27,6 +29,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
@@ -38,6 +41,10 @@ import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 public abstract class JobListPanel extends Panel {
 
 	private final ObjectId commitId;
+	
+	private final String triggerId;
+	
+	private final String refName;
 	
 	private final List<Job> jobs;
 	
@@ -55,13 +62,19 @@ public abstract class JobListPanel extends Panel {
 		
 	};
 	
-	public JobListPanel(String id, ObjectId commitId, List<Job> jobs) {
+	public JobListPanel(String id, ObjectId commitId, String triggerId, 
+			@Nullable String refName, List<Job> jobs) {
 		super(id);
 		this.commitId = commitId;
+		this.triggerId = triggerId;
+		this.refName = refName;
 		this.jobs = jobs;
 	}
 	
 	protected abstract Project getProject();
+	
+	@Nullable
+	protected abstract PullRequest getPullRequest();
 	
 	protected abstract void onRunJob(AjaxRequestTarget target);
 
@@ -96,7 +109,7 @@ public abstract class JobListPanel extends Panel {
 			defLink.add(new Label("label", job.getName()));
 			jobItem.add(defLink);
 				
-			jobItem.add(new RunJobLink("run", commitId, job.getName()) {
+			jobItem.add(new RunJobLink("run", commitId, job.getName(), triggerId, refName) {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
@@ -107,6 +120,11 @@ public abstract class JobListPanel extends Panel {
 				@Override
 				protected Project getProject() {
 					return JobListPanel.this.getProject();
+				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return JobListPanel.this.getPullRequest();
 				}
 				
 			});

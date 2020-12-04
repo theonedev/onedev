@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import java.util.UUID;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -20,6 +22,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.git.Blob;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.job.RunJobLink;
@@ -56,11 +59,17 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
 						nav.add(new Label("jobName", job.getName()));
 						nav.add(AttributeAppender.append("data-name", job.getName()));
-						nav.add(new RunJobLink("run", context.getCommit().copy(), job.getName()) {
+						nav.add(new RunJobLink("run", context.getCommit().copy(), job.getName(), 
+								UUID.randomUUID().toString(), getContext().getRefName()) {
 
 							@Override
 							protected Project getProject() {
 								return context.getProject();
+							}
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return context.getPullRequest();
 							}
 
 						});

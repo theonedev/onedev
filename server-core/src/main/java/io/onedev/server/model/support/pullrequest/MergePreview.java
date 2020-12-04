@@ -94,7 +94,7 @@ public class MergePreview implements Serializable {
 
 	public boolean isUpToDate(PullRequest request) {
 		return getHeadCommitHash().equals(request.getLatestUpdate().getHeadCommitHash())
-				&& getTargetHeadCommitHash().equals(request.getTarget().getObjectName())
+				&& getTargetHeadCommitHash().equals(request.getTarget().getObjectName(false))
 				&& getMergeStrategy() == request.getMergeStrategy();
 	}
 

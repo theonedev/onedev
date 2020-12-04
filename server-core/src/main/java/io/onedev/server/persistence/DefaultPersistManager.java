@@ -110,15 +110,12 @@ public class DefaultPersistManager implements PersistManager {
 		try (	Connection conn = getConnection();
 				Statement stmt = conn.createStatement();) {
 			for (String sql: sqls) {
-				logger.trace("Executing sql: " + sql);
-				if (failOnError) {
+				try {
 					stmt.execute(sql);
-				} else {
-					try {
-						stmt.execute(sql);
-					} catch (Exception e) {
-						logger.error("Error executing sql", e);
-					}
+				} catch (Exception e) {
+					logger.error("Error executing sql: " + sql, e);
+					if (failOnError) 
+						throw e;
 				}
 			}
 		} catch (SQLException e) {

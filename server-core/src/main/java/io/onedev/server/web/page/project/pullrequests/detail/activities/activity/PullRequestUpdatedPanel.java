@@ -90,7 +90,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					
 				});
 
-				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {
+				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy(), null) {
 					
 					@Override
 					protected String getCssClasses() {
@@ -100,6 +100,11 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					@Override
 					protected Project getProject() {
 						return getUpdate().getRequest().getTarget().getProject();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return getUpdate().getRequest();
 					}
 					
 				};

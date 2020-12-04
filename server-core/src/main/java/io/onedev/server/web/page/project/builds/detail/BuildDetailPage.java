@@ -46,6 +46,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
@@ -313,7 +314,8 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new JobListPanel(id, getBuild().getCommitId(), downstreamJobsModel.getObject()) {
+				return new JobListPanel(id, getBuild().getCommitId(), getBuild().getTriggerId(), 
+						getBuild().getRefName(), downstreamJobsModel.getObject()) {
 					
 					@Override
 					protected Project getProject() {
@@ -323,6 +325,11 @@ public abstract class BuildDetailPage extends ProjectPage
 					@Override
 					protected void onRunJob(AjaxRequestTarget target) {
 						dropdown.close();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return getBuild().getRequest();
 					}
 					
 				};

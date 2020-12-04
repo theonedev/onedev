@@ -101,10 +101,6 @@ public class ActionCondition extends Criteria<Build> {
 						return new PreviousIsCancelledCriteria();
 					case ActionConditionLexer.PreviousIsTimedOut:
 						return new PreviousIsTimedOutCriteria();
-					case ActionConditionLexer.AssociatedWithPullRequests:
-						return new AssociatedWithPullRequestsCriteria();
-					case ActionConditionLexer.RequiredByPullRequests:
-						return new RequiredByPullRequestsCriteria();
 					default:
 						throw new GeneralException("Unexpected operator: " + ctx.operator.getText());
 					}
@@ -115,7 +111,10 @@ public class ActionCondition extends Criteria<Build> {
 					String fieldName = getValue(ctx.Quoted().getText());
 					int operator = ctx.operator.getType();
 					checkField(job, fieldName, operator);
-					return new ParamIsEmptyCriteria(fieldName);
+					if (fieldName.equals(Build.NAME_PULL_REQUEST))
+						return new PullRequestIsEmptyCriteria();
+					else
+						return new ParamIsEmptyCriteria(fieldName);
 				}
 				
 				@Override
@@ -170,6 +169,9 @@ public class ActionCondition extends Criteria<Build> {
 	public static void checkField(Job job, String fieldName, int operator) {
 		if (fieldName.equals(Build.NAME_ERROR_MESSAGE) || fieldName.equals(Build.NAME_LOG)) {
 			if (operator != ActionConditionLexer.Contains)
+				throw newOperatorException(fieldName, operator);
+		} else if (fieldName.equals(Build.NAME_PULL_REQUEST)) {
+			if (operator != ActionConditionLexer.IsEmpty)
 				throw newOperatorException(fieldName, operator);
 		} else if (job.getParamSpecMap().containsKey(fieldName)) {
 			if (operator != ActionConditionLexer.IsEmpty && operator != ActionConditionLexer.Is)

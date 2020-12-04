@@ -93,13 +93,13 @@ public class RunJobAction extends PostBuildAction {
 				SubmitReason reason = new SubmitReason() {
 
 					@Override
-					public String getUpdatedRef() {
-						return null;
+					public String getRefName() {
+						return build.getRefName();
 					}
 
 					@Override
 					public PullRequest getPullRequest() {
-						return null;
+						return build.getRequest();
 					}
 
 					@Override
@@ -108,8 +108,9 @@ public class RunJobAction extends PostBuildAction {
 					}
 					
 				};
-				OneDev.getInstance(JobManager.class).submit(build.getProject(), 
-						build.getCommitId(), getJobName(), paramMap, reason); 
+				JobManager jobManager = OneDev.getInstance(JobManager.class);
+				jobManager.submit(build.getProject(), build.getCommitId(), getJobName(), 
+						build.getTriggerId(), paramMap, reason); 
 			}
 			
 		}.run();

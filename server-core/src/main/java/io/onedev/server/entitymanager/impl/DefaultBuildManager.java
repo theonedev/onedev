@@ -60,6 +60,7 @@ import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
@@ -250,12 +251,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName) {
-		return query(project, commitId, jobName, new HashMap<>());
+		return query(project, commitId, jobName, null, null, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, ObjectId commitId, String jobName, Map<String, List<String>> params) {
+	public Collection<Build> query(Project project, ObjectId commitId, String jobName, 
+			String refName, PullRequest request, String triggerId, 
+			Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -265,7 +268,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		predicates.add(builder.equal(root.get(Build.PROP_COMMIT), commitId.name()));
 		if (jobName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
-		
+		if (refName != null)
+			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
+
+		if (request != null)
+			predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request));
+		if (triggerId != null)
+			predicates.add(builder.equal(root.get(Build.PROP_TRIGGER_ID), triggerId));
+			
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
 				for (String value: entry.getValue()) {
@@ -849,4 +859,22 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 	}
 
+	@Override
+	public void populateBuilds(Collection<PullRequest> requests) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
+		
+		Root<Build> root = query.from(Build.class);
+		query.select(root);
+		root.join(Build.PROP_PULL_REQUEST);
+		
+		query.where(root.get(Build.PROP_PULL_REQUEST).in(requests));
+		
+		for (PullRequest request: requests)
+			request.setBuilds(new ArrayList<>());
+		
+		for (Build build: getSession().createQuery(query).getResultList())
+			build.getRequest().getBuilds().add(build);
+	}
+	
 }

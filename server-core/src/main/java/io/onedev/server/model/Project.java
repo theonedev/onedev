@@ -191,7 +191,7 @@ public class Project extends AbstractEntity {
 	@Column(nullable=false, unique=true)
 	private String name;
 	
-	@Column(length=16384)
+	@Column(length=15000)
 	private String description;
 	
     @OneToMany(mappedBy="project")
@@ -836,6 +836,12 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Nullable
+	public String getRefName(String revision) {
+		Ref ref = getRef(revision);
+		return ref != null? ref.getName(): null;
+	}
+	
+	@Nullable
 	public Ref getBranchRef(String revision) {
 		Ref ref = getRef(revision);
 		if (ref != null && ref.getName().startsWith(Constants.R_HEADS))
@@ -1414,7 +1420,7 @@ public class Project extends AbstractEntity {
 	
 	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		return getBranchProtection(branch, user).isBuildRequiredForPush(this, branch, oldObjectId, newObjectId, gitEnvs);
+		return getBranchProtection(branch, user).isBuildRequiredForPush(this, oldObjectId, newObjectId, gitEnvs);
 	}
 	
 	@Nullable

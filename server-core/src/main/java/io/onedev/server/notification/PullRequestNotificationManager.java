@@ -27,7 +27,7 @@ import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
-import io.onedev.server.event.pullrequest.PullRequestVerificationEvent;
+import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
@@ -230,7 +230,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					|| changeData instanceof PullRequestReopenData) {
 				notifyWatchers = true;
 			}
-		} else if (!(event instanceof PullRequestMergePreviewCalculated || event instanceof PullRequestVerificationEvent)) {
+		} else if (!(event instanceof PullRequestMergePreviewCalculated || event instanceof PullRequestBuildEvent)) {
 			notifyWatchers = true;
 		}
 		

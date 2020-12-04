@@ -7,6 +7,22 @@
         			<a wicket:id="commit"><span wicket:id="label"></span></a>
         		</div>
         	</div>
+			<wicket:enclosure child="branch">
+        	<div>
+        		<div class="name">Branch</div>
+        		<div class="value">
+        			<span wicket:id="branch"></span>
+        		</div>
+        	</div>
+			</wicket:enclosure>
+			<wicket:enclosure child="tag">
+        	<div>
+        		<div class="name">Tag</div>
+        		<div class="value">
+        			<span wicket:id="tag"></span>
+        		</div>
+        	</div>
+			</wicket:enclosure>
             <div>
                 <div class="name">Job</div>
                 <div class="value">
@@ -23,7 +39,7 @@
                 <div class="name">Submitted At</div>
                 <div class="value"><span wicket:id="submitDate"></span></div>
             </div>
-            <wicket:enclosure>
+            <wicket:enclosure child="submitReason">
             <div>
                 <div class="name">Submit Reason</div>
                 <div class="value"><span wicket:id="submitReason"></span></div>
@@ -56,17 +72,13 @@
             </div>
             </wicket:enclosure>
         </div>
-        <wicket:enclosure child="pullRequests">
-        <div class="pull-requests">
-	        <div class="font-weight-bolder mb-3">Verifying Pull Requests</div>
-	        <div class="body">
-	            <div wicket:id="pullRequests" class="pull-request d-flex align-items-center mb-3">
-	            	<a wicket:id="title" class="title mr-4"><span wicket:id="label"></span></a>
-	                <div wicket:id="status" class="ml-auto status"></div>
-	            </div>
+        <div wicket:id="pullRequest" class="pull-request">
+	        <div class="font-weight-bolder mb-3">Pull Request</div>
+	        <div class="body d-flex align-items-center">
+            	<a wicket:id="title" class="title mr-4"><span wicket:id="label"></span></a>
+                <div wicket:id="status" class="ml-auto status"></div>
 	        </div>
         </div>
-        </wicket:enclosure>
         <wicket:enclosure child="params">
         <div class="params properties">
             <div wicket:id="params">

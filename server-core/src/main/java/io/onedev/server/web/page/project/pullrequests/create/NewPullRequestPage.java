@@ -230,7 +230,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				update.setHeadCommitHash(source.getObjectName());
 				update.setTargetHeadCommitHash(request.getTarget().getObjectName());
 
-				OneDev.getInstance(PullRequestManager.class).checkQuality(request, Lists.newArrayList());
+				OneDev.getInstance(PullRequestManager.class).checkReviews(request, Lists.newArrayList());
 
 				if (SecurityUtils.canWriteCode(target.getProject())) {
 					PullRequestAssignment assignment = new PullRequestAssignment();

@@ -32,7 +32,7 @@ public class CodeCommentReply extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
-	@Column(nullable=false, length=16384)
+	@Column(nullable=false, length=14000)
 	private String content;
 	
 	public CodeComment getComment() {

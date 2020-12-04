@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -160,7 +159,6 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=700, description="Optionally specify path protection rules")
-	@NotNull(message="may not be empty")
 	@Valid
 	public List<FileProtection> getFileProtections() {
 		return fileProtections;
@@ -298,17 +296,17 @@ public class BranchProtection implements Serializable {
 		return false;
 	}
 
-	public Collection<String> getRequiredJobs(Project project, String branch, 
-			ObjectId oldObjectId, ObjectId newObjectId, Map<String, String> gitEnvs) {
+	public Collection<String> getRequiredJobs(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
+			Map<String, String> gitEnvs) {
 		Collection<String> requiredJobs = new HashSet<>(getJobNames());
 		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) 
 			requiredJobs.addAll(getFileProtection(changedFile).getJobNames());
 		return requiredJobs;
 	}
 	
-	public boolean isBuildRequiredForPush(Project project, String branch, ObjectId oldObjectId, 
-			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		Collection<String> requiredJobNames = getRequiredJobs(project, branch, oldObjectId, newObjectId, gitEnvs);
+	public boolean isBuildRequiredForPush(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
+			Map<String, String> gitEnvs) {
+		Collection<String> requiredJobNames = getRequiredJobs(project, oldObjectId, newObjectId, gitEnvs);
 
 		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId);
 		for (Build build: builds) {
