@@ -281,6 +281,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestVerification> verifications = new ArrayList<>();
 	
+	@OneToMany(mappedBy="verification2.request", cascade=CascadeType.REMOVE)
+	private Collection<Build> verifications2 = new ArrayList<>();
+	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
