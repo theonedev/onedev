@@ -78,7 +78,7 @@ public class TagCreateTrigger extends JobTrigger {
 				return new SubmitReason() {
 
 					@Override
-					public String getUpdatedRef() {
+					public String getRefName() {
 						return refUpdated.getRefName();
 					}
 

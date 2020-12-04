@@ -195,7 +195,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private Build submit(Project project, ObjectId commitId, String jobName, 
+	private Build submit(Project project, ObjectId commitId, String jobName,
 			Map<String, List<String>> paramMap, SubmitReason reason, Set<String> checkedJobNames) {
 		
 		ScriptIdentity.push(new JobIdentity(project, commitId));
@@ -208,7 +208,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setStatus(Build.Status.WAITING);
 			build.setSubmitReason(reason.getDescription());
 			build.setSubmitter(SecurityUtils.getUser());
-			build.setUpdatedRef(reason.getUpdatedRef());
+			build.setRefName(reason.getRefName());
 
 			// Set up verifications in order to be authorized to access secret value 
 			if (reason.getPullRequest() != null) {
@@ -231,7 +231,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					paramMapToQuery.remove(paramSpec.getName());
 			}
 	
-			Collection<Build> builds = buildManager.query(project, commitId, jobName, paramMapToQuery);
+			Collection<Build> builds = buildManager.query(project, commitId, jobName, 
+					reason.getRefName(), paramMapToQuery);
 			
 			if (builds.isEmpty()) {
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
@@ -631,7 +632,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 														@Override
 														public void run(Map<String, List<String>> paramMap) {
-															submit(project, commitId, job.getName(), paramMap, match.getReason()); 
+															Build build = submit(project, commitId, job.getName(), paramMap, match.getReason()); 
+															if (build.isFinished())
+																resubmit(build, paramMap);
 														}
 														
 													}.run();
@@ -676,7 +679,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setSubmitReason("Resubmitted manually");
 			build.setCanceller(null);
 			build.setCancellerName(null);
-			build.setUpdatedRef(null);
 			
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {

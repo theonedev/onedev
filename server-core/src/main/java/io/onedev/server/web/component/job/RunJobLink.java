@@ -69,7 +69,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 					SubmitReason reason = new SubmitReason() {
 
 						@Override
-						public String getUpdatedRef() {
+						public String getRefName() {
 							return null;
 						}
 
@@ -84,8 +84,10 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 						}
 						
 					};
-					Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId, 
-							job.getName(), paramMap, reason);
+					JobManager jobManager = OneDev.getInstance(JobManager.class);
+					Build build = jobManager.submit(getProject(), commitId, job.getName(), paramMap, reason);
+					if (build.isFinished())
+						jobManager.resubmit(build, paramMap);
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 				}
 
@@ -109,7 +111,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 			SubmitReason reason = new SubmitReason() {
 
 				@Override
-				public String getUpdatedRef() {
+				public String getRefName() {
 					return null;
 				}
 

@@ -11,6 +11,7 @@ import static io.onedev.server.model.Build.PROP_STATUS;
 import static io.onedev.server.model.Build.PROP_SUBMITTER_NAME;
 import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Build.PROP_VERSION;
+import static io.onedev.server.model.Build.PROP_REF_NAME;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +102,8 @@ import io.onedev.server.web.util.WicketUtils;
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
-				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS), 
+				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS),
+				@Index(columnList=PROP_REF_NAME),
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
 				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
 				@Index(columnList="o_project_id, " + PROP_COMMIT)},
@@ -167,6 +169,12 @@ public class Build extends AbstractEntity implements Referenceable {
 	public static final String PROP_FINISH_DATE = "finishDate";
 	
 	public static final String NAME_COMMIT = "Commit";
+	
+	public static final String NAME_BRANCH = "Branch";
+	
+	public static final String NAME_TAG = "tag";
+	
+	public static final String PROP_REF_NAME = "refName";
 	
 	public static final String PROP_COMMIT = "commitHash";
 	
@@ -262,6 +270,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String jobName;
 	
+	private String refName;
+	
 	private String version;
 	
 	private long number;
@@ -282,8 +292,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Date finishDate;
 	
 	private Date retryDate;
-	
-	private String updatedRef;
 	
 	@Column(nullable=false, length=1000)
 	private String submitReason;
@@ -545,12 +553,12 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 
 	@Nullable
-	public String getUpdatedRef() {
-		return updatedRef;
+	public String getRefName() {
+		return refName;
 	}
 
-	public void setUpdatedRef(String updatedRef) {
-		this.updatedRef = updatedRef;
+	public void setRefName(String refName) {
+		this.refName = refName;
 	}
 
 	public Collection<PullRequestVerification> getVerifications() {
