@@ -82,7 +82,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.PullRequestVerification2;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.SessionManager;
@@ -209,13 +208,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setSubmitReason(reason.getDescription());
 			build.setSubmitter(SecurityUtils.getUser());
 			build.setRefName(reason.getRefName());
-
-			// Set up verifications in order to be authorized to access secret value 
-			if (reason.getPullRequest() != null) {
-				PullRequestVerification2 verification = new PullRequestVerification2();
-				verification.setRequest(reason.getPullRequest());
-				build.setVerification2(verification);
-			}
+			build.setRequest(reason.getPullRequest());
 			
 			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 			

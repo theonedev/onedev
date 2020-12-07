@@ -79,8 +79,8 @@ public enum JobVariable {
 
 		@Override
 		public String getValue(Build build) {
-			if (build.getVerification2() != null)
-				return String.valueOf(build.getVerification2().getRequest().getNumber());
+			if (build.getRequest() != null)
+				return String.valueOf(build.getRequest().getNumber());
 			else
 				return null;
 		}

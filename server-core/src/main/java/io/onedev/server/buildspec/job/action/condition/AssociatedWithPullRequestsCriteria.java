@@ -9,7 +9,7 @@ public class AssociatedWithPullRequestsCriteria extends Criteria<Build> {
 
 	@Override
 	public boolean matches(Build build) {
-		return !build.getVerifications().isEmpty();
+		return build.getRequest() != null;
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -59,6 +61,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastUpdate;
@@ -164,7 +167,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public static final String PROP_REVIEWS = "reviews";
 	
-	public static final String PROP_VERIFICATIONS= "verifications";
+	public static final String PROP_BUILDS = "builds";
 	
 	public static final String PROP_ASSIGNMENTS = "assignments";
 	
@@ -279,10 +282,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private Collection<PullRequestAssignment> assignments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVerification> verifications = new ArrayList<>();
-	
-	@OneToMany(mappedBy="verification2.request", cascade=CascadeType.REMOVE)
-	private Collection<Build> verifications2 = new ArrayList<>();
+	private Collection<Build> builds = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
@@ -311,6 +311,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Collection<User> participants;
 	
 	private transient Collection<RevCommit> pendingCommits;
+	
+	private transient Collection<String> requiredJobs;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	private String checkError;
@@ -458,14 +460,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		sortedUpdates = null;
 	}
 	
-	public Collection<PullRequestVerification> getVerifications() {
-		return verifications;
-	}
-
-	public void setVerifications(Collection<PullRequestVerification> verifications) {
-		this.verifications = verifications;
-	}
-
 	public Collection<PullRequestComment> getComments() {
 		return comments;
 	}
@@ -715,6 +709,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.assignments = assignments;
 	}
 
+	public Collection<Build> getBuilds() {
+		return builds;
+	}
+
+	public void setBuilds(Collection<Build> builds) {
+		this.builds = builds;
+	}
+
 	public String getUUID() {
 		return uuid;
 	}
@@ -948,11 +950,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public boolean isRequiredBuildsSuccessful() {
-		for (PullRequestVerification verification: getVerifications()) {
-			if (verification.isRequired() && verification.getBuild().getStatus() != Build.Status.SUCCESSFUL)
+		Collection<String> requiredJobs = new ArrayList<>(getRequiredJobs());
+		for (Build build: getBuilds()) {
+			if (requiredJobs.contains(build.getJobName()) && build.getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
-		return true;
+		return getBuilds().stream().map(it->it.getJobName()).collect(Collectors.toSet()).containsAll(requiredJobs);
 	}
 	
 	public static class ComparingInfo implements Serializable {
@@ -1114,6 +1117,20 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public String getNumberAndTitle() {
 		return "#" + getNumber() + " - " + getTitle();
+	}
+	
+	public Collection<String> getRequiredJobs() {
+		if (requiredJobs == null) {
+			MergePreview preview = getMergePreview();
+			if (preview != null && preview.getMergeCommitHash() != null) {
+				BranchProtection protection = getTargetProject().getBranchProtection(getTargetBranch(), getSubmitter());
+				requiredJobs = protection.getRequiredJobs(getTargetProject(), getTargetBranch(), 
+						getTarget().getObjectId(), ObjectId.fromString(preview.getMergeCommitHash()), new HashMap<>());
+			} else {
+				requiredJobs = new HashSet<>();
+			}
+		}
+		return requiredJobs;
 	}
 	
 }

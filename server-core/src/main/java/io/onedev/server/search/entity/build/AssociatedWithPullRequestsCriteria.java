@@ -14,12 +14,12 @@ public class AssociatedWithPullRequestsCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		return builder.isNotEmpty(root.get(Build.PROP_VERIFICATIONS)); 
+		return builder.isNotNull(root.get(Build.PROP_PULL_REQUEST)); 
 	}
 
 	@Override
 	public boolean matches(Build build) {
-		return !build.getVerifications().isEmpty();
+		return build.getRequest() != null;
 	}
 
 	@Override

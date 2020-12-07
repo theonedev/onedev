@@ -131,8 +131,6 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new CancelledByMeCriteria();
 						case BuildQueryLexer.AssociatedWithPullRequests:
 							return new AssociatedWithPullRequestsCriteria();
-						case BuildQueryLexer.RequiredByPullRequests:
-							return new RequiredByPullRequestsCriteria();
 						default:
 							throw new GeneralException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -151,8 +149,6 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new DependsOnCriteria(project, value);
 						else if (ctx.DependenciesOf() != null) 
 							return new DependenciesOfCriteria(project, value);
-						else if (ctx.RequiredByPullRequest() != null) 
-							return new RequiredByPullRequestCriteria(project, value);
 						else if (ctx.AssociatedWithPullRequest() != null) 
 							return new AssociatedWithPullRequestCriteria(project, value);
 						else 

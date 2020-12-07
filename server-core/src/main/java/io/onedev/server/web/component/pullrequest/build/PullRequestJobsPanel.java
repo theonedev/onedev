@@ -36,7 +36,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
@@ -61,22 +60,23 @@ public abstract class PullRequestJobsPanel extends Panel {
 			@Override
 			protected List<JobBuildInfo> load() {
 				PullRequest request = getPullRequest();
-				Map<String, List<PullRequestVerification>> map = new HashMap<>();
-				for (PullRequestVerification verification: request.getVerifications()) {
-					String jobName = verification.getBuild().getJobName();
-					List<PullRequestVerification> list = map.get(jobName);
+				Map<String, List<Build>> map = new HashMap<>();
+				for (Build build: request.getBuilds()) {
+					String jobName = build.getJobName();
+					List<Build> list = map.get(jobName);
 					if (list == null) {
 						list = new ArrayList<>();
 						map.put(jobName, list);
 					}
-					list.add(verification);
+					list.add(build);
 				}
 				List<JobBuildInfo> listOfJobBuildInfo = new ArrayList<>();
-				for (Map.Entry<String, List<PullRequestVerification>> entry: map.entrySet()) {
+				for (Map.Entry<String, List<Build>> entry: map.entrySet()) {
 					if (SecurityUtils.canAccess(getPullRequest().getTargetProject(), entry.getKey())) {
-						List<Build> builds = entry.getValue().stream().map(it->it.getBuild()).collect(Collectors.toList());
+						List<Build> builds = new ArrayList<>(getPullRequest().getBuilds());
 						Collections.sort(builds);
-						listOfJobBuildInfo.add(new JobBuildInfo(entry.getKey(), entry.getValue().iterator().next().isRequired(), builds));
+						boolean required = getPullRequest().getRequiredJobs().contains(entry.getKey());
+						listOfJobBuildInfo.add(new JobBuildInfo(entry.getKey(), required, builds));
 					}
 				}
 				Collections.sort(listOfJobBuildInfo, new Comparator<JobBuildInfo>() {

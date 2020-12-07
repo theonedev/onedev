@@ -7,9 +7,9 @@ query
     ;
 
 criteria
-	: operator=(Successful|Failed|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
+	: operator=(Successful|Failed|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe|AssociatedWithPullRequests) #OperatorCriteria
     | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
-	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|AssociatedWithPullRequest|RequiredByPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|AssociatedWithPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -81,16 +81,8 @@ AssociatedWithPullRequest
 	: 'associated' WS+ 'with' WS+ 'pull' WS+ 'request'
 	;
 	
-RequiredByPullRequest
-	: 'required' WS+ 'by' WS+ 'pull' WS+ 'request'
-	;
-	
 AssociatedWithPullRequests
 	: 'associated' WS+ 'with' WS+ 'pull' WS+ 'requests'
-	;
-	
-RequiredByPullRequests
-	: 'required' WS+ 'by' WS+ 'pull' WS+ 'requests'
 	;
 	
 OrderBy

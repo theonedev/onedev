@@ -76,6 +76,12 @@
 					<div wicket:id="unfinishedBuilds" class="unfinished-builds text-warning">
 						<wicket:svg href="clock-o" class="icon"></wicket:svg> Pull request can not be merged now as <a class="more-info d-inline link-primary">required builds</a> are not finished yet
 					</div>
+					<wicket:enclosure child="untriggeredJobs">
+					<div class="untriggered-builds text-warning">
+						<wicket:svg href="warning-o" class="icon"></wicket:svg> Jobs &quot;<span wicket:id="untriggeredJobs"></span>&quot; are required to be successful, however no applicable pull request 
+						trigger is defined for these jobs in build spec 
+					</div>
+					</wicket:enclosure>
 					<div wicket:id="mergeableByCodeWriters" class="mergeable-by-code-writers text-info">
 						<wicket:svg href="info-circle-o" class="icon"></wicket:svg> Pull request can only be merged by users with code write permission
 					</div>

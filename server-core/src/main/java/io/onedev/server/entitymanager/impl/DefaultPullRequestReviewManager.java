@@ -18,7 +18,6 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.PullRequestVerificationManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
@@ -43,18 +42,14 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 	
 	private final PullRequestChangeManager pullRequestChangeManager;
 	
-	private final PullRequestVerificationManager pullRequestVerificationManager;
-	
 	@Inject
 	public DefaultPullRequestReviewManager(Dao dao, 
 			PullRequestManager pullRequestManager, 
-			PullRequestChangeManager pullRequestChangeManager, 
-			PullRequestVerificationManager pullRequestVerificationManager) {
+			PullRequestChangeManager pullRequestChangeManager) {
 		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
 		this.pullRequestChangeManager = pullRequestChangeManager;
-		this.pullRequestVerificationManager = pullRequestVerificationManager;
 	}
 
 	@Transactional
@@ -96,7 +91,6 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 			return request.getReview(reviewer) == null;
 		} else {
 			saveReviews(request);
-			pullRequestVerificationManager.saveVerifications(request);
 			if (request.getReview(reviewer) == null) {
 				PullRequestChange change = new PullRequestChange();
 				change.setDate(new Date());

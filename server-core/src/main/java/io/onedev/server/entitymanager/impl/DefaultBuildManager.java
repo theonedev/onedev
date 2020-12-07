@@ -64,7 +64,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.PullRequestVerification2;
 import io.onedev.server.model.support.build.BuildPreservation;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.persistence.SessionManager;
@@ -272,7 +271,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
 
 		if (request != null)
-			predicates.add(builder.equal(root.get(Build.PROP_VERIFICATIONS2).get(PullRequestVerification2.PROP_REQUEST), request));
+			predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request));
 			
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
@@ -857,4 +856,22 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 	}
 
+	@Override
+	public void populateBuilds(Collection<PullRequest> requests) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
+		
+		Root<Build> root = query.from(Build.class);
+		query.select(root);
+		root.join(Build.PROP_PULL_REQUEST);
+		
+		query.where(root.get(Build.PROP_PULL_REQUEST).in(requests));
+		
+		for (PullRequest request: requests)
+			request.setBuilds(new ArrayList<>());
+		
+		for (Build build: getSession().createQuery(query).getResultList())
+			build.getRequest().getBuilds().add(build);
+	}
+	
 }

@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestVerification;
 import io.onedev.server.search.entity.EntityCriteria;
 
 public class ToBeVerifiedByBuildsCriteria extends EntityCriteria<PullRequest> {
@@ -18,9 +17,7 @@ public class ToBeVerifiedByBuildsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		Join<?, ?> join = root
-				.join(PullRequest.PROP_VERIFICATIONS, JoinType.LEFT)
-				.join(PullRequestVerification.PROP_BUILD, JoinType.INNER);
+		Join<?, ?> join = root.join(PullRequest.PROP_BUILDS, JoinType.LEFT);
 		Path<?> status = join.get(Build.STATUS);
 		join.on(builder.or(
 				builder.equal(status, Build.Status.RUNNING), 
@@ -32,10 +29,10 @@ public class ToBeVerifiedByBuildsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public boolean matches(PullRequest request) {
-		for (PullRequestVerification build: request.getVerifications()) {
-			if (build.getBuild().getStatus() == Build.Status.RUNNING 
-					|| build.getBuild().getStatus() == Build.Status.PENDING 
-					|| build.getBuild().getStatus() == Build.Status.WAITING) {
+		for (Build build: request.getBuilds()) {
+			if (build.getStatus() == Build.Status.RUNNING 
+					|| build.getStatus() == Build.Status.PENDING 
+					|| build.getStatus() == Build.Status.WAITING) {
 				return true;
 			}
 		}

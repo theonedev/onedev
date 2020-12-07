@@ -38,7 +38,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -75,7 +74,6 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
-import io.onedev.server.model.support.PullRequestVerification2;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -103,9 +101,10 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
+				@Index(columnList="o_request_id"),
 				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS),
-				@Index(columnList=PROP_REF_NAME), @Index(columnList=PullRequestVerification2.COLUMN_PULL_REQUEST),  
+				@Index(columnList=PROP_REF_NAME), 
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
 				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
 				@Index(columnList="o_project_id, " + PROP_COMMIT)},
@@ -190,9 +189,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_DEPENDENTS = "dependents";
 	
-	public static final String PROP_VERIFICATIONS2 = "verifications2";
+	public static final String NAME_PULL_REQUEST = "Pull Request";
 	
-	public static final String PROP_VERIFICATIONS = "verifications";
+	public static final String PROP_PULL_REQUEST = "request";
 	
 	public static final String NAME_ERROR_MESSAGE = "Error Message";
 	
@@ -315,11 +314,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
-	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestVerification> verifications = new ArrayList<>();
-	
-	@Embedded
-	private PullRequestVerification2 verification2;
+	@ManyToOne(fetch=FetchType.LAZY)
+	private PullRequest request;
 	
 	private transient Map<String, List<String>> paramMap;
 	
@@ -568,21 +564,13 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.refName = refName;
 	}
 
-	public Collection<PullRequestVerification> getVerifications() {
-		return verifications;
-	}
-
-	public void setVerifications(Collection<PullRequestVerification> verifications) {
-		this.verifications = verifications;
-	}
-	
 	@Nullable
-	public PullRequestVerification2 getVerification2() {
-		return verification2;
+	public PullRequest getRequest() {
+		return request;
 	}
 
-	public void setVerification2(PullRequestVerification2 verification2) {
-		this.verification2 = verification2;
+	public void setRequest(PullRequest request) {
+		this.request = request;
 	}
 
 	public Map<String, List<String>> getParamMap() {
@@ -1010,18 +998,14 @@ public class Build extends AbstractEntity implements Referenceable {
 			branches = "**";
 		if (project.isCommitOnBranches(getCommitId(), branches)) {
 			return true;
-		} else {
+		} else if (getRequest() != null) {
 			PatternSet patternSet = PatternSet.parse(branches);
 			PathMatcher matcher = new PathMatcher();
-			for (PullRequestVerification verification: getVerifications()) {
-				PullRequest request = verification.getRequest();
-				if (project.equals(request.getSourceProject()) 
-						&& patternSet.matches(matcher, request.getTargetBranch())
-						&& request.getSourceBranch() != null 
-						&& patternSet.matches(matcher, request.getSourceBranch())) {
-					return true;
-				}
-			}
+			return project.equals(getRequest().getSourceProject()) 
+					&& patternSet.matches(matcher, getRequest().getTargetBranch())
+					&& getRequest().getSourceBranch() != null 
+					&& patternSet.matches(matcher, getRequest().getSourceBranch());
+		} else {
 			return false;
 		}
 	}

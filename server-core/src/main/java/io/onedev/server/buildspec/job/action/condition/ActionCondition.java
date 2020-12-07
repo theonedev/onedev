@@ -103,8 +103,6 @@ public class ActionCondition extends Criteria<Build> {
 						return new PreviousIsTimedOutCriteria();
 					case ActionConditionLexer.AssociatedWithPullRequests:
 						return new AssociatedWithPullRequestsCriteria();
-					case ActionConditionLexer.RequiredByPullRequests:
-						return new RequiredByPullRequestsCriteria();
 					default:
 						throw new GeneralException("Unexpected operator: " + ctx.operator.getText());
 					}
