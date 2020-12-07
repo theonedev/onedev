@@ -85,7 +85,7 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		request.getReviews().remove(review);
 		request.setReviews(request.getReviews());
 		
-		pullRequestManager.checkQuality(request, unpreferableReviewers);
+		pullRequestManager.checkReviews(request, unpreferableReviewers);
 		
 		if (request.isNew()) {
 			return request.getReview(reviewer) == null;

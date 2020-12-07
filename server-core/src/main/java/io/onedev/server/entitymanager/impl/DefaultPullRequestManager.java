@@ -450,7 +450,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					if (request.isMergedIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
-						checkQuality(request, Lists.newArrayList());
+						previewMerge(request);
+						
+						checkReviews(request, Lists.newArrayList());
 						
 						/*
 						 * If the check method runs concurrently, below statements may fail. It will 
@@ -704,14 +706,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
 		if (build.getRequest() != null) {
-			listenerRegistry.post(new PullRequestBuildEvent(build));
-			checkAsync(Lists.newArrayList(build.getRequest()));
+			MergePreview mergePreview = build.getRequest().getMergePreview();
+			if (mergePreview != null && build.getCommitHash().equals(mergePreview.getMergeCommitHash()))
+				listenerRegistry.post(new PullRequestBuildEvent(build));
 		}
-	}
-	
-	@Listen
-	public void on(PullRequestMergePreviewCalculated event) {
-		checkAsync(Lists.newArrayList(event.getRequest()));
 	}
 	
 	@Sessional
@@ -760,7 +758,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Transactional
 	@Override
-	public void checkQuality(PullRequest request, List<User> unpreferableReviewers) {
+	public void checkReviews(PullRequest request, List<User> unpreferableReviewers) {
 		unpreferableReviewers = new ArrayList<>(unpreferableReviewers);
 		unpreferableReviewers.remove(request.getSubmitter());
 		unpreferableReviewers.add(request.getSubmitter());
