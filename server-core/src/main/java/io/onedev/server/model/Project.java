@@ -191,7 +191,7 @@ public class Project extends AbstractEntity {
 	@Column(nullable=false, unique=true)
 	private String name;
 	
-	@Column(length=16384)
+	@Column(length=15000)
 	private String description;
 	
     @OneToMany(mappedBy="project")

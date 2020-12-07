@@ -16,7 +16,7 @@ public class ReviewResult implements Serializable {
 	
 	private Boolean approved = false;
 	
-	@Column(length=16384)
+	@Column(length=15000)
 	private String comment;
 	
 	public String getCommit() {

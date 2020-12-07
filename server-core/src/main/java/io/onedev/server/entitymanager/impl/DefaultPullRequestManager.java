@@ -917,6 +917,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
+		query.distinct(true);
 		Root<PullRequest> root = query.from(PullRequest.class);
 		
 		query.where(getPredicates(targetProject, requestQuery.getCriteria(), root, builder));
@@ -944,7 +945,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Sessional
 	@Override
 	public List<PullRequest> query(@Nullable Project targetProject, EntityQuery<PullRequest> requestQuery, 
-			int firstResult, int maxResults, boolean loadReviews, boolean loadVerifiations) {
+			int firstResult, int maxResults, boolean loadReviews, boolean loadBuilds) {
 		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -952,8 +953,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		List<PullRequest> requests = query.getResultList();
 		if (!requests.isEmpty()) {
-			pullRequestReviewManager.populateReviews(requests);
-			buildManager.populateBuilds(requests);
+			if (loadReviews)
+				pullRequestReviewManager.populateReviews(requests);
+			if (loadBuilds)
+				buildManager.populateBuilds(requests);
 		}
 		
 		return requests;
@@ -969,7 +972,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		criteriaQuery.where(getPredicates(targetProject, requestCriteria, root, builder));
 
-		criteriaQuery.select(builder.count(root));
+		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	

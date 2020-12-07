@@ -19,16 +19,16 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.OneDev;
 import io.onedev.server.GeneralException;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.BuildQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -130,6 +130,18 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestBuildVersions(project, matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(Build.NAME_BRANCH)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestBranches(project, matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(Build.NAME_TAG)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestTags(project, matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(Build.NAME_PULL_REQUEST)) {
+										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else {
 										return null;
 									}
@@ -193,11 +205,12 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Build.NAME_PROJECT)
-							|| fieldName.equals(Build.NAME_VERSION)
+					if (fieldName.equals(Build.NAME_PROJECT) || fieldName.equals(Build.NAME_VERSION)
 							|| fieldName.equals(Build.NAME_JOB)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
+					} else if (fieldName.equals(Build.NAME_BRANCH) || fieldName.equals(Build.NAME_TAG)) {
+						hints.add("Use '*' for wildcard match");
 					}
 				}
 			}

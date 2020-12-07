@@ -545,7 +545,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				Stream<Build> stream = getPullRequest().getBuilds().stream();
+				Stream<Build> stream = getPullRequest().getCurrentBuilds().stream();
 				setVisible(getPullRequest().isOpen() && !hasUnsuccessfulRequiredBuilds() 
 						&& stream.anyMatch(it-> getPullRequest().getRequiredJobs().contains(it.getJobName()) && !it.isFinished()));
 			}
@@ -557,9 +557,13 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			@Override
 			protected String load() {
 				Collection<String> requiredJobs = new ArrayList<>(getPullRequest().getRequiredJobs());
-				requiredJobs.removeAll(getPullRequest().getBuilds().stream().map(it->it.getJobName()).collect(Collectors.toSet()));
-				if (!requiredJobs.isEmpty()) {
-					return StringUtils.join(requiredJobs, ", ");
+				requiredJobs.removeAll(getPullRequest().getCurrentBuilds().stream().map(it->it.getJobName()).collect(Collectors.toSet()));
+				if (requiredJobs.size() > 1) {
+					return "Jobs \"" + StringUtils.join(requiredJobs, ", ") + "\" are required to be successful, "
+							+ "however no applicable pull request trigger is defined for these jobs in build spec";
+				} else if (requiredJobs.size() == 1) {
+					return "Job '" + requiredJobs.iterator().next() + "' is required to be successful, "
+							+ "however no applicable pull request trigger is defined for this job in build spec";
 				} else {
 					return null;
 				}
@@ -658,7 +662,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	}
 	
 	private boolean hasUnsuccessfulRequiredBuilds() {
-		return getPullRequest().getBuilds().stream().anyMatch(
+		return getPullRequest().getCurrentBuilds().stream().anyMatch(
 				it-> getPullRequest().getRequiredJobs().contains(it.getJobName()) && it.isFinished() && !it.isSuccessful());		
 	}
 	
@@ -693,7 +697,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						super.onConfigure();
 						
 						boolean hasHiddenJobs = false;
-						for (String jobName: getPullRequest().getBuilds().stream()
+						for (String jobName: getPullRequest().getCurrentBuilds().stream()
 								.map(it->it.getJobName()).collect(Collectors.toSet())) {
 							if (!SecurityUtils.canAccess(getProject(), jobName)) {
 								hasHiddenJobs = true;
@@ -714,7 +718,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!getPullRequest().getBuilds().isEmpty());
+						setVisible(!getPullRequest().getCurrentBuilds().isEmpty());
 					}
 
 				});
@@ -725,7 +729,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 						super.onConfigure();
 
 						boolean hasVisibleRequiredJobs = false;
-						for (Build build: getPullRequest().getBuilds()) {
+						for (Build build: getPullRequest().getCurrentBuilds()) {
 							if (getPullRequest().getRequiredJobs().contains(build.getJobName()) 
 									&& SecurityUtils.canAccess(getProject(), build.getJobName())) {
 								hasVisibleRequiredJobs = true;

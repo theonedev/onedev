@@ -216,7 +216,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Column(nullable=false)
 	private String title;
 	
-	@Column(length=16384)
+	@Column(length=12000)
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -313,6 +313,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Collection<RevCommit> pendingCommits;
 	
 	private transient Collection<String> requiredJobs;
+	
+	private transient Collection<Build> currentBuilds;
 	
 	@Column(length=MAX_CHECK_ERROR_LEN)
 	private String checkError;
@@ -716,6 +718,20 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
 	}
+	
+	public Collection<Build> getCurrentBuilds() {
+		if (currentBuilds == null) {
+			MergePreview preview = getMergePreview();
+			if (preview != null) {
+				currentBuilds = builds.stream()
+						.filter(it->it.getCommitHash().equals(preview.getMergeCommitHash()))
+						.collect(Collectors.toList());
+			} else {
+				currentBuilds = new ArrayList<>();
+			}
+		} 
+		return currentBuilds;
+	}
 
 	public String getUUID() {
 		return uuid;
@@ -951,11 +967,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public boolean isRequiredBuildsSuccessful() {
 		Collection<String> requiredJobs = new ArrayList<>(getRequiredJobs());
-		for (Build build: getBuilds()) {
+		for (Build build: getCurrentBuilds()) {
 			if (requiredJobs.contains(build.getJobName()) && build.getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
-		return getBuilds().stream().map(it->it.getJobName()).collect(Collectors.toSet()).containsAll(requiredJobs);
+		return getCurrentBuilds().stream()
+				.map(it->it.getJobName())
+				.collect(Collectors.toSet())
+				.containsAll(requiredJobs);
 	}
 	
 	public static class ComparingInfo implements Serializable {

@@ -173,7 +173,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String NAME_BRANCH = "Branch";
 	
-	public static final String NAME_TAG = "tag";
+	public static final String NAME_TAG = "Tag";
 	
 	public static final String PROP_REF_NAME = "refName";
 	
@@ -200,12 +200,12 @@ public class Build extends AbstractEntity implements Referenceable {
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
 			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE, 
-			NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, NAME_DEPENDENTS, NAME_ERROR_MESSAGE, 
-			NAME_LOG, NAME_IMAGE);
+			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, 
+			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, NAME_IMAGE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_VERSION, NAME_COMMIT, NAME_SUBMIT_DATE, 
-			NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
+			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
+			NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_JOB, PROP_JOB,
@@ -227,11 +227,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	};
 	
-	public static final String STATUS = "status";
-	
 	public static final String ARTIFACTS_DIR = "artifacts";
 	
-	private static final int MAX_ERROR_MESSAGE_LEN = 16380;
+	private static final int MAX_ERROR_MESSAGE_LEN = 12000;
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
@@ -563,7 +561,23 @@ public class Build extends AbstractEntity implements Referenceable {
 	public void setRefName(String refName) {
 		this.refName = refName;
 	}
+	
+	@Nullable
+	public String getBranch() {
+		if (refName != null)
+			return GitUtils.ref2branch(refName);
+		else
+			return null;
+	}
 
+	@Nullable
+	public String getTag() {
+		if (refName != null)
+			return GitUtils.ref2tag(refName);
+		else
+			return null;
+	}
+	
 	@Nullable
 	public PullRequest getRequest() {
 		return request;

@@ -1,9 +1,8 @@
 package io.onedev.server.web.component.pullrequest.build;
 
-import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.*;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.util.criteria.Criteria.quote;
 
@@ -36,6 +35,7 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
@@ -59,9 +59,10 @@ public abstract class PullRequestJobsPanel extends Panel {
 
 			@Override
 			protected List<JobBuildInfo> load() {
+				List<JobBuildInfo> listOfJobBuildInfo = new ArrayList<>();
 				PullRequest request = getPullRequest();
 				Map<String, List<Build>> map = new HashMap<>();
-				for (Build build: request.getBuilds()) {
+				for (Build build: request.getCurrentBuilds()) {
 					String jobName = build.getJobName();
 					List<Build> list = map.get(jobName);
 					if (list == null) {
@@ -70,13 +71,13 @@ public abstract class PullRequestJobsPanel extends Panel {
 					}
 					list.add(build);
 				}
-				List<JobBuildInfo> listOfJobBuildInfo = new ArrayList<>();
 				for (Map.Entry<String, List<Build>> entry: map.entrySet()) {
-					if (SecurityUtils.canAccess(getPullRequest().getTargetProject(), entry.getKey())) {
-						List<Build> builds = new ArrayList<>(getPullRequest().getBuilds());
+					String jobName = entry.getKey();
+					if (SecurityUtils.canAccess(getPullRequest().getTargetProject(), jobName)) {
+						List<Build> builds = new ArrayList<>(entry.getValue());
 						Collections.sort(builds);
-						boolean required = getPullRequest().getRequiredJobs().contains(entry.getKey());
-						listOfJobBuildInfo.add(new JobBuildInfo(entry.getKey(), required, builds));
+						boolean required = getPullRequest().getRequiredJobs().contains(jobName);
+						listOfJobBuildInfo.add(new JobBuildInfo(jobName, required, builds));
 					}
 				}
 				Collections.sort(listOfJobBuildInfo, new Comparator<JobBuildInfo>() {
@@ -117,12 +118,19 @@ public abstract class PullRequestJobsPanel extends Panel {
 							
 							@Override
 							protected Component newListLink(String componentId) {
-								String query = "" 
-										+ getRuleName(AssociatedWithPullRequest) + " " + quote("#" + getPullRequest().getNumber()) 
-										+ " " + getRuleName(And) + " "
-										+ quote(NAME_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
-								return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
-										ProjectBuildsPage.paramsOf(getPullRequest().getTargetProject(), query, 0));
+								MergePreview mergePreview = getPullRequest().getMergePreview();
+								if (mergePreview != null && mergePreview.getMergeCommitHash() != null) {
+									String query = "" 
+											+ quote(NAME_PULL_REQUEST) + " " + getRuleName(Is) + " " + quote("#" + getPullRequest().getNumber())
+											+ " " + getRuleName(And) + " "
+											+ quote(NAME_COMMIT) + " " + getRuleName(Is) + " " + quote(mergePreview.getMergeCommitHash())
+											+ " " + getRuleName(And) + " "
+											+ quote(NAME_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
+									return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
+											ProjectBuildsPage.paramsOf(getPullRequest().getTargetProject(), query, 0));
+								} else {
+									return super.newListLink(componentId);
+								}
 							}
 							
 						};

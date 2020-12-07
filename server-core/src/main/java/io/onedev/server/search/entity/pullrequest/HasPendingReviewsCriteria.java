@@ -20,11 +20,8 @@ public class HasPendingReviewsCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root.join(PullRequest.PROP_REVIEWS, JoinType.LEFT);
-		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.PROP_USER);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.PROP_RESULT + "." + ReviewResult.PROP_APPROVED);
-		join.on(builder.and(
-				builder.isNotNull(userPath), 
-				builder.isNull(approvedPath)));
+		join.on(builder.isNull(approvedPath));
 		return join.isNotNull();
 	}
 

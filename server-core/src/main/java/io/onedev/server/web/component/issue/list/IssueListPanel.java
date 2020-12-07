@@ -374,10 +374,10 @@ public abstract class IssueListPanel extends Panel {
 							setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(project));
 						}
 	
-					};
+					}.add(AttributeAppender.append("class", "no-current"));
 				}
 			
-			}.add(AttributeAppender.append("class", "no-current")));	
+			});	
 		} else {
 			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
 		}

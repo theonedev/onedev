@@ -12,15 +12,15 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 
-public class AssociatedWithPullRequestCriteria extends EntityCriteria<Build> {
+public class PullRequestCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final PullRequest request; 
+	private final PullRequest request;
 	
 	private final String value;
 	
-	public AssociatedWithPullRequestCriteria(@Nullable Project project, String value) {
+	public PullRequestCriteria(@Nullable Project project, String value) {
 		request = EntityQuery.getPullRequest(project, value);
 		this.value = value;
 	}
@@ -38,7 +38,9 @@ public class AssociatedWithPullRequestCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequest) + " " + quote(value);
+		return quote(Build.NAME_PULL_REQUEST) + " " 
+				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ quote(value);
 	}
 
 }

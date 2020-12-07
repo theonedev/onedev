@@ -172,7 +172,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@Column(nullable=false)
 	private String title;
 	
-	@Column(length=16384)
+	@Column(length=14000)
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
