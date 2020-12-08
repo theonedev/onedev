@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -49,16 +48,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     void check(PullRequest request);
     
     void merge(PullRequest request, @Nullable String commitMessage);
-    
-	/**
-     * Preview merge of this pull request.
-     * 
-     * @param request
-     * 			pull request to preview merge of
-     * @return
-     * 			merge preview, or <tt>null</tt> if preview is being calculating
-     */
-    MergePreview previewMerge(PullRequest request);
     
     void open(PullRequest request);
     

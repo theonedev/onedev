@@ -56,7 +56,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.PullRequestInfoManager;
@@ -554,8 +553,18 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@JsonView(RestView.class)
 	@Nullable
 	public MergePreview getMergePreview() {
-		if (mergePreviewOpt == null)
-			mergePreviewOpt = Optional.ofNullable(OneDev.getInstance(PullRequestManager.class).previewMerge(this));
+		if (mergePreviewOpt == null) {
+			MergePreview mergePreview;
+			if (isOpen()) {
+				if (lastMergePreview != null && lastMergePreview.isUpToDate(this))
+					mergePreview = lastMergePreview;
+				else
+					mergePreview = null;
+			} else {
+				mergePreview = lastMergePreview;
+			}
+			mergePreviewOpt = Optional.ofNullable(mergePreview);
+		}
 		return mergePreviewOpt.orElse(null);
 	}
 	
