@@ -624,9 +624,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 														@Override
 														public void run(Map<String, List<String>> paramMap) {
-															Build build = submit(project, commitId, job.getName(), paramMap, match.getReason()); 
-															if (build.isFinished())
-																resubmit(build, paramMap);
+															submit(project, commitId, job.getName(), paramMap, match.getReason()); 
 														}
 														
 													}.run();

@@ -114,7 +114,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 
 				@Override
 				public String getRefName() {
-					return null;
+					return refName;
 				}
 
 				@Override
