@@ -73,18 +73,19 @@ public abstract class BuildSidePanel extends Panel {
 		};
 		
 		general.setOutputMarkupId(true);
+		
 		add(general);
 
 		if (getBuild().getRefName() != null) {
 			String branch = GitUtils.ref2branch(getBuild().getRefName());
-			general.add(new Label("branch", branch)).setVisible(branch != null);
+			general.add(new Label("branch", branch).setVisible(branch != null));
 		} else {
 			general.add(new WebMarkupContainer("branch").setVisible(false));
 		}
 
 		if (getBuild().getRefName() != null) {
 			String tag = GitUtils.ref2tag(getBuild().getRefName());
-			general.add(new Label("tag", tag)).setVisible(tag != null);
+			general.add(new Label("tag", tag).setVisible(tag != null));
 		} else {
 			general.add(new WebMarkupContainer("tag").setVisible(false));
 		}

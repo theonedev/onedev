@@ -84,10 +84,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 						}
 						
 					};
-					JobManager jobManager = OneDev.getInstance(JobManager.class);
-					Build build = jobManager.submit(getProject(), commitId, job.getName(), paramMap, reason);
-					if (build.isFinished())
-						jobManager.resubmit(build, paramMap);
+					Build build = getJobManager().submit(getProject(), commitId, job.getName(), paramMap, reason);
 					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build));
 				}
 
@@ -126,10 +123,13 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 				}
 				
 			};
-			Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId, 
-					job.getName(), new HashMap<>(), reason);
+			Build build = getJobManager().submit(getProject(), commitId, job.getName(), new HashMap<>(), reason);
 			setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build));
 		}
+	}
+	
+	private JobManager getJobManager() {
+		return OneDev.getInstance(JobManager.class);
 	}
 
 	@Override
