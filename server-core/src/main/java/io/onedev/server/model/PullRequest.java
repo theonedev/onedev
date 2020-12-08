@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -301,8 +300,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private transient List<PullRequestReview> sortedReviews;
 	
-	private transient Optional<MergePreview> mergePreviewOpt;
-	
 	private transient Boolean valid;
 	
 	private transient Collection<Long> fixedIssueNumbers;
@@ -553,19 +550,14 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@JsonView(RestView.class)
 	@Nullable
 	public MergePreview getMergePreview() {
-		if (mergePreviewOpt == null) {
-			MergePreview mergePreview;
-			if (isOpen()) {
-				if (lastMergePreview != null && lastMergePreview.isUpToDate(this))
-					mergePreview = lastMergePreview;
-				else
-					mergePreview = null;
-			} else {
-				mergePreview = lastMergePreview;
-			}
-			mergePreviewOpt = Optional.ofNullable(mergePreview);
+		if (isOpen()) {
+			if (lastMergePreview != null && lastMergePreview.isUpToDate(this))
+				return lastMergePreview;
+			else
+				return null;
+		} else {
+			return lastMergePreview;
 		}
-		return mergePreviewOpt.orElse(null);
 	}
 	
 	/**

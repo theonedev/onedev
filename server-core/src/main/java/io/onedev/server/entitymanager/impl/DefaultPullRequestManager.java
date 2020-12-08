@@ -248,6 +248,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		change.setRequest(request);
 		change.setUser(user);
 		pullRequestChangeManager.save(change);
+		
+		MergePreview mergePreview = request.getMergePreview();
+		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
+			listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
+		
 		checkAsync(Lists.newArrayList(request));
 	}
 
@@ -400,6 +405,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (PullRequestAssignment assignment: request.getAssignments())
 			pullRequestAssignmentManager.save(assignment);
 
+		MergePreview mergePreview = request.getMergePreview();
+		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
+			listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
+		
 		checkAsync(Lists.newArrayList(request));
 		
 		listenerRegistry.post(event);
@@ -447,44 +456,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					if (request.isMergedIntoTarget()) {
 						closeAsMerged(request, true);
 					} else {
-						Long requestId = request.getId();
-						BatchWorker previewCalcWorker = new BatchWorker("request-" + requestId + "-previewMerge", 1) {
-
-							@Override
-							public void doWorks(Collection<Prioritized> works) {
-								sessionManager.run(new Runnable() {
-
-									@Override
-									public void run() {
-										Preconditions.checkState(works.size() == 1);
-										PullRequest request = load(requestId);
-										Project targetProject = request.getTargetProject();
-										if (request.isOpen() && !request.isMergedIntoTarget()) {
-											MergePreview mergePreview = request.getLastMergePreview();
-											if (mergePreview == null || !mergePreview.isUpToDate(request)) {
-												mergePreview = new MergePreview(request.getTarget().getObjectName(), 
-														request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
-												logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
-														request.getNumber(), targetProject.getName());
-												ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Merge preview of pull request #" + request.getNumber());
-												if (merged != null)
-													mergePreview.setMergeCommitHash(merged.name());
-												mergePreview.syncRef(request);
-												request.setLastMergePreview(mergePreview);
-												dao.persist(request);
-												listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
-											} else {
-												mergePreview.syncRef(request);
-											}
-										} 
-									}
-									
-								});
-							}
-							
-						};						
-						batchWorkManager.submit(previewCalcWorker, new Prioritized(PREVIEW_CALC_PRIORITY));
-						
 						checkReviews(request, Lists.newArrayList());
 						
 						/*
@@ -492,6 +463,51 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						 * not do any harm except that the transaction rolls back
 						 */
 						pullRequestReviewManager.saveReviews(request);
+						
+						Long requestId = request.getId();
+						transactionManager.runAfterCommit(new Runnable() {
+							
+							@Override
+							public void run() {
+								BatchWorker previewCalcWorker = new BatchWorker("request-" + requestId + "-previewMerge", 1) {
+
+									@Override
+									public void doWorks(Collection<Prioritized> works) {
+										sessionManager.run(new Runnable() {
+
+											@Override
+											public void run() {
+												Preconditions.checkState(works.size() == 1);
+												PullRequest request = load(requestId);
+												Project targetProject = request.getTargetProject();
+												if (request.isOpen() && !request.isMergedIntoTarget()) {
+													MergePreview mergePreview = request.getMergePreview();
+													if (mergePreview == null) {
+														mergePreview = new MergePreview(request.getTarget().getObjectName(), 
+																request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
+														logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
+																request.getNumber(), targetProject.getName());
+														ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Merge preview of pull request #" + request.getNumber());
+														if (merged != null)
+															mergePreview.setMergeCommitHash(merged.name());
+														mergePreview.syncRef(request);
+														request.setLastMergePreview(mergePreview);
+														dao.persist(request);
+														listenerRegistry.post(new PullRequestMergePreviewCalculated(request));
+													} else {
+														mergePreview.syncRef(request);
+													}
+												} 
+											}
+											
+										});
+									}
+									
+								};						
+								batchWorkManager.submit(previewCalcWorker, new Prioritized(PREVIEW_CALC_PRIORITY));								
+							}
+							
+						});
 					}
 				}
 			}

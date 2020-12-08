@@ -25,8 +25,8 @@ public class PullRequestMergePreviewCalculated extends PullRequestEvent implemen
 
 	@Override
 	public ProjectScopedCommit getCommit() {
-		MergePreview mergePreview = getRequest().getLastMergePreview();
-		if (mergePreview.getMergeCommitHash() != null)
+		MergePreview mergePreview = getRequest().getMergePreview();
+		if (mergePreview != null && mergePreview.getMergeCommitHash() != null)
 			return new ProjectScopedCommit(getProject(), ObjectId.fromString(mergePreview.getMergeCommitHash()));
 		else
 			return new ProjectScopedCommit(getProject(), ObjectId.zeroId());

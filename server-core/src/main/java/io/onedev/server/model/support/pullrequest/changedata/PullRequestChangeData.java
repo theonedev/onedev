@@ -12,11 +12,11 @@ import io.onedev.server.util.CommentAware;
 
 public interface PullRequestChangeData extends Serializable {
 
-	abstract Component render(String componentId, PullRequestChange change);
+	Component render(String componentId, PullRequestChange change);
 	
-	abstract String getActivity(@Nullable PullRequest withRequest);
+	String getActivity(@Nullable PullRequest withRequest);
 	
 	@Nullable
-	abstract CommentAware getCommentAware();
+	CommentAware getCommentAware();
 
 }
