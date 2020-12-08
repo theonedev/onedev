@@ -158,7 +158,7 @@ public abstract class PullRequestJobsPanel extends Panel {
 				item.add(link);
 
 				if (jobBuilds.isRequired()) 
-					link.add(new Label("name", HtmlEscape.escapeHtml5(jobName) + " &lowast;").setEscapeModelStrings(false));
+					link.add(new Label("name", HtmlEscape.escapeHtml5(jobName) + " <span class='text-danger'>*</span>").setEscapeModelStrings(false));
 				else
 					link.add(new Label("name", jobName));
 				item.add(link);

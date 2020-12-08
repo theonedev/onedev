@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -160,7 +159,6 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=700, description="Optionally specify path protection rules")
-	@NotNull(message="may not be empty")
 	@Valid
 	public List<FileProtection> getFileProtections() {
 		return fileProtections;
