@@ -48,8 +48,7 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = Lists.newArrayList(
-									Build.NAME_LOG, 
-									Build.NAME_ERROR_MESSAGE);
+									Build.NAME_LOG, Build.NAME_ERROR_MESSAGE, Build.NAME_PULL_REQUEST);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
 							Job job = jobAware.getJob();
 							fields.addAll(job.getParamSpecMap().keySet());

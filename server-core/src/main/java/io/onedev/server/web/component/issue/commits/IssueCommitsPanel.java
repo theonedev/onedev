@@ -75,7 +75,7 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 
 				item.add(new ContributorPanel("contribution", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {
+				CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy(), null) {
 					
 					@Override
 					protected String getCssClasses() {

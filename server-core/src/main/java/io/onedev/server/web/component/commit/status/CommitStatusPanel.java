@@ -37,6 +37,8 @@ public abstract class CommitStatusPanel extends Panel {
 	
 	private final ObjectId commitId;
 	
+	private final String refName;
+	
 	private final IModel<List<Job>> jobsModel = new LoadableDetachableModel<List<Job>>() {
 
 		@Override
@@ -64,9 +66,10 @@ public abstract class CommitStatusPanel extends Panel {
 		
 	};
 	
-	public CommitStatusPanel(String id, ObjectId commitId) {
+	public CommitStatusPanel(String id, ObjectId commitId, @Nullable String refName) {
 		super(id);
 		this.commitId = commitId;
+		this.refName = refName;
 	}
 	
 	protected abstract Project getProject();
@@ -79,7 +82,7 @@ public abstract class CommitStatusPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new JobListPanel(id, commitId, jobsModel.getObject()) {
+				return new JobListPanel(id, commitId, refName, jobsModel.getObject()) {
 
 					@Override
 					protected Project getProject() {

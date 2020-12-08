@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -39,6 +41,8 @@ public abstract class JobListPanel extends Panel {
 
 	private final ObjectId commitId;
 	
+	private final String refName;
+	
 	private final List<Job> jobs;
 	
 	private final IModel<List<Job>> accessibleJobsModel = new LoadableDetachableModel<List<Job>>() {
@@ -55,9 +59,10 @@ public abstract class JobListPanel extends Panel {
 		
 	};
 	
-	public JobListPanel(String id, ObjectId commitId, List<Job> jobs) {
+	public JobListPanel(String id, ObjectId commitId, @Nullable String refName, List<Job> jobs) {
 		super(id);
 		this.commitId = commitId;
+		this.refName = refName;
 		this.jobs = jobs;
 	}
 	
@@ -96,7 +101,7 @@ public abstract class JobListPanel extends Panel {
 			defLink.add(new Label("label", job.getName()));
 			jobItem.add(defLink);
 				
-			jobItem.add(new RunJobLink("run", commitId, job.getName()) {
+			jobItem.add(new RunJobLink("run", commitId, job.getName(), refName) {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {

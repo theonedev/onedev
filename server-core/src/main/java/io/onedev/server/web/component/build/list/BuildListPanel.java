@@ -580,15 +580,12 @@ public abstract class BuildListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
-				if (build.getRefName() != null) {
-					String branch = GitUtils.ref2branch(build.getRefName());
-					if (branch != null)
-						cellItem.add(new Label(componentId, branch));
-					else
-						cellItem.add(new Label(componentId, GitUtils.ref2tag(build.getRefName())));
-				} else {
+				if (build.getBranch() != null) 
+					cellItem.add(new Label(componentId, build.getBranch()));
+				else if (build.getTag() != null)
+					cellItem.add(new Label(componentId, build.getTag()));
+				else 
 					cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
-				}
 			}
 		});
 

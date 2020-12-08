@@ -99,7 +99,7 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 			fragment.add(new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params));
 			
-			fragment.add(new CommitStatusPanel("buildStatus", ObjectId.fromString(preview.getMergeCommitHash())) {
+			fragment.add(new CommitStatusPanel("buildStatus", ObjectId.fromString(preview.getMergeCommitHash()), null) {
 
 				@Override
 				protected Project getProject() {

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.eclipse.jgit.lib.ObjectId;
@@ -34,15 +36,18 @@ import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 @SuppressWarnings("serial")
 public abstract class RunJobLink extends AjaxLink<Void> {
 
+	private final String refName;
+	
 	private final ObjectId commitId;
 	
 	private final String jobName;
 	
-	public RunJobLink(String componentId, ObjectId commitId, String jobName) {
+	public RunJobLink(String componentId, ObjectId commitId, String jobName, @Nullable String refName) {
 		super(componentId);
 		
 		this.commitId = commitId;
 		this.jobName = jobName;
+		this.refName = refName;
 	}
 	
 	protected abstract Project getProject();
@@ -70,7 +75,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 
 						@Override
 						public String getRefName() {
-							return null;
+							return refName;
 						}
 
 						@Override

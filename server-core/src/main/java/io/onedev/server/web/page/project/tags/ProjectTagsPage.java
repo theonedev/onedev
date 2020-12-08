@@ -298,7 +298,7 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				fragment.add(link);
 				
-				fragment.add(new CommitStatusPanel("buildStatus", ref.getPeeledObj().copy()) {
+				fragment.add(new CommitStatusPanel("buildStatus", ref.getPeeledObj().copy(), ref.getRef().getName()) {
 
 					@Override
 					protected Project getProject() {

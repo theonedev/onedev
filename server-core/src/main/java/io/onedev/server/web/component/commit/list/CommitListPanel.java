@@ -637,7 +637,7 @@ public abstract class CommitListPanel extends Panel {
 			item.add(new CopyToClipboardLink("copyHash", Model.of(commit.name())));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
-			CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy()) {
+			CommitStatusPanel commitStatus = new CommitStatusPanel("buildStatus", commit.copy(), null) {
 
 				@Override
 				protected String getCssClasses() {

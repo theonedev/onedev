@@ -391,7 +391,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 				detailLink.setOutputMarkupId(true);
 				item.add(detailLink);
 				
-				item.add(new RunJobLink("run", commitId, job.getName()) {
+				item.add(new RunJobLink("run", commitId, job.getName(), null) {
 
 					@Override
 					protected Project getProject() {

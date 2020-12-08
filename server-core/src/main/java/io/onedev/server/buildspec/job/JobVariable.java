@@ -1,6 +1,5 @@
 package io.onedev.server.buildspec.job;
 
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 
 public enum JobVariable {
@@ -33,10 +32,7 @@ public enum JobVariable {
 
 		@Override
 		public String getValue(Build build) {
-			if (build.getRefName() != null)
-				return GitUtils.ref2branch(build.getRefName());
-			else
-				return null;
+			return build.getBranch();
 		}
 		
 	},
@@ -44,10 +40,7 @@ public enum JobVariable {
 
 		@Override
 		public String getValue(Build build) {
-			if (build.getRefName() != null)
-				return GitUtils.ref2tag(build.getRefName());
-			else
-				return null;
+			return build.getTag();
 		}
 		
 	},

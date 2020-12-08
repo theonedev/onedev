@@ -56,7 +56,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 						WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
 						nav.add(new Label("jobName", job.getName()));
 						nav.add(AttributeAppender.append("data-name", job.getName()));
-						nav.add(new RunJobLink("run", context.getCommit().copy(), job.getName()) {
+						nav.add(new RunJobLink("run", context.getCommit().copy(), job.getName(), getContext().getRefName()) {
 
 							@Override
 							protected Project getProject() {

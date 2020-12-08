@@ -836,6 +836,12 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Nullable
+	public String getRefName(String revision) {
+		Ref ref = getRef(revision);
+		return ref != null? ref.getName(): null;
+	}
+	
+	@Nullable
 	public Ref getBranchRef(String revision) {
 		Ref ref = getRef(revision);
 		if (ref != null && ref.getName().startsWith(Constants.R_HEADS))
