@@ -1,3 +1,13 @@
+# 4.0.5
+
+Build variable rename:
+
+|old name|new name|
+|---|---|
+|updated_ref|ref|
+|updated_branch|branch|
+|updated_tag|tag|
+
 # 3.2
 
 Version 3.2 uses token authentication instead of password authentication in build spec for security 
