@@ -2174,4 +2174,30 @@ public class DataMigrator {
 		}
 	}
 	
+	// Migrate to 4.0.5
+	private void migrate44(File dataDir, Stack<Integer> versions) {
+		Map<String, String> verifications = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequestVerifications.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					verifications.put(element.elementTextTrim("build"), element.elementTextTrim("request"));
+				}
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("triggerId").setText(UUID.randomUUID().toString());
+					String requestId = verifications.get(element.elementTextTrim("id"));
+					if (requestId != null)
+						element.addElement("request").setText(requestId);
+					element.element("updatedRef").setName("refName");
+				}
+			}
+		}
+	}
+	
 }
