@@ -20,6 +20,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.git.Blob;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.job.RunJobLink;
@@ -61,6 +62,11 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 							@Override
 							protected Project getProject() {
 								return context.getProject();
+							}
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return context.getPullRequest();
 							}
 
 						});

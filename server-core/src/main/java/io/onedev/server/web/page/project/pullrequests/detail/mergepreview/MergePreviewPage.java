@@ -105,6 +105,11 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 				protected Project getProject() {
 					return MergePreviewPage.this.getProject();
 				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return MergePreviewPage.this.getPullRequest();
+				}
 				
 			});
 			fragment.add(new WebMarkupContainer("outDated") {

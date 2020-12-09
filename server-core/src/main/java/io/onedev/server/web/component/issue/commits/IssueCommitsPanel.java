@@ -22,6 +22,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
@@ -85,6 +86,11 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 					@Override
 					protected Project getProject() {
 						return getIssue().getProject();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return null;
 					}
 					
 				};

@@ -744,6 +744,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				protected Project getProject() {
 					return ProjectBlobPage.this.getProject();
 				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return ProjectBlobPage.this.getPullRequest();
+				}
 				
 			};
 		} else {

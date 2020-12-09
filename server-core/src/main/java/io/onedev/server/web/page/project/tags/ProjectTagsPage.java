@@ -52,6 +52,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
@@ -303,6 +304,11 @@ public class ProjectTagsPage extends ProjectPage {
 					@Override
 					protected Project getProject() {
 						return ProjectTagsPage.this.getProject();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return null;
 					}
 					
 				});

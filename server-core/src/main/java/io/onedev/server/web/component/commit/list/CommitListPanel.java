@@ -60,6 +60,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.commit.CommitCriteria;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.MessageCriteria;
@@ -647,6 +648,11 @@ public abstract class CommitListPanel extends Panel {
 				@Override
 				protected Project getProject() {
 					return CommitListPanel.this.getProject();
+				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return null;
 				}
 				
 			};

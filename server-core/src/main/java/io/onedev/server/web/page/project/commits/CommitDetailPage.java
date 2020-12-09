@@ -51,6 +51,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -104,6 +105,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	private static final String PARAM_COMMENT = "comment";
 	
 	private static final String PARAM_MARK = "mark";
+	
+	private static final String PARAM_REQUEST = "request";
 	
 	private State state;
 	
@@ -397,6 +400,14 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 					protected Project getProject() {
 						return CommitDetailPage.this.getProject();
 					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						if (state.requestId != null)
+							return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+						else
+							return null;
+					}
 					
 				});
 			}
@@ -590,6 +601,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 			params.set(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
+		if (state.requestId != null)
+			params.set(PARAM_REQUEST, state.requestId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
 		return params;
@@ -625,6 +638,9 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		@Nullable
 		public Long commentId;
+		
+		@Nullable
+		public Long requestId;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 		

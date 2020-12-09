@@ -29,6 +29,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
@@ -67,6 +68,9 @@ public abstract class JobListPanel extends Panel {
 	}
 	
 	protected abstract Project getProject();
+	
+	@Nullable
+	protected abstract PullRequest getPullRequest();
 	
 	protected abstract void onRunJob(AjaxRequestTarget target);
 
@@ -112,6 +116,11 @@ public abstract class JobListPanel extends Panel {
 				@Override
 				protected Project getProject() {
 					return JobListPanel.this.getProject();
+				}
+
+				@Override
+				protected PullRequest getPullRequest() {
+					return null;
 				}
 				
 			});

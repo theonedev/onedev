@@ -509,6 +509,11 @@ public class ProjectBranchesPage extends ProjectPage {
 					protected Project getProject() {
 						return ProjectBranchesPage.this.getProject();
 					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return null;
+					}
 					
 				});
 				

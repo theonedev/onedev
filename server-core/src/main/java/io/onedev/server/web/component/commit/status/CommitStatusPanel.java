@@ -25,6 +25,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.joblist.JobListPanel;
@@ -73,6 +74,9 @@ public abstract class CommitStatusPanel extends Panel {
 	}
 	
 	protected abstract Project getProject();
+	
+	@Nullable
+	protected abstract PullRequest getPullRequest();
 
 	@Override
 	protected void onInitialize() {
@@ -92,6 +96,11 @@ public abstract class CommitStatusPanel extends Panel {
 					@Override
 					protected void onRunJob(AjaxRequestTarget target) {
 						dropdown.close();
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return CommitStatusPanel.this.getPullRequest();
 					}
 					
 				};

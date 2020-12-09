@@ -101,6 +101,11 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 					protected Project getProject() {
 						return getUpdate().getRequest().getTarget().getProject();
 					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return getUpdate().getRequest();
+					}
 					
 				};
 				item.add(commitStatus);

@@ -52,6 +52,9 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 	
 	protected abstract Project getProject();
 	
+	@Nullable
+	protected abstract PullRequest getPullRequest();
+	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
 		BuildSpec buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(commitId));
@@ -80,7 +83,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 
 						@Override
 						public PullRequest getPullRequest() {
-							return null;
+							return RunJobLink.this.getPullRequest();
 						}
 
 						@Override
@@ -119,7 +122,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 
 				@Override
 				public PullRequest getPullRequest() {
-					return null;
+					return RunJobLink.this.getPullRequest();
 				}
 
 				@Override
