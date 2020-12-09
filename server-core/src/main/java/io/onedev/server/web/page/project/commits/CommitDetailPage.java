@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -153,6 +154,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
+		state.requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		
 		resolvedRevision = getProject().getRevCommit(state.revision, true).copy();
@@ -394,7 +396,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 				detailLink.setOutputMarkupId(true);
 				item.add(detailLink);
 				
-				item.add(new RunJobLink("run", commitId, job.getName(), null) {
+				item.add(new RunJobLink("run", commitId, job.getName(), UUID.randomUUID().toString(), null) {
 
 					@Override
 					protected Project getProject() {

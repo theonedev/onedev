@@ -170,7 +170,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Transactional
 	@Override
-	public Build submit(Project project, ObjectId commitId, String jobName, 
+	public Build submit(Project project, ObjectId commitId, String jobName, String triggerId, 
 			Map<String, List<String>> paramMap, SubmitReason reason) {
     	Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
     	transactionManager.mustRunAfterTransaction(new Runnable() {
@@ -188,13 +188,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         	
         	validate(project, commitId);
         	
-			return submit(project, commitId, jobName, paramMap, reason, new LinkedHashSet<>()); 
+			return submit(project, commitId, jobName, triggerId, paramMap, reason, new LinkedHashSet<>()); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
-	private Build submit(Project project, ObjectId commitId, String jobName,
+	private Build submit(Project project, ObjectId commitId, String jobName, String triggerId, 
 			Map<String, List<String>> paramMap, SubmitReason reason, Set<String> checkedJobNames) {
 		
 		ScriptIdentity.push(new JobIdentity(project, commitId));
@@ -203,6 +203,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setProject(project);
 			build.setCommitHash(commitId.name());
 			build.setJobName(jobName);
+			build.setTriggerId(triggerId);
 			build.setSubmitDate(new Date());
 			build.setStatus(Build.Status.WAITING);
 			build.setSubmitReason(reason.getDescription());
@@ -224,7 +225,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 	
 			Collection<Build> builds = buildManager.query(project, commitId, jobName, 
-					reason.getRefName(), reason.getPullRequest(), paramMapToQuery);
+					reason.getRefName(), reason.getPullRequest(), triggerId, paramMapToQuery);
 			
 			if (builds.isEmpty()) {
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
@@ -255,7 +256,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							@Override
 							public void run(Map<String, List<String>> params) {
 								Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-										params, reason, new LinkedHashSet<>(checkedJobNames));
+										triggerId, params, reason, new LinkedHashSet<>(checkedJobNames));
 								BuildDependence dependence = new BuildDependence();
 								dependence.setDependency(dependencyBuild);
 								dependence.setDependent(build);
@@ -624,7 +625,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 														@Override
 														public void run(Map<String, List<String>> paramMap) {
-															submit(project, commitId, job.getName(), paramMap, match.getReason()); 
+															submit(project, commitId, job.getName(), event.getUuid(), 
+																	paramMap, match.getReason()); 
 														}
 														
 													}.run();

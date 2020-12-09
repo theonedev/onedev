@@ -251,13 +251,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName) {
-		return query(project, commitId, jobName, null, null, new HashMap<>());
+		return query(project, commitId, jobName, null, null, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName, 
-			String refName, PullRequest request, Map<String, List<String>> params) {
+			String refName, PullRequest request, String triggerId, 
+			Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -272,6 +273,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 		if (request != null)
 			predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request));
+		if (triggerId != null)
+			predicates.add(builder.equal(root.get(Build.PROP_TRIGGER_ID), triggerId));
 			
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
