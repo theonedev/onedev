@@ -1,3 +1,16 @@
+# 4.0.5
+
+1. Renamed build variables:
+
+  |old name|new name|
+  |---|---|
+  |updated_ref|ref|
+  |updated_branch|branch|
+  |updated_tag|tag|
+  |pull_request_ids|pull_request_number|
+
+1. Removed build variables: _on_branches_, _commit_tags_, 
+
 # 3.2
 
 Version 3.2 uses token authentication instead of password authentication in build spec for security 
