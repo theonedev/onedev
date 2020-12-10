@@ -1,7 +1,11 @@
 .commit-detail .list-group-item {
 	padding: 1.25rem 1.5rem;
 }
-.commit-detail .contribution-and-parents .avatar {
+.commit-detail .contribution-and-parents .committer .avatar {
+	width: 16px;
+	height: 16px;
+}
+.commit-detail .contribution-and-parents .author .avatar {
 	width: 32px;
 	height: 32px;
 }
