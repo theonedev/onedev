@@ -3,7 +3,6 @@ package io.onedev.server.web.component.commit.status;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -87,8 +86,7 @@ public abstract class CommitStatusPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new JobListPanel(id, commitId, UUID.randomUUID().toString(), 
-						refName, jobsModel.getObject()) {
+				return new JobListPanel(id, commitId, refName, jobsModel.getObject()) {
 
 					@Override
 					protected Project getProject() {

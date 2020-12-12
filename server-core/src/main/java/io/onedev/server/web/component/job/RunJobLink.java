@@ -45,16 +45,12 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 	
 	private final String jobName;
 	
-	private final String triggerId;
-	
-	public RunJobLink(String componentId, ObjectId commitId, String jobName, 
-			String triggerId, @Nullable String refName) {
+	public RunJobLink(String componentId, ObjectId commitId, String jobName, @Nullable String refName) {
 		super(componentId);
 		
 		this.commitId = commitId;
 		this.jobName = jobName;
 		this.refName = refName;
-		this.triggerId = triggerId;
 	}
 	
 	protected abstract Project getProject();
@@ -124,7 +120,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 							
 						};
 						builds.add(getJobManager().submit(getProject(), commitId, job.getName(), 
-								triggerId, paramMap, reason));
+								paramMap, reason));
 					}
 					if (builds.size() == 1)
 						setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
@@ -171,7 +167,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 				
 			};
 			Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
-					triggerId, new HashMap<>(), reason);
+					new HashMap<>(), reason);
 			setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build));
 		}
 	}

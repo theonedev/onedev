@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -396,7 +395,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 				detailLink.setOutputMarkupId(true);
 				item.add(detailLink);
 				
-				item.add(new RunJobLink("run", commitId, job.getName(), UUID.randomUUID().toString(), null) {
+				item.add(new RunJobLink("run", commitId, job.getName(), null) {
 
 					@Override
 					protected Project getProject() {

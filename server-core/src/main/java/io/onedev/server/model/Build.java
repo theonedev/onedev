@@ -7,7 +7,6 @@ import static io.onedev.server.model.Build.PROP_JOB;
 import static io.onedev.server.model.Build.PROP_NUMBER;
 import static io.onedev.server.model.Build.PROP_PENDING_DATE;
 import static io.onedev.server.model.Build.PROP_REF_NAME;
-import static io.onedev.server.model.Build.PROP_TRIGGER_ID;
 import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
 import static io.onedev.server.model.Build.PROP_STATUS;
 import static io.onedev.server.model.Build.PROP_SUBMITTER_NAME;
@@ -102,12 +101,13 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
-				@Index(columnList="o_request_id"),
-				@Index(columnList=PROP_SUBMITTER_NAME), @Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
-				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), @Index(columnList=PROP_STATUS),
-				@Index(columnList=PROP_REF_NAME), @Index(columnList=PROP_TRIGGER_ID), 
-				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), @Index(columnList=PROP_RUNNING_DATE), 
-				@Index(columnList=PROP_FINISH_DATE), @Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
+				@Index(columnList="o_request_id"), @Index(columnList=PROP_SUBMITTER_NAME), 
+				@Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
+				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), 
+				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
+				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
+				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
+				@Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
 				@Index(columnList="o_project_id, " + PROP_COMMIT)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
@@ -302,9 +302,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	@Column(length=MAX_ERROR_MESSAGE_LEN)
 	private String errorMessage;
-
-	@Column(nullable=false)
-	private String triggerId;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -557,15 +554,6 @@ public class Build extends AbstractEntity implements Referenceable {
 				errorMessage = StringUtils.replace(errorMessage, secretValue, SecretInput.MASK);
 		}
 		this.errorMessage = errorMessage;
-	}
-
-	@Nullable
-	public String getTriggerId() {
-		return triggerId;
-	}
-
-	public void setTriggerId(String triggerId) {
-		this.triggerId = triggerId;
 	}
 
 	@Nullable

@@ -2253,4 +2253,16 @@ public class DataMigrator {
 		}
 	}
 	
+	// Migrate to 4.0.6
+	private void migrate45(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.element("triggerId").detach();
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

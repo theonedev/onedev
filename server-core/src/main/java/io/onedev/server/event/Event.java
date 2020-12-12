@@ -1,7 +1,6 @@
 package io.onedev.server.event;
 
 import java.util.Date;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -13,8 +12,6 @@ import io.onedev.server.model.User;
 @JsonTypeInfo(property="@class", use=Id.CLASS)
 public abstract class Event {
 	
-	private final String uuid = UUID.randomUUID().toString();
-	
 	private final User user;
 	
 	private final Date date;
@@ -22,10 +19,6 @@ public abstract class Event {
 	public Event(@Nullable User user, Date date) {
 		this.user = user;
 		this.date = date;
-	}
-
-	public String getUuid() {
-		return uuid;
 	}
 
 	@Nullable

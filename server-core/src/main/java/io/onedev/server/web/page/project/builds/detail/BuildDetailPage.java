@@ -314,7 +314,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new JobListPanel(id, getBuild().getCommitId(), getBuild().getTriggerId(), 
+				return new JobListPanel(id, getBuild().getCommitId(),  
 						getBuild().getRefName(), downstreamJobsModel.getObject()) {
 					
 					@Override

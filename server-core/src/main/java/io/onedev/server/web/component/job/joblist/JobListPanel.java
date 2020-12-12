@@ -42,8 +42,6 @@ public abstract class JobListPanel extends Panel {
 
 	private final ObjectId commitId;
 	
-	private final String triggerId;
-	
 	private final String refName;
 	
 	private final List<Job> jobs;
@@ -62,11 +60,9 @@ public abstract class JobListPanel extends Panel {
 		
 	};
 	
-	public JobListPanel(String id, ObjectId commitId, String triggerId, 
-			@Nullable String refName, List<Job> jobs) {
+	public JobListPanel(String id, ObjectId commitId, @Nullable String refName, List<Job> jobs) {
 		super(id);
 		this.commitId = commitId;
-		this.triggerId = triggerId;
 		this.refName = refName;
 		this.jobs = jobs;
 	}
@@ -109,7 +105,7 @@ public abstract class JobListPanel extends Panel {
 			defLink.add(new Label("label", job.getName()));
 			jobItem.add(defLink);
 				
-			jobItem.add(new RunJobLink("run", commitId, job.getName(), triggerId, refName) {
+			jobItem.add(new RunJobLink("run", commitId, job.getName(), refName) {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {

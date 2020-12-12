@@ -110,7 +110,7 @@ public class RunJobAction extends PostBuildAction {
 				};
 				JobManager jobManager = OneDev.getInstance(JobManager.class);
 				jobManager.submit(build.getProject(), build.getCommitId(), getJobName(), 
-						build.getTriggerId(), paramMap, reason); 
+						paramMap, reason); 
 			}
 			
 		}.run();
