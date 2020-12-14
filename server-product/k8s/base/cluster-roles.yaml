@@ -14,7 +14,7 @@ rules:
   verbs: ["get", "list", "patch"] #require this permission to label nodes with build cache properties to increase cache hit rate
 - apiGroups: [""]
   resources: ["services", "pods", "pods/log", "pods/exec", "secrets", "configmaps", "events"]
-  verbs: ["get", "list", "watch", "create", "delete"] #require this permission to run builds as pods 
+  verbs: ["get", "list", "watch", "create", "patch", "delete"] #require this permission to run builds as pods 
 - apiGroups: ["apps"]
   resources: ["deployments"]
-  verbs: ["get", "list", "create", "delete"] #require this permission to run builds as pods
+  verbs: ["get", "list", "create", "patch", "delete"] #require this permission to run builds as pods
