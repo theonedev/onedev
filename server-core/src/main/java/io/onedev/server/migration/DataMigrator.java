@@ -2264,5 +2264,27 @@ public class DataMigrator {
 			}
 		}
 	}
+
+	// migrate to 4.0.7
+	private void migrate46(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						for (Element executorElement: valueElement.elements()) {
+							if (executorElement.getName().contains("KubernetesExecutor")) {
+								Element serviceAccountElement = executorElement.element("serviceAccount");
+								if (serviceAccountElement != null)
+									serviceAccountElement.detach();
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 	
 }

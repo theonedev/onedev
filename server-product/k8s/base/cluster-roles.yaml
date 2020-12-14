@@ -6,6 +6,9 @@ rules:
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["get", "list", "create", "delete"] #require this permission to run builds in isolated namespaces
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: ["clusterrolebindings"]
+  verbs: ["get", "list", "create", "delete"] #require this permission to bind cluster roles to service account of running builds 
 - apiGroups: [""]
   resources: ["nodes"]
   verbs: ["get", "list", "patch"] #require this permission to label nodes with build cache properties to increase cache hit rate
