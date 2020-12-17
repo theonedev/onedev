@@ -2287,4 +2287,19 @@ public class DataMigrator {
 		}
 	}
 	
+	// migrate to 4.0.8
+	private void migrate47(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element refNameElement = element.element("refName");
+					if (refNameElement == null)
+						element.addElement("refName").setText("unknown");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

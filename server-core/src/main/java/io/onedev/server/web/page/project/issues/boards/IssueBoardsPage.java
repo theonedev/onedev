@@ -611,7 +611,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								SpriteImage.getVersionedHref(IconScope.class, "plus")));
 					}
 					
-				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-outline-secondary btn-hover-primary")));
+				}.setEscapeModelStrings(false).add(AttributeAppender.append("class", "btn btn-outline-secondary bg-white btn-hover-primary")));
 			} else {
 				form.add(new WebMarkupContainer("milestone").setVisible(false));
 			}

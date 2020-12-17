@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authc.credential.PasswordMatcher;
 import org.apache.shiro.authc.credential.PasswordService;
@@ -120,7 +121,9 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 		    							+ "' has already been used by another account");
 		    				}
 		        			user = newUser(userName, authenticated, authenticator.getDefaultGroup());
-		    			} 
+		    			} else {
+		    	            throw new UnknownAccountException("Unable to find account data for token [" + token + "] in realm [" + this + "]");
+		    			}
 			    	} else if (user.getPassword().equals(User.EXTERNAL_MANAGED)) {
 		    			if (user.getSsoInfo().getConnector() != null) {
 		    				throw new AuthenticationException("Account '" + userName 

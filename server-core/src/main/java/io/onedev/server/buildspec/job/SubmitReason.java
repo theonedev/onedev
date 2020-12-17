@@ -6,9 +6,9 @@ import io.onedev.server.model.PullRequest;
 
 public interface SubmitReason {
 
-	@Nullable 
 	String getRefName();
 	
+	@Nullable
 	PullRequest getPullRequest();
 	
 	String getDescription();

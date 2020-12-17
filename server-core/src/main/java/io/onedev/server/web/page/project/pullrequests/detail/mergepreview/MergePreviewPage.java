@@ -96,7 +96,6 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 			
 			commitState = new CommitDetailPage.State();
 			commitState.revision = preview.getMergeCommitHash();
-			commitState.requestId = getPullRequest().getId();
 			params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 			fragment.add(new ViewStateAwarePageLink<Void>("mergedCommit", CommitDetailPage.class, params));
 			

@@ -51,7 +51,6 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -106,8 +105,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	
 	private static final String PARAM_MARK = "mark";
 	
-	private static final String PARAM_REQUEST = "request";
-	
 	private State state;
 	
 	private ObjectId resolvedRevision;
@@ -153,7 +150,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		state.requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
 		
 		resolvedRevision = getProject().getRevCommit(state.revision, true).copy();
@@ -331,7 +327,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 							@Override
 							protected Component newListLink(String componentId) {
 								return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
-										ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName()), 0)) {
+										ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), null, null), 0)) {
 									
 									@Override
 									protected void onConfigure() {
@@ -350,7 +346,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 						super.onComponentTag(tag);
 						
 						String cssClasses = "btn btn-outline-secondary";
-						Build.Status status = getProject().getCommitStatus(commitId).get(job.getName());
+						Build.Status status = getProject().getCommitStatus(commitId, null, null).get(job.getName());
 						String title;
 						if (status != null) {
 							if (status != Status.SUCCESSFUL)
@@ -371,7 +367,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 					@Override
 					protected Status load() {
-						return getProject().getCommitStatus(commitId).get(job.getName());
+						return getProject().getCommitStatus(commitId, null, null).get(job.getName());
 					}
 					
 				}));
@@ -404,10 +400,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 					@Override
 					protected PullRequest getPullRequest() {
-						if (state.requestId != null)
-							return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
-						else
-							return null;
+						return null;
 					}
 					
 				});
@@ -602,8 +595,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 			params.set(PARAM_BLAME_FILE, state.blameFile);
 		if (state.commentId != null)
 			params.set(PARAM_COMMENT, state.commentId);
-		if (state.requestId != null)
-			params.set(PARAM_REQUEST, state.requestId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
 		return params;
@@ -639,9 +630,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		@Nullable
 		public Long commentId;
-		
-		@Nullable
-		public Long requestId;
 		
 		public WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 		

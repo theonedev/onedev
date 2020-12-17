@@ -76,19 +76,11 @@ public abstract class BuildSidePanel extends Panel {
 		
 		add(general);
 
-		if (getBuild().getRefName() != null) {
-			String branch = GitUtils.ref2branch(getBuild().getRefName());
-			general.add(new Label("branch", branch).setVisible(branch != null));
-		} else {
-			general.add(new WebMarkupContainer("branch").setVisible(false));
-		}
-
-		if (getBuild().getRefName() != null) {
-			String tag = GitUtils.ref2tag(getBuild().getRefName());
-			general.add(new Label("tag", tag).setVisible(tag != null));
-		} else {
-			general.add(new WebMarkupContainer("tag").setVisible(false));
-		}
+		String branch = getBuild().getBranch();
+		general.add(new Label("branch", branch).setVisible(branch != null));
+		
+		String tag = getBuild().getTag();
+		general.add(new Label("tag", tag).setVisible(tag != null));
 		
 		CommitDetailPage.State commitState = new CommitDetailPage.State();
 		commitState.revision = getBuild().getCommitHash();

@@ -2,6 +2,10 @@ package io.onedev.server.buildspec.job;
 
 import static io.onedev.server.model.Build.NAME_COMMIT;
 import static io.onedev.server.model.Build.NAME_JOB;
+import static io.onedev.server.model.Build.NAME_BRANCH;
+import static io.onedev.server.model.Build.NAME_TAG;
+import static io.onedev.server.model.Build.NAME_PULL_REQUEST;
+
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
@@ -38,7 +42,9 @@ import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.criteria.Criteria;
@@ -480,11 +486,32 @@ public class Job implements Serializable, Validatable {
 		return paramSpecMap;
 	}
 	
-	public static String getBuildQuery(ObjectId commitId, String jobName) {
-		return "" 
+	public static String getBuildQuery(ObjectId commitId, String jobName, 
+			@Nullable String refName, @Nullable PullRequest request) {
+		String query = "" 
 				+ Criteria.quote(NAME_COMMIT) + " " + getRuleName(Is) + " " + Criteria.quote(commitId.name()) 
 				+ " " + getRuleName(And) + " "
 				+ Criteria.quote(NAME_JOB) + " " + getRuleName(Is) + " " + Criteria.quote(jobName);
+		if (request != null) {
+			query = query 
+					+ " " + getRuleName(And) + " " 
+					+ Criteria.quote(NAME_PULL_REQUEST) + " " + getRuleName(Is) + " " + Criteria.quote("#" + request.getNumber());
+		}
+		if (refName != null) {
+			String branch = GitUtils.ref2branch(refName);
+			if (branch != null) {
+				query = query 
+					+ " " + getRuleName(And) + " " 
+					+ Criteria.quote(NAME_BRANCH) + " " + getRuleName(Is) + " " + Criteria.quote(branch);
+			} 
+			String tag = GitUtils.ref2tag(refName);
+			if (tag != null) {
+				query = query 
+					+ " " + getRuleName(And) + " " 
+					+ Criteria.quote(NAME_TAG) + " " + getRuleName(Is) + " " + Criteria.quote(tag);
+			} 
+		}
+		return query;
 	}
 	
 	public static List<String> getChoices() {

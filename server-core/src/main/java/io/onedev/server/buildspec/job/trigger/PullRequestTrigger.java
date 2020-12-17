@@ -95,7 +95,7 @@ public class PullRequestTrigger extends JobTrigger {
 
 					@Override
 					public String getRefName() {
-						return null;
+						return request.getMergeRef();
 					}
 
 					@Override

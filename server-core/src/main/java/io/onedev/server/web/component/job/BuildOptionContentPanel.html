@@ -8,13 +8,14 @@
 			<wicket:enclosure child="refNames">
 			<div class="form-group">
 				<label class="control-label">Build On Behalf Of</label>
-				<div class="d-flex flex-wrap mb-3">
+				<div class="d-flex flex-wrap">
 					<label wicket:id="refNames" class="checkbox flex-shrink-0 mr-3 mb-2">
 		      			<input wicket:id="check" type="checkbox"> <wicket:container wicket:id="label"></wicket:container>
 					</label>
-					<div class="form-text text-muted">For each selected branch/tag, a separate build will be 
-					generated with branch/tag set to corresponding value</div>
 				</div>
+				<div wicket:id="refNamesError"></div>
+				<div class="form-text text-muted">For each selected branch/tag, a separate build will be 
+				generated with branch/tag set to corresponding value</div>
 			</div>
 			</wicket:enclosure>
             <div wicket:id="paramEditor"></div>

@@ -274,6 +274,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String jobName;
 	
+	@Column(nullable=false)
 	private String refName;
 	
 	private String version;
@@ -556,7 +557,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.errorMessage = errorMessage;
 	}
 
-	@Nullable
 	public String getRefName() {
 		return refName;
 	}

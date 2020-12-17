@@ -216,7 +216,7 @@ li.selectable:hover a, a.selectable:hover, li.selectable.active a, a.selectable.
     display: none;
 }
 .clearable-wrapper input.clearable {
-	padding-right: 22px;
+	padding-right: 30px;
 }
 a.input-clear {
 	font-family: sans-serif;

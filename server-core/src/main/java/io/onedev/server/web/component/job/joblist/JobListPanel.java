@@ -3,6 +3,7 @@ package io.onedev.server.web.component.job.joblist;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -92,7 +93,7 @@ public abstract class JobListPanel extends Panel {
 		add(jobsView);
 		for (Job job: accessibleJobsModel.getObject()) {
 			WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
-			Status status = getProject().getCommitStatus(commitId).get(job.getName());
+			Status status = getProject().getCommitStatus(commitId, getPullRequest(), refName).get(job.getName());
 					
 			Link<Void> defLink = new JobDefLink("name", commitId, job.getName()) {
 
@@ -126,7 +127,7 @@ public abstract class JobListPanel extends Panel {
 			});
 			
 			jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
-					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName()), 0)) {
+					ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName(), refName, getPullRequest()), 0)) {
 				
 				@Override
 				protected void onConfigure() {
@@ -141,7 +142,8 @@ public abstract class JobListPanel extends Panel {
 				@Override
 				protected List<Build> load() {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName()));
+					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName(), 
+							refName, getPullRequest(), new HashMap<>()));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}

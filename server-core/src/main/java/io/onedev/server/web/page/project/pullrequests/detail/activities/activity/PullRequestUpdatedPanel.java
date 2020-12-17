@@ -104,7 +104,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 
 					@Override
 					protected PullRequest getPullRequest() {
-						return getUpdate().getRequest();
+						return null;
 					}
 					
 				};

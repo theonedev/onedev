@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
@@ -53,7 +54,8 @@ abstract class BuildOptionContentPanel extends Panel {
 		};
 		form.setOutputMarkupId(true);
 		
-		form.add(new ListView<String>("refNames", refNames) {
+		ListView<String> refNamesView;
+		form.add(refNamesView = new ListView<String>("refNames", refNames) {
 
 			@Override
 			protected void populateItem(ListItem<String> item) {
@@ -94,6 +96,8 @@ abstract class BuildOptionContentPanel extends Panel {
 			
 		});
 		
+		form.add(new FencedFeedbackPanel("refNamesError", refNamesView));
+		
 		form.add(BeanContext.edit("paramEditor", paramBean));
 		
 		form.add(new AjaxButton("ok") {
@@ -101,7 +105,12 @@ abstract class BuildOptionContentPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSave(target, selectedRefNames, paramBean);
+				if (selectedRefNames.isEmpty()) {
+					refNamesView.error("At least one branch or tag should be selected");
+					target.add(form);
+				} else {
+					onSave(target, selectedRefNames, paramBean);
+				}
 			}
 			
 		});

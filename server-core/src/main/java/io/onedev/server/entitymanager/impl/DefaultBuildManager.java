@@ -80,6 +80,7 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -272,6 +273,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 		if (request != null)
 			predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request));
+		else
+			predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
 			
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
@@ -503,8 +506,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public Map<ObjectId, Map<String, Status>> queryStatus(Project project, Collection<ObjectId> commitIds) {
-		Map<ObjectId, Map<String, Collection<Status>>> commitStatuses = new HashMap<>();
+	public Map<ObjectId, Map<String, Collection<StatusInfo>>> queryStatus(Project project, Collection<ObjectId> commitIds) {
+		Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatuses = new HashMap<>();
 		
 		Collection<ObjectId> batch = new HashSet<>();
 		for (ObjectId commitId: commitIds) {
@@ -516,24 +519,17 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 		if (!batch.isEmpty())
 			fillStatus(project, batch, commitStatuses);
-		Map<ObjectId, Map<String, Status>> overallCommitStatuses = new HashMap<>();
-		for (Map.Entry<ObjectId, Map<String, Collection<Status>>> entry: commitStatuses.entrySet()) {
-			Map<String, Status> jobOverallStatuses = new HashMap<>();
-			for (Map.Entry<String, Collection<Status>> entry2: entry.getValue().entrySet()) 
-				jobOverallStatuses.put(entry2.getKey(), Status.getOverallStatus(entry2.getValue()));
-			overallCommitStatuses.put(entry.getKey(), jobOverallStatuses);
-		}
 		for (ObjectId commitId: commitIds) {
-			if (!overallCommitStatuses.containsKey(commitId))
-				overallCommitStatuses.put(commitId, new HashMap<>());
+			if (!commitStatuses.containsKey(commitId))
+				commitStatuses.put(commitId, new HashMap<>());
 		}
-		return overallCommitStatuses;
+		return commitStatuses;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void fillStatus(Project project, Collection<ObjectId> commitIds, 
-			Map<ObjectId, Map<String, Collection<Status>>> commitStatuses) {
-		Query<?> query = getSession().createQuery("select commitHash, jobName, status from Build "
+			Map<ObjectId, Map<String, Collection<StatusInfo>>> commitStatuses) {
+		Query<?> query = getSession().createQuery("select commitHash, jobName, status, refName, request.id from Build "
 				+ "where project=:project and commitHash in :commitHashes");
 		query.setParameter("project", project);
 		query.setParameter("commitHashes", commitIds.stream().map(it->it.name()).collect(Collectors.toList()));
@@ -541,17 +537,20 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			ObjectId commitId = ObjectId.fromString((String) row[0]);
 			String jobName = (String) row[1];
 			Status status = (Status) row[2];
-			Map<String, Collection<Status>> commitStatus = commitStatuses.get(commitId);
+			String refName = (String) row[3];
+			Long requestId = (Long) row[4];
+			
+			Map<String, Collection<StatusInfo>> commitStatus = commitStatuses.get(commitId);
 			if (commitStatus == null) {
 				commitStatus = new HashMap<>();
 				commitStatuses.put(commitId, commitStatus);
 			}
-			Collection<Status> jobStatus = commitStatus.get(jobName);
+			Collection<StatusInfo> jobStatus = commitStatus.get(jobName);
 			if (jobStatus == null) {
 				jobStatus = new HashSet<>();
 				commitStatus.put(jobName, jobStatus);
 			}
-			jobStatus.add(status);
+			jobStatus.add(new StatusInfo(status, requestId, refName));
 		}
 	}
 	
