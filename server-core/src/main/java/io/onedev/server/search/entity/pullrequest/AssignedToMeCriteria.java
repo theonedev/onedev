@@ -7,7 +7,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.User;
@@ -26,7 +26,7 @@ public class AssignedToMeCriteria extends EntityCriteria<PullRequest> {
 			join.on(builder.equal(userPath, User.get())); 
 			return join.isNotNull();
 		} else {
-			throw new GeneralException("Please login to perform this query");
+			throw new ExplicitException("Please login to perform this query");
 		}
 	}
 
@@ -36,7 +36,7 @@ public class AssignedToMeCriteria extends EntityCriteria<PullRequest> {
 		if (user != null)
 			return request.getAssignments().stream().anyMatch(it->it.getUser().equals(user));
 		else 
-			throw new GeneralException("Please login to perform this query");
+			throw new ExplicitException("Please login to perform this query");
 	}
 
 	@Override

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>4.0.9</version>
+		<version>4.1.0</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -26,5 +26,6 @@
 	    <module>server-plugin-authenticator-ldap</module>
 	    <module>server-plugin-sso-openid</module>
     	<module>server-plugin-report-markdown</module>
+   		<module>server-plugin-report-jest</module>
   </modules>
 </project>

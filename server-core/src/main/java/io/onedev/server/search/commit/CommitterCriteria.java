@@ -8,7 +8,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
@@ -33,7 +33,7 @@ public class CommitterCriteria extends CommitCriteria {
 				if (SecurityUtils.getUser() != null)
 					command.committers().add("<" + SecurityUtils.getUser().getEmail() + ">");
 				else
-					throw new GeneralException("Please login to perform this query");
+					throw new ExplicitException("Please login to perform this query");
 			} else {
 				command.committers().add(StringUtils.replace(value, "*", ".*"));
 			}
@@ -47,7 +47,7 @@ public class CommitterCriteria extends CommitCriteria {
 		for (String value: values) {
 			if (value == null) { // committed by me
 				if (User.get() == null)
-					throw new GeneralException("Please login to perform this query");
+					throw new ExplicitException("Please login to perform this query");
 				else if (User.get().getEmail().equals(committerEmail)) 
 					return true;
 			} else {

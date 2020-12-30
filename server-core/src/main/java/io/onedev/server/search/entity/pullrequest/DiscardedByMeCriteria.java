@@ -5,7 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -21,7 +21,7 @@ public class DiscardedByMeCriteria extends EntityCriteria<PullRequest> {
 			Path<User> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_USER);
 			return builder.equal(attribute, User.get());
 		} else {
-			throw new GeneralException("Please login to perform this query");
+			throw new ExplicitException("Please login to perform this query");
 		}
 	}
 
@@ -30,7 +30,7 @@ public class DiscardedByMeCriteria extends EntityCriteria<PullRequest> {
 		if (User.get() != null)
 			return User.get().equals(request.getSubmitter());
 		else
-			throw new GeneralException("Please login to perform this query");
+			throw new ExplicitException("Please login to perform this query");
 	}
 
 	@Override

@@ -36,7 +36,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -78,7 +78,7 @@ public class ProjectListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return ProjectQuery.parse(queryString);
-			} catch (GeneralException e) {
+			} catch (ExplicitException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
@@ -276,7 +276,7 @@ public class ProjectListPanel extends Panel {
 			public Iterator<? extends Project> iterator(long first, long count) {
 				try {
 					return getProjectManager().query(queryModel.getObject(), (int)first, (int)count).iterator();
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<Project>().iterator();
 				}
@@ -288,7 +288,7 @@ public class ProjectListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getProjectManager().count(query.getCriteria());
-					} catch (GeneralException e) {
+					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
 				}

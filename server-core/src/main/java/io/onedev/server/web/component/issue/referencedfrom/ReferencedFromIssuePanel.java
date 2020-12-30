@@ -13,7 +13,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.titleandstatus.TitleAndStatusCssResourceReference;
-import io.onedev.server.web.component.issue.IssueStateLabel;
+import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -36,7 +36,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new IssueStateLabel("state", getModel()));
+		add(new IssueStateBadge("state", getModel()));
 		
 		Project project = ((ProjectPage)getPage()).getProject();
 		

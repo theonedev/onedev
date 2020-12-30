@@ -50,7 +50,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -80,7 +80,7 @@ import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.issue.IssueStateLabel;
+import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -158,7 +158,7 @@ public abstract class IssueListPanel extends Panel {
 	private IssueQuery parse(@Nullable String queryString, IssueQuery baseQuery) {
 		try {
 			return IssueQuery.merge(baseQuery, IssueQuery.parse(getProject(), queryString, true, true, false, false, false));
-		} catch (GeneralException e) {
+		} catch (ExplicitException e) {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
@@ -604,7 +604,7 @@ public abstract class IssueListPanel extends Panel {
 				try {
 					return getIssueManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count, true).iterator();
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<Issue>().iterator();
 				}
@@ -616,7 +616,7 @@ public abstract class IssueListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getIssueManager().count(getProject(), query.getCriteria());
-					} catch (GeneralException e) {
+					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
 				}
@@ -736,7 +736,7 @@ public abstract class IssueListPanel extends Panel {
 					if (field.equals(Issue.NAME_STATE)) {
 						Fragment stateFragment = new Fragment(fieldsView.newChildId(), 
 								"stateFrag", IssueListPanel.this);
-						stateFragment.add(new IssueStateLabel("state", rowModel));
+						stateFragment.add(new IssueStateBadge("state", rowModel));
 						fieldsView.add(stateFragment);
 					} else {
 						fieldsView.add(new FieldValuesPanel(fieldsView.newChildId(), Mode.AVATAR_AND_NAME) {

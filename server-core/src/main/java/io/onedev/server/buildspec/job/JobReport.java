@@ -18,7 +18,7 @@ import io.onedev.server.web.editable.annotation.Patterns;
 public abstract class JobReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private String filePatterns;
 	
 	private transient PatternSet patternSet;

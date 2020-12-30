@@ -13,8 +13,8 @@ import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.Criteria;
@@ -130,12 +130,12 @@ public class JobMatch extends Criteria<Build> {
 			if (operator != JobMatchLexer.Is)
 				throw newOperatorException(fieldName, operator);
 		} else {
-			throw new GeneralException("Invalid field: " + fieldName);
+			throw new ExplicitException("Invalid field: " + fieldName);
 		}
 	}
 	
-	private static GeneralException newOperatorException(String fieldName, int operator) {
-		return new GeneralException("Field '" + fieldName + "' is not applicable for operator '" 
+	private static ExplicitException newOperatorException(String fieldName, int operator) {
+		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" 
 				+ AntlrUtils.getLexerRuleName(JobMatchLexer.ruleNames, operator) + "'");
 	}
 

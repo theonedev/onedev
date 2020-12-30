@@ -3,9 +3,9 @@ package io.onedev.server.util;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 
@@ -30,14 +30,14 @@ public class ProjectScopedNumber {
 					try {
 						return new ProjectScopedNumber(project, Long.valueOf(numberStr));
 					} catch (NumberFormatException e) {
-						throw new GeneralException("Invalid number: " + numberStr);
+						throw new ExplicitException("Invalid number: " + numberStr);
 					}
 				} else {
-					throw new GeneralException("Unable to find project: " + projectName);
+					throw new ExplicitException("Unable to find project: " + projectName);
 				}
 			} 
 		}
-		throw new GeneralException("Project is not specified");
+		throw new ExplicitException("Project is not specified");
 	}
 
 	public Project getProject() {

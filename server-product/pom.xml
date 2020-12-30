@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>4.0.9</version>
+		<version>4.1.0</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -18,6 +18,11 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-report-html</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-jest</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

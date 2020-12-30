@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -54,7 +54,7 @@ public class ScriptingChoices extends ChoiceProvider {
 					choices.put(item, null);
 				return choices;
 			} else {
-				throw new GeneralException("Script should return either a Map or a List");
+				throw new ExplicitException("Script should return either a Map or a List");
 			}
 		} catch (RuntimeException e) {
 			if (allPossible) {

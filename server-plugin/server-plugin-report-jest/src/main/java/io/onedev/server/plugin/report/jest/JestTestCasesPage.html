@@ -1,0 +1,42 @@
+<wicket:extend>
+	<div wicket:id="testCases"></div>
+	<wicket:fragment wicket:id="hasDataFrag">
+		<div class="test-cases">
+			<div class="d-flex flex-wrap flex-md-nowrap no-autofocus">
+				<form wicket:id="fileForm" class="w-100 pr-md-2">
+					<div class="clearable-wrapper">
+						<div class="input-group">
+	                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by path">
+							<span class="input-group-append">
+								<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							</span>
+						</div>
+					</div>
+					<div wicket:id="feedback" class="mt-3"></div>
+				</form>
+				<form wicket:id="nameForm" class="w-100 pl-md-2">
+					<div class="clearable-wrapper">
+						<div class="input-group">
+	                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter by name">
+							<span class="input-group-append">
+								<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+							</span>
+						</div>
+					</div>
+					<div wicket:id="feedback" class="mt-3"></div>
+				</form>
+			</div>
+			<div wicket:id="summary" class="summary"></div>
+			<table wicket:id="detail" class="detail table"></table>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="testCaseFrag">
+		<div class="d-flex">
+			<span wicket:id="status" class="mr-3"></span> 
+			<span wicket:id="name" class="mr-4 text-break"></span>
+			<a wicket:id="testSuite" class="ml-auto text-break" title="Show test cases of this test suite"><span wicket:id="label"></span></a>
+			<a wicket:id="viewSource" class="ml-2" title="View source file"><wicket:svg href="file" class="icon"/></a>
+		</div>
+		<pre wicket:id="messages" class="text-gray mt-3"></pre>
+	</wicket:fragment>
+</wicket:extend>

@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
@@ -50,7 +50,7 @@ public class CodeEditSupport implements EditSupport {
 					
 				};
 			} else {
-				throw new GeneralException("@Code annotation should only be applied to a List<String> property");
+				throw new ExplicitException("@Code annotation should only be applied to a List<String> property");
 			}
 		} else {
 			return null;

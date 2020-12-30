@@ -40,8 +40,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
@@ -88,7 +88,7 @@ public abstract class CodeCommentListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return CodeCommentQuery.parse(getProject(), queryString);
-			} catch (GeneralException e) {
+			} catch (ExplicitException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
@@ -281,7 +281,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				try {
 					return getCodeCommentManager().query(getProject(), getPullRequest(), 
 							queryModel.getObject(), (int)first, (int)count).iterator();
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<CodeComment>().iterator();
 				}
@@ -293,7 +293,7 @@ public abstract class CodeCommentListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getCodeCommentManager().count(getProject(), getPullRequest(), query.getCriteria());
-					} catch (GeneralException e) {
+					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
 				} 

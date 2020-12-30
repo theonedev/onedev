@@ -34,17 +34,17 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.SshCloneInfo;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
@@ -391,7 +391,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				else 
 					docker.addArgs("sh", "-c", jobService.getReadinessCheckCommand());
 				
-				ExecuteResult result = docker.execute(new LineConsumer() {
+				ExecutionResult result = docker.execute(new LineConsumer() {
 
 					@Override
 					public void consume(String line) {
@@ -434,7 +434,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					
 				}).checkReturnCode();
 				
-				throw new GeneralException(String.format("Service '" + jobService.getName() + "' is stopped unexpectedly"));
+				throw new ExplicitException(String.format("Service '" + jobService.getName() + "' is stopped unexpectedly"));
 			}
 			
 			try {
@@ -520,7 +520,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							hostWorkspace = new File(hostBuildHome, "workspace");
 							FileUtils.createDir(hostWorkspace);
 						}
-
+						
 						File hostHome = null;
 						try {
 							LineConsumer logger = new LineConsumer(StandardCharsets.UTF_8.name()) {
@@ -668,6 +668,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								}
 							}
 							
+							jobContext.reportJobWorkspace(containerWorkspace);
+
 							String containerName = network + "-job";
 							docker.clearArgs();
 							docker.addArgs("run", "--name=" + containerName, "--network=" + network);
@@ -703,7 +705,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							jobLogger.log("Running job container...");
 							
 							try {
-								docker.execute(logger, logger, null, new ProcessKiller() {
+								ExecutionResult result = docker.execute(logger, logger, null, new ProcessKiller() {
 			
 									@Override
 									public void kill(Process process, String executionId) {
@@ -727,7 +729,13 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 										}).checkReturnCode();
 									}
 									
-								}).checkReturnCode();
+								});
+								if (result.getReturnCode() != 0) {
+									String logMessage = String.format("Job command failed in build %s#%d", 
+											jobContext.getProjectName(), jobContext.getBuildNumber());
+									DockerExecutor.logger.debug(logMessage, result.buildException());
+									throw new ExplicitException("Job command failed with exit code " + result.getReturnCode());
+								}
 							} finally {
 								jobLogger.log("Sending job outcomes...");
 								
@@ -807,7 +815,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					if (argument.startsWith(option))
 						return true;
 				} else {
-					throw new GeneralException("Invalid option: " + option);
+					throw new ExplicitException("Invalid option: " + option);
 				}
 			}
 		}

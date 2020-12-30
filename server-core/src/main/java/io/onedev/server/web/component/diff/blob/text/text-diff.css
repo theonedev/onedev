@@ -131,13 +131,14 @@
 	font-size: inherit;
 }
 .text-diff>tbody>tr>td.content>span.content-mark {
-	background: #CCCCFF;
+	background: #8950FC;
+	color: white !important;
 }
 .text-diff>tbody>tr>td.content>span.content-mark.insert {
-	background: #88FFFF;
+	background: #91c8ae;
 }
 .text-diff>tbody>tr>td.content>span.content-mark.delete {
-	background: #FF88FF;
+	background: #dc9ec9;
 }
 
 .text-diff>tbody>tr>td.number>.comment-indicator {

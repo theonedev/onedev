@@ -6,7 +6,7 @@ import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestMapper;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.mapper.BaseResourceMapper;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
@@ -119,7 +119,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 	@Override
 	public CompoundRequestMapper add(IRequestMapper mapper) {
 		if (mapper instanceof ResourceMapper && !(mapper instanceof BaseResourceMapper))
-			throw new GeneralException("Base resource mapper should be used");
+			throw new ExplicitException("Base resource mapper should be used");
 		return super.add(mapper);
 	}
 

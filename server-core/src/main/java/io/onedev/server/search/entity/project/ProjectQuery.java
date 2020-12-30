@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.AntlrUtils;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.AndEntityCriteria;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -125,7 +125,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 						case ProjectQueryLexer.IsAfter:
 							return new UpdateDateCriteria(value, operator);
 						default:
-							throw new GeneralException("Unexpected operator " + getRuleName(operator));
+							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 						}
 					}
 					
@@ -159,7 +159,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
 				if (!Project.ORDER_FIELDS.containsKey(fieldName)) 
-					throw new GeneralException("Can not order by field: " + fieldName);
+					throw new ExplicitException("Can not order by field: " + fieldName);
 				
 				EntitySort projectSort = new EntitySort();
 				projectSort.setField(fieldName);
@@ -176,13 +176,13 @@ public class ProjectQuery extends EntityQuery<Project> {
 		}
 	}
 	
-	private static GeneralException newOperatorException(String fieldName, int operator) {
-		return new GeneralException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
+	private static ExplicitException newOperatorException(String fieldName, int operator) {
+		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
 	public static void checkField(String fieldName, int operator) {
 		if (!Project.QUERY_FIELDS.contains(fieldName))
-			throw new GeneralException("Field not found: " + fieldName);
+			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
 		case ProjectQueryLexer.Contains:
 			if (!fieldName.equals(Project.NAME_DESCRIPTION))

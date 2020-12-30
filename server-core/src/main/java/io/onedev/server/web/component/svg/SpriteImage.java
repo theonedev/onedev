@@ -18,8 +18,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.mapper.BaseResourceMapper;
 import io.onedev.server.web.resource.SvgSpriteResourceReference;
@@ -90,14 +90,14 @@ public class SpriteImage extends WebComponent {
 							if (baseMapper.getResourceReference() instanceof SvgSpriteResourceReference) {
 								scope = ((SvgSpriteResourceReference) baseMapper.getResourceReference()).getScope();
 							} else {
-								throw new GeneralException("Path '" + mountPath 
+								throw new ExplicitException("Path '" + mountPath 
 										+ "' should be mounted to a svg sprite resource reference");
 							}
 						}
 					}
 					
 					if (scope == null)
-						throw new GeneralException("Unable to find svg sprite resource mounted at: " + mountPath);
+						throw new ExplicitException("Unable to find svg sprite resource mounted at: " + mountPath);
 					
 					spriteScopes.put(mountPath, scope);
 				}

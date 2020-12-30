@@ -1,8 +1,27 @@
 .cm-identifierhighlight {
-	background: #CCC;
+	background: #D1D3E0;
+}
+.cm-searching {
+    background: #ffa;
 }
 .CodeMirror-mark {
-	background: #CCCCFF;
+	background: #8950FC;
+}
+.cm-identifierhighlight.CodeMirror-mark {
+	background: #ad91ee;	
+}
+.cm-searching.CodeMirror-mark {
+	background: #c4a7d3;
+}
+.cm-searching.cm-identifierhighlight {
+	background: #e8e9c5;
+}
+.cm-searching.cm-identifierhighlight.CodeMirror-mark {
+	background: #b89ce0;
+}
+
+.CodeMirror-mark:not(.CodeMirror-selectedtext) {
+	color: white !important;
 }
 .CodeMirror {
 	font-size: 12px;
@@ -14,10 +33,7 @@
 	border-right-color: var(--secondary);
 }
 .CodeMirror-selected {
-	background-color: #3399FF !important;
-}
-.CodeMirror-selectedtext {
-	color: white !important;
+	background-color: #b4d7ff !important;
 }
 .CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div {
 	background: none repeat scroll 0 0 var(--light-dark); 

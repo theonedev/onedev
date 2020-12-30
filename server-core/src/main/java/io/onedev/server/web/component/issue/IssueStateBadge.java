@@ -11,11 +11,11 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.util.ColorUtils;
 
 @SuppressWarnings("serial")
-public class IssueStateLabel extends Label {
+public class IssueStateBadge extends Label {
 
 	private IModel<Issue> issueModel;
 	
-	public IssueStateLabel(String id, IModel<Issue> issueModel) {
+	public IssueStateBadge(String id, IModel<Issue> issueModel) {
 		super(id, issueModel.getObject().getState());
 		this.issueModel = issueModel;
 	}

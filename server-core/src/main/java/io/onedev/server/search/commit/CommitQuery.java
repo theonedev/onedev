@@ -18,9 +18,9 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
@@ -99,11 +99,11 @@ public class CommitQuery implements Serializable {
 						if (NumberUtils.isDigits(numberStr)) {
 							Build build = OneDev.getInstance(BuildManager.class).find(project, Long.parseLong(numberStr));
 							if (build == null)
-								throw new GeneralException("Unable to find build: " + value);
+								throw new ExplicitException("Unable to find build: " + value);
 							else
 								value = build.getCommitHash();
 						} else {
-							throw new GeneralException("Invalid build number: " + numberStr);
+							throw new ExplicitException("Invalid build number: " + numberStr);
 						}
 					}
 					if (criteria.revisionCriteria().SINCE() != null)

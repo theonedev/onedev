@@ -18,7 +18,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -118,7 +118,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 											|| fieldName.equals(PullRequest.NAME_COMMENT)) {
 										return null;
 									}
-								} catch (GeneralException ex) {
+								} catch (ExplicitException ex) {
 								}
 							}
 						}
@@ -145,7 +145,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				String fieldName = PullRequestQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					PullRequestQuery.checkField(fieldName, PullRequestQuery.getOperator(suggestedLiteral));
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					return null;
 				}
 			}

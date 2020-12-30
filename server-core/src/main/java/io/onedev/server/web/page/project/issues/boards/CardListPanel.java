@@ -16,7 +16,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
@@ -70,7 +70,7 @@ abstract class CardListPanel extends Panel {
 				});
 				index++;
 			}
-		} catch (GeneralException e) {
+		} catch (ExplicitException e) {
 			error(e.getMessage());
 		}
 		add(cardsView);

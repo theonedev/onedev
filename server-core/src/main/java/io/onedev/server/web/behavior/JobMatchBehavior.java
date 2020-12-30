@@ -16,7 +16,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.jobmatch.JobMatch;
 import io.onedev.server.util.jobmatch.JobMatchLexer;
@@ -86,7 +86,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 				String fieldName = JobMatch.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					JobMatch.checkField(fieldName, AntlrUtils.getLexerRule(JobMatchLexer.ruleNames, suggestedLiteral));
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					return null;
 				}
 			}

@@ -112,6 +112,17 @@ onedev.server.layout = {
 		});		
 
 		var $main = $body.children(".main");
+
+		$main.on("getViewState", function() {
+		    return {
+				scrollLeft: $main.scrollLeft(),
+				scrollTop: $main.scrollTop()
+			}
+		});
+		$main.on("setViewState", function(e, viewState) {
+		    $main.scrollLeft(viewState.scrollLeft);
+			$main.scrollTop(viewState.scrollTop);
+		});
 		
 		$main.on("resized", function() {
 			var count = $(".need-width:visible:not(:has('.need-width:visible'))").length;

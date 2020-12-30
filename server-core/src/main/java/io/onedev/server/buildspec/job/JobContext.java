@@ -163,4 +163,6 @@ public abstract class JobContext {
 
 	public abstract void notifyJobRunning();
 	
+	public abstract void reportJobWorkspace(String jobWorkspace);
+	
 }

@@ -16,7 +16,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
@@ -85,7 +85,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 									} else {
 										return null;
 									}
-								} catch (GeneralException ex) {
+								} catch (ExplicitException ex) {
 								}
 							}
 						}
@@ -112,7 +112,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 				String fieldName = CodeCommentQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					CodeCommentQuery.checkField(getProject(), fieldName, CodeCommentQuery.getOperator(suggestedLiteral));
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					return null;
 				}
 			}

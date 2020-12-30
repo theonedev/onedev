@@ -5,8 +5,8 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Build;
@@ -57,10 +57,10 @@ public class CloseMilestoneAction extends PostBuildAction {
 						milestone.setClosed(true);
 						milestoneManager.save(milestone);
 					} else {
-						throw new GeneralException("Closing milestone '" + milestoneName + "' is not allowed in this build");
+						throw new ExplicitException("Closing milestone '" + milestoneName + "' is not allowed in this build");
 					}
 				} else {
-					throw new GeneralException("Unable to find milestone '" + milestoneName + "'");
+					throw new ExplicitException("Unable to find milestone '" + milestoneName + "'");
 				}
 			}
 			

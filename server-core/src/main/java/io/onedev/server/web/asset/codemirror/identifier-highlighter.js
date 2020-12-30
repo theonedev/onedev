@@ -33,15 +33,15 @@
 				cm.removeOverlay(over);
 			clearTimeout(cm.state.identifierHighlighter.timeout);
 			cm.state.identifierHighlighter = null;
-			cm.off("cursorActivity", cursorActivity);
+			cm.off("mousedown", mousedown);
 		}
 		if (val) {
 			cm.state.identifierHighlighter = new State(val);
-			cm.on("cursorActivity", cursorActivity);
+			cm.on("mousedown", mousedown);
 		}
 	});
 
-	function cursorActivity(cm) {
+	function mousedown(cm) {
 		var state = cm.state.identifierHighlighter;
 		clearTimeout(state.timeout);
 		state.timeout = setTimeout(function() {highlightIdentifiers(cm);}, state.delay);

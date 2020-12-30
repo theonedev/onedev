@@ -14,7 +14,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -66,7 +66,7 @@ public class PasswordResetPage extends SimplePage {
 				if (user == null) 
 					user = userManager.findByEmail(loginNameOrEmail);
 				if (user == null) {
-					throw new GeneralException("No user found with login name or email: " + loginNameOrEmail);
+					throw new ExplicitException("No user found with login name or email: " + loginNameOrEmail);
 				} else {
 					SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 					if (settingManager.getMailSetting() != null) {
@@ -94,7 +94,7 @@ public class PasswordResetPage extends SimplePage {
 								"Your OneDev password has been reset", htmlBody, textBody);
 						return "Please check your email " + user.getEmail() + " for the reset password";
 					} else {
-						throw new GeneralException("Unable to send password reset email as smtp setting is not defined");
+						throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");
 					}
 				}
 			}

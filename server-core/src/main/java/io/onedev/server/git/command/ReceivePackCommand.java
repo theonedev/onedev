@@ -8,9 +8,9 @@ import java.util.Map;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ExecutionResult;
 
-public class ReceivePackCommand extends GitCommand<ExecuteResult> {
+public class ReceivePackCommand extends GitCommand<ExecutionResult> {
 
 	private InputStream stdin;
 	
@@ -45,7 +45,7 @@ public class ReceivePackCommand extends GitCommand<ExecuteResult> {
 	}
 	
 	@Override
-	public ExecuteResult call() {
+	public ExecutionResult call() {
 		Preconditions.checkNotNull(stdin);
 		Preconditions.checkNotNull(stdout);
 		Preconditions.checkNotNull(stderr);

@@ -44,8 +44,8 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
@@ -224,7 +224,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											|| fieldSpec instanceof TextField) {
 										return null;
 									}
-								} catch (GeneralException ex) {
+								} catch (ExplicitException ex) {
 								}
 							}
 						}
@@ -260,7 +260,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					checkField(fieldName, getOperator(suggestedLiteral), 
 							withCurrentUserCriteria, withCurrentBuildCriteria, 
 							withCurrentPullRequestCriteria, withCurrentCommitCriteria);
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					return null;
 				}
 			}

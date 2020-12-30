@@ -47,10 +47,10 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CloneInfo;
-import io.onedev.server.GeneralException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
@@ -161,7 +161,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	    	for (ConstraintViolation<?> violation: validator.validate(project.getBuildSpec(commitId))) {
 	    		String message = String.format("Error validating build spec (project: %s, commit: %s, property: %s, message: %s)", 
 	    				project.getName(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
-	    		throw new GeneralException(message);
+	    		throw new ExplicitException(message);
 	    	}
 		} finally {
 			Project.pop();
@@ -214,7 +214,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			
 			if (!checkedJobNames.add(jobName)) {
 				String message = String.format("Circular job dependencies found (%s)", checkedJobNames);
-				throw new GeneralException(message);
+				throw new ExplicitException(message);
 			}
 	
 			Map<String, List<String>> paramMapToQuery = new HashMap<>(paramMap);
@@ -273,14 +273,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
 					Project dependencyProject = projectManager.find(dependency.getProjectName());
 					if (dependencyProject == null)
-						throw new GeneralException("Unable to find dependency project: " + dependency.getProjectName());
+						throw new ExplicitException("Unable to find dependency project: " + dependency.getProjectName());
 	
 					Subject subject;
 					if (dependency.getAccessTokenSecret() != null) {
 						String accessToken = build.getSecretValue(dependency.getAccessTokenSecret());
 						User user = userManager.findByAccessToken(accessToken);
 						if (user == null) {
-							throw new GeneralException("Unable to access dependency project '" 
+							throw new ExplicitException("Unable to access dependency project '" 
 									+ dependency.getProjectName() + "': invalid access token");
 						}
 						subject = user.asSubject();
@@ -295,12 +295,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					if (dependencyBuild == null) {
 						String errorMessage = String.format("Unable to find dependency build (project: %s, build number: %d)", 
 								dependency.getProjectName(), buildNumber);
-						throw new GeneralException(errorMessage);
+						throw new ExplicitException(errorMessage);
 					}
 					
 					JobPermission jobPermission = new JobPermission(dependencyBuild.getJobName(), new AccessBuild());
 					if (!subject.isPermitted(new ProjectPermission(dependencyProject, jobPermission))) {
-						throw new GeneralException("Unable to access dependency build '" 
+						throw new ExplicitException("Unable to access dependency build '" 
 								+ dependencyBuild.getFQN() + "': permission denied");
 					}
 					
@@ -433,6 +433,20 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 													});
 												}
+
+												@Override
+												public void reportJobWorkspace(String jobWorkspace) {
+													transactionManager.run(new Runnable() {
+
+														@Override
+														public void run() {
+															Build build = buildManager.load(buildId);
+															build.setJobWorkspace(jobWorkspace);
+															buildManager.save(build);
+														}
+														
+													});
+												}
 												
 											};
 										} finally {
@@ -456,7 +470,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											@Override
 											public Boolean call() {
 												Build build = buildManager.load(buildId);
-												if (e instanceof GeneralException) 
+												if (e instanceof ExplicitException) 
 													build.setErrorMessage(e.getMessage());
 												else 
 													build.setErrorMessage(Throwables.getStackTraceAsString(e));
@@ -526,7 +540,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												jobLogger.log("Publishing job artifacts...");
 												build.publishArtifacts(serverWorkspace, job.getArtifacts());
 											}
-											
+
 											jobLogger.log("Processing job reports...");
 											for (JobReport report: job.getReports())
 												report.process(build, serverWorkspace, jobLogger);
@@ -548,7 +562,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				
 				return executionRef.get();
 			} else {
-				throw new GeneralException("No applicable job executor");
+				throw new ExplicitException("No applicable job executor");
 			}
 		} finally {
 			Build.pop();
@@ -556,23 +570,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	private void log(Throwable e, SimpleLogger logger) {
-		if (e instanceof GeneralException)
+		if (e instanceof ExplicitException)
 			logger.log(e.getMessage());
 		else
 			logger.log(e);
 	}
 	
 	private RuntimeException maskSecrets(Throwable e, Collection<String> jobSecretsToMask) {
-		if (e instanceof GeneralException) {
+		if (e instanceof ExplicitException) {
 			String errorMessage = e.getMessage();
 			for (String secret: jobSecretsToMask)
 				errorMessage = StringUtils.replace(errorMessage, secret, SecretInput.MASK);
-			return new GeneralException(errorMessage);
+			return new ExplicitException(errorMessage);
 		} else {
 			String stackTrace = Throwables.getStackTraceAsString(e);
 			for (String secret: jobSecretsToMask)
 				stackTrace = StringUtils.replace(stackTrace, secret, SecretInput.MASK);
-			return new GeneralException(stackTrace);
+			return new ExplicitException(stackTrace);
 		}
 	}
 	
@@ -580,7 +594,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public JobContext getJobContext(String jobToken, boolean mustExist) {
 		JobContext jobContext = jobContexts.get(jobToken);
 		if (mustExist && jobContext == null)
-			throw new GeneralException("No job context found for specified job token");
+			throw new ExplicitException("No job context found for specified job token");
 		return jobContext;
 	}
 	
@@ -698,7 +712,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			buildManager.save(build);
 			listenerRegistry.post(new BuildSubmitted(build));
 		} else {
-			throw new GeneralException("Build #" + build.getNumber() + " not finished yet");
+			throw new ExplicitException("Build #" + build.getNumber() + " not finished yet");
 		}
 	}
 
@@ -791,7 +805,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										try {
 											jobExecutions.put(build.getId(), execute(build));
 										} catch (Throwable t) {
-											if (t instanceof GeneralException)
+											if (t instanceof ExplicitException)
 												markBuildError(build, t.getMessage());
 											else
 												markBuildError(build, Throwables.getStackTraceAsString(t));
@@ -838,7 +852,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										}
 										build.setStatus(Build.Status.CANCELLED);
 									} catch (ExecutionException e) {
-										if (e.getCause() instanceof GeneralException)
+										if (e.getCause() instanceof ExplicitException)
 											build.setStatus(Build.Status.FAILED, e.getCause().getMessage());
 										else
 											build.setStatus(Build.Status.FAILED, e.getMessage());

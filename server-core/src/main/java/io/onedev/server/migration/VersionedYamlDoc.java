@@ -38,7 +38,7 @@ import org.yaml.snakeyaml.serializer.Serializer;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.launcher.loader.ImplementationRegistry;
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -80,7 +80,7 @@ public class VersionedYamlDoc extends MappingNode {
 			if (keyNode.getValue().equals("version")) 
 				return ((ScalarNode)tuple.getValueNode()).getValue();
 		}
-		throw new GeneralException("Unable to find version");
+		throw new ExplicitException("Unable to find version");
 	}
 	
 	private void removeVersion() {

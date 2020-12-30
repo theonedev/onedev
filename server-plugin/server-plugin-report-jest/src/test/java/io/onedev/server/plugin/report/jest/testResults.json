@@ -1,0 +1,144 @@
+{
+  "numFailedTestSuites": 1,
+  "numFailedTests": 1,
+  "numPassedTestSuites": 3,
+  "numPassedTests": 4,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 1,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 1,
+  "numTotalTestSuites": 4,
+  "numTotalTests": 7,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": true,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 2,
+    "total": 2,
+    "unchecked": 1,
+    "uncheckedKeysByFile": [
+      {
+        "filePath": "/Users/robin/Projects/onedev/reports/jest-demo/src/components/Items.test.js",
+        "keys": [
+          "renders correctly when there are no items 1"
+        ]
+      }
+    ],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1608965513244,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "failureMessages": [
+            "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 600\nReceived: 500\n    at Object.<anonymous> (/Users/robin/Projects/onedev/reports/jest-demo/src/utils/Arith.test.js:4:21)\n    at Promise.then.completed (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/utils.js:276:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/utils.js:216:10)\n    at _callCircusTest (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:212:40)\n    at processTicksAndRejections (internal/process/task_queues.js:97:5)\n    at _runTest (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:149:3)\n    at _runTestsForDescribeBlock (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:63:9)\n    at run (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/run.js:25:3)\n    at runAndTransformResultsToJestFormat (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:176:21)\n    at jestAdapter (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:109:19)\n    at runTestInternal (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-runner/build/runTest.js:380:16)\n    at runTest (/Users/robin/Projects/onedev/reports/jest-demo/node_modules/jest-runner/build/runTest.js:472:34)"
+          ],
+          "fullName": "calc",
+          "location": null,
+          "status": "failed",
+          "title": "calc"
+        },
+        {
+          "ancestorTitles": [],
+          "failureMessages": [],
+          "fullName": "mul",
+          "location": null,
+          "status": "passed",
+          "title": "mul"
+        }
+      ],
+      "endTime": 1608965514276,
+      "message": "  ● calc\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 600\n    Received: 500\n\n      2 | \n      3 | it('calc', () => {\n    > 4 |   expect(add(2, 3)).toBe(600);\n        |                     ^\n      5 | });\n      6 | \n      7 | it('mul', () => {\n\n      at Object.<anonymous> (src/utils/Arith.test.js:4:21)\n",
+      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/utils/Arith.test.js",
+      "startTime": 1608965513679,
+      "status": "failed",
+      "summary": ""
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "NewsContent"
+          ],
+          "failureMessages": [],
+          "fullName": "NewsContent Should render a normal string",
+          "location": null,
+          "status": "pending",
+          "title": "Should render a normal string"
+        },
+        {
+          "ancestorTitles": [
+            "NewsContent",
+            "NewsContent2"
+          ],
+          "failureMessages": [],
+          "fullName": "NewsContent NewsContent2 Should render a normal string",
+          "location": null,
+          "status": "todo",
+          "title": "Should render a normal string"
+        }
+      ],
+      "endTime": 1608965514417,
+      "message": "",
+      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/Integration.test.js",
+      "startTime": 1608965514292,
+      "status": "passed",
+      "summary": ""
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "failureMessages": [],
+          "fullName": "renders correctly when there is a single item",
+          "location": null,
+          "status": "passed",
+          "title": "renders correctly when there is a single item"
+        },
+        {
+          "ancestorTitles": [],
+          "failureMessages": [],
+          "fullName": "renders correctly when there are multiple items",
+          "location": null,
+          "status": "passed",
+          "title": "renders correctly when there are multiple items"
+        }
+      ],
+      "endTime": 1608965514575,
+      "message": "",
+      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/components/Items.test.js",
+      "startTime": 1608965514428,
+      "status": "passed",
+      "summary": ""
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "failureMessages": [],
+          "fullName": "should return the product",
+          "location": null,
+          "status": "passed",
+          "title": "should return the product"
+        }
+      ],
+      "endTime": 1608965514696,
+      "message": "",
+      "name": "/Users/robin/Projects/onedev/reports/jest-demo/src/ProductManager.test.js",
+      "startTime": 1608965514584,
+      "status": "passed",
+      "summary": ""
+    }
+  ],
+  "wasInterrupted": false
+}

@@ -18,9 +18,9 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiverParser.CriteriaContext;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -63,14 +63,14 @@ public class NotificationReceiver {
 				if (user != null) 
 					emails.add(user.getEmail());
 				else 
-					throw new GeneralException("Unable to find user '" + userName + "'");
+					throw new ExplicitException("Unable to find user '" + userName + "'");
 			} else if (criteria.groupCriteria() != null) {
 				String groupName = getValue(criteria.groupCriteria().Value());
 				Group group = OneDev.getInstance(GroupManager.class).find(groupName);
 				if (group != null) 
 					emails.addAll(group.getMembers().stream().map(it->it.getEmail()).collect(Collectors.toList()));
 				else 
-					throw new GeneralException("Unable to find group '" + groupName + "'");
+					throw new ExplicitException("Unable to find group '" + groupName + "'");
 			} else if (criteria.Committers() != null) {
 				if (build != null) {
 					for (RevCommit commit: build.getCommits(null)) {

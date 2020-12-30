@@ -4,7 +4,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -18,7 +18,7 @@ public class OwnedByMeCriteria extends EntityCriteria<Project> {
 		if (User.get() != null)
 			return new OwnedByCriteria(User.get()).getPredicate(root, builder);
 		else
-			throw new GeneralException("Please login to perform this query");
+			throw new ExplicitException("Please login to perform this query");
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class OwnedByMeCriteria extends EntityCriteria<Project> {
 		if (User.get() != null)
 			return new OwnedByCriteria(User.get()).matches(project);
 		else
-			throw new GeneralException("Please login to perform this query");
+			throw new ExplicitException("Please login to perform this query");
 	}
 
 	@Override

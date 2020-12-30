@@ -13,7 +13,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.asset.titleandstatus.TitleAndStatusCssResourceReference;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -36,7 +36,7 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new RequestStatusLabel("state", getModel()));
+		add(new RequestStatusBadge("state", getModel()));
 		
 		Project project = ((ProjectPage)getPage()).getProject();
 		

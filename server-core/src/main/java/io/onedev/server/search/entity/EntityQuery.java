@@ -12,9 +12,9 @@ import javax.persistence.criteria.Path;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.MilestoneManager;
@@ -51,7 +51,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		try {
 			return Integer.parseInt(value);
 		} catch (NumberFormatException e) {
-			throw new GeneralException("Invalid number: " + value);
+			throw new ExplicitException("Invalid number: " + value);
 		}
 	}
 	
@@ -59,21 +59,21 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		try {
 			return Long.parseLong(value);
 		} catch (NumberFormatException e) {
-			throw new GeneralException("Invalid number: " + value);
+			throw new ExplicitException("Invalid number: " + value);
 		}
 	}
 	
 	public static User getUser(String loginName) {
 		User user = OneDev.getInstance(UserManager.class).findByName(loginName);
 		if (user == null)
-			throw new GeneralException("Unable to find user with login: " + loginName);
+			throw new ExplicitException("Unable to find user with login: " + loginName);
 		return user;
 	}
 	
 	public static Project getProject(String projectName) {
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		if (project == null)
-			throw new GeneralException("Unable to find project with name: " + projectName);
+			throw new ExplicitException("Unable to find project with name: " + projectName);
 		return project;
 	}
 	
@@ -83,13 +83,13 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		else if (value.equals("false"))
 			return false;
 		else
-			throw new GeneralException("Invalid boolean: " + value);
+			throw new ExplicitException("Invalid boolean: " + value);
 	}
 	
 	public static Date getDateValue(String value) {
 		Date dateValue = DateUtils.parseRelaxed(value);
 		if (dateValue == null)
-			throw new GeneralException("Unrecognized date: " + value);
+			throw new ExplicitException("Unrecognized date: " + value);
 		return dateValue;
 	}
 	
@@ -100,7 +100,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (commitId != null && commitId.getCommitId() != null)
 			return commitId;
 		else
-			throw new GeneralException("Unable to find revision: " + value);
+			throw new ExplicitException("Unable to find revision: " + value);
 	}
 
 	public static ProjectScopedRevision getRevision(@Nullable Project project, String value) {
@@ -110,7 +110,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (revision != null)
 			return revision;
 		else
-			throw new GeneralException("Unable to find revision: " + value);
+			throw new ExplicitException("Unable to find revision: " + value);
 	}
 	
 	public static Issue getIssue(@Nullable Project project, String value) {
@@ -124,7 +124,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (issue != null)
 			return issue;
 		else
-			throw new GeneralException("Unable to find issue: " + value);
+			throw new ExplicitException("Unable to find issue: " + value);
 	}
 	
 	public static PullRequest getPullRequest(@Nullable Project project, String value) {
@@ -138,7 +138,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (pullRequest != null)
 			return pullRequest;
 		else
-			throw new GeneralException("Unable to find pull request: " + value);
+			throw new ExplicitException("Unable to find pull request: " + value);
 	}
 	
 	public static Build getBuild(@Nullable Project project, String value) {
@@ -152,7 +152,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (build != null)
 			return build;
 		else
-			throw new GeneralException("Unable to find build: " + value);
+			throw new ExplicitException("Unable to find build: " + value);
 	}
 	
 	public static ProjectScopedNumber getProjectScopedNumber(@Nullable Project project, String value) {
@@ -172,7 +172,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (milestone != null)
 			return milestone;
 		else
-			throw new GeneralException("Unable to find milestone: " + value);
+			throw new ExplicitException("Unable to find milestone: " + value);
 	}
 	
 	public boolean matches(T entity) {

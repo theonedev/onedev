@@ -18,8 +18,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.AntlrUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -126,22 +126,22 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (ctx.operator.getType()) {
 						case IssueQueryLexer.SubmittedByMe:
 							if (!withCurrentUserCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new SubmittedByMeCriteria();
 						case IssueQueryLexer.FixedInCurrentBuild:
 							if (!withCurrentBuildCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentBuildCriteria();
 						case IssueQueryLexer.FixedInCurrentPullRequest:
 							if (!withCurrentPullRequestCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentPullRequestCriteria();
 						case IssueQueryLexer.FixedInCurrentCommit:
 							if (!withCurrentCommitCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentCommitCriteria();
 						default:
-							throw new GeneralException("Unexpected operator: " + ctx.operator.getText());
+							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 						}
 					}
 					
@@ -282,7 +282,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 								}
 							}
 						default:
-							throw new GeneralException("Unexpected operator " + getRuleName(operator));
+							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
 						}
 					}
 					
@@ -319,7 +319,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
 							&& !(fieldSpec instanceof NumberField)) {
-						throw new GeneralException("Can not order by field: " + fieldName);
+						throw new ExplicitException("Can not order by field: " + fieldName);
 					}
 				}
 				
@@ -345,8 +345,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 			return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
-	private static GeneralException newOperatorException(String fieldName, int operator) {
-		return new GeneralException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
+	private static ExplicitException newOperatorException(String fieldName, int operator) {
+		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
 	public static void checkField(String fieldName, int operator, 
@@ -354,7 +354,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			boolean withCurrentPullRequestCriteria, boolean withCurrentCommitCriteria) {
 		FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec == null && !Issue.QUERY_FIELDS.contains(fieldName))
-			throw new GeneralException("Field not found: " + fieldName);
+			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
 			if (Issue.QUERY_FIELDS.contains(fieldName) 

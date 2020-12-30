@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.command.ReceivePackCommand;
@@ -74,7 +74,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 			return new GitSshCommand(command) {
 
 				@Override
-				protected ExecuteResult execute(File gitDir, Map<String, String> gitEnvs) {
+				protected ExecutionResult execute(File gitDir, Map<String, String> gitEnvs) {
 		            return new UploadPackCommand(gitDir, gitEnvs)
 		            		.stdin(inputStream)
 		            		.stdout(outputStream)
@@ -95,7 +95,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 			return new GitSshCommand(command) {
 
 				@Override
-				protected ExecuteResult execute(File gitDir, Map<String, String> gitEnvs) {
+				protected ExecutionResult execute(File gitDir, Map<String, String> gitEnvs) {
 		            return new ReceivePackCommand(gitDir, gitEnvs)
 		            		.stdin(inputStream)
 		            		.stdout(outputStream)
@@ -188,7 +188,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 				@Override
 				public void run() {
 					try {
-						ExecuteResult result = execute(gitDir, gitEnvs);
+						ExecutionResult result = execute(gitDir, gitEnvs);
 						onExit(result.getReturnCode(), null);
 					} catch (Exception e) {
 						logger.error("Error executing git command", e);
@@ -203,7 +203,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 		@Nullable
 		protected abstract String checkPermission(Project project);
 
-		protected abstract ExecuteResult execute(File gitDir, Map<String, String> gitEnvs);
+		protected abstract ExecutionResult execute(File gitDir, Map<String, String> gitEnvs);
 
 		@Override
 		public void destroy() throws Exception {

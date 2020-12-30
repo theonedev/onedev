@@ -25,8 +25,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -1086,7 +1086,7 @@ public class DataMigrator {
 									Path target = projectsDir.toPath();
 								    File linkDir = new File(Bootstrap.installDir, "site/projects");
 								    if (linkDir.exists())
-								    	throw new GeneralException("Directory already exists: " + linkDir);
+								    	throw new ExplicitException("Directory already exists: " + linkDir);
 								    Files.createSymbolicLink(linkDir.toPath(), target);							
 								}
 							} catch (IOException e) {

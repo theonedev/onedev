@@ -46,7 +46,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -76,7 +76,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.pagenavigator.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
 import io.onedev.server.web.component.pullrequest.review.ReviewerAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
@@ -142,7 +142,7 @@ public abstract class PullRequestListPanel extends Panel {
 	private PullRequestQuery parse(@Nullable String queryString, PullRequestQuery baseQuery) {
 		try {
 			return PullRequestQuery.merge(baseQuery, PullRequestQuery.parse(getProject(), queryString));
-		} catch (GeneralException e) {
+		} catch (ExplicitException e) {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
@@ -458,7 +458,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 				fragment.add(new Label("comments", request.getCommentCount()));
 				
-				fragment.add(new RequestStatusLabel("status", rowModel));
+				fragment.add(new RequestStatusBadge("status", rowModel));
 				
 				fragment.add(new BranchLink("target", request.getTarget()));
 
@@ -503,7 +503,7 @@ public abstract class PullRequestListPanel extends Panel {
 				try {
 					return getPullRequestManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count, true, true).iterator();
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<PullRequest>().iterator();
 				}
@@ -515,7 +515,7 @@ public abstract class PullRequestListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getPullRequestManager().count(getProject(), query.getCriteria());
-					} catch (GeneralException e) {
+					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
 				}

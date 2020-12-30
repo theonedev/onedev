@@ -17,9 +17,9 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
@@ -71,9 +71,9 @@ public class ReviewRequirement {
 						if (!users.contains(user)) 
 							users.add(user);
 						else if (validate)
-							throw new GeneralException("User '" + userName + "' is included multiple times");
+							throw new ExplicitException("User '" + userName + "' is included multiple times");
 					} else if (validate) {
-						throw new GeneralException("Unable to find user '" + userName + "'");
+						throw new ExplicitException("Unable to find user '" + userName + "'");
 					}
 				} else if (criteria.groupCriteria() != null) {
 					String groupName = getValue(criteria.groupCriteria().Value());
@@ -90,10 +90,10 @@ public class ReviewRequirement {
 								groups.put(group, 1);
 							}
 						} else if (validate) {
-							throw new GeneralException("Group '" + groupName + "' is included multiple times");
+							throw new ExplicitException("Group '" + groupName + "' is included multiple times");
 						}
 					} else if (validate) {
-						throw new GeneralException("Unable to find group '" + groupName + "'");
+						throw new ExplicitException("Unable to find group '" + groupName + "'");
 					}
 				}
 			}			

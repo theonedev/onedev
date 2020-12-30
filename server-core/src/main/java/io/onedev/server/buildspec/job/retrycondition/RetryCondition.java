@@ -13,8 +13,8 @@ import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.AndCriteriaContext;
 import io.onedev.server.buildspec.job.retrycondition.RetryConditionParser.ConditionContext;
@@ -139,7 +139,7 @@ public class RetryCondition extends Criteria<Build> {
 			if (operator != RetryConditionLexer.IsEmpty && operator != RetryConditionLexer.Is)
 				throw newOperatorException(fieldName, operator);
 		} else {
-			throw new GeneralException("Param not found: " + fieldName);
+			throw new ExplicitException("Param not found: " + fieldName);
 		}				
 	}
 	
@@ -147,8 +147,8 @@ public class RetryCondition extends Criteria<Build> {
 		return AntlrUtils.getLexerRuleName(RetryConditionLexer.ruleNames, rule);
 	}
 	
-	private static GeneralException newOperatorException(String fieldName, int operator) {
-		return new GeneralException("Field '" + fieldName + "' is not applicable for operator '" 
+	private static ExplicitException newOperatorException(String fieldName, int operator) {
+		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" 
 				+ AntlrUtils.getLexerRuleName(RetryConditionLexer.ruleNames, operator) + "'");
 	}
 

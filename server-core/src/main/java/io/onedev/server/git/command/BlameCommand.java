@@ -23,7 +23,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
@@ -112,7 +112,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 		long time = System.currentTimeMillis();
 		
 		Logger effectiveLogger = logger!=null?logger:BlameCommand.logger;
-		ExecuteResult result = cmd.execute(new LineConsumer() {
+		ExecutionResult result = cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

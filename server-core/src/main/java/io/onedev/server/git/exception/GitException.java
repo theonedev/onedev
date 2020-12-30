@@ -1,8 +1,8 @@
 package io.onedev.server.git.exception;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 
-public class GitException extends GeneralException {
+public class GitException extends ExplicitException {
 
 	private static final long serialVersionUID = 1L;
 
@@ -14,9 +14,5 @@ public class GitException extends GeneralException {
 		super(message, cause);
 	}
 
-	public GitException(Throwable cause) {
-		super(cause);
-	}
-	
 }
 

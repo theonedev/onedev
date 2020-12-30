@@ -23,8 +23,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
@@ -161,7 +161,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 	    				try {
 	    					projectManager.onDeleteBranch(project, branchName);
-	    				} catch (GeneralException e) {
+	    				} catch (ExplicitException e) {
 	    					errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
 	    				}
 	    			}
@@ -183,7 +183,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 	    				try {
 	    					projectManager.onDeleteTag(project, tagName);
-	    				} catch (GeneralException e) {
+	    				} catch (ExplicitException e) {
 	    					errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
 	    				}
 	    			}

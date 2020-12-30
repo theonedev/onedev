@@ -60,9 +60,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -274,6 +274,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String jobName;
 	
+	private String jobWorkspace;
+	
 	@Column(nullable=false)
 	private String refName;
 	
@@ -399,6 +401,15 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
+	}
+
+	@Nullable
+	public String getJobWorkspace() {
+		return jobWorkspace;
+	}
+
+	public void setJobWorkspace(String jobWorkspace) {
+		this.jobWorkspace = jobWorkspace;
 	}
 
 	public String getVersion() {
@@ -753,10 +764,10 @@ public class Build extends AbstractEntity implements Referenceable {
 					if (isOnBranches(secret.getAuthorizedBranches()))				
 						return secret.getValue();
 					else
-						throw new GeneralException("Job secret not authorized: " + secretName);
+						throw new ExplicitException("Job secret not authorized: " + secretName);
 				}
 			}
-			throw new GeneralException("No job secret found: " + secretName);
+			throw new ExplicitException("No job secret found: " + secretName);
 		}
 	}
 	

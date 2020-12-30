@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 
 public class IsAncestorCommand extends GitCommand<Boolean> {
@@ -43,7 +43,7 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 		
 		cmd.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		
-		ExecuteResult result = cmd.execute(new LineConsumer() {
+		ExecutionResult result = cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {

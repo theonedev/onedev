@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.command.ErrorCollector;
-import io.onedev.commons.utils.command.ExecuteResult;
+import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -191,8 +191,8 @@ public class GitFilter implements Filter {
 						};
 						UploadPackCommand upload = new UploadPackCommand(gitDir, environments);
 						upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
-						ExecuteResult result = upload.call();
-						result.setErrorMessage(stderr.getMessage());
+						ExecutionResult result = upload.call();
+						result.setStderr(stderr.getMessage());
 						
 						if (result.getReturnCode() != 0 && !toleratedErrors.get())
 							throw result.buildException();
@@ -222,8 +222,8 @@ public class GitFilter implements Filter {
 						};
 						ReceivePackCommand receive = new ReceivePackCommand(gitDir, environments);
 						receive.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
-						ExecuteResult result = receive.call();
-						result.setErrorMessage(stderr.getMessage());
+						ExecutionResult result = receive.call();
+						result.setStderr(stderr.getMessage());
 						result.checkReturnCode();
 					} catch (IOException e) {
 						throw new RuntimeException(e);

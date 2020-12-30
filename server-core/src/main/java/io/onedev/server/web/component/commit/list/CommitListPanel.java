@@ -52,7 +52,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
@@ -105,7 +105,7 @@ public abstract class CommitListPanel extends Panel {
 			String queryString = queryStringModel.getObject();
 			try {
 				return CommitQuery.merge(getBaseQuery(), CommitQuery.parse(getProject(), queryString));
-			} catch (GeneralException e) {
+			} catch (ExplicitException e) {
 				error(e.getMessage());
 				return null;
 			} catch (Exception e) {
@@ -150,7 +150,7 @@ public abstract class CommitListPanel extends Panel {
 					command.ignoreCase(true);
 					
 					if (page > MAX_PAGES)
-						throw new GeneralException("Page should be no more than " + MAX_PAGES);
+						throw new ExplicitException("Page should be no more than " + MAX_PAGES);
 					
 					command.count(page * COMMITS_PER_PAGE);
 					

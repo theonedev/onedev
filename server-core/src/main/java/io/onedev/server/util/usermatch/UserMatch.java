@@ -17,8 +17,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.usermatch.UserMatchParser.CriteriaContext;
@@ -72,7 +72,7 @@ public class UserMatch implements Serializable {
 			specifiedGroup.setGroupName(groupName);
 			return specifiedGroup;
 		} else {
-			throw new GeneralException("Unrecognized user match criteria");
+			throw new ExplicitException("Unrecognized user match criteria");
 		}
 	}
 	

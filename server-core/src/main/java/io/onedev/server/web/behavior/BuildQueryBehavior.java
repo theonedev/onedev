@@ -19,7 +19,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Build;
@@ -145,7 +145,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 									} else {
 										return null;
 									}
-								} catch (GeneralException ex) {
+								} catch (ExplicitException ex) {
 								}
 							}
 						}
@@ -188,7 +188,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				String fieldName = BuildQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
 					BuildQuery.checkField(getProject(), fieldName, BuildQuery.getOperator(suggestedLiteral));
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					return null;
 				}
 			} 

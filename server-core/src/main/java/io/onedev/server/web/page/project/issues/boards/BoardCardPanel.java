@@ -29,7 +29,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.issue.IssueStateLabel;
+import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -61,7 +61,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		super.onInitialize();
 
 		List<String> displayFields = ((IssueBoardsPage)getPage()).getBoard().getDisplayFields();
-		add(new IssueStateLabel("state", new AbstractReadOnlyModel<Issue>() {
+		add(new IssueStateBadge("state", new AbstractReadOnlyModel<Issue>() {
 
 			@Override
 			public Issue getObject() {

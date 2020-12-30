@@ -43,7 +43,7 @@ import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.issue.IssueStateLabel;
+import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
@@ -76,7 +76,7 @@ public abstract class IssueOperationsPanel extends Panel {
 	protected void onBeforeRender() {
 		WebMarkupContainer stateContainer = new WebMarkupContainer("state");
 		addOrReplace(stateContainer);
-		stateContainer.add(new IssueStateLabel("state", new AbstractReadOnlyModel<Issue>() {
+		stateContainer.add(new IssueStateBadge("state", new AbstractReadOnlyModel<Issue>() {
 
 			@Override
 			public Issue getObject() {

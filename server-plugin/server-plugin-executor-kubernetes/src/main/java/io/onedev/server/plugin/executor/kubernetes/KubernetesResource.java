@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
@@ -28,10 +29,11 @@ import org.apache.commons.lang.SerializationUtils;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.server.GeneralException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
@@ -55,9 +57,11 @@ public class KubernetesResource {
     
 	@Path("/job-context")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @GET
-    public byte[] getJobContext() {
+    @POST
+    public byte[] getJobContext(@Nullable String jobWorkspace) {
 		JobContext context = jobManager.getJobContext(getJobToken(), true);
+		if (StringUtils.isNotBlank(jobWorkspace))
+			context.reportJobWorkspace(jobWorkspace);		
 		Map<String, Object> contextMap = new HashMap<>();
 		contextMap.put("commands", context.getCommands());
 		contextMap.put("retrieveSource", context.isRetrieveSource());
@@ -132,7 +136,7 @@ public class KubernetesResource {
 		if (jobToken != null)
 			return jobToken;
 		else
-			throw new GeneralException("Job token is expected");
+			throw new ExplicitException("Job token is expected");
 	}
 	
 }

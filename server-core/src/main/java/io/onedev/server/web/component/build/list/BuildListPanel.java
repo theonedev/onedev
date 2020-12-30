@@ -44,7 +44,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -134,7 +134,7 @@ public abstract class BuildListPanel extends Panel {
 	private BuildQuery parse(@Nullable String queryString, BuildQuery baseQuery) {
 		try {
 			return BuildQuery.merge(baseQuery, BuildQuery.parse(getProject(), queryString, true, true));
-		} catch (GeneralException e) {
+		} catch (ExplicitException e) {
 			error(e.getMessage());
 			return null;
 		} catch (Exception e) {
@@ -436,7 +436,7 @@ public abstract class BuildListPanel extends Panel {
 				try {
 					return getBuildManager().query(getProject(), queryModel.getObject(), 
 							(int)first, (int)count).iterator();
-				} catch (GeneralException e) {
+				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<Build>().iterator();
 				}
@@ -448,7 +448,7 @@ public abstract class BuildListPanel extends Panel {
 				if (query != null) {
 					try {
 						return getBuildManager().count(getProject(), query.getCriteria());
-					} catch (GeneralException e) {
+					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
 				} 

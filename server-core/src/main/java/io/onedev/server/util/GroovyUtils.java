@@ -12,9 +12,9 @@ import com.google.common.collect.MapMaker;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.script.ScriptContribution;
@@ -89,13 +89,13 @@ public class GroovyUtils {
     			try {
     				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
     			} catch (Exception e) {
-    				throw new GeneralException("Error evaluating groovy script: " + scriptName, e);
+    				throw new RuntimeException("Error evaluating groovy script: " + scriptName, e);
     			}
     		} else {
-    			throw new GeneralException("Unauthorized groovy script: " + scriptName);
+    			throw new ExplicitException("Unauthorized groovy script: " + scriptName);
     		}
     	} else {
-    		throw new GeneralException("Groovy script not found: " + scriptName);
+    		throw new ExplicitException("Groovy script not found: " + scriptName);
     	}
     }
     

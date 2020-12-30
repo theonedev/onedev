@@ -30,8 +30,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.AntlrUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.GeneralException;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -114,26 +114,26 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new TimedOutCriteria();
 						case BuildQueryLexer.Waiting:
 							if (!withUnfinishedCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new WaitingCriteria();
 						case BuildQueryLexer.Pending:
 							if (!withUnfinishedCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new PendingCriteria();
 						case BuildQueryLexer.Running:
 							if (!withUnfinishedCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new RunningCriteria();
 						case BuildQueryLexer.SubmittedByMe:
 							if (!withCurrentUserCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new SubmittedByMeCriteria();
 						case BuildQueryLexer.CancelledByMe:
 							if (!withCurrentUserCriteria)
-								throw new GeneralException("Criteria '" + ctx.operator.getText() + "' is not supported here");
+								throw new ExplicitException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new CancelledByMeCriteria();
 						default:
-							throw new GeneralException("Unexpected operator: " + ctx.operator.getText());
+							throw new ExplicitException("Unexpected operator: " + ctx.operator.getText());
 						}
 					}
 					
@@ -256,7 +256,7 @@ public class BuildQuery extends EntityQuery<Build> {
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
 				if (!ORDER_FIELDS.containsKey(fieldName)) 
-					throw new GeneralException("Can not order by field: " + fieldName);
+					throw new ExplicitException("Can not order by field: " + fieldName);
 				
 				EntitySort buildSort = new EntitySort();
 				buildSort.setField(fieldName);
@@ -276,7 +276,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	public static void checkField(Project project, String fieldName, int operator) {
 		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames(null);
 		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
-			throw new GeneralException("Field not found: " + fieldName);
+			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
 		case BuildQueryLexer.IsBefore:
 		case BuildQueryLexer.IsAfter:
@@ -310,8 +310,8 @@ public class BuildQuery extends EntityQuery<Build> {
 		}
 	}
 	
-	private static GeneralException newOperatorException(String fieldName, int operator) {
-		return new GeneralException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
+	private static ExplicitException newOperatorException(String fieldName, int operator) {
+		return new ExplicitException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
 	public static String getRuleName(int rule) {

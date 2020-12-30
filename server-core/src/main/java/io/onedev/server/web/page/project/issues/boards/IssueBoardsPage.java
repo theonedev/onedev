@@ -39,7 +39,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -142,7 +142,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		IssueQuery query;
 		try {
 			query = IssueQuery.parse(getProject(), queryString, true, true, false, false, false);
-		} catch (GeneralException e) {
+		} catch (ExplicitException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %squery: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
@@ -158,7 +158,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		IssueQuery baseQuery;
 		try {
 			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false, false, false);
-		} catch (GeneralException e) {
+		} catch (ExplicitException e) {
 			contentFrag.error(new QueryParseMessage(backlog, "Error parsing %sbase query: " + e.getMessage()));
 			return null;
 		} catch (Exception e) {
@@ -177,7 +177,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		if (StringUtils.isNotBlank(boardName)) {
 			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
-				throw new GeneralException("Can not find issue board: " + boardName);
+				throw new ExplicitException("Can not find issue board: " + boardName);
 		} else if (!boards.isEmpty()) {
 			boardIndex = 0;
 		} else {
@@ -189,7 +189,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		if (milestoneName != null) {
 			milestone = getProject().getMilestone(milestoneName);
 			if (milestone == null)
-				throw new GeneralException("Can not find milestone: " + milestoneName);
+				throw new ExplicitException("Can not find milestone: " + milestoneName);
 		} else if (!getProject().getSortedMilestones().isEmpty()) {
 			milestone = getProject().getSortedMilestones().iterator().next();
 		} else {

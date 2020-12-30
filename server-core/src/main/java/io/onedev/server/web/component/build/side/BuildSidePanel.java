@@ -38,7 +38,7 @@ import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.builds.BuildListPage;
@@ -267,7 +267,7 @@ public abstract class BuildSidePanel extends Panel {
 							PullRequestActivitiesPage.paramsOf(request));
 					link.add(new Label("label", "#" + request.getNumber() + " " + request.getTitle()));
 					add(link);
-					add(new RequestStatusLabel("status", new AbstractReadOnlyModel<PullRequest>() {
+					add(new RequestStatusBadge("status", new AbstractReadOnlyModel<PullRequest>() {
 	
 						@Override
 						public PullRequest getObject() {

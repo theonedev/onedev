@@ -13,7 +13,7 @@ import org.glassfish.jersey.internal.guava.Preconditions;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.util.ServerConfig;
 
 @Singleton
@@ -64,7 +64,7 @@ public class DefaultServerConfig implements ServerConfig {
 			httpsPort = Integer.parseInt(httpsPortStr.trim());
 		
 		if (httpPort == 0 && httpsPort == 0)
-			throw new GeneralException("Either " + PROP_HTTPPORT + " or " + PROP_HTTPSPORT + " or both should be enabled");
+			throw new ExplicitException("Either " + PROP_HTTPPORT + " or " + PROP_HTTPSPORT + " or both should be enabled");
 		
 		String sshPortStr = System.getenv(PROP_SSHPORT);
         if (StringUtils.isBlank(sshPortStr))
@@ -72,7 +72,7 @@ public class DefaultServerConfig implements ServerConfig {
         if (StringUtils.isNotBlank(sshPortStr))
             sshPort = Integer.parseInt(sshPortStr.trim());
         else
-        	throw new GeneralException(PROP_SSHPORT + " should be specified");
+        	throw new ExplicitException(PROP_SSHPORT + " should be specified");
 		
 		String keystore = System.getenv(PROP_KEYSTORE); 
 		if (StringUtils.isBlank(keystore))
@@ -100,7 +100,7 @@ public class DefaultServerConfig implements ServerConfig {
 				}
 			} 
 		} else if (httpsPort != 0) {
-			throw new GeneralException(PROP_KEYSTORE + " is required for https support");
+			throw new ExplicitException(PROP_KEYSTORE + " is required for https support");
 		}
 		
 		keystorePassword = System.getenv(PROP_KEYSTOREPASSWORD);
@@ -126,7 +126,7 @@ public class DefaultServerConfig implements ServerConfig {
 		if (StringUtils.isNotBlank(sessionTimeoutStr))
 			sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
 		else
-			throw new GeneralException(PROP_SESSION_TIMEOUT + " should be specified");
+			throw new ExplicitException(PROP_SESSION_TIMEOUT + " should be specified");
 	}
 	
 	@Override

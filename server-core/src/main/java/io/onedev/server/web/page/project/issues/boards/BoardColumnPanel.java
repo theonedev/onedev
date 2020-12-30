@@ -29,7 +29,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -103,7 +103,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			if (getQuery() != null) {
 				try {
 					return OneDev.getInstance(IssueManager.class).count(getProject(), getQuery().getCriteria());
-				} catch(GeneralException e) {
+				} catch(ExplicitException e) {
 					return 0;
 				}
 			} else {
@@ -404,7 +404,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				} else {
 					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 					if (fieldSpec == null)
-						throw new GeneralException("Undefined custom field: " + fieldName);
+						throw new ExplicitException("Undefined custom field: " + fieldName);
 					
 					if (!SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName()))
 						throw new UnauthorizedException("Permission denied");

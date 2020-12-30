@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.GeneralException;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -576,7 +576,7 @@ public class GlobalIssueSetting implements Serializable {
 		if (!getStateSpecs().isEmpty())
 			return getStateSpecs().iterator().next();
 		else
-			throw new GeneralException("No any issue state is defined");
+			throw new ExplicitException("No any issue state is defined");
 	}
 	
 	public List<BoardSpec> getBoardSpecs() {

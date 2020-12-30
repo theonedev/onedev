@@ -56,8 +56,8 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.GeneralException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -869,7 +869,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			String errorMessage = String.format("Impossible to provide required number of reviewers "
 					+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
 					reviewers, missingCount, update.getRequest().getNumber());
-			throw new GeneralException(errorMessage);
+			throw new ExplicitException(errorMessage);
 		}
 	}
 	
