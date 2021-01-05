@@ -65,7 +65,7 @@ import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -84,7 +84,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 
 @Singleton
-public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {
+public class DefaultIssueManager extends BaseEntityManager<Issue> implements IssueManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueManager.class);
 	

@@ -20,11 +20,11 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultMembershipManager extends AbstractEntityManager<Membership> implements MembershipManager {
+public class DefaultMembershipManager extends BaseEntityManager<Membership> implements MembershipManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMembershipManager.class);
 	

@@ -17,13 +17,21 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.JestTestMetric;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.buildmetric.BuildMetricQuery;
+import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.page.layout.SidebarMenuItem;
+import io.onedev.server.web.page.project.StatisticsMenuContribution;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
@@ -81,12 +89,35 @@ public class JestReportModule extends AbstractPluginModule {
 			
 		});
 		
+		contribute(StatisticsMenuContribution.class, new StatisticsMenuContribution() {
+			
+			@Override
+			public List<SidebarMenuItem> getMenuItems(Project project) {
+				List<SidebarMenuItem> menuItems = new ArrayList<>();
+				if (!OneDev.getInstance(BuildMetricManager.class).getAccessibleReportNames(project, JestTestMetric.class).isEmpty()) {
+					String query = String.format("%s \"last month\"", 
+							BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
+					PageParameters params = JestTestStatsPage.paramsOf(project, query);
+					menuItems.add(new SidebarMenuItem.Page(null, "Jest Test", 
+							JestTestStatsPage.class, params));
+				}
+				return menuItems;
+			}
+			
+			@Override
+			public int getOrder() {
+				return 100;
+			}
+			
+		});
+		
 		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
 			
 			@Override
 			public void configure(WebApplication application) {
 				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/jest-reports/${report}/test-suites", JestTestSuitesPage.class));
 				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/jest-reports/${report}/test-cases", JestTestCasesPage.class));
+				application.mount(new DynamicPathPageMapper("projects/${project}/stats/jest-test", JestTestStatsPage.class));
 			}
 			
 		});		

@@ -12,11 +12,11 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserAuthorization> 
+public class DefaultUserAuthorizationManager extends BaseEntityManager<UserAuthorization> 
 		implements UserAuthorizationManager {
 
 	@Inject

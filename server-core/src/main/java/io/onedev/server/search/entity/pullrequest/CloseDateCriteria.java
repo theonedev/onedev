@@ -31,7 +31,7 @@ public class CloseDateCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_DATE);
-		if (operator == PullRequestQueryLexer.IsBefore)
+		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -40,7 +40,7 @@ public class CloseDateCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		if (request.getCloseInfo() != null) {
-			if (operator == PullRequestQueryLexer.IsBefore)
+			if (operator == PullRequestQueryLexer.IsUntil)
 				return request.getCloseInfo().getDate().before(date);
 			else
 				return request.getCloseInfo().getDate().after(date);

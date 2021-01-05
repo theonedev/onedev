@@ -38,6 +38,10 @@ public class Day implements Serializable, Comparable<Day> {
 	public int getValue() {
 		return (year<<16) | (monthOfYear<<8) | dayOfMonth;
 	}
+	
+	public DateTime getDate() {
+		return new DateTime(year, monthOfYear+1, dayOfMonth, 0, 0);
+	}
 
 	@Override
 	public int compareTo(Day day) {

@@ -37,7 +37,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<Date> attribute = IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
-		if (operator == IssueQueryLexer.IsBefore)
+		if (operator == IssueQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -45,7 +45,7 @@ public class UpdateDateCriteria extends IssueCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (operator == IssueQueryLexer.IsBefore)
+		if (operator == IssueQueryLexer.IsUntil)
 			return issue.getLastUpdate().getDate().before(date);
 		else
 			return issue.getLastUpdate().getDate().after(date);

@@ -529,7 +529,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							throw maskSecrets(e, jobSecretsToMask);
 						} finally {
 							try {
-								sessionManager.run(new Runnable() {
+								transactionManager.run(new Runnable() {
 	
 									@Override
 									public void run() {

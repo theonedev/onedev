@@ -1069,8 +1069,8 @@ public class Project extends AbstractEntity {
 			namedCodeCommentQueries = new ArrayList<>(); 
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", null));
 			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
-			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
-			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is since \"last week\""));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is since \"last week\""));
 		}
 		return namedCodeCommentQueries;
 	}

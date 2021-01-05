@@ -30,7 +30,7 @@ public class SubmitDateCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(Build.PROP_SUBMIT_DATE);
-		if (operator == BuildQueryLexer.IsBefore)
+		if (operator == BuildQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -38,7 +38,7 @@ public class SubmitDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build) {
-		if (operator == BuildQueryLexer.IsBefore)
+		if (operator == BuildQueryLexer.IsUntil)
 			return build.getSubmitDate().before(date);
 		else
 			return build.getSubmitDate().after(date);

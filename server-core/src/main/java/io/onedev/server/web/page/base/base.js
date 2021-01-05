@@ -752,6 +752,25 @@ onedev.server = {
 		});		
 	},
 	
+	formatBriefDuration(seconds) {
+		var intervals = [];
+		var days = Math.floor(seconds/86400);
+		if (days != 0)
+			intervals.push(days + "d");
+		seconds = seconds%86400;
+		var hours = Math.floor(seconds/3600);
+		if (hours != 0)
+			intervals.push(hours + "h");
+		seconds = seconds%3600;
+		var minutes = Math.floor(seconds/60);
+		if (minutes != 0)
+			intervals.push(minutes + "m");
+		seconds = seconds%60;
+		if (seconds != 0)
+			intervals.push(seconds + "s");
+		return intervals.join(" ");
+	},
+	
 	onDomReady: function(icons, popStateCallback) {
 		onedev.server.icons = icons;
 		

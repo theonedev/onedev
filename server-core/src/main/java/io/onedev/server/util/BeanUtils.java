@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Preconditions;
+
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
 
 public class BeanUtils {
 	
@@ -231,6 +235,19 @@ public class BeanUtils {
 			throw new RuntimeException(message);
 		}
 		return setter;
+	}
+
+	public static String getDisplayName(AnnotatedElement element) {
+		if (element instanceof Class)
+			return WordUtils.uncamel(((Class<?>)element).getSimpleName());
+		else if (element instanceof Field) 
+			return WordUtils.uncamel(WordUtils.capitalize(((Field)element).getName()));
+		else if (element instanceof Method)
+			return StringUtils.substringAfter(WordUtils.uncamel(((Method)element).getName()), " ");
+		else if (element instanceof Package) 
+			return ((Package)element).getName();
+		else
+			throw new RuntimeException("Invalid element type: " + element.getClass().getName());
 	}
 	
 }

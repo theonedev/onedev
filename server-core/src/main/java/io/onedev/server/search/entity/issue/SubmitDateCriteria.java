@@ -29,7 +29,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(Issue.PROP_SUBMIT_DATE);
-		if (operator == IssueQueryLexer.IsBefore)
+		if (operator == IssueQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -37,7 +37,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (operator == IssueQueryLexer.IsBefore)
+		if (operator == IssueQueryLexer.IsUntil)
 			return issue.getSubmitDate().before(date);
 		else
 			return issue.getSubmitDate().after(date);

@@ -184,8 +184,8 @@ public class BuildQuery extends EntityQuery<Build> {
 						checkField(project, fieldName, operator);
 						
 						switch (operator) {
-						case BuildQueryLexer.IsBefore:
-						case BuildQueryLexer.IsAfter:
+						case BuildQueryLexer.IsUntil:
+						case BuildQueryLexer.IsSince:
 							if (fieldName.equals(NAME_SUBMIT_DATE))
 								return new SubmitDateCriteria(value, operator);
 							else if (fieldName.equals(NAME_PENDING_DATE))
@@ -278,8 +278,8 @@ public class BuildQuery extends EntityQuery<Build> {
 		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case BuildQueryLexer.IsBefore:
-		case BuildQueryLexer.IsAfter:
+		case BuildQueryLexer.IsUntil:
+		case BuildQueryLexer.IsSince:
 			if (!fieldName.equals(NAME_SUBMIT_DATE) 
 					&& !fieldName.equals(NAME_PENDING_DATE)
 					&& !fieldName.equals(NAME_RUNNING_DATE)

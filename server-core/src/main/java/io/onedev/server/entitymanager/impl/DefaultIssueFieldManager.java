@@ -17,11 +17,11 @@ import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> implements IssueFieldManager {
+public class DefaultIssueFieldManager extends BaseEntityManager<IssueField> implements IssueFieldManager {
 
 	@Inject
 	public DefaultIssueFieldManager(Dao dao) {

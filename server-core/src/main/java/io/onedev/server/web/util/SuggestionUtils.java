@@ -34,6 +34,7 @@ import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -42,6 +43,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -329,9 +331,24 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
 		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class)
-				.getAccessibleJobNames(project).get(project));
+				.getAccessibleJobNames(project));
 		Collections.sort(jobNames);
 		return suggest(jobNames, matchWith);
+	}
+	
+	public static List<InputSuggestion> suggestReports(
+			Project project, Class<? extends AbstractEntity> metricClass, String matchWith) {
+		Map<String, Collection<String>> accessibleReportNames = OneDev.getInstance(BuildMetricManager.class)
+				.getAccessibleReportNames(project, metricClass);
+		Collection<String> setOfReportNames = new HashSet<>();
+		
+		for (Map.Entry<String, Collection<String>> entry: accessibleReportNames.entrySet())
+			setOfReportNames.addAll(entry.getValue());
+		
+		List<String> listOfReportNames = new ArrayList<>(setOfReportNames);
+		Collections.sort(listOfReportNames);
+		
+		return suggest(listOfReportNames, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestBuildVersions(Project project, String matchWith) {

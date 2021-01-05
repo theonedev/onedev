@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.jest;
+package io.onedev.server.web.component.chart.line;
 
 import java.util.List;
 
@@ -10,12 +10,12 @@ import io.onedev.server.web.asset.echarts.EChartsResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class JestReportResourceReference extends BaseDependentResourceReference {
+public class LineChartResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public JestReportResourceReference() {
-		super(JestReportResourceReference.class, "jest-report.js");
+	public LineChartResourceReference() {
+		super(LineChartResourceReference.class, "line-chart.js");
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class JestReportResourceReference extends BaseDependentResourceReference 
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new EChartsResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
-				JestReportResourceReference.class, "jest-report.css")));
+				LineChartResourceReference.class, "line-chart.css")));
 		return dependencies;
 	}
 

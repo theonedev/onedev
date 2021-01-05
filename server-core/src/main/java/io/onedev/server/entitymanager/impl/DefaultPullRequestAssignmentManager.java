@@ -13,12 +13,12 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestAssigneeRemoveData;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
-public class DefaultPullRequestAssignmentManager extends AbstractEntityManager<PullRequestAssignment> 
+public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullRequestAssignment> 
 		implements PullRequestAssignmentManager {
 
 	private final PullRequestChangeManager pullRequestChangeManager;

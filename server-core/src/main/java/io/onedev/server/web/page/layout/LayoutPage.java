@@ -98,7 +98,7 @@ public abstract class LayoutPage extends BasePage {
 			sidebar.add(AttributeAppender.append("class", "sidebar-minimized"));
 		add(sidebar);
 		
-		UICustomization customization = OneDev.getInstance(UICustomization.class);
+		MainMenuCustomization customization = OneDev.getInstance(MainMenuCustomization.class);
 		
 		sidebar.add(new BookmarkablePageLink<Void>("brandLink", customization.getHomePage()));
 

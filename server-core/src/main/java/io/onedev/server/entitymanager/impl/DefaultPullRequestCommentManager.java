@@ -9,11 +9,11 @@ import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultPullRequestCommentManager extends AbstractEntityManager<PullRequestComment> 
+public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequestComment> 
 		implements PullRequestCommentManager {
 
 	private final ListenerRegistry listenerRegistry;

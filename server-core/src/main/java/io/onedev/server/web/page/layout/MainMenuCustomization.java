@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.onedev.server.web.page.base.BasePage;
 
-public interface UICustomization extends Serializable {
+public interface MainMenuCustomization extends Serializable {
 	
 	Class<? extends BasePage> getHomePage();
 	

@@ -29,7 +29,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(CodeComment.PROP_CREATE_DATE);
-		if (operator == CodeCommentQueryLexer.IsBefore)
+		if (operator == CodeCommentQueryLexer.IsUntil)
 			return builder.lessThan(attribute, value);
 		else
 			return builder.greaterThan(attribute, value);
@@ -37,7 +37,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public boolean matches(CodeComment comment) {
-		if (operator == CodeCommentQueryLexer.IsBefore)
+		if (operator == CodeCommentQueryLexer.IsUntil)
 			return comment.getCreateDate().before(value);
 		else
 			return comment.getCreateDate().after(value);

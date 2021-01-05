@@ -282,7 +282,7 @@ public class Role extends AbstractEntity implements Permission {
 				if (jobPrivilege.getAccessibleReports() != null) { 
 					AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
 					permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
-				}				
+				}
 			}
 		} else {
 			if (manageProject || managePullRequests || manageCodeComments || codePrivilege != CodePrivilege.NONE)

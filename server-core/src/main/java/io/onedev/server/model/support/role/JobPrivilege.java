@@ -14,7 +14,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -104,7 +103,6 @@ public class JobPrivilege implements Serializable {
 			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to match all")
 	@ShowCondition("isAccessLogDisabled")
 	@Patterns
-	@NameOfEmptyValue("All Reports")
 	@Nullable
 	public String getAccessibleReports() {
 		return accessibleReports;

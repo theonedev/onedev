@@ -1,0 +1,20 @@
+<wicket:extend>
+	<div class="build-metric-stats p-2 p-sm-5">
+		<form wicket:id="form" class="filter mb-5">
+			<div class="clearable-wrapper">
+				<div class="input-group">
+		            <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter...">
+					<span class="input-group-append">
+						<button wicket:id="submit" title="Filter" class="btn btn-icon bg-white btn-outline-secondary btn-hover-primary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+					</span>
+				</div>
+			</div>
+			<div wicket:id="feedback" class="feedback mt-3"></div>
+		</form>
+		<div wicket:id="content" class="content">
+			<div wicket:id="charts" class="card mb-5">
+				<div wicket:id="chart" class="card-body chart"></div>
+			</div>
+		</div>
+	</div>
+</wicket:extend>

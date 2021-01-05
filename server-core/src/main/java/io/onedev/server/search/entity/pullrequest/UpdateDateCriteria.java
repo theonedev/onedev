@@ -31,7 +31,7 @@ public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
-		if (operator == PullRequestQueryLexer.IsBefore)
+		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -39,7 +39,7 @@ public class UpdateDateCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public boolean matches(PullRequest request) {
-		if (operator == PullRequestQueryLexer.IsBefore)
+		if (operator == PullRequestQueryLexer.IsUntil)
 			return request.getLastUpdate().getDate().before(date);
 		else
 			return request.getLastUpdate().getDate().after(date);

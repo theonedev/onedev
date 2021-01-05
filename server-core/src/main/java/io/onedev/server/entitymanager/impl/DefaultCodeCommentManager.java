@@ -52,7 +52,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -64,7 +64,7 @@ import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
 @Singleton
-public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment> implements CodeCommentManager {
+public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> implements CodeCommentManager {
 
 	private final int MAX_HISTORY_COMMITS_TO_CHECK = 50000;
 	

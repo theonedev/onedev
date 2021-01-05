@@ -1,14 +1,11 @@
 package io.onedev.server.web.editable;
 
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.util.BeanUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
 public class EditableUtils {
@@ -27,16 +24,8 @@ public class EditableUtils {
 		Editable editable = element.getAnnotation(Editable.class);
 		if (editable != null && editable.name().trim().length() != 0)
 			return editable.name();
-		else if (element instanceof Class)
-			return WordUtils.uncamel(((Class<?>)element).getSimpleName());
-		else if (element instanceof Field) 
-			return WordUtils.uncamel(WordUtils.capitalize(((Field)element).getName()));
-		else if (element instanceof Method)
-			return StringUtils.substringAfter(WordUtils.uncamel(((Method)element).getName()), " ");
-		else if (element instanceof Package) 
-			return ((Package)element).getName();
-		else
-			throw new RuntimeException("Invalid element type: " + element.getClass().getName());
+		else 
+			return BeanUtils.getDisplayName(element);
 	}
 	
 	/**

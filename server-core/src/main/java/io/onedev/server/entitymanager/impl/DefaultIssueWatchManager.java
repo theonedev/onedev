@@ -9,12 +9,12 @@ import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
-public class DefaultIssueWatchManager extends AbstractEntityManager<IssueWatch> 
+public class DefaultIssueWatchManager extends BaseEntityManager<IssueWatch> 
 		implements IssueWatchManager {
 
 	@Inject

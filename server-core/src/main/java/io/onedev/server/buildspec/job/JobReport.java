@@ -10,6 +10,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.validation.annotation.PathSegment;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -19,10 +20,23 @@ public abstract class JobReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	private String reportName;
+	
 	private String filePatterns;
 	
 	private transient PatternSet patternSet;
 
+	@Editable(order=50, description="Specify report name")
+	@PathSegment
+	@NotEmpty
+	public String getReportName() {
+		return reportName;
+	}
+
+	public void setReportName(String reportName) {
+		this.reportName = reportName;
+	}
+	
 	@Editable(order=100, description="Specify files relative to OneDev workspace. Use * or ? for pattern match. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")

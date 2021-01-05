@@ -155,8 +155,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						checkField(fieldName, operator);
 						
 						switch (operator) {
-						case PullRequestQueryLexer.IsBefore:
-						case PullRequestQueryLexer.IsAfter:
+						case PullRequestQueryLexer.IsUntil:
+						case PullRequestQueryLexer.IsSince:
 							switch (fieldName) {
 							case PullRequest.NAME_SUBMIT_DATE:
 								return new SubmitDateCriteria(value, operator);
@@ -263,8 +263,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		if (!PullRequest.QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case PullRequestQueryLexer.IsBefore:
-		case PullRequestQueryLexer.IsAfter:
+		case PullRequestQueryLexer.IsUntil:
+		case PullRequestQueryLexer.IsSince:
 			if (!fieldName.equals(PullRequest.NAME_SUBMIT_DATE) 
 					&& !fieldName.equals(PullRequest.NAME_UPDATE_DATE) 
 					&& !fieldName.equals(PullRequest.NAME_CLOSE_DATE)) {

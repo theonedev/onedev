@@ -9,7 +9,7 @@ query
 criteria
 	: operator=CreatedByMe #OperatorCriteria
     | operator=(CreatedBy|OnCommit) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsBefore|IsAfter|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsUntil|IsSince|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -44,12 +44,12 @@ Contains
 	: 'contains'
 	;
 
-IsAfter
-	: 'is' WS+ 'after'
+IsSince
+	: 'is' WS+ 'since'
 	;
 
-IsBefore
-	: 'is' WS+ 'before'
+IsUntil
+	: 'is' WS+ 'until'
 	;
 	
 IsGreaterThan

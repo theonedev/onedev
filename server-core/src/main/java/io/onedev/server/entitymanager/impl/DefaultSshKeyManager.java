@@ -25,13 +25,13 @@ import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.ssh.SshKeyUtils;
 
 @Singleton
-public class DefaultSshKeyManager extends AbstractEntityManager<SshKey> implements SshKeyManager {
+public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements SshKeyManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultSshKeyManager.class);
 	

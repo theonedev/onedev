@@ -40,8 +40,6 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -54,8 +52,8 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastUpdate;
@@ -84,7 +82,6 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList=PROP_COMMENT_COUNT), @Index(columnList="o_milestone_id"), 
 				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_numberScope_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Editable

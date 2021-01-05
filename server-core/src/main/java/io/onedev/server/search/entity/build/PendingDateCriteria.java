@@ -31,7 +31,7 @@ public class PendingDateCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(Build.PROP_PENDING_DATE);
-		if (operator == BuildQueryLexer.IsBefore)
+		if (operator == BuildQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -39,7 +39,7 @@ public class PendingDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build) {
-		if (operator == BuildQueryLexer.IsBefore)
+		if (operator == BuildQueryLexer.IsUntil)
 			return build.getPendingDate().before(date);
 		else
 			return build.getPendingDate().after(date);

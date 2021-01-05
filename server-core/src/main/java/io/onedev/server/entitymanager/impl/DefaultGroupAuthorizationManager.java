@@ -11,11 +11,11 @@ import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultGroupAuthorizationManager extends AbstractEntityManager<GroupAuthorization> 
+public class DefaultGroupAuthorizationManager extends BaseEntityManager<GroupAuthorization> 
 		implements GroupAuthorizationManager {
 
 	@Inject

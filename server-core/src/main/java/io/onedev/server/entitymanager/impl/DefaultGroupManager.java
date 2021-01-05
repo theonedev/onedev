@@ -22,13 +22,13 @@ import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.usage.Usage;
 
 @Singleton
-public class DefaultGroupManager extends AbstractEntityManager<Group> implements GroupManager {
+public class DefaultGroupManager extends BaseEntityManager<Group> implements GroupManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultGroupManager.class);
 	

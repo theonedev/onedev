@@ -7,7 +7,6 @@
 .issue-boards>.body>.feedback>.feedbackPanel {
 	margin-bottom: 0;
 	margin-top: 1rem;
-    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 }
 .issue-boards>.body>.columns>.column>.content {
 	border: 1px solid var(--secondary);

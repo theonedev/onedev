@@ -31,7 +31,7 @@ public class UpdateDateCriteria extends EntityCriteria<Project> {
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
 		Path<Date> attribute = ProjectQuery.getPath(root, Project.PROP_UPDATE_DATE);
-		if (operator == ProjectQueryLexer.IsBefore)
+		if (operator == ProjectQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -39,7 +39,7 @@ public class UpdateDateCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public boolean matches(Project project) {
-		if (operator == ProjectQueryLexer.IsBefore)
+		if (operator == ProjectQueryLexer.IsUntil)
 			return project.getUpdateDate().before(date);
 		else
 			return project.getUpdateDate().after(date);

@@ -1,4 +1,4 @@
-package io.onedev.server.entityquery.codecomment;
+package io.onedev.server.search.entity.issue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,11 +12,10 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 
-public class CodeCommentQueryGrammarTest {
+public class IssueQueryGrammarTest {
 
-	private CodeAssist codeAssist = new CodeAssist(CodeCommentQueryLexer.class, false) {
+	private CodeAssist codeAssist = new CodeAssist(IssueQueryLexer.class, false) {
 
 		private static final long serialVersionUID = 1L;
 
@@ -44,15 +43,15 @@ public class CodeCommentQueryGrammarTest {
 	public void test()	{
 		List<? extends InputStatus> suggestions;
 		
-		suggestions = codeAssist.suggest(new InputStatus("\"Date\" is before 2018-09-01 2:30PM", 34), "query");
+		suggestions = codeAssist.suggest(new InputStatus("\"Submit Date\" is until 2018-09-01 2:30PM", 40), "query");
 		assertEquals(1, suggestions.size());
-		assertEquals("\"Date\" is before \"2018-09-01 2:30PM\":36", suggestions.get(0).toString());
+		assertEquals("\"Submit Date\" is until \"2018-09-01 2:30PM\":42", suggestions.get(0).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("created by me", 13), "query");
+		suggestions = codeAssist.suggest(new InputStatus("submitted by me", 15), "query");
 		assertEquals(3, suggestions.size());
-		assertEquals("created by me:13", suggestions.get(0).toString());
-		assertEquals("\"created by me\" :16", suggestions.get(1).toString());
-		assertEquals("created by me :14", suggestions.get(2).toString());
+		assertEquals("submitted by me:15", suggestions.get(0).toString());
+		assertEquals("\"submitted by me\" :18", suggestions.get(1).toString());
+		assertEquals("submitted by me :16", suggestions.get(2).toString());
 	}
 	
 }

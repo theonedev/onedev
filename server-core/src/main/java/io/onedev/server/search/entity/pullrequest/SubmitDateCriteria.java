@@ -30,7 +30,7 @@ public class SubmitDateCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Date> attribute = root.get(PullRequest.PROP_SUBMIT_DATE);
-		if (operator == PullRequestQueryLexer.IsBefore)
+		if (operator == PullRequestQueryLexer.IsUntil)
 			return builder.lessThan(attribute, date);
 		else
 			return builder.greaterThan(attribute, date);
@@ -38,7 +38,7 @@ public class SubmitDateCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public boolean matches(PullRequest request) {
-		if (operator == PullRequestQueryLexer.IsBefore)
+		if (operator == PullRequestQueryLexer.IsUntil)
 			return request.getSubmitDate().before(date);
 		else
 			return request.getSubmitDate().after(date);

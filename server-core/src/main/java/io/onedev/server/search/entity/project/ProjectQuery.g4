@@ -9,7 +9,7 @@ query
 criteria
 	: operator=(OwnedByMe|OwnedByNone) #OperatorCriteria
 	| operator=(OwnedBy|ForksOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|Contains|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|Contains|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -40,12 +40,12 @@ OwnedByNone
 	: 'owned' WS+ 'by' WS+ 'none'
 	;
 	
-IsAfter
-	: 'is' WS+ 'after'
+IsSince
+	: 'is' WS+ 'since'
 	;
 
-IsBefore
-	: 'is' WS+ 'before'
+IsUntil
+	: 'is' WS+ 'until'
 	;
 	
 Contains

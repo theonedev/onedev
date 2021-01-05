@@ -13,12 +13,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
-public class DefaultBuildQuerySettingManager extends AbstractEntityManager<BuildQuerySetting> 
+public class DefaultBuildQuerySettingManager extends BaseEntityManager<BuildQuerySetting> 
 		implements BuildQuerySettingManager {
 
 	@Inject

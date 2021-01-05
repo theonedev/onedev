@@ -13,7 +13,7 @@ import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
 
-public class DefaultUICustomization implements UICustomization {
+public class DefaultMainMenuCustomization implements MainMenuCustomization {
 
 	private static final long serialVersionUID = 1L;
 

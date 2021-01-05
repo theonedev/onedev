@@ -78,7 +78,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -94,7 +94,7 @@ import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.avatar.AvatarManager;
 
 @Singleton
-public class DefaultProjectManager extends AbstractEntityManager<Project> 
+public class DefaultProjectManager extends BaseEntityManager<Project> 
 		implements ProjectManager, SchedulableTask {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);

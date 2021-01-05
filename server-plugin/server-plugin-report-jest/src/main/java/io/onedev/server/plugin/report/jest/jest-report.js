@@ -1,4 +1,0 @@
-onedev.server.jestReport = {
-	testSuites: {
-	}
-}

@@ -25,7 +25,7 @@ public class GlobalBuildSetting implements Serializable {
 		namedQueries.add(new NamedBuildQuery("Running", "running"));
 		namedQueries.add(new NamedBuildQuery("Waiting", "waiting"));
 		namedQueries.add(new NamedBuildQuery("Pending", "pending"));
-		namedQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is after \"last week\""));
+		namedQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is since \"last week\""));
 	}
 	
 	public List<NamedBuildQuery> getNamedQueries() {

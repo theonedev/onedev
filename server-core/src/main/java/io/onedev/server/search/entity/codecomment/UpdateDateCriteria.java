@@ -30,7 +30,7 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<Date> attribute = CodeCommentQuery.getPath(root, CodeComment.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE);
-		if (operator == CodeCommentQueryLexer.IsBefore)
+		if (operator == CodeCommentQueryLexer.IsUntil)
 			return builder.lessThan(attribute, value);
 		else
 			return builder.greaterThan(attribute, value);
@@ -38,7 +38,7 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public boolean matches(CodeComment comment) {
-		if (operator == CodeCommentQueryLexer.IsBefore)
+		if (operator == CodeCommentQueryLexer.IsUntil)
 			return comment.getLastUpdate().getDate().before(value);
 		else
 			return comment.getLastUpdate().getDate().after(value);

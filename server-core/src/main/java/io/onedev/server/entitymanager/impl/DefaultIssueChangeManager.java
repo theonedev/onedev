@@ -74,7 +74,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeDat
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -93,7 +93,7 @@ import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 
 @Singleton
-public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange>
+public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		implements IssueChangeManager, SchedulableTask {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueChangeManager.class);
@@ -558,7 +558,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 				
 				criterias.add(new UpdateDateCriteria(
 						new DateTime().minusDays(trigger.getDays()).toDate(), 
-						IssueQueryLexer.IsBefore));
+						IssueQueryLexer.IsUntil));
 				
 				query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 				

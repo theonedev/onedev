@@ -65,7 +65,7 @@ import io.onedev.server.util.usage.InUseException;
 import io.onedev.server.web.component.svg.SpriteImageResolver;
 import io.onedev.server.web.mapper.BaseResourceMapper;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.layout.UICustomization;
+import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.simple.error.GeneralErrorPage;
 import io.onedev.server.web.page.simple.error.InUseErrorPage;
 import io.onedev.server.web.resource.SvgSpriteResourceReference;
@@ -79,11 +79,11 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 	
 	private final Set<WebApplicationConfigurator> applicationConfigurators;
 	
-	private final UICustomization uiCustomization;
+	private final MainMenuCustomization uiCustomization;
 
 	@Inject
 	public WebApplication(Set<WebApplicationConfigurator> applicationConfigurators, 
-			UICustomization uiCustomization) {
+			MainMenuCustomization uiCustomization) {
 		this.applicationConfigurators = applicationConfigurators;
 		this.uiCustomization = uiCustomization;
 	}

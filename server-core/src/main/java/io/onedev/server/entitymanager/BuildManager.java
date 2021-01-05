@@ -62,8 +62,10 @@ public interface BuildManager extends EntityManager<Build> {
 
 	List<String> queryVersions(Project project, String matchWith, int count);
 
-	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project);
+	Collection<String> getAccessibleJobNames(Project project);
 
+	Map<Project, Collection<String>> getAccessibleJobNames();
+	
 	void populateBuilds(Collection<PullRequest> requests);
 
 }

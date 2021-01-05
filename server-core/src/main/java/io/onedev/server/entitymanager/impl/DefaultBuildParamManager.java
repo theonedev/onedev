@@ -28,11 +28,11 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultBuildParamManager extends AbstractEntityManager<BuildParam> implements BuildParamManager {
+public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> implements BuildParamManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultBuildParamManager.class);
 	

@@ -8,11 +8,11 @@ import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultIssueCommentManager extends AbstractEntityManager<IssueComment>
+public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
 		implements IssueCommentManager {
 
 	private final ListenerRegistry listenerRegistry;

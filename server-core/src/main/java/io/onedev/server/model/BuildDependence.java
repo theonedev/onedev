@@ -9,15 +9,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
 @Entity
 @Table(
 		indexes={@Index(columnList="o_dependent_id"), @Index(columnList="o_dependency_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_dependent_id", "o_dependency_id"})
 })
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class BuildDependence extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

@@ -102,6 +102,50 @@ public class JestReportData implements Serializable {
 		};
 	}
 	
+	public int getNumOfTestSuites() {
+		return testSuites.size();
+	}
+	
+	public int getNumOfTestCases() {
+		int numOfTestCases = 0;
+		for (TestSuite testSuite: testSuites)
+			numOfTestCases += testSuite.getTestCases().size();
+		return numOfTestCases;
+	}
+	
+	public int getTotalTestDuration() {
+		int totalTestDuration = 0;
+		for (TestSuite testSuite: testSuites)
+			totalTestDuration += testSuite.getDuration()/1000;
+		return totalTestDuration;
+	}
+	
+	public int getTestSuiteSuccessRate() {
+		int numOfFailed = 0;
+		int numOfPassed = 0;
+		for (TestSuite testSuite: testSuites) {
+			if (testSuite.getStatus() == Status.FAILED) 
+				numOfFailed++;
+			else if (testSuite.getStatus() == Status.PASSED)
+				numOfPassed++;
+		}
+		return numOfFailed*100/(numOfPassed+numOfFailed);
+	}
+	
+	public int getTestCaseSuccessRate() {
+		int numOfFailed = 0;
+		int numOfPassed = 0;
+		for (TestSuite testSuite: testSuites) {
+			for (TestCase testCase: testSuite.getTestCases()) {
+				if (testCase.getStatus() == Status.FAILED) 
+					numOfFailed++;
+				else if (testCase.getStatus() == Status.PASSED)
+					numOfPassed++;
+			}
+		}
+		return numOfFailed*100/(numOfPassed+numOfFailed);
+	}
+	
 	public static class TestSuite implements Serializable {
 
 		private static final long serialVersionUID = 1L;

@@ -19,12 +19,12 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
-public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
+public class DefaultPullRequestUpdateManager extends BaseEntityManager<PullRequestUpdate> 
 		implements PullRequestUpdateManager {
 	
 	private final ListenerRegistry listenerRegistry;

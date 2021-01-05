@@ -11,11 +11,11 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCommentReply> 
+public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommentReply> 
 		implements CodeCommentReplyManager {
 
 	private final ListenerRegistry listenerRegistry;

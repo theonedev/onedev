@@ -32,13 +32,13 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.usage.Usage;
 
 @Singleton
-public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {
+public class DefaultUserManager extends BaseEntityManager<User> implements UserManager {
 
     private final ProjectManager projectManager;
     

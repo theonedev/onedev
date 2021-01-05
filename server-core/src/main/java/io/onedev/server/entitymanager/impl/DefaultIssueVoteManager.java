@@ -6,11 +6,11 @@ import javax.inject.Singleton;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 
 @Singleton
-public class DefaultIssueVoteManager extends AbstractEntityManager<IssueVote>
+public class DefaultIssueVoteManager extends BaseEntityManager<IssueVote>
 		implements IssueVoteManager {
 
 	@Inject

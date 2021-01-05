@@ -18,8 +18,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.JestTestMetric;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.SimpleLogger;
-import io.onedev.server.util.validation.annotation.PathSegment;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -30,8 +31,6 @@ public class JobJestReport extends JobReport {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String DIR = "jest-reports";
-	
-	private String reportName;
 	
 	@Editable(order=100, description="Specify json file containing Jest test results relative to OneDev workspace. "
 			+ "It can be generated via Jest option <tt>--json</tt> and <tt>--outputFile</tt>. Use * or ? for pattern match. "
@@ -49,19 +48,6 @@ public class JobJestReport extends JobReport {
 		super.setFilePatterns(filePatterns);
 	}
 	
-	@Editable(order=1000, description="Specify report name. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
-	@Interpolative(variableSuggester="suggestVariables")
-	@PathSegment
-	@NotEmpty
-	public String getReportName() {
-		return reportName;
-	}
-
-	public void setReportName(String reportName) {
-		this.reportName = reportName;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return Job.suggestVariables(matchWith);
@@ -72,10 +58,10 @@ public class JobJestReport extends JobReport {
 		File reportDir = new File(build.getReportDir(DIR), getReportName());
 		FileUtils.createDir(reportDir);
 
-		LockUtils.write(build.getReportLockKey(DIR), new Callable<Void>() {
+		JestReportData report = LockUtils.write(build.getReportLockKey(DIR), new Callable<JestReportData>() {
 
 			@Override
-			public Void call() throws Exception {
+			public JestReportData call() throws Exception {
 				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 				
 				Collection<JsonNode> rootNodes = new ArrayList<>();
@@ -87,12 +73,29 @@ public class JobJestReport extends JobReport {
 						logger.log("Failed to process Jest report: " + file.getAbsolutePath().substring(baseLen), e);
 					}
 				}
-				if (!rootNodes.isEmpty())
-					new JestReportData(build, rootNodes).writeTo(reportDir);
-				return null;
+				if (!rootNodes.isEmpty()) {
+					JestReportData report = new JestReportData(build, rootNodes);
+					report.writeTo(reportDir);
+					return report;
+				} else {
+					return null;
+				}
 			}
 			
 		});
+		
+		if (report != null) {
+			JestTestMetric metric = new JestTestMetric();
+			metric.setBuild(build);
+			metric.setReportName(getReportName());
+			metric.setTestCaseSuccessRate(report.getTestCaseSuccessRate());
+			metric.setTestSuiteSuccessRate(report.getTestSuiteSuccessRate());
+			metric.setNumOfTestCases(report.getNumOfTestCases());
+			metric.setNumOfTestSuites(report.getNumOfTestSuites());
+			metric.setTotalTestDuration(report.getTotalTestDuration());
+			OneDev.getInstance(Dao.class).persist(metric);
+		}
+		
 	}
 
 }

@@ -207,8 +207,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 						}
 						
 						switch (operator) {
-						case IssueQueryLexer.IsBefore:
-						case IssueQueryLexer.IsAfter:
+						case IssueQueryLexer.IsUntil:
+						case IssueQueryLexer.IsSince:
 							if (fieldName.equals(Issue.NAME_SUBMIT_DATE)) 
 								return new SubmitDateCriteria(value, operator);
 							else if (fieldName.equals(Issue.NAME_UPDATE_DATE))
@@ -376,8 +376,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 			if (!(fieldSpec instanceof BuildChoiceField && withCurrentBuildCriteria)) 
 				throw newOperatorException(fieldName, operator);
 			break;
-		case IssueQueryLexer.IsBefore:
-		case IssueQueryLexer.IsAfter:
+		case IssueQueryLexer.IsUntil:
+		case IssueQueryLexer.IsSince:
 			if (!fieldName.equals(Issue.NAME_SUBMIT_DATE) 
 					&& !fieldName.equals(Issue.NAME_UPDATE_DATE) 
 					&& !(fieldSpec instanceof DateField)) {

@@ -9,22 +9,22 @@ public class AccessBuildReports implements Permission {
 
 	private final String reportNames;
 	
-	private transient PatternSet reportNamesPatternSet;
+	private transient PatternSet reportPatterns;
 	
 	public AccessBuildReports(String reportNames) {
 		this.reportNames = reportNames;
 	}
 
-	private PatternSet getReportNamesPatternSet() {
-		if (reportNamesPatternSet == null)
-			reportNamesPatternSet = PatternSet.parse(reportNames);
-		return reportNamesPatternSet;
+	private PatternSet getReportPatterns() {
+		if (reportPatterns == null)
+			reportPatterns = PatternSet.parse(reportNames);
+		return reportPatterns;
 	}
 	@Override
 	public boolean implies(Permission p) {
 		if (p instanceof AccessBuildReports) {
 			AccessBuildReports accessBuildReports = (AccessBuildReports) p;
-			return getReportNamesPatternSet().matches(new StringMatcher(), accessBuildReports.reportNames);
+			return getReportPatterns().matches(new StringMatcher(), accessBuildReports.reportNames);
 		} else {
 			return new AccessBuild().implies(p);
 		}

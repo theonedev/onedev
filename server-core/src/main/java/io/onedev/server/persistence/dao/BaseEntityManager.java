@@ -12,7 +12,7 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ReflectionUtils;
 
-public abstract class AbstractEntityManager<T extends AbstractEntity> implements EntityManager<T> {
+public abstract class BaseEntityManager<T extends AbstractEntity> implements EntityManager<T> {
 
 	private final Class<T> entityClass;
 	
@@ -21,8 +21,8 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 	private final Map<Long, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
-	public AbstractEntityManager(Dao dao) {
-		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(AbstractEntityManager.class, getClass());
+	public BaseEntityManager(Dao dao) {
+		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(BaseEntityManager.class, getClass());
 		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
 			entityClass = (Class<T>) typeArguments.get(0);
 		} else {
@@ -130,4 +130,8 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 		return dao.getSession();
 	}
 
+	public Class<T> getEntityClass() {
+		return entityClass;
+	}
+	
 }

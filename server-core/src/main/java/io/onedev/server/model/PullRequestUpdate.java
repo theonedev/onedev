@@ -24,8 +24,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
@@ -35,7 +33,6 @@ import io.onedev.server.git.GitUtils;
 
 @Entity
 @Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="date")})
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class PullRequestUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

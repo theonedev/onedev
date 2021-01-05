@@ -121,8 +121,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 							return new NameCriteria(value);
 						case ProjectQueryLexer.Contains:
 							return new DescriptionCriteria(value);
-						case ProjectQueryLexer.IsBefore:
-						case ProjectQueryLexer.IsAfter:
+						case ProjectQueryLexer.IsUntil:
+						case ProjectQueryLexer.IsSince:
 							return new UpdateDateCriteria(value, operator);
 						default:
 							throw new ExplicitException("Unexpected operator " + getRuleName(operator));
@@ -192,8 +192,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 			if (!fieldName.equals(Project.NAME_NAME)) 
 				throw newOperatorException(fieldName, operator);
 			break;
-		case ProjectQueryLexer.IsBefore:
-		case ProjectQueryLexer.IsAfter:
+		case ProjectQueryLexer.IsUntil:
+		case ProjectQueryLexer.IsSince:
 			if (!fieldName.equals(Project.NAME_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;

@@ -25,7 +25,7 @@ import io.onedev.server.model.support.role.NoneIssueFields;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.usage.Usage;
@@ -33,7 +33,7 @@ import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 
 @Singleton
-public class DefaultRoleManager extends AbstractEntityManager<Role> implements RoleManager {
+public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleManager {
 
 	private final SettingManager settingManager;
 	

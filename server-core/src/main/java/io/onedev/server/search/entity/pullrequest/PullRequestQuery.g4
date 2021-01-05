@@ -9,7 +9,7 @@ query
 criteria
 	: operator=(Open|Merged|Discarded|AssignedToMe|SubmittedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|DiscardedByMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|ToBeVerifiedByBuilds|HasMergeConflicts) #OperatorCriteria
     | operator=(ToBeReviewedBy|AssignedTo|ApprovedBy|RequestedForChangesBy|SubmittedBy|DiscardedBy|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -128,12 +128,12 @@ IsLessThan
 	: 'is' WS+ 'less' WS+ 'than'
 	;
 
-IsAfter
-	: 'is' WS+ 'after'
+IsSince
+	: 'is' WS+ 'since'
 	;
 
-IsBefore
-	: 'is' WS+ 'before'
+IsUntil
+	: 'is' WS+ 'until'
 	;
 
 And

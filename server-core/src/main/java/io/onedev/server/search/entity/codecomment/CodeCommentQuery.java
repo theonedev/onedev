@@ -121,8 +121,8 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						checkField(project, fieldName, operator);
 						
 						switch (operator) {
-						case CodeCommentQueryLexer.IsBefore:
-						case CodeCommentQueryLexer.IsAfter:
+						case CodeCommentQueryLexer.IsUntil:
+						case CodeCommentQueryLexer.IsSince:
 							Date dateValue = getDateValue(value);
 							switch (fieldName) {
 							case NAME_CREATE_DATE:
@@ -209,8 +209,8 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 		if (!QUERY_FIELDS.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {
-		case CodeCommentQueryLexer.IsBefore:
-		case CodeCommentQueryLexer.IsAfter:
+		case CodeCommentQueryLexer.IsUntil:
+		case CodeCommentQueryLexer.IsSince:
 			if (!fieldName.equals(NAME_CREATE_DATE) && !fieldName.equals(NAME_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;

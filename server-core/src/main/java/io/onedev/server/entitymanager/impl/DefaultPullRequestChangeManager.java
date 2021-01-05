@@ -18,12 +18,12 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescript
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
-public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullRequestChange> 
+public class DefaultPullRequestChangeManager extends BaseEntityManager<PullRequestChange> 
 		implements PullRequestChangeManager {
 
 	private final ListenerRegistry listenerRegistry;

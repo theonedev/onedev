@@ -9,12 +9,12 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
-public class DefaultPullRequestWatchManager extends AbstractEntityManager<PullRequestWatch> 
+public class DefaultPullRequestWatchManager extends BaseEntityManager<PullRequestWatch> 
 		implements PullRequestWatchManager {
 
 	@Inject

@@ -112,7 +112,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -130,7 +130,7 @@ import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 
 @Singleton
-public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager {
+public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> implements PullRequestManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	

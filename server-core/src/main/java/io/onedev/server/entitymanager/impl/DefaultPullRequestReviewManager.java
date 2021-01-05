@@ -29,13 +29,13 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewer
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.AbstractEntityManager;
+import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 
 @Singleton
-public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullRequestReview> 
+public class DefaultPullRequestReviewManager extends BaseEntityManager<PullRequestReview> 
 		implements PullRequestReviewManager {
 
 	private final PullRequestManager pullRequestManager;

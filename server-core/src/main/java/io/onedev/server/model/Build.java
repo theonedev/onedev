@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import static io.onedev.server.model.Build.PROP_CANCELLER_NAME;
 import static io.onedev.server.model.Build.PROP_COMMIT;
 import static io.onedev.server.model.Build.PROP_FINISH_DATE;
+import static io.onedev.server.model.Build.PROP_FINISH_DAY;
 import static io.onedev.server.model.Build.PROP_JOB;
 import static io.onedev.server.model.Build.PROP_NUMBER;
 import static io.onedev.server.model.Build.PROP_PENDING_DATE;
@@ -59,8 +60,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -74,6 +75,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -81,6 +83,7 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.Day;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.MatrixRunner;
@@ -107,11 +110,10 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
 				@Index(columnList=PROP_RUNNING_DATE), @Index(columnList=PROP_FINISH_DATE), 
-				@Index(columnList=PROP_VERSION), @Index(columnList="o_numberScope_id"),
-				@Index(columnList="o_project_id, " + PROP_COMMIT)},
+				@Index(columnList=PROP_FINISH_DAY), @Index(columnList=PROP_VERSION), 
+				@Index(columnList="o_numberScope_id"), @Index(columnList="o_project_id, " + PROP_COMMIT)},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})}
 )
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
@@ -170,6 +172,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_FINISH_DATE = "finishDate";
 	
+	public static final String PROP_FINISH_DAY = "finishDay";
+	
 	public static final String NAME_COMMIT = "Commit";
 	
 	public static final String NAME_BRANCH = "Branch";
@@ -202,14 +206,17 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
-			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE, 
+			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE,
 			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, 
-			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, NAME_IMAGE);
+			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, NAME_IMAGE, BuildMetric.NAME_REPORT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
 			NAME_COMMIT, NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE);
 
+	public static final List<String> METRIC_QUERY_FIELDS = Lists.newArrayList(
+			NAME_JOB, NAME_BRANCH, NAME_PULL_REQUEST, BuildMetric.NAME_REPORT);
+	
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_JOB, PROP_JOB,
 			NAME_STATUS, PROP_STATUS,
@@ -299,6 +306,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Date finishDate;
 	
 	private Date retryDate;
+	
+	private Integer finishDay;
 	
 	@Column(nullable=false, length=1000)
 	private String submitReason;
@@ -521,6 +530,11 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setFinishDate(Date finishDate) {
 		this.finishDate = finishDate;
+		if (finishDate != null) {
+			finishDay = new Day(finishDate).getValue();
+		} else {
+			finishDay = null;
+		}
 	}
 
 	public Date getRetryDate() {
@@ -529,6 +543,11 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setRetryDate(Date retryDate) {
 		this.retryDate = retryDate;
+	}
+
+	@Nullable
+	public Integer getFinishDay() {
+		return finishDay;
 	}
 
 	public Collection<BuildParam> getParams() {
