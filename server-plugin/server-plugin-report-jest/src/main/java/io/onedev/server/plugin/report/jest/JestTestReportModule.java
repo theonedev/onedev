@@ -40,7 +40,7 @@ import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
  */
-public class JestReportModule extends AbstractPluginModule {
+public class JestTestReportModule extends AbstractPluginModule {
 
 	@Override
 	protected void configure() {
@@ -128,7 +128,7 @@ public class JestReportModule extends AbstractPluginModule {
 		private static final long serialVersionUID = 1L;
 
 		public JestReportTab(String title) {
-			super(title, JestTestSuitesPage.class, JestReportPage.class);
+			super(title, JestTestSuitesPage.class, JestTestReportPage.class);
 		}
 		
 		@Override
@@ -140,7 +140,7 @@ public class JestReportModule extends AbstractPluginModule {
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 					BuildDetailPage page = (BuildDetailPage) getPage();
-					PageParameters params = JestReportPage.paramsOf(
+					PageParameters params = JestTestReportPage.paramsOf(
 							page.getBuild(), getTitle());
 					return new ViewStateAwarePageLink<Void>(linkId, pageClass, params);
 				}
@@ -151,7 +151,7 @@ public class JestReportModule extends AbstractPluginModule {
 		@Override
 		public boolean isActive(Page currentPage) {
 			if (super.isActive(currentPage)) {
-				JestReportPage jestReportPage = (JestReportPage) currentPage;
+				JestTestReportPage jestReportPage = (JestTestReportPage) currentPage;
 				return getTitle().equals(jestReportPage.getReportName());
 			} else {
 				return false;

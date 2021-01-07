@@ -48,8 +48,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.jest.JestReportData.Status;
-import io.onedev.server.plugin.report.jest.JestReportData.TestSuite;
+import io.onedev.server.plugin.report.jest.JestTestReportData.Status;
+import io.onedev.server.plugin.report.jest.JestTestReportData.TestSuite;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.patternset.PatternSet;
@@ -65,7 +65,7 @@ import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class JestTestSuitesPage extends JestReportPage {
+public class JestTestSuitesPage extends JestTestReportPage {
 
 	public static final String PARAM_FILE = "file";
 	

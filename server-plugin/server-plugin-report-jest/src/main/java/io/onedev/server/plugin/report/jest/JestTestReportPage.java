@@ -12,12 +12,16 @@ import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.support.BuildMetric;
+import io.onedev.server.search.buildmetric.BuildMetricQuery;
+import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -27,22 +31,22 @@ import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 
 @SuppressWarnings("serial")
-public abstract class JestReportPage extends BuildDetailPage {
+public abstract class JestTestReportPage extends BuildDetailPage {
 
 	private static final String PARAM_REPORT = "report";
 
 	private final String reportName;
 	
-	private final IModel<JestReportData> reportDataModel = new LoadableDetachableModel<JestReportData>() {
+	private final IModel<JestTestReportData> reportDataModel = new LoadableDetachableModel<JestTestReportData>() {
 
 		@Override
-		protected JestReportData load() {
-			return LockUtils.read(getBuild().getReportLockKey(JobJestReport.DIR), new Callable<JestReportData>() {
+		protected JestTestReportData load() {
+			return LockUtils.read(getBuild().getReportLockKey(JobJestReport.DIR), new Callable<JestTestReportData>() {
 
 				@Override
-				public JestReportData call() throws Exception {
+				public JestTestReportData call() throws Exception {
 					File reportsDir = new File(getBuild().getReportDir(JobJestReport.DIR), reportName);				
-					return JestReportData.readFrom(reportsDir);
+					return JestTestReportData.readFrom(reportsDir);
 				}
 				
 			});
@@ -50,7 +54,7 @@ public abstract class JestReportPage extends BuildDetailPage {
 		
 	};
 	
-	public JestReportPage(PageParameters params) {
+	public JestTestReportPage(PageParameters params) {
 		super(params);
 		
 		reportName = params.get(PARAM_REPORT).toString();
@@ -74,7 +78,7 @@ public abstract class JestReportPage extends BuildDetailPage {
 	}
 	
 	@Nullable
-	protected JestReportData getReportData() {
+	protected JestTestReportData getReportData() {
 		return reportDataModel.getObject();
 	}
 
@@ -96,15 +100,29 @@ public abstract class JestReportPage extends BuildDetailPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new JestReportCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new JestTestReportCssResourceReference()));
 	}
 
 	private class JestReportTab extends BuildTab {
 
-		public JestReportTab(String title, Class<? extends JestReportPage> pageClass) {
+		public JestReportTab(String title, Class<? extends JestTestReportPage> pageClass) {
 			super(title, pageClass);
 		}
 		
+		@Override
+		protected Component renderOptions(String componentId) {
+			Fragment fragment = new Fragment(componentId, "trendingFrag", JestTestReportPage.this);
+
+			String query = String.format("%s \"last month\" and \"%s\" %s \"%s\"", 
+					BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since), 
+					BuildMetric.NAME_REPORT, 
+					BuildMetricQuery.getRuleName(BuildMetricQueryParser.Is), 
+					reportName);
+			PageParameters params = JestTestStatsPage.paramsOf(getProject(), query);
+			fragment.add(new ViewStateAwarePageLink<>("link", JestTestStatsPage.class, params));
+			return fragment;
+		}
+
 		@Override
 		public Component render(String componentId) {
 			return new PageTabHead(componentId, this) {
@@ -112,7 +130,7 @@ public abstract class JestReportPage extends BuildDetailPage {
 				@Override
 				protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 					BuildDetailPage page = (BuildDetailPage) getPage();
-					PageParameters params = JestReportPage.paramsOf(
+					PageParameters params = JestTestReportPage.paramsOf(
 							page.getBuild(), reportName);
 					return new ViewStateAwarePageLink<Void>(linkId, pageClass, params);
 				}
@@ -123,7 +141,7 @@ public abstract class JestReportPage extends BuildDetailPage {
 		@Override
 		public boolean isActive(Page currentPage) {
 			if (super.isActive(currentPage)) {
-				JestReportPage jestReportPage = (JestReportPage) currentPage;
+				JestTestReportPage jestReportPage = (JestTestReportPage) currentPage;
 				return reportName.equals(jestReportPage.getReportName());
 			} else {
 				return false;

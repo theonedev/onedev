@@ -24,7 +24,7 @@ import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
-public class JestReportData implements Serializable {
+public class JestTestReportData implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -48,7 +48,7 @@ public class JestReportData implements Serializable {
 			
 	private final List<TestSuite> testSuites;
 	
-	public JestReportData(Build build, Collection<JsonNode> rootNodes) {
+	public JestTestReportData(Build build, Collection<JsonNode> rootNodes) {
 		testSuites = new ArrayList<>();
 		for (JsonNode rootNode: rootNodes) {
 			for (JsonNode testSuiteNode: rootNode.get("testResults")) 
@@ -80,11 +80,11 @@ public class JestReportData implements Serializable {
 	}
 
 	@Nullable
-	public static JestReportData readFrom(File reportDir) {
+	public static JestTestReportData readFrom(File reportDir) {
 		File dataFile = new File(reportDir, FILE_NAME);
 		if (dataFile.exists()) {
 			try (InputStream is = new FileInputStream(dataFile)) {
-				return (JestReportData) SerializationUtils.deserialize(is);
+				return (JestTestReportData) SerializationUtils.deserialize(is);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -129,7 +129,7 @@ public class JestReportData implements Serializable {
 			else if (testSuite.getStatus() == Status.PASSED)
 				numOfPassed++;
 		}
-		return numOfFailed*100/(numOfPassed+numOfFailed);
+		return numOfPassed*100/(numOfPassed+numOfFailed);
 	}
 	
 	public int getTestCaseSuccessRate() {
@@ -143,7 +143,7 @@ public class JestReportData implements Serializable {
 					numOfPassed++;
 			}
 		}
-		return numOfFailed*100/(numOfPassed+numOfFailed);
+		return numOfPassed*100/(numOfPassed+numOfFailed);
 	}
 	
 	public static class TestSuite implements Serializable {

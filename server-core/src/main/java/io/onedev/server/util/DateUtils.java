@@ -45,6 +45,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
     
     public static String formatDuration(long durationMillis) {
+    	if (durationMillis < 0)
+    		durationMillis = 0;
     	return DurationFormatUtils.formatDurationWords(durationMillis, true, true);
     }
 }

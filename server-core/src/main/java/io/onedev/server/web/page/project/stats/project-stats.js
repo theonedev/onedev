@@ -406,6 +406,7 @@ onedev.server.stats = {
 				},
 				yAxis: {
 					minInterval: 1,
+					min: 0,
 			    	axisLine: {
 			    		show:false
 			    	},	

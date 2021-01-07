@@ -4,7 +4,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 
-import io.onedev.server.plugin.report.jest.JestReportData.Status;
+import io.onedev.server.plugin.report.jest.JestTestReportData.Status;
 
 @SuppressWarnings("serial")
 class TestStatusBadge extends Label {

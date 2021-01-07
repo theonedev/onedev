@@ -58,10 +58,10 @@ public class JobJestReport extends JobReport {
 		File reportDir = new File(build.getReportDir(DIR), getReportName());
 		FileUtils.createDir(reportDir);
 
-		JestReportData report = LockUtils.write(build.getReportLockKey(DIR), new Callable<JestReportData>() {
+		JestTestReportData report = LockUtils.write(build.getReportLockKey(DIR), new Callable<JestTestReportData>() {
 
 			@Override
-			public JestReportData call() throws Exception {
+			public JestTestReportData call() throws Exception {
 				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 				
 				Collection<JsonNode> rootNodes = new ArrayList<>();
@@ -74,7 +74,7 @@ public class JobJestReport extends JobReport {
 					}
 				}
 				if (!rootNodes.isEmpty()) {
-					JestReportData report = new JestReportData(build, rootNodes);
+					JestTestReportData report = new JestTestReportData(build, rootNodes);
 					report.writeTo(reportDir);
 					return report;
 				} else {

@@ -1,6 +1,6 @@
 onedev.server.day = {
 	format: function(day) {
-		return day.year + "-" + (day.monthOfYear + 1) + "-" + day.dayOfMonth;
+		return day.year%100 + "-" + (day.monthOfYear + 1) + "-" + day.dayOfMonth;
 	},
 	compare: function(day1, day2) {
 		if (day1.year < day2.year)

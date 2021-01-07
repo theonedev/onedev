@@ -11,11 +11,15 @@ onedev.server.lineChart = {
 				},
 			    yAxis: {
 			        type: 'value',
-					minInterval: 1
+					minInterval: 1,
+			    	axisLine: {
+			    		show:false
+			    	},	
 			    },
 			    series: [{
 			        data: [],
 			        type: 'line',
+					smooth: true,
 					lineStyle: {
 						color: '#3699FF'
 					},

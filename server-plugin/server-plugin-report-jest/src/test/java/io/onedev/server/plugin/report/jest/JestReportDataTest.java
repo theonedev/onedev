@@ -16,7 +16,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.jest.JestReportData.Status;
+import io.onedev.server.plugin.report.jest.JestTestReportData.Status;
 import io.onedev.server.util.patternset.PatternSet;
 
 public class JestReportDataTest {
@@ -30,7 +30,7 @@ public class JestReportDataTest {
 			
 			Build build = new Build();
 			build.setJobWorkspace("/Users/robin/Projects/onedev/reports/jest-demo");
-			JestReportData reportData = new JestReportData(build, rootNodes);
+			JestTestReportData reportData = new JestTestReportData(build, rootNodes);
 			assertEquals(1, reportData.getTestCases(null, null, Sets.newHashSet(Status.FAILED)).size());
 			assertEquals(1, reportData.getTestCases(null, null, Sets.newHashSet(Status.SKIPPED)).size());
 			assertEquals(1, reportData.getTestCases(null, null, Sets.newHashSet(Status.TODO)).size());
