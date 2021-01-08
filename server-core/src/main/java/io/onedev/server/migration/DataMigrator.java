@@ -2302,4 +2302,20 @@ public class DataMigrator {
 		}
 	}
 	
+	// migrate to 4.1.0
+	private void migrate48(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				content = StringUtils.replace(content, 
+						"\" is before \"", "\" is until \"");
+				content = StringUtils.replace(content, 
+						"\" is after \"", "\" is since \"");
+				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}	
+	}
+	
 }
