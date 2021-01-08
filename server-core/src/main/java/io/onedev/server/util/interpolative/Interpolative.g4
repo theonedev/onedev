@@ -4,6 +4,7 @@ interpolative: segment* EOF;
 
 segment: Literal|Variable;
 
-Variable: '@' CHAR+? '@';
-Literal: CHAR+;
-CHAR: ('\\'.|~[@\\]);
+Variable: '@' VariableChar+? '@';
+Literal: LiteralChar+;
+LiteralChar: '@@'|~[@];
+VariableChar: ~[@];

@@ -15,8 +15,6 @@ import io.onedev.server.util.validation.SecretNameValidator;
 @Constraint(validatedBy=SecretNameValidator.class) 
 public @interface SecretName {
 
-	boolean interpolative() default false;
-	
     String message() default "";
 
     Class<?>[] groups() default {};

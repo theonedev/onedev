@@ -22,6 +22,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -189,10 +190,16 @@ public class PropertyDescriptor implements Serializable {
 	
 	public String getDescription() {
 		String description = EditableUtils.getDescription(getPropertyGetter());
-		if (description != null) 
+		if (description != null) {
+			if (getPropertyGetter().getAnnotation(Interpolative.class) != null) {
+				if (!description.endsWith("."))
+					description += ".";
+				description += " <b>NOTE: </b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>. Use <tt>@@</tt> for literal <tt>@</tt>";
+			}
 			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
-		else 
+		} else { 
 			return null;
+		}
 	}
 
 }

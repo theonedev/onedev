@@ -30,7 +30,7 @@ onedev.server.codeSupport = {
 		    	
 		    	var beforeCursor = cm.doc.getLine(line).substring(0, start);
 		    	
-		    	var escapeFiltered = beforeCursor.replace("\\\\", "").replace("\\@", "");
+		    	var escapeFiltered = beforeCursor.replace("@@", "");
 		    	if ((escapeFiltered.match(/@/g) || []).length % 2 == 1) { // only show hint when type left @
 		    		function hint(cm, showHintCallback) {
 				    	var end = cm.getCursor().ch;

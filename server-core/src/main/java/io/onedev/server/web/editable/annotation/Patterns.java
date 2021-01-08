@@ -17,8 +17,6 @@ public @interface Patterns {
 
 	String message() default "";
 	
-	boolean interpolative() default false;
-	
 	String suggester() default "";
 	
 	Class<?>[] groups() default {};

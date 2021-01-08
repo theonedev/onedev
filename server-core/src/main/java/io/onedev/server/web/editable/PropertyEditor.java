@@ -40,10 +40,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				try {
 					Validator validator = AppLoader.getInstance(Validator.class);
 					Set<?> violations = validator.validateValue(
-							descriptor.getBeanClass(), 
-							descriptor.getPropertyName(), 
-							validatable.getValue());
-
+							descriptor.getBeanClass(), descriptor.getPropertyName(), validatable.getValue());
 					for (Object each: violations) {
 						ConstraintViolation<?> violation = (ConstraintViolation<?>) each;
 						error(violation.getMessage());

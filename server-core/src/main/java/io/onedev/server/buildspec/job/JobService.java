@@ -30,10 +30,9 @@ public class JobService implements Serializable {
 	
 	private String memoryRequirement = "128m";
 	
-	@Editable(order=100, description="Specify name of the service, which will be used as host name to access "
-			+ "the service. <b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=100, description="Specify name of the service, which will be used as host name to access the service")
 	@Interpolative(variableSuggester="suggestVariables")
-	@DnsName(interpolative = true)
+	@DnsName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -43,8 +42,7 @@ public class JobService implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify docker image of the service. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=200, description="Specify docker image of the service")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -55,8 +53,7 @@ public class JobService implements Serializable {
 		this.image = image;
 	}
 
-	@Editable(order=220, description="Optionally specify arguments to run above image. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=220, description="Optionally specify arguments to run above image")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getArguments() {
 		return arguments;
@@ -78,8 +75,7 @@ public class JobService implements Serializable {
 
 	@Editable(order=400, description="Specify command to check readiness of the service. This command will "
 			+ "be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be "
-			+ "executed repeatedly until a zero code is returned to indicate service ready. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "executed repeatedly until a zero code is returned to indicate service ready")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getReadinessCheckCommand() {
@@ -91,8 +87,7 @@ public class JobService implements Serializable {
 	}
 	
 	@Editable(order=10000, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getCpuRequirement() {
@@ -104,8 +99,7 @@ public class JobService implements Serializable {
 	}
 
 	@Editable(order=10100, group="More Settings", description="Specify memory requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getMemoryRequirement() {

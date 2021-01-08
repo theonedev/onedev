@@ -15,8 +15,6 @@ import io.onedev.server.util.validation.ProjectNameValidator;
 @Constraint(validatedBy=ProjectNameValidator.class) 
 public @interface ProjectName {
 
-	boolean interpolative() default false;
-	
 	String message() default "";
 	
     Class<?>[] groups() default {};

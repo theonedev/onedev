@@ -18,8 +18,6 @@ import io.onedev.server.util.validation.DirectoryValidator;
 @Constraint(validatedBy=DirectoryValidator.class) 
 public @interface Directory {
 
-	boolean interpolative() default false;
-	
 	boolean writeable();
 	
 	boolean outsideOfInstallDir();

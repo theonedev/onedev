@@ -15,8 +15,6 @@ import io.onedev.server.util.validation.RegExValidator;
 @Constraint(validatedBy=RegExValidator.class) 
 public @interface RegEx {
 
-	boolean interpolative() default false;
-	
 	String pattern();
 	
     String message() default "Not matching specified regular expression";

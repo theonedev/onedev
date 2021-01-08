@@ -15,8 +15,6 @@ import io.onedev.server.util.validation.UserNameValidator;
 @Constraint(validatedBy=UserNameValidator.class) 
 public @interface UserName {
 
-	boolean interpolative() default false;
-	
 	String message() default "";
 	
     Class<?>[] groups() default {};

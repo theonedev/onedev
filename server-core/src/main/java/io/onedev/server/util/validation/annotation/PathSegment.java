@@ -18,8 +18,6 @@ import io.onedev.server.util.validation.PathSegmentValidator;
 @Constraint(validatedBy=PathSegmentValidator.class) 
 public @interface PathSegment {
 
-	boolean interpolative() default false;
-	
 	String message() default "";
 	
 	Class<?>[] groups() default {};

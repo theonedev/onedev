@@ -23,8 +23,7 @@ public class CloseMilestoneAction extends PostBuildAction {
 	
 	private String milestoneName;
 	
-	@Editable(order=1000, description="Specify name of the milestone. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=1000, description="Specify name of the milestone")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getMilestoneName() {

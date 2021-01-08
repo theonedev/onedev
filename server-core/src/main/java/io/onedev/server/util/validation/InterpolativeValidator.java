@@ -24,26 +24,27 @@ public class InterpolativeValidator implements ConstraintValidator<Interpolative
 		if (value == null) 
 			return true;
 		
-		if (!Interpolated.get()) {
-			List<String> values = new ArrayList<>();
-			if (value instanceof Collection)
-				values.addAll((Collection<String>)value);
-			else
-				values.add((String) value);
-			
-			for (String each: values) {
-				try {
-					io.onedev.server.util.interpolative.Interpolative.parse(each);					
-				} catch (Exception e) {
-					constraintContext.disableDefaultConstraintViolation();
-					String message = this.message;
-					if (message.length() == 0)
-						message = "Malformed interpolative: please make sure '@' and '\\' is escaped appropriately";
-					constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-					return false;
+		List<String> values = new ArrayList<>();
+		if (value instanceof Collection)
+			values.addAll((Collection<String>)value);
+		else
+			values.add((String) value);
+		
+		for (String each: values) {
+			try {
+				io.onedev.server.util.interpolative.Interpolative.parse(each);					
+			} catch (Exception e) {
+				constraintContext.disableDefaultConstraintViolation();
+				String message = this.message;
+				if (message.length() == 0) {
+					message = "Last appearance of @ is a surprise to me. Either use @...@ to reference a variable, "
+							+ "or use @@ for literal @";
 				}
+				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+				return false;
 			}
-		} 
+		}
 		return true;
 	}
+	
 }

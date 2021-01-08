@@ -37,10 +37,9 @@ public abstract class JobReport implements Serializable {
 		this.reportName = reportName;
 	}
 	
-	@Editable(order=100, description="Specify files relative to OneDev workspace. Use * or ? for pattern match. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=100, description="Specify files relative to OneDev workspace. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(interpolative = true, path=true)
+	@Patterns(path=true)
 	@NotEmpty
 	public String getFilePatterns() {
 		return filePatterns;

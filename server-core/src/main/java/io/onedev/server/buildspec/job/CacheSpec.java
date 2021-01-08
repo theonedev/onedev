@@ -20,11 +20,10 @@ public class CacheSpec implements Serializable {
 	
 	private String path;
 
-	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different jobs. "
-			+ "Note: Type @ to insert variable, use \\ to escape normal occurrences of @ or \\")
+	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different jobs")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
-	@RegEx(interpolative=true, pattern="[a-zA-Z0-9\\-_\\.]+", message="Can only contain alphanumeric, dash, dot and underscore")
+	@RegEx(pattern="[a-zA-Z0-9\\-_\\.]+", message="Can only contain alphanumeric, dash, dot and underscore")
 	public String getKey() {
 		return key;
 	}
@@ -34,8 +33,7 @@ public class CacheSpec implements Serializable {
 	}
 	
 	@Editable(order=200, description="Specify path to cache. Non-absolute path is considered to be relative to job workspace. "
-			+ "Specify \".\" (without quote) to cache workspace itself. "
-			+ "Note: Type @ to insert variable, use \\ to escape normal occurrences of @ or \\")
+			+ "Specify \".\" (without quote) to cache workspace itself")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path
 	@NotEmpty

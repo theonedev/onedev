@@ -19,7 +19,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.interpolative.Segment;
+import io.onedev.server.util.interpolative.Interpolative.Segment;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -69,8 +69,7 @@ public class ProjectDependency implements Serializable {
 		return choices;
 	}
 	
-	@Editable(order=300, name="Build", description="Specify build to retrieve artifacts from. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=300, name="Build", description="Specify build to retrieve artifacts from")
 	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestBuilds")
 	@NotEmpty
 	public String getBuildNumber() {
@@ -101,10 +100,9 @@ public class ProjectDependency implements Serializable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(suggester="suggestArtifacts", interpolative=true, path=true)
+	@Patterns(suggester="suggestArtifacts", path=true)
 	@NotEmpty
 	public String getArtifacts() {
 		return artifacts;

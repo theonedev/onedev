@@ -15,8 +15,6 @@ import io.onedev.server.util.validation.UrlSegmentValidator;
 @Constraint(validatedBy=UrlSegmentValidator.class) 
 public @interface UrlSegment {
 
-	boolean interpolative() default false;
-	
 	String message() default "";
 	
     Class<?>[] groups() default {};

@@ -17,8 +17,9 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.util.interpolative.Interpolative.Segment.Type;
 import io.onedev.server.util.interpolative.InterpolativeParser.SegmentContext;
-import io.onedev.server.util.interpolative.Segment.Type;
 
 public class Interpolative implements Serializable {
 
@@ -39,7 +40,8 @@ public class Interpolative implements Serializable {
 			@Override
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
-				throw new RuntimeException("Malformed interpolative: " + interpolativeString);
+				throw new ExplicitException("Last appearance of @ is a surprise to me. Either use @...@ to reference "
+						+ "a variable, or use @@ for literal @: " + interpolativeString);
 			}
 			
 		});
@@ -51,11 +53,11 @@ public class Interpolative implements Serializable {
 		List<Segment> segments = new ArrayList<>();
 		for (SegmentContext segment: parser.interpolative().segment()) {
 			if (segment.Literal() != null) 
-				segments.add(new Segment(Type.LITERAL, segment.Literal().getText()));
+				segments.add(new Segment(Type.LITERAL, segment.Literal().getText().replace("@@", "@")));
 			else
 				segments.add(new Segment(Type.VARIABLE, FenceAware.unfence(segment.Variable().getText())));
 		}
-		return new Interpolative(segments);
+		return new Interpolative(segments);	
 	}
 
 	public List<Segment> getSegments(@Nullable Type type) {
@@ -74,6 +76,31 @@ public class Interpolative implements Serializable {
 			}
 		}
 		return builder.toString();
+	}
+	
+	public static class Segment implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		public enum Type {LITERAL, VARIABLE};
+		
+		private final Type type;
+		
+		private final String content;
+		
+		public Segment(Type type, String content) {
+			this.type = type;
+			this.content = content;
+		}
+
+		public Type getType() {
+			return type;
+		}
+
+		public String getContent() {
+			return content;
+		}
+		
 	}
 	
 }

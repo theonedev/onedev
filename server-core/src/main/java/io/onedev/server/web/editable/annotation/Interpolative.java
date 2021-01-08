@@ -25,4 +25,6 @@ public @interface Interpolative {
 
     Class<? extends Payload>[] payload() default {};
     
+    String exampleVar() default "a";
+    
 }

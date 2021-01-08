@@ -28,8 +28,7 @@ public class JobHtmlReport extends JobReport {
 
 	private String startPage;
 
-	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, for instance: api/index.html. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, for instance: api/index.html")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {

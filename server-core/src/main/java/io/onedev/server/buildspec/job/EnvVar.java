@@ -19,10 +19,9 @@ public class EnvVar implements Serializable {
 	
 	private String value;
 
-	@Editable(order=100, description="Specify name of the environment variable. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=100, description="Specify name of the environment variable")
 	@Interpolative(variableSuggester="suggestVariables")
-	@VariableName(interpolative = true)
+	@VariableName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -32,8 +31,7 @@ public class EnvVar implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify value of the environment variable. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Editable(order=200, description="Specify value of the environment variable")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getValue() {

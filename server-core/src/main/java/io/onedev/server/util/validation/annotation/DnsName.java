@@ -15,8 +15,6 @@ import io.onedev.server.util.validation.DnsNameValidator;
 @Constraint(validatedBy=DnsNameValidator.class) 
 public @interface DnsName {
 
-	boolean interpolative() default false;
-	
     String message() default "";
 
     Class<?>[] groups() default {};

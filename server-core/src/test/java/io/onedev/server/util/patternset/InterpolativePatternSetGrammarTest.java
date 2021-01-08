@@ -39,13 +39,13 @@ public class InterpolativePatternSetGrammarTest {
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("@robin", "-@alive"), Sets.newHashSet("\"@")); 
-		interpolated = Interpolative.parse("\\@robin \"-\\@alive\" -\\\"\\@").interpolateWith(interpolator);
+		interpolated = Interpolative.parse("@@robin \"-@@alive\" -\\\"@@").interpolateWith(interpolator);
 		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("@robin", "hello world", "world"), Sets.newHashSet("hello")); 
-		interpolated = Interpolative.parse("\\@robin @\"hello world\"@ -@hello world@").interpolateWith(interpolator);
+		interpolated = Interpolative.parse("@@robin @\"hello world\"@ -@hello world@").interpolateWith(interpolator);
 		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());

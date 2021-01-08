@@ -33,10 +33,9 @@ public class JobJestReport extends JobReport {
 	public static final String DIR = "jest-reports";
 	
 	@Editable(order=100, description="Specify json file containing Jest test results relative to OneDev workspace. "
-			+ "It can be generated via Jest option <tt>--json</tt> and <tt>--outputFile</tt>. Use * or ? for pattern match. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='$docRoot/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "It can be generated via Jest option <tt>--json</tt> and <tt>--outputFile</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(interpolative = true, path=true)
+	@Patterns(path=true)
 	@NotEmpty
 	@Override
 	public String getFilePatterns() {

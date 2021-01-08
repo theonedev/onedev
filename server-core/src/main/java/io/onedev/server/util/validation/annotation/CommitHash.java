@@ -14,8 +14,6 @@ import io.onedev.server.util.validation.CommitHashValidator;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=CommitHashValidator.class) 
 public @interface CommitHash {
-
-	boolean interpolative() default false;
 	
     String message() default "Not a valid commit hash";
 

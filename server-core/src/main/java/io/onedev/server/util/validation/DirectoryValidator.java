@@ -1,15 +1,12 @@
 package io.onedev.server.util.validation;
 
 import java.io.File;
-import java.util.function.Function;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.validation.annotation.Directory;
 
 public class DirectoryValidator implements ConstraintValidator<Directory, String> {
@@ -26,19 +23,6 @@ public class DirectoryValidator implements ConstraintValidator<Directory, String
 		if (value == null)
 			return true;
 
-		if (annotation.interpolative() && !Interpolated.get()) try {
-			value = StringUtils.unescape(Interpolative.parse(value).interpolateWith(new Function<String, String>() {
-
-				@Override
-				public String apply(String t) {
-					return "a";
-				}
-				
-			}));
-		} catch (Exception e) {
-			return true; // will be handled by interpolative validator
-		}
-		
 		try {
 			File dir = new File(value);
 			if (annotation.absolute()) {

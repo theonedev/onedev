@@ -1,5 +1,6 @@
 package io.onedev.server.web.behavior;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,9 +56,9 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 				Set<String> matches = new HashSet<>();
 				for (Token token: terminalExpect.getRoot().getState().getMatchedTokens()) {
 					if (token.getType() == InterpolativePatternSetLexer.Quoted)
-						matches.add(StringUtils.unescape(FenceAware.unfence(token.getText())));
+						matches.add(StringUtils.unescape(FenceAware.unfence(token.getText())).replace("@@", "@"));
 					else
-						matches.add(StringUtils.unescape(token.getText()));
+						matches.add(StringUtils.unescape(token.getText()).replace("@@", "@"));
 				}
 				if (spec.getRuleName().equals("NQuoted")) {
 					List<InputSuggestion> suggestions = suggestPatterns(unmatched);
@@ -67,7 +68,7 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 							.map(it->{
 								if (it.getContent().contains(" ") || it.getContent().startsWith("-")) {
 									InputSuggestion suggestion = it.escape("\"@");
-									suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
+									suggestion = new InputSuggestion("\"" + suggestion.getContent().replace("\\@", "@@") + "\"", 
 											suggestion.getCaret()!=-1? suggestion.getCaret()+1: -1,
 											suggestion.getDescription(), 
 											new LinearRange(suggestion.getMatch().getFrom()+1, suggestion.getMatch().getTo()+1));
@@ -82,7 +83,7 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 					 *  provide this suggestion only when we typed quote as otherwise we will have duplicated suggestions
 					 *  (one for nquoted, and one for quoted) 
 					 */
-					return new FenceAware(codeAssist.getGrammar(), '"', '"', "@") {
+					List<InputSuggestion> suggestions = new FenceAware(codeAssist.getGrammar(), '"', '"', "@") {
 	
 						@Override
 						protected List<InputSuggestion> match(String matchWith) {
@@ -102,6 +103,13 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 						}
 						
 					}.suggest(terminalExpect);
+					
+					List<InputSuggestion> atEscapedSuggestions = new ArrayList<>();
+					for (InputSuggestion suggestion: suggestions) {
+						atEscapedSuggestions.add(new InputSuggestion(suggestion.getContent().replace("\\@", "@@"), 
+								suggestion.getCaret(), suggestion.getDescription(), suggestion.getMatch()));
+					}
+					return atEscapedSuggestions;
 				}
 			}
 		}
