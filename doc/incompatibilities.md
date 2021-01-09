@@ -1,3 +1,8 @@
+# 4.1.0
+
+1. Backslash in job commands should not be escaped now. And literal '@' should be written as '@@'
+2. Various query operator _is before_ and _is after_ is substituted with _is until_ and _is since_. For instance issue query _"Submit Date" is before "yesterday"_ should be written as _"Submit Date" is until "yesterday"_
+
 # 4.0.5
 
 1. Renamed build variables:
