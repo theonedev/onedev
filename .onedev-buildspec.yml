@@ -44,7 +44,7 @@ jobs:
   - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
     deploy
   - ''
-  - curl -u onedev:@secrets:maven-deploy-password@ -f -d \@/root/.m2/archetype-catalog.xml
+  - curl -u onedev:@secrets:maven-deploy-password@ -f -d @@/root/.m2/archetype-catalog.xml
     -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"
   - ''
   - cd $projectDir/server-product/docker
@@ -74,8 +74,8 @@ jobs:
   artifacts: '*.zip *.sh'
   reports:
   - !JobMarkdownReport
-    filePatterns: doc/**
     reportName: Incompatibilities
+    filePatterns: doc/**
     startPage: doc/incompatibilities.md
   cpuRequirement: 250m
   memoryRequirement: 128m
@@ -99,7 +99,7 @@ jobs:
   image: alpine/git:1.0.7
   commands:
   - git config --global --unset http.extraHeader
-  - git push -f https://robinshine:@secrets:github-token@\@github.com/theonedev/server
+  - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/server
     HEAD:main
   triggers:
   - !BranchUpdateTrigger
@@ -119,7 +119,7 @@ jobs:
   - set -e
   - git fetch --tags
   - git config --global --unset http.extraHeader
-  - git push -f --tags https://robinshine:@secrets:github-token@\@github.com/theonedev/onedev
+  - git push -f --tags https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev
   triggers:
   - !TagCreateTrigger
     projects: onedev-server
