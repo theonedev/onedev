@@ -23,7 +23,7 @@ onedev.server.codeSupport = {
 		});
 		
 		cm.on("keyup", function(cm, event) {
-			if (event.keyCode == 50) {
+			if (event.key == "@") {
 		    	var cursor = cm.getCursor();
 		    	var line = cursor.line;
 		    	var start = cursor.ch;
