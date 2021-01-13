@@ -52,7 +52,8 @@ public class JestTestMetric extends AbstractEntity implements BuildMetric {
 		this.reportName = reportName;
 	}
 
-	@MetricIndicator(order=100, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, maxValue=100)
+	@MetricIndicator(order=100, group="Success Rate", name="Test Suite", color="#1BC5BD",
+			valueFormatter=BuildMetric.FORMAT_PERCENTAGE, maxValue=100, minValue=0)
 	public int getTestSuiteSuccessRate() {
 		return testSuiteSuccessRate;
 	}
@@ -61,7 +62,8 @@ public class JestTestMetric extends AbstractEntity implements BuildMetric {
 		this.testSuiteSuccessRate = testSuiteSuccessRate;
 	}
 
-	@MetricIndicator(order=200, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, maxValue=100)
+	@MetricIndicator(order=200, group="Success Rate", name="Test Case", color="#F64E60",
+			valueFormatter=BuildMetric.FORMAT_PERCENTAGE, maxValue=100, minValue=0)
 	public int getTestCaseSuccessRate() {
 		return testCaseSuccessRate;
 	}
@@ -70,16 +72,7 @@ public class JestTestMetric extends AbstractEntity implements BuildMetric {
 		this.testCaseSuccessRate = testCaseSuccessRate;
 	}
 
-	@MetricIndicator(order=300, valueFormatter=BuildMetric.FORMAT_DURATION)
-	public int getTotalTestDuration() {
-		return totalTestDuration;
-	}
-
-	public void setTotalTestDuration(int totalTestDuration) {
-		this.totalTestDuration = totalTestDuration;
-	}
-
-	@MetricIndicator(order=400)
+	@MetricIndicator(order=400, group="Total Number", name="Test Suite", color="#1BC5BD")
 	public int getNumOfTestSuites() {
 		return numOfTestSuites;
 	}
@@ -88,7 +81,7 @@ public class JestTestMetric extends AbstractEntity implements BuildMetric {
 		this.numOfTestSuites = numOfTestSuites;
 	}
 
-	@MetricIndicator(order=500)
+	@MetricIndicator(order=500, group="Total Number", name="Test Case", color="#F64E60")
 	public int getNumOfTestCases() {
 		return numOfTestCases;
 	}
@@ -97,4 +90,13 @@ public class JestTestMetric extends AbstractEntity implements BuildMetric {
 		this.numOfTestCases = numOfTestCases;
 	}
 	
+	@MetricIndicator(order=600, valueFormatter=BuildMetric.FORMAT_DURATION)
+	public int getTotalTestDuration() {
+		return totalTestDuration;
+	}
+
+	public void setTotalTestDuration(int totalTestDuration) {
+		this.totalTestDuration = totalTestDuration;
+	}
+
 }

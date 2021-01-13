@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.chart.line;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -9,9 +10,11 @@ public class LineSeries implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String name;
+	private final String seriesName;
 	
-	private final Map<String, Integer> values;
+	private final List<String> lineNames;
+	
+	private final Map<String, List<Integer>> lineValues;
 	
 	private final String valueFormatter;
 	
@@ -19,28 +22,39 @@ public class LineSeries implements Serializable {
 	
 	private final Integer maxValue;
 	
-	public LineSeries(@Nullable String name, Map<String, Integer> values, String valueFormatter, 
-			@Nullable Integer minValue, @Nullable Integer maxValue) {
-		this.name = name;
-		this.values = values;
+	private final List<String> lineColors;
+	
+	public LineSeries(@Nullable String seriesName, List<String> lineNames, 
+			Map<String, List<Integer>> lineValues, @Nullable String valueFormatter, 
+			@Nullable Integer minValue, @Nullable Integer maxValue, 
+			List<String> lineColors) {
+		this.seriesName = seriesName;
+		this.lineNames = lineNames;
+		this.lineValues = lineValues;
 		this.valueFormatter = valueFormatter;
 		this.minValue = minValue;
 		this.maxValue = maxValue;
+		this.lineColors = lineColors;
 	}
 
-	public Map<String, Integer> getValues() {
-		return values;
+	public String getSeriesName() {
+		return seriesName;
 	}
 
+	public List<String> getLineNames() {
+		return lineNames;
+	}
+
+	public Map<String, List<Integer>> getLineValues() {
+		return lineValues;
+	}
+
+	@Nullable
 	public String getValueFormatter() {
 		return valueFormatter;
 	}
 
 	@Nullable
-	public String getName() {
-		return name;
-	}
-
 	public Integer getMinValue() {
 		return minValue;
 	}
@@ -48,6 +62,10 @@ public class LineSeries implements Serializable {
 	@Nullable
 	public Integer getMaxValue() {
 		return maxValue;
+	}
+
+	public List<String> getLineColors() {
+		return lineColors;
 	}
 
 }

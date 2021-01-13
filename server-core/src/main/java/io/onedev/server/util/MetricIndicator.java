@@ -17,5 +17,9 @@ public @interface MetricIndicator {
 	
 	String valueFormatter() default "";
 	
+	String group() default "";
+	
+	String color() default "#8950FC";
+	
 	int order() default 100;
 }
