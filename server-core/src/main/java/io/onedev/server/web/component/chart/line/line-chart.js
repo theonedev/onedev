@@ -54,6 +54,7 @@ onedev.server.lineChart = {
 					data: [],
 					type: 'line',
 					smooth: true, 
+					animation: false,
 					lineStyle: {
 						color: lineSeries.lineColors[i]
 					},

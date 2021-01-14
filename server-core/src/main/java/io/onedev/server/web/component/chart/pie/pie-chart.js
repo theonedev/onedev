@@ -47,6 +47,7 @@ onedev.server.pieChart = {
 						}
 					},
 					stillShowZeroSum: false, 
+					animation: false,
 					data: chartData	
 				}]
 			});	
