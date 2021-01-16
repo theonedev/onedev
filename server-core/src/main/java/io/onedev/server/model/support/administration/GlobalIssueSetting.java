@@ -416,15 +416,15 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedStates(resolutions))
+			if (!it.next().fixUndefinedStates(resolutions))
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedStates(null, resolutions))
+			if (!it.next().fixUndefinedStates(null, resolutions))
 				it.remove();
 		}
 		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedStates(resolutions))
+			if (!it.next().fixUndefinedStates(resolutions))
 				it.remove();
 		}
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
@@ -432,9 +432,9 @@ public class GlobalIssueSetting implements Serializable {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.fixUndefinedStates(resolutions))
-					it.remove();
-				else
 					namedQuery.setQuery(query.toString());
+				else
+					it.remove();
 			} catch (Exception e) {
 			}
 		}
@@ -453,15 +453,15 @@ public class GlobalIssueSetting implements Serializable {
 		}
 		
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFields(resolutions))
+			if (!it.next().fixUndefinedFields(resolutions))
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFields(null, resolutions))
+			if (!it.next().fixUndefinedFields(null, resolutions))
 				it.remove();
 		}
 		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFields(resolutions))
+			if (!it.next().fixUndefinedFields(resolutions))
 				it.remove();
 		}
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
@@ -469,9 +469,9 @@ public class GlobalIssueSetting implements Serializable {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.fixUndefinedFields(resolutions))
-					it.remove();
-				else
 					namedQuery.setQuery(query.toString());
+				else
+					it.remove();
 			} catch (Exception e) {
 			}
 		}
@@ -479,7 +479,7 @@ public class GlobalIssueSetting implements Serializable {
 		Collection<String> derivedDeletions = new HashSet<>();
 		for (Iterator<FieldSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
 			FieldSpec field = it.next();
-			if (field.fixUndefinedFields(resolutions)) {
+			if (!field.fixUndefinedFields(resolutions)) {
 				it.remove();
 				derivedDeletions.add(field.getName());
 			}
@@ -490,15 +490,15 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public Collection<String> fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFieldValues(resolutions))
+			if (!it.next().fixUndefinedFieldValues(resolutions))
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getBoardSpecs().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFieldValues(null, resolutions))
+			if (!it.next().fixUndefinedFieldValues(null, resolutions))
 				it.remove();
 		}
 		for (Iterator<IssueTemplate> it = getIssueTemplates().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFieldValues(resolutions))
+			if (!it.next().fixUndefinedFieldValues(resolutions))
 				it.remove();
 		}
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
@@ -506,9 +506,9 @@ public class GlobalIssueSetting implements Serializable {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true, true, true);
 				if (query.fixUndefinedFieldValues(resolutions))
-					it.remove();
-				else
 					namedQuery.setQuery(query.toString());
+				else
+					it.remove();
 			} catch (Exception e) {
 			}
 		}
@@ -516,7 +516,7 @@ public class GlobalIssueSetting implements Serializable {
 		Collection<String> derivedDeletions = new HashSet<>();
 		for (Iterator<FieldSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
 			FieldSpec field = it.next();
-			if (field.fixUndefinedFieldValues(resolutions)) {
+			if (!field.fixUndefinedFieldValues(resolutions)) {
 				it.remove();
 				derivedDeletions.add(field.getName());
 			}

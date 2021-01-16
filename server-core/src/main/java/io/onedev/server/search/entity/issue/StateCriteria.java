@@ -58,10 +58,10 @@ public class StateCriteria extends IssueCriteria {
 				if (entry.getKey().equals(value))
 					value = entry.getValue().getNewState();
 			} else if (entry.getKey().equals(value)) {
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	
 }

@@ -286,4 +286,22 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 	
+	@SuppressWarnings("unused")
+	private void migrate2(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			if (((ScalarNode)specTuple.getKeyNode()).getValue().equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (Iterator<NodeTuple> itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						NodeTuple jobTuple = itJobTuple.next();
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("defaultFixedIssuesFilter"))
+							itJobTuple.remove();
+					}
+				}
+			}
+		}
+	}
+	
 }

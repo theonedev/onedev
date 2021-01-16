@@ -2318,4 +2318,18 @@ public class DataMigrator {
 		}	
 	}
 	
+	// migrate to 4.2.0
+	private void migrate49(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element buildSettingElement = element.element("buildSetting");
+					buildSettingElement.addElement("defaultFixedIssueFilters");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

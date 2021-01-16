@@ -85,13 +85,13 @@ public class FieldOperatorCriteria extends FieldCriteria {
 			if (getFieldSpec() instanceof BuildChoiceField) {
 				Build build = Build.get();
 				if (build != null) { 
-					Collection<Long> numbersOfStreamPrevious = Build.get().getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT);
-					if (!numbersOfStreamPrevious.isEmpty()) {
+					Collection<Long> streamPreviousNumbers = Build.get().getStreamPreviousNumbers(EntityCriteria.IN_CLAUSE_LIMIT);
+					if (!streamPreviousNumbers.isEmpty()) {
 						return builder.and(
 								builder.equal(projectAttribute, build.getProject()),
-								valueAttribute.in(numbersOfStreamPrevious.stream().map(it->it.toString()).collect(Collectors.toSet())));
+								valueAttribute.in(streamPreviousNumbers.stream().map(it->it.toString()).collect(Collectors.toSet())));
 					} else {
-						return builder.equal(projectAttribute, build.getProject());
+						return builder.disjunction();
 					}
 				} else {
 					throw new ExplicitException("No current build in query context");
@@ -141,7 +141,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 				Build build = Build.get();
 				if (build != null) {
 					return build.getProject().equals(issue.getProject()) 
-							&& build.getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT)
+							&& build.getStreamPreviousNumbers(EntityCriteria.IN_CLAUSE_LIMIT)
 								.stream()
 								.anyMatch(it->it.equals(fieldValue));
 				} else {

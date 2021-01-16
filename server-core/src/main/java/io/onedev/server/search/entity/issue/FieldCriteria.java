@@ -79,10 +79,10 @@ public abstract class FieldCriteria extends IssueCriteria {
 				if (entry.getKey().equals(fieldName))
 					fieldName = entry.getValue().getNewField();
 			} else if (entry.getKey().equals(fieldName)) {
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	public FieldSpec getFieldSpec() {

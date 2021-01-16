@@ -313,10 +313,10 @@ public class BoardSpec implements Serializable {
 				else 
 					getColumns().remove(entry.getKey());
 				if (getColumns().size() < 2)
-					return true;
+					return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private String fixUndefinedStates(@Nullable Project project, Map<String, UndefinedStateResolution> resolutions, 
@@ -326,16 +326,15 @@ public class BoardSpec implements Serializable {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
 						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
 				if (parsedQuery.fixUndefinedStates(resolutions))
-					query = null;
-				else
 					query = parsedQuery.toString();
+				else
+					query = null;
 			} catch (Exception e) {
 			}
 		}
 		return query;
 	}
 	
-	@Nullable
 	public boolean fixUndefinedFields(@Nullable Project project, Map<String, UndefinedFieldResolution> resolutions) {
 		setBaseQuery(fixUndefinedFields(project, resolutions, getBaseQuery()));
 		setBacklogBaseQuery(fixUndefinedFields(project, resolutions, getBacklogBaseQuery()));
@@ -349,10 +348,10 @@ public class BoardSpec implements Serializable {
 			} else {
 				getDisplayFields().remove(entry.getKey());
 				if (getIdentifyField().equals(entry.getKey())) 
-					return true;
+					return false;
 			} 
 		}				
-		return false;
+		return true;
 	}
 	
 	private String fixUndefinedFields(@Nullable Project project, Map<String, UndefinedFieldResolution> resolutions, 
@@ -362,9 +361,9 @@ public class BoardSpec implements Serializable {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
 						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
 				if (parsedQuery.fixUndefinedFields(resolutions))
-					query = null;
-				else
 					query = parsedQuery.toString();
+				else
+					query = null;
 			} catch (Exception e) {
 			}
 		}
@@ -388,7 +387,7 @@ public class BoardSpec implements Serializable {
 				}
 			}
 		}
-		return getColumns().size() < 2;
+		return getColumns().size() >= 2;
 	}
 	
 	@Nullable
@@ -399,9 +398,9 @@ public class BoardSpec implements Serializable {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
 						io.onedev.server.search.entity.issue.IssueQuery.parse(project, query, false, true, true, true, true);
 				if (parsedQuery.fixUndefinedFieldValues(resolutions))
-					query = null;
-				else
 					query = parsedQuery.toString();
+				else
+					query = null;
 			} catch (Exception e) {
 			}
 		}

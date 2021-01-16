@@ -34,15 +34,15 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	}
 
 	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
-		return false;
+		return true;
 	}
 	
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		return false;
+		return true;
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
-		return false;
+		return true;
 	}
 	
 	@Nullable

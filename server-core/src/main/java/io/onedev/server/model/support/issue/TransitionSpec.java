@@ -176,7 +176,7 @@ public class TransitionSpec implements Serializable {
 			} else {
 				fromStates.remove(entry.getKey());
 				if (fromStates.isEmpty() || toState.equals(entry.getKey())) 
-					return true;
+					return false;
 			}
 		}
 		return trigger.fixUndefinedStates(resolutions);

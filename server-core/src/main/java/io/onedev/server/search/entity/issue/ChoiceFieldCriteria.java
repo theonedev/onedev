@@ -88,13 +88,13 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 		for (Map.Entry<String, UndefinedFieldValuesResolution> entry: resolutions.entrySet()) {
 			if (entry.getKey().equals(getFieldName())) {
 				if (entry.getValue().getDeletions().contains(value))
-					return true;
+					return false;
 				String newValue = entry.getValue().getRenames().get(value);
 				if (newValue != null)
 					value = newValue;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	@SuppressWarnings({"unchecked" })

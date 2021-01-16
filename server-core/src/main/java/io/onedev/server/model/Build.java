@@ -344,7 +344,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Map<Build.Status, Build> streamPreviousCache = new HashMap<>();
 	
-	private transient Map<Integer, Collection<Long>> numbersOfStreamPreviousCache = new HashMap<>();
+	private transient Map<Integer, Collection<Long>> streamPreviousNumbersCache = new HashMap<>();
 	
 	public Project getNumberScope() {
 		return numberScope;
@@ -868,15 +868,15 @@ public class Build extends AbstractEntity implements Referenceable {
 		return streamPreviousCache.get(status);
 	}
 	
-	public Collection<Long> getNumbersOfStreamPrevious(int limit) {
-		if (numbersOfStreamPreviousCache == null) 
-			numbersOfStreamPreviousCache = new HashMap<>();
-		if (!numbersOfStreamPreviousCache.containsKey(limit)) {
+	public Collection<Long> getStreamPreviousNumbers(int limit) {
+		if (streamPreviousNumbersCache == null) 
+			streamPreviousNumbersCache = new HashMap<>();
+		if (!streamPreviousNumbersCache.containsKey(limit)) {
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-			numbersOfStreamPreviousCache.put(limit, buildManager.queryNumbersOfStreamPrevious(
+			streamPreviousNumbersCache.put(limit, buildManager.queryStreamPreviousNumbers(
 					this, null, EntityCriteria.IN_CLAUSE_LIMIT));
 		}
-		return numbersOfStreamPreviousCache.get(limit);
+		return streamPreviousNumbersCache.get(limit);
 	}
 	
 	public void retrieveArtifacts(Build dependency, String artifacts, File workspaceDir) {

@@ -87,15 +87,15 @@ public class PressButtonTrigger extends TransitionTrigger {
 
 	@Override
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
-		if (super.fixUndefinedFields(resolutions))
-			return true;
+		if (!super.fixUndefinedFields(resolutions))
+			return false;
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) 
 				ReconcileUtils.renameItem(getPromptFields(), entry.getKey(), entry.getValue().getNewField());
 			else 
 				getPromptFields().remove(entry.getKey());
 		}
-		return false;
+		return true;
 	}
 
 	@Override

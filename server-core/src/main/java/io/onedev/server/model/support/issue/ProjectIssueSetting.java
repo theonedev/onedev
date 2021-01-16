@@ -172,9 +172,9 @@ public class ProjectIssueSetting implements Serializable {
 				try {
 					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 					if (parsedQuery.fixUndefinedStates(resolutions))
-						it.remove();
-					else
 						namedQuery.setQuery(parsedQuery.toString());
+					else
+						it.remove();
 				} catch (Exception e) {
 				}
 			}
@@ -201,9 +201,9 @@ public class ProjectIssueSetting implements Serializable {
 				try {
 					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 					if (parsedQuery.fixUndefinedFields(resolutions))
-						it.remove();
-					else
 						namedQuery.setQuery(parsedQuery.toString());
+					else
+						it.remove();
 				} catch (Exception e) {
 				}
 			}
@@ -211,7 +211,7 @@ public class ProjectIssueSetting implements Serializable {
 		
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFields(project, resolutions))
+				if (!it.next().fixUndefinedFields(project, resolutions))
 					it.remove();
 			}		
 		}
@@ -224,16 +224,16 @@ public class ProjectIssueSetting implements Serializable {
 				try {
 					IssueQuery parsedQuery = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true, true, true);
 					if (parsedQuery.fixUndefinedFieldValues(resolutions))
-						it.remove();
-					else
 						namedQuery.setQuery(parsedQuery.toString());
+					else
+						it.remove();
 				} catch (Exception e) {
 				}
 			}
 		}
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFieldValues(project, resolutions)) {
+				if (!it.next().fixUndefinedFieldValues(project, resolutions)) {
 					it.remove();
 					break;
 				}

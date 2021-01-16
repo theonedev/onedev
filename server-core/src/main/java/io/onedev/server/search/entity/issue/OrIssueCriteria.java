@@ -71,28 +71,28 @@ public class OrIssueCriteria extends IssueCriteria {
 	@Override
 	public boolean fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
 		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedStates(resolutions))
+			if (!it.next().fixUndefinedStates(resolutions))
 				it.remove();
 		}
-		return criterias.isEmpty();
+		return !criterias.isEmpty();
 	}
 	
 	@Override
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFields(resolutions))
+			if (!it.next().fixUndefinedFields(resolutions))
 				it.remove();
 		}
-		return criterias.isEmpty();
+		return !criterias.isEmpty();
 	}
 	
 	@Override
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
 		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFieldValues(resolutions))
+			if (!it.next().fixUndefinedFieldValues(resolutions))
 				it.remove();
 		}
-		return criterias.isEmpty();
+		return !criterias.isEmpty();
 	}
 
 }

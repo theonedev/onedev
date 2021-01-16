@@ -160,11 +160,11 @@ public abstract class FieldSpec extends InputSpec {
 					if (entry.getKey().equals(showCondition.getInputName()))
 						showCondition.setInputName(entry.getValue().getNewField());
 				} else if (showCondition.getInputName().equals(entry.getKey())) {
-					return true;
+					return false;
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
@@ -185,7 +185,7 @@ public abstract class FieldSpec extends InputSpec {
 							}
 						}
 						if (valueIsOneOf.getValues().isEmpty())
-							return true;
+							return false;
 					} else if (showCondition.getValueMatcher() instanceof ValueIsNotAnyOf) {
 						ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) showCondition.getValueMatcher();
 						valueIsNotAnyOf.getValues().removeAll(resolutionEntry.getValue().getDeletions());
@@ -199,12 +199,12 @@ public abstract class FieldSpec extends InputSpec {
 							}
 						}
 						if (valueIsNotAnyOf.getValues().isEmpty())
-							return true;
+							return false;
 					}
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 		
 	public void onRenameUser(String oldName, String newName) {

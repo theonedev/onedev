@@ -58,6 +58,7 @@ import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
@@ -218,6 +219,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					ActionAuthorizationsPage.class, ActionAuthorizationsPage.paramsOf(getProject())));
 			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Build Preserve Rules", 
 					BuildPreservationsPage.class, BuildPreservationsPage.paramsOf(getProject())));
+			buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Fixed Issue Filters", 
+					DefaultFixedIssueFiltersPage.class, DefaultFixedIssueFiltersPage.paramsOf(getProject())));
 			
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build Setting", buildSettingMenuItems));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Web Hooks", 

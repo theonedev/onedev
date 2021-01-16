@@ -92,6 +92,7 @@ import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
 import io.onedev.server.web.page.project.setting.build.ActionAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
+import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
@@ -269,6 +270,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/settings/build/job-secrets", JobSecretsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/build/action-authorizations", ActionAuthorizationsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/build/build-preserve-rules", BuildPreservationsPage.class));
+		add(new DynamicPathPageMapper("projects/${project}/settings/build/default-fixed-issues-filter", DefaultFixedIssueFiltersPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 	}
 

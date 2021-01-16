@@ -469,21 +469,21 @@ public class IssueQuery extends EntityQuery<Issue> {
 		if (criteria != null) 
 			return criteria.fixUndefinedStates(resolutions);
 		else 
-			return false;
+			return true;
 	}
 	
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		if (criteria != null) 
 			return criteria.fixUndefinedFields(resolutions);
 		else 
-			return false;
+			return true;
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
 		if (criteria != null) 
 			return criteria.fixUndefinedFieldValues(resolutions);
 		else 
-			return false;
+			return true;
 	}
 	
 	public static IssueQuery merge(IssueQuery query1, IssueQuery query2) {

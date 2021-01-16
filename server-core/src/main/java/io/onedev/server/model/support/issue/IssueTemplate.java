@@ -94,13 +94,13 @@ public class IssueTemplate implements Serializable {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
 						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
 				if (parsedQuery.fixUndefinedStates(resolutions))
-					return true;
-				else 
 					issueQuery = parsedQuery.toString();
+				else 
+					return false;
 			} catch (Exception e) {
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
@@ -109,13 +109,13 @@ public class IssueTemplate implements Serializable {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
 						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
 				if (parsedQuery.fixUndefinedFields(resolutions))
-					return true;
-				else
 					issueQuery = parsedQuery.toString();
+				else
+					return false;
 			} catch (Exception e) {
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
@@ -124,13 +124,13 @@ public class IssueTemplate implements Serializable {
 				io.onedev.server.search.entity.issue.IssueQuery parsedQuery = 
 						io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true, true, true);
 				if (parsedQuery.fixUndefinedFieldValues(resolutions))
-					return true;
-				else
 					issueQuery = parsedQuery.toString();
+				else
+					return false;
 			} catch (Exception e) {
 			}
 		}
-		return false;
+		return true;
 	}
 	
 }

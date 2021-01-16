@@ -710,7 +710,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		}
 	}
 	
-	private CriteriaQuery<Object[]> buildQueryOfStreamPrevios(Build build, Status status, String...fields) {
+	private CriteriaQuery<Object[]> buildStreamPreviousQuery(Build build, Status status, String...fields) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
 		Root<Build> root = query.from(Build.class);
@@ -732,9 +732,9 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Sessional
 	@Override
-	public Collection<Long> queryNumbersOfStreamPrevious(Build build, Status status, int limit) {
+	public Collection<Long> queryStreamPreviousNumbers(Build build, Status status, int limit) {
 		Map<ObjectId, Long> buildNumbers = new HashMap<>();
-		for (Object[] fields: getSession().createQuery(buildQueryOfStreamPrevios(build, status, "commitHash", "number")).list()) {
+		for (Object[] fields: getSession().createQuery(buildStreamPreviousQuery(build, status, "commitHash", "number")).list()) {
 			buildNumbers.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		
@@ -762,7 +762,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Override
 	public Build findStreamPrevious(Build build, Status status) {
 		Map<ObjectId, Long> buildIds = new HashMap<>();
-		for (Object[] fields: getSession().createQuery(buildQueryOfStreamPrevios(
+		for (Object[] fields: getSession().createQuery(buildStreamPreviousQuery(
 				build, status, "commitHash", "id")).list()) {
 			buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
