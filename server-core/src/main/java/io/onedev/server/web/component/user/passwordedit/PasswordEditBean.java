@@ -30,7 +30,7 @@ public class PasswordEditBean implements Serializable {
 	}
 
 	@Editable(order=200)
-	@Password(confirmative=true)
+	@Password(needConfirm=true)
 	@NotEmpty
 	public String getNewPassword() {
 		return newPassword;

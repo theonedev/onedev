@@ -39,7 +39,6 @@ public abstract class JobSecretEditPanel extends Panel {
 		JobSecret editingSecret;
 		if (index != -1) {
 			editingSecret = getProject().getBuildSetting().getJobSecrets().get(index);
-			editingSecret.setValue(null);
 		} else { 
 			editingSecret = new JobSecret();
 		}

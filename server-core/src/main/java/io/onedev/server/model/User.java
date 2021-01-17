@@ -413,7 +413,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     }
     
 	@Editable(order=150)
-	@Password(confirmative=true, autoComplete="new-password")
+	@Password(needConfirm=true, autoComplete="new-password")
 	@NotEmpty
 	public String getPassword() {
 		return password;
