@@ -76,6 +76,7 @@ public class BeanListPropertyViewer extends Panel {
 			}
 			
 		});
+		
 		table.add(new ListView<Serializable>("rows", elements) {
 
 			@Override
