@@ -90,6 +90,8 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
 import io.onedev.server.entitymanager.BuildDependenceManager;
@@ -502,6 +504,14 @@ public class CoreModule extends AbstractPluginModule {
 			
 		});
 	    
+		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
+			
+			@Override
+			public List<LineCoverage> getLineCoverages(Build build, String blobPath) {
+				return Lists.newArrayList();
+			}
+			
+		});
 	}
 	
 	private void configureSsh() {

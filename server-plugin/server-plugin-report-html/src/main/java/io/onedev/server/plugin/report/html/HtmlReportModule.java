@@ -81,7 +81,7 @@ public class HtmlReportModule extends AbstractPluginModule {
 			}
 			
 		});		
-		
+
 		/*
 		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
 			
@@ -97,7 +97,17 @@ public class HtmlReportModule extends AbstractPluginModule {
 			}
 			
 		});
+		
+		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
+			
+			@Override
+			public List<LineCoverage> getLineCoverages(Build build, String blobPath) {
+				return Lists.newArrayList(new LineCoverage(5, 8, 1), new LineCoverage(12, 15, 0));
+			}
+			
+		});
 		*/
+		
 	}
 
 }

@@ -39,6 +39,22 @@
 	background: #FCF5DA;
 }
 
+.CodeMirror-coverages {
+	width: 4px;
+}
+.CodeMirror-coverage.tested {
+	background: var(--success);
+}
+.CodeMirror-coverage.not-tested {
+	background: var(--warning);
+}
+.CodeMirror-coverage.tested:hover {
+	background: #12827c;
+}
+.CodeMirror-coverage.not-tested:hover {
+	background: #b37600;
+}
+
 .CodeMirror-comments, .CodeMirror-problems {
 	width: 20px;
 }

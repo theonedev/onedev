@@ -61,7 +61,7 @@ onedev.server.codeProblem = {
 				$container.append($content);
 				$content.text(problem.content);
 				$content.prepend("<svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#" + icon + "'/></svg>");
-				$content.append("<a title='Add comment' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
+				$content.append("<a title='Add comment' class='add-comment link-gray ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			}
 			return $container.html();
 		} else {
@@ -69,7 +69,7 @@ onedev.server.codeProblem = {
 			var $content = $container.children('.problem-content');
 			$content.text(problems[0].content);
 			$content.addClass(onedev.server.codeProblem.getTextClass(problems[0]));
-			$content.append("<a title='Add comment' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
+			$content.append("<a title='Add comment' class='add-comment link-gray ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			return $container.html();
 		}
 	} 

@@ -1,6 +1,6 @@
 onedev.server.sourceView = {
 	onDomReady: function(filePath, fileContent, openComment, markRange, symbolTooltipId, 
-			revision, blameInfos, comments, problems, callback, blameMessageCallback, 
+			revision, blameInfos, comments, problems, coverages, callback, blameMessageCallback, 
 			tabSize, lineWrapMode) {
 		
 		var $sourceView = $(".source-view");
@@ -38,6 +38,8 @@ onedev.server.sourceView = {
 		
 		if (!onedev.server.util.isObjEmpty(problems))
 			gutters.splice(0, 0, "CodeMirror-problems");
+		if (!onedev.server.util.isObjEmpty(coverages))
+			gutters.splice(gutters.length-1, 0, "CodeMirror-coverages");
 			
 		gutters.splice(0, 0, "CodeMirror-comments");
 		cm.setOption("gutters", gutters);
@@ -50,6 +52,11 @@ onedev.server.sourceView = {
 		for (var line in problems) {
 		    if (problems.hasOwnProperty(line)) 
 		    	onedev.server.sourceView.addProblemGutter(line, problems[line][1]);
+		}
+		
+		for (var line in coverages) {
+			if (coverages.hasOwnProperty(line))
+				onedev.server.sourceView.addCoverageGutter(line, coverages[line]);
 		}
 
 		if (blameInfos) {
@@ -216,6 +223,23 @@ onedev.server.sourceView = {
 		else 
 			onedev.server.codemirror.clearMark(cm);
 	},
+	addCoverageGutter: function(line, testCount) {
+		let tooltip;
+		if (testCount > 0)
+			tooltip = `Tested ${testCount} times`;
+		else
+			tooltip = "Not tested";
+			
+		let $gutter = $(`<a class='CodeMirror-coverage d-block' title='${tooltip}'>&nbsp;</a>`);
+
+		if (testCount > 0) 
+			$gutter.addClass("tested");
+		else
+			$gutter.addClass("not-tested");
+			
+		let cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		cm.setGutterMarker(parseInt(line), "CodeMirror-coverages", $gutter[0]);	
+	},
 	addProblemGutter: function(line, problems) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var callback = $(".source-view").data("callback");
@@ -231,8 +255,8 @@ onedev.server.sourceView = {
 		var icon = onedev.server.codeProblem.getIcon(problems);
 		var linkClass = onedev.server.codeProblem.getLinkClass(problems);
 		
-		let svg = "<svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#" + icon + "'/></svg>";
-		$gutter.append("<a class='problem-trigger " + linkClass + "'>" + svg + "</a>");
+		let svg = `<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#${icon}'/></svg>`;
+		$gutter.append(`<a class='problem-trigger ${linkClass}'>${svg}</a>`);
 		var $trigger = $gutter.children("a");
 		$trigger.mouseover(function() {
 			onedev.server.codemirror.mark(cm, markRanges);

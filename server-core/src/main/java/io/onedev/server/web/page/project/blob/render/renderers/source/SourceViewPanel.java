@@ -64,6 +64,8 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -189,6 +191,30 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 			
 			return problems;
+		}
+		
+	};
+	
+	private final IModel<Map<Integer, Integer>> coveragesModel = new LoadableDetachableModel<Map<Integer, Integer>>() {
+
+		@Override
+		protected Map<Integer, Integer> load() {
+			Map<Integer, Integer> coverages = new HashMap<>();
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			for (Build build: buildManager.query(context.getProject(), context.getCommit(), null, null, null, new HashMap<>())) {
+				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
+					for (LineCoverage coverage: contribution.getLineCoverages(build, context.getBlobIdent().path)) {
+						for (int line = coverage.getFromLine(); line <= coverage.getToLine(); line++) {
+							Integer testCount = coverages.get(line);
+							if (testCount != null) 
+								coverages.put(line, testCount + coverage.getTestCount());
+							else
+								coverages.put(line, coverage.getTestCount());
+						}
+					}
+				}
+			}
+			return coverages;
 		}
 		
 	};
@@ -899,6 +925,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		String jsonOfCommentInfos = convertToJson(commentsModel.getObject());
 		String jsonOfProblems = convertToJson(problemsModel.getObject());
+		String jsonOfCoverages = convertToJson(coveragesModel.getObject());
 		
 		PlanarRange mark = SourceRendererProvider.getRange(context.getPosition());
 		String jsonOfMark = mark!=null? convertToJson(mark): "undefined";
@@ -908,7 +935,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				explicit("param3"), explicit("param4"));
 		
 		String script = String.format("onedev.server.sourceView.onDomReady("
-				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, %s, %s, '%s');", 
+				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, %s, %s, %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
@@ -918,6 +945,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				jsonOfBlameInfos, 
 				jsonOfCommentInfos,
 				jsonOfProblems,
+				jsonOfCoverages,
 				callback, 
 				blameMessageBehavior.getCallback(),
 				sourceFormat.getTabSize(),
@@ -932,6 +960,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	protected void onDetach() {
 		commentsModel.detach();
 		problemsModel.detach();
+		coveragesModel.detach();
 		super.onDetach();
 	}
 
