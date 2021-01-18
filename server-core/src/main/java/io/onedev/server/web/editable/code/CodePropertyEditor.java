@@ -78,8 +78,7 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String matchWith = params.getParameterValue("matchWith").toString();
-				matchWith = StringUtils.unescape(matchWith.toLowerCase());
+				String matchWith = params.getParameterValue("matchWith").toString().toLowerCase();
 				String line = params.getParameterValue("line").toString();
 				String start = params.getParameterValue("start").toString();
 				
@@ -91,7 +90,7 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 					try { 
 						for (String each: (List<String>) ReflectionUtils.invokeStaticMethod(
 								descriptor.getBeanClass(), variableProvider)) {
-							if (each.contains(matchWith.toLowerCase())) {
+							if (each.toLowerCase().contains(matchWith)) {
 								ObjectNode variableNode = mapper.createObjectNode();
 								variableNode.put("text", "@" + StringUtils.escape(each, "@") + "@"); 
 								variablesNode.add(variableNode);
