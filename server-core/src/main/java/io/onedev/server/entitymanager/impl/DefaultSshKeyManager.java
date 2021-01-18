@@ -28,6 +28,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.security.CipherUtils;
 import io.onedev.server.ssh.SshKeyUtils;
 
 @Singleton
@@ -56,7 +57,7 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
     	for (String content: sshKeys) {
     		try {
     			PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-    	        String digest = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, pubEntry);
+    	        String digest = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
     			
     	        SshKey sshKey = new SshKey();
     	        sshKey.setDigest(digest);

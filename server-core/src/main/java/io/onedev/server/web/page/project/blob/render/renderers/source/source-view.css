@@ -39,10 +39,10 @@
 	background: #FCF5DA;
 }
 
-.CodeMirror-comments {
+.CodeMirror-comments, .CodeMirror-problems {
 	width: 20px;
 }
-.CodeMirror-comment {
+.CodeMirror-comment, .CodeMirror-problem {
 	padding-left: 4px;
 }
 .CodeMirror-comment a {

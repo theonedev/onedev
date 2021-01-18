@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.git.Contribution;
+import io.onedev.server.git.GitContribution;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
@@ -75,9 +75,9 @@ public class ProjectContribsPage extends ProjectStatsPage {
 
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 		Map<Integer, Integer[]> data = new HashMap<>();
-		Map<Day, Contribution> overallContributions = commitInfoManager.getOverallContributions(getProject());
-		for (Map.Entry<Day, Contribution> entry: overallContributions.entrySet()) {
-			Contribution contribution = entry.getValue();
+		Map<Day, GitContribution> overallContributions = commitInfoManager.getOverallContributions(getProject());
+		for (Map.Entry<Day, GitContribution> entry: overallContributions.entrySet()) {
+			GitContribution contribution = entry.getValue();
 			Integer[] dataValue = new Integer[] {contribution.getCommits(), contribution.getAdditions(), contribution.getDeletions()};
 			data.put(entry.getKey().getValue(), dataValue);
 		}

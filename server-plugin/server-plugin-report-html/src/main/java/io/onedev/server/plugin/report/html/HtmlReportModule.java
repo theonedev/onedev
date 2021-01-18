@@ -82,6 +82,22 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 		});		
 		
+		/*
+		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
+			
+			@Override
+			public List<CodeProblem> getCodeProblems(Build build, String blobPath) {
+				String longMessage = "This is a very long message and we have a very good practice oover This is a very long message and we have a very good practice oover This is a very long message and we have a very good practice oover";
+				return Lists.newArrayList(
+						new CodeProblem(new PlanarRange(9, 1, 9, 5), longMessage, Severity.ERROR),
+						new CodeProblem(new PlanarRange(9, 6, 9, 10), "This is a warning message", Severity.WARNING),
+						new CodeProblem(new PlanarRange(14, 1, 14, 5), "This is an error message", Severity.ERROR),
+						new CodeProblem(new PlanarRange(19, 6, 19, 10), longMessage + "\n" + longMessage, Severity.WARNING)
+					);
+			}
+			
+		});
+		*/
 	}
 
 }

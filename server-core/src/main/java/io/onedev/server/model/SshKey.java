@@ -13,8 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.sshd.common.digest.BaseDigest;
-import org.apache.sshd.common.digest.Digest;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.StringUtils;
@@ -35,8 +33,6 @@ import io.onedev.server.web.editable.annotation.OmitName;
 public class SshKey extends AbstractEntity implements Validatable {
     
     private static final long serialVersionUID = 1L;
-    
-    public static final Digest DIGEST_FORMAT = new BaseDigest("MD5", 512);
     
     @Column(nullable=false, length = 5000)
     private String content;

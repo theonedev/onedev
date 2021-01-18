@@ -8,19 +8,28 @@ onedev.server.codemirror = {
 	clearSelection: function(cm) {
     	cm.setCursor(cm.getCursor("from"));
 	},
-	mark: function(cm, mark) {
+	mark: function(cm, range) {
         onedev.server.codemirror.clearMark(cm);
-		cm.markText(
-				{line: mark.fromRow, ch: mark.fromColumn}, 
-				{line: mark.toRow, ch: mark.toColumn},
-				{className: "CodeMirror-mark"});
+		if (Array.isArray(range)) {
+			for (var i in range) {
+				cm.markText(
+						{line: range[i].fromRow, ch: range[i].fromColumn}, 
+						{line: range[i].toRow, ch: range[i].toColumn},
+						{className: "CodeMirror-mark"});
+			}			
+		} else {
+			cm.markText(
+					{line: range.fromRow, ch: range.fromColumn}, 
+					{line: range.toRow, ch: range.toColumn},
+					{className: "CodeMirror-mark"});
+		}
 	},
-	scrollTo: function(cm, mark) {
-		var top = cm.charCoords({line: mark.fromRow, ch: 0}, "local").top;
+	scrollTo: function(cm, range) {
+		var top = cm.charCoords({line: range.fromRow, ch: 0}, "local").top;
 		cm.scrollTo(null, top - 50); 			
 	},
-	scrollIntoView: function(cm, mark) {
-		cm.scrollIntoView({line: mark.fromRow, ch: 0}, 8);
+	scrollIntoView: function(cm, range) {
+		cm.scrollIntoView({line: range.fromRow, ch: 0}, 8);
 	},
 	setModeByName: function(cm, modeName) {
 	    var modeInfo = CodeMirror.findModeByName(modeName);

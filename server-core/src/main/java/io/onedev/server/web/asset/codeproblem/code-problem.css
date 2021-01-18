@@ -1,0 +1,8 @@
+.problem-popover.popover {
+	max-width: 370px;
+}
+.problem-popover .problem-content+.problem-content {
+	margin-top: 0.75rem;
+	border-top: 1px solid var(--light);
+	padding-top: 0.75rem;
+}

@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.git.Contribution;
-import io.onedev.server.git.Contributor;
-import io.onedev.server.git.NameAndEmail;
+import io.onedev.server.git.GitContribution;
+import io.onedev.server.git.GitContributor;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Day;
+import io.onedev.server.util.NameAndEmail;
 
 public interface CommitInfoManager {
 	
@@ -48,7 +48,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			map of day to contribution
 	 */
-	Map<Day, Contribution> getOverallContributions(Project project);
+	Map<Day, GitContribution> getOverallContributions(Project project);
 	
 	/**
 	 * Get list of top contributors
@@ -66,7 +66,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			list of top user contributors, reversely ordered by number of contributions 
 	 */
-	List<Contributor> getTopContributors(Project project, int top, Contribution.Type type, int fromDay, int toDay);
+	List<GitContributor> getTopContributors(Project project, int top, GitContribution.Type type, int fromDay, int toDay);
 
 	/**
 	 * Get source code line statistics over time

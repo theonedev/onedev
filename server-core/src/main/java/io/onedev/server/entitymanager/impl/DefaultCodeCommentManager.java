@@ -147,8 +147,8 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	}
 	
 	@Override
-	public Map<CodeComment, PlanarRange> findHistory(Project project, ObjectId commitId, String path) {
-		Map<CodeComment, PlanarRange> comments = new HashMap<>();
+	public Collection<CodeComment> findHistory(Project project, ObjectId commitId, String path) {
+		Collection<CodeComment> comments = new ArrayList<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
 		Collection<String> possiblePaths = Sets.newHashSet(path);
@@ -161,7 +161,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		for (CodeComment comment: query(criteria)) {
 			String possiblePath = comment.getMark().getPath();
 			if (comment.getMark().getCommitHash().equals(commitId.name()) && possiblePath.equals(path)) {
-				comments.put(comment, comment.getMark().getRange());
+				comments.add(comment);
 			} else {
 				Map<String, List<CodeComment>> commentsOnCommit = 
 						possibleComments.get(comment.getMark().getCommitHash());
@@ -226,7 +226,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 								for (CodeComment comment: pathEntry.getValue()) {
 									PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
 									if (newRange != null) 
-										comments.put(comment, newRange);
+										comments.add(comment);
 								}
 								if (++checkedHistoryFiles == MAX_HISTORY_FILES_TO_CHECK) {
 									return comments;

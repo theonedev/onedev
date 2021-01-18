@@ -291,6 +291,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@OneToMany(mappedBy="request")
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
+	@OneToMany(mappedBy="request")
+	private Collection<PullRequestCodeCommentRelation> relations = new ArrayList<>();
+	
 	private transient Boolean mergedIntoTarget;
 
 	private transient List<PullRequestUpdate> sortedUpdates;

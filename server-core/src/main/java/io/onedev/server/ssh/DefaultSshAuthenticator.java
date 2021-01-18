@@ -13,6 +13,7 @@ import org.apache.sshd.server.session.ServerSession;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.security.CipherUtils;
 
 @Singleton
 public class DefaultSshAuthenticator implements SshAuthenticator {
@@ -29,7 +30,7 @@ public class DefaultSshAuthenticator implements SshAuthenticator {
 	@Sessional
 	@Override
 	public boolean authenticate(String username, PublicKey key, ServerSession session) throws AsyncAuthException {
-        String digest = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, key);  
+        String digest = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, key);  
         SshKey sshKey = sshKeyManager.findByDigest(digest);
         if (sshKey != null) {
             session.setAttribute(ATTR_PUBLIC_KEY_OWNER_ID, sshKey.getOwner().getId());

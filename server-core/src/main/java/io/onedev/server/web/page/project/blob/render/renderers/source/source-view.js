@@ -1,6 +1,6 @@
 onedev.server.sourceView = {
-	onDomReady: function(filePath, fileContent, openComment, mark, symbolTooltipId, 
-			revision, blameInfos, comments, callback, blameMessageCallback, 
+	onDomReady: function(filePath, fileContent, openComment, markRange, symbolTooltipId, 
+			revision, blameInfos, comments, problems, callback, blameMessageCallback, 
 			tabSize, lineWrapMode) {
 		
 		var $sourceView = $(".source-view");
@@ -28,19 +28,28 @@ onedev.server.sourceView = {
 		$sourceView.data("callback", callback);
 		$sourceView.data("blameMessageCallback", blameMessageCallback);
 		
-	    if (mark)
-	    	onedev.server.sourceView.mark(mark, false);
+	    if (markRange)
+	    	onedev.server.sourceView.mark(markRange, false);
 
 	    if (openComment)
 			$sourceView.data("openComment", openComment);
 	    
 		var gutters = cm.getOption("gutters").slice();
+		
+		if (!onedev.server.util.isObjEmpty(problems))
+			gutters.splice(0, 0, "CodeMirror-problems");
+			
 		gutters.splice(0, 0, "CodeMirror-comments");
 		cm.setOption("gutters", gutters);
+		
 		for (var line in comments) {
-		    if (comments.hasOwnProperty(line)) {
+		    if (comments.hasOwnProperty(line)) 
 		    	onedev.server.sourceView.addCommentGutter(line, comments[line][1]);
-		    }
+		}
+		
+		for (var line in problems) {
+		    if (problems.hasOwnProperty(line)) 
+		    	onedev.server.sourceView.addProblemGutter(line, problems[line][1]);
 		}
 
 		if (blameInfos) {
@@ -128,11 +137,11 @@ onedev.server.sourceView = {
 			});
 		}
 	},
-	onWindowLoad: function(mark) {
-		if (mark && onedev.server.viewState.getFromHistory() === undefined
+	onWindowLoad: function(markRange) {
+		if (markRange && onedev.server.viewState.getFromHistory() === undefined
 				&& onedev.server.viewState.carryOver === undefined) {
 			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-			onedev.server.codemirror.scrollTo(cm, mark);
+			onedev.server.codemirror.scrollTo(cm, markRange);
 		}
 	},
 	initComment: function() {
@@ -201,11 +210,65 @@ onedev.server.sourceView = {
 	restoreMark: function() {
 		var $sourceView = $(".source-view");
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var mark = $sourceView.data("mark");
-		if (mark) 
-			onedev.server.codemirror.mark(cm, mark);
+		var markRange = $sourceView.data("markRange");
+		if (markRange) 
+			onedev.server.codemirror.mark(cm, markRange);
 		else 
 			onedev.server.codemirror.clearMark(cm);
+	},
+	addProblemGutter: function(line, problems) {
+		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		var callback = $(".source-view").data("callback");
+		
+		var $gutter = $(document.createElement("div"));
+		$gutter.addClass("CodeMirror-problem");
+		$gutter.data("problems", problems);
+
+		var markRanges = [];
+		for (var i in problems) 
+			markRanges.push(problems[i].position);			
+		
+		var icon = onedev.server.codeProblem.getIcon(problems);
+		var linkClass = onedev.server.codeProblem.getLinkClass(problems);
+		
+		$gutter.append("<a class='problem-trigger " + linkClass + "'><svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#" + icon + "'/></svg></a>");
+		var $trigger = $gutter.children("a");
+		$trigger.mouseover(function() {
+			onedev.server.codemirror.mark(cm, markRanges);
+		}).mouseout(function() {
+			onedev.server.sourceView.restoreMark();
+		});
+		$trigger.popover({
+			html: true, 
+			sanitize: false, 
+			placement: "top",
+			container: ".source-view>.code",
+			content: onedev.server.codeProblem.renderProblems(problems),
+			template: "<div data-line='" + line + "' class='popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>",
+		}).on("shown.bs.popover", function() {
+			var $currentPopover = $(".problem-popover[data-line='" + line + "']");
+			$(".popover").not($currentPopover).popover("hide");
+			$currentPopover.find(".problem-content").mouseover(function() {
+				onedev.server.codemirror.mark(cm, problems[$(this).index()].position);
+			}).mouseout(function() {
+				onedev.server.sourceView.restoreMark();
+			}).each(function() {
+				var problem = problems[$(this).index()];
+				$(this).children(".add-comment").click(function() {
+					if (onedev.server.sourceView.confirmUnsavedChanges()) {
+						$currentPopover.popover("hide");
+						var position = problem.position;
+						callback("addComment", position.fromRow, position.fromColumn, 
+								position.toRow, position.toColumn);
+					}
+				});
+			});
+		});
+		
+		cm.setGutterMarker(parseInt(line), "CodeMirror-problems", $gutter[0]);	
+	},
+	confirmUnsavedChanges: function() {
+		return $(".source-view").find("form.dirty").length == 0 || confirm("There are unsaved changes, discard and continue?"); 
 	},
 	addCommentGutter: function(line, comments) {
 		$(".comment-popover[data-line='" + line + "']").remove();
@@ -227,11 +290,9 @@ onedev.server.sourceView = {
 			$gutter.append("<a><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comments'/></svg></a>");
 			var $indicator = $gutter.children("a");
 			var content = "";
-			for (var i in comments) {
-				var comment = comments[i];
-				var index = parseInt(i) + 1;
-				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + comment.id + "</a>";
-			}
+			for (var i in comments) 
+				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + comments[i].id + "</a>";
+				
 			$indicator.popover({
 				html: true, 
 				container: ".source-view>.code",
@@ -241,23 +302,19 @@ onedev.server.sourceView = {
 				content: content
 			});
 			$indicator.on('shown.bs.popover', function () {
-				$(".comment-popover[data-line='" + line + "'] a").each(function() {
+				var $currentPopover = $(".comment-popover[data-line='" + line + "']");
+				$(".popover").not($currentPopover).popover("hide");
+				$currentPopover.find("a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];
-						onedev.server.codemirror.mark(cm, comment.mark);
+						onedev.server.codemirror.mark(cm, comment.range);
 					});
 					$(this).mouseout(function() {
 						onedev.server.sourceView.restoreMark();
 					});
 					$(this).click(function() {
-						if (!$(this).hasClass("active")) {
-	    					if ($(".source-view form.dirty").length != 0 
-	    							&& !confirm("There are unsaved changes, discard and continue?")) {
-	    						return;
-	    					}
-							var comment = comments[$(this).index()];			        						
-							callback("openComment", comment.id);
-						}
+						if (!$(this).hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) 
+							callback("openComment", comments[$(this).index()].id);
 					});
 				});
 				onedev.server.sourceView.highlightCommentTrigger();				
@@ -267,34 +324,28 @@ onedev.server.sourceView = {
 			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
-				onedev.server.codemirror.mark(cm, comment.mark);
-			});
-			$indicator.mouseout(function() {
+				onedev.server.codemirror.mark(cm, comment.range);
+			}).mouseout(function() {
 				onedev.server.sourceView.restoreMark();
 			});
 			$indicator.click(function() {
-				if (!$indicator.hasClass("active")) {
-					if ($(".source-view form.dirty").length != 0 
-							&& !confirm("There are unsaved changes, discard and continue?")) {
-						return;
-					}
+				if (!$indicator.hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) 
 					callback("openComment", comment.id);
-				}
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopover: function(mark, markUrl, loggedIn, unableCommentMessage) {
+	openSelectionPopover: function(selectionRange, selectionUrl, loggedIn, unableCommentMessage) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
-		var ch = (mark.fromColumn + mark.toColumn)/2;
-		var position = cm.charCoords({line:mark.fromRow, ch:ch});
+		var ch = (selectionRange.fromColumn + selectionRange.toColumn)/2;
+		var position = cm.charCoords({line:selectionRange.fromRow, ch:ch});
 		
 		var $content;
 		if (unableCommentMessage) {
 			$content = $("<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> " + unableCommentMessage + "</a>");
 		} else {
 			$content = $("<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
-			$content.children("a.permanent").attr("href", markUrl);
+			$content.children("a.permanent").attr("href", selectionUrl);
 			$content.append("<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
 			var clipboard = new Clipboard(".copy-marked", {
 			    text: function(trigger) {
@@ -310,13 +361,11 @@ onedev.server.sourceView = {
 			if (loggedIn) {
 				$content.append("<a class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
 				$content.children("a.comment").click(function() {
-					if ($(".source-view").find("form.dirty").length != 0 
-							&& !confirm("There are unsaved changes, discard and continue?")) {
-						return;
+					if (onedev.server.sourceView.confirmUnsavedChanges()) {
+						$(".selection-popover").remove();
+						$(".source-view").data("callback")("addComment", selectionRange.fromRow, selectionRange.fromColumn, 
+								selectionRange.toRow, selectionRange.toColumn);
 					}
-					$(".selection-popover").remove();
-					var callback = $(".source-view").data("callback");
-					callback("addComment", mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
 				var loginHref = $(".sign-in").attr("href");
@@ -332,10 +381,10 @@ onedev.server.sourceView = {
 	onCommentAdded: function(comment) {
 		var $sourceView = $(".source-view");
 		$sourceView.data("openComment", comment);
-		$sourceView.data("mark", comment.mark);
+		$sourceView.data("markRange", comment.range);
 		
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var line = parseInt(comment.mark.fromRow);		
+		var line = parseInt(comment.range.fromRow);		
 		var lineInfo = cm.lineInfo(line);
 		var gutter;
 		if (lineInfo.gutterMarkers)
@@ -355,7 +404,7 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		
-		var line = parseInt(comment.mark.fromRow);
+		var line = parseInt(comment.range.fromRow);
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var lineInfo = cm.lineInfo(line);
 		var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
@@ -375,34 +424,36 @@ onedev.server.sourceView = {
 		$(window).resize();
 		onedev.server.sourceView.clearMark();
 	},
-	onAddComment: function(mark) {
+	onAddComment: function(markRange) {
+		$(".popover").popover("hide");
 		onedev.server.sourceView.exitFullScreen();
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
-		$sourceView.data("mark", mark);
+		$sourceView.data("markRange", markRange);
 		$(".source-view>.code").selectionPopover("close");
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		onedev.server.codemirror.clearSelection(cm);
 		$(window).resize();
 
-		onedev.server.sourceView.mark(mark, false);
-		onedev.server.codemirror.scrollIntoView(cm, mark);
+		onedev.server.sourceView.mark(markRange, false);
+		onedev.server.codemirror.scrollIntoView(cm, markRange);
 		
 		onedev.server.sourceView.highlightCommentTrigger();		
 		var $textarea = $sourceView.find(".comment textarea");
 		$textarea.caret($textarea.val().length);		
 	},
 	onOpenComment: function(comment) {
+		$(".popover").popover("hide");
 		onedev.server.sourceView.exitFullScreen();
 		var $sourceView = $(".source-view");
 		$sourceView.data("openComment", comment);
-		$sourceView.data("mark", comment.mark);
+		$sourceView.data("markRange", comment.range);
 		onedev.server.sourceView.highlightCommentTrigger();
 
 		$(window).resize();
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		onedev.server.codemirror.scrollIntoView(cm, comment.mark);
+		onedev.server.codemirror.scrollIntoView(cm, comment.range);
 	},
 	onCloseComment: function() {
 		var $sourceView = $(".source-view");
@@ -437,7 +488,7 @@ onedev.server.sourceView = {
 		
 		var openComment = $(".source-view").data("openComment");
 		if (openComment) {
-			var line = parseInt(openComment.mark.fromRow);
+			var line = parseInt(openComment.range.fromRow);
 			var lineInfo = cm.lineInfo(line);
 			if (lineInfo && lineInfo.gutterMarkers) {
 				var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
@@ -457,20 +508,20 @@ onedev.server.sourceView = {
 			}
 		}
 	},
-	mark: function(mark, scroll) {
+	mark: function(markRange, scroll) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		$(".source-view").data("mark", mark);
-		onedev.server.codemirror.mark(cm, mark);
+		$(".source-view").data("markRange", markRange);
+		onedev.server.codemirror.mark(cm, markRange);
 		if (scroll)
-			onedev.server.codemirror.scrollTo(cm, mark);
-		cm.setCursor({line: mark.fromRow, ch: mark.fromColumn});
+			onedev.server.codemirror.scrollTo(cm, markRange);
+		cm.setCursor({line: markRange.fromRow, ch: markRange.fromColumn});
 	},
 	clearMark: function() {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var mark = $(".source-view").data("mark");
-		if (mark) 
-			onedev.server.codemirror.scrollIntoView(cm, mark);
-		$(".source-view").removeData("mark");
+		var markRange = $(".source-view").data("markRange");
+		if (markRange) 
+			onedev.server.codemirror.scrollIntoView(cm, markRange);
+		$(".source-view").removeData("markRange");
 		onedev.server.codemirror.clearMark(cm);			
 	},
 	blame: function(blameInfos) {

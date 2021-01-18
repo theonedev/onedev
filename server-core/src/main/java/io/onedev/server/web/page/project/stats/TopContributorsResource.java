@@ -13,8 +13,8 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.git.Contribution;
-import io.onedev.server.git.Contributor;
+import io.onedev.server.git.GitContribution;
+import io.onedev.server.git.GitContributor;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
@@ -42,7 +42,7 @@ class TopContributorsResource extends AbstractResource {
 		Long projectId = params.get(PARAM_PROJECT).toLong();
 		int fromDay = params.get(PARAM_FROM).toInteger();
 		int toDay = params.get(PARAM_TO).toInteger();
-		Contribution.Type type = Contribution.Type.valueOf(params.get(PARAM_TYPE).toString());
+		GitContribution.Type type = GitContribution.Type.valueOf(params.get(PARAM_TYPE).toString());
 
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType("application/json");
@@ -55,12 +55,12 @@ class TopContributorsResource extends AbstractResource {
 				if (!SecurityUtils.canReadCode(project))
 					throw new UnauthorizedException();
 
-				List<Contributor> topContributors = OneDev.getInstance(CommitInfoManager.class).getTopContributors(project, TOP_CONTRIBUTORS, type, fromDay, toDay);
+				List<GitContributor> topContributors = OneDev.getInstance(CommitInfoManager.class).getTopContributors(project, TOP_CONTRIBUTORS, type, fromDay, toDay);
 				
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 
 				List<Map<String, Object>> data = new ArrayList<>();
-				for (Contributor contributor: topContributors) {
+				for (GitContributor contributor: topContributors) {
 					Map<String, Object> contributorData = new HashMap<>();
 					contributorData.put("authorName", contributor.getAuthor().getName());
 					contributorData.put("authorEmailAddress", contributor.getAuthor().getEmailAddress());

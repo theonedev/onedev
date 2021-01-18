@@ -130,6 +130,9 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
+	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestCodeCommentRelation> relations = new ArrayList<>();
+	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 	

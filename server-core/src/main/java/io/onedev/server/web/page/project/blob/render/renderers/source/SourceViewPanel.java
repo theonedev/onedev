@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -61,6 +62,9 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.git.BlameBlock;
@@ -68,6 +72,7 @@ import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.BlameCommand;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
@@ -125,24 +130,64 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
-	private final IModel<Map<CodeComment, PlanarRange>> commentRangesModel = 
-			new LoadableDetachableModel<Map<CodeComment, PlanarRange>>() {
+	private final IModel<Map<Integer, List<CommentInfo>>> commentsModel = 
+			new LoadableDetachableModel<Map<Integer, List<CommentInfo>>>() {
 
 		@Override
-		protected Map<CodeComment, PlanarRange> load() {
-			if (context.getPullRequest() != null) {
-				Map<CodeComment, PlanarRange> commentRanges = new HashMap<>();
-				for (CodeComment comment: context.getPullRequest().getCodeComments()) {
-					if (comment.getMark().getCommitHash().equals(context.getCommit().name()) 
-							&& comment.getMark().getPath().equals(context.getBlobIdent().path)) {
-						commentRanges.put(comment, comment.getMark().getRange());
+		protected Map<Integer, List<CommentInfo>> load() {
+			Map<Integer, List<CommentInfo>> comments = new HashMap<>(); 
+			CodeCommentManager codeCommentManager = OneDev.getInstance(CodeCommentManager.class);
+			for (CodeComment comment: codeCommentManager.findHistory(
+					context.getProject(), context.getCommit(), context.getBlobIdent().path)) {
+				PlanarRange postion = comment.getMark().getRange();
+				int line = postion.getFromRow();
+				List<CommentInfo> commentsAtLine = comments.get(line);
+				if (commentsAtLine == null) {
+					commentsAtLine = new ArrayList<>();
+					comments.put(line, commentsAtLine);
+				}
+				CommentInfo commentInfo = new CommentInfo();
+				commentInfo.id = comment.getId();
+				commentInfo.range = postion;
+				commentsAtLine.add(commentInfo);
+			}
+			for (List<CommentInfo> value: comments.values()) {
+				value.sort((o1, o2)->(int)(o1.id-o2.id));
+			}
+			
+			return comments;
+		}
+		
+	};
+	
+	private final IModel<Map<Integer, List<CodeProblem>>> problemsModel = new LoadableDetachableModel<Map<Integer, List<CodeProblem>>>() {
+
+		@Override
+		protected Map<Integer, List<CodeProblem>> load() {
+			Set<CodeProblem> duplicationCheck = new HashSet<>();
+			Map<Integer, List<CodeProblem>> problems = new HashMap<>(); 
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			for (Build build: buildManager.query(context.getProject(), context.getCommit(), null, null, null, new HashMap<>())) {
+				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
+					for (CodeProblem problem: contribution.getCodeProblems(build, context.getBlobIdent().path)) {
+						if (duplicationCheck.add(problem)) {
+							PlanarRange position = problem.getPosition();
+							int line = position.getFromRow();
+							List<CodeProblem> problemsAtLine = problems.get(line);
+							if (problemsAtLine == null) {
+								problemsAtLine = new ArrayList<>();
+								problems.put(line, problemsAtLine);
+							}
+							problemsAtLine.add(problem);
+						}
 					}
 				}
-				return commentRanges;
-			} else {
-				return OneDev.getInstance(CodeCommentManager.class).findHistory(
-						context.getProject(), context.getCommit(), context.getBlobIdent().path);
 			}
+			for (List<CodeProblem> value: problems.values()) {
+				value.sort((o1, o2)->(int)(o1.getSeverity().ordinal()-o2.getSeverity().ordinal()));
+			}
+			
+			return problems;
 		}
 		
 	};
@@ -250,9 +295,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		target.appendJavaScript("onedev.server.sourceView.onToggleOutline();");
 	}
 
-	private String getJson(PlanarRange mark) {
+	private String convertToJson(Object obj) {
 		try {
-			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(mark);
+			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -323,7 +368,15 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				CodeComment comment = context.getOpenComment();
 				PlanarRange range;
 				if (comment != null) { 
-					range = commentRangesModel.getObject().get(comment);
+					range = null;
+					for (List<CommentInfo> commentsAtLine: commentsModel.getObject().values()) {
+						for (CommentInfo each: commentsAtLine) {
+							if (each.id == comment.getId()) {
+								range = each.range;
+								break;
+							}
+						}
+					}
 					if (range == null)
 						range = comment.getMark().getRange();
 				} else { 
@@ -417,7 +470,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							
 					String position = SourceRendererProvider.getPosition(mark);
 					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s, %s);", 
-							getJson(mark), context.getPositionUrl(position), SecurityUtils.getUser()!=null, 
+							convertToJson(mark), context.getPositionUrl(position), SecurityUtils.getUser()!=null, 
 							unableCommentMessage!=null?"'" + unableCommentMessage + "'":"undefined");
 					target.appendJavaScript(script);
 					break;
@@ -553,7 +606,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					commentContainer.setVisible(true);
 					target.add(commentContainer);
 					context.onAddComment(target, mark);
-					target.appendJavaScript(String.format("onedev.server.sourceView.onAddComment(%s);", getJson(mark)));
+					target.appendJavaScript(String.format("onedev.server.sourceView.onAddComment(%s);", convertToJson(mark)));
 					break;
 				case "openComment":
 					Long commentId = params.getParameterValue("param1").toLong();
@@ -781,15 +834,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	private String getJsonOfComment(CodeComment comment) {
 		CommentInfo commentInfo = new CommentInfo();
 		commentInfo.id = comment.getId();
-		commentInfo.mark = Preconditions.checkNotNull(comment.mapRange(context.getBlobIdent()));
-
-		String jsonOfCommentInfo;
-		try {
-			jsonOfCommentInfo = OneDev.getInstance(ObjectMapper.class).writeValueAsString(commentInfo);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-		return jsonOfCommentInfo;
+		commentInfo.range = Preconditions.checkNotNull(comment.mapRange(context.getBlobIdent()));
+		return convertToJson(commentInfo);
 	}
 
 	private void clearComment(AjaxRequestTarget target) {
@@ -847,11 +893,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				blameInfo.ranges = blame.getRanges();
 				blameInfos.add(blameInfo);
 			}
-			try {
-				jsonOfBlameInfos = OneDev.getInstance(ObjectMapper.class).writeValueAsString(blameInfos);
-			} catch (JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
+			jsonOfBlameInfos = convertToJson(blameInfos);
 		} else {
 			jsonOfBlameInfos = "undefined";
 		}
@@ -867,41 +909,18 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
-		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 
-		for (Map.Entry<CodeComment, PlanarRange> entry: commentRangesModel.getObject().entrySet()) {
-			CodeComment comment = entry.getKey();
-			PlanarRange textRange = entry.getValue();
-			int line = textRange.getFromRow();
-			List<CommentInfo> commentInfosAtLine = commentInfos.get(line);
-			if (commentInfosAtLine == null) {
-				commentInfosAtLine = new ArrayList<>();
-				commentInfos.put(line, commentInfosAtLine);
-			}
-			CommentInfo commentInfo = new CommentInfo();
-			commentInfo.id = comment.getId();
-			commentInfo.mark = textRange;
-			commentInfosAtLine.add(commentInfo);
-		}
-		for (List<CommentInfo> value: commentInfos.values()) {
-			value.sort((o1, o2)->(int)(o1.id-o2.id));
-		}
-		
-		String jsonOfCommentInfos;
-		try {
-			jsonOfCommentInfos = OneDev.getInstance(ObjectMapper.class).writeValueAsString(commentInfos);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		String jsonOfCommentInfos = convertToJson(commentsModel.getObject());
+		String jsonOfProblems = convertToJson(problemsModel.getObject());
 		
 		PlanarRange mark = SourceRendererProvider.getRange(context.getPosition());
-		String jsonOfMark = mark!=null? getJson(mark): "undefined";
+		String jsonOfMark = mark!=null? convertToJson(mark): "undefined";
 			
 		CharSequence callback = ajaxBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
 		
 		String script = String.format("onedev.server.sourceView.onDomReady("
-				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, %s, '%s');", 
+				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, %s, %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",
@@ -910,6 +929,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				context.getBlobIdent().revision, 
 				jsonOfBlameInfos, 
 				jsonOfCommentInfos,
+				jsonOfProblems,
 				callback, 
 				blameMessageBehavior.getCallback(),
 				sourceFormat.getTabSize(),
@@ -922,7 +942,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 	@Override
 	protected void onDetach() {
-		commentRangesModel.detach();
+		commentsModel.detach();
+		problemsModel.detach();
 		super.onDetach();
 	}
 
@@ -952,7 +973,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		
 		String title;
 		
-		PlanarRange mark;
+		PlanarRange range;
 	}
 
 	@Override
@@ -965,7 +986,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		String script;
 		PlanarRange mark = SourceRendererProvider.getRange(position);
 		if (mark != null) 
-			script = String.format("onedev.server.sourceView.mark(%s, true);", getJson(mark));
+			script = String.format("onedev.server.sourceView.mark(%s, true);", convertToJson(mark));
 		else 
 			script = String.format("onedev.server.sourceView.clearMark();");
 		target.appendJavaScript(script);

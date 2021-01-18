@@ -18,6 +18,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
+import io.onedev.server.security.CipherUtils;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -60,7 +61,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 try {
                     PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(sshKey.getContent());
-                    String fingerPrint = KeyUtils.getFingerPrint(SshKey.DIGEST_FORMAT, pubEntry);
+                    String fingerPrint = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
                     sshKey.setDigest(fingerPrint);
                 } catch (IOException | GeneralSecurityException e) {
                     throw new RuntimeException(e);

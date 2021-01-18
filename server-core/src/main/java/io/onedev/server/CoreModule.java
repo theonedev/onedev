@@ -90,6 +90,8 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CodeProblemContribution;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
@@ -113,6 +115,7 @@ import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestCodeCommentRelationManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
@@ -148,6 +151,7 @@ import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
 import io.onedev.server.entitymanager.impl.DefaultProjectManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestAssignmentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestChangeManager;
+import io.onedev.server.entitymanager.impl.DefaultPullRequestCodeCommentRelationManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestQuerySettingManager;
@@ -179,6 +183,7 @@ import io.onedev.server.maintenance.DefaultDataManager;
 import io.onedev.server.maintenance.ResetAdminPassword;
 import io.onedev.server.maintenance.RestoreDatabase;
 import io.onedev.server.maintenance.Upgrade;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
@@ -393,6 +398,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
 		bind(PullRequestAssignmentManager.class).to(DefaultPullRequestAssignmentManager.class);
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
+		bind(PullRequestCodeCommentRelationManager.class).to(DefaultPullRequestCodeCommentRelationManager.class);
 		bind(BuildMetricManager.class).to(DefaultBuildMetricManager.class);
 		
 		bind(WebHookManager.class);
@@ -486,6 +492,16 @@ public class CoreModule extends AbstractPluginModule {
 			}
 
 	    });
+	    
+		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
+			
+			@Override
+			public List<CodeProblem> getCodeProblems(Build build, String blobPath) {
+				return Lists.newArrayList();
+			}
+			
+		});
+	    
 	}
 	
 	private void configureSsh() {

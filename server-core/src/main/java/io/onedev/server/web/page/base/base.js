@@ -533,6 +533,13 @@ onedev.server = {
 		},
 	},
 	util: {
+		isObjEmpty: function(obj) {
+    		for(var key in obj) {
+        		if(obj.hasOwnProperty(key))
+            		return false;
+    		}
+    		return true;
+		},
 		canInput: function(element) {
 			var $element = $(element);
 			return ($element.is("input") || $element.is("textarea") || $element.is("select")) && !$element.hasClass("readonly");			
