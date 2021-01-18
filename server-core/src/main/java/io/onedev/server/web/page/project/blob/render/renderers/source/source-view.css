@@ -45,24 +45,17 @@
 .CodeMirror-comment, .CodeMirror-problem {
 	padding-left: 4px;
 }
-.CodeMirror-comment a {
-	color: var(--gray) !important;
-}
-.CodeMirror-comment a:hover {
+.comment-indicator.active, .comment-trigger.active {
 	color: var(--dark) !important;
 }
-.comment-popover a {
-	display: block;
-	color: var(--gray);
-	text-decoration: none;
-	white-space: nowrap;
+.comment-indicator.updated, .comment-trigger.updated {
+	color: var(--primary) !important;
 }
-.comment-popover a:hover, .comment-trigger.active {
-	color: var(--dark) !important;
+.comment-indicator.updated.active, .comment-indicator.updated:hover, 
+.comment-trigger.updated.active, .comment-trigger.updated:hover {
+	color: #0073e9 !important;
 }
-.CodeMirror-comment .comment-trigger.active {
-	line-height: 14px;
-}
+
 .CodeMirror-annotations {
 	width: 240px;
 }

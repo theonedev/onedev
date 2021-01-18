@@ -147,7 +147,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	}
 	
 	@Override
-	public Collection<CodeComment> findHistory(Project project, ObjectId commitId, String path) {
+	public Collection<CodeComment> queryInHistory(Project project, ObjectId commitId, String path) {
 		Collection<CodeComment> comments = new ArrayList<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();

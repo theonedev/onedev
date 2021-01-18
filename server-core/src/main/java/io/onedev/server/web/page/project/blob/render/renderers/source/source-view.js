@@ -231,20 +231,22 @@ onedev.server.sourceView = {
 		var icon = onedev.server.codeProblem.getIcon(problems);
 		var linkClass = onedev.server.codeProblem.getLinkClass(problems);
 		
-		$gutter.append("<a class='problem-trigger " + linkClass + "'><svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#" + icon + "'/></svg></a>");
+		let svg = "<svg class='icon icon-sm'><use xlink:href='" + onedev.server.icons + "#" + icon + "'/></svg>";
+		$gutter.append("<a class='problem-trigger " + linkClass + "'>" + svg + "</a>");
 		var $trigger = $gutter.children("a");
 		$trigger.mouseover(function() {
 			onedev.server.codemirror.mark(cm, markRanges);
 		}).mouseout(function() {
 			onedev.server.sourceView.restoreMark();
 		});
+		
 		$trigger.popover({
 			html: true, 
 			sanitize: false, 
 			placement: "top",
 			container: ".source-view>.code",
 			content: onedev.server.codeProblem.renderProblems(problems),
-			template: "<div data-line='" + line + "' class='popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>",
+			template: `<div data-line='${line}' class='popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
 		}).on("shown.bs.popover", function() {
 			var $currentPopover = $(".problem-popover[data-line='" + line + "']");
 			$(".popover").not($currentPopover).popover("hide");
@@ -287,18 +289,29 @@ onedev.server.sourceView = {
 			 * list of comment triggers upon click, user can then click one of the 
 			 * trigger link to display the actual comment content  
 			 */
-			$gutter.append("<a><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comments'/></svg></a>");
-			var $indicator = $gutter.children("a");
+			var updated = false;
 			var content = "";
-			for (var i in comments) 
-				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + comments[i].id + "</a>";
-				
+			for (var i in comments) { 
+				let cssClasses = "comment-trigger text-gray text-hover-dark text-nowrap d-block";
+				if (comments[i].updated) {
+					cssClasses += " updated";
+					updated = true;
+				}
+				content += `<a class='${cssClasses}' title='Click to show comment of marked text'>#${comments[i].id}</a>`;
+			}
+
+			let cssClasses = "text-gray text-hover-dark comment-indicator";
+			if (updated)
+				cssClasses += " updated"; 			
+			$gutter.append(`<a class='${cssClasses}'><svg class='icon'><use xlink:href='${onedev.server.icons}#comments'/></svg></a>`);
+			
+			var $indicator = $gutter.children("a");
 			$indicator.popover({
 				html: true, 
 				container: ".source-view>.code",
 				sanitize: false,
 				placement: "auto",
-				template: "<div data-line='" + line + "' class='popover comment-popover'><div class='arrow'></div><div class='popover-body'></div></div>",
+				template: `<div data-line='${line}' class='popover comment-popover'><div class='arrow'></div><div class='popover-body'></div></div>`,
 				content: content
 			});
 			$indicator.on('shown.bs.popover', function () {
@@ -321,7 +334,11 @@ onedev.server.sourceView = {
 			});
 		} else {
 			var comment = comments[0];
-			$gutter.append("<a class='comment-trigger' title='Click to show comment of marked text'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
+			var cssClasses = "comment-trigger comment-indicator text-gray text-hover-dark";
+			if (comment.updated)
+				cssClasses += " updated";
+			var svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
+			$gutter.append(`<a class='${cssClasses}' title='Click to show comment of marked text'>${svg}</a>`);
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
 				onedev.server.codemirror.mark(cm, comment.range);
@@ -335,43 +352,43 @@ onedev.server.sourceView = {
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		
 	},
-	openSelectionPopover: function(selectionRange, selectionUrl, loggedIn, unableCommentMessage) {
+	openSelectionPopover: function(selectionRange, selectionUrl, loggedIn) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
 		var ch = (selectionRange.fromColumn + selectionRange.toColumn)/2;
 		var position = cm.charCoords({line:selectionRange.fromRow, ch:ch});
 		
 		var $content;
-		if (unableCommentMessage) {
-			$content = $("<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> " + unableCommentMessage + "</a>");
+		let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg>`;
+		$content = $(`<div><a class='permanent'>${svg} Permanent link of this selection</a>`);
+		$content.children("a.permanent").attr("href", selectionUrl);
+		svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg>`;
+		$content.append(`<a class='copy-marked'>${svg} Copy selected text to clipboard</a>`);
+		var clipboard = new Clipboard(".copy-marked", {
+		    text: function() {
+		        return cm.getSelection("\n");
+		    }
+		});		
+		clipboard.on("success", function() {
+			clipboard.destroy();
+		});
+		$content.children("a.copy-marked").click(function() {
+			$(".selection-popover").remove();
+		});
+		if (loggedIn) {
+			let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
+			$content.append(`<a class='comment'>${svg} Add comment on this selection</a>`);
+			$content.children("a.comment").click(function() {
+				if (onedev.server.sourceView.confirmUnsavedChanges()) {
+					$(".selection-popover").remove();
+					$(".source-view").data("callback")("addComment", selectionRange.fromRow, selectionRange.fromColumn, 
+							selectionRange.toRow, selectionRange.toColumn);
+				}
+			});
 		} else {
-			$content = $("<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
-			$content.children("a.permanent").attr("href", selectionUrl);
-			$content.append("<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
-			var clipboard = new Clipboard(".copy-marked", {
-			    text: function(trigger) {
-			        return cm.getSelection("\n");
-			    }
-			});		
-			clipboard.on("success", function(e) {
-				clipboard.destroy();
-			});
-			$content.children("a.copy-marked").click(function() {
-				$(".selection-popover").remove();
-			});
-			if (loggedIn) {
-				$content.append("<a class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
-				$content.children("a.comment").click(function() {
-					if (onedev.server.sourceView.confirmUnsavedChanges()) {
-						$(".selection-popover").remove();
-						$(".source-view").data("callback")("addComment", selectionRange.fromRow, selectionRange.fromColumn, 
-								selectionRange.toRow, selectionRange.toColumn);
-					}
-				});
-			} else {
-				var loginHref = $(".sign-in").attr("href");
-				$content.append("<a href='" + loginHref + "' class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</a>");
-			}			
-		}
+			let loginHref = $(".sign-in").attr("href");
+			let svg = `<svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg>`;
+			$content.append(`<a href='${loginHref}' class='comment'>${svg} Login to comment on selection</a>`);
+		}			
 		
 		$(".source-view>.code").selectionPopover("open", {
 			position: position,
@@ -456,6 +473,7 @@ onedev.server.sourceView = {
 		onedev.server.codemirror.scrollIntoView(cm, comment.range);
 	},
 	onCloseComment: function() {
+		$(".popover").popover("hide");
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		onedev.server.sourceView.highlightCommentTrigger();
@@ -494,9 +512,8 @@ onedev.server.sourceView = {
 				var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
 				if (gutter) {
 					var comments = $(gutter).data("comments");
-					if (comments.length == 1) {
-						$(gutter).children("a").addClass("active");
-					} else {
+					$(gutter).children("a").addClass("active");
+					if (comments.length != 1) {
 						$(".comment-popover[data-line='" + line + "'] a").each(function() {
 							var comment = comments[$(this).index()];			        						
 							if (comment.id == openComment.id) {

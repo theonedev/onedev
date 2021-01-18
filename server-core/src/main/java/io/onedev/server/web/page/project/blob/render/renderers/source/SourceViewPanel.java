@@ -137,7 +137,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		protected Map<Integer, List<CommentInfo>> load() {
 			Map<Integer, List<CommentInfo>> comments = new HashMap<>(); 
 			CodeCommentManager codeCommentManager = OneDev.getInstance(CodeCommentManager.class);
-			for (CodeComment comment: codeCommentManager.findHistory(
+			for (CodeComment comment: codeCommentManager.queryInHistory(
 					context.getProject(), context.getCommit(), context.getBlobIdent().path)) {
 				PlanarRange postion = comment.getMark().getRange();
 				int line = postion.getFromRow();
@@ -149,6 +149,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				CommentInfo commentInfo = new CommentInfo();
 				commentInfo.id = comment.getId();
 				commentInfo.range = postion;
+				commentInfo.updated = !comment.isVisitedAfter(comment.getLastUpdate().getDate());
 				commentsAtLine.add(commentInfo);
 			}
 			for (List<CommentInfo> value: comments.values()) {
@@ -455,23 +456,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				switch(params.getParameterValue("action").toString("")) {
 				case "openSelectionPopover": 
 					PlanarRange mark = getMark(params, "param1", "param2", "param3", "param4");
-					String unableCommentMessage = null;
-					PullRequest request = context.getPullRequest();
-					String commitHash = context.getCommit().name();
-					if (request != null && !request.canCommentOnCommit(commitHash)) { 
-						if (request.getMergePreview() != null 
-								&& request.getMergePreview().getMergeCommitHash() != null 
-								&& request.getMergePreview().getMergeCommitHash().equals(commitHash)) {
-							unableCommentMessage = "Unable to comment on pull request merge preview";
-						} else {
-							unableCommentMessage = "Unable to comment on commits not belonging to pull request";
-						}
-					}
 							
 					String position = SourceRendererProvider.getPosition(mark);
-					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s, %s);", 
-							convertToJson(mark), context.getPositionUrl(position), SecurityUtils.getUser()!=null, 
-							unableCommentMessage!=null?"'" + unableCommentMessage + "'":"undefined");
+					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s);", 
+							convertToJson(mark), context.getPositionUrl(position), SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment": 
@@ -969,11 +957,15 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	@SuppressWarnings("unused")
 	private static class CommentInfo {
+		
 		long id;
 		
 		String title;
 		
 		PlanarRange range;
+		
+		boolean updated;
+		
 	}
 
 	@Override
