@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.diff.revision;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -92,7 +93,7 @@ import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
-import io.onedev.server.web.component.diff.blob.SourceAware;
+import io.onedev.server.web.component.diff.blob.text.TextDiffPanel;
 import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -131,7 +132,7 @@ public class RevisionDiffPanel extends Panel {
 
 	private final IModel<String> blameModel;
 	
-	private final CommentSupport commentSupport;
+	private final AnnotationSupport commentSupport;
 	
 	private final IModel<String> pathFilterModel;
 	
@@ -352,7 +353,7 @@ public class RevisionDiffPanel extends Panel {
 	
 	public RevisionDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
-			@Nullable IModel<String> blameModel, @Nullable CommentSupport commentSupport) {
+			@Nullable IModel<String> blameModel, @Nullable AnnotationSupport commentSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
@@ -378,8 +379,8 @@ public class RevisionDiffPanel extends Panel {
 				String prevBlameFile = blameModel.getObject();
 				blameModel.setObject(object);
 				if (prevBlameFile != null && object != null && !prevBlameFile.equals(object)) {
-					SourceAware sourceAware = getSourceAware(prevBlameFile);
-					sourceAware.onUnblame(target);
+					BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevBlameFile);
+					blobDiffPanel.onUnblame(target);
 				}
 			}
 			
@@ -725,7 +726,7 @@ public class RevisionDiffPanel extends Panel {
 				item.setMarkupId("diff-" + encodePath(change.getPath()));
 				if (commentSupport != null) {
 					item.add(new BlobDiffPanel(DIFF_ID, projectModel, requestModel, change, diffMode, 
-							getBlobBlameModel(change), new BlobCommentSupport() {
+							getBlobBlameModel(change), new TextDiffPanel.AnnotationSupport() {
 	
 						@Override
 						public Mark getMark() {
@@ -818,10 +819,10 @@ public class RevisionDiffPanel extends Panel {
 									clearComment(target);
 									Mark mark = getMark();
 									if (mark != null) {
-										SourceAware sourceAware = getSourceAware(mark.getPath());
-										if (sourceAware != null) 
-											sourceAware.unmark(target);
-										((CommentSupport)commentSupport).onUnmark(target);
+										BlobDiffPanel blobDiffPanel = getBlobDiffPanel(mark.getPath());
+										if (blobDiffPanel != null) 
+											blobDiffPanel.unmark(target);
+										((AnnotationSupport)commentSupport).onUnmark(target);
 									}
 								}
 								
@@ -880,11 +881,11 @@ public class RevisionDiffPanel extends Panel {
 									commentContainer.replace(commentPanel);
 									target.add(commentContainer);
 									
-									SourceAware sourceAware = getSourceAware(comment.getMark().getPath());
-									if (sourceAware != null) 
-										sourceAware.onCommentAdded(target, comment);
+									BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
+									if (blobDiffPanel != null) 
+										blobDiffPanel.onCommentAdded(target, comment);
 
-									((CommentSupport)commentSupport).onCommentOpened(target, comment);
+									((AnnotationSupport)commentSupport).onCommentOpened(target, comment);
 								}
 
 							});
@@ -896,18 +897,18 @@ public class RevisionDiffPanel extends Panel {
 							
 							Mark prevMark = RevisionDiffPanel.this.getMark();
 							if (prevMark != null) {
-								SourceAware sourceAware = getSourceAware(prevMark.getPath());
-								if (sourceAware != null) 
-									sourceAware.unmark(target);
+								BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevMark.getPath());
+								if (blobDiffPanel != null) 
+									blobDiffPanel.unmark(target);
 							}
 							
 							CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
 							if (prevComment != null) {
-								SourceAware sourceAware = getSourceAware(prevComment.getMark().getPath());
-								if (sourceAware != null) 
-									sourceAware.onCommentClosed(target, prevComment);
+								BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevComment.getMark().getPath());
+								if (blobDiffPanel != null) 
+									blobDiffPanel.onCommentClosed(target, prevComment);
 							}  
-							((CommentSupport)commentSupport).onAddComment(target, mark);
+							((AnnotationSupport)commentSupport).onAddComment(target, mark);
 							String script = String.format(""
 									+ "setTimeout(function() {"
 									+ "  var $textarea = $('#%s textarea');"
@@ -924,7 +925,7 @@ public class RevisionDiffPanel extends Panel {
 						}
 
 						@Override
-						public Component getDirtyContainer() {
+						public Component getCommentContainer() {
 							return commentContainer;
 						}
 
@@ -1007,16 +1008,16 @@ public class RevisionDiffPanel extends Panel {
 		
 		CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
 		if (prevComment != null) {
-			SourceAware sourceAware = getSourceAware(prevComment.getMark().getPath());
-			if (sourceAware != null) 
-				sourceAware.onCommentClosed(target, prevComment);
+			BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevComment.getMark().getPath());
+			if (blobDiffPanel != null) 
+				blobDiffPanel.onCommentClosed(target, prevComment);
 		} 
 		
 		Mark prevMark = RevisionDiffPanel.this.getMark();
 		if (prevMark != null) {
-			SourceAware sourceAware = getSourceAware(prevMark.getPath());
-			if (sourceAware != null)
-				sourceAware.unmark(target);
+			BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevMark.getPath());
+			if (blobDiffPanel != null)
+				blobDiffPanel.unmark(target);
 		}
 		commentSupport.onCommentOpened(target, comment);
 	}
@@ -1129,10 +1130,10 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				Mark mark = getMark();
-				SourceAware sourceAware = getSourceAware(mark.getPath());
-				if (sourceAware != null)
-					sourceAware.mark(target, mark);
-				((CommentSupport)commentSupport).onMark(target, mark);
+				BlobDiffPanel blobDiffPanel = getBlobDiffPanel(mark.getPath());
+				if (blobDiffPanel != null)
+					blobDiffPanel.mark(target, mark);
+				((AnnotationSupport)commentSupport).onMark(target, mark);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
@@ -1151,9 +1152,9 @@ public class RevisionDiffPanel extends Panel {
 				CodeComment comment = getOpenComment();
 				clearComment(target);
 				if (comment != null) {
-					SourceAware sourceAware = getSourceAware(comment.getMark().getPath());
-					if (sourceAware != null) 
-						sourceAware.onCommentClosed(target, comment);
+					BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
+					if (blobDiffPanel != null) 
+						blobDiffPanel.onCommentClosed(target, comment);
 					commentSupport.onCommentClosed(target);
 				}
 			}
@@ -1225,7 +1226,7 @@ public class RevisionDiffPanel extends Panel {
 	@Nullable
 	private CodeComment getOpenComment() {
 		if (commentSupport != null) {
-			CodeComment comment = ((CommentSupport)commentSupport).getOpenComment();
+			CodeComment comment = ((AnnotationSupport)commentSupport).getOpenComment();
 			if (comment != null) {
 				PullRequest request = requestModel.getObject();
 				String commitHash = comment.getMark().getCommitHash();
@@ -1266,16 +1267,16 @@ public class RevisionDiffPanel extends Panel {
 	}
 	
 	@Nullable
-	private SourceAware getSourceAware(String path) {
-		return diffsView.visitChildren(new IVisitor<Component, SourceAware>() {
+	private BlobDiffPanel getBlobDiffPanel(String blobPath) {
+		return diffsView.visitChildren(new IVisitor<Component, BlobDiffPanel>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public void component(Component object, IVisit<SourceAware> visit) {
+			public void component(Component object, IVisit<BlobDiffPanel> visit) {
 				if (object instanceof ListItem) {
 					ListItem<BlobChange> item = (ListItem<BlobChange>) object;
-					if (item.getModelObject().getPaths().contains(path)) {
-						visit.stop((SourceAware) item.get(DIFF_ID));
+					if (item.getModelObject().getPaths().contains(blobPath)) {
+						visit.stop((BlobDiffPanel) item.get(DIFF_ID));
 					} else {
 						visit.dontGoDeeper();
 					}
@@ -1287,15 +1288,15 @@ public class RevisionDiffPanel extends Panel {
 	
 	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		clearComment(target);
-		SourceAware sourceAware = getSourceAware(comment.getMark().getPath());
-		if (sourceAware != null)
-			sourceAware.onCommentDeleted(target, comment);
-		((CommentSupport)commentSupport).onCommentClosed(target);
+		BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
+		if (blobDiffPanel != null)
+			blobDiffPanel.onCommentDeleted(target, comment);
+		((AnnotationSupport)commentSupport).onCommentClosed(target);
 		Mark mark = getMark();
 		if (mark != null) {
-			sourceAware = getSourceAware(mark.getPath());
-			if (sourceAware != null) 
-				sourceAware.mark(target, mark);
+			blobDiffPanel = getBlobDiffPanel(mark.getPath());
+			if (blobDiffPanel != null) 
+				blobDiffPanel.mark(target, mark);
 		}
 	}
 	
@@ -1368,4 +1369,33 @@ public class RevisionDiffPanel extends Panel {
 		
 	}
 
+	public static interface AnnotationSupport extends Serializable {
+		
+		@Nullable 
+		Mark getMark();
+		
+		@Nullable
+		String getMarkUrl(Mark mark);
+		
+		void onMark(AjaxRequestTarget target, Mark mark);
+		
+		void onUnmark(AjaxRequestTarget target);
+		
+		@Nullable 
+		CodeComment getOpenComment();
+
+		void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
+		
+		void onCommentClosed(AjaxRequestTarget target);
+		
+		void onAddComment(AjaxRequestTarget target, Mark mark);
+
+		Collection<CodeComment> getComments();
+		
+		void onSaveComment(CodeComment comment);
+		
+		void onSaveCommentReply(CodeCommentReply reply);
+		
+	}
+	
 }

@@ -8,10 +8,10 @@
 	background: #8950FC;
 }
 .cm-identifierhighlight.CodeMirror-mark {
-	background: #ad91ee;	
+	background: var(--dark);	
 }
 .cm-searching.CodeMirror-mark {
-	background: #c4a7d3;
+	background: var(--warning);
 }
 .cm-searching.cm-identifierhighlight {
 	background: #e8e9c5;

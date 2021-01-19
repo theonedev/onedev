@@ -2,11 +2,13 @@ package io.onedev.server.entitymanager;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -20,7 +22,7 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
 	Collection<CodeComment> query(Project project, ObjectId...commitIds);
 	
-	Collection<CodeComment> queryInHistory(Project project, ObjectId commitId, String path);
+	Map<CodeComment, PlanarRange> queryInHistory(Project project, ObjectId commitId, String path);
 		
 	List<CodeComment> query(Project project, @Nullable PullRequest request, 
 			EntityQuery<CodeComment> commentQuery, int firstResult, int maxResults);

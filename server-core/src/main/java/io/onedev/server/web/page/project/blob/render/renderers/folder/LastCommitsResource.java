@@ -36,7 +36,7 @@ class LastCommitsResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_REPO = "repo";
+	private static final String PARAM_PROJECT = "project";
 	
 	private static final String PARAM_REVISION = "revision";
 	
@@ -45,7 +45,7 @@ class LastCommitsResource extends AbstractResource {
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
-		final Long projectId = params.get(PARAM_REPO).toLong();
+		final Long projectId = params.get(PARAM_PROJECT).toLong();
 		final String revision = params.get(PARAM_REVISION).toString();
 		final String path = params.get(PARAM_PATH).toOptionalString();
 
@@ -98,7 +98,7 @@ class LastCommitsResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Project project, String revision, @Nullable String path) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_REPO, project.getId());
+		params.set(PARAM_PROJECT, project.getId());
 		params.set(PARAM_REVISION, revision);
 		if (path != null)
 			params.set(PARAM_PATH, path);

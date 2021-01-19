@@ -72,7 +72,6 @@ import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
-import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -92,7 +91,7 @@ import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
-public class NewPullRequestPage extends ProjectPage implements CommentSupport {
+public class NewPullRequestPage extends ProjectPage implements RevisionDiffPanel.AnnotationSupport {
 
 	private static final String TABS_ID = "tabs";
 	

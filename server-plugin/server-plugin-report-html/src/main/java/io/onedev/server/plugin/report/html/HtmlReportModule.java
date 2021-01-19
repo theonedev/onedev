@@ -6,19 +6,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import org.apache.wicket.protocol.http.WebApplication;
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.WebApplicationConfigurator;
-import io.onedev.server.web.mapper.DynamicPathPageMapper;
-import io.onedev.server.web.mapper.DynamicPathResourceMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 
@@ -71,6 +69,7 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 		});
 		
+		/*
 		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
 			
 			@Override
@@ -82,7 +81,6 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 		});		
 
-		/*
 		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
 			
 			@Override
@@ -97,6 +95,7 @@ public class HtmlReportModule extends AbstractPluginModule {
 			}
 			
 		});
+		*/
 		
 		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
 			
@@ -106,7 +105,6 @@ public class HtmlReportModule extends AbstractPluginModule {
 			}
 			
 		});
-		*/
 		
 	}
 

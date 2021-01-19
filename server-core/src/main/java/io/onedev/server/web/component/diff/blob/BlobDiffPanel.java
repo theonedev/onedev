@@ -24,12 +24,11 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.diff.DiffRenderer;
 import io.onedev.server.web.component.diff.blob.text.TextDiffPanel;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
-import io.onedev.server.web.component.diff.revision.BlobCommentSupport;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
-public class BlobDiffPanel extends Panel implements SourceAware {
+public class BlobDiffPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
@@ -43,11 +42,11 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 	
 	private final DiffViewMode diffMode;
 	
-	private final BlobCommentSupport commentSupport;
+	private final TextDiffPanel.AnnotationSupport commentSupport;
 	
 	public BlobDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable BlobCommentSupport commentSupport) {
+			@Nullable TextDiffPanel.AnnotationSupport commentSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
@@ -154,57 +153,51 @@ public class BlobDiffPanel extends Panel implements SourceAware {
 		super.onDetach();
 	}
 
-	@Override
 	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof SourceAware) {
-			SourceAware sourceAware = (SourceAware) content;
-			sourceAware.onCommentDeleted(target, comment);
+		if (content instanceof TextDiffPanel) {
+			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
+			textDiffPanel.onCommentDeleted(target, comment);
 		}
 	}
 
-	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof SourceAware) {
-			SourceAware sourceAware = (SourceAware) content;
-			sourceAware.onCommentClosed(target, comment);
+		if (content instanceof TextDiffPanel) {
+			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
+			textDiffPanel.onCommentClosed(target, comment);
 		}
 	}
 
-	@Override
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof SourceAware) {
-			SourceAware sourceAware = (SourceAware) content;
-			sourceAware.onCommentAdded(target, comment);
+		if (content instanceof TextDiffPanel) {
+			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
+			textDiffPanel.onCommentAdded(target, comment);
 		}
 	}
 
-	@Override
 	public void mark(AjaxRequestTarget target, Mark mark) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof SourceAware) {
-			SourceAware sourceAware = (SourceAware) content;
-			sourceAware.mark(target, mark);
+		if (content instanceof TextDiffPanel) {
+			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
+			textDiffPanel.mark(target, mark);
 		}
 	}
 
-	@Override
 	public void unmark(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof SourceAware) {
-			SourceAware sourceAware = (SourceAware) content;
-			sourceAware.unmark(target);
+		if (content instanceof TextDiffPanel) {
+			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
+			textDiffPanel.unmark(target);
 		}
 	}
 
-	@Override
 	public void onUnblame(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
-		if (content instanceof SourceAware) {
-			SourceAware sourceAware = (SourceAware) content;
-			sourceAware.onUnblame(target);
+		if (content instanceof TextDiffPanel) {
+			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
+			textDiffPanel.onUnblame(target);
 		}
 	}
 

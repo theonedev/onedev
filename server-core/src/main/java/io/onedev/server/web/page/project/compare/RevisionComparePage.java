@@ -47,7 +47,6 @@ import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.asset.revisioncompare.RevisionCompareCssResourceReference;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
-import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.revisionpicker.AffinalRevisionPicker;
@@ -62,7 +61,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequ
 import io.onedev.server.web.util.EditParamsAware;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends ProjectPage implements CommentSupport, EditParamsAware {
+public class RevisionComparePage extends ProjectPage implements RevisionDiffPanel.AnnotationSupport, EditParamsAware {
 
 	public enum TabPanel {
 		COMMITS, 

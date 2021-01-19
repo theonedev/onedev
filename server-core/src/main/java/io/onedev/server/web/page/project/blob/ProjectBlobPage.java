@@ -1137,9 +1137,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	@Override
-	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range) {
 		state.commentId = comment.getId();
-		state.position = SourceRendererProvider.getPosition(Preconditions.checkNotNull(comment.mapRange(state.blobIdent)));
+		state.position = SourceRendererProvider.getPosition(range);
 		pushState(target);
 	}
 

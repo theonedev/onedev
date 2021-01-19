@@ -1,7 +1,7 @@
 onedev.server.sourceView = {
 	onDomReady: function(filePath, fileContent, openComment, markRange, symbolTooltipId, 
-			revision, blameInfos, comments, problems, coverages, callback, blameMessageCallback, 
-			tabSize, lineWrapMode) {
+			revision, blameInfos, callback, blameMessageCallback, tabSize, lineWrapMode, 
+			annotationInfoUrl) {
 		
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
@@ -36,33 +36,15 @@ onedev.server.sourceView = {
 	    
 		var gutters = cm.getOption("gutters").slice();
 		
-		if (!onedev.server.util.isObjEmpty(problems))
-			gutters.splice(0, 0, "CodeMirror-problems");
-		if (!onedev.server.util.isObjEmpty(coverages))
-			gutters.splice(gutters.length-1, 0, "CodeMirror-coverages");
-			
+		gutters.splice(0, 0, "CodeMirror-problems");
+		gutters.splice(gutters.length-1, 0, "CodeMirror-coverages");
 		gutters.splice(0, 0, "CodeMirror-comments");
+		
 		cm.setOption("gutters", gutters);
 		
-		for (var line in comments) {
-		    if (comments.hasOwnProperty(line)) 
-		    	onedev.server.sourceView.addCommentGutter(line, comments[line][1]);
-		}
-		
-		for (var line in problems) {
-		    if (problems.hasOwnProperty(line)) 
-		    	onedev.server.sourceView.addProblemGutter(line, problems[line][1]);
-		}
-		
-		for (var line in coverages) {
-			if (coverages.hasOwnProperty(line))
-				onedev.server.sourceView.addCoverageGutter(line, coverages[line]);
-		}
-
 		if (blameInfos) {
 		    onedev.server.sourceView.blame(blameInfos);
     	}
-		onedev.server.sourceView.highlightCommentTrigger();	
 
 		onedev.server.codemirror.bindShortcuts(cm);
 		onedev.server.sourceView.checkShortcutsBinding();
@@ -125,6 +107,37 @@ onedev.server.sourceView = {
 			});
 			return false;
 		});
+		
+		if (cm.lineCount() > 0) {
+			$.ajax({
+				url: annotationInfoUrl,
+				cache: false, 
+				beforeSend: function(xhr) {
+					xhr.setRequestHeader('Wicket-Ajax', 'true');
+					xhr.setRequestHeader('Wicket-Ajax-BaseURL', Wicket.Ajax.baseUrl || '.');
+				},
+				success: function(annotationInfo) {
+					if (jQuery.contains(document, $sourceView[0])) {
+						for (var line in annotationInfo.comments) {
+						    if (annotationInfo.comments.hasOwnProperty(line)) 
+						    	onedev.server.sourceView.addCommentGutter(line, annotationInfo.comments[line]);
+						}
+						
+						for (var line in annotationInfo.problems) {
+						    if (annotationInfo.problems.hasOwnProperty(line)) 
+						    	onedev.server.sourceView.addProblemGutter(line, annotationInfo.problems[line]);
+						}
+						
+						for (var line in annotationInfo.coverages) {
+							if (annotationInfo.coverages.hasOwnProperty(line))
+								onedev.server.sourceView.addCoverageGutter(line, annotationInfo.coverages[line]);
+						}
+						$(".loading-annotations").remove();
+						onedev.server.sourceView.highlightCommentTrigger();	
+					}
+				}
+			});		
+		}
 	},
 	checkShortcutsBinding() {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
@@ -343,15 +356,19 @@ onedev.server.sourceView = {
 				$(".popover").not($currentPopover).popover("hide");
 				$currentPopover.find("a").each(function() {
 					$(this).mouseover(function() {
-						var comment = comments[$(this).index()];
+						let comment = comments[$(this).index()];
 						onedev.server.codemirror.mark(cm, comment.range);
 					});
 					$(this).mouseout(function() {
 						onedev.server.sourceView.restoreMark();
 					});
 					$(this).click(function() {
-						if (!$(this).hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) 
-							callback("openComment", comments[$(this).index()].id);
+						if (!$(this).hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) { 
+							let comment = comments[$(this).index()];
+							let range = comment.range;
+							callback("openComment", comment.id, range.fromRow, range.fromColumn, 
+									range.toRow, range.toColumn);
+						}
 					});
 				});
 				onedev.server.sourceView.highlightCommentTrigger();				
@@ -370,8 +387,11 @@ onedev.server.sourceView = {
 				onedev.server.sourceView.restoreMark();
 			});
 			$indicator.click(function() {
-				if (!$indicator.hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) 
-					callback("openComment", comment.id);
+				if (!$indicator.hasClass("active") && onedev.server.sourceView.confirmUnsavedChanges()) { 
+					let range = comment.range;
+					callback("openComment", comment.id, range.fromRow, range.fromColumn, 
+							range.toRow, range.toColumn);
+				}
 			});
 		}
 		cm.setGutterMarker(parseInt(line), "CodeMirror-comments", $gutter[0]);		

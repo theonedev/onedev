@@ -1,7 +1,6 @@
 onedev.server.folderView = {
 	onDomReady: function(containerId, lastCommitsUrl, userCardCallback) {
 		var $container = $("#" + containerId);
-		var $folderView = $container.find(">.folder-view");
 		
 		$.ajax({
 			url: lastCommitsUrl,

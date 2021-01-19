@@ -58,7 +58,6 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -68,7 +67,7 @@ import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class PullRequestChangesPage extends PullRequestDetailPage implements CommentSupport, EditParamsAware {
+public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionDiffPanel.AnnotationSupport, EditParamsAware {
 
 	public static final String PARAM_OLD_COMMIT = "old-commit";
 	

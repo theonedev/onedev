@@ -26,18 +26,15 @@ import javax.persistence.Table;
 
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastUpdate;
@@ -258,22 +255,6 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 			return project.getRepository().getObjectDatabase().has(ObjectId.fromString(mark.getCommitHash()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-	}
-	
-	@Nullable
-	public PlanarRange mapRange(BlobIdent blobIdent) {
-		RevCommit commit = project.getRevCommit(blobIdent.revision, true);
-		if (commit.name().equals(getMark().getCommitHash())) {
-			return getMark().getRange();
-		} else {
-			List<String> newLines = Preconditions.checkNotNull(
-					GitUtils.readLines(getProject().getRepository(), commit, blobIdent.path, WhitespaceOption.DEFAULT));
-			
-			RevCommit commitOfComment = project.getRevCommit(getMark().getCommitHash(), true);
-			List<String> oldLines = Preconditions.checkNotNull(
-					GitUtils.readLines(getProject().getRepository(), commitOfComment, getMark().getPath(), WhitespaceOption.DEFAULT));
-			return DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), getMark().getRange());
 		}
 	}
 	

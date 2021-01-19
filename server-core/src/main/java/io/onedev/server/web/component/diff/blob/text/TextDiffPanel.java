@@ -4,6 +4,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,11 +70,9 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
-import io.onedev.server.web.component.diff.blob.SourceAware;
 import io.onedev.server.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
-import io.onedev.server.web.component.diff.revision.BlobCommentSupport;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
@@ -87,7 +86,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergeP
 import io.onedev.server.web.util.EditParamsAware;
 
 @SuppressWarnings("serial")
-public class TextDiffPanel extends Panel implements SourceAware {
+public class TextDiffPanel extends Panel {
 
 	private final IModel<Project> projectModel;
 	
@@ -101,7 +100,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 
 	private final IModel<Boolean> blameModel;
 	
-	private final BlobCommentSupport commentSupport;
+	private final AnnotationSupport commentSupport;
 	
 	private final List<Mark> initialMarks;
 	
@@ -117,7 +116,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	
 	public TextDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable BlobCommentSupport commentSupport) {
+			@Nullable AnnotationSupport commentSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
@@ -579,7 +578,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			} else {
 				jsonOfCommentInfo = "undefined";
 			}
-			dirtyContainerId = "'" + commentSupport.getDirtyContainer().getMarkupId() + "'";
+			dirtyContainerId = "'" + commentSupport.getCommentContainer().getMarkupId() + "'";
 		} else {
 			jsonOfMark = "undefined";
 			jsonOfCommentInfo = "undefined";
@@ -1174,7 +1173,6 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		return jsonOfCommentInfo;
 	}
 	
-	@Override
 	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
 		String script = String.format("onedev.server.textDiff.onCommentDeleted($('#%s'), %s);", 
 				getMarkupId(), getJsonOfComment(comment));
@@ -1182,21 +1180,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		unmark(target);
 	}
 
-	@Override
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
 		String script = String.format("onedev.server.textDiff.onCloseComment($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		unmark(target);
 	}
 
-	@Override
 	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
 		String script = String.format("onedev.server.textDiff.onCommentAdded($('#%s'), %s);", 
 				getMarkupId(), getJsonOfComment(comment));
 		target.appendJavaScript(script);
 	}
 
-	@Override
 	public void mark(AjaxRequestTarget target, Mark mark) {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
@@ -1207,7 +1202,6 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		target.appendJavaScript(script);
 	}
 	
-	@Override
 	public void unmark(AjaxRequestTarget target) {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
@@ -1217,7 +1211,6 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		target.appendJavaScript(script);
 	}
 	
-	@Override
 	public void onUnblame(AjaxRequestTarget target) {
 		blameInfo = null;
 		target.add(this);
@@ -1271,4 +1264,22 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		
 	}
 
+	public static interface AnnotationSupport extends Serializable {
+		
+		@Nullable Mark getMark();
+		
+		String getMarkUrl(Mark mark);
+		
+		Collection<CodeComment> getComments();
+		
+		@Nullable CodeComment getOpenComment();
+
+		void onOpenComment(AjaxRequestTarget target, CodeComment comment);
+		
+		void onAddComment(AjaxRequestTarget target, Mark mark);
+		
+		Component getCommentContainer();
+		
+	}
+	
 }

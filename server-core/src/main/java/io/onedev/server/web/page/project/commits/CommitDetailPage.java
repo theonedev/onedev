@@ -70,7 +70,6 @@ import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
-import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
@@ -85,7 +84,7 @@ import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
-public class CommitDetailPage extends ProjectPage implements CommentSupport {
+public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.AnnotationSupport {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 	
