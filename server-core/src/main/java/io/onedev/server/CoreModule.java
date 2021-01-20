@@ -498,7 +498,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
 			
 			@Override
-			public List<CodeProblem> getCodeProblems(Build build, String blobPath) {
+			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
 				return Lists.newArrayList();
 			}
 			
@@ -507,7 +507,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
 			
 			@Override
-			public List<LineCoverage> getLineCoverages(Build build, String blobPath) {
+			public List<LineCoverage> getLineCoverages(Build build, String blobPath, String reportName) {
 				return Lists.newArrayList();
 			}
 			

@@ -109,6 +109,11 @@ onedev.server.sourceView = {
 		});
 		
 		if (cm.lineCount() > 0) {
+			var $gutter = $(document.createElement("div"));
+			$gutter.addClass("CodeMirror-problem").attr("title", "Loading annotations");
+			$gutter.append(`<svg class='icon spin'><use xlink:href='${onedev.server.icons}#loading'/></svg>`);
+			cm.setGutterMarker(0, "CodeMirror-problems", $gutter[0]);					
+			
 			$.ajax({
 				url: annotationInfoUrl,
 				cache: false, 
@@ -117,6 +122,7 @@ onedev.server.sourceView = {
 					xhr.setRequestHeader('Wicket-Ajax-BaseURL', Wicket.Ajax.baseUrl || '.');
 				},
 				success: function(annotationInfo) {
+					cm.setGutterMarker(0, "CodeMirror-problems", null);
 					if (jQuery.contains(document, $sourceView[0])) {
 						for (var line in annotationInfo.comments) {
 						    if (annotationInfo.comments.hasOwnProperty(line)) 
@@ -137,7 +143,7 @@ onedev.server.sourceView = {
 					}
 				}
 			});		
-		}
+		} 
 	},
 	checkShortcutsBinding() {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
@@ -241,7 +247,7 @@ onedev.server.sourceView = {
 		if (testCount > 0)
 			tooltip = `Tested ${testCount} times`;
 		else
-			tooltip = "Not tested";
+			tooltip = "Not covered by any test";
 			
 		let $gutter = $(`<a class='CodeMirror-coverage d-block' title='${tooltip}'>&nbsp;</a>`);
 

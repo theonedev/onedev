@@ -59,7 +59,7 @@
 	width: 20px;
 }
 .CodeMirror-comment, .CodeMirror-problem {
-	padding-left: 4px;
+	text-align: right;
 }
 .comment-indicator.active, .comment-trigger.active {
 	color: var(--dark) !important;

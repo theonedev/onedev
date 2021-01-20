@@ -790,7 +790,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				explicit("param3"), explicit("param4"), explicit("param5"));
 		
 		PageParameters params = AnnotationInfoResource.paramsOf(context.getProject(), 
-				context.getCommit().name(), context.getBlobIdent().path); 
+				context.getCommit().name(), context.getBlobIdent().path, 
+				context.getProblemReport(), context.getCoverageReport()); 
 		
 		String jsonOfInitialRange = convertToJson(initialRange);
 		

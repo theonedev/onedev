@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
@@ -39,12 +41,19 @@ class AnnotationInfoResource extends AbstractResource {
 	
 	private static final String PARAM_PATH = "path";
 	
+	private static final String PARAM_PROBLEM_REPORT = "problem-report";
+	
+	private static final String PARAM_COVERAGE_REPORT = "coverage-report";
+	
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
-		final Long projectId = params.get(PARAM_PROJECT).toLong();
-		final ObjectId commitId = ObjectId.fromString(params.get(PARAM_COMMIT).toString());
-		final String path = params.get(PARAM_PATH).toString();
+		
+		Long projectId = params.get(PARAM_PROJECT).toLong();
+		ObjectId commitId = ObjectId.fromString(params.get(PARAM_COMMIT).toString());
+		String path = params.get(PARAM_PATH).toString();
+		String problemReport = params.get(PARAM_PROBLEM_REPORT).toOptionalString();
+		String coverageReport = params.get(PARAM_COVERAGE_REPORT).toOptionalString();
 
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType("application/json");
@@ -82,7 +91,7 @@ class AnnotationInfoResource extends AbstractResource {
 				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 				for (Build build: buildManager.query(project, commitId, null, null, null, new HashMap<>())) {
 					for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
-						for (CodeProblem problem: contribution.getCodeProblems(build, path)) {
+						for (CodeProblem problem: contribution.getCodeProblems(build, path, problemReport)) {
 							if (problemDuplicationCheck.add(problem)) {
 								PlanarRange position = problem.getPosition();
 								int line = position.getFromRow();
@@ -97,7 +106,7 @@ class AnnotationInfoResource extends AbstractResource {
 					}
 					
 					for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-						for (LineCoverage coverage: contribution.getLineCoverages(build, path)) {
+						for (LineCoverage coverage: contribution.getLineCoverages(build, path, coverageReport)) {
 							for (int line = coverage.getFromLine(); line <= coverage.getToLine(); line++) {
 								Integer testCount = annotationInfo.coverages.get(line);
 								if (testCount != null) 
@@ -121,11 +130,17 @@ class AnnotationInfoResource extends AbstractResource {
 		return response;
 	}
 
-	public static PageParameters paramsOf(Project project, String commitHash, String path) {
+	public static PageParameters paramsOf(Project project, String commitHash, String path, 
+			@Nullable String problemReport, @Nullable String coverageReport) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getId());
-		params.set(PARAM_COMMIT, commitHash);
-		params.set(PARAM_PATH, path);
+		params.add(PARAM_PROJECT, project.getId());
+		params.add(PARAM_COMMIT, commitHash);
+		params.add(PARAM_PATH, path);
+		
+		if (problemReport != null)
+			params.add(PARAM_PROBLEM_REPORT, problemReport);
+		if (coverageReport != null)
+			params.add(PARAM_COVERAGE_REPORT, coverageReport);
 		
 		return params;
 	}

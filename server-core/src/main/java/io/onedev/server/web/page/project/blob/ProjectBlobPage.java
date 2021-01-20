@@ -142,6 +142,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	
 	private static final String PARAM_POSITION = "position";
 	
+	private static final String PARAM_COVERAGE_REPORT = "coverage-report";
+	
+	private static final String PARAM_PROBLEM_REPORT = "problem-report";
+	
 	private static final String PARAM_RAW = "raw";
 	
 	private static final String REVISION_PICKER_ID = "revisionPicker";
@@ -196,14 +200,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			resolvedRevision = getProject().getRevCommit(state.blobIdent.revision, true).copy();
 		
 		state.position = params.get(PARAM_POSITION).toString();
-		
 		state.requestId = params.get(PARAM_REQUEST).toOptionalLong();
-		
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
-		
 		state.query = params.get(PARAM_QUERY).toString();
-	
 		state.initialNewPath = params.get(PARAM_INITIAL_NEW_PATH).toString();
+		state.coverageReport = params.get(PARAM_COVERAGE_REPORT).toOptionalString();
+		state.problemReport = params.get(PARAM_PROBLEM_REPORT).toOptionalString();
 		
 		if (state.mode == Mode.ADD || state.mode == Mode.EDIT || state.mode == Mode.DELETE) {
 			if (!isOnBranch()) 
@@ -959,6 +961,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			params.add(PARAM_URL_BEFORE_EDIT, state.urlBeforeEdit);
 		if (state.urlAfterEdit != null)
 			params.add(PARAM_URL_AFTER_EDIT, state.urlAfterEdit);
+		if (state.coverageReport != null)
+			params.add(PARAM_COVERAGE_REPORT, state.coverageReport);
+		if (state.problemReport != null)
+			params.add(PARAM_PROBLEM_REPORT, state.problemReport);
 			
 		if (state.query != null)
 			params.add(PARAM_QUERY, state.query);
@@ -1199,6 +1205,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		 */
 		public boolean viewPlain;
 		
+		public String coverageReport;
+		
+		public String problemReport;
+		
 		public String urlBeforeEdit;
 		
 		public String urlAfterEdit;
@@ -1394,6 +1404,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			RevisionResolved revisionResolveEvent = (RevisionResolved) event.getPayload();
 			resolvedRevision = revisionResolveEvent.getResolvedRevision();
 		} 
+	}
+
+	@Override
+	public String getCoverageReport() {
+		return state.coverageReport;
+	}
+
+	@Override
+	public String getProblemReport() {
+		return state.problemReport;
 	}
 
 	@Override
