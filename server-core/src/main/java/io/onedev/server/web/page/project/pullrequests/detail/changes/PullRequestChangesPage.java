@@ -6,10 +6,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -32,15 +35,18 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -54,6 +60,7 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
+import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -111,20 +118,40 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		
 	};
 	
-	private final IModel<Collection<CodeComment>> commentsModel = 
-			new LoadableDetachableModel<Collection<CodeComment>>() {
+	private final IModel<Map<CodeComment, PlanarRange>> oldCommentsModel = 
+			new LoadableDetachableModel<Map<CodeComment, PlanarRange>>() {
 
 		@Override
-		protected Collection<CodeComment> load() {
-			Collection<CodeComment> comments = new ArrayList<>();
+		protected Map<CodeComment, PlanarRange> load() {
+			Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
 			for (CodeComment comment: getPullRequest().getCodeComments()) {
-				Mark diffMark = getDiffMark(comment.getMark());
-				if (diffMark != null) {
-					comment.setMark(diffMark);
-					comments.add(comment);
+				if (getCommitIndex(comment.getMark().getCommitHash()) <= getCommitIndex(state.oldCommitHash)) {
+					PlanarRange mappedRange = mapRange(comment, getComparisonBase());
+					if (mappedRange != null)
+						oldComments.put(comment, mappedRange);
 				}
 			}
-			return comments;
+			return oldComments;
+		}
+		
+	};
+	
+	private final IModel<Map<CodeComment, PlanarRange>> newCommentsModel = 
+			new LoadableDetachableModel<Map<CodeComment, PlanarRange>>() {
+
+		@Override
+		protected Map<CodeComment, PlanarRange> load() {
+			Map<CodeComment, PlanarRange> newComments = new HashMap<>();
+			for (CodeComment comment: getPullRequest().getCodeComments()) {
+				int commentCommitIndex = getCommitIndex(comment.getMark().getCommitHash());
+				if (commentCommitIndex > getCommitIndex(state.oldCommitHash)
+						&& commentCommitIndex <= getCommitIndex(state.newCommitHash)) {
+					PlanarRange mappedRange = mapRange(comment, ObjectId.fromString(state.newCommitHash));
+					if (mappedRange != null)
+						newComments.put(comment, mappedRange);
+				}
+			}
+			return newComments;
 		}
 		
 	};
@@ -133,18 +160,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 		@Override
 		protected CodeComment load() {
-			if (state.commentId != null) {
-				CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
-				Mark diffMark = getDiffMark(comment.getMark());
-				if (diffMark != null) {
-					comment.setMark(diffMark);
-					return comment;
-				}
-			} 
-			return null;
+			if (state.commentId != null) 
+				return OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
+			else
+				return null;
 		}
 		
 	};
+	
+	private transient Map<ImmutableTriple<ObjectId, ObjectId, String>, Map<Integer, Integer>> lineMappingCache;
 	
 	public PullRequestChangesPage(PageParameters params) {
 		super(params);
@@ -156,30 +180,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		state.newCommitHash = params.get(PARAM_NEW_COMMIT).toString();
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
-		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofName(params.get(PARAM_WHITESPACE_OPTION).toString());
 		     
 		PullRequest request = getPullRequest();
-		if (state.commentId != null) {
-			CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(state.commentId);
-			Preconditions.checkState(comment.getRequest().equals(request));
-			
-			CodeComment.ComparingInfo commentComparingInfo = comment.getComparingInfo();
-			PullRequest.ComparingInfo requestComparingInfo = 
-					getPullRequest().getRequestComparingInfo(commentComparingInfo);
-			if (requestComparingInfo != null && state.oldCommitHash == null && state.newCommitHash == null) {
-				if (comment.isContextChanged(request)) {
-					state.oldCommitHash = comment.getMark().getCommitHash();
-					state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
-				} else {
-					state.oldCommitHash = requestComparingInfo.getOldCommitHash();
-					state.newCommitHash = requestComparingInfo.getNewCommitHash();
-				}
-			} 
-		} 
 		if (state.oldCommitHash == null) 
 			state.oldCommitHash = request.getBaseCommitHash();
 		if (state.newCommitHash == null)
 			state.newCommitHash = request.getLatestUpdate().getHeadCommitHash();
+		if (state.whitespaceOption == null)
+			state.whitespaceOption = WhitespaceOption.DEFAULT;
 	}
 	
 	private int getCommitIndex(String commitHash) {
@@ -209,6 +218,39 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		} else {
 			return null;
 		}
+	}
+
+	@Nullable
+	private PlanarRange mapRange(CodeComment comment, ObjectId commitId) {
+		Map<Integer, Integer> lineMapping = getLineMapping(
+				comment.getMark().getPath(), 
+				ObjectId.fromString(comment.getMark().getCommitHash()), 
+				commitId);
+		return DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
+	}
+	
+	private Map<Integer, Integer> getLineMapping(String path, ObjectId oldCommitId, ObjectId newCommitId) {
+		if (lineMappingCache == null)
+			lineMappingCache = new HashMap<>();
+		ImmutableTriple<ObjectId, ObjectId, String> key = 
+				new ImmutableTriple<>(oldCommitId, newCommitId, path);
+		Map<Integer, Integer> lineMapping = lineMappingCache.get(key);
+		if (lineMapping == null) {
+			BlobIdent newBlobIdent = new BlobIdent(newCommitId.name(), path, FileMode.REGULAR_FILE.getBits());
+			List<String> newLines = getProject().readLines(newBlobIdent, WhitespaceOption.DEFAULT, false);
+			if (newLines != null) {
+				BlobIdent oldBlobIdent = new BlobIdent(oldCommitId.name(), path, FileMode.REGULAR_FILE.getBits());
+				List<String> oldLines = getProject().readLines(oldBlobIdent, WhitespaceOption.DEFAULT, true);
+				if (oldLines != null) 
+					lineMapping = DiffUtils.mapLines(oldLines, newLines);
+				else 
+					lineMapping = new HashMap<>();
+			} else {
+				lineMapping = new HashMap<>();
+			}
+			lineMappingCache.put(key, lineMapping);
+		}
+		return lineMapping;
 	}
 	
 	@Nullable
@@ -530,7 +572,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	public void onDetach() {
 		commitsModel.detach();
 		comparisonBaseModel.detach();
-		commentsModel.detach();
+		oldCommentsModel.detach();
+		newCommentsModel.detach();
 		openCommentModel.detach();
 		super.onDetach();
 	}
@@ -548,6 +591,14 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		state.mark = comment.getMark();
 		state.pathFilter = comment.getCompareContext().getPathFilter();
 		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
+		CompareContext compareContext = comment.getCompareContext();
+		if (compareContext.isLeftSide()) {
+			state.oldCommitHash = compareContext.getCompareCommitHash();
+			state.newCommitHash = comment.getMark().getCommitHash();
+		} else {
+			state.oldCommitHash = comment.getMark().getCommitHash();
+			state.newCommitHash = compareContext.getCompareCommitHash();
+		}
 		return state;
 	}
 	
@@ -689,7 +740,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			return null;
 		}
 	}
-
+	
 	@Override
 	public CodeComment getOpenComment() {
 		return openCommentModel.getObject();
@@ -697,11 +748,6 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	private ObjectId getComparisonBase() {
 		return comparisonBaseModel.getObject();
-	}
-	
-	@Override
-	public Collection<CodeComment> getComments() {
-		return commentsModel.getObject();
 	}
 	
 	@Override
@@ -744,37 +790,34 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		OneDev.getInstance(WebSocketManager.class).observe(this);
 	}
 
-	private void saveCommentOrReply(CodeComment comment, @Nullable CodeCommentReply reply) {
-		Mark prevMark = comment.getMark();
-		CompareContext prevCompareContext = comment.getCompareContext();
-		try {
-			comment.setMark(Preconditions.checkNotNull(getPermanentMark(prevMark)));
-			if (prevCompareContext.getCompareCommitHash().equals(getComparisonBase().name())) {
-				CompareContext compareContext = new CompareContext();
-				compareContext.setLeftSide(prevCompareContext.isLeftSide());
-				compareContext.setPathFilter(prevCompareContext.getPathFilter());
-				compareContext.setWhitespaceOption(prevCompareContext.getWhitespaceOption());
-				compareContext.setCompareCommitHash(state.oldCommitHash);
-				comment.setCompareContext(compareContext);
-			}
-			if (reply != null)
-				OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
-			else
+	@Override
+	public void onSaveComment(CodeComment comment) {
+		if (comment.isNew()) {
+			Mark prevMark = comment.getMark();
+			CompareContext prevCompareContext = comment.getCompareContext();
+			try {
+				comment.setMark(Preconditions.checkNotNull(getPermanentMark(prevMark)));
+				if (prevCompareContext.getCompareCommitHash().equals(getComparisonBase().name())) {
+					CompareContext compareContext = new CompareContext();
+					compareContext.setLeftSide(prevCompareContext.isLeftSide());
+					compareContext.setPathFilter(prevCompareContext.getPathFilter());
+					compareContext.setWhitespaceOption(prevCompareContext.getWhitespaceOption());
+					compareContext.setCompareCommitHash(state.oldCommitHash);
+					comment.setCompareContext(compareContext);
+				}
 				OneDev.getInstance(CodeCommentManager.class).save(comment);
-		} finally {
-			comment.setMark(prevMark);
-			comment.setCompareContext(prevCompareContext);
+			} finally {
+				comment.setMark(prevMark);
+				comment.setCompareContext(prevCompareContext);
+			}
+		} else {
+			OneDev.getInstance(CodeCommentManager.class).save(comment);
 		}
 	}
 	
 	@Override
-	public void onSaveComment(CodeComment comment) {
-		saveCommentOrReply(comment, null);
-	}
-	
-	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
-		saveCommentOrReply(reply.getComment(), reply);
+		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
 	}
 	
 	@Override
@@ -785,11 +828,8 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public PageParameters getParamsAfterEdit() {
 		PageParameters params = getParamsBeforeEdit();
+		params.remove(PARAM_OLD_COMMIT);
 		params.remove(PARAM_NEW_COMMIT);
-		if (getOpenComment() != null)
-			params.set(PARAM_OLD_COMMIT, getOpenComment().getMark().getCommitHash());
-		else
-			params.remove(PARAM_OLD_COMMIT);
 		return params;
 	}
 	
@@ -815,6 +855,16 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		@Nullable
 		public Mark mark;
 		
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getOldComments() {
+		return oldCommentsModel.getObject();
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getNewComments() {
+		return newCommentsModel.getObject();
 	}
 
 }

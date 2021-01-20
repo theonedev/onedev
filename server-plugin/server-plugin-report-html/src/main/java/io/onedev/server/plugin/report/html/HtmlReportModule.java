@@ -8,12 +8,19 @@ import java.util.concurrent.Callable;
 
 import org.apache.wicket.protocol.http.WebApplication;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CodeProblem.Severity;
+import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
@@ -82,7 +89,6 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 		});		
 
-		/*
 		contribute(CodeProblemContribution.class, new CodeProblemContribution() {
 			
 			@Override
@@ -92,7 +98,7 @@ public class HtmlReportModule extends AbstractPluginModule {
 						+ "we have a very good practice oover This is a very long message and we have a very good practice oover";
 				return Lists.newArrayList(
 						new CodeProblem(new PlanarRange(0, 1, 1, 5), longMessage, Severity.ERROR),
-						new CodeProblem(new PlanarRange(8, 6, 9, 10), reportName, Severity.WARNING),
+						new CodeProblem(new PlanarRange(10, 6, 12, 10), reportName, Severity.WARNING),
 						new CodeProblem(new PlanarRange(14, 1, 14, 5), "This is an error message", Severity.ERROR),
 						new CodeProblem(new PlanarRange(19, 6, 19, 10), longMessage + "\n" + longMessage, Severity.WARNING)
 					);
@@ -111,7 +117,6 @@ public class HtmlReportModule extends AbstractPluginModule {
 			}
 			
 		});
-		*/
 	}
 
 }

@@ -50,9 +50,10 @@
 				<div wicket:id="comment" class="comment need-width border border-right-0 rounded d-flex overflow-hidden flex-shrink-0 position-sticky mr-4">
 					<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
 						<div wicket:id="head" class="head d-flex align-items-center px-3 py-2 border-bottom">
-							<a wicket:id="context" class="btn btn-xs btn-icon btn-hover-primary btn-light mr-2 context" title="Compare with another revision"><wicket:svg href="diff" class="icon"></wicket:svg></a>
-							<a wicket:id="locate" class="btn btn-xs btn-icon btn-hover-primary btn-light locate mr-auto"><wicket:svg href="hand" class="icon"></wicket:svg></a>
-							<a wicket:id="close" class="ml-3" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
+							<h6 class="mb-0 mr-2">Code Comment</h6>
+							<span wicket:id="outdated" class="mr-3 badge badge-sm badge-warning">outdated</span>
+							<a wicket:id="locate" title="Show commented code snippet" class="btn btn-xs btn-icon btn-hover-primary btn-light locate mr-3"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+							<a wicket:id="close" class="ml-auto" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 						</div>
 						<div wicket:id="body" class="body overflow-auto flex-grow-1 p-3"></div>
 					</div>

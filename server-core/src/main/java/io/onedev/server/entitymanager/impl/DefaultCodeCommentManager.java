@@ -22,6 +22,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -43,7 +44,7 @@ import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
-import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.CodeComment;
@@ -201,9 +202,9 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 				command.count(MAX_HISTORY_COMMITS_TO_CHECK);
 				Set<String> revisions = new HashSet<>(command.call());
 				
-				RevCommit commit = revWalk.parseCommit(commitId);
-				List<String> newLines = Preconditions.checkNotNull(
-						GitUtils.readLines(project.getRepository(), commit, path, WhitespaceOption.DEFAULT));
+				List<String> newLines = Preconditions.checkNotNull(project.readLines(
+						new BlobIdent(commitId.name(), path, FileMode.REGULAR_FILE.getBits()), 
+						WhitespaceOption.DEFAULT, true));
 
 				Collections.sort(historyCommits, new Comparator<RevCommit>() {
 
@@ -219,8 +220,9 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 						Map<String, List<CodeComment>> commentsOnCommit = 
 								Preconditions.checkNotNull(possibleComments.get(historyCommit.name()));
 						for (Map.Entry<String, List<CodeComment>> pathEntry: commentsOnCommit.entrySet()) {
-							List<String> oldLines = GitUtils.readLines(project.getRepository(), historyCommit, 
-									pathEntry.getKey(), WhitespaceOption.DEFAULT);
+							List<String> oldLines = project.readLines( 
+									new BlobIdent(historyCommit.name(), pathEntry.getKey(), FileMode.REGULAR_FILE.getBits()), 
+									WhitespaceOption.DEFAULT, false);
 							if (oldLines != null) {
 								Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
 								for (CodeComment comment: pathEntry.getValue()) {

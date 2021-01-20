@@ -40,7 +40,10 @@
 }
 
 .CodeMirror-coverages {
-	width: 4px;
+	width: 6px;
+}
+.CodeMirror-coverage {
+	margin-right: 2px;
 }
 .CodeMirror-coverage.tested {
 	background: var(--success);
@@ -56,20 +59,10 @@
 }
 
 .CodeMirror-comments, .CodeMirror-problems {
-	width: 20px;
+	width: 24px;
 }
 .CodeMirror-comment, .CodeMirror-problem {
 	text-align: right;
-}
-.comment-indicator.active, .comment-trigger.active {
-	color: var(--dark) !important;
-}
-.comment-indicator.updated, .comment-trigger.updated {
-	color: var(--primary) !important;
-}
-.comment-indicator.updated.active, .comment-indicator.updated:hover, 
-.comment-trigger.updated.active, .comment-trigger.updated:hover {
-	color: #0073e9 !important;
 }
 
 .CodeMirror-annotations {

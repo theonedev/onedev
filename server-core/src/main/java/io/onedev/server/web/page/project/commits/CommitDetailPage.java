@@ -45,6 +45,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
@@ -61,6 +62,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -145,7 +147,8 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.A
 		state.revision = Joiner.on("/").join(revisionSegments);
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
-		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofName(
+				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.DEFAULT.name()));
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
@@ -581,6 +584,28 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.A
 		response.render(JavaScriptHeaderItem.forReference(new CommitDetailResourceReference()));
 	}
 
+	public static PageParameters paramsOf(CodeComment comment) {
+		return paramsOf(comment.getProject(), getState(comment));
+	}
+	
+	private static State getState(CodeComment comment) {
+		State state = new State();
+		state.commentId = comment.getId();
+		state.mark = comment.getMark();
+		CompareContext compareContext = comment.getCompareContext();
+		String compareCommit = compareContext.getCompareCommitHash();
+		if (compareContext.isLeftSide()) {
+			state.compareWith = compareCommit;
+			state.revision = comment.getMark().getCommitHash();
+		} else {
+			state.compareWith = comment.getMark().getCommitHash();
+			state.revision = compareCommit;
+		}
+		state.whitespaceOption = compareContext.getWhitespaceOption();
+		state.pathFilter = compareContext.getPathFilter();
+		return state;
+	}
+	
 	public static PageParameters paramsOf(Project project, State state) {
 		PageParameters params = paramsOf(project);
 		params.set(PARAM_REVISION, state.revision);
@@ -701,11 +726,6 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.A
 	}
 	
 	@Override
-	public Collection<CodeComment> getComments() {
-		return commentsModel.getObject();
-	}
-	
-	@Override
 	protected void onDetach() {
 		commentsModel.detach();
 		super.onDetach();
@@ -742,6 +762,26 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.A
 				ProjectCommitsPage.paramsOf(getProject())));
 		fragment.add(new Label("commitHash", GitUtils.abbreviateSHA(getCommit().name())));
 		return fragment;
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getOldComments() {
+		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (comment.getMark().getCommitHash().equals(getCompareWith().name()))
+				oldComments.put(comment, comment.getMark().getRange());
+		}
+		return oldComments;
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getNewComments() {
+		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (comment.getMark().getCommitHash().equals(resolvedRevision.name()))
+				newComments.put(comment, comment.getMark().getRange());
+		}
+		return newComments;
 	}
 	
 }

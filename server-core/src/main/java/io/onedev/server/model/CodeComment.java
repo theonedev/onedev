@@ -3,7 +3,6 @@ package io.onedev.server.model;
 import static io.onedev.server.model.CodeComment.PROP_CREATE_DATE;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -24,17 +23,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.git.Blob;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastUpdate;
@@ -42,8 +35,6 @@ import io.onedev.server.model.support.Mark;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
-import io.onedev.server.util.diff.DiffUtils;
-import io.onedev.server.util.diff.WhitespaceOption;
 
 @Entity
 @Table(indexes={
@@ -127,13 +118,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
 	
-	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestCodeCommentRelation> relations = new ArrayList<>();
-	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
-	
-	private transient Boolean contextChanged;
 	
 	private transient Collection<User> participants;
 	
@@ -246,103 +232,19 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 		}
 	}
 	
-	public ComparingInfo getComparingInfo() {
-		return new ComparingInfo(mark.getCommitHash(), compareContext);
-	}
-	
 	public boolean isValid() {
 		try {
-			return project.getRepository().getObjectDatabase().has(ObjectId.fromString(mark.getCommitHash()));
+			return project.getRepository().getObjectDatabase().has(ObjectId.fromString(mark.getCommitHash()))
+					&& project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getCompareCommitHash()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-	
-	public boolean isContextChanged(PullRequest request) {
-		if (contextChanged == null) {
-			if (request.getLatestUpdate().getHeadCommitHash().equals(mark.getCommitHash())) {
-				contextChanged = false;
-			} else {
-				Project project = request.getTargetProject();
-				try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-					TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), mark.getPath(), 
-							request.getLatestUpdate().getHeadCommit().getTree());
-					if (treeWalk != null) {
-						ObjectId blobId = treeWalk.getObjectId(0);
-						if (treeWalk.getRawMode(0) == FileMode.REGULAR_FILE.getBits()) {
-							BlobIdent blobIdent = new BlobIdent(request.getLatestUpdate().getHeadCommitHash(), 
-									mark.getPath(), treeWalk.getRawMode(0));
-							Blob newBlob = new Blob(blobIdent, blobId, treeWalk.getObjectReader()); 
-							Blob oldBlob = project.getBlob(new BlobIdent(mark.getCommitHash(), 
-									mark.getPath(), FileMode.REGULAR_FILE.getBits()), true);
-							Preconditions.checkState(oldBlob != null && oldBlob.getText() != null);
-							
-							List<String> oldLines = new ArrayList<>();
-							for (String line: oldBlob.getText().getLines())
-								oldLines.add(WhitespaceOption.DEFAULT.process(line));
-							
-							List<String> newLines = new ArrayList<>();
-							for (String line: newBlob.getText().getLines())
-								newLines.add(WhitespaceOption.DEFAULT.process(line));
-							
-							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-							int oldBeginLine = mark.getRange().getFromRow();
-							int oldEndLine = mark.getRange().getToRow();
-							Integer newBeginLine = lineMapping.get(oldBeginLine);
-							if (newBeginLine != null) {
-								for (int oldLine=oldBeginLine; oldLine<=oldEndLine; oldLine++) {
-									Integer newLine = lineMapping.get(oldLine);
-									if (newLine == null || newLine.intValue() != oldLine-oldBeginLine+newBeginLine) {
-										contextChanged = true;
-										break;
-									}
-								}
-								if (contextChanged == null)
-									contextChanged = false;
-							} else {
-								contextChanged = true;
-							}
-						} else  {
-							contextChanged = true;
-						}
-					} else {
-						contextChanged = true;
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		return contextChanged;
 	}
 	
 	public static String getWebSocketObservable(Long commentId) {
 		return CodeComment.class.getName() + ":" + commentId;
 	}
 	
-	public static class ComparingInfo implements Serializable {
-
-		private static final long serialVersionUID = 1L;
-
-		private final String commitHash;
-		
-		private final CompareContext compareContext;
-		
-		public ComparingInfo(String commit, CompareContext compareContext) {
-			this.commitHash = commit;
-			this.compareContext = compareContext;
-		}
-		
-		public String getCommitHash() {
-			return commitHash;
-		}
-
-		public CompareContext getCompareContext() {
-			return compareContext;
-		}
-		
-	}
-
 	@Override
 	public String getAttachmentStorageUUID() {
 		return uuid;

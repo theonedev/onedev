@@ -47,25 +47,25 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.LineCoverage;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
@@ -81,7 +81,6 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.PathComparator;
-import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.match.Matcher;
@@ -96,14 +95,12 @@ import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.blob.text.TextDiffPanel;
 import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.component.revisionpicker.RevisionSelector;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -132,7 +129,7 @@ public class RevisionDiffPanel extends Panel {
 
 	private final IModel<String> blameModel;
 	
-	private final AnnotationSupport commentSupport;
+	private final AnnotationSupport annotationSupport;
 	
 	private final IModel<String> pathFilterModel;
 	
@@ -157,7 +154,6 @@ public class RevisionDiffPanel extends Panel {
 		protected ChangesAndCount load() {
 			List<DiffEntry> diffEntries = diffEntriesModel.getObject();
 			
-			Set<String> changedPaths = new HashSet<>();
 			List<BlobChange> changes = new ArrayList<>();
 			for (DiffEntry entry: diffEntries) {
     			BlobChange change = new BlobChange(oldRev, newRev, entry, whitespaceOptionModel.getObject()) {
@@ -169,40 +165,6 @@ public class RevisionDiffPanel extends Panel {
 
 	    		};
 	    		changes.add(change);
-	    		changedPaths.addAll(change.getPaths());
-			}
-
-			Set<String> markedPaths = new HashSet<>();
-			for (CodeComment comment: getComments()) {
-				if (!changedPaths.contains(comment.getMark().getPath()) 
-						&& !markedPaths.contains(comment.getMark().getPath())) {
-					BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getMark().getPath(), FileMode.TYPE_FILE);
-					BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getMark().getPath(), FileMode.TYPE_FILE);
-					changes.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
-
-						@Override
-						public Blob getBlob(BlobIdent blobIdent) {
-							return projectModel.getObject().getBlob(blobIdent, true);
-						}
-						
-					});
-				}
-				markedPaths.add(comment.getMark().getPath());
-			}
-			
-			Mark mark = getMark();
-			if (mark != null && !changedPaths.contains(mark.getPath()) && !markedPaths.contains(mark.getPath())) {
-				BlobIdent oldBlobIdent = new BlobIdent(oldRev, mark.getPath(), FileMode.TYPE_FILE);
-				BlobIdent newBlobIdent = new BlobIdent(newRev, mark.getPath(), FileMode.TYPE_FILE);
-				changes.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
-
-					@Override
-					public Blob getBlob(BlobIdent blobIdent) {
-						return projectModel.getObject().getBlob(blobIdent, true);
-					}
-					
-				});
-				markedPaths.add(mark.getPath());
 			}
 			
 			List<BlobChange> filteredChanges = new ArrayList<>();
@@ -304,8 +266,7 @@ public class RevisionDiffPanel extends Panel {
 		    		BlobChange change = it.next();
 		    		if (change.getType() == ChangeType.MODIFY 
 		    				&& Objects.equal(change.getOldBlobIdent().mode, change.getNewBlobIdent().mode)
-		    				&& change.getAdditions() + change.getDeletions() == 0
-		    				&& !markedPaths.contains(change.getPath())) {
+		    				&& change.getAdditions() + change.getDeletions() == 0) {
 		    			Blob.Text oldText = change.getOldText();
 		    			Blob.Text newText = change.getNewText();
 		    			if (oldText != null && newText != null 
@@ -353,7 +314,7 @@ public class RevisionDiffPanel extends Panel {
 	
 	public RevisionDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			String oldRev, String newRev, IModel<String> pathFilterModel, IModel<WhitespaceOption> whitespaceOptionModel, 
-			@Nullable IModel<String> blameModel, @Nullable AnnotationSupport commentSupport) {
+			@Nullable IModel<String> blameModel, @Nullable AnnotationSupport annotationSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
@@ -386,7 +347,7 @@ public class RevisionDiffPanel extends Panel {
 			
 		};
 		this.whitespaceOptionModel = whitespaceOptionModel;
-		this.commentSupport = commentSupport;
+		this.annotationSupport = annotationSupport;
 		
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_VIEW_MODE);
@@ -560,9 +521,6 @@ public class RevisionDiffPanel extends Panel {
 			}
 		}
 		
-		for (CodeComment comment: getComments()) 
-			setOfInvolvedPaths.add(comment.getMark().getPath());
-		
 		List<String> listOfInvolvedPaths = new ArrayList<>(setOfInvolvedPaths);
 		listOfInvolvedPaths.sort(new PathComparator());
 		
@@ -683,7 +641,26 @@ public class RevisionDiffPanel extends Panel {
 				
 				item.add(new SpriteImage("icon", icon).add(AttributeAppender.append("class", icon)));
 
-				item.add(new WebMarkupContainer("hasComments").setVisible(!getComments(change).isEmpty()));
+				boolean hasComments = false;
+				if (annotationSupport != null) {
+					for (Map.Entry<CodeComment, PlanarRange> entry: annotationSupport.getOldComments().entrySet()) {
+						if (entry.getKey().getMark().getPath().equals(change.getOldBlobIdent().path)  
+								&& change.isVisible(new DiffPlanarRange(true, entry.getValue()))) {
+							hasComments = true;
+							break;
+						}
+					}
+					if (!hasComments) {
+						for (Map.Entry<CodeComment, PlanarRange> entry: annotationSupport.getNewComments().entrySet()) {
+							if (entry.getKey().getMark().getPath().equals(change.getNewBlobIdent().path) 
+									&& change.isVisible(new DiffPlanarRange(false, entry.getValue()))) {
+								hasComments = true;
+								break;
+							}
+						}
+					}
+				}
+				item.add(new WebMarkupContainer("hasComments").setVisible(hasComments));
 				
 				WebMarkupContainer fileLink = new WebMarkupContainer("file");
 				fileLink.add(new Label("name", change.getPath()));
@@ -724,41 +701,52 @@ public class RevisionDiffPanel extends Panel {
 			protected void populateItem(ListItem<BlobChange> item) {
 				BlobChange change = item.getModelObject();
 				item.setMarkupId("diff-" + encodePath(change.getPath()));
-				if (commentSupport != null) {
+				if (annotationSupport != null) {
 					item.add(new BlobDiffPanel(DIFF_ID, projectModel, requestModel, change, diffMode, 
 							getBlobBlameModel(change), new TextDiffPanel.AnnotationSupport() {
 	
 						@Override
-						public Mark getMark() {
-							Mark mark = RevisionDiffPanel.this.getMark();
-							if (mark != null && change.getPaths().contains(mark.getPath()))
-								return mark;
-							else
-								return null;
+						public DiffPlanarRange getMarkRange() {
+							Mark mark = annotationSupport.getMark();
+							if (mark != null) {
+								if (change.getPaths().contains(mark.getPath())) {
+									boolean leftSide = getOldCommitId().name().equals(mark.getCommitHash());
+									return new DiffPlanarRange(leftSide, mark.getRange());
+								} else {
+									return null;
+								}
+							} else {
+								CodeComment openComment = getOpenComment();
+								if (openComment != null) 
+									return getCommentRange(openComment);
+								else
+									return null;
+							}
 						}
 	
 						@Override
-						public String getMarkUrl(Mark mark) {
-							return commentSupport.getMarkUrl(mark);
+						public String getMarkUrl(DiffPlanarRange markRange) {
+							return annotationSupport.getMarkUrl(getMark(change, markRange));
 						}
 	
 						@Override
 						public CodeComment getOpenComment() {
-							CodeComment comment = RevisionDiffPanel.this.getOpenComment();
-							if (comment != null && change.getPaths().contains(comment.getMark().getPath()))
-								return comment;
+							CodeComment openComment = annotationSupport.getOpenComment();
+							if (openComment != null && change.getPaths().contains(openComment.getMark().getPath()))
+								return openComment;
 							else
 								return null;
 						}
 	
 						@Override
-						public void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
-							RevisionDiffPanel.this.onOpenComment(target, comment);
+						public void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange) {
+							RevisionDiffPanel.this.onOpenComment(target, comment, getMark(change, commentRange));
 							((BasePage)getPage()).resizeWindow(target);
 						}
 	
 						@Override
-						public void onAddComment(AjaxRequestTarget target, Mark mark) {
+						public void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange) {
+							Mark mark = getMark(change, commentRange);
 							commentContainer.setDefaultModelObject(mark);
 							
 							Fragment fragment = new Fragment(BODY_ID, "newCommentFrag", RevisionDiffPanel.this);
@@ -777,9 +765,9 @@ public class RevisionDiffPanel extends Panel {
 								 * Outside of pull request, no one will be notified of the comment. So we automatically 
 								 * mention authors of commented lines
 								 */
-								LinearRange range = new LinearRange(mark.getRange().getFromRow(), mark.getRange().getToRow());
-								ObjectId commitId = ObjectId.fromString(mark.getCommitHash());
-								for (User user: projectModel.getObject().getAuthors(mark.getPath(), commitId, range)) {
+								for (User user: projectModel.getObject().getAuthors(mark.getPath(), 
+										ObjectId.fromString(mark.getCommitHash()), 
+										new LinearRange(commentRange.getFromRow(), commentRange.getToRow()))) {
 									if (user.getEmail() != null)
 										mentions.append("@").append(user.getName()).append(" ");
 								}
@@ -817,12 +805,12 @@ public class RevisionDiffPanel extends Panel {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									clearComment(target);
-									Mark mark = getMark();
+									Mark mark = annotationSupport.getMark();
 									if (mark != null) {
 										BlobDiffPanel blobDiffPanel = getBlobDiffPanel(mark.getPath());
 										if (blobDiffPanel != null) 
 											blobDiffPanel.unmark(target);
-										((AnnotationSupport)commentSupport).onUnmark(target);
+										((AnnotationSupport)annotationSupport).onUnmark(target);
 									}
 								}
 								
@@ -851,18 +839,18 @@ public class RevisionDiffPanel extends Panel {
 									comment.setCompareContext(getCompareContext(mark.getCommitHash()));
 									comment.setContent(contentInput.getModelObject());
 									
-									commentSupport.onSaveComment(comment);
+									annotationSupport.onSaveComment(comment);
 									
 									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 
 										@Override
 										protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-											RevisionDiffPanel.this.onCommentDeleted(target, comment);
+											RevisionDiffPanel.this.onCommentDeleted(target, comment, mark);
 										}
 										
 										@Override
 										protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-											commentSupport.onSaveComment(comment);
+											annotationSupport.onSaveComment(comment);
 											target.add(commentContainer.get("head"));
 										}
 
@@ -874,7 +862,7 @@ public class RevisionDiffPanel extends Panel {
 										@Override
 										protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 											reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
-											commentSupport.onSaveCommentReply(reply);
+											annotationSupport.onSaveCommentReply(reply);
 										}
 
 									};
@@ -883,9 +871,9 @@ public class RevisionDiffPanel extends Panel {
 									
 									BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
 									if (blobDiffPanel != null) 
-										blobDiffPanel.onCommentAdded(target, comment);
+										blobDiffPanel.onCommentAdded(target, comment, commentRange);
 
-									((AnnotationSupport)commentSupport).onCommentOpened(target, comment);
+									((AnnotationSupport)annotationSupport).onCommentOpened(target, comment);
 								}
 
 							});
@@ -895,20 +883,20 @@ public class RevisionDiffPanel extends Panel {
 							commentContainer.setVisible(true);
 							target.add(commentContainer);
 							
-							Mark prevMark = RevisionDiffPanel.this.getMark();
+							Mark prevMark = annotationSupport.getMark();
 							if (prevMark != null) {
 								BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevMark.getPath());
 								if (blobDiffPanel != null) 
 									blobDiffPanel.unmark(target);
 							}
 							
-							CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
+							CodeComment prevComment = annotationSupport.getOpenComment();
 							if (prevComment != null) {
 								BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevComment.getMark().getPath());
 								if (blobDiffPanel != null) 
 									blobDiffPanel.onCommentClosed(target, prevComment);
 							}  
-							((AnnotationSupport)commentSupport).onAddComment(target, mark);
+							((AnnotationSupport)annotationSupport).onAddComment(target, mark);
 							String script = String.format(""
 									+ "setTimeout(function() {"
 									+ "  var $textarea = $('#%s textarea');"
@@ -920,13 +908,48 @@ public class RevisionDiffPanel extends Panel {
 						}
 
 						@Override
-						public Collection<CodeComment> getComments() {
-							return RevisionDiffPanel.this.getComments(change);
+						public Component getCommentContainer() {
+							return commentContainer;
 						}
 
 						@Override
-						public Component getCommentContainer() {
-							return commentContainer;
+						public Map<CodeComment, PlanarRange> getOldComments() {
+							Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
+							for (Map.Entry<CodeComment, PlanarRange> entry: annotationSupport.getOldComments().entrySet()) {
+								if (entry.getKey().getMark().getPath().equals(change.getOldBlobIdent().path)) 
+									oldComments.put(entry.getKey(), entry.getValue());
+							}
+							return oldComments;
+						}
+
+						@Override
+						public Map<CodeComment, PlanarRange> getNewComments() {
+							Map<CodeComment, PlanarRange> newComments = new HashMap<>();
+							for (Map.Entry<CodeComment, PlanarRange> entry: annotationSupport.getNewComments().entrySet()) {
+								if (entry.getKey().getMark().getPath().equals(change.getNewBlobIdent().path)) 
+									newComments.put(entry.getKey(), entry.getValue());
+							}
+							return newComments;
+						}
+
+						@Override
+						public Collection<CodeProblem> getOldProblems() {
+							return new ArrayList<>();
+						}
+
+						@Override
+						public Collection<CodeProblem> getNewProblems() {
+							return new ArrayList<>();
+						}
+
+						@Override
+						public Collection<LineCoverage> getOldCoverages() {
+							return new ArrayList<>();
+						}
+
+						@Override
+						public Collection<LineCoverage> getNewCoverages() {
+							return new ArrayList<>();
 						}
 
 					}));
@@ -949,15 +972,6 @@ public class RevisionDiffPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-	
-	private Collection<CodeComment> getComments(BlobChange change) {
-		Collection<CodeComment> comments = new ArrayList<>();
-		for (CodeComment comment: getComments()) {
-			if (change.getPaths().contains(comment.getMark().getPath()))
-				comments.add(comment);
-		}
-		return comments;
-	}
 
 	private CompareContext getCompareContext(String commitHash) {
 		CompareContext compareContext = new CompareContext();
@@ -975,17 +989,17 @@ public class RevisionDiffPanel extends Panel {
 		return compareContext;
 	}
 	
-	private void onOpenComment(AjaxRequestTarget target, CodeComment comment) {
+	private void onOpenComment(AjaxRequestTarget target, CodeComment comment, Mark mark) {
 		CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, comment.getId()) {
 
 			@Override
 			protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-				RevisionDiffPanel.this.onCommentDeleted(target, comment);
+				onCommentDeleted(target, comment, mark);
 			}
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-				commentSupport.onSaveComment(comment);
+				annotationSupport.onSaveComment(comment);
 				target.add(commentContainer.get("head"));
 			}
 
@@ -997,29 +1011,50 @@ public class RevisionDiffPanel extends Panel {
 			@Override
 			protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 				reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
-				commentSupport.onSaveCommentReply(reply);
+				annotationSupport.onSaveCommentReply(reply);
 			}
 			
 		};
 		
+		commentContainer.setDefaultModelObject(mark);
 		commentContainer.replace(commentPanel);
 		commentContainer.setVisible(true);
 		target.add(commentContainer);
 		
-		CodeComment prevComment = RevisionDiffPanel.this.getOpenComment();
+		CodeComment prevComment = annotationSupport.getOpenComment();
 		if (prevComment != null) {
 			BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevComment.getMark().getPath());
 			if (blobDiffPanel != null) 
 				blobDiffPanel.onCommentClosed(target, prevComment);
 		} 
 		
-		Mark prevMark = RevisionDiffPanel.this.getMark();
+		Mark prevMark = annotationSupport.getMark();
 		if (prevMark != null) {
 			BlobDiffPanel blobDiffPanel = getBlobDiffPanel(prevMark.getPath());
 			if (blobDiffPanel != null)
 				blobDiffPanel.unmark(target);
 		}
-		commentSupport.onCommentOpened(target, comment);
+		annotationSupport.onCommentOpened(target, comment);
+	}
+	
+	private Mark getMark(BlobChange change, DiffPlanarRange range) {
+		Mark mark = new Mark();
+		mark.setRange(new PlanarRange(range));
+		if (range.isLeftSide()) {
+			mark.setCommitHash(getOldCommitId().name());
+			mark.setPath(change.getOldBlobIdent().path);
+		} else {
+			mark.setCommitHash(getNewCommitId().name());
+			mark.setPath(change.getNewBlobIdent().path);
+		}
+		return mark;
+	}
+	
+	private DiffPlanarRange getMarkRange(@Nullable Mark mark) {
+		if (mark != null)
+			return new DiffPlanarRange(mark.getCommitHash().equals(getOldCommitId().name()), mark.getRange());
+		else
+			return null;
 	}
 	
 	private String encodePath(String path) {
@@ -1053,6 +1088,20 @@ public class RevisionDiffPanel extends Panel {
 		}
 	}
 	
+	@Nullable
+	private DiffPlanarRange getCommentRange(CodeComment comment) {
+		PlanarRange range = annotationSupport.getNewComments().get(comment);
+		if (range != null) {
+			return new DiffPlanarRange(false, range);
+		} else {
+			range = annotationSupport.getOldComments().get(comment);
+			if (range != null)
+				return new DiffPlanarRange(true, range);
+			else
+				return null;
+		}
+	}
+	
 	private WebMarkupContainer newCommentContainer() {
 		WebMarkupContainer commentContainer = new WebMarkupContainer("comment", Model.of((Mark)null)) {
 
@@ -1066,75 +1115,34 @@ public class RevisionDiffPanel extends Panel {
 		commentContainer.setOutputMarkupPlaceholderTag(true);
 		
 		WebMarkupContainer head = new WebMarkupContainer("head");
-		head.add(new WebSocketObserver() {
-
-			@Override
-			public Collection<String> getObservables() {
-				return getWebSocketObservables();
-			}
-
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler) {
-				if (commentContainer.isVisible()) 
-					handler.add(component);
-			}
-			
-		});
-		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
-		head.add(new DropdownLink("context") {
+		head.add(new WebMarkupContainer("outdated") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(requestModel.getObject() == null && getOpenComment() != null);
-			}
-
-			@Override
-			protected Component newContent(String id, FloatingPanel dropdown) {
-				return new RevisionSelector(id, projectModel) {
-					
-					@Override
-					protected void onSelect(AjaxRequestTarget target, String revision) {
-						RevisionComparePage.State state = new RevisionComparePage.State();
-						CodeComment comment = getOpenComment();
-						state.commentId = comment.getId();
-						state.mark = comment.getMark();
-						state.compareWithMergeBase = false;
-						state.leftSide = new ProjectAndRevision(comment.getProject(), 
-								comment.getMark().getCommitHash());
-						state.rightSide = new ProjectAndRevision(comment.getProject(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
-						state.whitespaceOption = whitespaceOptionModel.getObject();
-						PageParameters params = RevisionComparePage.paramsOf(comment.getProject(), state);
-						setResponsePage(RevisionComparePage.class, params);
-					}
-					
-				};
+				setVisible(commentContainer.getDefaultModelObject() == null);
 			}
 			
 		});
 		
 		head.add(new AjaxLink<Void>("locate") {
 
-			private Mark getMark() {
-				CodeComment comment = getOpenComment();
-				if (comment != null) {
-					return comment.getMark();
-				} else {
-					return (Mark)commentContainer.getDefaultModelObject();
-				}
-			}
-			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Mark mark = getMark();
+				Mark mark = (Mark) commentContainer.getDefaultModelObject();
 				BlobDiffPanel blobDiffPanel = getBlobDiffPanel(mark.getPath());
 				if (blobDiffPanel != null)
-					blobDiffPanel.mark(target, mark);
-				((AnnotationSupport)commentSupport).onMark(target, mark);
+					blobDiffPanel.mark(target, getMarkRange(mark));
+				((AnnotationSupport)annotationSupport).onMark(target, mark);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(commentContainer.getDefaultModelObject() != null);
 			}
 
 		}.setOutputMarkupId(true));
@@ -1149,56 +1157,56 @@ public class RevisionDiffPanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				CodeComment comment = getOpenComment();
+				CodeComment comment = annotationSupport.getOpenComment();
 				clearComment(target);
 				if (comment != null) {
 					BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
 					if (blobDiffPanel != null) 
 						blobDiffPanel.onCommentClosed(target, comment);
-					commentSupport.onCommentClosed(target);
+					annotationSupport.onCommentClosed(target);
 				}
 			}
 			
 		});
 
-		boolean locatable = false;
-		CodeComment comment = getOpenComment();
-		if (comment != null) {
-			for (BlobChange change: changesAndCountModel.getObject().getChanges()) {
-				if (change.getPaths().contains(comment.getMark().getPath())) {
-					locatable = true;
-					break;
+		if (annotationSupport != null) {
+			CodeComment openComment = annotationSupport.getOpenComment();
+			if (openComment != null) {
+				DiffPlanarRange commentRange = getCommentRange(openComment);
+				if (commentRange != null) {
+					BlobChange blobChange = getBlobChange(commentRange.isLeftSide(), openComment.getMark().getPath());
+					if (blobChange != null && blobChange.isVisible(commentRange))
+						commentContainer.setDefaultModelObject(getMark(blobChange, commentRange));
 				}
+				CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, openComment.getId()) {
+
+					@Override
+					protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
+						onCommentDeleted(target, comment, (Mark) commentContainer.getDefaultModelObject());
+					}
+					
+					@Override
+					protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
+						annotationSupport.onSaveComment(comment);
+						target.add(commentContainer.get("head"));
+					}
+
+					@Override
+					protected PullRequest getPullRequest() {
+						return requestModel.getObject();
+					}
+
+					@Override
+					protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
+						annotationSupport.onSaveCommentReply(reply);
+					}
+					
+				};
+				commentContainer.add(commentPanel);
+			} else {
+				commentContainer.add(new WebMarkupContainer(BODY_ID));
+				commentContainer.setVisible(false);
 			}
-		}
-		
-		if (locatable) {
-			CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, getOpenComment().getId()) {
-
-				@Override
-				protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-					RevisionDiffPanel.this.onCommentDeleted(target, comment);
-				}
-				
-				@Override
-				protected void onSaveComment(AjaxRequestTarget target, CodeComment comment) {
-					commentSupport.onSaveComment(comment);
-					target.add(commentContainer.get("head"));
-				}
-
-				@Override
-				protected PullRequest getPullRequest() {
-					return requestModel.getObject();
-				}
-
-				@Override
-				protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-					reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
-					commentSupport.onSaveCommentReply(reply);
-				}
-				
-			};
-			commentContainer.add(commentPanel);
 		} else {
 			commentContainer.add(new WebMarkupContainer(BODY_ID));
 			commentContainer.setVisible(false);
@@ -1224,49 +1232,6 @@ public class RevisionDiffPanel extends Panel {
 	}
 	
 	@Nullable
-	private CodeComment getOpenComment() {
-		if (commentSupport != null) {
-			CodeComment comment = ((AnnotationSupport)commentSupport).getOpenComment();
-			if (comment != null) {
-				PullRequest request = requestModel.getObject();
-				String commitHash = comment.getMark().getCommitHash();
-				if (commitHash.equals(getOldCommitId().name()) || commitHash.equals(getNewCommitId().name())) {
-					return comment;
-				} else if (request != null) {
-					Preconditions.checkState(request.equals(comment.getRequest()));
-					ObjectId oldCommitId = getOldCommitId();
-					ObjectId comparisonOrigin = request.getComparisonOrigin(oldCommitId);
-					if (commitHash.equals(comparisonOrigin.name()) || commitHash.equals(getNewCommitId().name()))
-						return comment;
-				} 
-			}
-		}
-		return null;
-	}
-	
-	private Collection<CodeComment> getComments() {
-		if (commentSupport != null)
-			return commentSupport.getComments();
-		else
-			return new ArrayList<>();
-	}
-	
-	@Nullable
-	private Mark getMark() {
-		if (commentSupport != null) {
-			Mark mark = commentSupport.getMark();
-			if (mark != null) {
-				String commit = mark.getCommitHash();
-				String oldCommitHash = getOldCommitId().name();
-				String newCommitHash = getNewCommitId().name();
-				if (commit.equals(oldCommitHash) || commit.equals(newCommitHash))
-					return mark;
-			}
-		}
-		return null;
-	}
-	
-	@Nullable
 	private BlobDiffPanel getBlobDiffPanel(String blobPath) {
 		return diffsView.visitChildren(new IVisitor<Component, BlobDiffPanel>() {
 
@@ -1286,17 +1251,28 @@ public class RevisionDiffPanel extends Panel {
 		});
 	}
 	
-	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+	@Nullable
+	private BlobChange getBlobChange(boolean leftSide, String path) {
+		for (BlobChange change: changesAndCountModel.getObject().getChanges()) {
+			if (leftSide && path.equals(change.getOldBlobIdent().path) 
+					|| !leftSide && path.equals(change.getNewBlobIdent().path)) {
+				return change;
+			}
+		}
+		return null;
+	}
+	
+	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment, @Nullable Mark mark) {
 		clearComment(target);
 		BlobDiffPanel blobDiffPanel = getBlobDiffPanel(comment.getMark().getPath());
 		if (blobDiffPanel != null)
-			blobDiffPanel.onCommentDeleted(target, comment);
-		((AnnotationSupport)commentSupport).onCommentClosed(target);
-		Mark mark = getMark();
+			blobDiffPanel.onCommentDeleted(target, comment, getMarkRange(mark));
+		annotationSupport.onCommentClosed(target);
+		mark = annotationSupport.getMark();
 		if (mark != null) {
 			blobDiffPanel = getBlobDiffPanel(mark.getPath());
 			if (blobDiffPanel != null) 
-				blobDiffPanel.mark(target, mark);
+				blobDiffPanel.mark(target, getMarkRange(mark));
 		}
 	}
 	
@@ -1383,6 +1359,10 @@ public class RevisionDiffPanel extends Panel {
 		
 		@Nullable 
 		CodeComment getOpenComment();
+		
+		Map<CodeComment, PlanarRange> getOldComments();
+		
+		Map<CodeComment, PlanarRange> getNewComments();
 
 		void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
 		
@@ -1390,8 +1370,6 @@ public class RevisionDiffPanel extends Panel {
 		
 		void onAddComment(AjaxRequestTarget target, Mark mark);
 
-		Collection<CodeComment> getComments();
-		
 		void onSaveComment(CodeComment comment);
 		
 		void onSaveCommentReply(CodeCommentReply reply);

@@ -7,7 +7,6 @@ import static io.onedev.server.model.PullRequest.PROP_TITLE;
 import static io.onedev.server.model.PullRequest.PROP_UUID;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.channels.IllegalSelectorException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +57,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -72,7 +70,6 @@ import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
-import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
 import io.onedev.server.web.util.PullRequestAware;
@@ -290,9 +287,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	@OneToMany(mappedBy="request")
 	private Collection<CodeComment> codeComments = new ArrayList<>();
-	
-	@OneToMany(mappedBy="request")
-	private Collection<PullRequestCodeCommentRelation> relations = new ArrayList<>();
 	
 	private transient Boolean mergedIntoTarget;
 
@@ -868,38 +862,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return pendingCommits;
 	}
 
-	@Nullable
-	public ComparingInfo getRequestComparingInfo(CodeComment.ComparingInfo commentComparingInfo) {
-		List<String> commitHashes = new ArrayList<>();
-		commitHashes.add(getBaseCommitHash());
-		for (PullRequestUpdate update: getSortedUpdates()) {
-			for (RevCommit commit: update.getCommits())
-				commitHashes.add(commit.name());
-		}
-		String commitHash = commentComparingInfo.getCommitHash();
-		int commitIndex = commitHashes.indexOf(commitHash);
-		if (commitIndex == -1)
-			return null;
-		
-		CompareContext compareContext = commentComparingInfo.getCompareContext();
-		int compareCommitIndex = commitHashes.indexOf(compareContext.getCompareCommitHash());
-		if (compareCommitIndex == -1 || compareCommitIndex == commitIndex) {
-			if (commitIndex == commitHashes.size()-1) {
-				return new ComparingInfo(commitHashes.get(0), commitHash, 
-						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-			} else {
-				return new ComparingInfo(commitHash, commitHashes.get(commitHashes.size()-1),
-						compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-			}
-		} else if (compareCommitIndex < commitIndex) {		
-			return new ComparingInfo(compareContext.getCompareCommitHash(), commitHash, 
-					compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-		} else {
-			return new ComparingInfo(commitHash, compareContext.getCompareCommitHash(), 
-					compareContext.getWhitespaceOption(), compareContext.getPathFilter());
-		}
-	}
-	
 	public Collection<User> getParticipants() {
 		if (participants == null) {
 			participants = new LinkedHashSet<>();
@@ -978,43 +940,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 				.containsAll(requiredJobs);
 	}
 	
-	public static class ComparingInfo implements Serializable {
-		
-		private static final long serialVersionUID = 1L;
-
-		private final String oldCommitHash; 
-		
-		private final String newCommitHash;
-		
-		private final String pathFilter;
-		
-		private final WhitespaceOption whitespaceOption;
-		
-		public ComparingInfo(String oldCommitHash, String newCommitHash, 
-				WhitespaceOption whitespaceOption, @Nullable String pathFilter) {
-			this.oldCommitHash = oldCommitHash;
-			this.newCommitHash = newCommitHash;
-			this.whitespaceOption = whitespaceOption;
-			this.pathFilter = pathFilter;
-		}
-
-		public String getOldCommitHash() {
-			return oldCommitHash;
-		}
-
-		public String getNewCommitHash() {
-			return newCommitHash;
-		}
-
-		public String getPathFilter() {
-			return pathFilter;
-		}
-
-		public WhitespaceOption getWhitespaceOption() {
-			return whitespaceOption;
-		}
-
-	}
 	
 	@Override
 	public String getAttachmentStorageUUID() {

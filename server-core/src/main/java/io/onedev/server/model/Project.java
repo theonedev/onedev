@@ -111,6 +111,7 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.StatusInfo;
+import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
@@ -1435,6 +1436,21 @@ public class Project extends AbstractEntity {
 	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
 		return getBranchProtection(branch, user).isBuildRequiredForPush(this, oldObjectId, newObjectId, gitEnvs);
+	}
+	
+	@Nullable
+	public List<String> readLines(BlobIdent blobIdent, WhitespaceOption whitespaceOption, boolean mustExist) {
+		Blob blob = getBlob(blobIdent, mustExist);
+		if (blob != null) {
+			Blob.Text text = blob.getText();
+			if (text != null) {
+				List<String> normalizedLines = new ArrayList<>();
+				for (String line: text.getLines()) 
+					normalizedLines.add(whitespaceOption.process(line));
+				return normalizedLines;
+			}
+		}
+		return null;
 	}
 	
 	@Nullable

@@ -1,0 +1,18 @@
+.comment-indicator, .comment-trigger {
+	color: var(--info);
+}
+.comment-indicator.updated, .comment-trigger.updated {
+	color: var(--primary);
+}
+.comment-indicator:hover, .comment-indicator.active, 
+.comment-trigger:hover, .comment-trigger.active {
+	color: #5605fb;
+}
+.comment-indicator.updated.active, .comment-indicator.updated:hover, 
+.comment-trigger.updated.active, .comment-trigger.updated:hover {
+	color: #0073e9;
+}
+.popover-body>.comment-trigger {
+	display: block;
+	white-space: nowrap;
+}

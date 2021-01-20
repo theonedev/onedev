@@ -3,7 +3,9 @@ package io.onedev.server.web.page.project.compare;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -27,6 +29,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -221,7 +224,8 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiffPane
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
-		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofName(
+				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.DEFAULT.name()));
 		
 		state.commitQuery = params.get(PARAM_COMMIT_QUERY).toString();
 		
@@ -766,11 +770,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiffPane
 	}
 
 	@Override
-	public Collection<CodeComment> getComments() {
-		return commentsModel.getObject();
-	}
-	
-	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		state.mark = comment.getMark();
 		state.commentId = comment.getId();
@@ -845,6 +844,27 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiffPane
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "Code Compare");
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getOldComments() {
+		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
+			if (comment.getMark().getCommitHash().equals(oldCommitId.name()))
+				oldComments.put(comment, comment.getMark().getRange());
+		}
+		return oldComments;
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getNewComments() {
+		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (comment.getMark().getCommitHash().equals(rightCommitId.name()))
+				newComments.put(comment, comment.getMark().getRange());
+		}
+		return newComments;
 	}
 
 }

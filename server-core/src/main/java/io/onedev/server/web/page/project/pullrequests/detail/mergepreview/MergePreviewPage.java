@@ -45,7 +45,8 @@ public class MergePreviewPage extends PullRequestDetailPage implements EditParam
 		super(params);
 
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
-		state.whitespaceOption = WhitespaceOption.ofNullableName(params.get(PARAM_WHITESPACE_OPTION).toString());
+		state.whitespaceOption = WhitespaceOption.ofName(
+				params.get(PARAM_WHITESPACE_OPTION).toString(WhitespaceOption.DEFAULT.name()));
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 	}
 	

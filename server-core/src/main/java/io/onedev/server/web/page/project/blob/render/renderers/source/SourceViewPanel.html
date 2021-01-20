@@ -3,8 +3,10 @@
 		<div wicket:id="comment" class="comment need-width d-flex overflow-hidden flex-shrink-0">
 			<div class="content flex-grow-1 overflow-hidden d-flex flex-column">
 				<div wicket:id="head" class="head d-flex align-items-center px-3 py-2 flex-shrink-0 border-bottom">
-					<a wicket:id="locate" class="locate btn btn-light btn-icon btn-xs btn-hover-primary mr-auto" title="Show commented code"><wicket:svg href="hand" class="icon"></wicket:svg></a>
-					<a wicket:id="close" class="ml-2 text-muted text-hover-primary" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
+					<h6 class="mr-2 mb-0">Code Comment</h6>
+					<span wicket:id="outdated" class="badge badge-sm badge-warning mr-3">outdated</span>
+					<a wicket:id="locate" class="locate btn btn-light btn-icon btn-xs btn-hover-primary mr-3" title="Show commented code snippet"><wicket:svg href="hand" class="icon"></wicket:svg></a>
+					<a wicket:id="close" class="ml-auto text-muted text-hover-primary" title="Hide comment"><wicket:svg href="times" class="icon"></wicket:svg></a>
 				</div>
 				<div wicket:id="body" class="body overflow-auto flex-grow-1 p-3"></div>
 			</div>

@@ -85,6 +85,7 @@ public class Mark implements Serializable {
 			return commitHash;
 	}
 	
+	@Nullable
 	public static Mark fromString(@Nullable String string) {
 		if (string != null) {
 			String commit = StringUtils.substringBefore(string, ":");

@@ -17,6 +17,8 @@ import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 
 @SuppressWarnings("serial")
@@ -188,6 +190,18 @@ public abstract class BlobChange implements Serializable {
 		if (newBlobIdent.path != null)
 			paths.add(newBlobIdent.path);
 		return paths;
+	}
+	
+	public boolean isVisible(DiffPlanarRange range) {
+		for (int line = range.getFromRow(); line<=range.getToRow(); line++) {
+			if (!DiffUtils.isVisible(getDiffBlocks(), range.isLeftSide(), line, WebConstants.DIFF_CONTEXT_SIZE))
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean isVisible(boolean leftSide, int line) {
+		return DiffUtils.isVisible(getDiffBlocks(), leftSide, line, WebConstants.DIFF_CONTEXT_SIZE);
 	}
 	
 	public abstract Blob getBlob(BlobIdent blobIdent);

@@ -28,6 +28,9 @@
 	text-align: right;
 	color: var(--gray);
 }
+.text-diff>tbody>tr:not(.expanded)+tr.expanded>td, .text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
+	border-top: 1px solid var(--light-gray);
+}
 .text-diff>tbody>tr>td:last-child {
 	border-right: 1px solid var(--light-gray);
 }
@@ -46,10 +49,13 @@
 .text-diff>tbody>tr:LAST-CHILD>td {
 	border-bottom: 1px solid var(--light-gray);
 }
+.text-diff>tbody>tr.expanded>td {
+	background: #F6F9FC;
+}
 .text-diff>tbody>tr.expander>td.skipped {
 	padding: 0.5rem 1.2rem;
 	border-left: 1px solid var(--light-gray);
-	background: var(--light);
+	background: #F0F8FF;
 	color: var(--gray);
 }
 .text-diff>tbody>tr.expander>td.expander {
@@ -59,7 +65,7 @@
 }
 .text-diff>tbody>tr.expander>td.expander a {
 	display: block;
-	background: var(--light);
+	background: #F0F8FF;
 	color: var(--gray);
 	padding: 2rem 0;
 	margin: -2rem -1px;
@@ -118,7 +124,7 @@
 	font-weight: bold;
 	padding: 0 0.3rem 0 0.3rem;
 }
-.text-diff>tbody>tr:hover>td {
+.text-diff>tbody>tr:hover:not(.expander)>td {
 	background: var(--light-primary) !important;
 }
 .text-diff>tbody>tr.code {
@@ -143,28 +149,8 @@
 
 .text-diff>tbody>tr>td.number>.comment-indicator {
 	margin: 0 0.3rem;
-	color: var(--gray);
-	font-size: 1rem;
 }
-.text-diff>tbody>tr>td.number>.comment-indicator:hover {
-	color: var(--dark);
-}
-.text-diff>tbody>tr>td.number>.comment-indicator svg {
-	margin-top: 0;
-}
-.comment-popover a {
-	display: block;
-	color: var(--gray);
-	text-decoration: none;
-	white-space: nowrap;
-}
-.comment-popover a:hover {
-	color: var(--dark);
-}
-.text-diff>tbody>tr>td.number>.comment-trigger.active, 
-.comment-popover .comment-trigger.active {
-	color: var(--dark);	
-}
+
 .text-diff>tbody>tr>td.blame {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	text-overflow: ellipsis;

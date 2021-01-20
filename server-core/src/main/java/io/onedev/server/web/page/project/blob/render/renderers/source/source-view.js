@@ -1,7 +1,7 @@
 onedev.server.sourceView = {
 	onDomReady: function(filePath, fileContent, openComment, markRange, symbolTooltipId, 
 			revision, blameInfos, callback, blameMessageCallback, tabSize, lineWrapMode, 
-			annotationInfoUrl) {
+			annotationInfo) {
 		
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
@@ -36,8 +36,10 @@ onedev.server.sourceView = {
 	    
 		var gutters = cm.getOption("gutters").slice();
 		
-		gutters.splice(0, 0, "CodeMirror-problems");
-		gutters.splice(gutters.length-1, 0, "CodeMirror-coverages");
+		if (!onedev.server.util.isObjEmpty(annotationInfo.problems))
+			gutters.splice(0, 0, "CodeMirror-problems");
+		if (!onedev.server.util.isObjEmpty(annotationInfo.coverages))
+			gutters.splice(gutters.length-1, 0, "CodeMirror-coverages");
 		gutters.splice(0, 0, "CodeMirror-comments");
 		
 		cm.setOption("gutters", gutters);
@@ -108,42 +110,22 @@ onedev.server.sourceView = {
 			return false;
 		});
 		
-		if (cm.lineCount() > 0) {
-			var $gutter = $(document.createElement("div"));
-			$gutter.addClass("CodeMirror-problem").attr("title", "Loading annotations");
-			$gutter.append(`<svg class='icon spin'><use xlink:href='${onedev.server.icons}#loading'/></svg>`);
-			cm.setGutterMarker(0, "CodeMirror-problems", $gutter[0]);					
-			
-			$.ajax({
-				url: annotationInfoUrl,
-				cache: false, 
-				beforeSend: function(xhr) {
-					xhr.setRequestHeader('Wicket-Ajax', 'true');
-					xhr.setRequestHeader('Wicket-Ajax-BaseURL', Wicket.Ajax.baseUrl || '.');
-				},
-				success: function(annotationInfo) {
-					cm.setGutterMarker(0, "CodeMirror-problems", null);
-					if (jQuery.contains(document, $sourceView[0])) {
-						for (var line in annotationInfo.comments) {
-						    if (annotationInfo.comments.hasOwnProperty(line)) 
-						    	onedev.server.sourceView.addCommentGutter(line, annotationInfo.comments[line]);
-						}
-						
-						for (var line in annotationInfo.problems) {
-						    if (annotationInfo.problems.hasOwnProperty(line)) 
-						    	onedev.server.sourceView.addProblemGutter(line, annotationInfo.problems[line]);
-						}
-						
-						for (var line in annotationInfo.coverages) {
-							if (annotationInfo.coverages.hasOwnProperty(line))
-								onedev.server.sourceView.addCoverageGutter(line, annotationInfo.coverages[line]);
-						}
-						$(".loading-annotations").remove();
-						onedev.server.sourceView.highlightCommentTrigger();	
-					}
-				}
-			});		
-		} 
+		for (var line in annotationInfo.comments) {
+		    if (annotationInfo.comments.hasOwnProperty(line)) 
+		    	onedev.server.sourceView.addCommentGutter(line, annotationInfo.comments[line]);
+		}
+		
+		for (var line in annotationInfo.problems) {
+		    if (annotationInfo.problems.hasOwnProperty(line)) 
+		    	onedev.server.sourceView.addProblemGutter(line, annotationInfo.problems[line]);
+		}
+		
+		for (var line in annotationInfo.coverages) {
+			if (annotationInfo.coverages.hasOwnProperty(line))
+				onedev.server.sourceView.addCoverageGutter(line, annotationInfo.coverages[line]);
+		}
+		
+		onedev.server.sourceView.highlightCommentTrigger();	
 	},
 	checkShortcutsBinding() {
 		if (!($(document).data("SourceViewShortcutsBinded"))) {
@@ -164,7 +146,7 @@ onedev.server.sourceView = {
 		}
 	},
 	onWindowLoad: function(markRange) {
-		if (markRange && onedev.server.viewState.getFromHistory() === undefined
+		if (onedev.server.viewState.getFromHistory() === undefined
 				&& onedev.server.viewState.carryOver === undefined) {
 			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 			onedev.server.codemirror.scrollTo(cm, markRange);
@@ -274,7 +256,7 @@ onedev.server.sourceView = {
 		var icon = onedev.server.codeProblem.getIcon(problems);
 		var linkClass = onedev.server.codeProblem.getLinkClass(problems);
 		
-		let svg = `<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#${icon}'/></svg>`;
+		let svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#${icon}'/></svg>`;
 		$gutter.append(`<a class='problem-trigger ${linkClass}'>${svg}</a>`);
 		var $trigger = $gutter.children("a");
 		$trigger.mouseover(function() {
@@ -335,7 +317,7 @@ onedev.server.sourceView = {
 			var updated = false;
 			var content = "";
 			for (var i in comments) { 
-				let cssClasses = "comment-trigger text-gray text-hover-dark text-nowrap d-block";
+				let cssClasses = "comment-trigger";
 				if (comments[i].updated) {
 					cssClasses += " updated";
 					updated = true;
@@ -343,10 +325,10 @@ onedev.server.sourceView = {
 				content += `<a class='${cssClasses}' title='Click to show comment of marked text'>#${comments[i].id}</a>`;
 			}
 
-			let cssClasses = "text-gray text-hover-dark comment-indicator";
+			let cssClasses = "comment-indicator";
 			if (updated)
 				cssClasses += " updated"; 			
-			$gutter.append(`<a class='${cssClasses}'><svg class='icon'><use xlink:href='${onedev.server.icons}#comments'/></svg></a>`);
+			$gutter.append(`<a class='${cssClasses}'><svg class='icon icon-lg'><use xlink:href='${onedev.server.icons}#comments'/></svg></a>`);
 			
 			var $indicator = $gutter.children("a");
 			$indicator.popover({
@@ -381,10 +363,10 @@ onedev.server.sourceView = {
 			});
 		} else {
 			var comment = comments[0];
-			var cssClasses = "comment-trigger comment-indicator text-gray text-hover-dark";
+			var cssClasses = "comment-trigger comment-indicator";
 			if (comment.updated)
 				cssClasses += " updated";
-			var svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
+			var svg = `<svg class='icon icon-lg'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
 			$gutter.append(`<a class='${cssClasses}' title='Click to show comment of marked text'>${svg}</a>`);
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
@@ -471,23 +453,25 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		
-		var line = parseInt(comment.range.fromRow);
-		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var lineInfo = cm.lineInfo(line);
-		var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
-		var comments = $gutter.data("comments");
-		if (comments.length == 1) {
-			cm.setGutterMarker(line, "CodeMirror-comments", null);
-		} else {
-			for (var i in comments) {
-				if (comments[i].id == comment.id) {
-					comments.splice(i, 1);
-					break;
+		if (comment.range) {
+			var line = parseInt(comment.range.fromRow);
+			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+			var lineInfo = cm.lineInfo(line);
+			var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
+			var comments = $gutter.data("comments");
+			if (comments.length == 1) {
+				cm.setGutterMarker(line, "CodeMirror-comments", null);
+			} else {
+				for (var i in comments) {
+					if (comments[i].id == comment.id) {
+						comments.splice(i, 1);
+						break;
+					}
 				}
+				onedev.server.sourceView.addCommentGutter(line, comments);
 			}
-			onedev.server.sourceView.addCommentGutter(line, comments);
+			onedev.server.sourceView.highlightCommentTrigger();				
 		}
-		onedev.server.sourceView.highlightCommentTrigger();				
 		$(window).resize();
 		onedev.server.sourceView.clearMark();
 	},
@@ -510,7 +494,7 @@ onedev.server.sourceView = {
 		var $textarea = $sourceView.find(".comment textarea");
 		$textarea.caret($textarea.val().length);		
 	},
-	onOpenComment: function(comment) {
+	onCommentOpened: function(comment) {
 		$(".popover").popover("hide");
 		onedev.server.sourceView.exitFullScreen();
 		var $sourceView = $(".source-view");
@@ -555,7 +539,7 @@ onedev.server.sourceView = {
 		}
 		
 		var openComment = $(".source-view").data("openComment");
-		if (openComment) {
+		if (openComment && openComment.range) {
 			var line = parseInt(openComment.range.fromRow);
 			var lineInfo = cm.lineInfo(line);
 			if (lineInfo && lineInfo.gutterMarkers) {

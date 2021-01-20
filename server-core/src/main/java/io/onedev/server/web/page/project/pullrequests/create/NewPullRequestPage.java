@@ -5,7 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +41,7 @@ import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -384,7 +387,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiffPanel
 				
 			});
 
-			tabs.add(new AjaxActionTab(Model.of("Files")) {
+			tabs.add(new AjaxActionTab(Model.of("File Changes")) {
 				
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
@@ -871,8 +874,23 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiffPanel
 	}
 
 	@Override
-	public Collection<CodeComment> getComments() {
-		return commentsModel.getObject();
+	public Map<CodeComment, PlanarRange> getOldComments() {
+		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (comment.getMark().getCommitHash().equals(getPullRequest().getBaseCommitHash()))
+				oldComments.put(comment, comment.getMark().getRange());
+		}
+		return oldComments;
+	}
+
+	@Override
+	public Map<CodeComment, PlanarRange> getNewComments() {
+		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
+		for (CodeComment comment: commentsModel.getObject()) {
+			if (comment.getMark().getCommitHash().equals(source.getObjectName()))
+				newComments.put(comment, comment.getMark().getRange());
+		}
+		return newComments;
 	}
 	
 	@Override

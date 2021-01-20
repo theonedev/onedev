@@ -925,10 +925,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	public static ProjectBlobPage.State getState(CodeComment comment) {
+	public static State getState(CodeComment comment) {
 		BlobIdent blobIdent = new BlobIdent(comment.getMark().getCommitHash(), comment.getMark().getPath(), 
 				FileMode.REGULAR_FILE.getBits());
-		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
+		State state = new State(blobIdent);
 		state.commentId = comment.getId();
 		state.position = SourceRendererProvider.getPosition(comment.getMark().getRange());
 		return state;

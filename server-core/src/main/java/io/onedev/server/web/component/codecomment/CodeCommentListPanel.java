@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.codecomment;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +37,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -70,6 +69,7 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -355,24 +355,34 @@ public abstract class CodeCommentListPanel extends Panel {
 						link = new BookmarkablePageLink<Void>("link", PullRequestChangesPage.class, 
 								PullRequestChangesPage.paramsOf(comment.getRequest(), comment));
 					} else {
-						try {
-							String compareCommit = comment.getCompareContext().getCompareCommitHash();
-							if (!compareCommit.equals(comment.getMark().getCommitHash())
-									&& getProject().getRepository().getObjectDatabase().has(ObjectId.fromString(compareCommit))) {
+						String compareCommitHash = comment.getCompareContext().getCompareCommitHash();
+						if (!compareCommitHash.equals(comment.getMark().getCommitHash())) {
+							RevCommit markCommit = getProject().getRevCommit(comment.getMark().getCommitHash(), true);
+							RevCommit compareCommit = getProject().getRevCommit(compareCommitHash, true);
+							if (isParent(markCommit, compareCommit) || isParent(compareCommit, markCommit)) {
+								link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, 
+										CommitDetailPage.paramsOf(comment));
+							} else {
 								link = new BookmarkablePageLink<Void>("link", RevisionComparePage.class, 
 										RevisionComparePage.paramsOf(comment));
-							} else {
-								link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
-										ProjectBlobPage.paramsOf(comment));
 							}
-						} catch (IOException e) {
-							throw new RuntimeException(e);
+						} else {
+							link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
+									ProjectBlobPage.paramsOf(comment));
 						}
 					}				
 				}
 				link.add(new Label("label", comment.getMark().getPath()));
 				fragment.add(link);
 				cellItem.add(fragment);
+			}
+			
+			private boolean isParent(RevCommit parent, RevCommit child) {
+				for (RevCommit each: child.getParents()) {
+					if (each.equals(parent))
+						return true;
+				}
+				return false;
 			}
 
 			@Override

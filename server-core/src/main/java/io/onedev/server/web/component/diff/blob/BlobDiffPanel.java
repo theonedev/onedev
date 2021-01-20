@@ -18,7 +18,6 @@ import io.onedev.server.git.BlobChange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.Mark;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.diff.DiffRenderer;
@@ -26,6 +25,7 @@ import io.onedev.server.web.component.diff.blob.text.TextDiffPanel;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.util.DiffPlanarRange;
 
 @SuppressWarnings("serial")
 public class BlobDiffPanel extends Panel {
@@ -42,11 +42,11 @@ public class BlobDiffPanel extends Panel {
 	
 	private final DiffViewMode diffMode;
 	
-	private final TextDiffPanel.AnnotationSupport commentSupport;
+	private final TextDiffPanel.AnnotationSupport annotationSupport;
 	
 	public BlobDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable TextDiffPanel.AnnotationSupport commentSupport) {
+			@Nullable TextDiffPanel.AnnotationSupport annotationSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
@@ -54,7 +54,7 @@ public class BlobDiffPanel extends Panel {
 		this.change = change;
 		this.blameModel = blameModel;
 		this.diffMode = diffMode;
-		this.commentSupport = commentSupport;
+		this.annotationSupport = annotationSupport;
 	}
 	
 	private Fragment newFragment(String message, boolean warning) {
@@ -80,7 +80,7 @@ public class BlobDiffPanel extends Panel {
 				else
 					add(newFragment("Empty file removed.", false));
 			} else {
-				add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, commentSupport));
+				add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, annotationSupport));
 			}
 		} else if (blob.isPartial()) {
 			add(newFragment("File is too large to be loaded.", true));
@@ -112,11 +112,10 @@ public class BlobDiffPanel extends Panel {
 					add(newFragment("Unable to diff as the file is too large.", true));
 				} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
 					add(newFragment("Diff is too large to be displayed.", true));
-				} else if (change.getAdditions() + change.getDeletions() == 0 
-						&& (commentSupport == null || commentSupport.getComments().isEmpty())) {
+				} else if (change.getAdditions() + change.getDeletions() == 0) {
 					add(newFragment("Content is identical", false));
 				} else {
-					add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, commentSupport));
+					add(new TextDiffPanel(CONTENT_ID, projectModel, requestModel, change, diffMode, blameModel, annotationSupport));
 				}
 			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
 				add(newFragment("File is too large to be loaded.", true));
@@ -153,11 +152,11 @@ public class BlobDiffPanel extends Panel {
 		super.onDetach();
 	}
 
-	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment, @Nullable DiffPlanarRange range) {
 		Component content = get(CONTENT_ID);
 		if (content instanceof TextDiffPanel) {
 			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
-			textDiffPanel.onCommentDeleted(target, comment);
+			textDiffPanel.onCommentDeleted(target, comment, range);
 		}
 	}
 
@@ -169,19 +168,19 @@ public class BlobDiffPanel extends Panel {
 		}
 	}
 
-	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange range) {
 		Component content = get(CONTENT_ID);
 		if (content instanceof TextDiffPanel) {
 			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
-			textDiffPanel.onCommentAdded(target, comment);
+			textDiffPanel.onCommentAdded(target, comment, range);
 		}
 	}
 
-	public void mark(AjaxRequestTarget target, Mark mark) {
+	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
 		Component content = get(CONTENT_ID);
 		if (content instanceof TextDiffPanel) {
 			TextDiffPanel textDiffPanel = (TextDiffPanel) content;
-			textDiffPanel.mark(target, mark);
+			textDiffPanel.mark(target, markRange);
 		}
 	}
 
@@ -192,7 +191,7 @@ public class BlobDiffPanel extends Panel {
 			textDiffPanel.unmark(target);
 		}
 	}
-
+	
 	public void onUnblame(AjaxRequestTarget target) {
 		Component content = get(CONTENT_ID);
 		if (content instanceof TextDiffPanel) {

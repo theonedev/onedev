@@ -1,9 +1,9 @@
 onedev.server.textDiff = {
 	symbolClasses: ".cm-property, .cm-variable, .cm-variable-2, .cm-variable-3, .cm-def, .cm-meta, .cm-string, .cm-tag, .cm-attribute, cm-builtin, cm-qualifier",
 	onDomReady: function(containerId, symbolTooltipId, oldRev, newRev, callback, blameMessageCallback,
-			mark, openComment, oldComments, newComments, dirtyContainerId, doclink) {
+			markRange, openComment, annotationInfo, commentContainerId, doclink) {
 		var $container = $("#" + containerId);
-		$container.data("dirtyContainerId", dirtyContainerId);
+		$container.data("commentContainerId", commentContainerId);
 		$container.data("callback", callback);
 		$container.data("blameMessageCallback", blameMessageCallback);
 		$container.data("symbolHover", function() {
@@ -328,7 +328,7 @@ onedev.server.textDiff = {
 
 			function showInvalidSelection() {
 				var $content = $("<div></div>");
-				$content.append("<a class='invalid'><svg class='icon'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Invalid selection, click for details</a>");
+				$content.append(`<a class='invalid'><svg class='icon'><use xlink:href='${onedev.server.icons}#warning'/></svg> Invalid selection, click for details</a>`);
 				$content.children("a").attr("href", doclink + "/pages/diff-selection.md").attr("target", "_blank");
 				return {
 					position: position, 
@@ -336,9 +336,9 @@ onedev.server.textDiff = {
 				}
 			}
 
-			// all lines between selection has been expanded
-			if ($startTr.nextAll("tr.expander").filter($endTr.prevAll("tr.expander")).length != 0
-					|| $startTr.prevAll("tr.expander").filter($endTr.nextAll("tr.expander")).length != 0) {  
+			if ($startTr.hasClass("expanded") || $endTr.hasClass("expanded") 
+					|| $startTr.nextAll("tr.expander, tr.expanded").filter($endTr.prevAll("tr.expander, tr.expanded")).length != 0
+					|| $startTr.prevAll("tr.expander, tr.expanded").filter($endTr.nextAll("tr.expander, tr.expanded")).length != 0) {  
 				return showInvalidSelection();
 			}
 			
@@ -419,29 +419,36 @@ onedev.server.textDiff = {
 		if (openComment) {
 			$container.data("openComment", openComment);
 		}
+		var oldComments = annotationInfo.oldAnnotations.comments;
 		for (var line in oldComments) {
 		    if (oldComments.hasOwnProperty(line)) {
-		    	onedev.server.textDiff.addCommentIndicator($container, true, line, oldComments[line][1]);
+				let oldCommentsOnLine = oldComments[line];
+				for (var i in oldCommentsOnLine) 
+					oldCommentsOnLine[i].range.leftSide = true;
+		    	onedev.server.textDiff.addCommentIndicator($container, true, line, oldCommentsOnLine);
 		    }
 		}
+		var newComments = annotationInfo.newAnnotations.comments;
 		for (var line in newComments) {
 		    if (newComments.hasOwnProperty(line)) {
-		    	onedev.server.textDiff.addCommentIndicator($container, false, line, newComments[line][1]);
+				let newCommentsOnLine = newComments[line];
+				for (var i in newCommentsOnLine) 
+					newCommentsOnLine[i].range.leftSide = false;
+		    	onedev.server.textDiff.addCommentIndicator($container, false, line, newCommentsOnLine);
 		    }
 		}
 
 		onedev.server.textDiff.highlightCommentTrigger($container);				
 		
-		if (mark) {
-			$container.data("mark", mark);
-			onedev.server.textDiff.mark($container, mark);	
+		if (markRange) {
+			$container.data("markRange", markRange);
+			onedev.server.textDiff.mark($container, markRange);	
 		}			
 	},
-	onWindowLoad: function(containerId, ajax, mark) {
+	onWindowLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
-		if (!ajax && mark && !onedev.server.history.isVisited()) {
-			onedev.server.textDiff.scrollTo($container, mark);
-		}
+		if (!onedev.server.history.isVisited()) 
+			onedev.server.textDiff.scrollTo($container, markRange);
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
 		var $container = $("#" + containerId);
@@ -466,15 +473,15 @@ onedev.server.textDiff = {
 			return $tooltip;
 		}, alignment);
 	},
-	openSelectionPopover: function(containerId, position, mark, markUrl, markedText, loggedIn) {
+	openSelectionPopover: function(containerId, position, markRange, markUrl, markedText, loggedIn) {
 		var $container = $("#" + containerId);
 		
 		if (!markUrl) {
-			$content = $("<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Unable to comment here</a>");
+			$content = $(`<div><span class='invalid'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> Unable to comment here</a>`);
 		} else {
-			var $content = $("<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#link'/></svg> Permanent link of this selection</a>");
+			var $content = $(`<div><a class='permanent'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#link'/></svg> Permanent link of this selection</a>`);
 			$content.children("a.permanent").attr("href", markUrl);
-			$content.append("<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#copy'/></svg> Copy selected text to clipboard</a>");
+			$content.append(`<a class='copy-marked'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#copy'/></svg> Copy selected text to clipboard</a>`);
 			var clipboard = new Clipboard(".copy-marked", {
 			    text: function(trigger) {
 			        return markedText;
@@ -484,18 +491,16 @@ onedev.server.textDiff = {
 				clipboard.destroy();
 			});
 			if (loggedIn) {
-				$content.append("<a class='comment'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#comment'/></svg> Add comment on this selection</a>");
+				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> Add comment on this selection</a>`);
 				$content.children("a.comment").click(function() {
-					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-							&& !confirm("There are unsaved changes, discard and continue?")) {
-						return;
+					if (onedev.server.textDiff.confirmUnsavedChanges($container)) {
+						$container.data("callback")("addComment", markRange.leftSide, 
+								markRange.fromRow, markRange.fromColumn, markRange.toRow, markRange.toColumn);
 					}
-					$container.data("callback")("addComment", mark.leftSide, 
-							mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
 				var loginHref = $(".sign-in").attr("href");
-				$content.append("<a class='comment' href='" + loginHref + "'><svg class='icon mr-1'><use xlink:href='" + onedev.server.icons + "#warning'/></svg> Login to comment on selection</a>");
+				$content.append(`<a class='comment' href='${loginHref}'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#warning'/></svg> Login to comment on selection</a>`);
 			}			
 		}		
 		
@@ -503,6 +508,10 @@ onedev.server.textDiff = {
 			position: position,
 			content: $content
 		});
+	},
+	confirmUnsavedChanges: function($container) {
+		return $("#"+$container.data("commentContainerId")).find("form.dirty").length == 0 
+				|| confirm("There are unsaved changes, discard and continue?"); 
 	},
 	expand: function(containerId, blockIndex, expandedHtml) {
 		var $container = $("#" + containerId);
@@ -564,10 +573,10 @@ onedev.server.textDiff = {
 		
 		onedev.server.textDiff.initBlameTooltip(containerId, $expandedTrs.find(">td.blame>a.hash"));
 	},
-	getMarkInfo: function($container, mark) {
-		var oldOrNew = mark.leftSide?"old":"new";
-		var startCursor = [mark.fromRow+1, mark.fromColumn];
-		var endCursor = [mark.toRow+1, mark.toColumn];
+	getMarkInfo: function($container, markRange) {
+		var oldOrNew = markRange.leftSide?"old":"new";
+		var startCursor = [markRange.fromRow+1, markRange.fromColumn];
+		var endCursor = [markRange.toRow+1, markRange.toColumn];
 		var $startTd = $container.find("td.content[data-" + oldOrNew + "='" + (startCursor[0]-1) + "']");
 		var $endTd = $container.find("td.content[data-" + oldOrNew + "='" + (endCursor[0]-1) + "']");
 		if ($startTd.length == 0) { 
@@ -598,8 +607,8 @@ onedev.server.textDiff = {
 			oldOrNew: oldOrNew
 		};
 	},
-	scrollTo: function($container, mark) {
-		var markInfo = onedev.server.textDiff.getMarkInfo($container, mark);
+	scrollTo: function($container, markRange) {
+		var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
@@ -607,17 +616,17 @@ onedev.server.textDiff = {
 			$scrollParent.scrollTop($startTd.offset().top - $scrollParent.offset().top + $scrollParent.scrollTop()-50);
 		}
 	},
-	scrollIntoView: function($container, mark) {
-		var markInfo = onedev.server.textDiff.getMarkInfo($container, mark);
+	scrollIntoView: function($container, markRange) {
+		var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd)
 			$startTd.scrollIntoView();
 	},
-	mark: function($container, mark) {
+	mark: function($container, markRange) {
 		onedev.server.textDiff.clearMark($container);
 		
-		var markInfo = onedev.server.textDiff.getMarkInfo($container, mark);
+		var markInfo = onedev.server.textDiff.getMarkInfo($container, markRange);
 		var $startTd = markInfo.startTd;
 		var $endTd = markInfo.endTd;
 		if ($startTd && $endTd) {
@@ -740,9 +749,9 @@ onedev.server.textDiff = {
 		});
 	},
 	restoreMark: function($container) {
-		var mark = $container.data("mark");
-		if (mark) {
-			onedev.server.textDiff.mark($container, mark);
+		var markRange = $container.data("markRange");
+		if (markRange) {
+			onedev.server.textDiff.mark($container, markRange);
 		} else {
 			onedev.server.textDiff.clearMark($container);
 		}
@@ -765,38 +774,48 @@ onedev.server.textDiff = {
 			 * trigger link to display the actual comment content  
 			 */
 			var oldOrNew = leftSide?"old":"new";
-			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comments'/></svg>");
+
+			var updated = false;
 			var content = "";
-			for (var i in comments) {
-				var comment = comments[i];
-				var index = parseInt(i) + 1;
-				content += "<a class='comment-trigger' title='Click to show comment of marked text'>#" + comment.id + "</a>";
+			for (var i in comments) { 
+				let cssClasses = "comment-trigger";
+				if (comments[i].updated) {
+					cssClasses += " updated";
+					updated = true;
+				}
+				content += `<a class='${cssClasses}' title='Click to show comment of marked text'>#${comments[i].id}</a>`;
 			}
+
+			if (updated)
+				$indicator.addClass("updated");
+			
+			$indicator.append(`<svg class='icon icon-lg'><use xlink:href='${onedev.server.icons}#comments'/></svg>`);
+			
 			$indicator.popover({
 				html: true, 
 				sanitize: false, 
-				container: $lineNumTd[0],
+				container: $container,
 				placement: "auto",
-				template: "<div class='" + oldOrNew + " popover comment-popover' data-line='" + line + "'><div class='arrow'></div><div class='popover-body'></div></div>",
+				template: `<div class='${oldOrNew} popover comment-popover' data-line='${line}'><div class='arrow'></div><div class='popover-body'></div></div>`,
 				content: content
 			});
 			$indicator.on('shown.bs.popover', function () {
-				$("." + oldOrNew + ".comment-popover[data-line='" + line + "'] a").each(function() {
+				var $currentPopover = $(`.${oldOrNew}.comment-popover[data-line='${line}']`);
+				$(".popover").not($currentPopover).popover("hide");
+				
+				$currentPopover.find("a").each(function() {
 					$(this).mouseover(function() {
 						var comment = comments[$(this).index()];			        						
-						onedev.server.textDiff.mark($container, comment.mark);
+						onedev.server.textDiff.mark($container, comment.range);
 					});
 					$(this).mouseout(function() {
 						onedev.server.textDiff.restoreMark($container);
 					});
 					$(this).click(function() {
-						if (!$(this).hasClass("active")) {
-	    					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-	    							&& !confirm("There are unsaved changes, discard and continue?")) {
-	    						return;
-	    					}
+						if (!$(this).hasClass("active") && onedev.server.textDiff.confirmUnsavedChanges($container)) {
 							var comment = comments[$(this).index()];			        						
-							callback("openComment", comment.id);
+							callback("openComment", comment.id, comment.range.leftSide, comment.range.fromRow, 
+									comment.range.fromColumn, comment.range.toRow, comment.range.toColumn);
 						}
 					});
 				});
@@ -804,21 +823,20 @@ onedev.server.textDiff = {
 			});
 		} else {
 			var comment = comments[0];
+			if (comment.updated)
+				$indicator.addClass("updated");
 			$indicator.addClass("comment-trigger").attr("title", "Click to show comment of marked text");
-			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
+			$indicator.append("<svg class='icon icon-lg'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
 			$indicator.mouseover(function() {
-				onedev.server.textDiff.mark($container, comment.mark);
+				onedev.server.textDiff.mark($container, comment.range);
 			});
 			$indicator.mouseout(function() {
 				onedev.server.textDiff.restoreMark($container);
 			});
 			$indicator.click(function() {
-				if (!$indicator.hasClass("active")) {
-					if ($("#"+$container.data("dirtyContainerId")).find("form.dirty").length != 0 
-							&& !confirm("There are unsaved changes, discard and continue?")) {
-						return;
-					}
-					callback("openComment", comment.id);
+				if (!$indicator.hasClass("active") && onedev.server.textDiff.confirmUnsavedChanges($container)) {
+					callback("openComment", comment.id, comment.range.leftSide, comment.range.fromRow, 
+							comment.range.fromColumn, comment.range.toRow, comment.range.toColumn);
 				}
 			});
 		}
@@ -841,15 +859,15 @@ onedev.server.textDiff = {
 	highlightCommentTrigger: function($container) {
 		$container.find(".comment-trigger").removeClass("active");
 		var openComment = $container.data("openComment");
-		if (openComment) {
-			var line = parseInt(openComment.mark.fromRow);
-			var $indicator = onedev.server.textDiff.getLineNumTd($container, openComment.mark.leftSide, line).children(".comment-indicator");
+		if (openComment && openComment.range) {
+			var line = parseInt(openComment.range.fromRow);
+			var $indicator = onedev.server.textDiff.getLineNumTd($container, openComment.range.leftSide, line).children(".comment-indicator");
 			if ($indicator.length != 0) {
 				var comments = $indicator.data("comments");
 				if (comments.length == 1) {
 					$indicator.addClass("active");
 				} else {
-					var oldOrNew = openComment.mark.leftSide?"old":"new";
+					var oldOrNew = openComment.range.leftSide?"old":"new";
 					$container.find("." + oldOrNew + ".comment-popover[data-line='" + line + "'] a").each(function() {
 						var comment = comments[$(this).index()];			        						
 						if (comment.id == openComment.id) {
@@ -862,10 +880,10 @@ onedev.server.textDiff = {
 	},
 	onCommentAdded: function($container, comment) {
 		$container.data("openComment", comment);
-		$container.data("mark", comment.mark);
+		$container.data("markRange", comment.range);
 		
-		var line = parseInt(comment.mark.fromRow);		
-		var leftSide = comment.mark.leftSide;
+		var line = parseInt(comment.range.fromRow);		
+		var leftSide = comment.range.leftSide;
 		
 		var $indicator = onedev.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 		var comments;
@@ -879,10 +897,11 @@ onedev.server.textDiff = {
 		onedev.server.textDiff.highlightCommentTrigger($container);				
 	},
 	onCommentDeleted: function($container, comment) {
+		$(".popover").popover("hide");
 		$container.removeData("openComment");
 		
-		var line = parseInt(comment.mark.fromRow);
-		var leftSide = comment.mark.leftSide;
+		var line = parseInt(comment.range.fromRow);
+		var leftSide = comment.range.leftSide;
 		var $indicator = onedev.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 		var comments = $indicator.data("comments");
 		if (comments.length == 1) {
@@ -899,20 +918,23 @@ onedev.server.textDiff = {
 		}
 		onedev.server.textDiff.highlightCommentTrigger($container);				
 	},
-	onOpenComment: function($container, comment) {
+	onCommentOpened: function($container, comment) {
+		$(".popover").popover("hide");
 		$container.data("openComment", comment);
-		$container.data("mark", comment.mark);
+		$container.data("markRange", comment.range);
 		onedev.server.textDiff.highlightCommentTrigger($container);
-		onedev.server.textDiff.mark($container, comment.mark);
-		onedev.server.textDiff.scrollIntoView($container, comment.mark);
+		onedev.server.textDiff.mark($container, comment.range);
+		onedev.server.textDiff.scrollIntoView($container, comment.range);
 	},
-	onCloseComment: function($container) {
+	onCommentClosed: function($container) {
+		$(".popover").popover("hide");
 		$container.removeData("openComment");
 		onedev.server.textDiff.highlightCommentTrigger($container);
 	},
-	onAddComment: function($container, mark) {
+	onAddComment: function($container, markRange) {
+		$(".popover").popover("hide");
 		$container.removeData("openComment");
-		$container.data("mark", mark);
+		$container.data("markRange", markRange);
 		
 		$container.selectionPopover("close");
 		window.getSelection().removeAllRanges();
@@ -921,8 +943,8 @@ onedev.server.textDiff = {
 		// clear selections
 		setTimeout(function() {
 			onedev.server.textDiff.highlightCommentTrigger($container);
-			onedev.server.textDiff.mark($container, mark);
-			onedev.server.textDiff.scrollIntoView($container, mark);
+			onedev.server.textDiff.mark($container, markRange);
+			onedev.server.textDiff.scrollIntoView($container, markRange);
 		}, 100);
 	}
 };

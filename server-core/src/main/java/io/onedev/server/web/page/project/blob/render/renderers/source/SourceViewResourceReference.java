@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import io.onedev.server.web.asset.clipboard.ClipboardResourceReference;
 import io.onedev.server.web.asset.codemirror.CodeMirrorResourceReference;
 import io.onedev.server.web.asset.codeproblem.CodeProblemResourceReference;
+import io.onedev.server.web.asset.commentindicator.CommentIndicatorCssResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
@@ -42,6 +43,8 @@ public class SourceViewResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new CodeProblemResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(SourceViewResourceReference.class, "source-view.css")));
+		dependencies.add(CssHeaderItem.forReference(new CommentIndicatorCssResourceReference()));
+		
 		return dependencies;
 	}
 

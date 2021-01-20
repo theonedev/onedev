@@ -92,9 +92,13 @@ public class DiffUtils {
 				 * show addition/deletion as a whole. To tokenize line as plain text, specify 
 				 * file name with a .txt suffix
 				 */
-				long[] tokens = new long[1];
-				tokens[0] = TokenUtils.getToken(0, line.length(), 0); 
-				tokenizedLines.add(new Tokenized(line, tokens));
+				if (line.length() != 0) {
+					long[] tokens = new long[1];
+					tokens[0] = TokenUtils.getToken(0, line.length(), 0); 
+					tokenizedLines.add(new Tokenized(line, tokens));
+				} else {
+					tokenizedLines.add(new Tokenized(line, new long[0]));
+				}
 			}
 			return tokenizedLines;
 		}
@@ -272,14 +276,60 @@ public class DiffUtils {
 		return mapLines(diff(oldLines, newLines));
 	}
 	
+	public static <T> boolean isVisible(List<DiffBlock<T>> diffBlocks, boolean leftSide, 
+			int line, int contextSize) {
+		if (leftSide) {
+			for (int i=0; i<diffBlocks.size(); i++) {
+				DiffBlock<T> block = diffBlocks.get(i);
+				if (block.getOperation() == Operation.INSERT)
+					continue;
+				if (line>=block.getOldStart() && line<block.getOldEnd()) {
+					if (block.getOperation() == Operation.DELETE) 
+						return true;
+					else if (i == 0 && i == diffBlocks.size()-1) 
+						return false;
+					else if (i != 0 && i != diffBlocks.size()-1)
+						return line < block.getOldStart() + contextSize || line >= block.getOldEnd()-contextSize;
+					else if (i == 0) 
+						return line >= block.getOldEnd()-contextSize;
+					else 
+						return line < block.getOldStart() + contextSize;
+				} 
+			}
+		} else {
+			for (int i=0; i<diffBlocks.size(); i++) {
+				DiffBlock<T> block = diffBlocks.get(i);
+				if (block.getOperation() == Operation.DELETE)
+					continue;
+				if (line>=block.getNewStart() && line<block.getNewEnd()) {
+					if (block.getOperation() == Operation.INSERT) 
+						return true;
+					else if (i == 0 && i == diffBlocks.size()-1) 
+						return false;
+					else if (i != 0 && i != diffBlocks.size()-1)
+						return line < block.getNewStart() + contextSize || line >= block.getNewEnd()-contextSize;
+					else if (i == 0) 
+						return line >= block.getNewEnd()-contextSize;
+					else 
+						return line < block.getNewStart() + contextSize;
+				} 
+			}
+		}
+		return false;
+	}
+	
 	public static PlanarRange mapRange(Map<Integer, Integer> lineMapping, PlanarRange range) {
 		int oldBeginLine = range.getFromRow();
 		int oldEndLine = range.getToRow();
 		Integer newBeginLine = lineMapping.get(oldBeginLine);
-		Integer newEndLine = lineMapping.get(oldEndLine);
-		if (newBeginLine != null && newEndLine != null && newEndLine >= newBeginLine) {
+		if (newBeginLine != null) {
+			for (int oldLine = oldBeginLine+1; oldLine < oldEndLine; oldLine++) {
+				Integer newLine = lineMapping.get(oldLine);
+				if (newLine == null || newLine - newBeginLine != oldLine - oldBeginLine)
+					return null;
+			}
 			PlanarRange newRange = new PlanarRange(newBeginLine, range.getFromColumn(), 
-					newEndLine, range.getToColumn()); 
+					newBeginLine + oldEndLine - oldBeginLine, range.getToColumn()); 
 			return newRange;
 		} else {
 			return null;

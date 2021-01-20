@@ -56,7 +56,6 @@ import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.git.command.IsAncestorCommand;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
-import io.onedev.server.util.diff.WhitespaceOption;
 
 public class GitUtils {
 	
@@ -531,27 +530,4 @@ public class GitUtils {
 		}
 	}
 
-	@Nullable
-	public static List<String> readLines(Repository repository, RevCommit commit, String path, 
-			WhitespaceOption whitespaceOption) {
-		try {
-			TreeWalk treeWalk = TreeWalk.forPath(repository, path, commit.getTree());
-			if (treeWalk != null) {
-				ObjectId blobId = treeWalk.getObjectId(0);
-				ObjectReader objectReader = treeWalk.getObjectReader();
-				BlobIdent blobIdent = new BlobIdent(commit.name(), path, FileMode.REGULAR_FILE.getBits()); 
-				Blob blob = new Blob(blobIdent, blobId, objectReader);
-				List<String> normalizedLines = new ArrayList<>();
-				for (String line: Preconditions.checkNotNull(blob.getText()).getLines()) {
-					normalizedLines.add(whitespaceOption.process(line));
-				}
-				return normalizedLines;
-			} else {
-				return null;
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 }

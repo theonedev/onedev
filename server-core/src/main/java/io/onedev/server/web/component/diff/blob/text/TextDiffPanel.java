@@ -3,9 +3,9 @@ package io.onedev.server.web.component.diff.blob.text;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +47,8 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.LineCoverage;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
@@ -57,11 +59,9 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.Mark;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.RangeUtils;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
@@ -70,7 +70,6 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
-import io.onedev.server.web.component.diff.blob.text.MarkAwareDiffBlock.Type;
 import io.onedev.server.web.component.diff.diffstat.DiffStatBar;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
@@ -83,6 +82,9 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
+import io.onedev.server.web.util.AnnotationInfo;
+import io.onedev.server.web.util.CodeCommentInfo;
+import io.onedev.server.web.util.DiffPlanarRange;
 import io.onedev.server.web.util.EditParamsAware;
 
 @SuppressWarnings("serial")
@@ -100,9 +102,63 @@ public class TextDiffPanel extends Panel {
 
 	private final IModel<Boolean> blameModel;
 	
-	private final AnnotationSupport commentSupport;
+	private final AnnotationSupport annotationSupport;
 	
-	private final List<Mark> initialMarks;
+	private final IModel<DiffAnnotationInfo> annotationInfoModel = new LoadableDetachableModel<DiffAnnotationInfo>() {
+
+		@Override
+		protected DiffAnnotationInfo load() {
+			if (annotationSupport != null) {
+				Map<CodeComment, PlanarRange> oldComments = annotationSupport.getOldComments();
+				for (Iterator<Map.Entry<CodeComment, PlanarRange>> it = oldComments.entrySet().iterator(); it.hasNext();) {
+					if (!change.isVisible(new DiffPlanarRange(true, it.next().getValue()))) 
+						it.remove();
+				}
+				Map<Integer, List<CodeCommentInfo>> oldCommentsByLine = CodeCommentInfo.groupByLine(oldComments);
+				
+				Map<CodeComment, PlanarRange> newComments = annotationSupport.getNewComments();
+				for (Iterator<Map.Entry<CodeComment, PlanarRange>> it = newComments.entrySet().iterator(); it.hasNext();) {
+					if (!change.isVisible(new DiffPlanarRange(false, it.next().getValue()))) 
+						it.remove();
+				}
+				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = CodeCommentInfo.groupByLine(newComments);
+
+				Collection<CodeProblem> oldProblems = annotationSupport.getOldProblems();
+				for (Iterator<CodeProblem> it = oldProblems.iterator(); it.hasNext();) {
+					if (!change.isVisible(new DiffPlanarRange(true, it.next().getPosition())))
+						it.remove();
+				}
+				Map<Integer, List<CodeProblem>> oldProblemsByLine = CodeProblem.groupByLine(oldProblems);
+				
+				Collection<CodeProblem> newProblems = annotationSupport.getNewProblems();
+				for (Iterator<CodeProblem> it = newProblems.iterator(); it.hasNext();) {
+					if (!change.isVisible(new DiffPlanarRange(false, it.next().getPosition())))
+						it.remove();
+				}
+				Map<Integer, List<CodeProblem>> newProblemsByLine = CodeProblem.groupByLine(newProblems);
+				
+				Map<Integer, Integer> oldCoveragesByLine = LineCoverage.groupByLine(annotationSupport.getOldCoverages());
+				for (Iterator<Map.Entry<Integer, Integer>> it = oldCoveragesByLine.entrySet().iterator(); it.hasNext();) {
+					if (!change.isVisible(false, it.next().getValue()))
+						it.remove();
+				}
+				
+				Map<Integer, Integer> newCoveragesByLine = LineCoverage.groupByLine(annotationSupport.getNewCoverages());
+				for (Iterator<Map.Entry<Integer, Integer>> it = newCoveragesByLine.entrySet().iterator(); it.hasNext();) {
+					if (!change.isVisible(true, it.next().getValue()))
+						it.remove();
+				}
+				return new DiffAnnotationInfo(
+						new AnnotationInfo(oldCommentsByLine, oldProblemsByLine, oldCoveragesByLine), 
+						new AnnotationInfo(newCommentsByLine, newProblemsByLine, newCoveragesByLine));
+			} else {
+				return new DiffAnnotationInfo(
+						new AnnotationInfo(new HashMap<>(), new HashMap<>(), new HashMap<>()), 
+						new AnnotationInfo(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+			}
+		}
+		
+	};
 	
 	private Component symbolTooltip;
 	
@@ -110,43 +166,29 @@ public class TextDiffPanel extends Panel {
 	
 	private BlameMessageBehavior blameMessageBehavior;
 	
-	private transient List<MarkAwareDiffBlock> diffBlocks;
-	
 	private BlameInfo blameInfo;
 	
 	public TextDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
 			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable AnnotationSupport commentSupport) {
+			@Nullable AnnotationSupport annotationSupport) {
 		super(id);
 		
 		this.projectModel = projectModel;
 		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
-		this.commentSupport = commentSupport;
+		this.annotationSupport = annotationSupport;
 		this.blameModel = blameModel;
 		
 		if (blameModel != null && blameModel.getObject()) {
 			blameInfo = getBlameInfo();
 		}
 		
-		initialMarks = new ArrayList<>();
-		if (commentSupport != null) {
-			Mark mark = commentSupport.getMark();
-			if (mark != null) {
-				initialMarks.add(mark);
-			}
-			for (CodeComment comment: commentSupport.getComments()) {
-				mark = comment.getMark();
-				initialMarks.add(mark);
-			}
-		}
 	}
 
-	private String getJson(Mark mark) {
+	private String convertToJson(Object obj) {
 		try {
-			MarkInfo markInfo = new MarkInfo(mark, getOldCommit().name());
-			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(markInfo);
+			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
@@ -291,25 +333,25 @@ public class TextDiffPanel extends Panel {
 		
 		add(callbackBehavior = new AbstractPostAjaxBehavior() {
 			
-			private String getMarkedText(Mark mark) {
+			private String getMarkedText(DiffPlanarRange markRange) {
 				List<String> lines;
-				if (mark.getCommitHash().equals(getOldCommit().name()))
+				if (markRange.leftSide)
 					lines = change.getOldText().getLines();
 				else 
 					lines = change.getNewText().getLines();
 				StringBuilder builder = new StringBuilder();
-				if (mark.getRange().getFromRow() != mark.getRange().getToRow()) {
-					String line = lines.get(mark.getRange().getFromRow());
-					int beginChar = mark.getRange().getFromColumn();
+				if (markRange.getFromRow() != markRange.getToRow()) {
+					String line = lines.get(markRange.getFromRow());
+					int beginChar = markRange.getFromColumn();
 					if (beginChar < line.length())
 						builder.append(line.substring(beginChar));
-					for (int i=mark.getRange().getFromRow()+1; i<mark.getRange().getToRow(); i++) {
+					for (int i=markRange.getFromRow()+1; i<markRange.getToRow(); i++) {
 						if (builder.length() != 0)
 							builder.append("\n");
 						builder.append(lines.get(i));
 					}
-					line = lines.get(mark.getRange().getToRow());
-					int endChar = mark.getRange().getToColumn();
+					line = lines.get(markRange.getToRow());
+					int endChar = markRange.getToColumn();
 					if (endChar > 0) {
 						if (endChar > line.length())
 							endChar = line.length();
@@ -318,9 +360,9 @@ public class TextDiffPanel extends Panel {
 						builder.append(line.substring(0, endChar));
 					}
 				} else {
-					String line = lines.get(mark.getRange().getFromRow());
-					int beginChar = mark.getRange().getFromColumn();
-					int endChar = mark.getRange().getToColumn();
+					String line = lines.get(markRange.getFromRow());
+					int beginChar = markRange.getFromColumn();
+					int endChar = markRange.getToColumn();
 					if (beginChar < line.length() && endChar > 0) {
 						if (endChar > line.length())
 							endChar = line.length();
@@ -361,11 +403,11 @@ public class TextDiffPanel extends Panel {
 					String jsonOfPosition = String.format("{left: %d, top: %d}", 
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
-					Mark mark = getMark(params, "param3", "param4", "param5", "param6", "param7");
+					DiffPlanarRange markRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
 					
 					String markUrl;
-					if (commentSupport != null) {
-						markUrl = commentSupport.getMarkUrl(mark);
+					if (annotationSupport != null) {
+						markUrl = annotationSupport.getMarkUrl(markRange);
 						if (markUrl != null) 
 							markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
 						else 
@@ -374,26 +416,27 @@ public class TextDiffPanel extends Panel {
 						markUrl = "undefined";
 					}
 					script = String.format("onedev.server.textDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
-							getMarkupId(), jsonOfPosition, getJson(mark), markUrl, 
-							JavaScriptEscape.escapeJavaScript(getMarkedText(mark)),
+							getMarkupId(), jsonOfPosition, convertToJson(markRange), markUrl, 
+							JavaScriptEscape.escapeJavaScript(getMarkedText(markRange)),
 							SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment":
 					Preconditions.checkNotNull(SecurityUtils.getUser());
 					
-					mark = getMark(params, "param1", "param2", "param3", "param4", "param5");
-					commentSupport.onAddComment(target, mark);
+					markRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
+					annotationSupport.onAddComment(target, markRange);
 					script = String.format("onedev.server.textDiff.onAddComment($('#%s'), %s);", 
-							getMarkupId(), getJson(mark));
+							getMarkupId(), convertToJson(markRange));
 					target.appendJavaScript(script);
 					break;
 				case "openComment": 
 					Long commentId = params.getParameterValue("param1").toLong();
+					markRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
-					commentSupport.onOpenComment(target, comment);
-					script = String.format("onedev.server.textDiff.onOpenComment($('#%s'), %s);", 
-							getMarkupId(), getJsonOfComment(comment));
+					annotationSupport.onOpenComment(target, comment, markRange);
+					script = String.format("onedev.server.textDiff.onCommentOpened($('#%s'), %s);", 
+							getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, markRange)));
 					target.appendJavaScript(script);
 					break;
 				}
@@ -444,30 +487,29 @@ public class TextDiffPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	private Mark getMark(IRequestParameters params, String leftSideParam, 
-			String beginLineParam, String beginCharParam, 
+	private DiffPlanarRange getRange(IRequestParameters params,
+			String leftSideParam, String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		boolean leftSide = params.getParameterValue(leftSideParam).toBoolean();
 		int beginLine = params.getParameterValue(beginLineParam).toInt();
 		int beginChar = params.getParameterValue(beginCharParam).toInt();
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
-		String commit = leftSide?getOldCommit().name():getNewCommit().name();
-		return new Mark(commit, change.getPath(), new PlanarRange(beginLine, beginChar, endLine, endChar));
+		return new DiffPlanarRange(leftSide, beginLine, beginChar, endLine, endChar);
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
-		MarkAwareDiffBlock block = getDiffBlocks().get(index);
+		DiffBlock<Tokenized> block = change.getDiffBlocks().get(index);
 		if (index == 0) {
-			int start = block.getLines().size()-contextSize;
+			int start = block.getUnits().size()-contextSize;
 			if (start < 0)
 				start=0;
 			else if (start > 0)
 				appendExpander(builder, index, start);
-			for (int j=start; j<block.getLines().size()-lastContextSize; j++) 
+			for (int j=start; j<block.getUnits().size()-lastContextSize; j++) 
 				appendEqual(builder, block, j, lastContextSize);
-		} else if (index == getDiffBlocks().size()-1) {
-			int end = block.getLines().size();
+		} else if (index == change.getDiffBlocks().size()-1) {
+			int end = block.getUnits().size();
 			int skipped = 0;
 			if (end > contextSize) {
 				skipped = end-contextSize;
@@ -477,22 +519,16 @@ public class TextDiffPanel extends Panel {
 				appendEqual(builder, block, j, lastContextSize);
 			if (skipped != 0)
 				appendExpander(builder, index, skipped);
-		} else if (2*contextSize < block.getLines().size()) {
+		} else if (2*contextSize < block.getUnits().size()) {
 			for (int j=lastContextSize; j<contextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
-			appendExpander(builder, index, block.getLines().size() - 2*contextSize);
-			for (int j=block.getLines().size()-contextSize; j<block.getLines().size()-lastContextSize; j++)
+			appendExpander(builder, index, block.getUnits().size() - 2*contextSize);
+			for (int j=block.getUnits().size()-contextSize; j<block.getUnits().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		} else {
-			for (int j=lastContextSize; j<block.getLines().size()-lastContextSize; j++)
+			for (int j=lastContextSize; j<block.getUnits().size()-lastContextSize; j++)
 				appendEqual(builder, block, j, lastContextSize);
 		}
-	}
-	
-	private void appendMarkedEquals(StringBuilder builder, int index) {
-		MarkAwareDiffBlock block = getDiffBlocks().get(index);
-		for (int i=0; i<block.getLines().size(); i++)
-			appendEqual(builder, block, i, 0);
 	}
 	
 	private ObjectId getOldCommit() {
@@ -519,72 +555,25 @@ public class TextDiffPanel extends Panel {
 		
 		response.render(JavaScriptHeaderItem.forReference(new TextDiffResourceReference()));
 		
-		String jsonOfOldCommentInfos;
-		String jsonOfNewCommentInfos;
-		String jsonOfMark;
-		String jsonOfCommentInfo;
-		String dirtyContainerId;
-		if (commentSupport != null) {
-			String oldCommitHash = getOldCommit().name();
-			Map<Integer, List<CommentInfo>> oldCommentInfos = new HashMap<>(); 
-			Map<Integer, List<CommentInfo>> newCommentInfos = new HashMap<>(); 
-			for (CodeComment comment: commentSupport.getComments()) {
-				if (comment.getMark().getRange() != null) {
-					int line = comment.getMark().getRange().getFromRow();
-					List<CommentInfo> commentInfosAtLine;
-					CommentInfo commentInfo = new CommentInfo();
-					commentInfo.id = comment.getId();
-					commentInfo.mark = new MarkInfo(comment, oldCommitHash);
-					if (commentInfo.mark.leftSide) {
-						commentInfosAtLine = oldCommentInfos.get(line);
-						if (commentInfosAtLine == null) {
-							commentInfosAtLine = new ArrayList<>();
-							oldCommentInfos.put(line, commentInfosAtLine);
-						}
-					} else {
-						commentInfosAtLine = newCommentInfos.get(line);
-						if (commentInfosAtLine == null) {
-							commentInfosAtLine = new ArrayList<>();
-							newCommentInfos.put(line, commentInfosAtLine);
-						}
-					}
-					commentInfosAtLine.add(commentInfo);
-				}
-			}
-			for (List<CommentInfo> value: oldCommentInfos.values()) {
-				value.sort((o1, o2)->(int)(o1.id-o2.id));
-			}
-			for (List<CommentInfo> value: newCommentInfos.values()) {
-				value.sort((o1, o2)->(int)(o1.id-o2.id));
-			}
-			
-			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
-			try {
-				jsonOfOldCommentInfos = mapper.writeValueAsString(oldCommentInfos);
-				jsonOfNewCommentInfos = mapper.writeValueAsString(newCommentInfos);
-			} catch (JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
-			
-			Mark mark = commentSupport.getMark();
-			if (mark != null) {
-				jsonOfMark = getJson(mark);
-			} else {
-				jsonOfMark = "undefined";
-			}
-			CodeComment comment = commentSupport.getOpenComment();
+		DiffCodeCommentInfo openComment;
+		DiffPlanarRange markRange;
+		String commentContainerId;
+		if (annotationSupport != null) {
+			markRange = annotationSupport.getMarkRange();
+			if (markRange != null && !change.isVisible(markRange))
+				markRange = null;
+			CodeComment comment = annotationSupport.getOpenComment();
 			if (comment != null) {
-				jsonOfCommentInfo = getJsonOfComment(comment);
-			} else {
-				jsonOfCommentInfo = "undefined";
+				DiffPlanarRange commentRange = annotationInfoModel.getObject().getMarkRange(comment);
+				openComment = new DiffCodeCommentInfo(comment, commentRange);
+			} else { 
+				openComment = null;
 			}
-			dirtyContainerId = "'" + commentSupport.getCommentContainer().getMarkupId() + "'";
+			commentContainerId = "'" + annotationSupport.getCommentContainer().getMarkupId() + "'";
 		} else {
-			jsonOfMark = "undefined";
-			jsonOfCommentInfo = "undefined";
-			jsonOfOldCommentInfos = "undefined";
-			jsonOfNewCommentInfos = "undefined";
-			dirtyContainerId = "undefined";
+			markRange = null;
+			openComment = null;
+			commentContainerId = null;
 		}
 		
 		CharSequence callback = callbackBehavior.getCallbackFunction(
@@ -593,17 +582,20 @@ public class TextDiffPanel extends Panel {
 				explicit("param6"), explicit("param7"), explicit("param8")); 
 		
 		String script = String.format("onedev.server.textDiff.onDomReady('%s', '%s', '%s', '%s', %s, %s, %s,"
-				+ "%s, %s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
+				+ "%s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				callback, blameMessageBehavior.getCallback(),
-				jsonOfMark, jsonOfCommentInfo, jsonOfOldCommentInfos, jsonOfNewCommentInfos, 
-				dirtyContainerId, OneDev.getInstance().getDocRoot());
+				convertToJson(markRange), convertToJson(openComment), 
+				convertToJson(annotationInfoModel.getObject()), 
+				commentContainerId, OneDev.getInstance().getDocRoot());
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 
-		script = String.format("onedev.server.textDiff.onWindowLoad('%s', %b, %s);", 
-				getMarkupId(), RequestCycle.get().find(AjaxRequestTarget.class) != null, jsonOfMark);
-		response.render(OnLoadHeaderItem.forScript(script));
+		if (markRange != null && RequestCycle.get().find(AjaxRequestTarget.class) == null) {
+			script = String.format("onedev.server.textDiff.onWindowLoad('%s', %s);", 
+					getMarkupId(), convertToJson(markRange));
+			response.render(OnLoadHeaderItem.forScript(script));
+		}
 	}
 	
 	private String renderDiffs() {
@@ -658,23 +650,21 @@ public class TextDiffPanel extends Panel {
 						+ "</colgroup>");
 			}
 		}
-		for (int i=0; i<getDiffBlocks().size(); i++) {
-			MarkAwareDiffBlock block = getDiffBlocks().get(i);
-			if (block.getType() == Type.EQUAL) {
+		for (int i=0; i<change.getDiffBlocks().size(); i++) {
+			DiffBlock<Tokenized> block = change.getDiffBlocks().get(i);
+			if (block.getOperation() == Operation.EQUAL) {
 				Integer lastContextSize = contextSizes.get(i);
 				if (lastContextSize == null)
 					lastContextSize = WebConstants.DIFF_CONTEXT_SIZE;
 				appendEquals(builder, i, 0, lastContextSize);
-			} else if (block.getType() == Type.MARKED_EQUAL) {
-				appendMarkedEquals(builder, i);
-			} else if (block.getType () == Type.DELETE) {
-				if (i+1<getDiffBlocks().size()) {
-					MarkAwareDiffBlock nextBlock = getDiffBlocks().get(i+1);
-					if (nextBlock.getType() == Type.INSERT) {
+			} else if (block.getOperation() == Operation.DELETE) {
+				if (i+1<change.getDiffBlocks().size()) {
+					DiffBlock<Tokenized> nextBlock = change.getDiffBlocks().get(i+1);
+					if (nextBlock.getOperation() == Operation.INSERT) {
 						LinkedHashMap<Integer, LineDiff> lineChanges = 
-								DiffUtils.align(block.getLines(), nextBlock.getLines(), false);
+								DiffUtils.align(block.getUnits(), nextBlock.getUnits(), false);
 						if (blameInfo != null && diffMode == DiffViewMode.UNIFIED) {
-							for (int j=0; j<block.getLines().size(); j++) { 
+							for (int j=0; j<block.getUnits().size(); j++) { 
 								LineDiff lineDiff = lineChanges.get(j);
 								if (lineDiff != null) {
 									appendDelete(builder, block, j, lineDiff.getTokenDiffs());
@@ -686,7 +676,7 @@ public class TextDiffPanel extends Panel {
 							for (LineDiff diff: lineChanges.values()) {
 								lineChangesByInsert.put(diff.getCompareLine(), diff);
 							}
-							for (int j=0; j<nextBlock.getLines().size(); j++) {
+							for (int j=0; j<nextBlock.getUnits().size(); j++) {
 								LineDiff lineDiff = lineChangesByInsert.get(j);
 								if (lineDiff != null) {
 									appendInsert(builder, nextBlock, j, lineDiff.getTokenDiffs());
@@ -712,28 +702,28 @@ public class TextDiffPanel extends Panel {
 								prevInsertLineIndex = insertLineIndex+1;
 							}
 							appendDeletesAndInserts(builder, block, nextBlock, 
-									prevDeleteLineIndex, block.getLines().size(), 
-									prevInsertLineIndex, nextBlock.getLines().size());
+									prevDeleteLineIndex, block.getUnits().size(), 
+									prevInsertLineIndex, nextBlock.getUnits().size());
 						}
 						i++;
 					} else {
-						for (int j=0; j<block.getLines().size(); j++) 
+						for (int j=0; j<block.getUnits().size(); j++) 
 							appendDelete(builder, block, j, null);
 					}
 				} else {
-					for (int j=0; j<block.getLines().size(); j++) 
+					for (int j=0; j<block.getUnits().size(); j++) 
 						appendDelete(builder, block, j, null);
 				}
 			} else {
-				for (int j=0; j<block.getLines().size(); j++) 
+				for (int j=0; j<block.getUnits().size(); j++) 
 					appendInsert(builder, block, j, null);
 			}
 		}
 		return builder.toString();
 	}
 
-	private void appendDeletesAndInserts(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
-			MarkAwareDiffBlock insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
+	private void appendDeletesAndInserts(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
+			DiffBlock<Tokenized> insertBlock, int fromDeleteLineIndex, int toDeleteLineIndex, 
 			int fromInsertLineIndex, int toInsertLineIndex) {
 		if (diffMode == DiffViewMode.UNIFIED) {
 			for (int i=fromDeleteLineIndex; i<toDeleteLineIndex; i++)
@@ -813,7 +803,7 @@ public class TextDiffPanel extends Panel {
 		}
 	}
 	
-	private void appendEqual(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, int lastContextSize) {
+	private void appendEqual(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, int lastContextSize) {
 		if (lastContextSize != 0)
 			builder.append("<tr class='code expanded'>");
 		else
@@ -830,7 +820,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getLines().get(lineIndex));
+			appendTokenized(builder, block.getUnits().get(lineIndex));
 			builder.append("</td>");
 		} else {
 			if (blameInfo != null) {
@@ -839,7 +829,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getLines().get(lineIndex));
+			appendTokenized(builder, block.getUnits().get(lineIndex));
 			builder.append("</td>");
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
@@ -847,13 +837,13 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getLines().get(lineIndex));
+			appendTokenized(builder, block.getUnits().get(lineIndex));
 			builder.append("</td>");
 		}
 		builder.append("</tr>");
 	}
 	
-	private void appendInsert(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, 
+	private void appendInsert(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, 
 			@Nullable List<DiffBlock<TextToken>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
@@ -878,7 +868,7 @@ public class TextDiffPanel extends Panel {
 					}
 				}			
 			} else {
-				appendTokenized(builder, block.getLines().get(lineIndex));
+				appendTokenized(builder, block.getUnits().get(lineIndex));
 			}
 			builder.append("</td>");
 		} else {
@@ -894,13 +884,13 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-			appendTokenized(builder, block.getLines().get(lineIndex));
+			appendTokenized(builder, block.getUnits().get(lineIndex));
 			builder.append("</td>");
 		}
 		builder.append("</tr>");
 	}
 	
-	private void appendDelete(StringBuilder builder, MarkAwareDiffBlock block, int lineIndex, 
+	private void appendDelete(StringBuilder builder, DiffBlock<Tokenized> block, int lineIndex, 
 			@Nullable List<DiffBlock<TextToken>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 		
@@ -925,7 +915,7 @@ public class TextDiffPanel extends Panel {
 					}
 				}
 			} else {
-				appendTokenized(builder, block.getLines().get(lineIndex));
+				appendTokenized(builder, block.getUnits().get(lineIndex));
 			}
 			builder.append("</td>");
 		} else {
@@ -935,7 +925,7 @@ public class TextDiffPanel extends Panel {
 			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-			appendTokenized(builder, block.getLines().get(lineIndex));
+			appendTokenized(builder, block.getUnits().get(lineIndex));
 			builder.append("</td>");
 			if (blameInfo != null) {
 				builder.append("<td class='blame noselect'>&nbsp;</td>");
@@ -947,8 +937,8 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private void appendSideBySide(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
-			MarkAwareDiffBlock insertBlock, int deleteLineIndex, int insertLineIndex) {
+	private void appendSideBySide(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
+			DiffBlock<Tokenized> insertBlock, int deleteLineIndex, int insertLineIndex) {
 		builder.append("<tr class='code original'>");
 
 		int oldLineNo = deleteBlock.getOldStart()+deleteLineIndex;
@@ -958,7 +948,7 @@ public class TextDiffPanel extends Panel {
 		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
-		appendTokenized(builder, deleteBlock.getLines().get(deleteLineIndex));
+		appendTokenized(builder, deleteBlock.getUnits().get(deleteLineIndex));
 		builder.append("</td>");
 		
 		int newLineNo = insertBlock.getNewStart()+insertLineIndex;
@@ -968,14 +958,14 @@ public class TextDiffPanel extends Panel {
 		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
 		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
-		appendTokenized(builder, insertBlock.getLines().get(insertLineIndex));
+		appendTokenized(builder, insertBlock.getUnits().get(insertLineIndex));
 		builder.append("</td>");
 		
 		builder.append("</tr>");
 	}
 
-	private void appendModification(StringBuilder builder, MarkAwareDiffBlock deleteBlock, 
-			MarkAwareDiffBlock insertBlock, int deleteLineIndex, int insertLineIndex, 
+	private void appendModification(StringBuilder builder, DiffBlock<Tokenized> deleteBlock, 
+			DiffBlock<Tokenized> insertBlock, int deleteLineIndex, int insertLineIndex, 
 			List<DiffBlock<TextToken>> tokenDiffs) {
 		builder.append("<tr class='code original'>");
 
@@ -1080,78 +1070,11 @@ public class TextDiffPanel extends Panel {
 		builder.append("</tr>");
 	}
 	
-	private List<MarkAwareDiffBlock> getDiffBlocks() {
-		if (diffBlocks == null) {
-			diffBlocks = new ArrayList<>();
-			List<LinearRange> oldRanges = new ArrayList<>();
-			List<LinearRange> newRanges = new ArrayList<>();
-			if (commentSupport != null) {
-				String oldCommitHash = getOldCommit().name();
-				for (Mark each: initialMarks) {
-					LinearRange range = new LinearRange(each.getRange().fromRow, each.getRange().toRow+1);
-					if (each.getCommitHash().equals(oldCommitHash)) {
-						oldRanges.add(range);
-					} else {
-						newRanges.add(range);
-					}
-				}
-			}
-			
-			for (DiffBlock<Tokenized> diffBlock: change.getDiffBlocks()) {
-				if (diffBlock.getOperation() == Operation.DELETE) {
-					diffBlocks.add(new MarkAwareDiffBlock(Type.DELETE, diffBlock.getUnits(), 
-							diffBlock.getOldStart(), diffBlock.getNewStart()));
-				} else if (diffBlock.getOperation() == Operation.INSERT) {
-					diffBlocks.add(new MarkAwareDiffBlock(Type.INSERT, diffBlock.getUnits(), 
-							diffBlock.getOldStart(), diffBlock.getNewStart()));
-				} else {
-					List<LinearRange> ranges = new ArrayList<>();
-					for (LinearRange range: oldRanges) {
-						ranges.add(new LinearRange(range.getFrom()-diffBlock.getOldStart(), range.getTo()-diffBlock.getOldStart()));
-					}
-					for (LinearRange range: newRanges) {
-						ranges.add(new LinearRange(range.getFrom()-diffBlock.getNewStart(), range.getTo()-diffBlock.getNewStart()));
-					}
-					ranges = RangeUtils.merge(ranges);
-					
-					int lastIndex = 0;
-					for (LinearRange range: ranges) {
-						int from = range.getFrom();
-						int to = range.getTo();
-						if (from < diffBlock.getUnits().size() && to > 0) {
-							if (from < lastIndex)
-								from = lastIndex;
-							if (to > diffBlock.getUnits().size())
-								to = diffBlock.getUnits().size();
-							if (lastIndex < from) {
-								List<Tokenized> lines = diffBlock.getUnits().subList(lastIndex, from);
-								diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
-										diffBlock.getOldStart()+lastIndex, diffBlock.getNewStart()+lastIndex));
-							}
-							if (from < to) {
-								List<Tokenized> lines = diffBlock.getUnits().subList(from, to);
-								diffBlocks.add(new MarkAwareDiffBlock(Type.MARKED_EQUAL, lines, 
-										diffBlock.getOldStart()+from, diffBlock.getNewStart()+from));
-							}
-							lastIndex = to;
-						}
-					}
-					
-					if (lastIndex < diffBlock.getUnits().size()) {
-						List<Tokenized> lines = diffBlock.getUnits().subList(lastIndex, diffBlock.getUnits().size());
-						diffBlocks.add(new MarkAwareDiffBlock(Type.EQUAL, lines, 
-								diffBlock.getOldStart()+lastIndex, diffBlock.getNewStart()+lastIndex));
-					}
-				}
-			}
-		}
-		return diffBlocks;
-	}
-	
 	@Override
 	protected void onDetach() {
 		projectModel.detach();
 		requestModel.detach();
+		annotationInfoModel.detach();
 		
 		if (blameModel != null)
 			blameModel.detach();
@@ -1159,46 +1082,32 @@ public class TextDiffPanel extends Panel {
 		super.onDetach();
 	}
 
-	private String getJsonOfComment(CodeComment comment) {
-		CommentInfo commentInfo = new CommentInfo();
-		commentInfo.id = comment.getId();
-		commentInfo.mark = new MarkInfo(comment, getOldCommit().name());
-
-		String jsonOfCommentInfo;
-		try {
-			jsonOfCommentInfo = OneDev.getInstance(ObjectMapper.class).writeValueAsString(commentInfo);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-		return jsonOfCommentInfo;
-	}
-	
-	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment, @Nullable DiffPlanarRange range) {
 		String script = String.format("onedev.server.textDiff.onCommentDeleted($('#%s'), %s);", 
-				getMarkupId(), getJsonOfComment(comment));
+				getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, range)));
 		target.appendJavaScript(script);
 		unmark(target);
 	}
 
 	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
-		String script = String.format("onedev.server.textDiff.onCloseComment($('#%s'));", getMarkupId());
+		String script = String.format("onedev.server.textDiff.onCommentClosed($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		unmark(target);
 	}
 
-	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentAdded(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange range) {
 		String script = String.format("onedev.server.textDiff.onCommentAdded($('#%s'), %s);", 
-				getMarkupId(), getJsonOfComment(comment));
+				getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, range)));
 		target.appendJavaScript(script);
 	}
-
-	public void mark(AjaxRequestTarget target, Mark mark) {
+	
+	public void mark(AjaxRequestTarget target, DiffPlanarRange markRange) {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
-			+ "var mark = %s;"
-			+ "onedev.server.textDiff.scrollTo($container, mark);"
-			+ "onedev.server.textDiff.mark($container, mark);", 
-			getMarkupId(), getJson(mark));
+			+ "var markRange = %s;"
+			+ "onedev.server.textDiff.scrollTo($container, markRange);"
+			+ "onedev.server.textDiff.mark($container, markRange);", 
+			getMarkupId(), convertToJson(markRange));
 		target.appendJavaScript(script);
 	}
 	
@@ -1206,7 +1115,7 @@ public class TextDiffPanel extends Panel {
 		String script = String.format(""
 			+ "var $container = $('#%s');"
 			+ "onedev.server.textDiff.clearMark($container);"
-			+ "$container.removeData('mark');", 
+			+ "$container.removeData('markRange');", 
 			getMarkupId());
 		target.appendJavaScript(script);
 	}
@@ -1214,40 +1123,6 @@ public class TextDiffPanel extends Panel {
 	public void onUnblame(AjaxRequestTarget target) {
 		blameInfo = null;
 		target.add(this);
-	}
-	
-	@SuppressWarnings("unused")
-	private static class CommentInfo {
-		long id;
-		
-		String title;
-		
-		MarkInfo mark;
-	}
-
-	@SuppressWarnings("unused")
-	private static class MarkInfo extends PlanarRange {
-		
-		String path;
-		
-		boolean leftSide;
-
-		public MarkInfo() {
-			
-		}
-		
-		public MarkInfo(CodeComment comment, String oldCommitHash) {
-			super(comment.getMark().getRange());
-			path = comment.getMark().getPath();
-			leftSide = comment.getMark().getCommitHash().equals(oldCommitHash);
-		}
-		
-		public MarkInfo(Mark mark, String oldCommitHash) {
-			super(mark.getRange());
-			path = mark.getPath();
-			leftSide = mark.getCommitHash().equals(oldCommitHash);
-		}
-		
 	}
 	
 	private static class BlameInfo implements Serializable {
@@ -1266,17 +1141,29 @@ public class TextDiffPanel extends Panel {
 
 	public static interface AnnotationSupport extends Serializable {
 		
-		@Nullable Mark getMark();
+		@Nullable 
+		DiffPlanarRange getMarkRange();
 		
-		String getMarkUrl(Mark mark);
+		String getMarkUrl(DiffPlanarRange markRange);
 		
-		Collection<CodeComment> getComments();
+		Map<CodeComment, PlanarRange> getOldComments();
 		
-		@Nullable CodeComment getOpenComment();
+		Map<CodeComment, PlanarRange> getNewComments();
+		
+		Collection<CodeProblem> getOldProblems();
+		
+		Collection<CodeProblem> getNewProblems();
+		
+		Collection<LineCoverage> getOldCoverages();
+		
+		Collection<LineCoverage> getNewCoverages();
+		
+		@Nullable 
+		CodeComment getOpenComment();
 
-		void onOpenComment(AjaxRequestTarget target, CodeComment comment);
+		void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange);
 		
-		void onAddComment(AjaxRequestTarget target, Mark mark);
+		void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange);
 		
 		Component getCommentContainer();
 		
