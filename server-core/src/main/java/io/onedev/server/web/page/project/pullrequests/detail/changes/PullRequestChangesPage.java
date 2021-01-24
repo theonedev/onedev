@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -44,12 +46,18 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
@@ -57,6 +65,7 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
+import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
@@ -71,10 +80,11 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.EditParamsAware;
+import io.onedev.server.web.util.RevisionDiff;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionDiffPanel.AnnotationSupport, EditParamsAware {
+public class PullRequestChangesPage extends PullRequestDetailPage implements RevisionDiff.AnnotationSupport, EditParamsAware {
 
 	public static final String PARAM_OLD_COMMIT = "old-commit";
 	
@@ -222,24 +232,23 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 	@Nullable
 	private PlanarRange mapRange(CodeComment comment, ObjectId commitId) {
-		Map<Integer, Integer> lineMapping = getLineMapping(
-				comment.getMark().getPath(), 
+		Map<Integer, Integer> lineMapping = getLineMapping( 
 				ObjectId.fromString(comment.getMark().getCommitHash()), 
-				commitId);
+				commitId, comment.getMark().getPath());
 		return DiffUtils.mapRange(lineMapping, comment.getMark().getRange());
 	}
 	
-	private Map<Integer, Integer> getLineMapping(String path, ObjectId oldCommitId, ObjectId newCommitId) {
+	private Map<Integer, Integer> getLineMapping(ObjectId oldCommitId, ObjectId newCommitId, String blobPath) {
 		if (lineMappingCache == null)
 			lineMappingCache = new HashMap<>();
 		ImmutableTriple<ObjectId, ObjectId, String> key = 
-				new ImmutableTriple<>(oldCommitId, newCommitId, path);
+				new ImmutableTriple<>(oldCommitId, newCommitId, blobPath);
 		Map<Integer, Integer> lineMapping = lineMappingCache.get(key);
 		if (lineMapping == null) {
-			BlobIdent newBlobIdent = new BlobIdent(newCommitId.name(), path, FileMode.REGULAR_FILE.getBits());
+			BlobIdent newBlobIdent = new BlobIdent(newCommitId.name(), blobPath, FileMode.REGULAR_FILE.getBits());
 			List<String> newLines = getProject().readLines(newBlobIdent, WhitespaceOption.DEFAULT, false);
 			if (newLines != null) {
-				BlobIdent oldBlobIdent = new BlobIdent(oldCommitId.name(), path, FileMode.REGULAR_FILE.getBits());
+				BlobIdent oldBlobIdent = new BlobIdent(oldCommitId.name(), blobPath, FileMode.REGULAR_FILE.getBits());
 				List<String> oldLines = getProject().readLines(oldBlobIdent, WhitespaceOption.DEFAULT, true);
 				if (oldLines != null) 
 					lineMapping = DiffUtils.mapLines(oldLines, newLines);
@@ -700,9 +709,20 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 
 		};
 		
-		Component revisionDiff = new RevisionDiffPanel("revisionDiff", projectModel,  
-				requestModel, getComparisonBase().name(), state.newCommitHash, 
-				pathFilterModel, whitespaceOptionModel, blameModel, this);
+		Component revisionDiff = new RevisionDiffPanel("revisionDiff", getComparisonBase().name(), 
+				state.newCommitHash, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+			
+			@Override
+			protected Project getProject() {
+				return projectModel.getObject();
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return requestModel.getObject();
+			}
+			
+		};
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
 			replace(revisionDiff);
@@ -858,13 +878,129 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Map<CodeComment, PlanarRange> getOldComments() {
-		return oldCommentsModel.getObject();
+	public Map<CodeComment, PlanarRange> getOldComments(String blobPath) {
+		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
+		for (Map.Entry<CodeComment, PlanarRange> entry: oldCommentsModel.getObject().entrySet()) {
+			if (entry.getKey().getMark().getPath().equals(blobPath))
+				oldComments.put(entry.getKey(), entry.getValue());
+		}
+		return oldComments;
 	}
 
 	@Override
-	public Map<CodeComment, PlanarRange> getNewComments() {
-		return newCommentsModel.getObject();
+	public Map<CodeComment, PlanarRange> getNewComments(String blobPath) {
+		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
+		for (Map.Entry<CodeComment, PlanarRange> entry: newCommentsModel.getObject().entrySet()) {
+			if (entry.getKey().getMark().getPath().equals(blobPath))
+				newComments.put(entry.getKey(), entry.getValue());
+		}
+		return newComments;
+	}
+
+	@Override
+	public Collection<CodeProblem> getOldProblems(String blobPath) {
+		Set<CodeProblem> problems = new HashSet<>();
+		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
+		for (Build build: getBuilds(buildCommitId)) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
+				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
+					if (!buildCommitId.equals(getComparisonBase())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+						PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
+						if (range != null)
+							problems.add(new CodeProblem(range, problem.getContent(), problem.getSeverity()));
+					} else {
+						problems.add(problem);
+					}
+				}
+			}
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<CodeProblem> getNewProblems(String blobPath) {
+		ObjectId buildCommitId;
+		MergePreview preview = getPullRequest().getMergePreview();
+		if (preview != null && preview.getMergeCommitHash() != null 
+				&& state.newCommitHash.equals(preview.getHeadCommitHash())) {
+			buildCommitId = ObjectId.fromString(preview.getMergeCommitHash());
+		} else {
+			buildCommitId = ObjectId.fromString(state.newCommitHash);
+		}
+		
+		Set<CodeProblem> problems = new HashSet<>();
+		for (Build build: getBuilds(buildCommitId)) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
+				for (CodeProblem problem: contribution.getCodeProblems(build, blobPath, null)) {
+					if (!state.newCommitHash.equals(buildCommitId.name())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, 
+								ObjectId.fromString(state.newCommitHash), blobPath);
+						PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
+						if (range != null)
+							problems.add(new CodeProblem(range, problem.getContent(), problem.getSeverity()));
+					} else {
+						problems.add(problem);
+					}
+				}
+			}
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<LineCoverage> getOldCoverages(String blobPath) {
+		List<LineCoverage> coverages = new ArrayList<>();
+		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
+		for (Build build: getBuilds(buildCommitId)) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
+				for (LineCoverage coverage: contribution.getLineCoverages(build, blobPath, null)) {
+					if (!buildCommitId.equals(getComparisonBase())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
+						for (int line = coverage.getFromLine(); line<=coverage.getToLine(); line++) {
+							Integer mappedLine = lineMapping.get(line);
+							if (mappedLine != null)
+								coverages.add(new LineCoverage(mappedLine, mappedLine, coverage.getTestCount()));
+						}
+					} else {
+						coverages.add(coverage);
+					}
+				}
+			}
+		}
+		return coverages;
+	}
+
+	@Override
+	public Collection<LineCoverage> getNewCoverages(String blobPath) {
+		ObjectId commitId;
+		MergePreview preview = getPullRequest().getMergePreview();
+		if (preview != null && preview.getMergeCommitHash() != null 
+				&& state.newCommitHash.equals(preview.getHeadCommitHash())) {
+			commitId = ObjectId.fromString(preview.getMergeCommitHash());
+		} else {
+			commitId = ObjectId.fromString(state.newCommitHash);
+		}
+		
+		List<LineCoverage> coverages = new ArrayList<>();
+		for (Build build: getBuilds(commitId)) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
+				for (LineCoverage coverage: contribution.getLineCoverages(build, blobPath, null)) {
+					if (!state.newCommitHash.equals(commitId.name())) {
+						Map<Integer, Integer> lineMapping = getLineMapping(commitId, 
+								ObjectId.fromString(state.newCommitHash), blobPath);
+						for (int line = coverage.getFromLine(); line<=coverage.getToLine(); line++) {
+							Integer mappedLine = lineMapping.get(line);
+							if (mappedLine != null)
+								coverages.add(new LineCoverage(mappedLine, mappedLine, coverage.getTestCount()));
+						}
+					} else {
+						coverages.add(coverage);
+					}
+				}
+			}
+		}
+		return coverages;
 	}
 
 }

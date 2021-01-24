@@ -3,6 +3,7 @@ package io.onedev.server.entitymanager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -33,8 +34,9 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<Long> queryStreamPreviousNumbers(Build build, @Nullable Build.Status status, int limit);
 
-	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, @Nullable String refName,
-			@Nullable PullRequest request, Map<String, List<String>> params);
+	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, 
+			@Nullable String refName, @Nullable Optional<PullRequest> request, 
+			Map<String, List<String>> params);
 
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName);
 

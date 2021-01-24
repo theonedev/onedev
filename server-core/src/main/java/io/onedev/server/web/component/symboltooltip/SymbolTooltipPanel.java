@@ -20,7 +20,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -53,19 +52,17 @@ public abstract class SymbolTooltipPanel extends Panel {
 
 	private static final int QUERY_ENTRIES = 20;
 	
-	private final IModel<Project> projectModel;
-	
 	private String revision = "";
 	
 	private String symbolName = "";
 	
 	private List<QueryHit> symbolHits = new ArrayList<>();
 	
-	public SymbolTooltipPanel(String id, IModel<Project> projectModel) {
+	public SymbolTooltipPanel(String id) {
 		super(id);
-		
-		this.projectModel = projectModel;
 	}
+	
+	protected abstract Project getProject();
 
 	@Override
 	protected void onInitialize() {
@@ -153,8 +150,8 @@ public abstract class SymbolTooltipPanel extends Panel {
 									.build();
 							try {
 								SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-								ObjectId commit = projectModel.getObject().getRevCommit(revision, true);
-								hits = searchManager.search(projectModel.getObject(), commit, query);
+								ObjectId commit = getProject().getRevCommit(revision, true);
+								hits = searchManager.search(getProject(), commit, query);
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}								
@@ -207,11 +204,11 @@ public abstract class SymbolTooltipPanel extends Panel {
 				// do this check to avoid TooGeneralQueryException
 				if (symbolName.length() != 0 && symbolName.indexOf('?') == -1 && symbolName.indexOf('*') == -1) {
 					BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.TYPE_FILE);
-					Blob blob = projectModel.getObject().getBlob(blobIdent, true);
+					Blob blob = getProject().getBlob(blobIdent, true);
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// first find in current file for matched symbols
-						List<Symbol> symbols = OneDev.getInstance(SearchManager.class).getSymbols(projectModel.getObject(), 
+						List<Symbol> symbols = OneDev.getInstance(SearchManager.class).getSymbols(getProject(), 
 								blob.getBlobId(), getBlobPath());
 						if (symbols != null) {
 							for (Symbol symbol: symbols) {
@@ -237,7 +234,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						// then find in other files for public symbols
 						try {
 							SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-							ObjectId commit = projectModel.getObject().getRevCommit(revision, true);
+							ObjectId commit = getProject().getRevCommit(revision, true);
 							BlobQuery query;
 							if (symbolHits.size() < QUERY_ENTRIES) {
 								query = new SymbolQuery.Builder().term(symbolName)
@@ -247,7 +244,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.caseSensitive(true)
 										.count(QUERY_ENTRIES)
 										.build();
-								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+								symbolHits.addAll(searchManager.search(getProject(), commit, query));
 							}							
 							if (symbolHits.size() < QUERY_ENTRIES) {
 								query = new SymbolQuery.Builder().term(symbolName)
@@ -257,7 +254,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 										.caseSensitive(true)
 										.count(QUERY_ENTRIES - symbolHits.size())
 										.build();
-								symbolHits.addAll(searchManager.search(projectModel.getObject(), commit, query));
+								symbolHits.addAll(searchManager.search(getProject(), commit, query));
 							}
 						} catch (InterruptedException e) {
 							throw new RuntimeException(e);
@@ -294,14 +291,14 @@ public abstract class SymbolTooltipPanel extends Panel {
 		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.position = SourceRendererProvider.getPosition(hit.getTokenPos());
-		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
+		return ProjectBlobPage.paramsOf(getProject(), state);
 	}
 	
 	public PageParameters getFindOccurrencesParams() {
 		BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.query = symbolName;
-		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
+		return ProjectBlobPage.paramsOf(getProject(), state);
 	}
 	
 	public String getSymbol() {
@@ -312,12 +309,6 @@ public abstract class SymbolTooltipPanel extends Panel {
 		return revision;
 	}
 	
-	@Override
-	protected void onDetach() {
-		projectModel.detach();
-		super.onDetach();
-	}
-
 	protected abstract String getBlobPath();
 	
 	protected abstract void onSelect(AjaxRequestTarget target, QueryHit hit);

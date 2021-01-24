@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -258,7 +259,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId, String jobName, 
-			String refName, PullRequest request, Map<String, List<String>> params) {
+			String refName, Optional<PullRequest> request, Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -271,10 +272,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		if (refName != null)
 			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
 
-		if (request != null)
-			predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request));
-		else
-			predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
+		if (request != null) {
+			if (request.isPresent())
+				predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request.get()));
+			else
+				predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
+		}
 			
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {

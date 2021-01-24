@@ -93,14 +93,9 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				String longMessage = "This is a very long message and we have a very \n"
-						+ "good practice oover This <b>is a very</b> long message and \n"
-						+ "we have a very good practice oover This is a very long message and we have a very good practice oover";
 				return Lists.newArrayList(
-						new CodeProblem(new PlanarRange(0, 1, 1, 5), longMessage, Severity.ERROR),
-						new CodeProblem(new PlanarRange(10, 6, 12, 10), reportName, Severity.WARNING),
-						new CodeProblem(new PlanarRange(14, 1, 14, 5), "This is an error message", Severity.ERROR),
-						new CodeProblem(new PlanarRange(19, 6, 19, 10), longMessage + "\n" + longMessage, Severity.WARNING)
+						new CodeProblem(new PlanarRange(21, 1, 21, 5), "message1", Severity.ERROR),
+						new CodeProblem(new PlanarRange(227, 1, 230, 10), "message4", Severity.WARNING)
 					);
 			}
 			
@@ -110,10 +105,7 @@ public class HtmlReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<LineCoverage> getLineCoverages(Build build, String blobPath, String reportName) {
-				if (reportName == null)
-					return Lists.newArrayList(new LineCoverage(5, 8, 1), new LineCoverage(12, 15, 0));
-				else
-					return Lists.newArrayList(new LineCoverage(5, 8, 1));
+				return Lists.newArrayList(new LineCoverage(21, 21, 1), new LineCoverage(226, 229, 0));
 			}
 			
 		});

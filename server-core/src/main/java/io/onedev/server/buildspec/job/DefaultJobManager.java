@@ -224,7 +224,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 	
 			Collection<Build> builds = buildManager.query(project, commitId, jobName, 
-					reason.getRefName(), reason.getPullRequest(), paramMapToQuery);
+					reason.getRefName(), Optional.ofNullable(reason.getPullRequest()), 
+					paramMapToQuery);
 			
 			if (builds.isEmpty()) {
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {

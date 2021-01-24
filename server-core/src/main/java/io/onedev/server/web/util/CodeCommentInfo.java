@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.model.CodeComment;
 
@@ -21,7 +19,7 @@ public class CodeCommentInfo implements Serializable {
 	
 	private final boolean updated;
 	
-	public CodeCommentInfo(CodeComment comment, @Nullable PlanarRange range) {
+	public CodeCommentInfo(CodeComment comment, PlanarRange range) {
 		id = comment.getId();
 		updated = !comment.isVisitedAfter(comment.getLastUpdate().getDate());
 		this.range = range;
@@ -31,7 +29,6 @@ public class CodeCommentInfo implements Serializable {
 		return id;
 	}
 
-	@Nullable
 	public PlanarRange getRange() {
 		return range;
 	}

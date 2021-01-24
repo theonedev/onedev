@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -142,8 +143,8 @@ public abstract class JobListPanel extends Panel {
 				@Override
 				protected List<Build> load() {
 					BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName(), 
-							refName, getPullRequest(), new HashMap<>()));
+					List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, 
+							job.getName(), refName, Optional.ofNullable(getPullRequest()), new HashMap<>()));
 					builds.sort(Comparator.comparing(Build::getNumber));
 					return builds;
 				}

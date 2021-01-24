@@ -37,7 +37,6 @@ import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -352,8 +351,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 				@Override
 				protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-					SourceViewPanel.this.onCommentDeleted(target, comment, 
-							(PlanarRange) commentContainer.getDefaultModelObject());
+					SourceViewPanel.this.onCommentDeleted(target);
 				}
 
 				@Override
@@ -475,7 +473,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							mark.setCommitHash(context.getCommit().name());
 							mark.setPath(context.getBlobIdent().path);
 							
-							PlanarRange range = (PlanarRange) commentContainer.getDefaultModelObject();
 							mark.setRange(range);
 							
 							comment.setMark(mark);
@@ -491,7 +488,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 								@Override
 								protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-									SourceViewPanel.this.onCommentDeleted(target, comment, range);
+									SourceViewPanel.this.onCommentDeleted(target);
 								}
 
 								@Override
@@ -538,8 +535,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 						@Override
 						protected void onDeleteComment(AjaxRequestTarget target, CodeComment comment) {
-							PlanarRange range = (PlanarRange) commentContainer.getDefaultModelObject();
-							SourceViewPanel.this.onCommentDeleted(target, comment, range);
+							SourceViewPanel.this.onCommentDeleted(target);
 						}
 
 						@Override
@@ -685,14 +681,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		
 		outline.setVisible(isOutlineVisibleInitially());
 		
-		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip", new AbstractReadOnlyModel<Project>() {
-
-			@Override
-			public Project getObject() {
-				return context.getProject();
-			}
-			
-		}) {
+		add(symbolTooltip = new SymbolTooltipPanel("symbolTooltip") {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
@@ -709,6 +698,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			@Override
 			protected String getBlobPath() {
 				return context.getBlobIdent().path;
+			}
+
+			@Override
+			protected Project getProject() {
+				return context.getProject();
 			}
 			
 		});
@@ -765,11 +759,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		super.onDetach();
 	}
 
-	private void onCommentDeleted(AjaxRequestTarget target, CodeComment comment, @Nullable PlanarRange range) {
+	private void onCommentDeleted(AjaxRequestTarget target) {
 		clearComment(target);
-		String script = String.format("onedev.server.sourceView.onCommentDeleted(%s);", 
-				convertToJson(new CodeCommentInfo(comment, range)));
-		target.appendJavaScript(script);
+		target.appendJavaScript("onedev.server.sourceView.onCommentDeleted();");
 		context.onCommentClosed(target);
 	}
 	
@@ -831,12 +823,15 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		
-		CodeCommentInfo openComment;
+		CodeCommentInfo openCommentInfo;
 		if (context.getOpenComment() != null) {
 			PlanarRange range = (PlanarRange) commentContainer.getDefaultModelObject();
-			openComment = new CodeCommentInfo(context.getOpenComment(), range);
+			if (range != null)
+				openCommentInfo = new CodeCommentInfo(context.getOpenComment(), range);
+			else
+				openCommentInfo = null;
 		} else { 
-			openComment = null;
+			openCommentInfo = null;
 		}
 
 		CharSequence callback = ajaxBehavior.getCallbackFunction(
@@ -851,7 +846,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s);", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
-				convertToJson(openComment),
+				convertToJson(openCommentInfo),
 				convertToJson(markRange),
 				symbolTooltip.getMarkupId(), 
 				context.getBlobIdent().revision, 
@@ -993,8 +988,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private void closeComment(AjaxRequestTarget target) {
 		clearComment(target);
-		if (context.getOpenComment() != null) 
-			context.onCommentClosed(target);
+		context.onCommentClosed(target);
 		target.appendJavaScript("onedev.server.sourceView.onCloseComment();");
 	}
 	

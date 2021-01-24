@@ -25,8 +25,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
@@ -40,7 +38,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -50,7 +47,6 @@ import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Provider;
@@ -143,18 +139,10 @@ public abstract class CommitOptionPanel extends Panel {
 	
 	private void newChangesOfOthersContainer(@Nullable AjaxRequestTarget target) {
 		Component changesOfOthersContainer;
-		if (changesOfOthers != null) {
-			changesOfOthersContainer = new BlobDiffPanel("changesOfOthers", new AbstractReadOnlyModel<Project>() {
-
-				@Override
-				public Project getObject() {
-					return context.getProject();
-				}
-				
-			}, new Model<PullRequest>(null), changesOfOthers, DiffViewMode.UNIFIED, null, null);
-		} else {
+		if (changesOfOthers != null) 
+			changesOfOthersContainer = new BlobDiffPanel("changesOfOthers", changesOfOthers, DiffViewMode.UNIFIED, null);
+		else 
 			changesOfOthersContainer = new WebMarkupContainer("changesOfOthers").setVisible(false);
-		}
 		if (target != null) {
 			form.replace(changesOfOthersContainer);
 			target.add(form);
@@ -393,8 +381,8 @@ public abstract class CommitOptionPanel extends Panel {
 		return new BlobChange(changeType, oldBlobIdent, newBlobIdent, WhitespaceOption.DEFAULT) {
 
 			@Override
-			public Blob getBlob(BlobIdent blobIdent) {
-				return context.getProject().getBlob(blobIdent, true);
+			public Project getProject() {
+				return context.getProject();
 			}
 
 		};

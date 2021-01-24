@@ -5,21 +5,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.diff.DiffEntry;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.jsyntax.Tokenized;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.Mark;
+import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
+import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.util.DiffPlanarRange;
-import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 
 @SuppressWarnings("serial")
 public abstract class BlobChange implements Serializable {
@@ -34,37 +44,14 @@ public abstract class BlobChange implements Serializable {
 	
 	private transient List<DiffBlock<Tokenized>> diffBlocks;
 	
-	public BlobChange(String oldRev, String newRev, DiffEntry diffEntry, 
-			WhitespaceOption whitespaceOption) {
-		if (diffEntry.getChangeType() == ChangeType.RENAME 
-				&& diffEntry.getOldPath().equals(diffEntry.getNewPath())) {
-			// for some unknown reason, jgit detects rename even if path 
-			// is the same
-			type = ChangeType.MODIFY;
-		} else {
-			type = diffEntry.getChangeType();
-		}
-		this.whitespaceOption = whitespaceOption;
-		oldBlobIdent = GitUtils.getOldBlobIdent(diffEntry, oldRev);
-		newBlobIdent = GitUtils.getNewBlobIdent(diffEntry, newRev);
-	}
-	
-	public BlobChange(@Nullable ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
+	public BlobChange(ChangeType type, BlobIdent oldBlobIdent, BlobIdent newBlobIdent, 
 			WhitespaceOption whitespaceOption) {
 		this.type = type;
 		this.oldBlobIdent = oldBlobIdent;
 		this.newBlobIdent = newBlobIdent;
 		this.whitespaceOption = whitespaceOption;
 	}
-	
-	/**
-	 * Get change type. Return <tt>null</tt> if this is a faked change representing 
-	 * an unchanged file
-	 * 
-	 * @return 
-	 * 			type of change, or <tt>null</tt> if the file is not changed actually
-	 */
-	@Nullable
+
 	public ChangeType getType() {
 		return type;
 	}
@@ -161,12 +148,12 @@ public abstract class BlobChange implements Serializable {
 	
 	public Blob getOldBlob() {
 		Preconditions.checkNotNull(oldBlobIdent.path);
-		return getBlob(oldBlobIdent);
+		return getProject().getBlob(oldBlobIdent, true);
 	}
 	
 	public Blob getNewBlob() {
 		Preconditions.checkNotNull(newBlobIdent.path);
-		return getBlob(newBlobIdent);
+		return getProject().getBlob(newBlobIdent, true);
 	}
 	
 	@Nullable
@@ -204,6 +191,70 @@ public abstract class BlobChange implements Serializable {
 		return DiffUtils.isVisible(getDiffBlocks(), leftSide, line, WebConstants.DIFF_CONTEXT_SIZE);
 	}
 	
-	public abstract Blob getBlob(BlobIdent blobIdent);
+	public abstract Project getProject();
+	
+	@Nullable
+	public AnnotationSupport getAnnotationSupport() {
+		return null;
+	}
+	
+	public ObjectId getOldCommitId() {
+		if (oldBlobIdent.revision.equals(ObjectId.zeroId().name().toString())) 
+			return ObjectId.zeroId();
+		else 
+			return getProject().getRevCommit(oldBlobIdent.revision, true);
+	}
+	
+	public ObjectId getNewCommitId() {
+		if (newBlobIdent.revision.equals(ObjectId.zeroId().name().toString())) 
+			return ObjectId.zeroId();
+		else 
+			return getProject().getRevCommit(newBlobIdent.revision, true);
+	}
+
+	public Mark getMark(DiffPlanarRange range) {
+		Mark mark = new Mark();
+		mark.setRange(new PlanarRange(range));
+		if (range.isLeftSide()) {
+			mark.setCommitHash(getOldCommitId().name());
+			mark.setPath(oldBlobIdent.path);
+		} else {
+			mark.setCommitHash(getNewCommitId().name());
+			mark.setPath(newBlobIdent.path);
+		}
+		return mark;
+	}
+	
+	public static interface AnnotationSupport extends Serializable {
+		
+		@Nullable 
+		DiffPlanarRange getMarkRange();
+		
+		String getMarkUrl(DiffPlanarRange markRange);
+		
+		Map<CodeComment, PlanarRange> getOldComments();
+		
+		Map<CodeComment, PlanarRange> getNewComments();
+		
+		Collection<CodeProblem> getOldProblems();
+		
+		Collection<CodeProblem> getNewProblems();
+		
+		Collection<LineCoverage> getOldCoverages();
+		
+		Collection<LineCoverage> getNewCoverages();
+		
+		DiffPlanarRange getCommentRange(CodeComment comment);
+		
+		@Nullable 
+		Pair<CodeComment, DiffPlanarRange> getOpenComment();
+
+		void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange);
+		
+		void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange);
+		
+		Component getCommentContainer();
+		
+	}
 	
 }

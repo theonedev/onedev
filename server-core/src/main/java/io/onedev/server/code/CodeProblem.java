@@ -18,20 +18,20 @@ public class CodeProblem implements Serializable {
 
 	public static enum Severity {ERROR, WARNING};
 	
-	private final PlanarRange position;
+	private final PlanarRange range;
 	
 	private final String content;
 	
 	private final Severity severity;
 
-	public CodeProblem(PlanarRange position, String content, Severity severity) {
-		this.position = position;
+	public CodeProblem(PlanarRange range, String content, Severity severity) {
+		this.range = range;
 		this.content = content;
 		this.severity = severity;
 	}
 
-	public PlanarRange getPosition() {
-		return position;
+	public PlanarRange getRange() {
+		return range;
 	}
 
 	public String getContent() {
@@ -50,7 +50,7 @@ public class CodeProblem implements Serializable {
 			return true;
 		CodeProblem otherProblem = (CodeProblem) other;
 		return new EqualsBuilder()
-				.append(position, otherProblem.position)
+				.append(range, otherProblem.range)
 				.append(content, otherProblem.content)
 				.append(severity, otherProblem.severity)
 				.isEquals();
@@ -59,7 +59,7 @@ public class CodeProblem implements Serializable {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(position)
+				.append(range)
 				.append(content)
 				.append(severity)
 				.toHashCode();
@@ -69,7 +69,7 @@ public class CodeProblem implements Serializable {
 		Map<Integer, List<CodeProblem>> problemsByLine = new HashMap<>();
 		
 		for (CodeProblem problem: problems) {
-			PlanarRange position = problem.getPosition();
+			PlanarRange position = problem.getRange();
 			int line = position.getFromRow();
 			List<CodeProblem> problemsAtLine = problemsByLine.get(line);
 			if (problemsAtLine == null) {

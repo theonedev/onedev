@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -49,6 +51,10 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -84,9 +90,10 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.util.ReferenceTransformer;
+import io.onedev.server.web.util.RevisionDiff;
 
 @SuppressWarnings("serial")
-public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.AnnotationSupport {
+public class CommitDetailPage extends ProjectPage implements RevisionDiff.AnnotationSupport {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 	
@@ -566,9 +573,15 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.A
 			}
 			
 		};
-		revisionDiff = new RevisionDiffPanel("revisionDiff", projectModel,  
-				Model.of((PullRequest)null), getCompareWith().name(), state.revision, 
-				pathFilterModel, whitespaceOptionModel, blameModel, this);
+		revisionDiff = new RevisionDiffPanel("revisionDiff", getCompareWith().name(), 
+				state.revision, pathFilterModel, whitespaceOptionModel, blameModel, this) {
+			
+			@Override
+			protected Project getProject() {
+				return projectModel.getObject();
+			}
+
+		};
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
 			replace(revisionDiff);
@@ -765,23 +778,67 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiffPanel.A
 	}
 
 	@Override
-	public Map<CodeComment, PlanarRange> getOldComments() {
+	public Map<CodeComment, PlanarRange> getOldComments(String blobPath) {
 		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getMark().getCommitHash().equals(getCompareWith().name()))
+			if (comment.getMark().getPath().equals(blobPath) 
+					&& comment.getMark().getCommitHash().equals(getCompareWith().name())) {
 				oldComments.put(comment, comment.getMark().getRange());
+			}
 		}
 		return oldComments;
 	}
 
 	@Override
-	public Map<CodeComment, PlanarRange> getNewComments() {
+	public Map<CodeComment, PlanarRange> getNewComments(String blobPath) {
 		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getMark().getCommitHash().equals(resolvedRevision.name()))
+			if (comment.getMark().getPath().equals(blobPath) 
+					&& comment.getMark().getCommitHash().equals(getCommit().name())) {
 				newComments.put(comment, comment.getMark().getRange());
+			}
 		}
 		return newComments;
+	}
+	
+	@Override
+	public Collection<CodeProblem> getOldProblems(String blobPath) {
+		Set<CodeProblem> problems = new HashSet<>();
+		for (Build build: getBuilds(getCompareWith())) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
+				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<CodeProblem> getNewProblems(String blobPath) {
+		Set<CodeProblem> problems = new HashSet<>();
+		for (Build build: getBuilds(getCommit())) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
+				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<LineCoverage> getOldCoverages(String blobPath) {
+		Collection<LineCoverage> coverages = new ArrayList<>();
+		for (Build build: getBuilds(getCompareWith())) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class))
+				coverages.addAll(contribution.getLineCoverages(build, blobPath, null));
+		}
+		return coverages;
+	}
+
+	@Override
+	public Collection<LineCoverage> getNewCoverages(String blobPath) {
+		Collection<LineCoverage> coverages = new ArrayList<>();
+		for (Build build: getBuilds(getCommit())) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class))
+				coverages.addAll(contribution.getLineCoverages(build, blobPath, null));
+		}
+		return coverages;
 	}
 	
 }

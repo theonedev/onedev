@@ -111,17 +111,17 @@ onedev.server.sourceView = {
 		});
 		
 		for (var line in annotationInfo.comments) {
-		    if (annotationInfo.comments.hasOwnProperty(line)) 
+		    if (annotationInfo.comments.hasOwnProperty(line) && line<cm.lineCount()) 
 		    	onedev.server.sourceView.addCommentGutter(line, annotationInfo.comments[line]);
 		}
 		
 		for (var line in annotationInfo.problems) {
-		    if (annotationInfo.problems.hasOwnProperty(line)) 
+		    if (annotationInfo.problems.hasOwnProperty(line) && line<cm.lineCount()) 
 		    	onedev.server.sourceView.addProblemGutter(line, annotationInfo.problems[line]);
 		}
 		
 		for (var line in annotationInfo.coverages) {
-			if (annotationInfo.coverages.hasOwnProperty(line))
+			if (annotationInfo.coverages.hasOwnProperty(line) && line<cm.lineCount())
 				onedev.server.sourceView.addCoverageGutter(line, annotationInfo.coverages[line]);
 		}
 		
@@ -229,7 +229,7 @@ onedev.server.sourceView = {
 		if (testCount > 0)
 			tooltip = `Tested ${testCount} times`;
 		else
-			tooltip = "Not covered by any test";
+			tooltip = "Not covered by any tests";
 			
 		let $gutter = $(`<a class='CodeMirror-coverage d-block' title='${tooltip}'>&nbsp;</a>`);
 
@@ -239,6 +239,7 @@ onedev.server.sourceView = {
 			$gutter.addClass("not-tested");
 			
 		let cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
+		
 		cm.setGutterMarker(parseInt(line), "CodeMirror-coverages", $gutter[0]);	
 	},
 	addProblemGutter: function(line, problems) {
@@ -247,11 +248,10 @@ onedev.server.sourceView = {
 		
 		var $gutter = $(document.createElement("div"));
 		$gutter.addClass("CodeMirror-problem");
-		$gutter.data("problems", problems);
 
 		var markRanges = [];
 		for (var i in problems) 
-			markRanges.push(problems[i].position);			
+			markRanges.push(problems[i].range);			
 		
 		var icon = onedev.server.codeProblem.getIcon(problems);
 		var linkClass = onedev.server.codeProblem.getLinkClass(problems);
@@ -276,7 +276,7 @@ onedev.server.sourceView = {
 			var $currentPopover = $(".problem-popover[data-line='" + line + "']");
 			$(".popover").not($currentPopover).popover("hide");
 			$currentPopover.find(".problem-content").mouseover(function() {
-				onedev.server.codemirror.mark(cm, problems[$(this).index()].position);
+				onedev.server.codemirror.mark(cm, problems[$(this).index()].range);
 			}).mouseout(function() {
 				onedev.server.sourceView.restoreMark();
 			}).each(function() {
@@ -284,9 +284,9 @@ onedev.server.sourceView = {
 				$(this).children(".add-comment").click(function() {
 					if (onedev.server.sourceView.confirmUnsavedChanges()) {
 						$currentPopover.popover("hide");
-						var position = problem.position;
-						callback("addComment", position.fromRow, position.fromColumn, 
-								position.toRow, position.toColumn);
+						var range = problem.range;
+						callback("addComment", range.fromRow, range.fromColumn, 
+								range.toRow, range.toColumn);
 					}
 				});
 			});
@@ -449,12 +449,12 @@ onedev.server.sourceView = {
 		onedev.server.sourceView.highlightCommentTrigger();				
 		$(window).resize();
 	},
-	onCommentDeleted: function(comment) {
+	onCommentDeleted: function() {
 		var $sourceView = $(".source-view");
-		$sourceView.removeData("openComment");
-		
-		if (comment.range) {
-			var line = parseInt(comment.range.fromRow);
+		var openComment = $sourceView.data("openComment");
+		if (openComment) {
+			$sourceView.removeData("openComment");
+			var line = parseInt(openComment.range.fromRow);
 			var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 			var lineInfo = cm.lineInfo(line);
 			var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
@@ -463,7 +463,7 @@ onedev.server.sourceView = {
 				cm.setGutterMarker(line, "CodeMirror-comments", null);
 			} else {
 				for (var i in comments) {
-					if (comments[i].id == comment.id) {
+					if (comments[i].id == openComment.id) {
 						comments.splice(i, 1);
 						break;
 					}
@@ -475,20 +475,20 @@ onedev.server.sourceView = {
 		$(window).resize();
 		onedev.server.sourceView.clearMark();
 	},
-	onAddComment: function(markRange) {
+	onAddComment: function(commentRange) {
 		$(".popover").popover("hide");
 		onedev.server.sourceView.exitFullScreen();
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
-		$sourceView.data("markRange", markRange);
+		$sourceView.data("markRange", commentRange);
 		$(".source-view>.code").selectionPopover("close");
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		onedev.server.codemirror.clearSelection(cm);
 		$(window).resize();
 
-		onedev.server.sourceView.mark(markRange, false);
-		onedev.server.codemirror.scrollIntoView(cm, markRange);
+		onedev.server.sourceView.mark(commentRange, false);
+		onedev.server.codemirror.scrollIntoView(cm, commentRange);
 		
 		onedev.server.sourceView.highlightCommentTrigger();		
 		var $textarea = $sourceView.find(".comment textarea");
@@ -539,7 +539,7 @@ onedev.server.sourceView = {
 		}
 		
 		var openComment = $(".source-view").data("openComment");
-		if (openComment && openComment.range) {
+		if (openComment) {
 			var line = parseInt(openComment.range.fromRow);
 			var lineInfo = cm.lineInfo(line);
 			if (lineInfo && lineInfo.gutterMarkers) {

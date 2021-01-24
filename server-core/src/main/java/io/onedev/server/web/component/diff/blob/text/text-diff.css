@@ -23,11 +23,25 @@
 	position: relative;
 }
 .text-diff>tbody>tr>td.number {
-	padding: 0 0.3rem;
+	padding: 0 0.6rem 0.3rem 0;
 	border-left: 1px solid var(--light-gray);
 	text-align: right;
 	color: var(--gray);
 }
+.text-diff>tbody>tr>td.number>.coverage {
+	position: absolute;
+	width: 4px;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+.text-diff>tbody>tr>td.number>.tested {
+	background: var(--success);	
+}
+.text-diff>tbody>tr>td.number>.not-tested {
+	background: var(--warning);	
+}
+
 .text-diff>tbody>tr:not(.expanded)+tr.expanded>td, .text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
 	border-top: 1px solid var(--light-gray);
 }
@@ -147,8 +161,9 @@
 	background: #dc9ec9;
 }
 
-.text-diff>tbody>tr>td.number>.comment-indicator {
-	margin: 0 0.3rem;
+.text-diff>tbody>tr>td.number>.comment-indicator,
+.text-diff>tbody>tr>td.number>.problem-trigger {
+	margin-right: 0.3rem;
 }
 
 .text-diff>tbody>tr>td.blame {
@@ -177,3 +192,4 @@
 .text-diff>tbody>tr>td.blame.abbr .same-as-above {
 	margin-left: 1rem;
 }
+

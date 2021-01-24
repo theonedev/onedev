@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,9 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -74,6 +77,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	protected static final String PARAM_PROJECT = "project";
 	
 	protected final IModel<Project> projectModel;
+	
+	private transient Map<ObjectId, Collection<Build>> buildsCache;
 	
 	public static PageParameters paramsOf(Project project) {
 		PageParameters params = new PageParameters();
@@ -271,4 +276,16 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	protected abstract Component newProjectTitle(String componentId);
 	
+	protected Collection<Build> getBuilds(ObjectId commitId) {
+		if (buildsCache == null)
+			buildsCache = new HashMap<>();
+		Collection<Build> builds = buildsCache.get(commitId);
+		if (builds == null) {
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			builds = buildManager.query(getProject(), commitId, null, null, null, new HashMap<>());
+			buildsCache.put(commitId, builds);
+		}
+		return builds;
+	}
+
 }

@@ -39,6 +39,10 @@
 	background: #FCF5DA;
 }
 
+.CodeMirror-linenumber {
+	width: 30px;
+	padding-left: 0;
+}
 .CodeMirror-coverages {
 	width: 6px;
 }
@@ -58,8 +62,11 @@
 	background: #b37600;
 }
 
-.CodeMirror-comments, .CodeMirror-problems {
+.CodeMirror-comments {
 	width: 24px;
+}
+.CodeMirror-problems {
+	width: 20px;
 }
 .CodeMirror-comment, .CodeMirror-problem {
 	text-align: right;

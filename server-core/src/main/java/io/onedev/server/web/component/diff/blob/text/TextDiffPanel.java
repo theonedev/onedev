@@ -3,9 +3,7 @@ package io.onedev.server.web.component.diff.blob.text;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.html.HtmlEscape;
 import org.unbescape.javascript.JavaScriptEscape;
 
@@ -44,7 +41,6 @@ import io.onedev.commons.jsyntax.TextToken;
 import io.onedev.commons.jsyntax.TokenUtils;
 import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
@@ -62,6 +58,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Pair;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
@@ -81,7 +78,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
-import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
@@ -90,10 +86,6 @@ import io.onedev.server.web.util.EditParamsAware;
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel {
 
-	private final IModel<Project> projectModel;
-	
-	private final IModel<PullRequest> requestModel;
-	
 	private final BlobChange change;
 	
 	private final Map<Integer, Integer> contextSizes = new HashMap<>();
@@ -102,52 +94,26 @@ public class TextDiffPanel extends Panel {
 
 	private final IModel<Boolean> blameModel;
 	
-	private final AnnotationSupport annotationSupport;
-	
 	private final IModel<DiffAnnotationInfo> annotationInfoModel = new LoadableDetachableModel<DiffAnnotationInfo>() {
 
 		@Override
 		protected DiffAnnotationInfo load() {
-			if (annotationSupport != null) {
-				Map<CodeComment, PlanarRange> oldComments = annotationSupport.getOldComments();
-				for (Iterator<Map.Entry<CodeComment, PlanarRange>> it = oldComments.entrySet().iterator(); it.hasNext();) {
-					if (!change.isVisible(new DiffPlanarRange(true, it.next().getValue()))) 
-						it.remove();
-				}
-				Map<Integer, List<CodeCommentInfo>> oldCommentsByLine = CodeCommentInfo.groupByLine(oldComments);
-				
-				Map<CodeComment, PlanarRange> newComments = annotationSupport.getNewComments();
-				for (Iterator<Map.Entry<CodeComment, PlanarRange>> it = newComments.entrySet().iterator(); it.hasNext();) {
-					if (!change.isVisible(new DiffPlanarRange(false, it.next().getValue()))) 
-						it.remove();
-				}
-				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = CodeCommentInfo.groupByLine(newComments);
+			if (change.getAnnotationSupport() != null) {
+				Map<Integer, List<CodeCommentInfo>> oldCommentsByLine = 
+						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getOldComments());
+				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = 
+						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getNewComments());
 
-				Collection<CodeProblem> oldProblems = annotationSupport.getOldProblems();
-				for (Iterator<CodeProblem> it = oldProblems.iterator(); it.hasNext();) {
-					if (!change.isVisible(new DiffPlanarRange(true, it.next().getPosition())))
-						it.remove();
-				}
-				Map<Integer, List<CodeProblem>> oldProblemsByLine = CodeProblem.groupByLine(oldProblems);
+				Map<Integer, List<CodeProblem>> oldProblemsByLine = 
+						CodeProblem.groupByLine(change.getAnnotationSupport().getOldProblems());
+				Map<Integer, List<CodeProblem>> newProblemsByLine = 
+						CodeProblem.groupByLine(change.getAnnotationSupport().getNewProblems());
 				
-				Collection<CodeProblem> newProblems = annotationSupport.getNewProblems();
-				for (Iterator<CodeProblem> it = newProblems.iterator(); it.hasNext();) {
-					if (!change.isVisible(new DiffPlanarRange(false, it.next().getPosition())))
-						it.remove();
-				}
-				Map<Integer, List<CodeProblem>> newProblemsByLine = CodeProblem.groupByLine(newProblems);
+				Map<Integer, Integer> oldCoveragesByLine = 
+						LineCoverage.groupByLine(change.getAnnotationSupport().getOldCoverages());
+				Map<Integer, Integer> newCoveragesByLine = 
+						LineCoverage.groupByLine(change.getAnnotationSupport().getNewCoverages());
 				
-				Map<Integer, Integer> oldCoveragesByLine = LineCoverage.groupByLine(annotationSupport.getOldCoverages());
-				for (Iterator<Map.Entry<Integer, Integer>> it = oldCoveragesByLine.entrySet().iterator(); it.hasNext();) {
-					if (!change.isVisible(false, it.next().getValue()))
-						it.remove();
-				}
-				
-				Map<Integer, Integer> newCoveragesByLine = LineCoverage.groupByLine(annotationSupport.getNewCoverages());
-				for (Iterator<Map.Entry<Integer, Integer>> it = newCoveragesByLine.entrySet().iterator(); it.hasNext();) {
-					if (!change.isVisible(true, it.next().getValue()))
-						it.remove();
-				}
 				return new DiffAnnotationInfo(
 						new AnnotationInfo(oldCommentsByLine, oldProblemsByLine, oldCoveragesByLine), 
 						new AnnotationInfo(newCommentsByLine, newProblemsByLine, newCoveragesByLine));
@@ -168,16 +134,12 @@ public class TextDiffPanel extends Panel {
 	
 	private BlameInfo blameInfo;
 	
-	public TextDiffPanel(String id, IModel<Project> projectModel, IModel<PullRequest> requestModel, 
-			BlobChange change, DiffViewMode diffMode, @Nullable IModel<Boolean> blameModel, 
-			@Nullable AnnotationSupport annotationSupport) {
+	public TextDiffPanel(String id, BlobChange change, DiffViewMode diffMode, 
+			@Nullable IModel<Boolean> blameModel) {
 		super(id);
 		
-		this.projectModel = projectModel;
-		this.requestModel = requestModel;
 		this.change = change;
 		this.diffMode = diffMode;
-		this.annotationSupport = annotationSupport;
 		this.blameModel = blameModel;
 		
 		if (blameModel != null && blameModel.getObject()) {
@@ -194,12 +156,21 @@ public class TextDiffPanel extends Panel {
 		}
 	}
 	
+	private Project getProject() {
+		return change.getProject();
+	}
+	
+	@Nullable
+	protected PullRequest getPullRequest() {
+		return null;
+	}
+	
 	private BlameInfo getBlameInfo() {
 		blameInfo = new BlameInfo();
-		BlameCommand cmd = new BlameCommand(projectModel.getObject().getGitDir());
+		BlameCommand cmd = new BlameCommand(getProject().getGitDir());
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
-			cmd.commitHash(getOldCommit().name()).file(oldPath);
+			cmd.commitHash(change.getOldCommitId().name()).file(oldPath);
 			for (BlameBlock blame: cmd.call()) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
@@ -209,7 +180,7 @@ public class TextDiffPanel extends Panel {
 		}
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
-			cmd.commitHash(getNewCommit().name()).file(newPath);
+			cmd.commitHash(change.getNewCommitId().name()).file(newPath);
 			for (BlameBlock blame: cmd.call()) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
@@ -252,41 +223,39 @@ public class TextDiffPanel extends Panel {
 			
 		})).setOutputMarkupId(true));
 		
-		Project project = projectModel.getObject();
-		PullRequest request = requestModel.getObject();
 		ProjectBlobPage.State viewState = new ProjectBlobPage.State(change.getBlobIdent());
 
-		viewState.requestId = PullRequest.idOf(request);
-		PageParameters params = ProjectBlobPage.paramsOf(project, viewState);
+		viewState.requestId = PullRequest.idOf(getPullRequest());
+		PageParameters params = ProjectBlobPage.paramsOf(getProject(), viewState);
 		actions.add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
 		
 		if (change.getType() != ChangeType.DELETE) {
-			if (request != null 
-					&& request.getSource() != null 
-					&& request.getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), change.getPath())
-					&& (getPage() instanceof PullRequestChangesPage || getPage() instanceof MergePreviewPage)) { 
+			if (getPullRequest() != null 
+					&& getPullRequest().getSource() != null 
+					&& getPullRequest().getSource().getObjectName(false) != null
+					&& SecurityUtils.canModify(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())
+					&& getPage() instanceof PullRequestChangesPage) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 
 					@Override
 					public void onClick() {
-						BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), change.getPath(), 
+						BlobIdent blobIdent = new BlobIdent(getPullRequest().getSourceBranch(), change.getPath(), 
 								FileMode.REGULAR_FILE.getBits());
 						ProjectBlobPage.State editState = new ProjectBlobPage.State(blobIdent);
-						editState.requestId = request.getId();
+						editState.requestId = getPullRequest().getId();
 						editState.mode = Mode.EDIT;
 						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
 						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
-						PageParameters params = ProjectBlobPage.paramsOf(request.getSourceProject(), editState);
+						PageParameters params = ProjectBlobPage.paramsOf(getPullRequest().getSourceProject(), editState);
 						setResponsePage(ProjectBlobPage.class, params);
 					}
 					
 				};
 				editLink.add(AttributeAppender.append("title", "Edit on source branch"));
 				actions.add(editLink);
-			} else if (SecurityUtils.canModify(project, change.getBlobIdent().revision, change.getPath()) 
-					&& project.getBranchRef(change.getBlobIdent().revision) != null) {
+			} else if (SecurityUtils.canModify(getProject(), change.getBlobIdent().revision, change.getPath()) 
+					&& getProject().getBranchRef(change.getBlobIdent().revision) != null) {
 				// we are on a branch 
 				Link<Void> editLink = new Link<Void>("editFile") {
 
@@ -296,7 +265,7 @@ public class TextDiffPanel extends Panel {
 						editState.mode = Mode.EDIT;
 						editState.urlBeforeEdit = EditParamsAware.getUrlBeforeEdit(getPage());
 						editState.urlAfterEdit = EditParamsAware.getUrlAfterEdit(getPage());
-						PageParameters params = ProjectBlobPage.paramsOf(project, editState);
+						PageParameters params = ProjectBlobPage.paramsOf(getProject(), editState);
 						setResponsePage(ProjectBlobPage.class, params);
 					}
 					
@@ -403,11 +372,11 @@ public class TextDiffPanel extends Panel {
 					String jsonOfPosition = String.format("{left: %d, top: %d}", 
 							params.getParameterValue("param1").toInt(), 
 							params.getParameterValue("param2").toInt());
-					DiffPlanarRange markRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
+					DiffPlanarRange commentRange = getRange(params, "param3", "param4", "param5", "param6", "param7");
 					
 					String markUrl;
-					if (annotationSupport != null) {
-						markUrl = annotationSupport.getMarkUrl(markRange);
+					if (change.getAnnotationSupport() != null) {
+						markUrl = change.getAnnotationSupport().getMarkUrl(commentRange);
 						if (markUrl != null) 
 							markUrl = "'" + JavaScriptEscape.escapeJavaScript(markUrl) + "'";
 						else 
@@ -416,27 +385,27 @@ public class TextDiffPanel extends Panel {
 						markUrl = "undefined";
 					}
 					script = String.format("onedev.server.textDiff.openSelectionPopover('%s', %s, %s, %s, '%s', %s);", 
-							getMarkupId(), jsonOfPosition, convertToJson(markRange), markUrl, 
-							JavaScriptEscape.escapeJavaScript(getMarkedText(markRange)),
+							getMarkupId(), jsonOfPosition, convertToJson(commentRange), markUrl, 
+							JavaScriptEscape.escapeJavaScript(getMarkedText(commentRange)),
 							SecurityUtils.getUser()!=null);
 					target.appendJavaScript(script);
 					break;
 				case "addComment":
 					Preconditions.checkNotNull(SecurityUtils.getUser());
 					
-					markRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
-					annotationSupport.onAddComment(target, markRange);
+					commentRange = getRange(params, "param1", "param2", "param3", "param4", "param5");
+					change.getAnnotationSupport().onAddComment(target, commentRange);
 					script = String.format("onedev.server.textDiff.onAddComment($('#%s'), %s);", 
-							getMarkupId(), convertToJson(markRange));
+							getMarkupId(), convertToJson(commentRange));
 					target.appendJavaScript(script);
 					break;
 				case "openComment": 
 					Long commentId = params.getParameterValue("param1").toLong();
-					markRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
+					commentRange = getRange(params, "param2", "param3", "param4", "param5", "param6");
 					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).load(commentId);
-					annotationSupport.onOpenComment(target, comment, markRange);
+					change.getAnnotationSupport().onOpenComment(target, comment, commentRange);
 					script = String.format("onedev.server.textDiff.onCommentOpened($('#%s'), %s);", 
-							getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, markRange)));
+							getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, commentRange)));
 					target.appendJavaScript(script);
 					break;
 				}
@@ -448,11 +417,11 @@ public class TextDiffPanel extends Panel {
 			
 			@Override
 			protected Project getProject() {
-				return projectModel.getObject();
+				return change.getProject();
 			}
 		});
 		
-		symbolTooltip = new SymbolTooltipPanel("symbolTooltip", projectModel) {
+		symbolTooltip = new SymbolTooltipPanel("symbolTooltip") {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
@@ -470,6 +439,11 @@ public class TextDiffPanel extends Panel {
 					return change.getNewBlobIdent().path;
 				else
 					return change.getOldBlobIdent().path;
+			}
+
+			@Override
+			protected Project getProject() {
+				return change.getProject();
 			}
 			
 		};
@@ -531,48 +505,26 @@ public class TextDiffPanel extends Panel {
 		}
 	}
 	
-	private ObjectId getOldCommit() {
-		String oldRev = change.getOldBlobIdent().revision;
-		if (oldRev.equals(ObjectId.zeroId().name().toString())) {
-			return ObjectId.zeroId();
-		} else {
-			return projectModel.getObject().getRevCommit(oldRev, true);
-		}
-	}
-	
-	private ObjectId getNewCommit() {
-		String newRev = change.getNewBlobIdent().revision;
-		if (newRev.equals(ObjectId.zeroId().name().toString())) {
-			return ObjectId.zeroId();
-		} else {
-			return projectModel.getObject().getRevCommit(newRev, true);
-		}
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(new TextDiffResourceReference()));
 		
-		DiffCodeCommentInfo openComment;
+		DiffCodeCommentInfo openCommentInfo;
 		DiffPlanarRange markRange;
 		String commentContainerId;
-		if (annotationSupport != null) {
-			markRange = annotationSupport.getMarkRange();
-			if (markRange != null && !change.isVisible(markRange))
-				markRange = null;
-			CodeComment comment = annotationSupport.getOpenComment();
-			if (comment != null) {
-				DiffPlanarRange commentRange = annotationInfoModel.getObject().getMarkRange(comment);
-				openComment = new DiffCodeCommentInfo(comment, commentRange);
-			} else { 
-				openComment = null;
-			}
-			commentContainerId = "'" + annotationSupport.getCommentContainer().getMarkupId() + "'";
+		if (change.getAnnotationSupport() != null) {
+			markRange = change.getAnnotationSupport().getMarkRange();
+			Pair<CodeComment, DiffPlanarRange> openCommentPair = change.getAnnotationSupport().getOpenComment();
+			if (openCommentPair != null) 
+				openCommentInfo = new DiffCodeCommentInfo(openCommentPair.getFirst(), openCommentPair.getSecond());
+			else 
+				openCommentInfo = null;
+			commentContainerId = "'" + change.getAnnotationSupport().getCommentContainer().getMarkupId() + "'";
 		} else {
 			markRange = null;
-			openComment = null;
+			openCommentInfo = null;
 			commentContainerId = null;
 		}
 		
@@ -585,7 +537,7 @@ public class TextDiffPanel extends Panel {
 				+ "%s, %s, %s, '%s');", getMarkupId(), symbolTooltip.getMarkupId(), 
 				change.getOldBlobIdent().revision, change.getNewBlobIdent().revision,
 				callback, blameMessageBehavior.getCallback(),
-				convertToJson(markRange), convertToJson(openComment), 
+				convertToJson(markRange), convertToJson(openCommentInfo), 
 				convertToJson(annotationInfoModel.getObject()), 
 				commentContainerId, OneDev.getInstance().getDocRoot());
 		
@@ -606,49 +558,52 @@ public class TextDiffPanel extends Panel {
 			blameInfo.lastNewCommitHash = null;
 		}
 		
+		int oldProblemsWidth;
+		if (!annotationInfoModel.getObject().getOldAnnotations().getProblems().isEmpty())
+			oldProblemsWidth = 24;
+		else
+			oldProblemsWidth = 0;
+		
+		int newProblemsWidth;
+		if (!annotationInfoModel.getObject().getNewAnnotations().getProblems().isEmpty())
+			newProblemsWidth = 24;
+		else
+			newProblemsWidth = 0;
+		
+		int shortBlameColumnWidth = 70;
+		int longBlameColumnWidth = 240;
+		int baseLineNumColumnWidth = 66;
+		int operationColumnWidth = 15;
+		
 		if (diffMode == DiffViewMode.UNIFIED) {
-			if (blameInfo != null) {
-				builder.append(""
-						+ "<colgroup>"
-						+ "<col width='240'></col>"
-						+ "<col width='60'></col>"
-						+ "<col width='60'></col>"
-						+ "<col width='15'></col>"
-						+ "<col></col>"
-						+ "</colgroup>");
-			} else {
-				builder.append(""
-						+ "<colgroup>"
-						+ "<col width='60'></col>"
-						+ "<col width='60'></col>"
-						+ "<col width='15'></col>"
-						+ "<col></col>"
-						+ "</colgroup>");
-			}
+			builder.append("<colgroup>");
+			if (blameInfo != null)
+				builder.append(String.format("<col width='%d'></col>", longBlameColumnWidth));
+			builder.append(String.format(""
+					+ "<col width='%d'></col>"
+					+ "<col width='%d'></col>"
+					+ "<col width='%d'></col>"
+					+ "<col></col>"
+					+ "</colgroup>", 
+					baseLineNumColumnWidth+oldProblemsWidth, baseLineNumColumnWidth+newProblemsWidth, 
+					operationColumnWidth));
 		} else {
-			if (blameInfo != null) {
-				builder.append(""
-						+ "<colgroup>"
-						+ "<col width='70'></col>"
-						+ "<col width='60'></col>"
-						+ "<col width='15'></col>"
-						+ "<col></col>"
-						+ "<col width='70'></col>"
-						+ "<col width='60'></col>"
-						+ "<col width='15'></col>"
-						+ "<col></col>"
-						+ "</colgroup>");
-			} else {
-				builder.append(""
-						+ "<colgroup>"
-						+ "<col width='60'></col>"
-						+ "<col width='15'></col>"
-						+ "<col></col>"
-						+ "<col width='60'></col>"
-						+ "<col width='15'></col>"
-						+ "<col></col>"
-						+ "</colgroup>");
-			}
+			builder.append("<colgroup>");
+			if (blameInfo != null)
+				builder.append(String.format("<col width='%d'></col>", shortBlameColumnWidth));
+			builder.append(String.format(""
+					+ "<col width='%d'></col>"
+					+ "<col width='%d'></col>"
+					+ "<col></col>", 
+					baseLineNumColumnWidth+oldProblemsWidth, operationColumnWidth));
+			if (blameInfo != null)
+				builder.append(String.format("<col width='%d'></col>", shortBlameColumnWidth));
+			builder.append(String.format(""
+					+ "<col width='%d'></col>"
+					+ "<col width='%d'></col>"
+					+ "<col></col>"
+					+ "</colgroup>", 
+					baseLineNumColumnWidth+newProblemsWidth, operationColumnWidth));
 		}
 		for (int i=0; i<change.getDiffBlocks().size(); i++) {
 			DiffBlock<Tokenized> block = change.getDiffBlocks().get(i);
@@ -759,7 +714,7 @@ public class TextDiffPanel extends Panel {
 			CommitDetailPage.State state = new CommitDetailPage.State();
 			state.revision = commit.getHash();
 			state.whitespaceOption = change.getWhitespaceOption();
-			PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), state);
+			PageParameters params = CommitDetailPage.paramsOf(getProject(), state);
 			String url = urlFor(CommitDetailPage.class, params).toString();
 			if (diffMode == DiffViewMode.UNIFIED) {
 				builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
@@ -816,8 +771,8 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, newLineNo);
 			}
-			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
-			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+			builder.append("<td class='number noselect'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			appendTokenized(builder, block.getUnits().get(lineIndex));
@@ -826,7 +781,7 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, -1);
 			}
-			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content left' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			appendTokenized(builder, block.getUnits().get(lineIndex));
@@ -834,7 +789,7 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
-			builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content right' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			appendTokenized(builder, block.getUnits().get(lineIndex));
@@ -852,8 +807,8 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
-			builder.append("<td class='number noselect new'>&nbsp;</td>");
-			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect new'><a class='coverage'>&nbsp;</a></td>");
+			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
 			if (tokenDiffs != null) {
@@ -875,13 +830,13 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				builder.append("<td class='blame noselect'>&nbsp;</td>");
 			}
-			builder.append("<td class='number noselect'>&nbsp;</td>");
-			builder.append("<td class='operation noselect'>&nbsp;</td>");
+			builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
+			builder.append("<td class='operation noselect'></td>");
 			builder.append("<td class='content left'>&nbsp;</td>");
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
-			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
 			appendTokenized(builder, block.getUnits().get(lineIndex));
@@ -899,8 +854,8 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, -1);
 			}
-			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
-			builder.append("<td class='number noselect old'>&nbsp;</td>");
+			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+			builder.append("<td class='number noselect old'><a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
 			if (tokenDiffs != null) {
@@ -922,7 +877,7 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, -1);
 			}
-			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 			appendTokenized(builder, block.getUnits().get(lineIndex));
@@ -930,7 +885,7 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				builder.append("<td class='blame noselect'>&nbsp;</td>");
 			}
-			builder.append("<td class='number noselect'>&nbsp;</td>");
+			builder.append("<td class='number noselect'><a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect'>&nbsp;</td>");
 			builder.append("<td class='content right'>&nbsp;</td>");
 		}
@@ -945,7 +900,7 @@ public class TextDiffPanel extends Panel {
 		if (blameInfo != null) {
 			appendBlame(builder, oldLineNo, -1);
 		}
-		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 		builder.append("<td class='operation noselect old'>-</td>");
 		builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 		appendTokenized(builder, deleteBlock.getUnits().get(deleteLineIndex));
@@ -955,7 +910,7 @@ public class TextDiffPanel extends Panel {
 		if (blameInfo != null) {
 			appendBlame(builder, -1, newLineNo);
 		}
-		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 		builder.append("<td class='operation noselect new'>+</td>");
 		builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
 		appendTokenized(builder, insertBlock.getUnits().get(insertLineIndex));
@@ -975,8 +930,8 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, newLineNo);
 			}
-			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("</td>");
-			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
+			builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect old new'>*</td>");
 			builder.append("<td class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 			if (tokenDiffs.isEmpty()) {
@@ -992,7 +947,7 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, oldLineNo, -1);
 			}
-			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
+			builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect old'>-</td>");
 			builder.append("<td class='content left old' data-old='").append(oldLineNo).append("'>");
 			if (tokenDiffs.isEmpty()) {
@@ -1010,7 +965,7 @@ public class TextDiffPanel extends Panel {
 			if (blameInfo != null) {
 				appendBlame(builder, -1, newLineNo);
 			}
-			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
+			builder.append("<td class='number noselect new'>").append(newLineNo+1).append("<a class='coverage'>&nbsp;</a></td>");
 			builder.append("<td class='operation noselect new'>+</td>");
 			builder.append("<td class='content right new' data-new='").append(newLineNo).append("'>");
 			if (tokenDiffs.isEmpty()) {
@@ -1072,8 +1027,6 @@ public class TextDiffPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		projectModel.detach();
-		requestModel.detach();
 		annotationInfoModel.detach();
 		
 		if (blameModel != null)
@@ -1082,14 +1035,13 @@ public class TextDiffPanel extends Panel {
 		super.onDetach();
 	}
 
-	public void onCommentDeleted(AjaxRequestTarget target, CodeComment comment, @Nullable DiffPlanarRange range) {
-		String script = String.format("onedev.server.textDiff.onCommentDeleted($('#%s'), %s);", 
-				getMarkupId(), convertToJson(new DiffCodeCommentInfo(comment, range)));
+	public void onCommentDeleted(AjaxRequestTarget target) {
+		String script = String.format("onedev.server.textDiff.onCommentDeleted($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		unmark(target);
 	}
 
-	public void onCommentClosed(AjaxRequestTarget target, CodeComment comment) {
+	public void onCommentClosed(AjaxRequestTarget target) {
 		String script = String.format("onedev.server.textDiff.onCommentClosed($('#%s'));", getMarkupId());
 		target.appendJavaScript(script);
 		unmark(target);
@@ -1139,34 +1091,4 @@ public class TextDiffPanel extends Panel {
 		
 	}
 
-	public static interface AnnotationSupport extends Serializable {
-		
-		@Nullable 
-		DiffPlanarRange getMarkRange();
-		
-		String getMarkUrl(DiffPlanarRange markRange);
-		
-		Map<CodeComment, PlanarRange> getOldComments();
-		
-		Map<CodeComment, PlanarRange> getNewComments();
-		
-		Collection<CodeProblem> getOldProblems();
-		
-		Collection<CodeProblem> getNewProblems();
-		
-		Collection<LineCoverage> getOldCoverages();
-		
-		Collection<LineCoverage> getNewCoverages();
-		
-		@Nullable 
-		CodeComment getOpenComment();
-
-		void onOpenComment(AjaxRequestTarget target, CodeComment comment, DiffPlanarRange commentRange);
-		
-		void onAddComment(AjaxRequestTarget target, DiffPlanarRange commentRange);
-		
-		Component getCommentContainer();
-		
-	}
-	
 }

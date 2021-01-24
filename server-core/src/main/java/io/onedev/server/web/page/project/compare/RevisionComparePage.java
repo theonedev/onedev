@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -31,10 +33,15 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.LineCoverage;
+import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
@@ -62,9 +69,10 @@ import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.EditParamsAware;
+import io.onedev.server.web.util.RevisionDiff;
 
 @SuppressWarnings("serial")
-public class RevisionComparePage extends ProjectPage implements RevisionDiffPanel.AnnotationSupport, EditParamsAware {
+public class RevisionComparePage extends ProjectPage implements RevisionDiff.AnnotationSupport, EditParamsAware {
 
 	public enum TabPanel {
 		COMMITS, 
@@ -619,10 +627,16 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiffPane
 
 			};
 			
-			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, projectModel, 
-					new Model<PullRequest>(null), 
+			tabPanel = new RevisionDiffPanel(TAB_PANEL_ID, 
 					state.compareWithMergeBase?mergeBase.name():state.leftSide.getRevision(), 
-					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
+					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this) {
+				
+				@Override
+				protected Project getProject() {
+					return projectModel.getObject();
+				}
+
+			};
 			break;
 		default:
 			tabPanel = new CommitListPanel(TAB_PANEL_ID, new IModel<String>() {
@@ -847,24 +861,70 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiffPane
 	}
 
 	@Override
-	public Map<CodeComment, PlanarRange> getOldComments() {
+	public Map<CodeComment, PlanarRange> getOldComments(String blobPath) {
 		Map<CodeComment, PlanarRange> oldComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
 			ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
-			if (comment.getMark().getCommitHash().equals(oldCommitId.name()))
+			if (comment.getMark().getCommitHash().equals(oldCommitId.name()) 
+					&& comment.getMark().getPath().equals(blobPath)) {
 				oldComments.put(comment, comment.getMark().getRange());
+			}
 		}
 		return oldComments;
 	}
 
 	@Override
-	public Map<CodeComment, PlanarRange> getNewComments() {
+	public Map<CodeComment, PlanarRange> getNewComments(String blobPath) {
 		Map<CodeComment, PlanarRange> newComments = new HashMap<>();
 		for (CodeComment comment: commentsModel.getObject()) {
-			if (comment.getMark().getCommitHash().equals(rightCommitId.name()))
+			if (comment.getMark().getCommitHash().equals(rightCommitId.name())
+					&& comment.getMark().getPath().equals(blobPath)) {
 				newComments.put(comment, comment.getMark().getRange());
+			}
 		}
 		return newComments;
 	}
 
+	@Override
+	public Collection<CodeProblem> getOldProblems(String blobPath) {
+		Set<CodeProblem> problems = new HashSet<>();
+		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
+		for (Build build: getBuilds(oldCommitId)) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
+				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<CodeProblem> getNewProblems(String blobPath) {
+		Set<CodeProblem> problems = new HashSet<>();
+		for (Build build: getBuilds(rightCommitId)) {
+			for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
+				problems.addAll(contribution.getCodeProblems(build, blobPath, null));
+		}
+		return problems;
+	}
+
+	@Override
+	public Collection<LineCoverage> getOldCoverages(String blobPath) {
+		Collection<LineCoverage> coverages = new ArrayList<>();
+		ObjectId oldCommitId = state.compareWithMergeBase?mergeBase:leftCommitId;
+		for (Build build: getBuilds(oldCommitId)) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class))
+				coverages.addAll(contribution.getLineCoverages(build, blobPath, null));
+		}
+		return coverages;
+	}
+
+	@Override
+	public Collection<LineCoverage> getNewCoverages(String blobPath) {
+		Collection<LineCoverage> coverages = new ArrayList<>();
+		for (Build build: getBuilds(rightCommitId)) {
+			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class))
+				coverages.addAll(contribution.getLineCoverages(build, blobPath, null));
+		}
+		return coverages;
+	}
+	
 }
