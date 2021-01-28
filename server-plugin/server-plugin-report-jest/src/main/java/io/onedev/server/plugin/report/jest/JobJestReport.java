@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
@@ -55,7 +56,6 @@ public class JobJestReport extends JobReport {
 	@Override
 	public void process(Build build, File workspace, SimpleLogger logger) {
 		File reportDir = new File(build.getReportDir(DIR), getReportName());
-		FileUtils.createDir(reportDir);
 
 		JestTestReportData report = LockUtils.write(build.getReportLockKey(DIR), new Callable<JestTestReportData>() {
 
@@ -64,15 +64,17 @@ public class JobJestReport extends JobReport {
 				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 				
 				Collection<JsonNode> rootNodes = new ArrayList<>();
-				int baseLen = workspace.getAbsolutePath().length() + 1;
+				int baseLen = workspace.getAbsolutePath().length()+1;
 				for (File file: getPatternSet().listFiles(workspace)) {
+					logger.log("Processing jest test report: " + file.getAbsolutePath().substring(baseLen));
 					try {
 						rootNodes.add(mapper.readTree(file));
 					} catch (Exception e) {
-						logger.log("Failed to process Jest report: " + file.getAbsolutePath().substring(baseLen), e);
+						throw ExceptionUtils.unchecked(e);
 					}
 				}
 				if (!rootNodes.isEmpty()) {
+					FileUtils.createDir(reportDir);
 					JestTestReportData report = new JestTestReportData(build, rootNodes);
 					report.writeTo(reportDir);
 					return report;

@@ -98,7 +98,7 @@ public class JestTestReportModule extends AbstractPluginModule {
 					String query = String.format("%s \"last month\"", 
 							BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
 					PageParameters params = JestTestStatsPage.paramsOf(project, query);
-					menuItems.add(new SidebarMenuItem.Page(null, "Jest Test", 
+					menuItems.add(new SidebarMenuItem.Page(null, "Jest", 
 							JestTestStatsPage.class, params));
 				}
 				return menuItems;
@@ -117,7 +117,7 @@ public class JestTestReportModule extends AbstractPluginModule {
 			public void configure(WebApplication application) {
 				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/jest-reports/${report}/test-suites", JestTestSuitesPage.class));
 				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/jest-reports/${report}/test-cases", JestTestCasesPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/jest-test", JestTestStatsPage.class));
+				application.mount(new DynamicPathPageMapper("projects/${project}/stats/jest", JestTestStatsPage.class));
 			}
 			
 		});		

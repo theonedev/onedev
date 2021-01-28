@@ -124,6 +124,14 @@ class JobReportListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("Name")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getReportName()));
+			}
+		});		
+		
 		columns.add(new AbstractColumn<JobReport, Void>(Model.of("File Patterns")) {
 
 			@Override

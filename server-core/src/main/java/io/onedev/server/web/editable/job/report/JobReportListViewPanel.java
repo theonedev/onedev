@@ -65,6 +65,21 @@ class JobReportListViewPanel extends Panel {
 			}
 		});		
 		
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("Name")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, rowModel.getObject().getReportName());
+					}
+					
+				});
+			}
+		});		
+		
 		columns.add(new AbstractColumn<JobReport, Void>(Model.of("File Patterns")) {
 
 			@Override

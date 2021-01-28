@@ -44,7 +44,6 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.LineCoverage;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
@@ -109,14 +108,11 @@ public class TextDiffPanel extends Panel {
 				Map<Integer, List<CodeProblem>> newProblemsByLine = 
 						CodeProblem.groupByLine(change.getAnnotationSupport().getNewProblems());
 				
-				Map<Integer, Integer> oldCoveragesByLine = 
-						LineCoverage.groupByLine(change.getAnnotationSupport().getOldCoverages());
-				Map<Integer, Integer> newCoveragesByLine = 
-						LineCoverage.groupByLine(change.getAnnotationSupport().getNewCoverages());
-				
 				return new DiffAnnotationInfo(
-						new AnnotationInfo(oldCommentsByLine, oldProblemsByLine, oldCoveragesByLine), 
-						new AnnotationInfo(newCommentsByLine, newProblemsByLine, newCoveragesByLine));
+						new AnnotationInfo(oldCommentsByLine, oldProblemsByLine, 
+								change.getAnnotationSupport().getOldCoverages()), 
+						new AnnotationInfo(newCommentsByLine, newProblemsByLine, 
+								change.getAnnotationSupport().getNewCoverages()));
 			} else {
 				return new DiffAnnotationInfo(
 						new AnnotationInfo(new HashMap<>(), new HashMap<>(), new HashMap<>()), 

@@ -6,7 +6,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -92,7 +94,6 @@ import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
-import io.onedev.server.code.LineCoverage;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
@@ -504,8 +505,8 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
 			
 			@Override
-			public List<LineCoverage> getLineCoverages(Build build, String blobPath, String reportName) {
-				return Lists.newArrayList();
+			public Map<Integer, Integer> getLineCoverages(Build build, String blobPath, String reportName) {
+				return new HashMap<>();
 			}
 			
 		});

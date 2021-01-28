@@ -52,8 +52,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -316,16 +314,19 @@ public class Build extends AbstractEntity implements Referenceable {
 	private String errorMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildParam> params = new ArrayList<>();
 	
 	@OneToMany(mappedBy="dependent", cascade=CascadeType.REMOVE)
-	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependencies = new ArrayList<>();
 	
 	@OneToMany(mappedBy="dependency", cascade=CascadeType.REMOVE)
-	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependents= new ArrayList<>();
+	
+	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	private Collection<JestTestMetric> jestTestMetrics = new ArrayList<>();
+	
+	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	private Collection<CloverMetric> cloverMetrics = new ArrayList<>();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private PullRequest request;

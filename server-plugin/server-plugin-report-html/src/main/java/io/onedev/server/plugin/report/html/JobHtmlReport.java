@@ -47,14 +47,14 @@ public class JobHtmlReport extends JobReport {
 	@Override
 	public void process(Build build, File workspace, SimpleLogger logger) {
 		File reportDir = new File(build.getReportDir(DIR), getReportName());
-		FileUtils.createDir(reportDir);
-
 		LockUtils.write(build.getReportLockKey(DIR), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
 				File startPage = new File(workspace, getStartPage()); 
 				if (startPage.exists()) {
+					FileUtils.createDir(reportDir);
+
 					File startPageFile = new File(reportDir, START_PAGE);
 					FileUtils.writeFile(startPageFile, getStartPage());
 					

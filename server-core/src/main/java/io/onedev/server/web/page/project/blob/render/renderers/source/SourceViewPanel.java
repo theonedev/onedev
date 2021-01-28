@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.blob.render.renderers.source;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,7 +64,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
-import io.onedev.server.code.LineCoverage;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -143,20 +141,20 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			Map<CodeComment, PlanarRange> comments = codeCommentManager.queryInHistory(project, commitId, path);
 
 			Set<CodeProblem> problems = new HashSet<>();
-			Collection<LineCoverage> coverages = new ArrayList<>();
+			Map<Integer, Integer> coverages = new HashMap<>();
 			
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 			for (Build build: buildManager.query(project, commitId, null, null, null, new HashMap<>())) {
 				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
 					problems.addAll(contribution.getCodeProblems(build, path, context.getProblemReport()));
-				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) 
-					coverages.addAll(contribution.getLineCoverages(build, path, context.getCoverageReport()));
+				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 
+					contribution.getLineCoverages(build, path, context.getCoverageReport()).forEach((key, value)->{
+						coverages.merge(key, value, (v1, v2)->v1+v2);
+					});
+				}
 			}
 			
-			return new AnnotationInfo(
-					CodeCommentInfo.groupByLine(comments), 
-					CodeProblem.groupByLine(problems), 
-					LineCoverage.groupByLine(coverages));
+			return new AnnotationInfo(CodeCommentInfo.groupByLine(comments), CodeProblem.groupByLine(problems), coverages);
 		}
 		
 	};

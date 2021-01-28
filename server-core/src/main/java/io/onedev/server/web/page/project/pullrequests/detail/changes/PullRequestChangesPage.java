@@ -48,7 +48,6 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
-import io.onedev.server.code.LineCoverage;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -949,21 +948,19 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Collection<LineCoverage> getOldCoverages(String blobPath) {
-		List<LineCoverage> coverages = new ArrayList<>();
+	public Map<Integer, Integer> getOldCoverages(String blobPath) {
+		Map<Integer, Integer> coverages = new HashMap<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
 		for (Build build: getBuilds(buildCommitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				for (LineCoverage coverage: contribution.getLineCoverages(build, blobPath, null)) {
+				for (Map.Entry<Integer, Integer> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
 					if (!buildCommitId.equals(getComparisonBase())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
-						for (int line = coverage.getFromLine(); line<=coverage.getToLine(); line++) {
-							Integer mappedLine = lineMapping.get(line);
-							if (mappedLine != null)
-								coverages.add(new LineCoverage(mappedLine, mappedLine, coverage.getTestCount()));
-						}
+						Integer mappedLine = lineMapping.get(entry.getKey());
+						if (mappedLine != null)
+							coverages.put(mappedLine, entry.getValue());
 					} else {
-						coverages.add(coverage);
+						coverages.put(entry.getKey(), entry.getValue());
 					}
 				}
 			}
@@ -972,7 +969,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Collection<LineCoverage> getNewCoverages(String blobPath) {
+	public Map<Integer, Integer> getNewCoverages(String blobPath) {
 		ObjectId commitId;
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (preview != null && preview.getMergeCommitHash() != null 
@@ -982,20 +979,18 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			commitId = ObjectId.fromString(state.newCommitHash);
 		}
 		
-		List<LineCoverage> coverages = new ArrayList<>();
+		Map<Integer, Integer> coverages = new HashMap<>();
 		for (Build build: getBuilds(commitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				for (LineCoverage coverage: contribution.getLineCoverages(build, blobPath, null)) {
+				for (Map.Entry<Integer, Integer> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
 					if (!state.newCommitHash.equals(commitId.name())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(commitId, 
 								ObjectId.fromString(state.newCommitHash), blobPath);
-						for (int line = coverage.getFromLine(); line<=coverage.getToLine(); line++) {
-							Integer mappedLine = lineMapping.get(line);
-							if (mappedLine != null)
-								coverages.add(new LineCoverage(mappedLine, mappedLine, coverage.getTestCount()));
-						}
+						Integer mappedLine = lineMapping.get(entry.getKey());
+						if (mappedLine != null)
+							coverages.put(mappedLine, entry.getValue());
 					} else {
-						coverages.add(coverage);
+						coverages.put(entry.getKey(), entry.getValue());
 					}
 				}
 			}

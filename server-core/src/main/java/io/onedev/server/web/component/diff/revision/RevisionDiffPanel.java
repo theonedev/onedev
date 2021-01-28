@@ -65,7 +65,6 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.LineCoverage;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
@@ -1013,36 +1012,32 @@ public abstract class RevisionDiffPanel extends Panel {
 								return newProblems;
 							}
 
-							private transient Collection<LineCoverage> oldCoverages;
+							private transient Map<Integer, Integer> oldCoverages;
 							
 							@Override
-							public Collection<LineCoverage> getOldCoverages() {
+							public Map<Integer, Integer> getOldCoverages() {
 								if (oldCoverages == null) {
-									oldCoverages = new ArrayList<>();
+									oldCoverages = new HashMap<>();
 									if (getOldBlobIdent().path != null) {
-										for (LineCoverage coverage: annotationSupport.getOldCoverages(getOldBlobIdent().path)) {
-											for (int line = coverage.getFromLine(); line<=coverage.getToLine(); line++) {
-												if (isVisible(true, line))
-													oldCoverages.add(new LineCoverage(line, line, coverage.getTestCount()));
-											}
+										for (Map.Entry<Integer, Integer> entry: annotationSupport.getOldCoverages(getOldBlobIdent().path).entrySet()) {
+											if (isVisible(true, entry.getKey()))
+												oldCoverages.put(entry.getKey(), entry.getValue());
 										}
 									}
 								}
 								return oldCoverages;
 							}
 
-							private transient Collection<LineCoverage> newCoverages;
+							private transient Map<Integer, Integer> newCoverages;
 							
 							@Override
-							public Collection<LineCoverage> getNewCoverages() {
+							public Map<Integer, Integer> getNewCoverages() {
 								if (newCoverages == null) {
-									newCoverages = new ArrayList<>();
+									newCoverages = new HashMap<>();
 									if (getNewBlobIdent().path != null) {
-										for (LineCoverage coverage: annotationSupport.getNewCoverages(getNewBlobIdent().path)) {
-											for (int line = coverage.getFromLine(); line<=coverage.getToLine(); line++) {
-												if (isVisible(false, line))
-													newCoverages.add(new LineCoverage(line, line, coverage.getTestCount()));
-											}
+										for (Map.Entry<Integer, Integer> entry: annotationSupport.getNewCoverages(getNewBlobIdent().path).entrySet()) {
+											if (isVisible(false, entry.getKey()))
+												newCoverages.put(entry.getKey(), entry.getValue());
 										}
 									}
 								} 

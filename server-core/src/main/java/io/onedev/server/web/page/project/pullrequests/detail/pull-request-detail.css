@@ -29,9 +29,10 @@
 	margin-right: 4px;
 }
 ul>li>a.code-comments.new .icon {
-	width: 0.9rem;
-	height: 0.9rem;
+	width: 12px;
+	height: 12px;
 	fill: var(--primary);
+	flex-shrink: 0;
 	display: inline-block !important;
 }
 

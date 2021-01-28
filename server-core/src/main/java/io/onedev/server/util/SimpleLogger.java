@@ -19,13 +19,11 @@ public abstract class SimpleLogger {
 		StringBuilder builder = new StringBuilder();
 		if (message != null)
 			builder.append(message);
-		boolean firstLine = true;
 		for (String line: Splitter.on(EOL_PATTERN).split(Throwables.getStackTraceAsString(t))) {
-			if (firstLine)
+			if (builder.length() == 0)
 				builder.append(line);
 			else
 				builder.append("\n    ").append(line);
-			firstLine = false;
 		}
 		log(builder.toString());
 	}
