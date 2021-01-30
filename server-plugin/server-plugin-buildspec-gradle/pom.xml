@@ -7,13 +7,6 @@
 		<artifactId>server-plugin</artifactId>
 		<version>4.1.3</version>
 	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-report-html</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.buildspec.gradle.GradleModule</moduleClass>
 	</properties>

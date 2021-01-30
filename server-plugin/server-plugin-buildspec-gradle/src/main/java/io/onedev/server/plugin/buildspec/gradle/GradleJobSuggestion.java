@@ -22,7 +22,6 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.plugin.report.html.JobHtmlReport;
 
 public class GradleJobSuggestion implements JobSuggestion {
 		
@@ -49,7 +48,6 @@ public class GradleJobSuggestion implements JobSuggestion {
 					"gradle build"));
 			setupTriggers(job);
 			setupCaches(job);
-			setupReports(job);
 			jobs.add(job);
 		} 
 		
@@ -78,14 +76,6 @@ public class GradleJobSuggestion implements JobSuggestion {
 		cache.setKey("gradle-cache");
 		cache.setPath("/home/gradle/.gradle");
 		job.getCaches().add(cache);
-	}
-	
-	private void setupReports(Job job) {
-		JobHtmlReport testReport = new JobHtmlReport();
-		testReport.setFilePatterns("build/reports/tests/test/**");
-		testReport.setReportName("Unit Test");
-		testReport.setStartPage("build/reports/tests/test/index.html");
-		job.getReports().add(testReport);
 	}
 	
 	@Nullable
