@@ -1,3 +1,8 @@
+<span style="color:red; font-size: 16px;"> NOTE: We develop OneDev at https://code.onedev.io/onedev-server for sake of dogfooding. All issues and pull requests should be created there. 
+</span>
+
+<hr/>
+
 # Super Easy All-In-One DevOps Platform 
 
 With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Powerful.
@@ -81,4 +86,4 @@ Configure issues to transit to desired state upon commit, build or pull request 
 
 Define permission schemes best suiting your development workflow. For instance, you may specify who can change particular source folder, who can assign issues, who can run release builds, or who can access build log, etc.
 
-![Role](doc/images/role.png)
+![Role](doc/images/role.png)This
