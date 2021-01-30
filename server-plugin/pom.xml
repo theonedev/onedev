@@ -17,7 +17,6 @@
 	</dependencies>
 	<modules>
 		<module>server-plugin-archetype</module>
-		<module>server-plugin-report-html</module>
 		<module>server-plugin-executor-kubernetes</module>
 		<module>server-plugin-executor-docker</module>
 		<module>server-plugin-buildspec-maven</module>

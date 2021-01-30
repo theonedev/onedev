@@ -32,8 +32,7 @@ import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable(name="Clover Coverage Metrics", description="Collected coverage information will be displayed "
-		+ "when view source files. <b>Note:</b> No any clover report will be displayed at build level "
-		+ "as clover also generates very powerful html report which can be published if necessary")
+		+ "when view source files")
 public class JobCloverReport extends JobReport {
 
 	private static final long serialVersionUID = 1L;

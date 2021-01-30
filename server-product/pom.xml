@@ -17,11 +17,6 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-report-html</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-report-jest</artifactId>
 			<version>${project.version}</version>
 		</dependency>
