@@ -1,3 +1,8 @@
+# 4.1.3
+
+1. Html report is removed from build spec due to possible XSS vulnerabilities. Check issue #230 for details
+2. Setting _Default Fixed Issues Filter_ in build spec has been moved to be under project build setting, in order to facilitate issue query auto-updating upon custom field/state change
+
 # 4.1.0
 
 1. Backslash in job commands should not be escaped now. And literal '@' should be written as '@@'
