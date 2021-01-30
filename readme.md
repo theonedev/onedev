@@ -1,4 +1,4 @@
-###### ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) NOTE: We develop OneDev at https://code.onedev.io/onedev-server for sake of dogfooding. All issues and pull requests should be created there
+###### ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) NOTE: We develop OneDev at https://code.onedev.io/projects/onedev-server for sake of dogfooding. All issues and pull requests should be created there
 
 <hr/>
 
