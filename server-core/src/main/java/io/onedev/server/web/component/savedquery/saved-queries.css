@@ -1,5 +1,9 @@
-.saved-queries>.card-body .watch-status:after, 
-.saved-queries>.card-body .subscription-status:after {
+.saved-queries {
+	max-width: 300px;
+}
+
+.saved-queries > .card-body .watch-status:after, 
+.saved-queries > .card-body .subscription-status:after {
 	display: none;
 }
 .edit-saved-queries .modal-footer {
