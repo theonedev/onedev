@@ -6,6 +6,9 @@ jdk:
 script: mvn clean install
 
 notifications:
-    email:jaafar.kaoussarani@polymtl.ca
-    email:souleiman.ayoub@polymtl.ca
-    
+    email:  
+        recipients:  
+        - jaafar.kaoussarani@polymtl.ca 
+        - souleiman.ayoub@polymtl.ca
+        on_success: always  
+        on_failure: always
