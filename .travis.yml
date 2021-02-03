@@ -7,3 +7,5 @@ script: mvn clean install
 
 notifications:
     email:jaafar.kaoussarani@polymtl.ca
+    email:souleiman.ayoub@polymtl.ca
+    
