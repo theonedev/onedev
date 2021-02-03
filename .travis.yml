@@ -10,5 +10,7 @@ notifications:
         recipients:  
         - jaafar.kaoussarani@polymtl.ca 
         - souleiman.ayoub@polymtl.ca
+        - fernando.foy@hotmail.com
+        - trl.theo@gmail.com
         on_success: always  
         on_failure: always
