@@ -59,7 +59,6 @@ public class SignUpPage extends SimplePage {
 							"This email has already been used by another user.");
 				} 
 				if (editor.isValid()) {
-					User user = new User();
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(user.getPassword()));
 					userManager.save(user, null);
 					Session.get().success("Welcome to OneDev");
