@@ -1,8 +1,6 @@
-name: CI
+name: Basic ci pipeline
 
-on:
-  pull_request:
-    branches: [ master ]
+on: push
 
 jobs:
   build:
