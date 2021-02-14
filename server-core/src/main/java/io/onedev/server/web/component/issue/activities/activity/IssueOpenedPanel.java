@@ -3,6 +3,7 @@ package io.onedev.server.web.component.issue.activities.activity;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
@@ -34,7 +35,8 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 		
 		Issue issue = getIssue();
 		add(new Label("user", User.from(issue.getSubmitter(), issue.getSubmitterName()).getDisplayName()));
-		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate())));
+		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 		
 		add(new ProjectCommentPanel("body") {
 

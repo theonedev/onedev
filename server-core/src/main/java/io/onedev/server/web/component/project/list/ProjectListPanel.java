@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -357,7 +358,8 @@ public class ProjectListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
 					IModel<Project> rowModel) {
 				Project project = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(project.getUpdateDate())));
+				cellItem.add(new Label(componentId, DateUtils.formatAge(project.getUpdateDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(project.getUpdateDate()))));
 			}
 
 			@Override
