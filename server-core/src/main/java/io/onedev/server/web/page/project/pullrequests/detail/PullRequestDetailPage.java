@@ -1012,7 +1012,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		
 		User submitter = User.from(request.getSubmitter(), request.getSubmitterName());
 		statusAndBranchesContainer.add(new UserIdentPanel("user", submitter, Mode.NAME));
-		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
+		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(request.getSubmitDate()))));
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget()));
 		if (request.getSourceProject() != null) {

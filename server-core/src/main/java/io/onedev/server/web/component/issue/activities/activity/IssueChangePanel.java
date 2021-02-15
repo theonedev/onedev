@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -28,7 +29,8 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 			add(new WebMarkupContainer("user").setVisible(false));
 
 		add(new Label("description", change.getData().getActivity(null)));
-		add(new Label("age", DateUtils.formatAge(change.getDate())));
+		add(new Label("age", DateUtils.formatAge(change.getDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));
 		
 		add(change.getData().render("body", change));
 	}

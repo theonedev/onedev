@@ -484,7 +484,8 @@ public abstract class PullRequestListPanel extends Panel {
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
 				}
 				fragment.add(new Label("activity", lastUpdate.getActivity()));
-				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate())));
+				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
+					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));
 				
 				cellItem.add(fragment);
 			}

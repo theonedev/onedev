@@ -34,7 +34,8 @@ class PullRequestChangePanel extends GenericPanel<PullRequestChange> {
 			add(new WebMarkupContainer("user").setVisible(false));
 		
 		add(new Label("description", change.getData().getActivity(null)));
-		add(new Label("age", DateUtils.formatAge(change.getDate())));
+		add(new Label("age", DateUtils.formatAge(change.getDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 
 			@Override
