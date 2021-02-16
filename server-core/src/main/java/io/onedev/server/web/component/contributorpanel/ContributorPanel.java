@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.contributorpanel;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -33,7 +34,8 @@ public class ContributorPanel extends Panel {
 		} else {
 			add(new PersonIdentPanel("committer", committer, "Committer", Mode.NAME));
 		}
-		add(new Label("date", DateUtils.formatAge(committer.getWhen())));
+		add(new Label("date", DateUtils.formatAge(committer.getWhen()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(committer.getWhen()))));
 	}
 
 }

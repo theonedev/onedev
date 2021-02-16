@@ -103,7 +103,8 @@ public abstract class CodeCommentPanel extends Panel {
 		commentContainer.add(new UserIdentPanel("userAvatar", user, Mode.AVATAR));
 		commentContainer.add(new Label("userName", user.getDisplayName()));
 		commentContainer.add(new Label("action", "commented"));
-		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate())));
+		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
+				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
 
 		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -252,7 +253,8 @@ public abstract class CodeCommentPanel extends Panel {
 		replyContainer.add(new Label("userName", user.getDisplayName()));
 		
 		replyContainer.add(new Label("action", "replied"));
-		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate())));
+		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate()))
+				.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
 
 		replyContainer.add(new MarkdownViewer("content", new IModel<String>() {
 

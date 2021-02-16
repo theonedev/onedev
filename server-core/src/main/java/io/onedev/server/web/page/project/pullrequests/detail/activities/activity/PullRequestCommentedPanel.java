@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.pullrequests.detail.activities.activit
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -39,7 +40,8 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 		super.onInitialize();
 
 		add(new Label("user", User.from(getComment().getUser(), getComment().getUserName()).getDisplayName()));
-		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
+		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
+			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
 		
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {
 
