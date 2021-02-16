@@ -903,7 +903,7 @@ onedev.server.markdown = {
 				referenceType = "commit";
 			}
 			if (referenceType) {
-				var $tooltip = $("<div id='reference-tooltip'></div>");
+				var $tooltip = $("<div id='reference-tooltip'>Loading...</div>");
 				$tooltip.data("trigger", this);
 				$tooltip.data("alignment", alignment);
 				$("body").append($tooltip);
@@ -926,7 +926,7 @@ onedev.server.markdown = {
 	},
 	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.append("" +
+		$tooltip.empty().append("" +
 				"<div class='d-flex issue align-items-center'>" +
 				"  <span class='state badge mr-3'></span> <span class='title font-weight-bold'></span>" +
 				"</div>");
@@ -939,7 +939,7 @@ onedev.server.markdown = {
 	},
 	renderPullRequestTooltip: function(title, status, statusCss) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.append("" +
+		$tooltip.empty().append("" +
 				"<div class='d-flex align-items-center'>" +
 				"  <span class='badge status mr-3'></span> <span class='title font-weight-bold'></span>" +
 				"</div>");
@@ -949,7 +949,7 @@ onedev.server.markdown = {
 	},
 	renderBuildTooltip: function(title, iconHref, iconCss) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.append("" +
+		$tooltip.empty().append("" +
 				"<div class='d-flex align-items-center'>" +
 				"  <svg class='mr-2 " + iconCss + "'><use xlink:href='" + iconHref + "'/></svg> <span class='title font-weight-bold'></span>" +
 				"</div>");
@@ -958,7 +958,7 @@ onedev.server.markdown = {
 	},
 	renderUserTooltip: function(avatarUrl, name, email) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.append("" +
+		$tooltip.empty().append("" +
 				"<div class='d-flex align-items-center'>" +
 				"  <img class='avatar mr-2'></img> <div class='name font-weight-bold'></div>" +
 				"</div>");
@@ -968,7 +968,7 @@ onedev.server.markdown = {
 	},
 	renderCommitTooltip: function(author, date, commitMessage) {
 		var $tooltip = $("#reference-tooltip");
-		$tooltip.append("" +
+		$tooltip.empty().append("" +
 				"  <div class='font-weight-bolder mb-2'><span class='author'></span> <span class='date'></span></div>" +
 				"  <pre class='body mb-0'></pre>");
 		$tooltip.find(".author").text(author);
