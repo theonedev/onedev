@@ -431,12 +431,12 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getPullRequest().isMerged());
+				setVisible(!NewPullRequestPage.this.getPullRequest().isMerged());
 			}
 
 			@Override
 			protected CommitQuery getBaseQuery() {
-				PullRequest request = getPullRequest();
+				PullRequest request = NewPullRequestPage.this.getPullRequest();
 				List<Revision> revisions = new ArrayList<>();
 				revisions.add(new Revision(request.getBaseCommitHash(), Revision.Scope.SINCE));
 				revisions.add(new Revision(request.getLatestUpdate().getHeadCommitHash(), Revision.Scope.UNTIL));
@@ -445,7 +445,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 			@Override
 			protected Project getProject() {
-				return getPullRequest().getSourceProject();
+				return NewPullRequestPage.this.getPullRequest().getSourceProject();
 			}
 
 		}.setOutputMarkupId(true);
@@ -535,7 +535,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getPullRequest().isMerged());
+				setVisible(!NewPullRequestPage.this.getPullRequest().isMerged());
 			}
 			
 		};
@@ -698,19 +698,20 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 
 			@Override
 			public String getObject() {
-				return getPullRequest().getDescription();
+				return NewPullRequestPage.this.getPullRequest().getDescription();
 			}
 
 			@Override
 			public void setObject(String object) {
-				getPullRequest().setDescription(object);
+				NewPullRequestPage.this.getPullRequest().setDescription(object);
 			}
 			
 		}, false) {
 
 			@Override
 			protected AttachmentSupport getAttachmentSupport() {
-				return new ProjectAttachmentSupport(target.getProject(), getPullRequest().getUUID(), 
+				return new ProjectAttachmentSupport(target.getProject(), 
+						NewPullRequestPage.this.getPullRequest().getUUID(), 
 						SecurityUtils.canManagePullRequests(target.getProject()));
 			}
 
