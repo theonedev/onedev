@@ -47,7 +47,7 @@ public class ProjectScopedCommit implements Serializable {
 	public Collection<Long> getFixedIssueNumbers() {
 		if (fixedIssueNumbers == null) {
 			RevCommit revCommit = project.getRevCommit(commitId, true);
-			fixedIssueNumbers = IssueUtils.parseFixedIssueNumbers(revCommit.getFullMessage());
+			fixedIssueNumbers = IssueUtils.parseFixedIssueNumbers(project, revCommit.getFullMessage());
 		}
 		return fixedIssueNumbers;
 	}

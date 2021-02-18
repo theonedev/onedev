@@ -657,7 +657,7 @@ public class Build extends AbstractEntity implements Referenceable {
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) 
-						fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
+						fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(getProject(), commit.getFullMessage()));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}

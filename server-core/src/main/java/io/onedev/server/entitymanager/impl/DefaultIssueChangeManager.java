@@ -477,7 +477,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 													}
 													RevCommit commit;
 													while ((commit = revWalk.next()) != null) {
-														fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
+														fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(project, commit.getFullMessage()));
 														if (fixedIssueNumbers.size() > MAX_FIXED_ISSUES)
 															break;
 													}

@@ -89,7 +89,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 
 				RevCommit commit;
 				while ((commit = revWalk.next()) != null) 
-					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
+					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(project, commit.getFullMessage()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -123,7 +123,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) { 
-						if (IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()).contains(issue.getNumber()))
+						if (IssueUtils.parseFixedIssueNumbers(issue.getProject(), commit.getFullMessage()).contains(issue.getNumber()))
 							return true;
 					}
 					return false;

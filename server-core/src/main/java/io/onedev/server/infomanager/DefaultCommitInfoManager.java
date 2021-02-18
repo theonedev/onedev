@@ -437,7 +437,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 										if (currentCommit.getBody() != null)
 											commitMessage += "\n\n" + currentCommit.getBody();
 										
-										for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(commitMessage)) {
+										for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(project, commitMessage)) {
 											ByteIterable issueKey = new LongByteIterable(issueNumber);
 											Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
 											

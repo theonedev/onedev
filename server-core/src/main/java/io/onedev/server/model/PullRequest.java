@@ -914,7 +914,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			fixedIssueNumbers = new HashSet<>();
 			for (PullRequestUpdate update: getUpdates()) {
 				for (RevCommit commit: update.getCommits())
-					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(commit.getFullMessage()));
+					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssueNumbers(update.getRequest().getProject(), commit.getFullMessage()));
 			}
 		}
 		return fixedIssueNumbers;

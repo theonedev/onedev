@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import org.unbescape.java.JavaEscape;
+
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
@@ -21,6 +23,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.validation.ProjectNameValidator;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -36,7 +39,9 @@ public class IssueUtils {
     static {
     	StringBuilder builder = new StringBuilder("(^|\\W+)(");
     	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
-    	builder.append(")\\s+issue\\s+#(\\d+)(?=$|\\W+)");
+    	builder.append(")\\s+issue\\s+(");
+    	builder.append(JavaEscape.unescapeJava(ProjectNameValidator.PATTERN.pattern()));
+    	builder.append(")?#(\\d+)(?=$|\\W+)");
     	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
     }
     
@@ -100,7 +105,7 @@ public class IssueUtils {
 		}
 	}
 	
-	public static Collection<Long> parseFixedIssueNumbers(String commitMessage) {
+	public static Collection<Long> parseFixedIssueNumbers(Project project, String commitMessage) {
 		Collection<Long> issueNumbers = new HashSet<>();
 
 		// Skip unmatched commit message quickly 
@@ -117,8 +122,12 @@ public class IssueUtils {
 				&& lowerCaseCommitMessage.contains("#") 
 				&& lowerCaseCommitMessage.contains("issue")) {
 			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
-			while (matcher.find())
-				issueNumbers.add(Long.parseLong(matcher.group(3)));
+			
+			while (matcher.find()) {
+				String projectName = matcher.group(3);
+				if (projectName == null || projectName.equalsIgnoreCase(project.getName()))
+					issueNumbers.add(Long.parseLong(matcher.group(matcher.groupCount())));
+			}
 		}
 		
 		return issueNumbers;
