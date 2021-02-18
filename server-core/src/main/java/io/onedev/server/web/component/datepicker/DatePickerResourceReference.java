@@ -1,14 +1,14 @@
 package io.onedev.server.web.component.datepicker;
 
-import io.onedev.server.web.page.base.BaseDependentResourceReference;
-import org.apache.wicket.Session;
+import java.util.List;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import java.util.List;
+import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class DatePickerResourceReference extends BaseDependentResourceReference {
 	
