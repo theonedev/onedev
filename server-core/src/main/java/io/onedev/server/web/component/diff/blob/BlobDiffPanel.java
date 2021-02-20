@@ -4,8 +4,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -51,7 +49,7 @@ public class BlobDiffPanel extends Panel {
 		if (warning)
 			fragment.add(new SpriteImage("icon", "warning"));
 		else
-			fragment.add(new SpriteImage("icon", "info"));
+			fragment.add(new SpriteImage("icon", "info-circle"));
 		fragment.add(new Label("message", message));
 		return fragment;
 	}
@@ -142,13 +140,8 @@ public class BlobDiffPanel extends Panel {
 			}
 		}
 	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BlobDiffResourceReference()));
-	}
 
+	@Override
 	protected void onDetach() {
 		if (blameModel != null)
 			blameModel.detach();

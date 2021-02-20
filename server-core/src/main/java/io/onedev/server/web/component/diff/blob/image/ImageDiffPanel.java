@@ -1,8 +1,5 @@
 package io.onedev.server.web.component.diff.blob.image;
 
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.resource.DynamicImageResource;
@@ -13,6 +10,7 @@ import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
+import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {
@@ -29,6 +27,8 @@ public class ImageDiffPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new BlobDiffTitle("title", change));
+		
 		add(newImage("old", change.getOldBlobIdent(), new Provider<Blob>() {
 
 			@Override
@@ -72,14 +72,6 @@ public class ImageDiffPanel extends Panel {
 			add(image = new Image(id, new PackageResourceReference(ImageDiffPanel.class, "blank.png")));
 		}
 		return image;
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new ImageDiffResourceReference()));
-		String script = String.format("onedev.server.imageDiff.onDomReady('%s');", getMarkupId());
-		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 }

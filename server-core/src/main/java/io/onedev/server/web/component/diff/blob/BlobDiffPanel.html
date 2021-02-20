@@ -1,12 +1,10 @@
 <wicket:panel>
 	<div wicket:id="content"></div>
 	<wicket:fragment wicket:id="noDiffFrag">
-		<div class="no-diff">
-			<div class="head">
-				<div wicket:id="title"></div>
-			</div>
-			<div class="body">
-				<svg wicket:id="icon" class="icon mr-1"></svg> <span wicket:id="message"></span>
+		<div class="no-diff border rounded">
+			<div wicket:id="title" class="head text-break py-2 px-3 border-bottom"></div>
+			<div class="body p-3 d-flex align-items-center">
+				<svg wicket:id="icon" class="icon mr-2"></svg> <i wicket:id="message"></i>
 			</div>
 		</div>
 	</wicket:fragment>
