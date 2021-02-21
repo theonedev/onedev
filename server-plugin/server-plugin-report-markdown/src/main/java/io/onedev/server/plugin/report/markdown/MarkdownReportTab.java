@@ -53,7 +53,7 @@ public class MarkdownReportTab extends BuildTab {
 
 	@Override
 	public boolean isActive(Page currentPage) {
-		if (!super.isActive(currentPage)) {
+		if (super.isActive(currentPage)) {
 			MarkdownReportPage markdownReportPage = (MarkdownReportPage) currentPage;
 			return getTitle().equals(markdownReportPage.getReportName());
 		} else {
