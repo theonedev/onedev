@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('test_commit') {
       steps {
-        echo 'hello pipeline'
+        echo 'hello world'
       }
     }
 
