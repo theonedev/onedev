@@ -210,26 +210,26 @@ public class OneDev extends AbstractPlugin implements Serializable {
 				} else {
 					serverUrl = buildServerUrl(externalIp, "http", httpPort);
 				}
-			} 
-			
-			if (serverUrl == null) {
-				String httpPortEnv = System.getenv("ONEDEV_SERVICE_PORT_HTTP");
-				String httpsPortEnv = System.getenv("ONEDEV_SERVICE_PORT_HTTPS");
-				String sshPortEnv = System.getenv("ONEDEV_SERVICE_PORT_SSH");
 				
-				Integer httpPort = httpPortEnv!=null?Integer.valueOf(httpPortEnv):null;
-				Integer httpsPort = httpsPortEnv!=null?Integer.valueOf(httpsPortEnv):null;
-				Integer sshPort = sshPortEnv!=null?Integer.valueOf(sshPortEnv):null;
-				
-				if (ssh) {
-					if (sshPort != null) 
-						serverUrl = buildServerUrl(externalIp, "ssh", sshPort);
-				} else if (httpsPort != null) {
-					serverUrl = buildServerUrl(externalIp, "https", httpsPort);
-				} else {
-					serverUrl = buildServerUrl(externalIp, "http", httpPort);
+				if (serverUrl == null) {
+					String httpPortEnv = System.getenv("ONEDEV_SERVICE_PORT_HTTP");
+					String httpsPortEnv = System.getenv("ONEDEV_SERVICE_PORT_HTTPS");
+					String sshPortEnv = System.getenv("ONEDEV_SERVICE_PORT_SSH");
+					
+					httpPort = httpPortEnv!=null?Integer.valueOf(httpPortEnv):null;
+					httpsPort = httpsPortEnv!=null?Integer.valueOf(httpsPortEnv):null;
+					sshPort = sshPortEnv!=null?Integer.valueOf(sshPortEnv):null;
+					
+					if (ssh) {
+						if (sshPort != null) 
+							serverUrl = buildServerUrl(externalIp, "ssh", sshPort);
+					} else if (httpsPort != null) {
+						serverUrl = buildServerUrl(externalIp, "https", httpsPort);
+					} else {
+						serverUrl = buildServerUrl(externalIp, "http", httpPort);
+					}
 				}
-			}
+			} 			
 		} 
 		
 		if (serverUrl == null) {
