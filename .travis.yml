@@ -1,9 +1,9 @@
-language:	java
+language: java
 
-jdk:
-	- openjdk8
+jdk: 
+  - openjdk8
 
 script: mvn clean install
 
 notifications:
-	email: elie.rouphael@polymtl.ca
+  email: elie.rouphael@polymtl.ca
