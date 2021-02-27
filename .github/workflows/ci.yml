@@ -15,7 +15,7 @@ jobs:
         java-version: 1.8
 
     - name: Test onedev - Server Core
-      run: mvn --batch-mode --update-snapshots -pl server-core, server-product -am verify
+      run: mvn --batch-mode --update-snapshots -pl server-core -am verify
 
     # - name: Test onedev - Server Product
     #   run: mvn --batch-mode --update-snapshots -pl server-product -am verify
