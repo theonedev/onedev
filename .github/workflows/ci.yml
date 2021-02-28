@@ -2,9 +2,8 @@ name: CI pipeline
 
 on: 
   push:
-    # branches:
-    #   - main
-    #   - git
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -28,7 +27,7 @@ jobs:
     - name: Test OneDev
       run: mvn --batch-mode --update-snapshots verify
       
-      
+
   Build:
 
     if: github.ref == 'refs/heads/main'
