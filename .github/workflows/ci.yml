@@ -28,7 +28,6 @@ jobs:
     - name: Test OneDev
       run: mvn --batch-mode --update-snapshots verify
       
-  
   Build:
 
     if: github.ref == 'refs/heads/main'
