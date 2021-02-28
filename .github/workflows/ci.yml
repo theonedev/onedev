@@ -1,25 +1,39 @@
-name: Basic ci pipeline
+name: CI pipeline
 
-on: push
+on: 
+  push:
+    # branches:
+    #   - main
+    #   - git
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
-
+  Test:
+    # if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
 
-    - name: Compile onedev
+    - name: Compile OneDev
       run: mvn --batch-mode --update-snapshots clean compile
 
-    - name: Test onedev - Server Core
-      run: mvn --batch-mode --update-snapshots -pl server-core -am verify
+    - name: Test OneDev
+      run: mvn --batch-mode --update-snapshots verify
+      
+  
+  Build:
 
-    - name: Test onedev - Server Product
-      run: mvn --batch-mode --update-snapshots -pl server-product -am verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
 
+    steps:
+    - name: Build OneDev
+      run: mvn --batch-mode --update-snapshots clean clean package
