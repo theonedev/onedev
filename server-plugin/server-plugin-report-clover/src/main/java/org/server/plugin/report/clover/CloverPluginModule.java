@@ -33,6 +33,9 @@ import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
 import io.onedev.server.web.page.project.StatisticsMenuContribution;
+import io.onedev.server.web.page.project.builds.detail.BuildTab;
+import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportTab;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -90,10 +93,11 @@ public class CloverPluginModule extends AbstractPluginModule {
 						Map<Integer, Integer> coverages = new HashMap<>();
 						if (build.getReportDir(JobCloverReport.DIR).exists()) {
 							for (File reportDir: build.getReportDir(JobCloverReport.DIR).listFiles()) {
-								if (SecurityUtils.canAccessReport(build, reportDir.getName())) { 
-									File lineCoverageFile = new File(reportDir, JobCloverReport.LINE_COVERAGES_DIR + "/" + blobPath);
-									if (lineCoverageFile.exists()) {
-										try (InputStream is = new FileInputStream(lineCoverageFile)) {
+								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
+										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
+									File testCountFile = new File(reportDir, JobCloverReport.TEST_COUNTS_DIR + "/" + blobPath);
+									if (testCountFile.exists()) {
+										try (InputStream is = new FileInputStream(testCountFile)) {
 											@SuppressWarnings("unchecked")
 											Map<Integer, Integer> deserialized = (Map<Integer, Integer>) SerializationUtils.deserialize(is);
 											deserialized.forEach((key, value) -> {
@@ -113,15 +117,45 @@ public class CloverPluginModule extends AbstractPluginModule {
 			
 		});
 		
+		contribute(BuildTabContribution.class, new BuildTabContribution() {
+			
+			@Override
+			public List<BuildTab> getTabs(Build build) {
+				List<BuildTab> tabs = new ArrayList<>();
+				LockUtils.read(build.getReportLockKey(JobCloverReport.DIR), new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						if (build.getReportDir(JobCloverReport.DIR).exists()) {
+							for (File reportDir: build.getReportDir(JobCloverReport.DIR).listFiles()) {
+								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) 
+									tabs.add(new BuildReportTab(reportDir.getName(), CloverReportPage.class));
+							}
+						}
+						return null;
+					}
+					
+				});
+				return tabs;
+			}
+			
+			@Override
+			public int getOrder() {
+				return 200;
+			}
+			
+		});
+		
 		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
 			
 			@Override
 			public void configure(WebApplication application) {
+				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/clover-reports/${report}", CloverReportPage.class));
 				application.mount(new DynamicPathPageMapper("projects/${project}/stats/clover", CloverStatsPage.class));
 			}
 			
-		});		
+		});				
 		
 	}
-
+	
 }

@@ -28,6 +28,12 @@ public class BuildTab extends PageTab {
 	
 	public BuildTab(String title, Class<? extends BuildDetailPage> mainPageClass, 
 			Class<? extends BuildDetailPage> additionalPageClass1, Class<? extends BuildDetailPage> additionalPageClass2, 
+			Class<? extends BuildDetailPage> additionalPageClass3) {
+		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2, additionalPageClass3);
+	}
+	
+	public BuildTab(String title, Class<? extends BuildDetailPage> mainPageClass, 
+			Class<? extends BuildDetailPage> additionalPageClass1, Class<? extends BuildDetailPage> additionalPageClass2, 
 			Class<? extends BuildDetailPage> additionalPageClass3, Class<? extends BuildDetailPage> additionalPageClass4) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2, 
 				additionalPageClass3, additionalPageClass4);

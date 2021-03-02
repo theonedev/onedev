@@ -58,7 +58,7 @@ public class CloverMetric extends AbstractEntity implements BuildMetric {
 		this.reportName = reportName;
 	}
 
-	@MetricIndicator(group="Test Coverages", order=100, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
+	@MetricIndicator(group="Code Coverage", order=100, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
 			maxValue=100, minValue=0, name="Method", color="#F64E60")
 	public int getMethodCoverage() {
 		return methodCoverage;
@@ -68,17 +68,7 @@ public class CloverMetric extends AbstractEntity implements BuildMetric {
 		this.methodCoverage = methodCoverage;
 	}
 
-	@MetricIndicator(group="Test Coverages", order=200, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
-			maxValue=100, minValue=0, name="Statement", color="#8950FC")
-	public int getStatementCoverage() {
-		return statementCoverage;
-	}
-
-	public void setStatementCoverage(int statementCoverage) {
-		this.statementCoverage = statementCoverage;
-	}
-
-	@MetricIndicator(group="Test Coverages", order=300, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
+	@MetricIndicator(group="Code Coverage", order=200, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
 			maxValue=100, minValue=0, name="Branch", color="#1BC5BD")
 	public int getBranchCoverage() {
 		return branchCoverage;
@@ -88,7 +78,17 @@ public class CloverMetric extends AbstractEntity implements BuildMetric {
 		this.branchCoverage = branchCoverage;
 	}
 
-	@MetricIndicator(group="Test Coverages", order=400, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
+	@MetricIndicator(group="Code Coverage", order=300, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
+			maxValue=100, minValue=0, name="Statement", color="#8950FC")
+	public int getStatementCoverage() {
+		return statementCoverage;
+	}
+
+	public void setStatementCoverage(int statementCoverage) {
+		this.statementCoverage = statementCoverage;
+	}
+
+	@MetricIndicator(group="Code Coverage", order=400, valueFormatter=BuildMetric.FORMAT_PERCENTAGE, 
 			maxValue=100, minValue=0, name="Line", color="#FFA800")
 	public int getLineCoverage() {
 		return lineCoverage;
@@ -107,22 +107,22 @@ public class CloverMetric extends AbstractEntity implements BuildMetric {
 		this.totalMethods = totalMethods;
 	}
 
-	@MetricIndicator(group="Total Number", order=600, minValue=0, name="Statement", color="#8950FC")
-	public int getTotalStatements() {
-		return totalStatements;
-	}
-
-	public void setTotalStatements(int totalStatements) {
-		this.totalStatements = totalStatements;
-	}
-
-	@MetricIndicator(group="Total Number", order=700, minValue=0, name="Branch", color="#1BC5BD")
+	@MetricIndicator(group="Total Number", order=600, minValue=0, name="Branch", color="#1BC5BD")
 	public int getTotalBranches() {
 		return totalBranches;
 	}
 
 	public void setTotalBranches(int totalBranches) {
 		this.totalBranches = totalBranches;
+	}
+
+	@MetricIndicator(group="Total Number", order=700, minValue=0, name="Statement", color="#8950FC")
+	public int getTotalStatements() {
+		return totalStatements;
+	}
+
+	public void setTotalStatements(int totalStatements) {
+		this.totalStatements = totalStatements;
 	}
 
 	@MetricIndicator(group="Total Number", order=800, minValue=0, name="Effective Line", color="#FFA800")
