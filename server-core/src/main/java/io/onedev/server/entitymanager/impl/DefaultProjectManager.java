@@ -47,6 +47,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -113,6 +114,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final TransactionManager transactionManager;
     
+    private final JobManager jobManager;
+    
     private final TaskScheduler taskScheduler;
     
     private final ListenerRegistry listenerRegistry;
@@ -135,7 +138,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		SettingManager settingManager, TransactionManager transactionManager, 
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
     		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
-    		RoleManager roleManager) {
+    		RoleManager roleManager, JobManager jobManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -149,6 +152,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.taskScheduler = taskScheduler;
         this.userAuthorizationManager = userAuthorizationManager;
         this.roleManager = roleManager;
+        this.jobManager = jobManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -193,6 +197,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         		jobExecutor.onRenameProject(oldName, project.getName());
         	for (GroovyScript groovyScript: settingManager.getGroovyScripts())
         		groovyScript.onRenameProject(oldName, project.getName());
+        	jobManager.schedule(project);
     	}
     }
     

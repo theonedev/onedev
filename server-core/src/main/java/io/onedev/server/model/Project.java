@@ -72,6 +72,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
@@ -535,6 +536,8 @@ public class Project extends AbstractEntity {
 		RefUpdate refUpdate = GitUtils.getRefUpdate(getRepository(), "HEAD");
 		GitUtils.linkRef(refUpdate, GitUtils.branch2ref(defaultBranchName));
 		defaultBranchOptional = null;
+		
+		OneDev.getInstance(JobManager.class).schedule(this);
 	}
 	
 	private Map<BlobIdent, Optional<Blob>> getBlobCache() {

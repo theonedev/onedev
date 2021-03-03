@@ -234,7 +234,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			private void resubmit(Serializable paramBean) {
 				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
-				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap);
+				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, "Resubmitted manually");
 				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
 			}
 			

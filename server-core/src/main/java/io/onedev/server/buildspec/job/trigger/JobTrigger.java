@@ -101,4 +101,5 @@ public abstract class JobTrigger implements Serializable {
 	public abstract SubmitReason matchesWithoutProject(ProjectEvent event, Job job);
 	
 	public abstract String getDescriptionWithoutProject();
+	
 }

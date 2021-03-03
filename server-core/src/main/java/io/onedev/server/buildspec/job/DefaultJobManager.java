@@ -36,6 +36,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,20 +62,27 @@ import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramspec.SecretParam;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
+import io.onedev.server.buildspec.job.trigger.JobTrigger;
+import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.ProjectCreated;
 import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.ScheduledTimeReaches;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRetrying;
 import io.onedev.server.event.build.BuildRunning;
 import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -97,6 +106,8 @@ import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 
@@ -110,6 +121,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 	
 	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
+	
+	private final Map<Long, Collection<String>> scheduledTasks = new ConcurrentHashMap<>();
 	
 	private final ProjectManager projectManager;
 	
@@ -131,6 +144,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final BuildParamManager buildParamManager;
 	
+	private final TaskScheduler taskScheduler;
+	
 	private final Validator validator;
 	
 	private volatile List<JobExecutor> jobExecutors;
@@ -141,7 +156,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
-			ProjectManager projectManager, Validator validator) {
+			ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -153,6 +168,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.buildParamManager = buildParamManager;
 		this.projectManager = projectManager;
 		this.validator = validator;
+		this.taskScheduler = taskScheduler;
 	}
 
 	private void validate(Project project, ObjectId commitId) {
@@ -670,7 +686,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Transactional
 	@Override
-	public void resubmit(Build build, Map<String, List<String>> paramMap) {
+	public void resubmit(Build build, Map<String, List<String>> paramMap, String resubmitReason) {
 		if (build.isFinished()) {
         	validate(build.getProject(), build.getCommitId());
 			
@@ -681,7 +697,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setSubmitter(SecurityUtils.getUser());
-			build.setSubmitReason("Resubmitted manually");
+			build.setSubmitReason(resubmitReason);
 			build.setCanceller(null);
 			build.setCancellerName(null);
 			
@@ -768,11 +784,137 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
+	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
 		jobExecutors = settingManager.getJobExecutors();
 		thread = new Thread(this);
-		thread.start();		
+		thread.start();	
+		
+		for (Project project: projectManager.query())
+			schedule(project);
+	}
+	
+	@Transactional
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			Long projectId = ((Project) event.getEntity()).getId();
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					Collection<String> tasksOfProject = scheduledTasks.remove(projectId);
+					if (tasksOfProject != null) 
+						tasksOfProject.stream().forEach(it->taskScheduler.unschedule(it));
+				}
+				
+			});
+		}
+	}
+
+	@Sessional
+	@Listen
+	public void on(RefUpdated event) {
+		String branch = GitUtils.ref2branch(event.getRefName());
+		Project project = event.getProject();
+		if (branch != null && branch.equals(project.getDefaultBranch()) && !event.getNewCommitId().equals(ObjectId.zeroId()))
+			schedule(project);
+	}
+	
+	@Transactional
+	@Listen
+	public void on(ProjectCreated event) {
+		Long projectId = event.getProject().getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						Project project = projectManager.load(projectId);
+						schedule(project);
+					}
+					
+				});
+			}
+			
+		});
+	}
+	
+	@Sessional
+	@Override
+	public void schedule(Project project) {
+		Collection<String> tasksOfProject = new HashSet<>();
+		try {
+			String defaultBranch = project.getDefaultBranch();
+			if (defaultBranch != null) {
+				ObjectId commitId = project.getObjectId(defaultBranch, false);
+				if (commitId != null) {
+					BuildSpec buildSpec = project.getBuildSpec(commitId);
+					if (buildSpec != null) {
+						ScheduledTimeReaches event = new ScheduledTimeReaches(project);
+						for (Job job: buildSpec.getJobs()) {
+							for (JobTrigger trigger: job.getTriggers()) {
+								if (trigger instanceof ScheduleTrigger) {
+									ScheduleTrigger scheduledTrigger = (ScheduleTrigger) trigger;
+									SubmitReason reason = trigger.matches(event, job);
+									if (reason != null) {
+										String taskId = taskScheduler.schedule(newSchedulableTask(project, commitId, job, scheduledTrigger, reason));
+										tasksOfProject.add(taskId);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error scheduling project '" + project.getName() + "'", e);
+		} finally {
+			tasksOfProject = scheduledTasks.put(project.getId(), tasksOfProject);
+			if (tasksOfProject != null)
+				tasksOfProject.stream().forEach(it->taskScheduler.unschedule(it));
+		}
+	}
+
+	private SchedulableTask newSchedulableTask(Project project, ObjectId commitId, Job job, 
+			ScheduleTrigger trigger, SubmitReason reason) {
+		Long projectId = project.getId();
+		return new SchedulableTask() {
+
+			@Override
+			public void execute() {
+				sessionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(userManager.getSystem().asSubject());
+						
+						Project project = projectManager.load(projectId);
+						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(trigger.getParams(), null)) {
+							
+							@Override
+							public void run(Map<String, List<String>> paramMap) {
+								Build build = submit(project, commitId, job.getName(), paramMap, reason); 
+								if (build.isFinished())
+									resubmit(build, paramMap, "Resubmitted by schedule");
+							}
+							
+						}.run();
+					}
+					
+				});
+			}
+
+			@Override
+			public ScheduleBuilder<?> getScheduleBuilder() {
+				return CronScheduleBuilder.cronSchedule(trigger.getCronExpression());
+			}
+			
+		};
 	}
 	
 	@Listen
@@ -785,6 +927,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} catch (InterruptedException e) {
 			}
 		}
+		scheduledTasks.values().stream().forEach(it1->it1.stream().forEach(it2->taskScheduler.unschedule(it2)));
+		scheduledTasks.clear();
 	}
 
 	@Override
