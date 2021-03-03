@@ -1,6 +1,3 @@
-.job-list>.job>.head {
-    border-bottom: 1px solid var(--light-gray);
-}
 .job-list .no-builds {
 	margin: 0.5rem 1rem !important;
 }
