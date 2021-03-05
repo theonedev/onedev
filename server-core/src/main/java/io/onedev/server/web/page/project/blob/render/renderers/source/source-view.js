@@ -52,8 +52,10 @@ onedev.server.sourceView = {
 		onedev.server.sourceView.checkShortcutsBinding();
 	    
 	    $code.selectionPopover("init", function(e) {
-	    	if ($(e.target).closest(".selection-popover").length != 0)
+	    	if ($(e.target).closest(".CodeMirror-line").length == 0 
+					|| $(e.target).closest(".selection-popover").length != 0) {
 	    		return;
+			}
 	    	var from = cm.getCursor("from");
 	    	var to = cm.getCursor("to");
 	    	if (from.line != to.line || from.ch != to.ch) {
@@ -253,11 +255,10 @@ onedev.server.sourceView = {
 		for (var i in problems) 
 			markRanges.push(problems[i].range);			
 		
-		var icon = onedev.server.codeProblem.getIcon(problems);
-		var linkClass = onedev.server.codeProblem.getLinkClass(problems);
+		var iconInfo = onedev.server.codeProblem.getIconInfo(problems);
 		
-		let svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#${icon}'/></svg>`;
-		$gutter.append(`<a class='problem-trigger ${linkClass}'>${svg}</a>`);
+		let svg = `<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#${iconInfo[0]}'/></svg>`;
+		$gutter.append(`<a class='problem-trigger ${iconInfo[1]}'>${svg}</a>`);
 		var $trigger = $gutter.children("a");
 		$trigger.mouseover(function() {
 			onedev.server.codemirror.mark(cm, markRanges);
@@ -328,7 +329,7 @@ onedev.server.sourceView = {
 			let cssClasses = "comment-indicator";
 			if (updated)
 				cssClasses += " updated"; 			
-			$gutter.append(`<a class='${cssClasses}'><svg class='icon icon-lg'><use xlink:href='${onedev.server.icons}#comments'/></svg></a>`);
+			$gutter.append(`<a class='${cssClasses}'><svg class='icon'><use xlink:href='${onedev.server.icons}#comments'/></svg></a>`);
 			
 			var $indicator = $gutter.children("a");
 			$indicator.popover({
@@ -366,7 +367,7 @@ onedev.server.sourceView = {
 			var cssClasses = "comment-trigger comment-indicator";
 			if (comment.updated)
 				cssClasses += " updated";
-			var svg = `<svg class='icon icon-lg'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
+			var svg = `<svg class='icon'><use xlink:href='${onedev.server.icons}#comment'/></svg>`;
 			$gutter.append(`<a class='${cssClasses}' title='Click to show comment of marked text'>${svg}</a>`);
 			var $indicator = $gutter.children("a");
 			$indicator.mouseover(function() {
@@ -691,3 +692,13 @@ onedev.server.sourceView = {
 		$body.children().bind("keydown", "down", onKeydown);		
 	}
 };
+
+$(function() {
+	$(document).keydown(function(e) {
+		if (e.keyCode == 27) 
+			$('.problem-popover').popover("hide");
+	}).mouseup(function(e) {
+		if ($(e.target).closest(".problem-trigger, .problem-popover").length == 0)
+			$(".problem-popover").popover("hide");
+	});
+});

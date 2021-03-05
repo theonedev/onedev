@@ -41,7 +41,12 @@ onedev.server.textDiff = {
 
 		onedev.server.textDiff.initBlameTooltip(containerId, $container.find("td.blame>a.hash"));
 		
-		$container.selectionPopover("init", function() {
+		$container.selectionPopover("init", function(e) {
+	    	if ($(e.target).closest("td.content").length == 0 
+					|| $(e.target).closest(".selection-popover").length != 0) {
+	    		return;
+			}
+			
 	    	var selection = window.getSelection();
 	    	if (!selection.rangeCount) {
 	    		return "close";
@@ -808,10 +813,11 @@ onedev.server.textDiff = {
 		
 		let $trigger = $(document.createElement("a"));
 		$trigger.addClass("problem-trigger");
-		$trigger.addClass(onedev.server.codeProblem.getLinkClass(problems));
+		
+		let iconInfo = onedev.server.codeProblem.getIconInfo(problems);
+		$trigger.addClass(iconInfo[1]);
 
-		let icon = onedev.server.codeProblem.getIcon(problems);
-		$trigger.append(`<svg class='icon'><use xlink:href='${onedev.server.icons}#${icon}'/></svg>`);
+		$trigger.append(`<svg class='icon icon-sm'><use xlink:href='${onedev.server.icons}#${iconInfo[0]}'/></svg>`);
 		
 		let markRanges = [];
 		for (var i in problems) 
@@ -897,7 +903,7 @@ onedev.server.textDiff = {
 			if (updated)
 				$indicator.addClass("updated");
 			
-			$indicator.append(`<svg class='icon icon-lg'><use xlink:href='${onedev.server.icons}#comments'/></svg>`);
+			$indicator.append(`<svg class='icon'><use xlink:href='${onedev.server.icons}#comments'/></svg>`);
 			
 			$indicator.popover({
 				html: true, 
@@ -934,7 +940,7 @@ onedev.server.textDiff = {
 			if (comment.updated)
 				$indicator.addClass("updated");
 			$indicator.addClass("comment-trigger").attr("title", "Click to show comment of marked text");
-			$indicator.append("<svg class='icon icon-lg'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
+			$indicator.append("<svg class='icon'><use xlink:href='" + onedev.server.icons + "#comment'/></svg>");
 			$indicator.mouseover(function() {
 				onedev.server.textDiff.mark($container, comment.range);
 			});
@@ -1060,3 +1066,13 @@ onedev.server.textDiff = {
 		}, 100);
 	}
 };
+
+$(function() {
+	$(document).keydown(function(e) {
+		if (e.keyCode == 27) 
+			$('.problem-popover').popover("hide");
+	}).mouseup(function(e) {
+		if ($(e.target).closest(".problem-popover, .problem-trigger").length == 0)		
+			$('.problem-popover').popover("hide");
+	});
+});

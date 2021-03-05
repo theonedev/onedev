@@ -1,5 +1,7 @@
 package io.onedev.server.plugin.report.jest;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -83,7 +85,7 @@ public class JestTestReportData implements Serializable {
 	public static JestTestReportData readFrom(File reportDir) {
 		File dataFile = new File(reportDir, FILE_NAME);
 		if (dataFile.exists()) {
-			try (InputStream is = new FileInputStream(dataFile)) {
+			try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
 				return (JestTestReportData) SerializationUtils.deserialize(is);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -95,11 +97,11 @@ public class JestTestReportData implements Serializable {
 	
 	public void writeTo(File reportDir) {
 		File dataFile = new File(reportDir, FILE_NAME);
-		try (OutputStream os = new FileOutputStream(dataFile)) {
+		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(dataFile))) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		};
+		}
 	}
 	
 	public int getNumOfTestSuites() {

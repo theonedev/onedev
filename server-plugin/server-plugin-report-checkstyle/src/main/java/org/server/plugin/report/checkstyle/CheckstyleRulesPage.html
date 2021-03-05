@@ -1,0 +1,35 @@
+<wicket:extend>
+	<div class="rules">
+		<form wicket:id="form">
+			<div class="clearable-wrapper flex-grow-1">
+				<div class="input-group">
+                    <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter rules">
+					<span class="input-group-append">
+						<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+					</span>
+				</div>
+			</div>
+			<div wicket:id="feedback" class="mt-3"></div>
+		</form>
+		<table wicket:id="rules" class="rules table"></table>
+	</div>
+	<wicket:fragment wicket:id="ruleFrag">
+		<a wicket:id="toggle">
+			<wicket:svg href="arrow" class="icon"/> 
+			<svg wicket:id="icon" class="icon icon-sm mr-1"/>
+			<span wicket:id="label" class="text-break"></span>
+		</a>
+		<wicket:enclosure child="violations">
+		<div class="violations mt-2">
+			<div wicket:id="tooManyViolations" class="alert alert-notice alert-light-warning"></div>
+			<div wicket:id="violations" class="violation px-3 py-2 rounded bg-hover-light">
+				<div class="d-flex align-items-center mb-1">
+					<div wicket:id="message" class="message mr-auto"></div>
+					<a wicket:id="range" title="Show position in file" class="range ml-3 text-nowrap"><span wicket:id="label"></span></a>
+				</div>
+				<a wicket:id="file" title="Show all violations in this file" class="file link-gray font-size-sm"><span wicket:id="label" class="text-break"></span></a>
+			</div>
+		</div>
+		</wicket:enclosure>
+	</wicket:fragment>
+</wicket:extend>

@@ -1,53 +1,29 @@
 onedev.server.codeProblem = {
-	getIcon: function(problems) {
+	getIconInfo: function(problems) {
 		if (Array.isArray(problems)) {
-			var icon = "warning-o";
+			var hasErrors = false;
+			var hasWarnings = false;
 			for (var i in problems) {
 				if (problems[i].severity == "ERROR") {
-					icon = "times-circle-o";
+					hasErrors = true;
 					break;
+				} else if (problems[i].severity == "WARNING") {
+					hasWarnings = true;
 				}
 			}
-			return icon;
+			if (hasErrors)
+				return ["times-circle-o", "link-danger", "text-danger"];
+			else if (hasWarnings)
+				return ["warning-o", "link-warning", "text-warning"];
+			else
+				return ["info-circle-o", "link-info", "text-info"];
 		} else {
 			if (problems.severity == "ERROR")
-				return "times-circle-o";
+				return ["times-circle-o", "link-danger", "text-danger"];
+			else if (problems.severity == "WARNING")
+				return ["warning-o", "link-warning", "text-warning"];
 			else
-				return "warning-o";
-		}
-	},
-	getLinkClass: function(problems) {
-		if (Array.isArray(problems)) {
-			var hoverClass = "link-warning";
-			for (var i in problems) {
-				if (problems[i].severity == "ERROR") {
-					hoverClass = "link-danger";
-					break;
-				}
-			}
-			return hoverClass;
-		} else {
-			if (problems.severity == "ERROR")
-				return "link-danger";
-			else
-				return "link-warning";			
-		}
-	},
-	getTextClass: function(problems) {
-		if (Array.isArray(problems)) {
-			var hoverClass = "text-warning";
-			for (var i in problems) {
-				if (problems[i].severity == "ERROR") {
-					hoverClass = "text-danger";
-					break;
-				}
-			}
-			return hoverClass;
-		} else {
-			if (problems.severity == "ERROR")
-				return "text-danger";
-			else
-				return "text-warning";			
+				return ["info-circle-o", "link-info", "text-info"];
 		}
 	},
 	renderProblems: function(problems) {
@@ -55,21 +31,20 @@ onedev.server.codeProblem = {
 			var $container = $("<div></div>");
 			for (var i in problems) {
 				var problem = problems[i];
-				var icon = onedev.server.codeProblem.getIcon(problem);
+				var iconInfo = onedev.server.codeProblem.getIconInfo(problem);
 				var $content = $("<pre class='problem-content mb-0 font-size-sm'></pre>");
-				$content.addClass(onedev.server.codeProblem.getTextClass(problem));
 				$container.append($content);
 				$content.text(problem.content);
-				$content.prepend("<svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#" + icon + "'/></svg>");
-				$content.append("<a title='Add comment' class='add-comment link-gray ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
+				
+				$content.prepend(`<svg class='icon icon-sm mr-2 ${iconInfo[2]}'><use xlink:href='${onedev.server.icons}#${iconInfo[0]}'/></svg>`);
+				$content.append("<a title='Add comment' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			}
 			return $container.html();
 		} else {
 			var $container = $("<div><pre class='problem-content mb-0 font-size-sm'></pre></div>");
 			var $content = $container.children('.problem-content');
 			$content.text(problems[0].content);
-			$content.addClass(onedev.server.codeProblem.getTextClass(problems[0]));
-			$content.append("<a title='Add comment' class='add-comment link-gray ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
+			$content.append("<a title='Add comment' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			return $container.html();
 		}
 	} 

@@ -1,5 +1,6 @@
 package io.onedev.server.web.resource;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -94,7 +95,7 @@ public class ArtifactResource extends AbstractResource {
 		}
 			
 		ResourceResponse response = new ResourceResponse();
-		try (InputStream is = new FileInputStream(artifactFile)) {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(artifactFile))) {
 			response.setContentType(ContentDetector.detectMediaType(is, artifactPath).toString());
 		} catch (Exception e) {
 			throw new RuntimeException(e);

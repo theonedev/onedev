@@ -143,10 +143,13 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			Set<CodeProblem> problems = new HashSet<>();
 			Map<Integer, Integer> coverages = new HashMap<>();
 			
+			List<String> lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 			for (Build build: buildManager.query(project, commitId, null, null, null, new HashMap<>())) {
-				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class))
-					problems.addAll(contribution.getCodeProblems(build, path, context.getProblemReport()));
+				for (CodeProblemContribution contribution: OneDev.getExtensions(CodeProblemContribution.class)) {
+					for (CodeProblem problem: contribution.getCodeProblems(build, path, context.getProblemReport())) 
+						problems.add(problem.normalizeRange(lines));
+				}
 				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 
 					contribution.getLineCoverages(build, path, context.getCoverageReport()).forEach((key, value)->{
 						coverages.merge(key, value, (v1, v2)->v1+v2);
@@ -839,6 +842,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		PlanarRange markRange = SourceRendererProvider.getRange(context.getPosition());
 		if (markRange == null)
 			markRange = (PlanarRange) commentContainer.getDefaultModelObject();
+		else
+			markRange = markRange.normalize(blob.getText().getLines());
 		
 		String script = String.format("onedev.server.sourceView.onDomReady("
 				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', %s);", 

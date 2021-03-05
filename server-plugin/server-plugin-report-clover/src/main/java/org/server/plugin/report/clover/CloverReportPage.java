@@ -177,7 +177,7 @@ public class CloverReportPage extends BuildReportPage {
 			@Override
 			protected List<String> getHints(TerminalExpect terminalExpect) {
 				return Lists.newArrayList(
-						"Path containing spaces or starting with dash needs to be quoted",
+						"Name containing spaces or starting with dash needs to be quoted",
 						"Use '*' or '?' for wildcard match. Prefix with '-' to exclude"
 						);
 			}

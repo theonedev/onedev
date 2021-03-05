@@ -79,7 +79,7 @@ public class JestTestReportModule extends AbstractPluginModule {
 			
 			@Override
 			public int getOrder() {
-				return 200;
+				return 100;
 			}
 			
 		});

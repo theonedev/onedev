@@ -1,0 +1,3 @@
+.checkstyle-report .expanded .icon:first-child {
+	transform: rotate(90deg);
+}

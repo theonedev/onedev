@@ -3,6 +3,7 @@ package io.onedev.server.web.component.diff.blob.text;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -103,10 +104,15 @@ public class TextDiffPanel extends Panel {
 				Map<Integer, List<CodeCommentInfo>> newCommentsByLine = 
 						CodeCommentInfo.groupByLine(change.getAnnotationSupport().getNewComments());
 
-				Map<Integer, List<CodeProblem>> oldProblemsByLine = 
-						CodeProblem.groupByLine(change.getAnnotationSupport().getOldProblems());
-				Map<Integer, List<CodeProblem>> newProblemsByLine = 
-						CodeProblem.groupByLine(change.getAnnotationSupport().getNewProblems());
+				List<CodeProblem> oldProblems = new ArrayList<>();
+				for (CodeProblem problem: change.getAnnotationSupport().getOldProblems()) 
+					oldProblems.add(problem.normalizeRange(change.getOldText().getLines()));
+				Map<Integer, List<CodeProblem>> oldProblemsByLine = CodeProblem.groupByLine(oldProblems);
+				
+				List<CodeProblem> newProblems = new ArrayList<>();
+				for (CodeProblem problem: change.getAnnotationSupport().getNewProblems()) 
+					newProblems.add(problem.normalizeRange(change.getNewText().getLines()));
+				Map<Integer, List<CodeProblem>> newProblemsByLine = CodeProblem.groupByLine(newProblems);
 				
 				return new DiffAnnotationInfo(
 						new AnnotationInfo(oldCommentsByLine, oldProblemsByLine, 

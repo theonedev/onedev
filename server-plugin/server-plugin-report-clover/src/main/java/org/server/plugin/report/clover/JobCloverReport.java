@@ -32,7 +32,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(name="Clover Coverage Report")
+@Editable(name="Clover Report")
 public class JobCloverReport extends JobReport {
 
 	private static final long serialVersionUID = 1L;
@@ -89,7 +89,7 @@ public class JobCloverReport extends JobReport {
 				List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
 				
 				for (File file: getPatternSet().listFiles(workspace)) {
-					logger.log("Processing clover coverage report: " + file.getAbsolutePath().substring(baseLen));
+					logger.log("Processing clover report: " + file.getAbsolutePath().substring(baseLen));
 					Document doc = reader.read(file);
 					for (Element projectElement: doc.getRootElement().elements("project")) {
 						Element metricsElement = projectElement.element("metrics");

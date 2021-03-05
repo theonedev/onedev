@@ -27,5 +27,6 @@
     	<module>server-plugin-report-markdown</module>
    		<module>server-plugin-report-jest</module>
     <module>server-plugin-report-clover</module>
+    <module>server-plugin-report-checkstyle</module>
   </modules>
 </project>

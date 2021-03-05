@@ -16,14 +16,14 @@ public class CodeProblem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static enum Severity {ERROR, WARNING};
+	public static enum Severity {ERROR, WARNING, INFO};
 	
 	private final PlanarRange range;
 	
 	private final String content;
 	
 	private final Severity severity;
-
+	
 	public CodeProblem(PlanarRange range, String content, Severity severity) {
 		this.range = range;
 		this.content = content;
@@ -40,6 +40,10 @@ public class CodeProblem implements Serializable {
 
 	public Severity getSeverity() {
 		return severity;
+	}
+	
+	public CodeProblem normalizeRange(List<String> lines) {
+		return new CodeProblem(range.normalize(lines), content, severity);
 	}
 
 	@Override

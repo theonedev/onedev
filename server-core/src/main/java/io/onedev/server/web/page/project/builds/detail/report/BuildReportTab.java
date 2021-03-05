@@ -44,7 +44,8 @@ public class BuildReportTab extends BuildTab {
 			@Override
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
-				return new ViewStateAwarePageLink<Void>(linkId, pageClass, BuildReportPage.paramsOf(page.getBuild(), getTitle()));
+				return new ViewStateAwarePageLink<Void>(linkId, pageClass, 
+						BuildReportPage.paramsOf(page.getBuild(), getTitle()));
 			}
 			
 		};
@@ -53,8 +54,8 @@ public class BuildReportTab extends BuildTab {
 	@Override
 	public boolean isActive(Page currentPage) {
 		if (super.isActive(currentPage)) {
-			BuildReportPage jestReportPage = (BuildReportPage) currentPage;
-			return getTitle().equals(jestReportPage.getReportName());
+			BuildReportPage buildReportPage = (BuildReportPage) currentPage;
+			return getTitle().equals(buildReportPage.getReportName());
 		} else {
 			return false;
 		}
