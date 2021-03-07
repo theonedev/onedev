@@ -157,12 +157,7 @@ onedev.server.sourceView = {
 	initComment: function() {
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
-		var commentWidthCookieKey = "sourceView.comment.width";
 		var $comment = $sourceView.children(".comment");
-		var commentWidth = Cookies.get(commentWidthCookieKey);
-		if (!commentWidth)
-			commentWidth = $sourceView.outerWidth()/3;
-		$comment.outerWidth(commentWidth);
 		var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 		$comment.resizable({
 			autoHide: false,
@@ -175,7 +170,7 @@ onedev.server.sourceView = {
 			},
 			stop: function(e, ui) {
 				$(this).resizable({maxWidth: undefined});
-				Cookies.set(commentWidthCookieKey, ui.size.width, {expires: Infinity});
+				Cookies.set("sourceView.comment.width", ui.size.width, {expires: Infinity});
 			}
 		});
 	},
@@ -188,12 +183,7 @@ onedev.server.sourceView = {
 	initOutline: function() {
 		var $sourceView = $(".source-view");
 		var $code = $sourceView.children(".code");
-		var outlineWidthCookieKey = "sourceView.outline.width";
 		var $outline = $sourceView.children(".outline");
-		var outlineWidth = Cookies.get(outlineWidthCookieKey);
-		if (!outlineWidth)
-			outlineWidth = 300;
-		$outline.outerWidth(outlineWidth);
 		var $outlineResizeHandle = $outline.children(".ui-resizable-handle");
 		$outline.resizable({
 			autoHide: false,
@@ -206,7 +196,7 @@ onedev.server.sourceView = {
 			},
 			stop: function(e, ui) {
 				$(this).resizable({maxWidth: undefined});
-				Cookies.set(outlineWidthCookieKey, ui.size.width, {expires: Infinity});
+				Cookies.set("sourceView.outline.width", ui.size.width, {expires: Infinity});
 			}
 		});
 	},

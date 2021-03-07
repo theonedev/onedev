@@ -125,6 +125,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private static final String COOKIE_OUTLINE = "sourceView.outline";
 	
+	private static final String COOKIE_OUTLINE_WIDTH = "sourceView.outline.width";
+	
+	private static final String COOKIE_COMMENT_WIDTH = "sourceView.comment.width";
+	
 	private static final String BODY_ID = "body";
 	
 	private final List<Symbol> symbols = new ArrayList<>();
@@ -286,6 +290,17 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 
 		};
+		
+		int commentWidth;
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
+		if (cookie != null) 
+			commentWidth = Integer.parseInt(cookie.getValue());
+		else 
+			commentWidth = 300;
+		
+		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
+		
 		if (context.getOpenComment() != null) {
 			for (List<CodeCommentInfo> listOfCommentInfos: annotationInfoModel.getObject().getComments().values()) {
 				for (CodeCommentInfo commentInfo: listOfCommentInfos) {
@@ -630,6 +645,15 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			}
 			
 		};
+		
+		int outlineWidth;
+		cookie = request.getCookie(COOKIE_OUTLINE_WIDTH);
+		if (cookie != null) 
+			outlineWidth = Integer.parseInt(cookie.getValue());
+		else 
+			outlineWidth = 300;
+		
+		outline.add(AttributeAppender.append("style", "width:" + outlineWidth + "px"));
 		outline.add(new AjaxLink<Void>("close") {
 
 			@Override
