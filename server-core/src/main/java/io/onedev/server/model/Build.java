@@ -328,6 +328,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<CloverMetric> cloverMetrics = new ArrayList<>();
 	
+	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	private Collection<CheckstyleMetric> checkstyleMetrics = new ArrayList<>();
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private PullRequest request;
 	
