@@ -52,7 +52,7 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -306,7 +306,7 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 			}
 			
 		};			
-		add(filesTable = new HistoryAwareDataTable<ViolationFile, Void>("files", columns, 
+		add(filesTable = new OneDataTable<ViolationFile, Void>("files", columns, 
 				dataProvider, WebConstants.PAGE_SIZE, null));
 		filesTable.setOutputMarkupId(true);
 		

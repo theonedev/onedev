@@ -9,7 +9,7 @@
 					<div class="operations d-flex flex-nowrap">
 						<div class="clearable-wrapper flex-grow-1 mr-3">
 							<div class="input-group">
-		                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off" placeholder="Filter">
+		                        <input wicket:id="input" class="form-control" spellcheck="false" autocomplete="off">
 								<span class="input-group-append">
 									<button wicket:id="submit" title="Filter" class="btn btn-icon btn-outline-secondary" type="submit"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
 								</span>
@@ -24,6 +24,8 @@
 						<a wicket:id="name" class="name font-weight-bold text-break"><span wicket:id="label"></span></a>
 						<div wicket:id="coverages" class="coverages mt-3"></div>
 					</div>
+					<div wicket:id="pagingNavigator" class="mt-4"></div>
+					<div wicket:id="noRecords"></div>
 				</div>
 			</div>
 		</div>

@@ -62,7 +62,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -430,7 +430,7 @@ public class ProjectTagsPage extends ProjectPage {
 			}
 		};		
 		
-		add(tagsTable = new HistoryAwareDataTable<RefInfo, Void>("tags", columns, dataProvider, 
+		add(tagsTable = new OneDataTable<RefInfo, Void>("tags", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override

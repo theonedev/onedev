@@ -79,7 +79,7 @@ import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -753,7 +753,7 @@ public class ProjectBranchesPage extends ProjectPage {
 			}
 		};		
 		
-		add(branchesTable = new HistoryAwareDataTable<RefInfo, Void>("branches", columns, dataProvider, 
+		add(branchesTable = new OneDataTable<RefInfo, Void>("branches", columns, dataProvider, 
 				PAGE_SIZE, pagingHistorySupport) {
 			
 			@Override

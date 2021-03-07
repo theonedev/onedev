@@ -74,7 +74,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.component.pagenavigator.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.pullrequest.build.PullRequestJobsPanel;
@@ -557,7 +557,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 			@Override
 			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new HistoryAwarePagingNavigator(navigatorId, table, getPagingHistorySupport());
+				return new OnePagingNavigator(navigatorId, table, getPagingHistorySupport());
 			}
 			
 		});

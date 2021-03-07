@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.pagenavigator;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -14,15 +16,17 @@ import org.apache.wicket.markup.html.navigation.paging.IPagingLabelProvider;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigation;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigationIncrementLink;
 import org.apache.wicket.markup.html.navigation.paging.PagingNavigationLink;
+import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class HistoryAwarePagingNavigator extends org.apache.wicket.markup.html.navigation.paging.PagingNavigator {
+public class OnePagingNavigator extends PagingNavigator {
 
 	private final PagingHistorySupport pagingHistorySupport;
 
-	public HistoryAwarePagingNavigator(String markupId, IPageable pageable, PagingHistorySupport pagingHistorySupport) {
+	public OnePagingNavigator(String markupId, IPageable pageable, 
+			@Nullable PagingHistorySupport pagingHistorySupport) {
 		super(markupId, pageable);
 		this.pagingHistorySupport = pagingHistorySupport;
 	}
@@ -37,6 +41,12 @@ public class HistoryAwarePagingNavigator extends org.apache.wicket.markup.html.n
 		add(AttributeAppender.append("class", "pagination justify-content-center align-items-center"));
 		
 		setOutputMarkupId(true);
+	}
+
+	@Override
+	protected void onConfigure() {
+		super.onConfigure();
+		setVisible(getPageable().getPageCount() > 1);
 	}
 
 	@Override

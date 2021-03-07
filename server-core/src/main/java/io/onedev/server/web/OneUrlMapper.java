@@ -114,7 +114,7 @@ import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.resource.ServerLogResourceReference;
 import io.onedev.server.web.resource.SvgSpriteResourceReference;
 
-public class BaseUrlMapper extends CompoundRequestMapper {
+public class OneUrlMapper extends CompoundRequestMapper {
 
 	@Override
 	public CompoundRequestMapper add(IRequestMapper mapper) {
@@ -123,7 +123,7 @@ public class BaseUrlMapper extends CompoundRequestMapper {
 		return super.add(mapper);
 	}
 
-	public BaseUrlMapper(WebApplication app) {
+	public OneUrlMapper(WebApplication app) {
 		add(new DynamicPathPageMapper("init", ServerInitPage.class));
 		add(new DynamicPathPageMapper("loading", BrowserInfoPage.class));
 		add(new DynamicPathPageMapper("issues", IssueListPage.class));

@@ -51,7 +51,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -369,7 +369,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(dataTable = new HistoryAwareDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(dataTable = new OneDataTable<Project, Void>("projects", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

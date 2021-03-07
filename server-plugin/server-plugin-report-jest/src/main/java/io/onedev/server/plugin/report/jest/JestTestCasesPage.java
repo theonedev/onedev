@@ -59,7 +59,7 @@ import io.onedev.server.web.component.chart.pie.PieChartPanel;
 import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.pagenavigator.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -420,7 +420,7 @@ public class JestTestCasesPage extends JestTestReportPage {
 
 				@Override
 				protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-					return new HistoryAwarePagingNavigator(navigatorId, table, null);
+					return new OnePagingNavigator(navigatorId, table, null);
 				}
 				
 			});

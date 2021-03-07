@@ -40,7 +40,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -273,7 +273,7 @@ public class RoleListPage extends AdministrationPage {
 			
 		};
 		
-		add(rolesTable = new HistoryAwareDataTable<>("roles", columns, dataProvider, 
+		add(rolesTable = new OneDataTable<>("roles", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 

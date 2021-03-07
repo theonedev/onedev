@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -27,7 +28,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -44,11 +45,14 @@ import io.onedev.server.model.Build;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -156,6 +160,17 @@ public class CloverReportPage extends BuildReportPage {
 			}
 			
 		});
+		input.add(AttributeAppender.append("placeholder", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				if (packageName != null)
+					return "Filter files...";
+				else
+					return "Filter packages...";
+			}
+			
+		}));
 		input.add(new PatternSetAssistBehavior() {
 			
 			@Override
@@ -266,7 +281,8 @@ public class CloverReportPage extends BuildReportPage {
 		itemsContainer.setOutputMarkupId(true);
 		add(itemsContainer);
 		
-		itemsContainer.add(new ListView<NamedCoverageInfo>("items", new LoadableDetachableModel<List<NamedCoverageInfo>>() {
+		PageableListView<NamedCoverageInfo> itemsView = 
+				new PageableListView<NamedCoverageInfo>("items", new LoadableDetachableModel<List<NamedCoverageInfo>>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
@@ -303,7 +319,7 @@ public class CloverReportPage extends BuildReportPage {
 				}
 			}
 			
-		}) {
+		}, WebConstants.PAGE_SIZE) {
 
 			@Override
 			protected void populateItem(ListItem<NamedCoverageInfo> item) {
@@ -328,7 +344,10 @@ public class CloverReportPage extends BuildReportPage {
 				item.add(new CoverageInfoPanel<NamedCoverageInfo>("coverages", item.getModel()));
 			}
 			
-		});
+		};
+		itemsContainer.add(itemsView);
+		itemsContainer.add(new OnePagingNavigator("pagingNavigator", itemsView, null));
+		itemsContainer.add(new NoRecordsPlaceholder("noRecords", itemsView));
 	}
 
 	private void parseFilterPatterns() {

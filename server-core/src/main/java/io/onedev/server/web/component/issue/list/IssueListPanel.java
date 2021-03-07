@@ -88,7 +88,7 @@ import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
-import io.onedev.server.web.component.pagenavigator.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -795,7 +795,7 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new HistoryAwarePagingNavigator(navigatorId, table, getPagingHistorySupport());
+				return new OnePagingNavigator(navigatorId, table, getPagingHistorySupport());
 			}
 			
 		});

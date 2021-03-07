@@ -229,7 +229,7 @@ public class WebApplication extends org.apache.wicket.protocol.http.WebApplicati
 			
 		});
 		
-		mount(new BaseUrlMapper(this));
+		mount(new OneUrlMapper(this));
 		
 		for (WebApplicationConfigurator configurator: applicationConfigurators)
 			configurator.configure(this);
