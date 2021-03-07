@@ -20,18 +20,13 @@ onedev.server.revisionDiff = {
 		var $comment = $(".revision-diff>.body>.detail>.comment");
 		
 		if ($comment.is(":visible")) {
-			var commentWidthCookieKey = "revisionDiff.comment.width";
-			var commentWidth = Cookies.get(commentWidthCookieKey);
-			if (!commentWidth)
-				commentWidth = $(".revision-diff").outerWidth()/3;
-			$comment.outerWidth(commentWidth);
 			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 			$comment.resizable({
 				autoHide: false,
 				handles: {"e": $commentResizeHandle},
 				minWidth: 200,
 				stop: function(e, ui) {
-					Cookies.set(commentWidthCookieKey, ui.size.width, {expires: Infinity});
+					Cookies.set("revisionDiff.comment.width", ui.size.width, {expires: Infinity});
 				}
 			});
 		}

@@ -291,11 +291,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 		};
 		
-		int commentWidth;
+		float commentWidth;
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
 		if (cookie != null) 
-			commentWidth = Integer.parseInt(cookie.getValue());
+			commentWidth = Float.parseFloat(cookie.getValue());
 		else 
 			commentWidth = 300;
 		
@@ -646,10 +646,10 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 		};
 		
-		int outlineWidth;
+		float outlineWidth;
 		cookie = request.getCookie(COOKIE_OUTLINE_WIDTH);
 		if (cookie != null) 
-			outlineWidth = Integer.parseInt(cookie.getValue());
+			outlineWidth = Float.parseFloat(cookie.getValue());
 		else 
 			outlineWidth = 300;
 		

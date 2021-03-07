@@ -114,6 +114,8 @@ import io.onedev.server.web.util.SuggestionUtils;
 public abstract class RevisionDiffPanel extends Panel {
 
 	private static final String COOKIE_VIEW_MODE = "onedev.server.diff.viewmode";
+	
+	private static final String COOKIE_COMMENT_WIDTH = "revisionDiff.comment.width";
 
 	private static final String BODY_ID = "body";
 	
@@ -1179,6 +1181,16 @@ public abstract class RevisionDiffPanel extends Panel {
 			
 		};
 		commentContainer.setOutputMarkupPlaceholderTag(true);
+		
+		float commentWidth;
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(COOKIE_COMMENT_WIDTH);
+		if (cookie != null) 
+			commentWidth = Float.parseFloat(cookie.getValue());
+		else 
+			commentWidth = 300;
+		
+		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
 		
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		commentContainer.add(head);
