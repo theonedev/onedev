@@ -828,33 +828,41 @@ onedev.server.textDiff = {
 		}).mouseout(function() {
 			onedev.server.textDiff.restoreMark($container);
 		});
-		
-		$trigger.popover({
-			html: true, 
-			sanitize: false, 
-			placement: "top", 
-			container: $container,
-			content: onedev.server.codeProblem.renderProblems(problems),
-			template: `<div data-line='${line}' class='${oldOrNew} popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
-		}).on("shown.bs.popover", function() {
-			var $currentPopover = $(`.problem-popover.${oldOrNew}[data-line='${line}']`);
-			$(".popover").not($currentPopover).popover("hide");
-			$currentPopover.find(".problem-content").mouseover(function() {
-				onedev.server.textDiff.mark($container, problems[$(this).index()].range);
-			}).mouseout(function() {
-				onedev.server.textDiff.restoreMark($container);
-			}).each(function() {
-				var problem = problems[$(this).index()];
-				$(this).children(".add-comment").click(function() {
-					if (onedev.server.textDiff.confirmUnsavedChanges($container)) {
-						$currentPopover.popover("hide");
-						var range = problem.range;
-						$container.data("callback")("addComment", leftSide, range.fromRow, range.fromColumn, 
-								range.toRow, range.toColumn);
-					}
-				});
-			});
-		});
+
+		$trigger.mousedown(function() {
+			/* 
+			 * When there are many problems, initializing popover for all of them will slow down 
+		 	 * load of the source view. So we initialize popover in mouse down event
+			 */
+			if (!$trigger.data("popoverInited")) {
+				$trigger.popover({
+					html: true, 
+					sanitize: false, 
+					placement: "top", 
+					container: $container,
+					content: onedev.server.codeProblem.renderProblems(problems),
+					template: `<div data-line='${line}' class='${oldOrNew} popover problem-popover'><div class='arrow'></div><div class='popover-body'></div></div>`
+				}).on("shown.bs.popover", function() {
+					var $currentPopover = $(`.problem-popover.${oldOrNew}[data-line='${line}']`);
+					$(".popover").not($currentPopover).popover("hide");
+					$currentPopover.find(".problem-content").mouseover(function() {
+						onedev.server.textDiff.mark($container, problems[$(this).index()].range);
+					}).mouseout(function() {
+						onedev.server.textDiff.restoreMark($container);
+					}).each(function() {
+						var problem = problems[$(this).index()];
+						$(this).children(".add-comment").click(function() {
+							if (onedev.server.textDiff.confirmUnsavedChanges($container)) {
+								$currentPopover.popover("hide");
+								var range = problem.range;
+								$container.data("callback")("addComment", leftSide, range.fromRow, range.fromColumn, 
+										range.toRow, range.toColumn);
+							}
+						});
+					});
+				}).data("popoverInited", true);				
+			}			
+		});		
 		
 		$lineNumTd.prepend($trigger);
 	},
