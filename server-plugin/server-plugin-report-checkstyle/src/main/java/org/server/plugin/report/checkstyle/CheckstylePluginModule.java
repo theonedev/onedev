@@ -58,7 +58,7 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobCheckstyleReport.class);
+				return Sets.newHashSet(JobESLintReport.class, JobCheckstyleReport.class);
 			}
 			
 		});

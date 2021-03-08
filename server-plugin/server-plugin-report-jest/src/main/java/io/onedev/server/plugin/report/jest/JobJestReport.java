@@ -33,8 +33,8 @@ public class JobJestReport extends JobReport {
 	
 	public static final String DIR = "jest-reports";
 	
-	@Editable(order=100, description="Specify json file containing Jest test results relative to OneDev workspace. "
-			+ "It can be generated via Jest option <tt>--json</tt> and <tt>--outputFile</tt>. Use * or ? for pattern match")
+	@Editable(order=100, description="Specify Jest test result file in json format relative to repository root. "
+			+ "This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty

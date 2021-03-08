@@ -167,9 +167,8 @@ public class Job implements Serializable, Validatable {
 		return suggestions;
 	}
 	
-	@Editable(order=120, name="Commands", description="Specify content of Linux shell script or Windows command batch to execute in above image. "
-			+ "It will be executed under <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, which may contain files of your repository and "
-			+ "dependency artifacts based on your configuration below")
+	@Editable(order=120, name="Commands", description="Specify content of Linux shell script or Windows command batch to execute "
+			+ "in above image under the repository root")
 	@Interpolative
 	@Code(language = Code.SHELL, variableProvider="getVariables")
 	@Size(min=1, message="may not be empty")
@@ -214,8 +213,7 @@ public class Job implements Serializable, Validatable {
 		this.triggers = triggers;
 	}
 
-	@Editable(order=9000, group="Source Retrieval", description="Whether or not to retrieve files under the repository "
-			+ "into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
+	@Editable(order=9000, group="Source Retrieval", description="Whether or not to retrieve repository files")
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
@@ -285,8 +283,8 @@ public class Job implements Serializable, Validatable {
 		this.services = services;
 	}
 
-	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
-			+ "Artifact files are relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, and may use * or ? for pattern match")
+	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts relative to "
+			+ "repository root. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NameOfEmptyValue("No artifacts")

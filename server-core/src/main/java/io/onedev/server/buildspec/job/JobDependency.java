@@ -69,7 +69,7 @@ public class JobDependency implements Serializable {
 	}
 	
 	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
-			+ "from the dependency into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>. Leave empty to do not retrieve any artifacts")
+			+ "from the dependency into repository root. Leave empty to do not retrieve any artifacts")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NameOfEmptyValue("Do not retrieve")

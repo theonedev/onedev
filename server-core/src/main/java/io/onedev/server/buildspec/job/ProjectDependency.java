@@ -100,7 +100,7 @@ public class ProjectDependency implements Serializable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>")
+	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into repository root")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(suggester="suggestArtifacts", path=true)
 	@NotEmpty

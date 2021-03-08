@@ -39,8 +39,8 @@ public class JobCheckstyleReport extends JobReport {
 	
 	public static final String VIOLATION_FILES = "violation-files";
 	
-	@Editable(order=100, description="Specify checkstyle result xml file. This should be a "
-			+ "relative path under OneDev workspace. For instance, <tt>target/checkstyle-result.xml</tt>. "
+	@Editable(order=100, description="Specify checkstyle result xml file relative to repository root, "
+			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
 			+ "Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> "
 			+ "on how to generate the result xml file. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")

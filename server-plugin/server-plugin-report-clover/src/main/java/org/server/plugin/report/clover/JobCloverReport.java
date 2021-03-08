@@ -41,8 +41,8 @@ public class JobCloverReport extends JobReport {
 	
 	public static final String TEST_COUNTS_DIR = "test-count";
 	
-	@Editable(order=100, description="Specify clover xml file containing coverage data. This should be a "
-			+ "relative path under OneDev workspace. For instance, <tt>target/site/clover/clover.xml</tt>. "
+	@Editable(order=100, description="Specify clover xml report file relative to repository root, "
+			+ "for instance, <tt>target/site/clover/clover.xml</tt>. "
 			+ "Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> "
 			+ "on how to generate clover xml file. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
