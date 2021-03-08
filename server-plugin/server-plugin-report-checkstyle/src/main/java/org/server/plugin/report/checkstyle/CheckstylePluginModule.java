@@ -132,8 +132,8 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 						if (build.getReportDir(JobCheckstyleReport.DIR).exists()) {
 							for (File reportDir: build.getReportDir(JobCheckstyleReport.DIR).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
-									tabs.add(new BuildReportTab(reportDir.getName(), 
-											CheckstyleFilesPage.class, CheckstyleRulesPage.class));
+									tabs.add(new BuildReportTab(reportDir.getName(), CheckstyleFilesPage.class, 
+											CheckstyleRulesPage.class, CheckstyleStatsPage.class));
 								}
 							}
 						}

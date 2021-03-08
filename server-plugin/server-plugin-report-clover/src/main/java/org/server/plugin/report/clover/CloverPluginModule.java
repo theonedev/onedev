@@ -129,8 +129,10 @@ public class CloverPluginModule extends AbstractPluginModule {
 					public Void call() throws Exception {
 						if (build.getReportDir(JobCloverReport.DIR).exists()) {
 							for (File reportDir: build.getReportDir(JobCloverReport.DIR).listFiles()) {
-								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) 
-									tabs.add(new BuildReportTab(reportDir.getName(), CloverReportPage.class));
+								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) { 
+									tabs.add(new BuildReportTab(reportDir.getName(), CloverReportPage.class, 
+											CloverStatsPage.class));
+								}
 							}
 						}
 						return null;

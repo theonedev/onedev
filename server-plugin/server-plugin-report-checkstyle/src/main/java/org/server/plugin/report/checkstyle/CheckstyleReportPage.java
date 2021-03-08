@@ -13,16 +13,12 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.code.CodeProblem.Severity;
-import io.onedev.server.model.support.BuildMetric;
-import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -114,20 +110,6 @@ public class CheckstyleReportPage extends BuildReportPage {
 			super(title, pageClass);
 		}
 		
-		@Override
-		protected Component renderOptions(String componentId) {
-			Fragment fragment = new Fragment(componentId, "trendingFrag", CheckstyleReportPage.this);
-
-			String query = String.format("%s \"last month\" and \"%s\" %s \"%s\"", 
-					BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since), 
-					BuildMetric.NAME_REPORT, 
-					BuildMetricQuery.getRuleName(BuildMetricQueryParser.Is), 
-					getReportName());
-			PageParameters params = CheckstyleStatsPage.paramsOf(getProject(), query);
-			fragment.add(new ViewStateAwarePageLink<>("link", CheckstyleStatsPage.class, params));
-			return fragment;
-		}
-
 		@Override
 		public Component render(String componentId) {
 			return new PageTabHead(componentId, this) {

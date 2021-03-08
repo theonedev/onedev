@@ -66,8 +66,10 @@ public class JestTestReportModule extends AbstractPluginModule {
 					public Void call() throws Exception {
 						if (build.getReportDir(JobJestReport.DIR).exists()) {
 							for (File reportDir: build.getReportDir(JobJestReport.DIR).listFiles()) {
-								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) 
-									tabs.add(new BuildReportTab(reportDir.getName(), JestTestSuitesPage.class, JestTestCasesPage.class));
+								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
+									tabs.add(new BuildReportTab(reportDir.getName(), JestTestSuitesPage.class, 
+											JestTestCasesPage.class, JestTestStatsPage.class));
+								}
 							}
 						}
 						return null;

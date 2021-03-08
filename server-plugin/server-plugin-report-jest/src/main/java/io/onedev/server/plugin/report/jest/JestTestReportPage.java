@@ -12,15 +12,11 @@ import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.model.support.BuildMetric;
-import io.onedev.server.search.buildmetric.BuildMetricQuery;
-import io.onedev.server.search.buildmetric.BuildMetricQueryParser;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTabHead;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -85,20 +81,6 @@ public abstract class JestTestReportPage extends BuildReportPage {
 
 		public JestReportTab(String title, Class<? extends JestTestReportPage> pageClass) {
 			super(title, pageClass);
-		}
-		
-		@Override
-		protected Component renderOptions(String componentId) {
-			Fragment fragment = new Fragment(componentId, "trendingFrag", JestTestReportPage.this);
-
-			String query = String.format("%s \"last month\" and \"%s\" %s \"%s\"", 
-					BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since), 
-					BuildMetric.NAME_REPORT, 
-					BuildMetricQuery.getRuleName(BuildMetricQueryParser.Is), 
-					getReportName());
-			PageParameters params = JestTestStatsPage.paramsOf(getProject(), query);
-			fragment.add(new ViewStateAwarePageLink<>("link", JestTestStatsPage.class, params));
-			return fragment;
 		}
 
 		@Override
