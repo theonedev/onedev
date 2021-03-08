@@ -27,7 +27,7 @@ import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable(name="Jest Test Report")
-public class JobJestReport extends JobReport {
+public class JobJestTestReport extends JobReport {
 
 	private static final long serialVersionUID = 1L;
 	

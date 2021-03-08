@@ -32,7 +32,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(name="Clover Report")
+@Editable(name="Clover Coverage Report")
 public class JobCloverReport extends JobReport {
 
 	private static final long serialVersionUID = 1L;
@@ -41,7 +41,7 @@ public class JobCloverReport extends JobReport {
 	
 	public static final String TEST_COUNTS_DIR = "test-count";
 	
-	@Editable(order=100, description="Specify clover xml report file relative to repository root, "
+	@Editable(order=100, description="Specify clover coverage xml report file relative to repository root, "
 			+ "for instance, <tt>target/site/clover/clover.xml</tt>. "
 			+ "Refer to <a href='https://openclover.org/documentation'>OpenClover documentation</a> "
 			+ "on how to generate clover xml file. Use * or ? for pattern match")

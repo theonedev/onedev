@@ -50,7 +50,7 @@ public class JestTestReportModule extends AbstractPluginModule {
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobJestReport.class);
+				return Sets.newHashSet(JobJestTestReport.class);
 			}
 			
 		});
@@ -60,12 +60,12 @@ public class JestTestReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportLockKey(JobJestReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportLockKey(JobJestTestReport.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportDir(JobJestReport.DIR).exists()) {
-							for (File reportDir: build.getReportDir(JobJestReport.DIR).listFiles()) {
+						if (build.getReportDir(JobJestTestReport.DIR).exists()) {
+							for (File reportDir: build.getReportDir(JobJestTestReport.DIR).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
 									tabs.add(new BuildReportTab(reportDir.getName(), JestTestSuitesPage.class, 
 											JestTestCasesPage.class, JestTestStatsPage.class));

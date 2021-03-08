@@ -57,7 +57,7 @@ public class CloverPluginModule extends AbstractPluginModule {
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobCloverReport.class);
+				return Sets.newHashSet(JobJestCoverageReport.class, JobCloverReport.class);
 			}
 			
 		});
@@ -71,7 +71,7 @@ public class CloverPluginModule extends AbstractPluginModule {
 					String query = String.format("%s \"last month\"", 
 							BuildMetricQuery.getRuleName(BuildMetricQueryParser.Since));
 					PageParameters params = CloverStatsPage.paramsOf(project, query);
-					menuItems.add(new SidebarMenuItem.Page(null, "Clover", CloverStatsPage.class, params));
+					menuItems.add(new SidebarMenuItem.Page(null, "Clover Coverage", CloverStatsPage.class, params));
 				}
 				return menuItems;
 			}
