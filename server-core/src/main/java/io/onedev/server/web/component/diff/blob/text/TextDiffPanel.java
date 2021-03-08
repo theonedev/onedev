@@ -77,7 +77,6 @@ import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.AnnotationInfo;
 import io.onedev.server.web.util.CodeCommentInfo;
 import io.onedev.server.web.util.DiffPlanarRange;
@@ -235,8 +234,7 @@ public class TextDiffPanel extends Panel {
 			if (getPullRequest() != null 
 					&& getPullRequest().getSource() != null 
 					&& getPullRequest().getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())
-					&& getPage() instanceof PullRequestChangesPage) { 
+					&& SecurityUtils.canModify(getPullRequest().getSourceProject(), getPullRequest().getSourceBranch(), change.getPath())) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 

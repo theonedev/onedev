@@ -11,7 +11,7 @@
         	<div>
         		<div class="name">Branch</div>
         		<div class="value">
-        			<span wicket:id="branch"></span>
+        			<a wicket:id="branch"><span wicket:id="label"></span></a>
         		</div>
         	</div>
 			</wicket:enclosure>
@@ -19,7 +19,7 @@
         	<div>
         		<div class="name">Tag</div>
         		<div class="value">
-        			<span wicket:id="tag"></span>
+        			<a wicket:id="tag"><span wicket:id="label"></span></a>
         		</div>
         	</div>
 			</wicket:enclosure>
@@ -27,6 +27,7 @@
                 <div class="name">Job</div>
                 <div class="value">
                     <a wicket:id="job"><span wicket:id="label"></span></a>
+					<a wicket:id="editJob" title="Edit job"><wicket:svg href="edit" class="icon icon-sm ml-1 mb-1"/></a>
                 </div>
             </div>
             <div>

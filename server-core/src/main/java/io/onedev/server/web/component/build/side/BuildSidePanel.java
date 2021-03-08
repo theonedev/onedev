@@ -20,9 +20,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -42,6 +46,9 @@ import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.builds.BuildListPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -77,14 +84,50 @@ public abstract class BuildSidePanel extends Panel {
 		add(general);
 
 		String branch = getBuild().getBranch();
-		general.add(new Label("branch", branch).setVisible(branch != null));
+		
+		ProjectBlobPage.State state = new ProjectBlobPage.State();
+		state.blobIdent = new BlobIdent(branch, null, FileMode.TREE.getBits());
+		PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
+		
+		Link<Void> branchLink = new BookmarkablePageLink<Void>("branch", ProjectBlobPage.class, params) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!isEnabled())
+					tag.setName("span");
+			}
+			
+		};
+		branchLink.add(new Label("label", branch));
+		branchLink.setVisible(branch != null);
+		branchLink.setEnabled(SecurityUtils.canReadCode(getProject()));
+		general.add(branchLink);
 		
 		String tag = getBuild().getTag();
-		general.add(new Label("tag", tag).setVisible(tag != null));
+		
+		state = new ProjectBlobPage.State();
+		state.blobIdent = new BlobIdent(tag, null, FileMode.TREE.getBits());
+		params = ProjectBlobPage.paramsOf(getProject(), state);
+		
+		Link<Void> tagLink = new BookmarkablePageLink<Void>("tag", ProjectBlobPage.class, params) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!isEnabled())
+					tag.setName("span");
+			}
+			
+		};
+		tagLink.add(new Label("label", tag));
+		tagLink.setVisible(tag != null);
+		tagLink.setEnabled(SecurityUtils.canReadCode(getProject()));
+		general.add(tagLink);
 		
 		CommitDetailPage.State commitState = new CommitDetailPage.State();
 		commitState.revision = getBuild().getCommitHash();
-		PageParameters params = CommitDetailPage.paramsOf(getProject(), commitState);
+		params = CommitDetailPage.paramsOf(getProject(), commitState);
 		
 		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commit", CommitDetailPage.class, params) {
 
@@ -110,6 +153,39 @@ public abstract class BuildSidePanel extends Panel {
 		};
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
+		
+		if (branch != null) {
+			if (SecurityUtils.canModify(getProject(), branch, BuildSpec.BLOB_PATH)) {
+				state = new ProjectBlobPage.State();
+				state.blobIdent = new BlobIdent(getBuild().getBranch(), BuildSpec.BLOB_PATH, 
+						FileMode.REGULAR_FILE.getBits());
+				state.mode = BlobRenderContext.Mode.EDIT;
+				state.position = BuildSpecRendererProvider.getPosition(Job.SELECTION_PREFIX + getBuild().getJobName());
+				state.urlBeforeEdit = urlFor(getPage().getClass(), getPage().getPageParameters()).toString();
+				params = ProjectBlobPage.paramsOf(getProject(), state);
+				general.add(new BookmarkablePageLink<Void>("editJob", ProjectBlobPage.class, params));
+			} else {
+				general.add(new WebMarkupContainer("editJob").setVisible(false));
+			}
+		} else {
+			PullRequest request = getBuild().getRequest();
+			if (request != null
+					&& request.getSource() != null 
+					&& request.getSource().getObjectName(false) != null
+					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), BuildSpec.BLOB_PATH)) { 
+				BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), BuildSpec.BLOB_PATH, 
+						FileMode.REGULAR_FILE.getBits());
+				state = new ProjectBlobPage.State(blobIdent);
+				state.requestId = request.getId();
+				state.mode = BlobRenderContext.Mode.EDIT;
+				state.urlBeforeEdit = urlFor(getPage().getClass(), getPage().getPageParameters()).toString();
+				state.urlAfterEdit = urlFor(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request)).toString();
+				params = ProjectBlobPage.paramsOf(request.getSourceProject(), state);
+				general.add(new BookmarkablePageLink<Void>("editJob", ProjectBlobPage.class, params));
+			} else {
+				general.add(new WebMarkupContainer("editJob").setVisible(false));
+			}
+		}
 		
 		general.add(new Label("submitDate", new LoadableDetachableModel<String>() {
 
