@@ -77,6 +77,7 @@ public class JobCheckstyleReport extends JobReport {
 
 				List<CheckstyleViolation> violations = new ArrayList<>();
 				
+				boolean hasReports = false;
 				for (File file: getPatternSet().listFiles(workspace)) {
 					logger.log("Processing checkstyle report: " + file.getAbsolutePath().substring(baseLen));
 					Document doc = reader.read(file);
@@ -105,14 +106,18 @@ public class JobCheckstyleReport extends JobReport {
 							}
 						}
 					}
+					hasReports = true;
 				}
 				
-				return new CheckstyleReportData(violations);
+				if (hasReports)
+					return new CheckstyleReportData(violations);
+				else
+					return null;
 			}
 			
 		});
 		
-		if (!reportData.getViolations().isEmpty()) {
+		if (reportData != null) {
 			FileUtils.createDir(reportDir);
 			reportData.writeTo(reportDir);
 			
