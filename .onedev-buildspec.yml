@@ -1,4 +1,4 @@
-version: 1
+version: 2
 jobs:
 - name: CI
   image: 1dev/build-environment:1.2
@@ -62,7 +62,7 @@ jobs:
   - cp server-product/target/onedev-${buildVersion}.zip .
   - ''
   - cat << EOF > run-as-docker.sh
-  - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(pwd)/onedev:/opt/onedev
+  - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \$(pwd)/onedev:/opt/onedev
     -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
   - EOF
   retrieveSource: true
@@ -93,8 +93,6 @@ jobs:
   - !CloseMilestoneAction
     condition: successful
     milestoneName: '@build_version@'
-  defaultFixedIssuesFilter: '"State" is "Released" order by "Type" asc and "Priority"
-    desc'
 - name: Sync Main (GitHub)
   image: alpine/git:1.0.7
   commands:
