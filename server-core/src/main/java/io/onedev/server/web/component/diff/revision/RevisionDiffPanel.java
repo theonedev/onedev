@@ -1193,6 +1193,7 @@ public abstract class RevisionDiffPanel extends Panel {
 		commentContainer.add(AttributeAppender.append("style", "width:" + commentWidth + "px"));
 		
 		WebMarkupContainer head = new WebMarkupContainer("head");
+		head.setOutputMarkupId(true);
 		commentContainer.add(head);
 		
 		head.add(new WebMarkupContainer("outdated") {
