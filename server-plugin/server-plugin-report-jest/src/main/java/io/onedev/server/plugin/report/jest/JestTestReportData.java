@@ -84,14 +84,10 @@ public class JestTestReportData implements Serializable {
 	@Nullable
 	public static JestTestReportData readFrom(File reportDir) {
 		File dataFile = new File(reportDir, FILE_NAME);
-		if (dataFile.exists()) {
-			try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
-				return (JestTestReportData) SerializationUtils.deserialize(is);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return null;
+		try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
+			return (JestTestReportData) SerializationUtils.deserialize(is);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	

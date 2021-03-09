@@ -26,9 +26,9 @@ public class CheckstyleReportData implements Serializable {
 
 	private final List<CheckstyleViolation> violations;
 	
-	private transient Map<String, ViolationFile> violationFiles;
+	private transient List<ViolationFile> violationFiles;
 	
-	private transient Map<String, ViolationRule> violationRules;
+	private transient List<ViolationRule> violationRules;
 	
 	public CheckstyleReportData(List<CheckstyleViolation> violations) {
 		this.violations = violations;
@@ -38,14 +38,14 @@ public class CheckstyleReportData implements Serializable {
 		return violations;
 	}
 
-	public Map<String, ViolationFile> getViolationFiles() {
+	public List<ViolationFile> getViolationFiles() {
 		if (violationFiles == null) {
-			violationFiles = new LinkedHashMap<>();
+			Map<String, ViolationFile> filesMap = new LinkedHashMap<>();
 			for (CheckstyleViolation violation: violations) {
-				ViolationFile file = violationFiles.get(violation.getFile());
+				ViolationFile file = filesMap.get(violation.getFile());
 				if (file == null) {
 					file = new ViolationFile(violation.getFile());
-					violationFiles.put(violation.getFile(), file);
+					filesMap.put(violation.getFile(), file);
 				}
 				file.getViolations().add(new ViolationFile.Violation(
 						violation.getSeverity(), violation.getMessage(), 
@@ -53,8 +53,8 @@ public class CheckstyleReportData implements Serializable {
 						violation.getRule()));
 			}
 			
-			List<ViolationFile> fileList = new ArrayList<>(violationFiles.values());
-			for (ViolationFile file: fileList) {
+			violationFiles = new ArrayList<>(filesMap.values());
+			for (ViolationFile file: violationFiles) {
 				file.getViolations().sort(new Comparator<ViolationFile.Violation>() {
 	
 					@Override
@@ -64,7 +64,7 @@ public class CheckstyleReportData implements Serializable {
 					
 				});
 			}
-			fileList.sort(new Comparator<ViolationFile>() {
+			violationFiles.sort(new Comparator<ViolationFile>() {
 	
 				@Override
 				public int compare(ViolationFile o1, ViolationFile o2) {
@@ -77,32 +77,27 @@ public class CheckstyleReportData implements Serializable {
 				}
 				
 			});
-			
-			violationFiles.clear();
-			
-			for (ViolationFile file: fileList)
-				violationFiles.put(file.getPath(), file);
 		}
 		return violationFiles;
 	}
 	
-	public Map<String, ViolationRule> getViolationRules() {
+	public List<ViolationRule> getViolationRules() {
 		if (violationRules == null) {
-			violationRules = new LinkedHashMap<>();
+			Map<String, ViolationRule> rulesMap = new LinkedHashMap<>();
 			for (CheckstyleViolation violation: violations) {
-				ViolationRule rule = violationRules.get(violation.getRule());
+				ViolationRule rule = rulesMap.get(violation.getRule());
 				if (rule == null) {
 					rule = new ViolationRule(violation.getRule(), violation.getSeverity());
-					violationRules.put(violation.getRule(), rule);
+					rulesMap.put(violation.getRule(), rule);
 				}
 				rule.getViolations().add(new ViolationRule.Violation(
 						violation.getMessage(), violation.getLine(), 
 						violation.getColumn(), violation.getFile()));
 			}
 			
-			List<ViolationRule> ruleList = new ArrayList<>(violationRules.values());
+			violationRules = new ArrayList<>(rulesMap.values());
 			
-			ruleList.sort(new Comparator<ViolationRule>() {
+			violationRules.sort(new Comparator<ViolationRule>() {
 
 				@Override
 				public int compare(ViolationRule o1, ViolationRule o2) {
@@ -113,10 +108,6 @@ public class CheckstyleReportData implements Serializable {
 				}
 				
 			});
-			
-			violationRules.clear();
-			for(ViolationRule rule: ruleList)
-				violationRules.put(rule.getName(), rule);
 		}
 		return violationRules;
 	}

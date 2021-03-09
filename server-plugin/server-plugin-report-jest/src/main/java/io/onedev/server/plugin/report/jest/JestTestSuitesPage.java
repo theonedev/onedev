@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,25 +16,16 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.eclipse.jgit.lib.FileMode;
@@ -56,12 +46,12 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.chart.pie.PieChartPanel;
 import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -77,30 +67,6 @@ public class JestTestSuitesPage extends JestTestReportPage {
 	
 	private Optional<PatternSet> filePatterns;
 	
-	private final IModel<List<TestSuite>> testSuitesModel = new LoadableDetachableModel<List<TestSuite>>() {
-
-		@Override
-		protected List<TestSuite> load() {
-			if (filePatterns != null) {
-				List<TestSuite> testSuites = getReportData().getTestSuites(filePatterns.orNull(), state.statuses);
-				if (state.longestDurationFirst) {
-					testSuites.sort(new Comparator<TestSuite>() {
-
-						@Override
-						public int compare(TestSuite o1, TestSuite o2) {
-							return (int)(o2.getDuration()/1000 - o1.getDuration()/1000);
-						}
-						
-					});
-				}
-				return testSuites;
-			} else {
-				return new ArrayList<>();
-			}
-		}
-		
-	};
-	
 	private Form<?> form;
 
 	private Component feedback;
@@ -109,7 +75,7 @@ public class JestTestSuitesPage extends JestTestReportPage {
 
 	private Component orderBy;
 	
-	private DataTable<TestSuite, Void> detail;
+	private WebMarkupContainer detail;
 	
 	public JestTestSuitesPage(PageParameters params) {
 		super(params);
@@ -149,233 +115,212 @@ public class JestTestSuitesPage extends JestTestReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getReportData() != null) {
-			Fragment fragment = new Fragment("testSuites", "hasDataFrag", this);
+		form = new Form<Void>("form");
+		TextField<String> fileFilter = new TextField<String>("file", new IModel<String>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public String getObject() {
+				return state.file;
+			}
+
+			@Override
+			public void setObject(String object) {
+				state.file = object;
+			}
 			
-			form = new Form<Void>("form");
-			TextField<String> fileFilter = new TextField<String>("file", new IModel<String>() {
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public String getObject() {
-					return state.file;
-				}
-
-				@Override
-				public void setObject(String object) {
-					state.file = object;
-				}
-				
-			});
-			fileFilter.add(new PatternSetAssistBehavior() {
-				
-				@Override
-				protected List<InputSuggestion> suggest(String matchWith) {
-					return SuggestionUtils.suggest(
-							getReportData().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()), 
-							matchWith);
-				}
-				
-				@Override
-				protected List<String> getHints(TerminalExpect terminalExpect) {
-					return Lists.newArrayList(
-							"Path containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
-							);
-				}
-				
-			});
-			form.add(fileFilter);
+		});
+		fileFilter.add(new PatternSetAssistBehavior() {
 			
-			fileFilter.add(new AjaxFormComponentUpdatingBehavior("clear") {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					pushState(target);
-					parseFilePatterns();
-					target.add(feedback);
-					target.add(summary);
-					target.add(detail);
-				}
-				
-			});
+			@Override
+			protected List<InputSuggestion> suggest(String matchWith) {
+				return SuggestionUtils.suggest(
+						getReportData().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()), 
+						matchWith);
+			}
 			
-			form.add(feedback = new FencedFeedbackPanel("feedback", form));
-			feedback.setOutputMarkupPlaceholderTag(true);
-
-			form.add(new AjaxButton("submit") {
-
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-				}
-				
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-					pushState(target);
-					parseFilePatterns();
-					target.add(feedback);
-					target.add(summary);
-					target.add(detail);
-				}
-				
-			});
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				return Lists.newArrayList(
+						"Path containing spaces or starting with dash needs to be quoted",
+						"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+						);
+			}
 			
-			fragment.add(form);
-			
-			parseFilePatterns();
-			
-			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
-
-				@Override
-				protected List<PieSlice> load() {
-					if (filePatterns != null) {
-						List<PieSlice> slices = new ArrayList<>();
-						for (Status status: Status.values()) {
-							int numOfTestSuites = getReportData().getTestSuites(
-									filePatterns.orNull(), Sets.newHashSet(status)).size();
-							slices.add(new PieSlice(status.name().toLowerCase(), numOfTestSuites, 
-									status.getColor(), state.statuses.contains(status)));
-						}
-						return slices;
-					} else {
-						return null;
-					}
-				}
-				
-			}) {
-
-				@Override
-				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-					Status status = Status.valueOf(sliceName.toUpperCase());
-					if (state.statuses.contains(status))
-						state.statuses.remove(status);
-					else
-						state.statuses.add(status);
-					pushState(target);
-					target.add(detail);
-				}
-				
-			});
-			
-			fragment.add(orderBy = new AjaxCheckBox("longestDurationFirst", new IModel<Boolean>() {
-
-				@Override
-				public void detach() {
-				}
-
-				@Override
-				public Boolean getObject() {
-					return state.longestDurationFirst;
-				}
-
-				@Override
-				public void setObject(Boolean object) {
-					state.longestDurationFirst = object;
-				}
-				
-			}) {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					pushState(target);
-					target.add(detail);
-				}
-				
-			});
-			
-			List<IColumn<TestSuite, Void>> columns = new ArrayList<>();
-			
-			columns.add(new AbstractColumn<TestSuite, Void>(Model.of("")) {
-
-				@Override
-				public void populateItem(Item<ICellPopulator<TestSuite>> cellItem, 
-						String componentId, IModel<TestSuite> rowModel) {
-					TestSuite testSuite = rowModel.getObject();
-					Fragment fragment = new Fragment(componentId, "testSuiteFrag", JestTestSuitesPage.this);
-					
-					fragment.add(new TestStatusBadge("status", testSuite.getStatus()));
-					
-					JestTestCasesPage.State state = new JestTestCasesPage.State();
-					state.file = testSuite.getName();
-					state.statuses = JestTestSuitesPage.this.state.statuses;
-					PageParameters params = JestTestCasesPage.paramsOf(getBuild(), getReportName(), state);
-					Link<Void> link = new ViewStateAwarePageLink<Void>("testCases", 
-							JestTestCasesPage.class, params);
-					link.add(new Label("label", testSuite.getName()));
-					
-					BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getName(), 
-							FileMode.REGULAR_FILE.getBits());
-					if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
-						fragment.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class, 
-								ProjectBlobPage.paramsOf(getProject(), blobIdent)));
-					} else {
-						fragment.add(new WebMarkupContainer("viewSource").setVisible(false));
-					}
-										
-					fragment.add(new Label("duration", DateUtils.formatDuration(testSuite.getDuration())));
-					fragment.add(link);
-					
-					fragment.add(new TestMessagePanel("message", testSuite.getMessage()) {
-
-						@Override
-						protected Build getBuild() {
-							return JestTestSuitesPage.this.getBuild();
-						}
-						
-					}.setVisible(testSuite.getMessage() != null));
-					
-					cellItem.add(fragment);
-				}
-
-			});
-			
-			SortableDataProvider<TestSuite, Void> dataProvider = new LoadableDetachableDataProvider<TestSuite, Void>() {
-
-				@Override
-				public Iterator<? extends TestSuite> iterator(long first, long count) {
-					if (getTestSuites().size() > first+count)
-						return getTestSuites().subList((int)first, (int)(first+count)).iterator();
-					else
-						return getTestSuites().subList((int)first, getTestSuites().size()).iterator();
-				}
-
-				@Override
-				public long calcSize() {
-					return getTestSuites().size();
-				}
-
-				@Override
-				public IModel<TestSuite> model(TestSuite object) {
-					return Model.of(object);
-				}
-				
-			};			
-			fragment.add(detail = new DataTable<TestSuite, Void>("detail", columns, 
-					dataProvider, WebConstants.PAGE_SIZE));
-			
-			detail.addBottomToolbar(new NavigationToolbar(detail) {
-
-				@Override
-				protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-					return new OnePagingNavigator(navigatorId, table, null);
-				}
-				
-			});
-			
-			fragment.add(detail.setOutputMarkupId(true));
-			
-			add(fragment);
-		} else {
-			add(new Label("testSuites", "No test suites published")
-					.add(AttributeAppender.append("class", "alert alert-notice alert-light-warning")));
-		}
+		});
+		form.add(fileFilter);
 		
+		fileFilter.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				pushState(target);
+				parseFilePatterns();
+				target.add(feedback);
+				target.add(summary);
+				target.add(detail);
+			}
+			
+		});
+		
+		form.add(feedback = new FencedFeedbackPanel("feedback", form));
+		feedback.setOutputMarkupPlaceholderTag(true);
+
+		form.add(new AjaxButton("submit") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+			}
+			
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				pushState(target);
+				parseFilePatterns();
+				target.add(feedback);
+				target.add(summary);
+				target.add(detail);
+			}
+			
+		});
+		
+		add(form);
+		
+		parseFilePatterns();
+		
+		add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
+
+			@Override
+			protected List<PieSlice> load() {
+				if (filePatterns != null) {
+					List<PieSlice> slices = new ArrayList<>();
+					for (Status status: Status.values()) {
+						int numOfTestSuites = getReportData().getTestSuites(
+								filePatterns.orNull(), Sets.newHashSet(status)).size();
+						slices.add(new PieSlice(status.name().toLowerCase(), numOfTestSuites, 
+								status.getColor(), state.statuses.contains(status)));
+					}
+					return slices;
+				} else {
+					return null;
+				}
+			}
+			
+		}) {
+
+			@Override
+			protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
+				Status status = Status.valueOf(sliceName.toUpperCase());
+				if (state.statuses.contains(status))
+					state.statuses.remove(status);
+				else
+					state.statuses.add(status);
+				pushState(target);
+				target.add(detail);
+			}
+			
+		});
+		
+		add(orderBy = new AjaxCheckBox("longestDurationFirst", new IModel<Boolean>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Boolean getObject() {
+				return state.longestDurationFirst;
+			}
+
+			@Override
+			public void setObject(Boolean object) {
+				state.longestDurationFirst = object;
+			}
+			
+		}) {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				pushState(target);
+				target.add(detail);
+			}
+			
+		});
+		
+		detail = new WebMarkupContainer("detail");
+		detail.setOutputMarkupId(true);
+		add(detail);
+
+		PageableListView<TestSuite> testSuitesView;
+		detail.add(testSuitesView = new PageableListView<TestSuite>("testSuites", 
+				new LoadableDetachableModel<List<TestSuite>>() {
+
+			@Override
+			protected List<TestSuite> load() {
+				if (filePatterns != null) {
+					List<TestSuite> testSuites = getReportData().getTestSuites(filePatterns.orNull(), state.statuses);
+					if (state.longestDurationFirst) {
+						testSuites.sort(new Comparator<TestSuite>() {
+
+							@Override
+							public int compare(TestSuite o1, TestSuite o2) {
+								return (int)(o2.getDuration()/1000 - o1.getDuration()/1000);
+							}
+							
+						});
+					}
+					return testSuites;
+				} else {
+					return new ArrayList<>();
+				}
+			}
+
+		}, WebConstants.PAGE_SIZE) {
+
+			@Override
+			protected void populateItem(ListItem<TestSuite> item) {
+				TestSuite testSuite = item.getModelObject();
+				item.add(new TestStatusBadge("status", testSuite.getStatus()));
+				
+				JestTestCasesPage.State state = new JestTestCasesPage.State();
+				state.file = testSuite.getName();
+				state.statuses = JestTestSuitesPage.this.state.statuses;
+				PageParameters params = JestTestCasesPage.paramsOf(getBuild(), getReportName(), state);
+				Link<Void> link = new ViewStateAwarePageLink<Void>("testCases", 
+						JestTestCasesPage.class, params);
+				link.add(new Label("label", testSuite.getName()));
+				
+				BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getName(), 
+						FileMode.REGULAR_FILE.getBits());
+				if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
+					item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class, 
+							ProjectBlobPage.paramsOf(getProject(), blobIdent)));
+				} else {
+					item.add(new WebMarkupContainer("viewSource").setVisible(false));
+				}
+									
+				item.add(new Label("duration", DateUtils.formatDuration(testSuite.getDuration())));
+				item.add(link);
+				
+				item.add(new TestMessagePanel("message", testSuite.getMessage()) {
+
+					@Override
+					protected Build getBuild() {
+						return JestTestSuitesPage.this.getBuild();
+					}
+					
+				}.setVisible(testSuite.getMessage() != null));					
+			}
+			
+		});
+
+		detail.add(new OnePagingNavigator("pagingNavigator", testSuitesView, null));
+		detail.add(new NoRecordsPlaceholder("noRecords", testSuitesView));
 	}
 	
 	private void parseFilePatterns() {
@@ -391,16 +336,6 @@ public class JestTestSuitesPage extends JestTestReportPage {
 		}
 	}
 	
-	private List<TestSuite> getTestSuites() {
-		return testSuitesModel.getObject();
-	}
-
-	@Override
-	protected void onDetach() {
-		testSuitesModel.detach();
-		super.onDetach();
-	}
-
 	public static PageParameters paramsOf(Build build, String reportName, State state) {
 		PageParameters params = paramsOf(build, reportName);
 		if (state.file != null)

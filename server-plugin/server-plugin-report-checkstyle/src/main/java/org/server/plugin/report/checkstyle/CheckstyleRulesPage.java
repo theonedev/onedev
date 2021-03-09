@@ -2,7 +2,6 @@ package org.server.plugin.report.checkstyle;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -16,24 +15,17 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
@@ -52,36 +44,16 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
-import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
+import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
 public class CheckstyleRulesPage extends CheckstyleReportPage {
 
 	private static final String PARAM_RULE = "rule";
-	
-	private final IModel<List<ViolationRule>> rulesModel = new LoadableDetachableModel<List<ViolationRule>>() {
-
-		@Override
-		protected List<ViolationRule> load() {
-			if (rulePatterns != null) {
-				List<ViolationRule> rules = new ArrayList<>(getReportData().getViolationRules().values());
-				if (rulePatterns.isPresent()) {
-					Matcher matcher = new StringMatcher();
-					rules = rules.stream()
-							.filter(it->rulePatterns.get().matches(matcher, it.getName()))
-							.collect(Collectors.toList());
-				}
-				return rules;
-			} else {
-				return new ArrayList<>();
-			}
-		}
-		
-	};
 	
 	private String rule;
 	
@@ -91,7 +63,7 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 	
 	private Component feedback;
 	
-	private DataTable<ViolationRule, Void> rulesTable;
+	private WebMarkupContainer rulesContainer;
 	
 	private List<String> ruleNames;
 	
@@ -105,7 +77,9 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		ruleNames = new ArrayList<>(getReportData().getViolationRules().keySet());
+		ruleNames = getReportData().getViolationRules().stream()
+				.map(it->it.getName())
+				.collect(Collectors.toList());
 		
 		form = new Form<Void>("form");
 		
@@ -135,7 +109,7 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 				pushState(target);
 				parseRulePatterns();
 				target.add(feedback);
-				target.add(rulesTable);
+				target.add(rulesContainer);
 			}
 			
 		});
@@ -157,35 +131,53 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 				pushState(target);
 				parseRulePatterns();
 				target.add(feedback);
-				target.add(rulesTable);
+				target.add(rulesContainer);
 			}
 			
 		});
 		form.setOutputMarkupId(true);
 		add(form);		
 
-		List<IColumn<ViolationRule, Void>> columns = new ArrayList<>();
+		parseRulePatterns();
 		
-		columns.add(new AbstractColumn<ViolationRule, Void>(Model.of("")) {
+		rulesContainer = new WebMarkupContainer("rulesContainer");
+		rulesContainer.setOutputMarkupId(true);
+		add(rulesContainer);
+		
+		PageableListView<ViolationRule> rulesView;
+		rulesContainer.add(rulesView = new PageableListView<ViolationRule>("rules", 
+				new LoadableDetachableModel<List<ViolationRule>>() {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ViolationRule>> cellItem, 
-					String componentId, IModel<ViolationRule> rowModel) {
-				Fragment fragment = new Fragment(componentId, "ruleFrag", CheckstyleRulesPage.this);
-				fragment.setOutputMarkupId(true);
-				cellItem.add(fragment);
-				
-				ViolationRule rule = rowModel.getObject();
+			protected List<ViolationRule> load() {
+				if (rulePatterns != null) {
+					if (rulePatterns.isPresent()) {
+						Matcher matcher = new StringMatcher();
+						return getReportData().getViolationRules().stream()
+								.filter(it->rulePatterns.get().matches(matcher, it.getName()))
+								.collect(Collectors.toList());
+					} else {
+						return getReportData().getViolationRules();
+					}
+				} else {
+					return new ArrayList<>();
+				}
+			}
+			
+		}, WebConstants.PAGE_SIZE) {
 
-				AtomicBoolean showViolations = new AtomicBoolean(
-						rulesTable.getCurrentPage() == 0 && cellItem.findParent(Item.class).getIndex() == 0);
+			@Override
+			protected void populateItem(ListItem<ViolationRule> item) {
+				ViolationRule rule = item.getModelObject();
+
+				AtomicBoolean showViolations = new AtomicBoolean(getCurrentPage() == 0 && item.getIndex() == 0);
 				
 				AjaxLink<Void> toggleLink = new AjaxLink<Void>("toggle") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						showViolations.set(!showViolations.get());
-						target.add(fragment);
+						target.add(item);
 					}
 					
 				};
@@ -202,25 +194,25 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 					
 				}));
 				
-				fragment.add(toggleLink);
+				item.add(toggleLink);
 				
-				fragment.add(new Label("tooManyViolations", 
+				item.add(new Label("tooManyViolations", 
 						"Too many violations, displaying first " + MAX_VIOLATIONS_TO_DISPLAY) {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(showViolations.get() 
-								&& rowModel.getObject().getViolations().size() > MAX_VIOLATIONS_TO_DISPLAY);
+								&& item.getModelObject().getViolations().size() > MAX_VIOLATIONS_TO_DISPLAY);
 					}
 					
 				});
 				
-				fragment.add(new ListView<Violation>("violations", new LoadableDetachableModel<List<Violation>>() {
+				item.add(new ListView<Violation>("violations", new LoadableDetachableModel<List<Violation>>() {
 
 					@Override
 					protected List<Violation> load() {
-						List<Violation> violations = rowModel.getObject().getViolations();
+						List<Violation> violations = item.getModelObject().getViolations();
 						if (violations.size() > MAX_VIOLATIONS_TO_DISPLAY)
 							return violations.subList(0, MAX_VIOLATIONS_TO_DISPLAY);
 						else
@@ -259,46 +251,13 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 						setVisible(showViolations.get());
 					}
 					
-				});
-			}
-
-		});
-		
-		SortableDataProvider<ViolationRule, Void> dataProvider = 
-				new LoadableDetachableDataProvider<ViolationRule, Void>() {
-
-			@Override
-			public Iterator<? extends ViolationRule> iterator(long first, long count) {
-				if (getRules().size() > first+count)
-					return getRules().subList((int)first, (int)(first+count)).iterator();
-				else
-					return getRules().subList((int)first, getRules().size()).iterator();
-			}
-
-			@Override
-			public long calcSize() {
-				return getRules().size();
-			}
-
-			@Override
-			public IModel<ViolationRule> model(ViolationRule object) {
-				String ruleName = object.getName();
-				return new LoadableDetachableModel<ViolationRule>() {
-
-					@Override
-					protected ViolationRule load() {
-						return getReportData().getViolationRules().get(ruleName);
-					}
-					
-				};
+				});		
+				item.setOutputMarkupId(true);
 			}
 			
-		};			
-		add(rulesTable = new OneDataTable<ViolationRule, Void>("rules", columns, 
-				dataProvider, WebConstants.PAGE_SIZE, null));
-		rulesTable.setOutputMarkupId(true);
-		
-		parseRulePatterns();
+		});
+		rulesContainer.add(new OnePagingNavigator("pagingNavigator", rulesView, null));
+		rulesContainer.add(new NoRecordsPlaceholder("noRecords", rulesView));
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
@@ -312,19 +271,9 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 		rule = (String) data;
 		parseRulePatterns();
 		target.add(form);
-		target.add(rulesTable);
+		target.add(rulesContainer);
 	}
 	
-	private List<ViolationRule> getRules() {
-		return rulesModel.getObject();
-	}
-	
-	@Override
-	protected void onDetach() {
-		rulesModel.detach();
-		super.onDetach();
-	}
-
 	private void parseRulePatterns() {
 		if (rule != null) {
 			try {

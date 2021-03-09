@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,25 +16,16 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.string.StringValue;
 import org.eclipse.jgit.lib.FileMode;
@@ -55,13 +45,13 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
+import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.chart.pie.PieChartPanel;
 import io.onedev.server.web.component.chart.pie.PieSlice;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -79,18 +69,6 @@ public class JestTestCasesPage extends JestTestReportPage {
 	
 	private Optional<PatternSet> namePatterns;
 	
-	private final IModel<List<TestCase>> testCasesModel = new LoadableDetachableModel<List<TestCase>>() {
-
-		@Override
-		protected List<TestCase> load() {
-			if (filePatterns != null && namePatterns != null)
-				return getReportData().getTestCases(filePatterns.orNull(), namePatterns.orNull(), state.statuses);
-			else
-				return new ArrayList<>();
-		}
-		
-	};
-	
 	private Form<?> fileForm;
 	
 	private Form<?> nameForm;
@@ -101,7 +79,7 @@ public class JestTestCasesPage extends JestTestReportPage {
 	
 	private Component summary;
 	
-	private DataTable<TestCase, Void> detail;
+	private WebMarkupContainer detail;
 	
 	public JestTestCasesPage(PageParameters params) {
 		super(params);
@@ -143,296 +121,263 @@ public class JestTestCasesPage extends JestTestReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (getReportData() != null) {
-			Fragment fragment = new Fragment("testCases", "hasDataFrag", this);
-			
-			fileForm = new Form<Void>("fileForm");
-			
-			TextField<String> input = new TextField<String>("input", new IModel<String>() {
+		fileForm = new Form<Void>("fileForm");
+		
+		TextField<String> input = new TextField<String>("input", new IModel<String>() {
 
-				@Override
-				public void detach() {
-				}
+			@Override
+			public void detach() {
+			}
 
-				@Override
-				public String getObject() {
-					return state.file;
-				}
+			@Override
+			public String getObject() {
+				return state.file;
+			}
 
-				@Override
-				public void setObject(String object) {
-					state.file = object;
-				}
-				
-			});
-			input.add(new PatternSetAssistBehavior() {
-				
-				@Override
-				protected List<InputSuggestion> suggest(String matchWith) {
-					return SuggestionUtils.suggest(
-							getReportData().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()), 
-							matchWith);
-				}
-				
-				@Override
-				protected List<String> getHints(TerminalExpect terminalExpect) {
-					return Lists.newArrayList(
-							"Path containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
-							);
-				}
-				
-			});
-			fileForm.add(input);
+			@Override
+			public void setObject(String object) {
+				state.file = object;
+			}
 			
-			input.add(new AjaxFormComponentUpdatingBehavior("clear") {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					pushState(target);
-					parseFilePatterns();
-					target.add(fileFeedback);
-					target.add(summary);
-					target.add(detail);
-				}
-				
-			});
+		});
+		input.add(new PatternSetAssistBehavior() {
 			
-			fileForm.add(fileFeedback = new FencedFeedbackPanel("feedback", fileForm));
-			fileFeedback.setOutputMarkupPlaceholderTag(true);
+			@Override
+			protected List<InputSuggestion> suggest(String matchWith) {
+				return SuggestionUtils.suggest(
+						getReportData().getTestSuites().stream().map(it->it.getName()).collect(Collectors.toList()), 
+						matchWith);
+			}
+			
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				return Lists.newArrayList(
+						"Path containing spaces or starting with dash needs to be quoted",
+						"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+						);
+			}
+			
+		});
+		fileForm.add(input);
+		
+		input.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				pushState(target);
+				parseFilePatterns();
+				target.add(fileFeedback);
+				target.add(summary);
+				target.add(detail);
+			}
+			
+		});
+		
+		fileForm.add(fileFeedback = new FencedFeedbackPanel("feedback", fileForm));
+		fileFeedback.setOutputMarkupPlaceholderTag(true);
 
-			fileForm.add(new AjaxButton("submit") {
+		fileForm.add(new AjaxButton("submit") {
 
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-				}
-				
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-					pushState(target);
-					parseFilePatterns();
-					target.add(fileFeedback);
-					target.add(summary);
-					target.add(detail);
-				}
-				
-			});
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+			}
 			
-			fragment.add(fileForm);
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				pushState(target);
+				parseFilePatterns();
+				target.add(fileFeedback);
+				target.add(summary);
+				target.add(detail);
+			}
 			
-			nameForm = new Form<Void>("nameForm");
-			
-			input = new TextField<String>("input", new IModel<String>() {
+		});
+		
+		add(fileForm);
+		
+		nameForm = new Form<Void>("nameForm");
+		
+		input = new TextField<String>("input", new IModel<String>() {
 
-				@Override
-				public void detach() {
-				}
+			@Override
+			public void detach() {
+			}
 
-				@Override
-				public String getObject() {
-					return state.name;
-				}
+			@Override
+			public String getObject() {
+				return state.name;
+			}
 
-				@Override
-				public void setObject(String object) {
-					state.name = object;
-				}
-				
-			});
-			input.add(new PatternSetAssistBehavior() {
-				
-				@Override
-				protected List<InputSuggestion> suggest(String matchWith) {
-					return SuggestionUtils.suggest(
-							getReportData().getTestCases(null, null, null).stream().map(it->it.getName()).distinct().collect(Collectors.toList()), 
-							matchWith);
-				}
-				
-				@Override
-				protected List<String> getHints(TerminalExpect terminalExpect) {
-					return Lists.newArrayList(
-							"Path containing spaces or starting with dash needs to be quoted",
-							"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
-							);
-				}
-				
-			});
-			nameForm.add(input);
+			@Override
+			public void setObject(String object) {
+				state.name = object;
+			}
 			
-			input.add(new AjaxFormComponentUpdatingBehavior("clear") {
-				
-				@Override
-				protected void onUpdate(AjaxRequestTarget target) {
-					pushState(target);
-					parseNamePatterns();
-					target.add(nameFeedback);
-					target.add(summary);
-					target.add(detail);
-				}
-				
-			});
+		});
+		input.add(new PatternSetAssistBehavior() {
 			
-			nameForm.add(nameFeedback = new FencedFeedbackPanel("feedback", nameForm));
-			nameFeedback.setOutputMarkupPlaceholderTag(true);
+			@Override
+			protected List<InputSuggestion> suggest(String matchWith) {
+				return SuggestionUtils.suggest(
+						getReportData().getTestCases(null, null, null).stream().map(it->it.getName()).distinct().collect(Collectors.toList()), 
+						matchWith);
+			}
+			
+			@Override
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				return Lists.newArrayList(
+						"Path containing spaces or starting with dash needs to be quoted",
+						"Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude"
+						);
+			}
+			
+		});
+		nameForm.add(input);
+		
+		input.add(new AjaxFormComponentUpdatingBehavior("clear") {
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				pushState(target);
+				parseNamePatterns();
+				target.add(nameFeedback);
+				target.add(summary);
+				target.add(detail);
+			}
+			
+		});
+		
+		nameForm.add(nameFeedback = new FencedFeedbackPanel("feedback", nameForm));
+		nameFeedback.setOutputMarkupPlaceholderTag(true);
 
-			nameForm.add(new AjaxButton("submit") {
+		nameForm.add(new AjaxButton("submit") {
 
-				@Override
-				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
-				}
-				
-				@Override
-				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-					super.onSubmit(target, form);
-					pushState(target);
-					parseNamePatterns();
-					target.add(nameFeedback);
-					target.add(summary);
-					target.add(detail);
-				}
-				
-			});
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(this));
+			}
 			
-			fragment.add(nameForm);
+			@Override
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				pushState(target);
+				parseNamePatterns();
+				target.add(nameFeedback);
+				target.add(summary);
+				target.add(detail);
+			}
 			
-			parseFilePatterns();
-			parseNamePatterns();
-			
-			fragment.add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
+		});
+		
+		add(nameForm);
+		
+		parseFilePatterns();
+		parseNamePatterns();
+		
+		add(summary = new PieChartPanel("summary", new LoadableDetachableModel<List<PieSlice>>() {
 
-				@Override
-				protected List<PieSlice> load() {
-					if (filePatterns != null && namePatterns != null) {
-						List<PieSlice> slices = new ArrayList<>();
-						for (Status status: Status.values()) {
-							int numOfTestCases = getReportData().getTestCases(
-									filePatterns.orNull(), namePatterns.orNull(), Sets.newHashSet(status)).size();
-							slices.add(new PieSlice(status.name().toLowerCase(), numOfTestCases, 
-									status.getColor(), state.statuses.contains(status)));
-						}
-						return slices;
-					} else {
-						return null;
+			@Override
+			protected List<PieSlice> load() {
+				if (filePatterns != null && namePatterns != null) {
+					List<PieSlice> slices = new ArrayList<>();
+					for (Status status: Status.values()) {
+						int numOfTestCases = getReportData().getTestCases(
+								filePatterns.orNull(), namePatterns.orNull(), Sets.newHashSet(status)).size();
+						slices.add(new PieSlice(status.name().toLowerCase(), numOfTestCases, 
+								status.getColor(), state.statuses.contains(status)));
 					}
+					return slices;
+				} else {
+					return null;
 				}
-				
-			}) {
+			}
+			
+		}) {
 
-				@Override
-				protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
-					Status status = Status.valueOf(sliceName.toUpperCase());
-					if (state.statuses.contains(status))
-						state.statuses.remove(status);
-					else
-						state.statuses.add(status);
-					pushState(target);
-					target.add(detail);
+			@Override
+			protected void onSelectionChange(AjaxRequestTarget target, String sliceName) {
+				Status status = Status.valueOf(sliceName.toUpperCase());
+				if (state.statuses.contains(status))
+					state.statuses.remove(status);
+				else
+					state.statuses.add(status);
+				pushState(target);
+				target.add(detail);
+			}
+			
+		});
+		
+		detail = new WebMarkupContainer("detail");
+		detail.setOutputMarkupId(true);
+		add(detail);
+		
+		PageableListView<TestCase> testCasesView;
+		detail.add(testCasesView = new PageableListView<TestCase>("testCases", 
+				new LoadableDetachableModel<List<TestCase>>() {
+
+			@Override
+			protected List<TestCase> load() {
+				if (filePatterns != null && namePatterns != null)
+					return getReportData().getTestCases(filePatterns.orNull(), namePatterns.orNull(), state.statuses);
+				else
+					return new ArrayList<>();
+			}
+			
+		}, WebConstants.PAGE_SIZE) {
+
+			@Override
+			protected void populateItem(ListItem<TestCase> item) {
+				TestCase testCase = item.getModelObject();
+				item.add(new TestStatusBadge("status", testCase.getStatus()));
+				item.add(new Label("name", testCase.getName()));
+				
+				AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("testSuite") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						state.file = testCase.getTestSuite().getName();
+						pushState(target);
+						parseFilePatterns();
+						target.add(fileForm);
+						target.add(summary);
+						target.add(detail);
+					}
+					
+				};
+				link.add(new Label("label", testCase.getTestSuite().getName()));
+				item.add(link);
+				
+				BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testCase.getTestSuite().getName(), 
+						FileMode.REGULAR_FILE.getBits());
+				if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
+					item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class, 
+							ProjectBlobPage.paramsOf(getProject(), blobIdent)));
+				} else {
+					item.add(new WebMarkupContainer("viewSource").setVisible(false));
 				}
-				
-			});
-			
-			List<IColumn<TestCase, Void>> columns = new ArrayList<>();
-			
-			columns.add(new AbstractColumn<TestCase, Void>(Model.of("")) {
-
-				@Override
-				public void populateItem(Item<ICellPopulator<TestCase>> cellItem, 
-						String componentId, IModel<TestCase> rowModel) {
-					TestCase testCase = rowModel.getObject();
-					Fragment fragment = new Fragment(componentId, "testCaseFrag", JestTestCasesPage.this);
-					
-					fragment.add(new TestStatusBadge("status", testCase.getStatus()));
-					fragment.add(new Label("name", testCase.getName()));
-					
-					AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("testSuite") {
+								
+				RepeatingView messagesView = new RepeatingView("messages");
+				for (String message: testCase.getMessages()) {
+					messagesView.add(new TestMessagePanel(messagesView.newChildId(), message) {
 
 						@Override
-						public void onClick(AjaxRequestTarget target) {
-							state.file = testCase.getTestSuite().getName();
-							pushState(target);
-							parseFilePatterns();
-							target.add(fileForm);
-							target.add(summary);
-							target.add(detail);
+						protected Build getBuild() {
+							return JestTestCasesPage.this.getBuild();
 						}
 						
-					};
-					link.add(new Label("label", testCase.getTestSuite().getName()));
-					fragment.add(link);
-					
-					BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testCase.getTestSuite().getName(), 
-							FileMode.REGULAR_FILE.getBits());
-					if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
-						fragment.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class, 
-								ProjectBlobPage.paramsOf(getProject(), blobIdent)));
-					} else {
-						fragment.add(new WebMarkupContainer("viewSource").setVisible(false));
-					}
-									
-					RepeatingView messagesView = new RepeatingView("messages");
-					for (String message: testCase.getMessages()) {
-						messagesView.add(new TestMessagePanel(messagesView.newChildId(), message) {
-
-							@Override
-							protected Build getBuild() {
-								return JestTestCasesPage.this.getBuild();
-							}
-							
-						});
-					}
-					fragment.add(messagesView);
-					
-					cellItem.add(fragment);
+					});
 				}
-
-			});
+				item.add(messagesView);
+			}
 			
-			SortableDataProvider<TestCase, Void> dataProvider = new LoadableDetachableDataProvider<TestCase, Void>() {
-
-				@Override
-				public Iterator<? extends TestCase> iterator(long first, long count) {
-					if (getTestCases().size() > first+count)
-						return getTestCases().subList((int)first, (int)(first+count)).iterator();
-					else
-						return getTestCases().subList((int)first, getTestCases().size()).iterator();
-				}
-
-				@Override
-				public long calcSize() {
-					return getTestCases().size();
-				}
-
-				@Override
-				public IModel<TestCase> model(TestCase object) {
-					return Model.of(object);
-				}
-				
-			};			
-			fragment.add(detail = new DataTable<TestCase, Void>("detail", columns, 
-					dataProvider, WebConstants.PAGE_SIZE));
-			
-			detail.addBottomToolbar(new NavigationToolbar(detail) {
-
-				@Override
-				protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-					return new OnePagingNavigator(navigatorId, table, null);
-				}
-				
-			});
-			
-			fragment.add(detail.setOutputMarkupId(true));
-			
-			add(fragment);
-		} else {
-			add(new Label("testCases", "No test suites published")
-					.add(AttributeAppender.append("class", "alert alert-notice alert-light-warning")));
-		}
+		});
 		
+		detail.add(new OnePagingNavigator("pagingNavigator", testCasesView, null));
+		detail.add(new NoRecordsPlaceholder("noRecords", testCasesView));
 	}
 	
 	private void parseFilePatterns() {
@@ -461,16 +406,6 @@ public class JestTestCasesPage extends JestTestReportPage {
 		}
 	}
 	
-	private List<TestCase> getTestCases() {
-		return testCasesModel.getObject();
-	}
-
-	@Override
-	protected void onDetach() {
-		testCasesModel.detach();
-		super.onDetach();
-	}
-
 	public static PageParameters paramsOf(Build build, String reportName, State state) {
 		PageParameters params = paramsOf(build, reportName);
 		if (state.file != null)
