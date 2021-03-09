@@ -41,6 +41,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.collect.Sets;
 
@@ -50,6 +51,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -86,6 +88,7 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -551,7 +554,7 @@ public abstract class BuildListPanel extends Panel {
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
 				if (SecurityUtils.canReadCode(build.getProject())) {
-					Fragment fragment = new Fragment(componentId, "jobFrag", BuildListPanel.this);
+					Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 					Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
 
 						@Override
@@ -580,12 +583,34 @@ public abstract class BuildListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
-				if (build.getBranch() != null) 
-					cellItem.add(new Label(componentId, build.getBranch()));
-				else if (build.getTag() != null)
-					cellItem.add(new Label(componentId, build.getTag()));
-				else 
-					cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+				if (SecurityUtils.canReadCode(build.getProject())) {
+					if (build.getBranch() != null) {
+						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+						PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
+								new BlobIdent(build.getBranch(), null, FileMode.TREE.getBits()));
+						Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
+						link.add(new Label("label", build.getBranch()));
+						fragment.add(link);
+						cellItem.add(fragment);
+					} else if (build.getTag() != null) {
+						Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+						PageParameters params = ProjectBlobPage.paramsOf(build.getProject(), 
+								new BlobIdent(build.getTag(), null, FileMode.TREE.getBits()));
+						Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
+						link.add(new Label("label", build.getTag()));
+						fragment.add(link);
+						cellItem.add(fragment);
+					} else { 
+						cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+					}
+				} else {
+					if (build.getBranch() != null) 
+						cellItem.add(new Label(componentId, build.getBranch()));
+					else if (build.getTag() != null)
+						cellItem.add(new Label(componentId, build.getTag()));
+					else 
+						cellItem.add(new Label(componentId, "<i>n/a</i>").setEscapeModelStrings(false));
+				}
 			}
 		});
 
