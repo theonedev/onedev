@@ -1253,7 +1253,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				if (change != null) {
 					DiffPlanarRange commentRange = change.getAnnotationSupport().getCommentRange(openComment);
 					if (commentRange != null)
-						commentContainer.setDefaultModelObject(commentRange);
+						commentContainer.setDefaultModelObject(change.getMark(commentRange));
 				}
 				CodeCommentPanel commentPanel = new CodeCommentPanel(BODY_ID, openComment.getId()) {
 
