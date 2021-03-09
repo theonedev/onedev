@@ -2335,4 +2335,19 @@ public class DataMigrator {
 	private void migrate50(File dataDir, Stack<Integer> versions) {
 	}
 	
+	private void migrate51(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element rangeElement = element.element("mark").element("range");
+					Element tabWidthElement = rangeElement.element("tabWidth");
+					if (tabWidthElement == null)
+						tabWidthElement = rangeElement.addElement("tabWidth");
+					tabWidthElement.setText("1");
+				}
+				dom.writeToFile(file, false);
+			}
+		}		
+	}
 }
