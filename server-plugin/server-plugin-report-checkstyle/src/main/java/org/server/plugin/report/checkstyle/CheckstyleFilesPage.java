@@ -2,8 +2,9 @@ package org.server.plugin.report.checkstyle;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -67,6 +68,8 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 	
 	private List<String> filePaths;
 	
+	private Collection<String> expandedFiles = new HashSet<>();
+	
 	public CheckstyleFilesPage(PageParameters params) {
 		super(params);
 		
@@ -79,7 +82,7 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 		
 		filePaths = getReportData().getViolationFiles().stream()
 				.map(it->it.getPath())
-				.collect(Collectors.toList());			
+				.collect(Collectors.toList());	
 		
 		form = new Form<Void>("form");
 		
@@ -170,13 +173,15 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 			protected void populateItem(ListItem<ViolationFile> item) {
 				ViolationFile file = item.getModelObject();
 				String filePath = file.getPath();
-				AtomicBoolean showViolations = new AtomicBoolean(item.getIndex() == 0);
 				
 				AjaxLink<Void> toggleLink = new AjaxLink<Void>("toggle") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						showViolations.set(!showViolations.get());
+						if (expandedFiles.contains(filePath))
+							expandedFiles.remove(filePath);
+						else
+							expandedFiles.add(filePath);
 						target.add(item);
 					}
 					
@@ -186,7 +191,7 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 
 					@Override
 					public String getObject() {
-						return showViolations.get()? "expanded": "collapsed";
+						return expandedFiles.contains(filePath)? "expanded": "collapsed";
 					}
 					
 				}));
@@ -213,7 +218,7 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(showViolations.get() 
+						setVisible(expandedFiles.contains(filePath) 
 								&& item.getModelObject().getViolations().size() > MAX_VIOLATIONS_TO_DISPLAY);
 					}
 					
@@ -260,7 +265,7 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(showViolations.get());
+						setVisible(expandedFiles.contains(filePath));
 					}
 					
 				});
@@ -268,6 +273,9 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 			}
 			
 		});
+		if (!filesView.getModelObject().isEmpty())
+			expandedFiles.add(filesView.getModelObject().iterator().next().getPath());
+		
 		filesContainer.add(new OnePagingNavigator("pagingNavigator", filesView, null));
 		filesContainer.add(new NoRecordsPlaceholder("noRecords", filesView));
 	}

@@ -2,8 +2,9 @@ package org.server.plugin.report.checkstyle;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -66,6 +67,8 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 	private WebMarkupContainer rulesContainer;
 	
 	private List<String> ruleNames;
+	
+	private Collection<String> expandedRules = new HashSet<>();
 	
 	public CheckstyleRulesPage(PageParameters params) {
 		super(params);
@@ -169,14 +172,16 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 			@Override
 			protected void populateItem(ListItem<ViolationRule> item) {
 				ViolationRule rule = item.getModelObject();
-
-				AtomicBoolean showViolations = new AtomicBoolean(getCurrentPage() == 0 && item.getIndex() == 0);
+				String ruleName = rule.getName();
 				
 				AjaxLink<Void> toggleLink = new AjaxLink<Void>("toggle") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						showViolations.set(!showViolations.get());
+						if (expandedRules.contains(ruleName))
+							expandedRules.remove(ruleName);
+						else
+							expandedRules.add(ruleName);
 						target.add(item);
 					}
 					
@@ -184,12 +189,12 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 				
 				toggleLink.add(newSeverityIcon("icon", rule.getSeverity()));
 				
-				toggleLink.add(new Label("label", rule.getName()));
+				toggleLink.add(new Label("label", ruleName));
 				toggleLink.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
-						return showViolations.get()? "expanded": "collapsed";
+						return expandedRules.contains(ruleName)? "expanded": "collapsed";
 					}
 					
 				}));
@@ -202,7 +207,7 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(showViolations.get() 
+						setVisible(expandedRules.contains(ruleName) 
 								&& item.getModelObject().getViolations().size() > MAX_VIOLATIONS_TO_DISPLAY);
 					}
 					
@@ -248,7 +253,7 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(showViolations.get());
+						setVisible(expandedRules.contains(ruleName));
 					}
 					
 				});		
@@ -256,6 +261,9 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 			}
 			
 		});
+		if (!rulesView.getModelObject().isEmpty())
+			expandedRules.add(rulesView.getModelObject().iterator().next().getName());
+		
 		rulesContainer.add(new OnePagingNavigator("pagingNavigator", rulesView, null));
 		rulesContainer.add(new NoRecordsPlaceholder("noRecords", rulesView));
 	}
