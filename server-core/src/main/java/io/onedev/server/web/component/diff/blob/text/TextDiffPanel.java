@@ -717,12 +717,12 @@ public class TextDiffPanel extends Panel {
 			PageParameters params = CommitDetailPage.paramsOf(getProject(), state);
 			String url = urlFor(CommitDetailPage.class, params).toString();
 			if (diffMode == DiffViewMode.UNIFIED) {
-				builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
+				builder.append(String.format("<td class='blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a><span class='date'>%s</span><span class='author'>%s</span></td>", 
 						url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash()), 
 						DateUtils.formatDate(commit.getCommitter().getWhen()),
 						HtmlEscape.escapeHtml5(commit.getAuthor().getName())));
 			} else {
-				builder.append(String.format("<td class='abbr blame noselect'><a class='hash' href='%s' data-hash='%s'>%s</a></td>", 
+				builder.append(String.format("<td class='abbr blame noselect'><a class='hash' href='%s' onclick='onedev.server.viewState.getFromViewAndSetToHistory();' data-hash='%s'>%s</a></td>", 
 						url, commit.getHash(), GitUtils.abbreviateSHA(commit.getHash())));
 			}
 		} else {
