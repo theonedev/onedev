@@ -484,7 +484,7 @@ onedev.server.textDiff = {
 	},
 	onWindowLoad: function(containerId, markRange) {
 		var $container = $("#" + containerId);
-		if (!onedev.server.history.isVisited()) 
+		if (onedev.server.viewState.getFromHistory() === undefined)
 			onedev.server.textDiff.scrollTo($container, markRange);
 	},
 	initBlameTooltip: function(containerId, $hashLink) {
