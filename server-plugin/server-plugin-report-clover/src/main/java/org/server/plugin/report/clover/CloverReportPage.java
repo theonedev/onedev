@@ -327,6 +327,8 @@ public class CloverReportPage extends BuildReportPage {
 				
 				Link<Void> nameLink;
 				if (coverageInfo instanceof PackageCoverageInfo) {
+					State state = new State();
+					state.orderBy = CloverReportPage.this.state.orderBy;
 					PageParameters params = paramsOf(getBuild(), getReportName(), 
 							coverageInfo.getName(), state);
 					nameLink = new BookmarkablePageLink<Void>("name", CloverReportPage.class, params);
