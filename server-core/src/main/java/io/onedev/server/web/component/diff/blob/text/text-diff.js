@@ -526,6 +526,7 @@ onedev.server.textDiff = {
 			});		
 			clipboard.on("success", function(e) {
 				clipboard.destroy();
+				$(".selection-popover").remove();
 			});
 			if (loggedIn) {
 				$content.append(`<a class='comment'><svg class='icon mr-1'><use xlink:href='${onedev.server.icons}#comment'/></svg> Add comment on this selection</a>`);
