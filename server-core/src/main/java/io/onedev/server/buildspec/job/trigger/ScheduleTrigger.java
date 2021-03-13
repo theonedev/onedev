@@ -31,7 +31,7 @@ public class ScheduleTrigger extends JobTrigger {
 	}
 
 	@Override
-	public SubmitReason matchesWithoutProject(ProjectEvent event, Job job) {
+	public SubmitReason triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof ScheduledTimeReaches) {
 			return new SubmitReason() {
 
@@ -57,7 +57,7 @@ public class ScheduleTrigger extends JobTrigger {
 	}
 
 	@Override
-	public String getDescriptionWithoutProject() {
+	public String getTriggerDescription() {
 		return "Schedule at " + cronExpression;
 	}
 

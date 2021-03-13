@@ -85,21 +85,21 @@ public abstract class JobTrigger implements Serializable {
 		String projectName = event.getProject().getName();
 		Matcher matcher = new StringMatcher();
 		if (projects == null || PatternSet.parse(projects).matches(matcher, projectName)) 
-			return matchesWithoutProject(event, job);
+			return triggerMatches(event, job);
 		else 
 			return null;
 	}
 	
 	public String getDescription() {
-		String description = getDescriptionWithoutProject();
+		String description = getTriggerDescription();
 		if (projects != null)
 			description += " in projects '" + projects + "'";
 		return description;
 	}
 
 	@Nullable
-	public abstract SubmitReason matchesWithoutProject(ProjectEvent event, Job job);
+	public abstract SubmitReason triggerMatches(ProjectEvent event, Job job);
 	
-	public abstract String getDescriptionWithoutProject();
+	public abstract String getTriggerDescription();
 	
 }

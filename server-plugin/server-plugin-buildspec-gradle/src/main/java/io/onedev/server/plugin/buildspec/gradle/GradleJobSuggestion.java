@@ -16,7 +16,7 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
-import io.onedev.server.buildspec.job.trigger.PullRequestTrigger;
+import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -68,7 +68,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 	
 	private void setupTriggers(Job job) {
 		job.getTriggers().add(new BranchUpdateTrigger());
-		job.getTriggers().add(new PullRequestTrigger());
+		job.getTriggers().add(new PullRequestUpdateTrigger());
 	}
 	
 	private void setupCaches(Job job) {

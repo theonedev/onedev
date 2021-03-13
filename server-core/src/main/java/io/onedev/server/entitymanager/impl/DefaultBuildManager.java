@@ -506,7 +506,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(Build.PROP_ID)));
+			orders.add(builder.desc(root.get(Build.PROP_SUBMIT_DATE)));
 		criteriaQuery.orderBy(orders);
 	}
 	

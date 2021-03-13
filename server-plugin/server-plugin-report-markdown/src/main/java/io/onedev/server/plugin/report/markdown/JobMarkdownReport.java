@@ -25,10 +25,10 @@ public class JobMarkdownReport extends JobReport {
 	public static final String DIR = "markdown-reports";
 	
 	public static final String START_PAGE = "$onedev-markdownreport-startpage$";
-
+	
 	private String startPage;
-
-	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace' target='_blank'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
+	
+	@Editable(order=1100, description="Specify start page of the report relative to repository root, for instance: <tt>manual/index.md</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {
@@ -46,9 +46,9 @@ public class JobMarkdownReport extends JobReport {
 
 	@Override
 	public void process(Build build, File workspace, SimpleLogger logger) {
-		File reportDir = new File(build.getReportDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
-		LockUtils.write(build.getReportLockKey(DIR), new Callable<Void>() {
+		LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
@@ -66,6 +66,7 @@ public class JobMarkdownReport extends JobReport {
 							throw new RuntimeException(e);
 						}
 					}
+					
 				} else {
 					logger.log("WARNING: Markdown report start page not found: " + startPage.getAbsolutePath());
 				}

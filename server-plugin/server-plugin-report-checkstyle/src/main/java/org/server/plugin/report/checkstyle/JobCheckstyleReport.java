@@ -63,9 +63,9 @@ public class JobCheckstyleReport extends JobReport {
 
 	@Override
 	public void process(Build build, File workspace, SimpleLogger logger) {
-		File reportDir = new File(build.getReportDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 		
-		CheckstyleReportData reportData = LockUtils.write(build.getReportLockKey(DIR), new Callable<CheckstyleReportData>() {
+		CheckstyleReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CheckstyleReportData>() {
 
 			@Override
 			public CheckstyleReportData call() throws Exception {

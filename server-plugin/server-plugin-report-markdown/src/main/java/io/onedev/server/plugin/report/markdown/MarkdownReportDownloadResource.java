@@ -121,7 +121,7 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				LockUtils.read(build.getReportLockKey(JobMarkdownReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(JobMarkdownReport.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {

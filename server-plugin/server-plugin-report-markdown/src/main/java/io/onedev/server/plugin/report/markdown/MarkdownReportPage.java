@@ -8,11 +8,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
@@ -52,14 +49,10 @@ public class MarkdownReportPage extends BuildDetailPage {
 				pathSegments.add(segment);
 		}
 		
-		if (!pathSegments.isEmpty()) {
-			filePath = StringUtils.join(pathSegments, "/");
-			if (!filePath.endsWith(".md")) {
-				RequestCycle.get().scheduleRequestHandlerAfterCurrent(
-						new ResourceReferenceRequestHandler(new MarkdownReportDownloadResourceReference(), getPageParameters()));
-			}
-		} else {
-			filePath = null;
+		filePath = StringUtils.join(pathSegments, "/");
+		if (!filePath.endsWith(".md")) {
+			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
+					new ResourceReferenceRequestHandler(new MarkdownReportDownloadResourceReference(), getPageParameters()));
 		}
 		
 	}
@@ -68,25 +61,13 @@ public class MarkdownReportPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (filePath != null) { 
-			File file = new File(getBuild().getReportDir(JobMarkdownReport.DIR), 
-					reportName + "/" + filePath);
-			try {
-				String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-				add(new MarkdownViewer("markdownReport", Model.of(markdown), null));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			add(new Label("markdownReport", "No markdown report published") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.setName("div");
-				}
-				
-			}.add(AttributeAppender.append("class", "alert alert-notice alert-light-warning mb-0")));
+		File file = new File(getBuild().getReportCategoryDir(JobMarkdownReport.DIR), 
+				reportName + "/" + filePath);
+		try {
+			String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+			add(new MarkdownViewer("markdownReport", Model.of(markdown), null));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

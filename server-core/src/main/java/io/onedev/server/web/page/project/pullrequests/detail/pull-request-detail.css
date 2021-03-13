@@ -28,6 +28,13 @@
 	margin-left: -2px;
 	margin-right: 4px;
 }
+.pull-request-detail>.card-body>.main>.summary>.contribution {
+	border-top: 1px dashed var(--light-gray);
+	padding-top: 1rem;
+	margin-top: 1rem;
+	font-size: 1rem !important;
+}
+
 ul>li>a.code-comments.new .icon {
 	width: 12px;
 	height: 12px;

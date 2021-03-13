@@ -9,6 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.OptimisticLock;
+
 import io.onedev.server.model.User;
 
 @Embeddable
@@ -28,15 +30,19 @@ public class LastUpdate implements Serializable {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name=COLUMN_USER)
+	@OptimisticLock(excluded=true)
 	private User user;
 	
 	@Column(name=COLUMN_USER_NAME)
+	@OptimisticLock(excluded=true)
 	private String userName;
 
 	@Column(name=COLUMN_DATE, nullable=false)
+	@OptimisticLock(excluded=true)
 	private Date date;
 	
 	@Column(name=COLUMN_ACTIVITY, nullable=false)
+	@OptimisticLock(excluded=true)
 	private String activity;
 
 	public User getUser() {

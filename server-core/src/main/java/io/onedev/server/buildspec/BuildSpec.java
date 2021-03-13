@@ -319,15 +319,35 @@ public class BuildSpec implements Serializable, Validatable {
 				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
 				for (Node jobsNodeItem: jobsNode.getValue()) {
 					MappingNode jobNode = (MappingNode) jobsNodeItem;
-					for (Iterator<NodeTuple> itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
-						NodeTuple jobTuple = itJobTuple.next();
+					for (NodeTuple jobTuple: jobNode.getValue()) {
 						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
 						if (jobTupleKey.equals("reports")) {
 							SequenceNode reportsNode = (SequenceNode) jobTuple.getValueNode();
-							for (Iterator<Node> itReportsItem = reportsNode.getValue().iterator(); itReportsItem.hasNext();) {
-								MappingNode reportNode = (MappingNode) itReportsItem.next();
+							for (Node reportNode: reportsNode.getValue()) {
 								if (reportNode.getTag().getValue().equals("!JobJestReport"))
 									reportNode.setTag(new Tag("!JobJestTestReport"));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void migrate4(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			if (((ScalarNode)specTuple.getKeyNode()).getValue().equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("triggers")) {
+							SequenceNode triggersNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node triggerNode: triggersNode.getValue()) {
+								if (triggerNode.getTag().getValue().equals("!PullRequestTrigger"))
+									triggerNode.setTag(new Tag("!PullRequestUpdateTrigger"));
 							}
 						}
 					}

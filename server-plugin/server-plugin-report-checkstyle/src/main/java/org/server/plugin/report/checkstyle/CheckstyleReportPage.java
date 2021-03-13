@@ -37,11 +37,11 @@ public class CheckstyleReportPage extends BuildReportPage {
 
 		@Override
 		protected CheckstyleReportData load() {
-			return LockUtils.read(getBuild().getReportLockKey(JobCheckstyleReport.DIR), new Callable<CheckstyleReportData>() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(JobCheckstyleReport.DIR), new Callable<CheckstyleReportData>() {
 
 				@Override
 				public CheckstyleReportData call() throws Exception {
-					File reportsDir = new File(getBuild().getReportDir(JobCheckstyleReport.DIR), getReportName());				
+					File reportsDir = new File(getBuild().getReportCategoryDir(JobCheckstyleReport.DIR), getReportName());				
 					return CheckstyleReportData.readFrom(reportsDir);
 				}
 				

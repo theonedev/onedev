@@ -37,7 +37,7 @@ public abstract class JobReport implements Serializable {
 		this.reportName = reportName;
 	}
 	
-	@Editable(order=100, description="Specify files relative to repository root. Use * or ? for pattern match")
+	@Editable(order=100, description="Specify files relative to repository root to publish. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty

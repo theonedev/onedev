@@ -88,14 +88,15 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			
 			@Override
 			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportLockKey(JobCheckstyleReport.DIR), new Callable<List<CodeProblem>>() {
+				return LockUtils.read(build.getReportCategoryLockKey(JobCheckstyleReport.DIR), new Callable<List<CodeProblem>>() {
 
 					@SuppressWarnings("unchecked")
 					@Override
 					public List<CodeProblem> call() throws Exception {
 						List<CodeProblem> problems = new ArrayList<>();
-						if (build.getReportDir(JobCheckstyleReport.DIR).exists()) {
-							for (File reportDir: build.getReportDir(JobCheckstyleReport.DIR).listFiles()) {
+						File categoryDir = build.getReportCategoryDir(JobCheckstyleReport.DIR);
+						if (categoryDir.exists()) {
+							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
 										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
 									File violationsFile = new File(reportDir, JobCheckstyleReport.VIOLATION_FILES + "/" + blobPath);
@@ -125,12 +126,12 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportLockKey(JobCheckstyleReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(JobCheckstyleReport.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportDir(JobCheckstyleReport.DIR).exists()) {
-							for (File reportDir: build.getReportDir(JobCheckstyleReport.DIR).listFiles()) {
+						if (build.getReportCategoryDir(JobCheckstyleReport.DIR).exists()) {
+							for (File reportDir: build.getReportCategoryDir(JobCheckstyleReport.DIR).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
 									tabs.add(new BuildReportTab(reportDir.getName(), CheckstyleFilesPage.class, 
 											CheckstyleRulesPage.class, CheckstyleStatsPage.class));

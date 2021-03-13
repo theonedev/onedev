@@ -60,12 +60,13 @@ public class JestTestReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportLockKey(JobJestTestReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(JobJestTestReport.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportDir(JobJestTestReport.DIR).exists()) {
-							for (File reportDir: build.getReportDir(JobJestTestReport.DIR).listFiles()) {
+						File categoryDir = build.getReportCategoryDir(JobJestTestReport.DIR);
+						if (categoryDir.exists()) {
+							for (File reportDir: categoryDir.listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
 									tabs.add(new BuildReportTab(reportDir.getName(), JestTestSuitesPage.class, 
 											JestTestCasesPage.class, JestTestStatsPage.class));

@@ -87,13 +87,14 @@ public class CloverPluginModule extends AbstractPluginModule {
 			
 			@Override
 			public Map<Integer, Integer> getLineCoverages(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportLockKey(JobCloverReport.DIR), new Callable<Map<Integer, Integer>>() {
+				return LockUtils.read(build.getReportCategoryLockKey(JobCloverReport.DIR), new Callable<Map<Integer, Integer>>() {
 
 					@Override
 					public Map<Integer, Integer> call() throws Exception {
 						Map<Integer, Integer> coverages = new HashMap<>();
-						if (build.getReportDir(JobCloverReport.DIR).exists()) {
-							for (File reportDir: build.getReportDir(JobCloverReport.DIR).listFiles()) {
+						File categoryDir = build.getReportCategoryDir(JobCloverReport.DIR);
+						if (categoryDir.exists()) {
+							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
 										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
 									File testCountFile = new File(reportDir, JobCloverReport.TEST_COUNTS_DIR + "/" + blobPath);
@@ -123,12 +124,12 @@ public class CloverPluginModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportLockKey(JobCloverReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(JobCloverReport.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportDir(JobCloverReport.DIR).exists()) {
-							for (File reportDir: build.getReportDir(JobCloverReport.DIR).listFiles()) {
+						if (build.getReportCategoryDir(JobCloverReport.DIR).exists()) {
+							for (File reportDir: build.getReportCategoryDir(JobCloverReport.DIR).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) { 
 									tabs.add(new BuildReportTab(reportDir.getName(), CloverReportPage.class, 
 											CloverStatsPage.class));

@@ -2350,4 +2350,17 @@ public class DataMigrator {
 			}
 		}		
 	}
+	
+	// Migrate to 4.2.1
+	private void migrate52(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.addElement("revision").setText("0");
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

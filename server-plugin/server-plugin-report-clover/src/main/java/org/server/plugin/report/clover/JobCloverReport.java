@@ -65,9 +65,9 @@ public class JobCloverReport extends JobReport {
 
 	@Override
 	public void process(Build build, File workspace, SimpleLogger logger) {
-		File reportDir = new File(build.getReportDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 		
-		CloverReportData reportData = LockUtils.write(build.getReportLockKey(DIR), new Callable<CloverReportData>() {
+		CloverReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CloverReportData>() {
 
 			@Override
 			public CloverReportData call() throws Exception {

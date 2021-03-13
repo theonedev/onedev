@@ -833,12 +833,12 @@ public class Build extends AbstractEntity implements Referenceable {
 		return new File(getPublishDir(), ARTIFACTS_DIR);
 	}
 	
-	public String getReportLockKey(String reportDir) {
-		return "job-report:" + getId() + ":" + reportDir;
+	public String getReportCategoryLockKey(String reportCategory) {
+		return "job-report:" + getId() + ":" + reportCategory;
 	}
 	
-	public File getReportDir(String reportDir) {
-		return new File(getPublishDir(), reportDir);
+	public File getReportCategoryDir(String reportCategory) {
+		return new File(getPublishDir(), reportCategory);
 	}
 	
 	public void publishArtifacts(File workspaceDir, String artifacts) {

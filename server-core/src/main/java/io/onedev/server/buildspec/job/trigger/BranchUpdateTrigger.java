@@ -89,7 +89,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public SubmitReason matchesWithoutProject(ProjectEvent event, Job job) {
+	public SubmitReason triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedBranch = GitUtils.ref2branch(refUpdated.getRefName());
@@ -121,7 +121,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	}
 
 	@Override
-	public String getDescriptionWithoutProject() {
+	public String getTriggerDescription() {
 		String description;
 		if (getBranches() != null && getPaths() != null)
 			description = String.format("When update branches '%s' and touch files '%s'", getBranches(), getPaths());

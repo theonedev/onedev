@@ -8,6 +8,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SO
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +37,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -590,6 +593,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			
 		});
 		
+		summaryContainer.add(newSummaryContributions());
+		
 		add(newOperationsContainer());
 		add(newMoreInfoContainer());
 		
@@ -1036,6 +1041,35 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 		return statusAndBranchesContainer;
 	}
 
+	private WebMarkupContainer newSummaryContributions() {
+		return new ListView<PullRequestSummaryPart>("contributions", 
+				new LoadableDetachableModel<List<PullRequestSummaryPart>>() {
+
+			@Override
+			protected List<PullRequestSummaryPart> load() {
+				List<PullRequestSummaryContribution> contributions = 
+						new ArrayList<>(OneDev.getExtensions(PullRequestSummaryContribution.class));
+				contributions.sort(Comparator.comparing(PullRequestSummaryContribution::getOrder));
+				
+				List<PullRequestSummaryPart> parts = new ArrayList<>();
+				for (PullRequestSummaryContribution contribution: contributions)
+					parts.addAll(contribution.getParts(getPullRequest()));
+				
+				return parts;
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<PullRequestSummaryPart> item) {
+				PullRequestSummaryPart part = item.getModelObject();
+				item.add(new Label("head", part.getTitle()));
+				item.add(part.render("body"));
+			}
+			
+		};
+	}
+	
 	private WebMarkupContainer newOperationsContainer() {
 		WebMarkupContainer operationsContainer = new WebMarkupContainer("requestOperations");
 		operationsContainer.add(new WebSocketObserver() {

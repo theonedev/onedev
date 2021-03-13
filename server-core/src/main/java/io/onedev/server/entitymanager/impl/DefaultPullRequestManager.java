@@ -912,10 +912,9 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			}
 		}
 
-		if (orders.isEmpty()) {
-			orders.add(builder.asc(PullRequestQuery.getPath(root, PullRequest.PROP_CLOSE_INFO + "." + CloseInfo.PROP_STATUS)));
+		if (orders.isEmpty()) 
 			orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
-		}
+		
 		query.orderBy(orders);
 		
 		return query;

@@ -34,6 +34,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectDatabase;
@@ -44,6 +45,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -206,15 +208,19 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private CloseInfo closeInfo;
 
 	@Column(nullable=false)
+	@OptimisticLock(excluded=true)
 	private String title;
 	
 	@Column(length=12000)
+	@OptimisticLock(excluded=true)
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn
+	@OptimisticLock(excluded=true)
 	private User submitter;
 	
+	@OptimisticLock(excluded=true)
 	private String submitterName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -238,17 +244,20 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private String baseCommitHash;
 	
 	@Column(nullable=true)
+	@OptimisticLock(excluded=true)
 	private Date lastCodeCommentActivityDate;
 
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonView(DefaultView.class)
+	@OptimisticLock(excluded=true)
 	private String noSpaceTitle;
 	
 	@Embedded
 	private MergePreview lastMergePreview;
 	
 	@Column(nullable=false)
+	@OptimisticLock(excluded=true)
 	private Date submitDate = new Date();
 	
 	@Column(nullable=false)
@@ -259,10 +268,22 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private long number;
 	
+	@OptimisticLock(excluded=true)
 	private int commentCount;
 	
 	@Embedded
 	private LastUpdate lastUpdate;
+	
+	@Column(length=MAX_CHECK_ERROR_LEN)
+	@OptimisticLock(excluded=true)
+	private String checkError;
+	
+	/*
+	 * Add version check in order to prevent sending MergePreviewCalculated event 
+	 * after pull request is discarded 
+	 */
+	@Version
+	private int revision;
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -305,9 +326,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Collection<String> requiredJobs;
 	
 	private transient Collection<Build> currentBuilds;
-	
-	@Column(length=MAX_CHECK_ERROR_LEN)
-	private String checkError;
 	
 	/**
 	 * Get title of this merge request.

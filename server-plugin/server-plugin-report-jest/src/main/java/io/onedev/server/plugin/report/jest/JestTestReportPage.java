@@ -32,11 +32,11 @@ public abstract class JestTestReportPage extends BuildReportPage {
 
 		@Override
 		protected JestTestReportData load() {
-			return LockUtils.read(getBuild().getReportLockKey(JobJestTestReport.DIR), new Callable<JestTestReportData>() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(JobJestTestReport.DIR), new Callable<JestTestReportData>() {
 
 				@Override
 				public JestTestReportData call() throws Exception {
-					File reportsDir = new File(getBuild().getReportDir(JobJestTestReport.DIR), getReportName());				
+					File reportsDir = new File(getBuild().getReportCategoryDir(JobJestTestReport.DIR), getReportName());				
 					return JestTestReportData.readFrom(reportsDir);
 				}
 				

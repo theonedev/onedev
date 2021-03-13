@@ -66,7 +66,7 @@ public class TagCreateTrigger extends JobTrigger {
 	}
 	
 	@Override
-	public SubmitReason matchesWithoutProject(ProjectEvent event, Job job) {
+	public SubmitReason triggerMatches(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String updatedTag = GitUtils.ref2tag(refUpdated.getRefName());
@@ -99,7 +99,7 @@ public class TagCreateTrigger extends JobTrigger {
 	}
 
 	@Override
-	public String getDescriptionWithoutProject() {
+	public String getTriggerDescription() {
 		String description = "When create tags";
 		if (tags != null)
 			description += " '" + tags + "'";

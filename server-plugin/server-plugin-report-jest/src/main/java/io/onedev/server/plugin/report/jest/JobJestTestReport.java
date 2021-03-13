@@ -55,9 +55,9 @@ public class JobJestTestReport extends JobReport {
 
 	@Override
 	public void process(Build build, File workspace, SimpleLogger logger) {
-		File reportDir = new File(build.getReportDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
-		JestTestReportData report = LockUtils.write(build.getReportLockKey(DIR), new Callable<JestTestReportData>() {
+		JestTestReportData report = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<JestTestReportData>() {
 
 			@Override
 			public JestTestReportData call() throws Exception {
