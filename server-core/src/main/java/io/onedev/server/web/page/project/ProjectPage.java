@@ -234,7 +234,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		}
 		
 		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(getProject());
-		SidebarMenu.Header menuHeader = new SidebarMenu.Header(avatarUrl, "CURRENT PROJECT") {
+		SidebarMenu.Header menuHeader = new SidebarMenu.Header(avatarUrl, getProject().getName()) {
 			
 			@Override
 			protected Component newMoreInfo(String componentId, FloatingPanel dropdown) {

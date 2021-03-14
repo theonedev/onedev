@@ -1,5 +1,5 @@
 :root {
-	--sidebar-width: 265px;
+	--sidebar-width: 275px;
 	--sidebar-mini-width: 51px;
 	--topbar-height: 50px;	
 	--transition-duration: 0.3s;
@@ -80,16 +80,19 @@
     height: 40px;
 	align-items: center;
 	justify-content: center;
-	flex-wrap: wrap;
 }
 .sidebar-menu .menu-header-icon {
 	width: 20px;
 	height: 20px;
 }
 .sidebar-menu .menu-header-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 	color: #5c5e81;
 	font-weight: 500;
 	margin-left: 0.8rem;
+	margin-right: 1rem;
 	flex-grow: 1;
 }
 
@@ -281,6 +284,11 @@
 	.sidebar-minimized .menu-body .menu-body .menu-text {
 		margin-left: 0;
 	} 
+
+	.sidebar-minimized .sidebar-menu .menu-header {
+		flex-wrap: wrap;
+	}
+
 	.sidebar-minimized .sidebar-brand, .sidebar-minimized .menu-header-text, 
 	.sidebar-minimized .menu-body .menu-body, .sidebar-minimized .menu-bullet,
 	.sidebar-minimized .sidebar-menu>.menu-body>.menu-item>.menu-link>.menu-text, 
