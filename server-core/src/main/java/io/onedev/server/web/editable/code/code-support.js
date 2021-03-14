@@ -22,25 +22,28 @@ onedev.server.codeSupport = {
 			onedev.server.form.markDirty($input.closest("form"));
 		});
 		
-		cm.on("keyup", function(cm, event) {
+		cm.on("keypress", function(cm, event) {
 			if (event.key == "@") {
-		    	var cursor = cm.getCursor();
-		    	var line = cursor.line;
-		    	var start = cursor.ch;
-		    	
-		    	var beforeCursor = cm.doc.getLine(line).substring(0, start);
-		    	
-		    	var escapeFiltered = beforeCursor.replace("@@", "");
-		    	if ((escapeFiltered.match(/@/g) || []).length % 2 == 1) { // only show hint when type left @
-		    		function hint(cm, showHintCallback) {
-				    	var end = cm.getCursor().ch;
-				    	var matchWith = cm.doc.getLine(line).substring(start, end);
-				    	$input.data("showHintCallback", showHintCallback);
-				    	varQueryCallback(matchWith, line, start);
-					}
-		    		hint.async = true;
-					CodeMirror.showHint(cm, hint, {completeSingle: false});
-		    	}
+				// Give codemirror a chance to handle keypress first
+				setTimeout(function() {
+			    	var cursor = cm.getCursor();
+			    	var line = cursor.line;
+			    	var start = cursor.ch;
+					
+			    	var beforeCursor = cm.doc.getLine(line).substring(0, start);
+			    	
+			    	var escapeFiltered = beforeCursor.replace("@@", "");
+			    	if ((escapeFiltered.match(/@/g) || []).length % 2 == 1) { // only show hint when type left @
+			    		function hint(cm, showHintCallback) {
+					    	var end = cm.getCursor().ch;
+					    	var matchWith = cm.doc.getLine(line).substring(start, end);
+					    	$input.data("showHintCallback", showHintCallback);
+					    	varQueryCallback(matchWith, line, start);
+						}
+			    		hint.async = true;
+						CodeMirror.showHint(cm, hint, {completeSingle: false});
+			    	}
+				}, 0);
 			}
 		});
 		
