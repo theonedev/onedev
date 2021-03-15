@@ -809,6 +809,49 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			}
 		}
 	}
+	
+	private <T> Set<ConstraintViolation<T>> processGroupsAndSequences(
+	        ValidationContext<T> context, 
+	        List<MetaConstraint<?>> metaConstraints, 
+	        List<MetaConstraint<?>> typeConstraints, 
+	        ValueContext<?, Object> valueContext, 
+	        ValidationOrder validationOrder
+	    ) {
+	    
+	    // process first single groups
+		Iterator<Group> groupIterator = validationOrder.getGroupIterator();
+		while ( groupIterator.hasNext() ) {
+			Group group = groupIterator.next();
+			valueContext.setCurrentGroup( group.getDefiningClass() );
+			validatePropertyForCurrentGroup( valueContext, context, metaConstraints, typeConstraints );
+			if ( shouldFailFast( context ) ) {
+				return context.getFailingConstraints();
+			}
+		}
+
+	    // now process sequences, stop after the first erroneous group
+		Iterator<Sequence> sequenceIterator = validationOrder.getSequenceIterator();
+		while ( sequenceIterator.hasNext() ) {
+			Sequence sequence = sequenceIterator.next();
+			for ( GroupWithInheritance groupOfGroups : sequence ) {
+				int numberOfConstraintViolations = 0;
+				for ( Group group : groupOfGroups ) {
+					valueContext.setCurrentGroup( group.getDefiningClass() );
+					numberOfConstraintViolations += validatePropertyForCurrentGroup(
+						valueContext, context, metaConstraints, typeConstraints
+					);
+					if ( shouldFailFast( context ) ) {
+						return context.getFailingConstraints();
+					}
+				}
+				if ( numberOfConstraintViolations > 0 ) {
+					break;
+				}
+			}
+		}
+
+		return context.getFailingConstraints();
+	}
 
 	private <T> Set<ConstraintViolation<T>> validatePropertyInContext(ValidationContext<T> context, PathImpl propertyPath, ValidationOrder validationOrder) {
 		List<MetaConstraint<?>> metaConstraints = newArrayList();
@@ -830,41 +873,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 
 		assertDefaultGroupSequenceIsExpandable( valueContext, validationOrder );
 
-		// process first single groups
-		Iterator<Group> groupIterator = validationOrder.getGroupIterator();
-		while ( groupIterator.hasNext() ) {
-			Group group = groupIterator.next();
-			valueContext.setCurrentGroup( group.getDefiningClass() );
-			validatePropertyForCurrentGroup( valueContext, context, metaConstraints, typeUseConstraints );
-			if ( shouldFailFast( context ) ) {
-				return context.getFailingConstraints();
-			}
-		}
-
-		// now process sequences, stop after the first erroneous group
-		Iterator<Sequence> sequenceIterator = validationOrder.getSequenceIterator();
-		while ( sequenceIterator.hasNext() ) {
-			Sequence sequence = sequenceIterator.next();
-
-			for ( GroupWithInheritance groupOfGroups : sequence ) {
-				int numberOfConstraintViolations = 0;
-
-				for ( Group group : groupOfGroups ) {
-					valueContext.setCurrentGroup( group.getDefiningClass() );
-					numberOfConstraintViolations += validatePropertyForCurrentGroup(
-							valueContext, context, metaConstraints, typeUseConstraints
-					);
-					if ( shouldFailFast( context ) ) {
-						return context.getFailingConstraints();
-					}
-				}
-				if ( numberOfConstraintViolations > 0 ) {
-					break;
-				}
-			}
-		}
-
-		return context.getFailingConstraints();
+		return processGroupsAndSequences(context, metaConstraints, typeUseConstraints, valueContext, validationOrder);
 	}
 
 	private <T> void assertDefaultGroupSequenceIsExpandable(ValueContext<T, ?> valueContext, ValidationOrder validationOrder) {
@@ -891,39 +900,7 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 			validationOrder.assertDefaultGroupSequenceIsExpandable( beanMetaData.getDefaultGroupSequence( null ) );
 		}
 
-		// process first single groups
-		Iterator<Group> groupIterator = validationOrder.getGroupIterator();
-		while ( groupIterator.hasNext() ) {
-			Group group = groupIterator.next();
-			valueContext.setCurrentGroup( group.getDefiningClass() );
-			validatePropertyForCurrentGroup( valueContext, context, metaConstraints, typeArgumentConstraints );
-			if ( shouldFailFast( context ) ) {
-				return context.getFailingConstraints();
-			}
-		}
-
-		// now process sequences, stop after the first erroneous group
-		Iterator<Sequence> sequenceIterator = validationOrder.getSequenceIterator();
-		while ( sequenceIterator.hasNext() ) {
-			Sequence sequence = sequenceIterator.next();
-			for ( GroupWithInheritance groupOfGroups : sequence ) {
-				int numberOfConstraintViolations = 0;
-				for ( Group group : groupOfGroups ) {
-					valueContext.setCurrentGroup( group.getDefiningClass() );
-					numberOfConstraintViolations += validatePropertyForCurrentGroup(
-							valueContext, context, metaConstraints, typeArgumentConstraints
-					);
-					if ( shouldFailFast( context ) ) {
-						return context.getFailingConstraints();
-					}
-				}
-				if ( numberOfConstraintViolations > 0 ) {
-					break;
-				}
-			}
-		}
-
-		return context.getFailingConstraints();
+		return processGroupsAndSequences(context, metaConstraints, typeArgumentConstraints, valueContext, validationOrder);
 	}
 
 	/**
