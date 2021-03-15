@@ -73,12 +73,6 @@ public class EntityReferenceManager {
 					if (!found) {
 						io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData referencedFromIssueData = 
 								new io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData(issue);
-						IssueChange change = new IssueChange();
-						change.setData(referencedFromIssueData);
-						change.setDate(new Date());
-						change.setIssue(referencedIssue);
-						referencedIssue.getChanges().add(change);
-						issueChangeManager.save(change);
 					}
 				}
 			}
@@ -99,12 +93,6 @@ public class EntityReferenceManager {
 					if (!found) {
 						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData referencedFromIssueData = 
 								new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData(issue);
-						PullRequestChange change = new PullRequestChange();
-						change.setData(referencedFromIssueData);
-						change.setDate(new Date());
-						change.setRequest(referencedRequest);
-						referencedRequest.getChanges().add(change);
-						pullRequestChangeManager.save(change);
 					}
 				}
 			}
@@ -131,12 +119,6 @@ public class EntityReferenceManager {
 					if (!found) {
 						io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData referencedFromPullRequestData = 
 								new io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData(request);
-						IssueChange change = new IssueChange();
-						change.setData(referencedFromPullRequestData);
-						change.setDate(new Date());
-						change.setIssue(referencedIssue);
-						referencedIssue.getChanges().add(change);
-						issueChangeManager.save(change);
 					}
 				}
 			}
@@ -157,12 +139,6 @@ public class EntityReferenceManager {
 					if (!found) {
 						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData referencedFromPullRequestData = 
 								new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData(request);
-						PullRequestChange change = new PullRequestChange();
-						change.setData(referencedFromPullRequestData);
-						change.setDate(new Date());
-						change.setRequest(referencedRequest);
-						referencedRequest.getChanges().add(change);
-						pullRequestChangeManager.save(change);
 					}
 				}
 			}
@@ -189,12 +165,6 @@ public class EntityReferenceManager {
 					if (!found) {
 						io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData referencedFromCodeCommentData = 
 								new io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData(comment);
-						IssueChange change = new IssueChange();
-						change.setData(referencedFromCodeCommentData);
-						change.setDate(new Date());
-						change.setIssue(referencedIssue);
-						referencedIssue.getChanges().add(change);
-						issueChangeManager.save(change);
 					}
 				}
 			}
@@ -215,12 +185,7 @@ public class EntityReferenceManager {
 					if (!found) {
 						io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = 
 								new io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData(comment);
-						PullRequestChange change = new PullRequestChange();
-						change.setData(referencedFromCodeCommentData);
-						change.setDate(new Date());
-						change.setRequest(referencedRequest);
-						referencedRequest.getChanges().add(change);
-						pullRequestChangeManager.save(change);
+
 					}
 				}
 			}

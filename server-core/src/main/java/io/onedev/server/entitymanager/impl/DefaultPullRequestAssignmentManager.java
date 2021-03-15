@@ -37,13 +37,6 @@ public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullR
 		
 		PullRequest request = assignment.getRequest();
 		request.getAssignments().add(assignment);
-		
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestAssigneeAddData(assignment.getUser().getDisplayName()));
-		change.setUser(SecurityUtils.getUser());
-		pullRequestChangeManager.save(change);
 	}
 
 	@Transactional
@@ -53,13 +46,6 @@ public class DefaultPullRequestAssignmentManager extends BaseEntityManager<PullR
 		
 		PullRequest request = assignment.getRequest();
 		request.getAssignments().remove(assignment);
-		
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestAssigneeRemoveData(assignment.getUser().getDisplayName()));
-		change.setUser(SecurityUtils.getUser());
-		pullRequestChangeManager.save(change);
 	}
 		
 }

@@ -44,13 +44,6 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 	@Transactional
 	@Override
 	public void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy) {
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestMergeStrategyChangeData(request.getMergeStrategy(), mergeStrategy));
-		change.setUser(SecurityUtils.getUser());
-		save(change);
-		request.setMergeStrategy(mergeStrategy);
 	}
 
 	@Transactional
@@ -59,13 +52,6 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		String prevTitle = request.getTitle();
 		if (!title.equals(prevTitle)) {
 			request.setTitle(title);
-			
-			PullRequestChange change = new PullRequestChange();
-			change.setDate(new Date());
-			change.setRequest(request);
-			change.setData(new PullRequestTitleChangeData(prevTitle, title));
-			change.setUser(SecurityUtils.getUser());
-			save(change);
 		}
 	}
 
@@ -75,13 +61,7 @@ public class DefaultPullRequestChangeManager extends BaseEntityManager<PullReque
 		String prevDescription = request.getDescription();
 		if (!Objects.equal(prevDescription, description)) {
 			request.setDescription(description);
-			
-			PullRequestChange change = new PullRequestChange();
-			change.setDate(new Date());
-			change.setRequest(request);
-			change.setData(new PullRequestDescriptionChangeData(prevDescription, description));
-			change.setUser(SecurityUtils.getUser());
-			save(change);
+		
 		}
 	}
 	

@@ -56,16 +56,6 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 	@Override
 	public void review(PullRequestReview review) {
 		ReviewResult result = review.getResult();
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(review.getRequest());
-		if (result.isApproved()) 
-			change.setData(new PullRequestApproveData(result.getComment()));
-		else 
-			change.setData(new PullRequestRequestedForChangesData(result.getComment()));
-		change.setUser(review.getUser());
-		pullRequestChangeManager.save(change);
-		save(review);
 	}
 
 	@Override
@@ -92,12 +82,6 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		} else {
 			saveReviews(request);
 			if (request.getReview(reviewer) == null) {
-				PullRequestChange change = new PullRequestChange();
-				change.setDate(new Date());
-				change.setRequest(request);
-				change.setUser(SecurityUtils.getUser());
-				change.setData(new PullRequestReviewerRemoveData(reviewer.getDisplayName()));
-				pullRequestChangeManager.save(change);
 				return true;
 			} else {
 				return false;
@@ -113,13 +97,7 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		PullRequest request = review.getRequest();
 		request.getReviews().add(review);
 		request.setReviews(request.getReviews());
-		
-		PullRequestChange change = new PullRequestChange();
-		change.setDate(new Date());
-		change.setRequest(request);
-		change.setData(new PullRequestReviewerAddData(review.getUser().getDisplayName()));
-		change.setUser(SecurityUtils.getUser());
-		pullRequestChangeManager.save(change);
+	
 	}
 
 	@Transactional

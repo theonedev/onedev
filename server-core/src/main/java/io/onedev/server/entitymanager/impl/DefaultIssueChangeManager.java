@@ -151,13 +151,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		String prevTitle = issue.getTitle();
 		if (!title.equals(prevTitle)) {
 			issue.setTitle(title);
-			
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueTitleChangeData(prevTitle, issue.getTitle()));
-			save(change);
 		}
 	}
 
@@ -167,13 +160,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		String prevDescription = issue.getDescription();
 		if (!Objects.equal(description, prevDescription)) {
 			issue.setDescription(description);
-			
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueDescriptionChangeData(prevDescription, issue.getDescription()));
-			save(change);
 		}
 	}
 	
@@ -183,13 +169,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		Milestone prevMilestone = issue.getMilestone();
 		if (!Objects.equal(prevMilestone, milestone)) {
 			issue.setMilestone(milestone);
-			
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueMilestoneChangeData(prevMilestone, issue.getMilestone()));
-			save(change);
 		}
 	}
 	
@@ -200,13 +179,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		issue.setFieldValues(fieldValues);
 		if (!prevFields.equals(issue.getFieldInputs())) {
 			issueFieldManager.saveFields(issue);
-			
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueFieldChangeData(prevFields, issue.getFieldInputs()));
-			save(change);
 		}
 	}
 	
@@ -222,14 +194,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		issue.setFieldValues(fieldValues);
 		
 		issueFieldManager.saveFields(issue);
-		
-		IssueChange change = new IssueChange();
-		change.setIssue(issue);
-		change.setDate(new Date());
-		change.setUser(SecurityUtils.getUser());
-		change.setData(new IssueStateChangeData(prevState, issue.getState(), 
-				prevFields, issue.getFieldInputs(), comment));
-		save(change);
 	}
 	
 	@Transactional
@@ -249,15 +213,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			
 			issue.setFieldValues(fieldValues);
 			issueFieldManager.saveFields(issue);
-
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestone, 
-					issue.getMilestone(), prevFields, issue.getFieldInputs(), comment));
-			
-			save(change);
 		}
 	}
 	

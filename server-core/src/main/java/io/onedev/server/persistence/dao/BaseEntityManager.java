@@ -1,7 +1,12 @@
 package io.onedev.server.persistence.dao;
+import io.onedev.server.entitymanager.*;
+import io.onedev.server.model.*;
+import io.onedev.server.model.support.pullrequest.changedata.*;
+import io.onedev.server.security.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,6 +36,16 @@ public abstract class BaseEntityManager<T extends AbstractEntity> implements Ent
 		}
 		this.dao = dao;
     }
+	
+	public void changeRequest(PullRequestChangeManager pullRequestChangeManager, PullRequest request, String note) {
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(new Date());
+		change.setData(new PullRequestSourceBranchRestoreData(note));
+		change.setRequest(request);
+		change.setUser(SecurityUtils.getUser());
+		pullRequestChangeManager.save(change);
+		return;
+	}
 	
 	protected long getNextNumber(Project numberScope, Query<?> maxNumberQuery) {
 		AtomicLong nextNumber;
