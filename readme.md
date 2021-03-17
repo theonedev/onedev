@@ -7,11 +7,9 @@
 With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Powerful.
 
 <div style="font-size: 18px;">
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/5min-tutorial.md">A Five Minutes Tutorial</a> 
+| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/quickstart.md">5-minute Quickstart</a> 
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/installation-guide.md">Installation Guide</a> 
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/usage-scenarios.md">Usage Scenarios</a>
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/development-guide.md">Development Guide</a>
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/articles.md">Articles</a>
+| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/tutorials.md">Tutorials</a>
 | <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
 </div>
 <p style="margin-bottom: 20px;">
