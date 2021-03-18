@@ -43,7 +43,7 @@ public class PullRequestChangeEvent extends PullRequestEvent implements Markdown
 			MergePreview preview = getRequest().getMergePreview();
 			commitId = ObjectId.fromString(preview.getMergeCommitHash());
 		} else if (change.getData() instanceof PullRequestDiscardData) {
-			commitId = ObjectId.fromString(getRequest().getTarget().getObjectName());
+			commitId = ObjectId.fromString(getRequest().getLatestUpdate().getTargetHeadCommitHash());
 		} else {
 			commitId = ObjectId.zeroId();
 		}

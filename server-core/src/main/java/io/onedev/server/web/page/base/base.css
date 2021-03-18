@@ -484,6 +484,7 @@ pre {
 .side-main>.side {
 	margin-right: 2rem;
 	flex: 0 0 auto;
+	max-width: 300px;
 }
 .side-main>.main {
 	flex: 1 1 0;
@@ -495,6 +496,7 @@ pre {
 	}
 	.side-main.side-main-wrap>* {
 		flex: 0 0 100%;
+		max-width: inherit;
 	}
 	.side-main.side-main-wrap>.side {
 		margin-right: 0;

@@ -687,9 +687,14 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
 		if (build.getRequest() != null) {
-			MergePreview mergePreview = build.getRequest().getMergePreview();
-			if (mergePreview != null && build.getCommitHash().equals(mergePreview.getMergeCommitHash()))
-				listenerRegistry.post(new PullRequestBuildEvent(build));
+			if (build.getRequest().isDiscarded()) {
+				if (build.getRequest().getLatestUpdate().getTargetHeadCommitHash().equals(build.getCommitHash()))
+					listenerRegistry.post(new PullRequestBuildEvent(build));
+			} else {
+				MergePreview mergePreview = build.getRequest().getMergePreview();
+				if (mergePreview != null && build.getCommitHash().equals(mergePreview.getMergeCommitHash()))
+					listenerRegistry.post(new PullRequestBuildEvent(build));
+			}
 		}
 	}
 	

@@ -1,5 +1,6 @@
 .pull-request-jobs>.job {
 	margin-right: 1rem;
+	margin-bottom: 0.5rem;
 }
 .pull-request-jobs>.job:last-child {
 	margin-right: 0;

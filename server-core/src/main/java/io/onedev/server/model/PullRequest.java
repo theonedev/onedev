@@ -734,14 +734,18 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public Collection<Build> getCurrentBuilds() {
 		if (currentBuilds == null) {
+			currentBuilds = new ArrayList<>();
 			MergePreview preview = getMergePreview();
 			if (preview != null) {
-				currentBuilds = builds.stream()
+				currentBuilds.addAll(builds.stream()
 						.filter(it->it.getCommitHash().equals(preview.getMergeCommitHash()))
-						.collect(Collectors.toList());
-			} else {
-				currentBuilds = new ArrayList<>();
+						.collect(Collectors.toList()));
 			}
+			if (isDiscarded()) {
+				currentBuilds.addAll(builds.stream()
+						.filter(it->it.getCommitHash().equals(getLatestUpdate().getTargetHeadCommitHash()))
+						.collect(Collectors.toList()));
+			} 
 		} 
 		return currentBuilds;
 	}
