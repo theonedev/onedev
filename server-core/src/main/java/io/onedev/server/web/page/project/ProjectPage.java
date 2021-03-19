@@ -44,6 +44,7 @@ import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
@@ -265,7 +266,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		fragment.add(new BookmarkablePageLink<Void>("projects", ProjectListPage.class));
 		
 		ViewStateAwarePageLink<?> link = new ViewStateAwarePageLink<Void>("projectLink", 
-				ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
+				ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(getProject()));
 		link.add(new Label("label", getProject().getName()));
 		
 		fragment.add(link);
