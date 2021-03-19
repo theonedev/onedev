@@ -288,7 +288,10 @@ public class ServletWebResponse extends WebResponse
 				httpServletResponse.resetBuffer();
 				httpServletResponse.setContentType("text/html");
 				
-				String script = String.format(""
+				String content = String.format(""
+						+ "<!doctype html>"
+						+ "<html lang='en'>"
+						+ "<head>"
 						+ "<script type='application/javascript'>"
 						+ "  function getKey(url) {"
 						+ "    var key = url;"
@@ -312,8 +315,13 @@ public class ServletWebResponse extends WebResponse
 						+ "  }"
 						+ "  sessionStorage.removeItem(key);"
 						+ "  window.location.replace(redirect);"
-						+ "</script>", url);
-				httpServletResponse.getOutputStream().write(script.getBytes());
+						+ "</script>"
+						+ "</head>"
+						+ "<body>"
+						+ "<a href='%s'>content</a>" // add this for SEO
+						+ "</body>"
+						+ "</html>", url, url);
+				httpServletResponse.getOutputStream().write(content.getBytes());
 				httpServletResponse.getOutputStream().close();
 			}
 		}

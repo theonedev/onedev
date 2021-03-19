@@ -11,8 +11,10 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
@@ -73,6 +75,20 @@ public class MarkdownViewer extends GenericPanel<String> {
 		return null;
 	}
 	
+	@Nullable
+	private String renderMarkdown() {
+		String markdown = getModelObject();
+		if (markdown != null) {
+			Project project = null;
+			if (getPage() instanceof ProjectPage)
+				project = ((ProjectPage) getPage()).getProject(); 
+			MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
+			return manager.process(manager.render(markdown), project, getRenderContext());
+		} else {
+			return null;
+		}
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -81,31 +97,35 @@ public class MarkdownViewer extends GenericPanel<String> {
 		feedback.setOutputMarkupPlaceholderTag(true);
 		add(feedback);
 		
-		add(new WebMarkupContainer("content") {
+		if (RequestCycle.get().find(AjaxRequestTarget.class) != null) {
+			/*
+			 *  Render it as html will cause issue when markdown contains some html
+			 *  entities such as "&#27;" and when the component is rendered via ajax. 
+			 *  
+			 *  This is because some html valid chars are not valid xml chars (the 
+			 *  component html will be sent to browser via xml when render via ajax) 
+			 */
+			add(new WebMarkupContainer("content") {
 
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					String rendered = renderMarkdown();
+					if (rendered != null)
+						tag.put("data-content", rendered);
+				}
 				
-				String markdown = MarkdownViewer.this.getModelObject();
-				if (markdown != null) {
-					Project project = null;
-					if (getPage() instanceof ProjectPage)
-						project = ((ProjectPage) getPage()).getProject(); 
-					MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
-					
-					/*
-					 *  Render it as html will cause issue when markdown contains some html
-					 *  entities such as "&#27;" and when the component is rendered via ajax. 
-					 *  
-					 *  This is because some html valid chars are not valid xml chars (the 
-					 *  component html will be sent to browser via xml when render via ajax) 
-					 */
-					tag.put("data-content", manager.process(manager.render(markdown), project, getRenderContext()));
-				} 
-			}
-			
-		});
+			});
+		} else {
+			add(new Label("content", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return renderMarkdown();
+				}
+				
+			}).setEscapeModelStrings(false));
+		}
 		
 		add(taskBehavior = new AbstractPostAjaxBehavior() {
 			

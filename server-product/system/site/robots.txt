@@ -17,3 +17,4 @@ Disallow: /*/changes
 Disallow: /projects/new
 Disallow: /downloads
 Disallow: /login
+Disallow: /wicket
