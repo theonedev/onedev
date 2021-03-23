@@ -26,4 +26,9 @@ public abstract class ProjectSettingPage extends ProjectPage {
 		response.render(CssHeaderItem.forReference(new ProjectSettingResourceReference()));
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "Settings - " + getProject().getName();
+	}
+	
 }

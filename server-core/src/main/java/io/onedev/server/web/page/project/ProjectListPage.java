@@ -243,6 +243,11 @@ public class ProjectListPage extends LayoutPage {
 	}
 
 	@Override
+	protected String getPageTitle() {
+		return "Projects - OneDev";
+	}
+	
+	@Override
 	protected Component newTopbarTitle(String componentId) {
 		return new Label(componentId, "Projects");
 	}

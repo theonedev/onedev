@@ -240,4 +240,9 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 		return new Label(componentId, "<span class='text-truncate'>Code Comments</span>").setEscapeModelStrings(false);
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Code Comments - " + getProject().getName();
+	}
+	
 }

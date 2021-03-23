@@ -234,4 +234,9 @@ public class ProjectCommitsPage extends ProjectPage {
 		return new Label(componentId, "Commits");
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Commits - " + getProject().getName();
+	}
+	
 }

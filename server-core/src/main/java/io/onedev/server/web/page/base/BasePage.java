@@ -40,6 +40,7 @@ import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Splitter;
 
@@ -192,16 +193,22 @@ public abstract class BasePage extends WebPage {
 		super.onBeforeRender();
 	}
 
-	public void pushState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
+	public void pushState(IPartialPageRequestHandler handler, String url, Serializable data) {
 		String encodedData = new String(Base64.encodeBase64(CipherUtils.encrypt(SerializationUtils.serialize(data))));
-		String script = String.format("onedev.server.history.pushState('%s', '%s');", url, encodedData);
-		partialPageRequestHandler.prependJavaScript(script);
+		String script = String.format("onedev.server.history.pushState('%s', '%s', '%s');", 
+				url, encodedData, JavaScriptEscape.escapeJavaScript(getPageTitle()));
+		handler.prependJavaScript(script);
+	}
+
+	public void replaceState(IPartialPageRequestHandler handler, String url, Serializable data, @Nullable String title) {
+		String encodedData = new String(Base64.encodeBase64(CipherUtils.encrypt(SerializationUtils.serialize(data))));
+		String script = String.format("onedev.server.history.replaceState('%s', '%s', '%s');", 
+				url, encodedData, JavaScriptEscape.escapeJavaScript(title));
+		handler.prependJavaScript(script);
 	}
 	
-	public void replaceState(IPartialPageRequestHandler partialPageRequestHandler, String url, Serializable data) {
-		String encodedData = new String(Base64.encodeBase64(CipherUtils.encrypt(SerializationUtils.serialize(data))));
-		String script = String.format("onedev.server.history.replaceState('%s', '%s');", url, encodedData);
-		partialPageRequestHandler.prependJavaScript(script);
+	public void replaceState(IPartialPageRequestHandler handler, String url, Serializable data) {
+		replaceState(handler, url, null);
 	}
 	
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
@@ -263,7 +270,7 @@ public abstract class BasePage extends WebPage {
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 	}
 	
-	protected final String getPageTitle() {
+	protected String getPageTitle() {
 		return "OneDev - Super Easy All-in-One DevOps Platform";
 	}
 

@@ -253,4 +253,9 @@ public class IssueListPage extends LayoutPage {
 		return new Label(componentId, "Issues");
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Issues - OneDev";
+	}
+	
 }

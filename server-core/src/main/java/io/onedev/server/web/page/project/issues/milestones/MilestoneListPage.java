@@ -378,4 +378,9 @@ public class MilestoneListPage extends ProjectPage {
 		return new Label(componentId, "Milestones");
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "Milestones - " + getProject().getName();
+	}
+	
 }

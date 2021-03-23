@@ -567,4 +567,12 @@ public abstract class BuildDetailPage extends ProjectPage
 		return fragment;
 	}
 
+	@Override
+	protected String getPageTitle() {
+		if (getBuild().getVersion() != null)
+			return getBuild().getVersion() + " - Build #" +  getBuild().getNumber() + " - " + getProject().getName();
+		else
+			return "Build #" +  getBuild().getNumber() + " - " + getProject().getName();
+	}
+	
 }

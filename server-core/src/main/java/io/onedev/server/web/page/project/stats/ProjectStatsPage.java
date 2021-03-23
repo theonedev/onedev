@@ -30,4 +30,9 @@ public abstract class ProjectStatsPage extends ProjectPage {
 		response.render(JavaScriptHeaderItem.forReference(new ProjectStatsResourceReference()));
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "Statistics - " + getProject().getName();
+	}
+	
 }

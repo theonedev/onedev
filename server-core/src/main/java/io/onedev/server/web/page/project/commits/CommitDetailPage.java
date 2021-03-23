@@ -846,4 +846,11 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		return coverages;
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return getCommit().getShortMessage() 
+				+ " - Commit " +  GitUtils.abbreviateSHA(getCommit().getName()) 
+				+ " - " + getProject().getName();
+	}
+	
 }

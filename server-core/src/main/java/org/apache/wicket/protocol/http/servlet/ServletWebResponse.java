@@ -285,44 +285,49 @@ public class ServletWebResponse extends WebResponse
 			}
 			else
 			{
-				httpServletResponse.resetBuffer();
-				httpServletResponse.setContentType("text/html");
-				
-				String content = String.format(""
-						+ "<!doctype html>"
-						+ "<html lang='en'>"
-						+ "<head>"
-						+ "<script type='application/javascript'>"
-						+ "  function getKey(url) {"
-						+ "    var key = url;"
-						+ "    if (key.indexOf('#') != -1)"
-						+ "      key = key.substr(0, key.indexOf('#'));"
-						+ "    return key.substr(key.indexOf(':'), key.length);"
-						+ "  }"
-						+ "  if (location.hash) {"
-						+ "    var url = location.pathname;"
-						+ "    if (location.search)"
-						+ "      url += location.search;"
-						+ "    url += location.hash;"
-						+ "    sessionStorage.setItem(getKey(url), location.hash);"
-						+ "  }"
-						+ "  var redirect = '%s';"
-						+ "  var key = getKey(redirect);"
-						+ "  if (redirect.indexOf('#') == -1) {"
-						+ "    var hash = sessionStorage.getItem(key);"
-						+ "    if (hash) "
-						+ "      redirect += hash;"
-						+ "  }"
-						+ "  sessionStorage.removeItem(key);"
-						+ "  window.location.replace(redirect);"
-						+ "</script>"
-						+ "</head>"
-						+ "<body>"
-						+ "<a href='%s'>content</a>" // add this for SEO
-						+ "</body>"
-						+ "</html>", url, url);
-				httpServletResponse.getOutputStream().write(content.getBytes());
-				httpServletResponse.getOutputStream().close();
+				String userAgent = webRequest.getContainerRequest().getHeader("User-Agent").toLowerCase();
+				if (userAgent.contains("bot") || userAgent.contains("crawler") 
+						|| userAgent.contains("spider") || userAgent.contains("crawling")) {
+					httpServletResponse.sendRedirect(url);
+				} else {
+					httpServletResponse.resetBuffer();
+					httpServletResponse.setContentType("text/html");
+					
+					String content = String.format(""
+							+ "<!doctype html>"
+							+ "<html lang='en'>"
+							+ "<head>"
+							+ "<script type='application/javascript'>"
+							+ "  function getKey(url) {"
+							+ "    var key = url;"
+							+ "    if (key.indexOf('#') != -1)"
+							+ "      key = key.substr(0, key.indexOf('#'));"
+							+ "    if (key.indexOf(':') != -1)"
+							+ "      key = key.substr(key.indexOf(':'), key.length);"
+							+ "    return key;"
+							+ "  }"
+							+ "  if (location.hash) {"
+							+ "    var url = location.pathname;"
+							+ "    if (location.search)"
+							+ "      url += location.search;"
+							+ "    url += location.hash;"
+							+ "    sessionStorage.setItem(getKey(url), location.hash);"
+							+ "  }"
+							+ "  var redirect = '%s';"
+							+ "  var key = getKey(redirect);"
+							+ "  if (redirect.indexOf('#') == -1) {"
+							+ "    var hash = sessionStorage.getItem(key);"
+							+ "    if (hash) "
+							+ "      redirect += hash;"
+							+ "  }"
+							+ "  sessionStorage.removeItem(key);"
+							+ "  window.location.replace(redirect);"
+							+ "</script>"
+							+ "</head>"
+							+ "</html>", url);
+					httpServletResponse.getOutputStream().write(content.getBytes());
+					httpServletResponse.getOutputStream().close();
+				}
 			}
 		}
 		catch (IOException e)

@@ -21,4 +21,9 @@ public abstract class MyPage extends LayoutPage {
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "My - OneDev";
+	}
+	
 }

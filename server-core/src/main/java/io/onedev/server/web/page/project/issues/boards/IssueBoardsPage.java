@@ -999,4 +999,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		return new Label(componentId, "Issue Boards");
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Issue Boards - " + getProject().getName();
+	}
+	
 }

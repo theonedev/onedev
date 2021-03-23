@@ -250,4 +250,9 @@ public class ProjectBuildsPage extends ProjectPage {
 		return new Label(componentId, "Builds");
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Builds - " + getProject().getName();
+	}
+	
 }

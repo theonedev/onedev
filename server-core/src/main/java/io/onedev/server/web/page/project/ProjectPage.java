@@ -275,6 +275,11 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		return fragment;
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return getProject().getName();
+	}
+	
 	protected abstract Component newProjectTitle(String componentId);
 	
 	protected Collection<Build> getBuilds(ObjectId commitId) {

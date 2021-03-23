@@ -12,6 +12,8 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.IRequestHandlerDelegate;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.RequestCycle;
 
@@ -28,11 +30,15 @@ public class WicketUtils {
 	
 	@Nullable
 	public static Page getPage() {
-		if (RequestCycle.get() != null && RequestCycle.get().getActiveRequestHandler() instanceof IPageRequestHandler) {
-			return (Page) ((IPageRequestHandler) RequestCycle.get().getActiveRequestHandler()).getPage();	
-		} else {
-			return null;
-		}
+		RequestCycle requestCycle = RequestCycle.get();
+		if (requestCycle != null) {
+			IRequestHandler requestHandler = requestCycle.getActiveRequestHandler();
+			if (requestHandler instanceof IRequestHandlerDelegate) 
+				requestHandler = ((IRequestHandlerDelegate) requestHandler).getDelegateHandler();			
+			if (requestHandler instanceof IPageRequestHandler)
+				return (Page) ((IPageRequestHandler) requestHandler).getPage();	
+		} 
+		return null;
 	}
 	
 	@Nullable

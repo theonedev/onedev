@@ -1226,7 +1226,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		public State() {
 			blobIdent = new BlobIdent();
 		}
-		
+
 	}
 
 	@Override
@@ -1502,6 +1502,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		}
 	}
 
+	@Override
+	protected String getPageTitle() {
+		if (state.blobIdent.revision == null)
+			return getProject().getName();
+		else if (state.blobIdent.path == null) 
+			return state.blobIdent.revision + " - " + getProject().getName();
+		else if (state.blobIdent.isFile())
+			return state.blobIdent.getName() + " at " + state.blobIdent.revision + " - " + getProject().getName();
+		else
+			return state.blobIdent.path + " at " + state.blobIdent.revision + " - " + getProject().getName();
+	}
+	
 	@Override
 	public ScriptIdentity getScriptIdentity() {
 		if (getBlobIdent().revision != null)

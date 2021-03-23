@@ -313,4 +313,9 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 		return fragment;
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return getIssue().getTitle() + " - Issue #" +  getIssue().getNumber() + " - " + getProject().getName();
+	}
+	
 }

@@ -227,6 +227,11 @@ public class PullRequestListPage extends LayoutPage {
 		return params;
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Pull Requests - OneDev";
+	}
+	
 	public static PageParameters paramsOf(int page) {
 		String query = null;
 		User user = SecurityUtils.getUser();

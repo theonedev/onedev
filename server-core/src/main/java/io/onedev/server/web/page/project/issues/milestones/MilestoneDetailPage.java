@@ -232,4 +232,9 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 		return fragment;
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Milestone " +  getMilestone().getName() + " - " + getProject().getName();
+	}
+	
 }

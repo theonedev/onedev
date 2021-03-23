@@ -480,4 +480,9 @@ public class ProjectTagsPage extends ProjectPage {
 		return new Label(componentId, "Tags");
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "Tags - " + getProject().getName();
+	}
+	
 }

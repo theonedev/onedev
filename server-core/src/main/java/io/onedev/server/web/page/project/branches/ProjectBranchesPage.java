@@ -882,4 +882,9 @@ public class ProjectBranchesPage extends ProjectPage {
 		return new Label(componentId, "Branches");
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "Branches - " + getProject().getName();
+	}
+	
 }

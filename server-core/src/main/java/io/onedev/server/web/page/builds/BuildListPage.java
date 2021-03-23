@@ -249,4 +249,9 @@ public class BuildListPage extends LayoutPage {
 		return new Label(componentId, "Builds");
 	}
 	
+	@Override
+	protected String getPageTitle() {
+		return "Builds - OneDev";
+	}
+	
 }

@@ -488,20 +488,22 @@ onedev.server = {
 				url: window.location.href 
 			};
 		},
-		pushState: function(url, data) {
+		pushState: function(url, data, title) {
 			var state = {data: data};
 			onedev.server.history.current = {state: state, url: url};
 			history.pushState(state, '', url);
+			document.title = title;
 			
 			// Let others have a chance to do something before marking the page as visited
 			setTimeout(function() {
 				onedev.server.history.setVisited();
 			}, 100);
 		},
-		replaceState: function(url, data) {
-			var state = {data: data};
+		replaceState: function(url, data, title) {
+			var state = {data: data, title: title};
 			onedev.server.history.current = {state: state, url: url};
 			history.replaceState(state, '', url);
+			document.title = title;
 			
 			// Let others have a chance to do something before marking the page as visited
 			setTimeout(function() {

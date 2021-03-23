@@ -2,6 +2,8 @@ package io.onedev.server.web.page.project.dashboard;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.core.request.handler.PageProvider;
+import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -16,11 +18,12 @@ public class ProjectDashboardPage extends ProjectPage {
 	public ProjectDashboardPage(PageParameters params) {
 		super(params);
 		
+		PageProvider pageProvider;
 		if (SecurityUtils.canReadCode(getProject()))
-			throw new RestartResponseException(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
+			pageProvider = new PageProvider(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
 		else 
-			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
-		
+			pageProvider = new PageProvider(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
+		throw new RestartResponseException(pageProvider, RedirectPolicy.NEVER_REDIRECT);
 	}
 
 	@Override

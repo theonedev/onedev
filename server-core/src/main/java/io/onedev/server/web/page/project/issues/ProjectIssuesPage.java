@@ -42,4 +42,9 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 		return new SiteAdministrator();
 	}
 
+	@Override
+	protected String getPageTitle() {
+		return "Issues - " + getProject().getName();
+	}
+	
 }

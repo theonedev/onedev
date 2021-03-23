@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.builds.detail.dashboard;
 
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.core.request.handler.PageProvider;
+import org.apache.wicket.core.request.handler.RenderPageRequestHandler.RedirectPolicy;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.security.SecurityUtils;
@@ -15,13 +17,15 @@ public class BuildDashboardPage extends BuildDetailPage {
 	public BuildDashboardPage(PageParameters params) {
 		super(params);
 		
+		PageProvider pageProvider;
 		if (SecurityUtils.canAccessLog(getBuild()))
-			throw new RestartResponseException(BuildLogPage.class, BuildLogPage.paramsOf(getBuild()));
+			pageProvider = new PageProvider(BuildLogPage.class, BuildLogPage.paramsOf(getBuild()));
 		else if (getBuild().getArtifactsDir().exists())
-			throw new RestartResponseException(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild()));
+			pageProvider = new PageProvider(BuildArtifactsPage.class, BuildArtifactsPage.paramsOf(getBuild()));
 		else
-			throw new RestartResponseException(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild()));
+			pageProvider = new PageProvider(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild()));
 		
+		throw new RestartResponseException(pageProvider, RedirectPolicy.NEVER_REDIRECT);
 	}
 
 }

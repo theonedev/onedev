@@ -34,6 +34,11 @@ public abstract class AdministrationPage extends LayoutPage implements ScriptIde
 	}
 
 	@Override
+	protected String getPageTitle() {
+		return "Administration - OneDev";
+	}
+
+	@Override
 	public ScriptIdentity getScriptIdentity() {
 		return new SiteAdministrator();
 	}

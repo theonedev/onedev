@@ -421,15 +421,16 @@ public class Build extends AbstractEntity implements Referenceable {
 		return jobWorkspace;
 	}
 
-	public void setJobWorkspace(String jobWorkspace) {
+	public void setJobWorkspace(@Nullable String jobWorkspace) {
 		this.jobWorkspace = jobWorkspace;
 	}
 
+	@Nullable
 	public String getVersion() {
 		return version;
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(@Nullable String version) {
 		this.version = version;
 	}
 
