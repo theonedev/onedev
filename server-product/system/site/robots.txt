@@ -1,5 +1,9 @@
 User-agent: *
 
+Disallow: /*?*ILinkListener*
+Disallow: /*?*IBehaviorListener*
+Allow: /*/onedev-manual/blob
+Allow: /*/onedev-server/builds
 Disallow: /*/blob/
 Disallow: /*/commits
 Disallow: /*/archive
@@ -17,4 +21,3 @@ Disallow: /*/changes
 Disallow: /projects/new
 Disallow: /downloads
 Disallow: /login
-Disallow: /wicket
