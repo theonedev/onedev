@@ -233,7 +233,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/pulls", ProjectPullRequestsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/new", NewPullRequestPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}", PullRequestActivitiesPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/activities", PullRequestActivitiesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/code-comments", PullRequestCodeCommentsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/changes", PullRequestChangesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/pulls/${request}/invalid", InvalidPullRequestPage.class));
@@ -242,7 +241,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/issues/boards/${board}", IssueBoardsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/list", ProjectIssueListPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}", IssueActivitiesPage.class));
-		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/activities", IssueActivitiesPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/commits", IssueCommitsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/pull-requests", IssuePullRequestsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/builds", IssueBuildsPage.class));
