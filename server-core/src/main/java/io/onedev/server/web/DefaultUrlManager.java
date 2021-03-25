@@ -94,12 +94,12 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(PullRequestComment comment) {
-		return urlFor(comment.getRequest()) + "/activities#" + comment.getAnchor();
+		return urlFor(comment.getRequest()) + "#" + comment.getAnchor();
 	}
 
 	@Override
 	public String urlFor(PullRequestChange change) {
-		return urlFor(change.getRequest()) + "/activities#" + change.getAnchor();
+		return urlFor(change.getRequest()) + "#" + change.getAnchor();
 	}
 
 	@Override
@@ -114,12 +114,12 @@ public class DefaultUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(IssueComment comment) {
-		return urlFor(comment.getIssue()) + "/activities#" + comment.getAnchor();
+		return urlFor(comment.getIssue()) + "#" + comment.getAnchor();
 	}
 
 	@Override
 	public String urlFor(IssueChange change) {
-		return urlFor(change.getIssue()) + "/activities#" + change.getAnchor();
+		return urlFor(change.getIssue()) + "#" + change.getAnchor();
 	}
 
 	@Override
