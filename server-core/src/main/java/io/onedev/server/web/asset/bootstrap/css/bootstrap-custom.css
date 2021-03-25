@@ -258,6 +258,9 @@ pre {
     font-size: 87.5%;
     color: var(--dark);
 }
+pre code {
+	padding: 0;
+}
 
 .card {
     box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
