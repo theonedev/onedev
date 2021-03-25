@@ -143,7 +143,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(getCookieName());
-		closed = cookie != null && "no".equals(cookie.getValue());
+		closed = cookie != null && "yes".equals(cookie.getValue());
 		
 		add(new AjaxLink<Void>("close") {
 
