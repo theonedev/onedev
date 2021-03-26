@@ -877,8 +877,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					Map<Object, Object> dockerSockVolume = CollectionUtils.newLinkedHashMap(
 							"name", "docker-sock", 
 							"hostPath", CollectionUtils.newLinkedHashMap(
-									"path", dockerSock, 
-									"type", "File"));
+									"path", dockerSock));
 					volumes.add(dockerSockVolume);
 				}
 				podSpec.put("volumes", volumes);
