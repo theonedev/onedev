@@ -22,16 +22,7 @@ public class BlobDeletionProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					return new CommitOptionPanel(componentId, context, null) {
-
-						private static final long serialVersionUID = 1L;
-
-						@Override
-						protected String getPosition() {
-							return null;
-						}
-
-					};
+					return new CommitOptionPanel(componentId, context, null);
 				}
 				
 				@Override

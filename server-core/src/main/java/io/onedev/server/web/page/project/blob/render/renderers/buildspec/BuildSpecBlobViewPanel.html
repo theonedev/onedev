@@ -1,33 +1,23 @@
 <wicket:extend>
     <div wicket:id="content" class="build-spec build-spec-view"></div>
     <wicket:fragment wicket:id="validFrag">
-        <div class="valid">
-        	<div class="head">
-            	<a class="jobs">Jobs</a>
-            	<a class="properties">Properties</a>
-            </div>
-            <div class="body">
-                <div wicket:id="jobs" class="jobs"></div>
-                <div wicket:id="properties" class="properties d-none"></div>
-            </div>
+    	<div class="head">
+        	<a wicket:id="jobs" class="jobs">Jobs</a>
+        	<a wicket:id="properties" class="properties">Properties</a>
         </div>
+        <div wicket:id="body" class="body"></div>
     </wicket:fragment>
     <wicket:fragment wicket:id="invalidFrag">
-        <div class="invalid">
-            <div class="title">Error rendering build spec</div>
-            <div wicket:id="errorMessage" class="error-message"></div>
-        </div>
+        <div class="title">Error rendering build spec</div>
+        <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
-    <wicket:fragment wicket:id="hasJobsFrag">
+    <wicket:fragment wicket:id="jobsFrag">
         <div class="side flex-shrink-0">
-        	<div class="navs">
-        		<div wicket:id="navs" class="nav btn-group btn-block mb-3">
-            	<a class="select btn btn-secondary justify-content-start"><span wicket:id="jobName"></span></a>
-            	<a wicket:id="run" class="run btn btn-secondary btn-icon flex-grow-0 flex-shrink-0" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
-        	</div>
-        </div></div>
-        <div class="contents ml-4 flex-grow-1">
-            <div wicket:id="contents" class="content"></div>
-        </div>
+        	<div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
+            	<a wicket:id="job" class="select btn btn-secondary justify-content-start"><span wicket:id="label"></span></a>
+            	<a wicket:id="runJob" class="run btn btn-secondary btn-icon flex-grow-0 flex-shrink-0" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
+	        </div></div>
+		</div>
+        <div wicket:id="job" class="main ml-4 flex-grow-1"></div>
     </wicket:fragment>
 </wicket:extend>

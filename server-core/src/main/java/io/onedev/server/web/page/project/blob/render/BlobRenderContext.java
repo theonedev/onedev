@@ -85,6 +85,8 @@ public interface BlobRenderContext extends Serializable {
 	
 	void pushState(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
 	
+	void replaceState(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
+	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
@@ -93,7 +95,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onModeChange(AjaxRequestTarget target, Mode mode, boolean viewPlain, @Nullable String newPath);
 	
-	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position);
+	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated);
 	
 	void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range);
 

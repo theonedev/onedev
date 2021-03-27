@@ -457,7 +457,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 									@Override
 									public void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
-										ProjectBlobPage.this.onCommitted(target, refUpdated, null);
+										ProjectBlobPage.this.onCommitted(target, refUpdated);
 										modal.close();
 									}
 									
@@ -735,6 +735,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		PageParameters params = paramsOf(getProject(), state);
 		CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 		pushState(target, url.toString(), state);
+	}
+	
+	private void replaceState(AjaxRequestTarget target) {
+		PageParameters params = paramsOf(getProject(), state);
+		CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
+		replaceState(target, url.toString(), state);
 	}
 	
 	private void newCommitStatus(@Nullable AjaxRequestTarget target) {
@@ -1137,6 +1143,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 	
 	@Override
+	public void replaceState(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position) {
+		state.blobIdent = blobIdent;
+		state.position = position;
+		replaceState(target);
+	}
+	
+	@Override
 	public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
 		newSearchResult(target, hits);
 		resizeWindow(target);
@@ -1257,7 +1270,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	@Override
-	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position) {
+	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated) {
 		Project project = getProject();
 		if (state.blobIdent.revision == null) {
 			state.blobIdent.revision = "master";
@@ -1332,7 +1345,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				
 				if (newBlobIdent != null) {
 					state.blobIdent = newBlobIdent;
-					state.position = position;
 					state.commentId = null;
 					state.mode = Mode.VIEW;
 					onResolvedRevisionChange(target);

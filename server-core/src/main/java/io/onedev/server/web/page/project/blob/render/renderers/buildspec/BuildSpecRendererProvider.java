@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import java.util.stream.IntStream;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
@@ -34,6 +36,19 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 			return position.substring(POSITION_PREFIX.length());
 		else
 			return null;
+	}
+	
+	public static int getActiveJobIndex(BlobRenderContext context, BuildSpec buildSpec) {
+		String selection = getSelection(context.getPosition());
+		if (selection != null && selection.startsWith("jobs/")) {
+			String activeJobName = selection.substring("jobs/".length());
+			return IntStream.range(0, buildSpec.getJobs().size())
+				     .filter(i -> activeJobName.equals(buildSpec.getJobs().get(i).getName()))
+				     .findFirst()
+				     .orElse(0);										
+		} else {
+			return 0;
+		}
 	}
 	
 	@Override
