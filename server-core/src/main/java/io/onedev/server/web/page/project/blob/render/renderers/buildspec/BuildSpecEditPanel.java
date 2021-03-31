@@ -177,6 +177,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											target.add(jobEdit);
 										}
 									}
+									target.appendJavaScript("onedev.server.form.markDirty($('.build-spec').closest('form'));");
 								}
 								
 							});

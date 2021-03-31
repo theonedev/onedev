@@ -112,13 +112,13 @@ onedev.server.markdown = {
 				// Only sync preview scroll when we moved cursor
 				onedev.server.markdown.syncPreviewScroll(containerId);
 			}
-		}, 500);
+		}, previewTimeout);
 		
 		$input.doneEvents("click focus", function(e) {
 			if ($preview.is(":visible")) {
 				onedev.server.markdown.syncPreviewScroll(containerId);
 			}
-		}, 500);
+		}, previewTimeout);
 		
 	    var fontSize = parseInt(getComputedStyle($input[0]).getPropertyValue('font-size'));
 	    

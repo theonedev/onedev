@@ -13,6 +13,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -58,6 +59,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferenc
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -450,6 +452,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			}
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				showComments = !showComments;
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
@@ -495,6 +503,12 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				if (showChangeHistory)
 					add(AttributeAppender.append("class", "active"));
 				setOutputMarkupId(true);
+			}
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 			}
 			
 			@Override

@@ -628,7 +628,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
-
+				
 				Dao dao = OneDev.getInstance(Dao.class);
 				ProjectAndBranch target = getPullRequest().getTarget();
 				ProjectAndBranch source = getPullRequest().getSource();

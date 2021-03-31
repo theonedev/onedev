@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -42,6 +43,7 @@ import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -181,6 +183,12 @@ public abstract class IssueOperationsPanel extends Panel {
 								activeTransitionLinkRef.set(null);
 								for (Component each: transitionsView)
 									target.add(each);
+							}
+							
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 							}
 							
 						});

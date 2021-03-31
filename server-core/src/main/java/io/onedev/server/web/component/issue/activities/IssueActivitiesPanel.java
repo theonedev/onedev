@@ -11,6 +11,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -49,6 +50,7 @@ import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCo
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
@@ -330,6 +332,12 @@ public abstract class IssueActivitiesPanel extends Panel {
 			}
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				showComments = !showComments;
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
@@ -350,6 +358,12 @@ public abstract class IssueActivitiesPanel extends Panel {
 				super.onInitialize();
 				if (showChangeHistory)
 					add(AttributeAppender.append("class", "active"));
+			}
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
 			}
 			
 			@Override
