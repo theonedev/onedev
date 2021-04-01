@@ -2,13 +2,13 @@ onedev.server.buildSpec = {
 	onTabDomReady: function(tabClass) {
 		$(".build-spec>.head>a").removeClass("active").filter(tabClass).addClass("active");		
 	},
-    onJobDomReady: function(jobIndex, nameChangeCallback) {
-        var $jobs = $(".build-spec>.jobs");
-        var $navs = $jobs.find(">.side>.navs");
-		$navs.children().removeClass("active").eq(jobIndex).addClass("active");
+    onNamedElementDomReady: function(elementIndex, nameChangeCallback) {
+        var $elements = $(".build-spec>.elements");
+        var $navs = $elements.find(">.side>.navs");
+		$navs.children().removeClass("active").eq(elementIndex).addClass("active");
 		
 		if (nameChangeCallback) {
-	        var $main = $jobs.children(".main");
+	        var $main = $elements.children(".main");
 	        
 	        var $input = $main.find(">div>div>.property-name input");
 	

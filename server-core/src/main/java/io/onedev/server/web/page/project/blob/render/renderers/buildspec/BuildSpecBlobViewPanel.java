@@ -132,7 +132,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 										public void renderHead(Component component, IHeaderResponse response) {
 											super.renderHead(component, response);
 											
-											String script = String.format("onedev.server.buildSpec.onJobDomReady(%d);", jobIndex);
+											String script = String.format("onedev.server.buildSpec.onNamedElementDomReady(%d);", jobIndex);
 											response.render(OnDomReadyHeaderItem.forScript(script));
 										}
 										

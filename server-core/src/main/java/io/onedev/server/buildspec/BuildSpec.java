@@ -17,6 +17,8 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.wicket.Component;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -30,19 +32,26 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
+import io.onedev.server.buildspec.step.StepTemplate;
 import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.migration.XmlBuildSpecMigrator;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 @ClassValidating
@@ -72,9 +81,15 @@ public class BuildSpec implements Serializable, Validatable {
 	
 	private List<Job> jobs = new ArrayList<>();
 	
+	private List<StepTemplate> stepTemplates = new ArrayList<>();
+	
 	private List<Property> properties = new ArrayList<>();
 	
+	private List<BuildSpecImport> imports = new ArrayList<>();
+	
 	private transient Map<String, Job> jobMap;
+	
+	private transient Map<String, StepTemplate> stepTemplateMap;
 	
 	private transient Map<String, String> propertyMap;
 	
@@ -89,12 +104,32 @@ public class BuildSpec implements Serializable, Validatable {
 	}
 	
 	@Editable
+	@Valid
+	public List<StepTemplate> getStepTemplates() {
+		return stepTemplates;
+	}
+
+	public void setStepTemplates(List<StepTemplate> stepTemplates) {
+		this.stepTemplates = stepTemplates;
+	}
+
+	@Editable
 	public List<Property> getProperties() {
 		return properties;
 	}
 
 	public void setProperties(List<Property> properties) {
 		this.properties = properties;
+	}
+
+	@Editable
+	@Valid
+	public List<BuildSpecImport> getImports() {
+		return imports;
+	}
+
+	public void setImports(List<BuildSpecImport> imports) {
+		this.imports = imports;
 	}
 
 	public Map<String, Job> getJobMap() {
@@ -113,6 +148,15 @@ public class BuildSpec implements Serializable, Validatable {
 				propertyMap.put(property.getName(), property.getValue());
 		}
 		return propertyMap;
+	}
+	
+	public Map<String, StepTemplate> getStepTemplateMap() {
+		if (stepTemplateMap == null) { 
+			stepTemplateMap = new LinkedHashMap<>();
+			for (StepTemplate template: stepTemplates)
+				stepTemplateMap.put(template.getName(), template);
+		}
+		return stepTemplateMap;
 	}
 	
 	@Override
@@ -136,7 +180,7 @@ public class BuildSpec implements Serializable, Validatable {
 				Job dependencyJob = getJobMap().get(dependency.getJobName());
 				if (dependencyJob != null) {
 					try {
-						ParamSupply.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
+						ParamSupply.validateParams(null, dependencyJob.getParamSpecs(), dependency.getJobParams());
 					} catch (ValidationException e) {
 						String message = "Item #" + j + ": Error validating parameters of dependency job '" 
 								+ dependencyJob.getName() + "': " + e.getMessage();
@@ -167,7 +211,7 @@ public class BuildSpec implements Serializable, Validatable {
 			j=1;
 			for (JobTrigger trigger: job.getTriggers()) {
 				try {
-					ParamSupply.validateParams(job.getParamSpecs(), trigger.getParams());
+					ParamSupply.validateParams(null, job.getParamSpecs(), trigger.getParams());
 				} catch (Exception e) {
 					String message = "Item #" + j + ": Error validating job parameters: " + e.getMessage();
 					context.buildConstraintViolationWithTemplate(message)
@@ -232,6 +276,32 @@ public class BuildSpec implements Serializable, Validatable {
 			} 
 			return false;
 		}
+	}
+	
+	public static List<InputSuggestion> suggestVariables(String matchWith) {
+		Component component = ComponentContext.get().getComponent();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+		if (buildSpecAware != null) {
+			BuildSpec buildSpec = buildSpecAware.getBuildSpec();
+			if (buildSpec != null) {
+				JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+				if (jobAware != null) {
+					Job job = jobAware.getJob();
+					if (job != null) {
+						RevCommit commit;
+						if (page.getBlobIdent().revision != null)
+							commit = page.getCommit();
+						else
+							commit = null;
+						suggestions.addAll(SuggestionUtils.suggestVariables(
+								page.getProject(), commit, buildSpec, job, matchWith));
+					}
+				}
+			}
+		}
+		return suggestions;
 	}
 	
 	@Nullable

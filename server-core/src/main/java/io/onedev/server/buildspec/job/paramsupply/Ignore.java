@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="Ignore")
@@ -26,7 +27,7 @@ public class Ignore implements ValuesProvider {
 	}		
 	
 	@Override
-	public List<List<String>> getValues() {
+	public List<List<String>> getValues(Build build, String paramName) {
 		List<List<String>> values = new ArrayList<>();
 		values.add(new ArrayList<>());
 		return values;

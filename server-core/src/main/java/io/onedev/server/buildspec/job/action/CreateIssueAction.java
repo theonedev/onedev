@@ -64,7 +64,7 @@ public class CreateIssueAction extends PostBuildAction {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return Job.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith);
 	}
 	
 	@Editable(order=1100, group="Issue Detail")

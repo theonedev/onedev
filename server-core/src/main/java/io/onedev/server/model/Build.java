@@ -1012,14 +1012,16 @@ public class Build extends AbstractEntity implements Referenceable {
 		return Build.class.getName() + ":" + buildId;
 	}
 	
-	public static void push(Build build) {
+	public static void push(@Nullable Build build) {
 		stack.get().push(build);
-		ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
+		if (build != null)
+			ScriptIdentity.push(new JobIdentity(build.getProject(), build.getCommitId()));
 	}
 
 	public static void pop() {
-		ScriptIdentity.pop();
-		stack.get().pop();
+		Build build = stack.get().pop();
+		if (build != null)
+			ScriptIdentity.pop();
 	}
 	
 	public boolean isValid() {
@@ -1064,7 +1066,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public boolean matchParams(List<ParamSupply> paramSupplies) {
 		AtomicBoolean matches = new AtomicBoolean(false);
-		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(paramSupplies, null)) {
+		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(null, paramSupplies)) {
 			
 			@Override
 			public void run(Map<String, List<String>> params) {

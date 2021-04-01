@@ -29,7 +29,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 					for (ParamSupply param: dependency.getJobParams()) {
 						if (!param.isSecret()) {
 							List<String> paramValue = build.getParamMap().get(param.getName());
-							if (!param.getValuesProvider().getValues().contains(paramValue))
+							if (!param.getValuesProvider().getValues(null, param.getName()).contains(paramValue))
 								return null;
 						}
 					}

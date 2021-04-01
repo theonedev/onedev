@@ -1,0 +1,12 @@
+<wicket:panel>
+	<div class="import-list">
+		<table wicket:id="imports"></table>
+		<div class="foot mt-3">
+			<a wicket:id="addNew" title="Add new" class="btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="actionColumnFrag">
+		<a wicket:id="edit" class="btn btn-icon btn-xs btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-icon btn-xs btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+   </wicket:fragment>
+</wicket:panel>

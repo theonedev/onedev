@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SimpleLogger;
@@ -47,7 +47,7 @@ public class JobPullRequestMarkdownReport extends JobReport {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return Job.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith);
 	}
 
 	@Override

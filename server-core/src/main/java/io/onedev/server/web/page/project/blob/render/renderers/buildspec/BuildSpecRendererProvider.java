@@ -51,6 +51,19 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 		}
 	}
 	
+	public static int getActiveStepTemplateIndex(BlobRenderContext context, BuildSpec buildSpec) {
+		String selection = getSelection(context.getPosition());
+		if (selection != null && selection.startsWith("step-templates/")) {
+			String activeTemplateName = selection.substring("step-templates/".length());
+			return IntStream.range(0, buildSpec.getStepTemplates().size())
+				     .filter(i -> activeTemplateName.equals(buildSpec.getStepTemplates().get(i).getName()))
+				     .findFirst()
+				     .orElse(0);										
+		} else {
+			return 0;
+		}
+	}
+	
 	@Override
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
 		if (context.getMode() == Mode.ADD && isBuildSpec(context.getNewPath()) 

@@ -19,7 +19,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.code.CodeProblem.Severity;
 import io.onedev.server.model.Build;
@@ -58,7 +58,7 @@ public class JobCheckstyleReport extends JobReport {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return Job.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith);
 	}
 
 	@Override

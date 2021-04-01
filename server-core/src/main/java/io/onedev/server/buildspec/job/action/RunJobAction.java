@@ -86,7 +86,7 @@ public class RunJobAction extends PostBuildAction {
 	
 	@Override
 	public void execute(Build build) {
-		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(getJobParams(), build)) {
+		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(build, getJobParams())) {
 			
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
@@ -128,7 +128,7 @@ public class RunJobAction extends PostBuildAction {
 		Job jobToRun = buildSpec.getJobMap().get(jobName);
 		if (jobToRun != null) {
 			try {
-				ParamSupply.validateParams(jobToRun.getParamSpecs(), jobParams);
+				ParamSupply.validateParams(null, jobToRun.getParamSpecs(), jobParams);
 			} catch (ValidationException e) {
 				throw new ValidationException("Error validating parameters of run job '" 
 						+ jobToRun.getName() + "': " + e.getMessage());

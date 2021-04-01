@@ -16,7 +16,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.JestTestMetric;
@@ -50,7 +50,7 @@ public class JobJestTestReport extends JobReport {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return Job.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith);
 	}
 
 	@Override

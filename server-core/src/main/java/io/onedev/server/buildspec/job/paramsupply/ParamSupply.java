@@ -49,7 +49,9 @@ public class ParamSupply implements Serializable {
 	private boolean secret;
 	
 	private ValuesProvider valuesProvider = new SpecifiedValues();
-
+	
+	private static ThreadLocal<String> paramName = new ThreadLocal<String>();
+	
 	@Editable
 	@NotEmpty
 	public String getName() {
@@ -173,12 +175,12 @@ public class ParamSupply implements Serializable {
 		return paramSpecMap;
 	}
 	
-	public static void validateParams(List<ParamSpec> paramSpecs, List<ParamSupply> params) {
+	public static void validateParams(Build build, List<ParamSpec> paramSpecs, List<ParamSupply> params) {
 		Map<String, List<List<String>>> paramMap = new HashMap<>();
 		for (ParamSupply param: params) {
 			List<List<String>> values;
 			if (param.getValuesProvider() instanceof SpecifiedValues)
-				values = param.getValuesProvider().getValues();
+				values = param.getValuesProvider().getValues(build, param.getName());
 			else
 				values = null;
 			if (paramMap.put(param.getName(), values) != null)
@@ -247,29 +249,38 @@ public class ParamSupply implements Serializable {
 		return paramMap;
 	}
 
-	public static Map<String, List<List<String>>> getParamMatrix(List<ParamSupply> params, @Nullable Build build) {
+	public static Map<String, List<List<String>>> getParamMatrix(@Nullable Build build, List<ParamSupply> params) {
 		Map<String, List<List<String>>> paramMatrix = new LinkedHashMap<>();
 		for (ParamSupply param: params) {
-			/*
-			 * Resolve secret value with current build context as otherwise we may not be authorized to 
-			 * access the secret value. This is possible for instance if a pull request triggers a job, 
-			 * and then post-action of the job triggers another job with a parameter taking value of 
-			 * a secret accessible by the pull request   
-			 */
-			if (param.isSecret() && build != null) { 
-				List<List<String>> resolvedValues = new ArrayList<>();
-				for (List<String> value: param.getValuesProvider().getValues()) {
-					List<String> resolvedValue = new ArrayList<>();
-					for (String each: value) 
-						resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getSecretValue(each));
-					resolvedValues.add(resolvedValue);
+			paramName.set(param.getName());
+			try {
+				/*
+				 * Resolve secret value with current build context as otherwise we may not be authorized to 
+				 * access the secret value. This is possible for instance if a pull request triggers a job, 
+				 * and then post-action of the job triggers another job with a parameter taking value of 
+				 * a secret accessible by the pull request   
+				 */
+				if (param.isSecret() && build != null) { 
+					List<List<String>> resolvedValues = new ArrayList<>();
+					for (List<String> value: param.getValuesProvider().getValues(build, param.getName())) {
+						List<String> resolvedValue = new ArrayList<>();
+						for (String each: value) 
+							resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getSecretValue(each));
+						resolvedValues.add(resolvedValue);
+					}
+					paramMatrix.put(param.getName(), resolvedValues);
+				} else {
+					paramMatrix.put(param.getName(), param.getValuesProvider().getValues(build, param.getName()));
 				}
-				paramMatrix.put(param.getName(), resolvedValues);
-			} else {
-				paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
+			} finally {
+				paramName.set(null);
 			}
 		}
 		return paramMatrix;
 	}
 
+	public static String getParamName() {
+		return paramName.get();
+	}
+	
 }

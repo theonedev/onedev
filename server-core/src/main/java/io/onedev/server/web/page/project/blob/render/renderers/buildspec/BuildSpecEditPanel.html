@@ -3,7 +3,9 @@
     <wicket:fragment wicket:id="validFrag">
     	<div class="head">
     		<a wicket:id="jobs" class="jobs">Jobs</a>
+    		<a wicket:id="stepTemplates" class="step-templates">Step Templates</a>
     		<a wicket:id="properties" class="properties">Properties</a>
+    		<a wicket:id="imports" class="imports">Imports</a>
     	</div>
         <div wicket:id="body" class="body position-aware"></div>
     </wicket:fragment>
@@ -11,26 +13,26 @@
         <div class="title">Error rendering build spec</div>
         <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
-	<wicket:fragment wicket:id="jobsFrag">
+	<wicket:fragment wicket:id="namedElementsFrag">
         <div class="side flex-shrink-0">
             <!-- do not leave white space between navs and nav element as we are using .navs:not(:empty)
             in css -->
             <div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
-                <a wicket:id="job" class="select btn btn-secondary justify-content-start">
+                <a wicket:id="element" class="select btn btn-secondary justify-content-start">
                     <wicket:svg href="grip" class="icon drag-indicator flex-shrink-0 mr-1"/>
                     <span wicket:id="label" class="label"></span>
                 </a>
-                <a wicket:id="deleteJob" title="Delete job" class="delete btn btn-secondary btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+                <a wicket:id="delete" title="Delete" class="delete btn btn-secondary btn-icon flex-grow-0 flex-shrink-0"><wicket:svg href="trash" class="icon"></wicket:svg></a>
             </div></div>
             <div class="add btn-group btn-block">
                 <a wicket:id="create" class="create btn btn-primary justify-content-start">
-                    <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add Job
+                    <wicket:svg href="plus" class="icon flex-shrink-0 mr-1"></wicket:svg> Add New
                 </a>
-                <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Job suggestions">
+                <a wicket:id="suggestions" class="suggestions btn btn-primary flex-grow-0 flex-shrink-0 btn-icon" title="Suggestions">
 					<wicket:svg href="wand" class="icon"/>
 				</a>
             </div>
         </div>
-        <div wicket:id="job" class="main flex-grow-1 ml-4"></div>
+        <div wicket:id="element" class="main flex-grow-1 ml-4"></div>
 	</wicket:fragment>
 </wicket:panel>

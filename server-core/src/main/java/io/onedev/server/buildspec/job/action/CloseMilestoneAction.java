@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Milestone;
@@ -36,7 +36,7 @@ public class CloseMilestoneAction extends PostBuildAction {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return Job.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith);
 	}
 
 	@Override

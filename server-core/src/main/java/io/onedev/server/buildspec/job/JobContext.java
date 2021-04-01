@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
@@ -24,6 +25,8 @@ public abstract class JobContext {
 	private final String image;
 	
 	private final File serverWorkspace;
+	
+	private final List<Action> actions;
 	
 	private final List<String> commands;
 	
@@ -56,7 +59,7 @@ public abstract class JobContext {
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	public JobContext(String projectName, Long buildNumber, 
-			File projectGitDir, String image, File workspace, List<String> commands, 
+			File projectGitDir, List<Action> actions, String image, File workspace, List<String> commands, 
 			boolean retrieveSource, Integer cloneDepth, CloneInfo cloneInfo, 
 			String cpuRequirement, String memoryRequirement, ObjectId commitId, 
 			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
@@ -64,6 +67,7 @@ public abstract class JobContext {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
+		this.actions = actions;
 		this.image = image;
 		this.serverWorkspace = workspace;
 		this.commands = commands;
@@ -80,7 +84,7 @@ public abstract class JobContext {
 		this.services = services;
 		this.logger = logger;
 	}
-
+	
 	public String getProjectName() {
 		return projectName;
 	}
@@ -91,6 +95,10 @@ public abstract class JobContext {
 
 	public File getProjectGitDir() {
 		return projectGitDir;
+	}
+
+	public List<Action> getActions() {
+		return actions;
 	}
 
 	public String getImage() {

@@ -99,9 +99,8 @@ public abstract class BuildDetailPage extends ProjectPage
 
 		@Override
 		protected List<Job> load() {
-			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
-			
 			List<Job> downstreamJobs = new ArrayList<>();
+			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
 			for (Job job: buildSpec.getJobs()) {
 				for (JobDependency dependency: job.getJobDependencies()) {
 					if (dependency.getJobName().equals(getBuild().getJobName()) 

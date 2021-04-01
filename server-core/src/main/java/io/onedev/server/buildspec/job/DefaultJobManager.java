@@ -212,7 +212,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private Build submit(Project project, ObjectId commitId, String jobName, 
 			Map<String, List<String>> paramMap, SubmitReason reason, Set<String> checkedJobNames) {
-		
+
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
 			Build build = new Build();
@@ -264,27 +264,22 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					}
 				}
 				
-				Build.push(build);
-				try {
-					for (JobDependency dependency: build.getJob().getJobDependencies()) {
-						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(dependency.getJobParams(), build)) {
-							
-							@Override
-							public void run(Map<String, List<String>> params) {
-								Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-										params, reason, new LinkedHashSet<>(checkedJobNames));
-								BuildDependence dependence = new BuildDependence();
-								dependence.setDependency(dependencyBuild);
-								dependence.setDependent(build);
-								dependence.setRequireSuccessful(dependency.isRequireSuccessful());
-								dependence.setArtifacts(build.interpolate(dependency.getArtifacts()));
-								build.getDependencies().add(dependence);
-							}
-							
-						}.run();
-					}
-				} finally {
-					Build.pop();
+				for (JobDependency dependency: build.getJob().getJobDependencies()) {
+					new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(build, dependency.getJobParams())) {
+						
+						@Override
+						public void run(Map<String, List<String>> params) {
+							Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
+									params, reason, new LinkedHashSet<>(checkedJobNames));
+							BuildDependence dependence = new BuildDependence();
+							dependence.setDependency(dependencyBuild);
+							dependence.setDependent(build);
+							dependence.setRequireSuccessful(dependency.isRequireSuccessful());
+							dependence.setArtifacts(build.interpolate(dependency.getArtifacts()));
+							build.getDependencies().add(dependence);
+						}
+						
+					}.run();
 				}
 				
 				for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
@@ -354,6 +349,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			String jobToken = UUID.randomUUID().toString();
 			Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
 			
+			BuildSpec buildSpec = build.getProject().getBuildSpec(build.getCommitId());
 			Job job = (Job) VariableInterpolator.installInterceptor(build.getJob());
 			
 			JobExecutor executor = getJobExecutor(build);
@@ -429,7 +425,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										Build build = buildManager.load(buildId);
 										Build.push(build);
 										try {
-											return new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
+											return new JobContext(projectName, buildNumber, projectGitDir, job.getActions(buildSpec), job.getImage(), 
 													serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
 													cloneInfo, job.getCpuRequirement(), job.getMemoryRequirement(), 
 													commitId, caches, new PatternSet(includeFiles, excludeFiles), 
@@ -635,7 +631,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							JobTriggerMatch match = job.getTriggerMatch(event);
 							if (match != null) {
 								Map<String, List<List<String>>> paramMatrix = 
-										ParamSupply.getParamMatrix(match.getTrigger().getParams(), null);						
+										ParamSupply.getParamMatrix(null, match.getTrigger().getParams());						
 								Long projectId = event.getProject().getId();
 								
 								// run asynchrously as session may get closed due to exception
@@ -894,7 +890,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						ThreadContext.bind(userManager.getSystem().asSubject());
 						
 						Project project = projectManager.load(projectId);
-						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(trigger.getParams(), null)) {
+						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(null, trigger.getParams())) {
 							
 							@Override
 							public void run(Map<String, List<String>> paramMap) {

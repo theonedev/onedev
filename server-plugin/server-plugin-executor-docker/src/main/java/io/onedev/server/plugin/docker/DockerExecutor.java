@@ -33,8 +33,8 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -42,6 +42,10 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.k8shelper.CacheInstance;
+import io.onedev.k8shelper.CommandExecutable;
+import io.onedev.k8shelper.CommandHandler;
+import io.onedev.k8shelper.CompositeExecutable;
+import io.onedev.k8shelper.Executable;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.SshCloneInfo;
 import io.onedev.server.OneDev;
@@ -53,9 +57,9 @@ import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.docker.DockerExecutor.TestData;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.concurrent.CapacityRunner;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -133,30 +137,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			return new Commandline("docker");
 	}
 	
-	private String getImageOS(SimpleLogger jobLogger, String image) {
-		Commandline docker = newDocker();
-		docker.addArgs("image", "inspect", "-f", "{{.Os}}", image);
-		
-		AtomicReference<String> osRef = new AtomicReference<>(null);
-		docker.execute(new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				osRef.set(line);
-			}
-			
-		}, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				jobLogger.log(line);
-			}
-			
-		}).checkReturnCode();
-		
-		return Preconditions.checkNotNull(osRef.get());
-	}
-	
 	private synchronized CapacityRunner getCapacityRunner() {
 		if (capacityRunner == null)
 			capacityRunner = new CapacityRunner(capacity);
@@ -167,10 +147,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		return new File(Bootstrap.getSiteDir(), "cache"); 
 	}
 
-	private String createNetwork(JobContext jobContext, boolean isWindows, SimpleLogger jobLogger) {
-		String network = getName() + "-" + jobContext.getProjectName() + "-" 
-				+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
-		
+	private void createNetwork(String network, JobContext jobContext, SimpleLogger jobLogger) {
 		AtomicBoolean networkExists = new AtomicBoolean(false);
 		Commandline docker = newDocker();
 		docker.addArgs("network", "ls", "-q", "--filter", "name=" + network);
@@ -195,7 +172,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		} else {
 			docker.clearArgs();
 			docker.addArgs("network", "create");
-			if (isWindows)
+			if (SystemUtils.IS_OS_WINDOWS)
 				docker.addArgs("-d", "nat");
 			docker.addArgs(network);
 			docker.execute(new LineConsumer() {
@@ -214,8 +191,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				
 			}).checkReturnCode();
 		}
-		
-		return network;
 	}
 	
 	private void deleteNetwork(String network, SimpleLogger jobLogger) {
@@ -303,28 +278,11 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	
 	@SuppressWarnings("resource")
 	private void startService(String network, JobService jobService, SimpleLogger jobLogger) {
-		jobLogger.log("Pulling service image...") ;
-		Commandline docker = newDocker();
-		docker.addArgs("pull", jobService.getImage());
-		docker.execute(new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				logger.debug(line);
-			}
-			
-		}, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				jobLogger.log(line);
-			}
-			
-		}).checkReturnCode();
-		
 		jobLogger.log("Creating service container...");
 		
 		String containerName = network + "-service-" + jobService.getName();
+		
+		Commandline docker = newDocker();
 		docker.clearArgs();
 		docker.addArgs("run", "-d", "--name=" + containerName, "--network=" + network, 
 				"--network-alias=" + jobService.getName());
@@ -354,7 +312,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 
 		jobLogger.log("Waiting for service to be ready...");
 		
-		boolean isWindows = getImageOS(jobLogger, jobService.getImage()).equalsIgnoreCase("windows");
 		ObjectMapper jsonReader = OneDev.getInstance(ObjectMapper.class);		
 		while (true) {
 			StringBuilder builder = new StringBuilder();
@@ -386,7 +343,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			if (stateNode.get("Status").asText().equals("running")) {
 				docker.clearArgs();
 				docker.addArgs("exec", containerName);
-				if (isWindows) 
+				if (SystemUtils.IS_OS_WINDOWS) 
 					docker.addArgs("cmd", "/c", jobService.getReadinessCheckCommand());
 				else 
 					docker.addArgs("sh", "-c", jobService.getReadinessCheckCommand());
@@ -455,8 +412,10 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				@SuppressWarnings("resource")
 				@Override
 				public Void call() {
-					jobLogger.log(String.format("Executing job (executor: %s, image: %s)...", 
-							getName(), jobContext.getImage()));
+					String network = getName() + "-" + jobContext.getProjectName() + "-" 
+							+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
+
+					jobLogger.log(String.format("Executing job (executor: %s, network: %s)...", getName(), network));
 					jobContext.notifyJobRunning();
 					
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
@@ -476,52 +435,31 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					});
 						
 					login(jobLogger);
-
-					jobLogger.log("Pulling job image...") ;
-					Commandline docker = newDocker();
-					docker.addArgs("pull", jobContext.getImage());
-					docker.execute(new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							logger.debug(line);
-						}
-						
-					}, new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							jobLogger.log(line);
-						}
-						
-					}).checkReturnCode();
 					
-					boolean isWindows = getImageOS(jobLogger, jobContext.getImage()).equalsIgnoreCase("windows");
-
-					String network = createNetwork(jobContext, isWindows, jobLogger);
+					createNetwork(network, jobContext, jobLogger);
 					try {
 						for (JobService jobService: jobContext.getServices()) {
 							jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 							startService(network, jobService, jobLogger);
 						}
 						
-						File workspaceCache = null;
+						AtomicReference<File> workspaceCache = new AtomicReference<>(null);
 						for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
 							if (PathUtils.isCurrent(entry.getValue())) {
-								workspaceCache = entry.getKey().getDirectory(hostCacheHome);
+								workspaceCache.set(entry.getKey().getDirectory(hostCacheHome));
 								break;
 							}
 						}
 						
 						File hostWorkspace;
-						if (workspaceCache != null) {
-							hostWorkspace = workspaceCache;
+						if (workspaceCache.get() != null) {
+							hostWorkspace = workspaceCache.get();
 						} else { 
 							hostWorkspace = new File(hostBuildHome, "workspace");
 							FileUtils.createDir(hostWorkspace);
 						}
 						
-						File hostHome = null;
+						AtomicReference<File> hostHome = new AtomicReference<>(null);
 						try {
 							LineConsumer logger = new LineConsumer(StandardCharsets.UTF_8.name()) {
 
@@ -534,11 +472,11 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 
 							if (jobContext.isRetrieveSource()) {
 								jobLogger.log("Retrieving source code...");
-								hostHome = FileUtils.createTempDir();
+								hostHome.set(FileUtils.createTempDir());
 								Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
-								git.workingDir(hostWorkspace).environments().put("HOME", hostHome.getAbsolutePath());
+								git.workingDir(hostWorkspace).environments().put("HOME", hostHome.get().getAbsolutePath());
 
-								jobContext.getCloneInfo().writeAuthData(hostHome, git, logger, logger);
+								jobContext.getCloneInfo().writeAuthData(hostHome.get(), git, logger, logger);
 								
 								List<String> trustCertContent = new ArrayList<>();
 								ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
@@ -556,7 +494,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								}
 	
 								if (!trustCertContent.isEmpty()) {
-									KubernetesHelper.installGitCert(new File(hostHome, "trust-cert.pem"), trustCertContent, 
+									KubernetesHelper.installGitCert(new File(hostHome.get(), "trust-cert.pem"), trustCertContent, 
 											git, logger, logger);
 								}
 
@@ -585,7 +523,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 										 */
 										Commandline cmd = newDocker();
 										String containerName = network + "-submodule-update-helper";
-										String homeOuterPath = getOuterPath(hostHome.getAbsolutePath());
+										String homeOuterPath = getOuterPath(hostHome.get().getAbsolutePath());
 										String workspaceOuterPath = getOuterPath(hostWorkspace.getAbsolutePath());
 										cmd.addArgs("run", "--name=" + containerName, "-v", homeOuterPath + ":/root", 
 												"-v", workspaceOuterPath+ ":/git", "--rm", "alpine/git", 
@@ -635,13 +573,13 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							String containerWorkspace;
 							String containerEntryPoint;
 							String[] containerCommand;
-							if (isWindows) {
+							if (SystemUtils.IS_OS_WINDOWS) {
 								containerBuildHome = "C:\\onedev-build";
 								containerWorkspace = "C:\\onedev-build\\workspace";
 								containerEntryPoint = "cmd";
 								
-								if (hostHome != null)
-									containerCommand = new String[] {"/c", "xcopy /Y /S /K /Q /H /R C:\\Users\\ContainerAdministrator\\onedev\\* C:\\Users\\ContainerAdministrator>nul && C:\\onedev-build\\job-commands.bat"};						
+								if (hostHome.get() != null)
+									containerCommand = new String[] {"/c", "xcopy /Y /S /K /Q /H /R C:\\Users\\%USERHOME%\\onedev\\* C:\\Users\\%USERHOME% > nul && C:\\onedev-build\\job-commands.bat"};						
 								else
 									containerCommand = new String[] {"/c", "C:\\onedev-build\\job-commands.bat"};						
 		
@@ -655,7 +593,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								containerBuildHome = "/onedev-build";
 								containerWorkspace = "/onedev-build/workspace";
 								containerEntryPoint = "sh";
-								if (hostHome != null)
+								if (hostHome.get() != null)
 									containerCommand = new String[] {"-c", "cp -r -f -p /root/onedev/. /root && sh /onedev-build/job-commands.sh"};
 								else
 									containerCommand = new String[] {"/onedev-build/job-commands.sh"};
@@ -669,73 +607,112 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							}
 							
 							jobContext.reportJobWorkspace(containerWorkspace);
-
-							String containerName = network + "-job";
-							docker.clearArgs();
-							docker.addArgs("run", "--name=" + containerName, "--network=" + network);
-							if (getRunOptions() != null)
-								docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-							
-							docker.addArgs("-v", getOuterPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
-							if (workspaceCache != null)
-								docker.addArgs("-v", getOuterPath(workspaceCache.getAbsolutePath()) + ":" + containerWorkspace);
-							for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
-								if (!PathUtils.isCurrent(entry.getValue())) {
-									String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
-									String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
-									docker.addArgs("-v", getOuterPath(hostCachePath) + ":" + containerCachePath);
-								}
-							}
-							
-							if (SystemUtils.IS_OS_LINUX) 
-								docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
-							
-							if (hostHome != null) {
-								String outerPath = getOuterPath(hostHome.getAbsolutePath());
-								if (SystemUtils.IS_OS_WINDOWS)
-									docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerAdministrator\\onedev");
-								else 
-									docker.addArgs("-v", outerPath + ":/root/onedev");
-							}
-							
-							docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
-							docker.addArgs(jobContext.getImage());
-							docker.addArgs(containerCommand);
-							
-							jobLogger.log("Running job container...");
-							
+							Executable entryExecutable = new CompositeExecutable(jobContext.getActions());
 							try {
-								ExecutionResult result = docker.execute(logger, logger, null, new ProcessKiller() {
-			
+								List<String> errorMessages = new ArrayList<>();
+								
+								entryExecutable.execute(new CommandHandler() {
+	
 									@Override
-									public void kill(Process process, String executionId) {
-										jobLogger.log("Stopping job container...");
-										Commandline cmd = newDocker();
-										cmd.addArgs("stop", containerName);
-										cmd.execute(new LineConsumer() {
-	
+									public boolean execute(CommandExecutable executable, List<Integer> position) {
+										if (SystemUtils.IS_OS_WINDOWS) {
+											File scriptFile = new File(hostBuildHome, "job-commands.bat");
+											try {
+												FileUtils.writeLines(scriptFile, executable.getCommands(), "\r\n");
+											} catch (IOException e) {
+												throw new RuntimeException(e);
+											}
+										} else {
+											File scriptFile = new File(hostBuildHome, "job-commands.sh");
+											try {
+												FileUtils.writeLines(scriptFile, executable.getCommands(), "\n");
+											} catch (IOException e) {
+												throw new RuntimeException(e);
+											}
+										}
+										
+										String stepName = KubernetesHelper.describe(position);
+										
+										String containerName = network + "-step-" + stepName;
+										Commandline docker = newDocker();
+										docker.clearArgs();
+										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
+										if (getRunOptions() != null)
+											docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+										
+										docker.addArgs("-v", getOuterPath(hostBuildHome.getAbsolutePath()) + ":" + containerBuildHome);
+										if (workspaceCache.get() != null)
+											docker.addArgs("-v", getOuterPath(workspaceCache.get().getAbsolutePath()) + ":" + containerWorkspace);
+										for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
+											if (!PathUtils.isCurrent(entry.getValue())) {
+												String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
+												String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
+												docker.addArgs("-v", getOuterPath(hostCachePath) + ":" + containerCachePath);
+											}
+										}
+										
+										if (SystemUtils.IS_OS_LINUX) 
+											docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+										
+										if (hostHome.get() != null) {
+											String outerPath = getOuterPath(hostHome.get().getAbsolutePath());
+											if (SystemUtils.IS_OS_WINDOWS) {
+												docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerAdministrator\\onedev");
+												docker.addArgs("-v",  outerPath + ":C:\\Users\\ContainerUser\\onedev");
+											} else { 
+												docker.addArgs("-v", outerPath + ":/root/onedev");
+											}
+										}
+										
+										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
+										docker.addArgs(executable.getImage());
+										
+										docker.addArgs(containerCommand);
+										
+										jobLogger.log("Running step #" + stepName + "...");
+										
+										ExecutionResult result = docker.execute(logger, logger, null, new ProcessKiller() {
+					
 											@Override
-											public void consume(String line) {
-												DockerExecutor.logger.debug(line);
+											public void kill(Process process, String executionId) {
+												jobLogger.log("Stopping step container...");
+												Commandline cmd = newDocker();
+												cmd.addArgs("stop", containerName);
+												cmd.execute(new LineConsumer() {
+			
+													@Override
+													public void consume(String line) {
+														DockerExecutor.logger.debug(line);
+													}
+													
+												}, new LineConsumer() {
+			
+													@Override
+													public void consume(String line) {
+														jobLogger.log(line);
+													}
+													
+												}).checkReturnCode();
 											}
 											
-										}, new LineConsumer() {
+										});
+										if (result.getReturnCode() != 0) {
+											errorMessages.add("Step #" + stepName + ": Command failed with exit code " + result.getReturnCode());
+											return false;
+										} else {
+											return true;
+										}
+									}
 	
-											@Override
-											public void consume(String line) {
-												jobLogger.log(line);
-											}
-											
-										}).checkReturnCode();
+									@Override
+									public void skip(CommandExecutable executable, List<Integer> position) {
+										jobLogger.log("Skipping step #" + KubernetesHelper.describe(position) + "...");
 									}
 									
-								});
-								if (result.getReturnCode() != 0) {
-									String logMessage = String.format("Job command failed in build %s#%d", 
-											jobContext.getProjectName(), jobContext.getBuildNumber());
-									DockerExecutor.logger.debug(logMessage, result.buildException());
-									throw new ExplicitException("Job command failed with exit code " + result.getReturnCode());
-								}
+								}, new ArrayList<>());
+
+								if (!errorMessages.isEmpty())
+									throw new ExplicitException(errorMessages.iterator().next());
 							} finally {
 								jobLogger.log("Sending job outcomes...");
 								
@@ -748,6 +725,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									}
 								}
 							}
+							
 							jobLogger.log("Reporting job caches...");
 							
 							jobManager.reportJobCaches(jobToken, KubernetesHelper.getCacheInstances(hostCacheHome).keySet());
@@ -756,8 +734,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						} finally {
-							if (hostHome != null)
-								FileUtils.deleteDir(hostHome);
+							if (hostHome.get() != null)
+								FileUtils.deleteDir(hostHome.get());
 						}
 					} finally {
 						deleteNetwork(network, jobLogger);
@@ -896,31 +874,11 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	public void test(TestData testData, SimpleLogger jobLogger) {
 		login(jobLogger);
 		
-		jobLogger.log("Pulling image...");
-		
-		Commandline cmd = newDocker();
-		cmd.addArgs("pull", testData.getDockerImage());
-		cmd.execute(new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				logger.debug(line);
-			}
-			
-		}, new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				jobLogger.log(line);
-			}
-			
-		}).checkReturnCode();
-		
-		boolean windows = getImageOS(jobLogger, testData.getDockerImage()).equals("windows");
-		
 		jobLogger.log("Running container...");
 		File workspaceDir = null;
 		File cacheDir = null;
+
+		Commandline cmd = newDocker();
 		try {
 			workspaceDir = Bootstrap.createTempDir("workspace");
 			cacheDir = new File(getCacheHome(), UUID.randomUUID().toString());
@@ -932,7 +890,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				cmd.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 			String containerWorkspacePath;
 			String containerCachePath;
-			if (windows) {
+			if (SystemUtils.IS_OS_WINDOWS) {
 				containerWorkspacePath = "C:\\onedev-build\\workspace";
 				containerCachePath = "C:\\onedev-build\\cache";
 			} else {
@@ -945,7 +903,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			cmd.addArgs("-w", containerWorkspacePath);
 			cmd.addArgs(testData.getDockerImage());
 			
-			if (windows) 
+			if (SystemUtils.IS_OS_WINDOWS) 
 				cmd.addArgs("cmd", "/c", "echo hello from container");
 			else 
 				cmd.addArgs("sh", "-c", "echo hello from container");
