@@ -78,7 +78,7 @@ public abstract class TaskButton extends AjaxButton {
 				String result;
 				try {
 					result = String.format(
-						"<div class='task-result alert alert-light-success'>%s</div>", 
+						"<div class='task-result text-break alert alert-light-success'>%s</div>", 
 						HtmlEscape.escapeHtml5(runTask(new SimpleLogger() {
 
 							@Override
@@ -99,7 +99,7 @@ public abstract class TaskButton extends AjaxButton {
 					else
 						result = "Error " + title;
 					result = String.format(
-							"<div class='task-result alert alert-light-danger'>%s</div>", 
+							"<div class='task-result text-break alert alert-light-danger'>%s</div>", 
 							HtmlEscape.escapeHtml5(result));					
 				} 
 				result = StringUtils.replace(result, "\n", "<br>");

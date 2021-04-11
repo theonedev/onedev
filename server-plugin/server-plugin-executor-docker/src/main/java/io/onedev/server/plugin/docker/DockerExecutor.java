@@ -579,7 +579,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								containerEntryPoint = "cmd";
 								
 								if (hostHome.get() != null)
-									containerCommand = new String[] {"/c", "xcopy /Y /S /K /Q /H /R C:\\Users\\%USERHOME%\\onedev\\* C:\\Users\\%USERHOME% > nul && C:\\onedev-build\\job-commands.bat"};						
+									containerCommand = new String[] {"/c", "xcopy /Y /S /K /Q /H /R C:\\Users\\%USERNAME%\\onedev\\* C:\\Users\\%USERNAME% > nul && C:\\onedev-build\\job-commands.bat"};						
 								else
 									containerCommand = new String[] {"/c", "C:\\onedev-build\\job-commands.bat"};						
 		
