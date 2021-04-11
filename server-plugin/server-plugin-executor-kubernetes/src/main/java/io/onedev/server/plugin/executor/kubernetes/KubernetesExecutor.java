@@ -1244,6 +1244,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		StringBuilder json = new StringBuilder();
 		kubectl.addArgs("get", "pod", podName, "-n", namespace, "--watch", "-o", "json");
+		
 		kubectl.timeout(POD_WATCH_TIMEOUT);
 		
 		Thread thread = Thread.currentThread();
@@ -1319,7 +1320,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						throw new ExplicitException(abort.getErrorMessage());
 					else 
 						break;
-				} else if (ExceptionUtils.find(e, TimeoutException.class) == null){ 
+				} else if (ExceptionUtils.find(e, TimeoutException.class) == null) { 
+					// If there is no output for some time, let's re-watch as sometimes 
+					// pod status update is not pushed
 					throw ExceptionUtils.unchecked(e);
 				}
 			}		

@@ -22,14 +22,11 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.Action;
@@ -54,7 +51,6 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -83,12 +79,10 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private String name;
 	
+	private List<Step> steps;
+	
 	private List<ParamSpec> paramSpecs = new ArrayList<>();
 	
-	private String image;
-	
-	private List<String> commands;
-
 	private boolean retrieveSource = true;
 	
 	private Integer cloneDepth;
@@ -125,6 +119,10 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
+	public Job() {
+		steps.add(new CommandStep());
+	}
+	
 	@Editable(order=100, description="Specify name of the job")
 	@NotEmpty
 	@Override
@@ -136,88 +134,12 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.name = name;
 	}
 
-	@Editable(order=110, description="Specify docker image of the job")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getImage() {
-		return image;
-	}
-
-	public void setImage(String image) {
-		this.image = image;
-	}
-
-	@Editable(order=120, name="Commands", description="Specify content of Linux shell script or Windows command batch to execute "
-			+ "in above image under the repository root")
-	@Interpolative
-	@Code(language = Code.SHELL, variableProvider="getVariables")
-	@Size(min=1, message="may not be empty")
-	public List<String> getCommands() {
-		return commands;
-	}
-
-	public void setCommands(List<String> commands) {
-		this.commands = commands;
+	public List<Step> getSteps() {
+		return steps;
 	}
 	
-	public List<Step> getSteps() {
-		List<Step> steps = new ArrayList<>();
-
-		CommandStep step = new CommandStep();
-		step.setImage("mcr.microsoft.com/windows/nanoserver:1809");
-		step.setCommands(Lists.newArrayList("dir", "echo 1 > file1"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("mcr.microsoft.com/windows/servercore:1809");
-		step.setCommands(Lists.newArrayList("dir", "echo 2 > file2"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("mcr.microsoft.com/windows/nanoserver:1809");
-		step.setCommands(Lists.newArrayList("dir", "echo 3 > file3"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("mcr.microsoft.com/windows/servercore:1809");
-		step.setCommands(Lists.newArrayList("dir", "echo 4 > file4"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("mcr.microsoft.com/windows/nanoserver2:1809");
-		step.setCommands(Lists.newArrayList("dir", "echo 5 > file5"));
-		steps.add(step);
-		
-		/*
-		CommandStep step = new CommandStep();
-		step.setImage("alpine");
-		step.setCommands(Lists.newArrayList("set -e", "ls", "echo 1 > file1"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("alpine");
-		step.setAlwaysExecute(true);
-		step.setCommands(Lists.newArrayList("set -e", "ls", "echo 2 > file2"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("alpine");
-		step.setCommands(Lists.newArrayList("set -e", "ls", "echo 3 > file3"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("alpine");
-		step.setCommands(Lists.newArrayList("set -e", "ls", "echo 4 > file4"));
-		steps.add(step);
-		
-		step = new CommandStep();
-		step.setImage("alpine");
-		step.setAlwaysExecute(true);
-		step.setCommands(Lists.newArrayList("set -e", "ls", "echo 5 > file5"));
-		steps.add(step);
-		*/
-		
-		return steps;
+	public void setSteps(List<Step> steps) {
+		this.steps = steps;
 	}
 
 	public List<Action> getActions(BuildSpec buildSpec) {

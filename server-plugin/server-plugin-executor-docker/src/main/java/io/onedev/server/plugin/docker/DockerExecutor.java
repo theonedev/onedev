@@ -582,13 +582,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									containerCommand = new String[] {"/c", "xcopy /Y /S /K /Q /H /R C:\\Users\\%USERNAME%\\onedev\\* C:\\Users\\%USERNAME% > nul && C:\\onedev-build\\job-commands.bat"};						
 								else
 									containerCommand = new String[] {"/c", "C:\\onedev-build\\job-commands.bat"};						
-		
-								File scriptFile = new File(hostBuildHome, "job-commands.bat");
-								try {
-									FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\r\n");
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
 							} else {
 								containerBuildHome = "/onedev-build";
 								containerWorkspace = "/onedev-build/workspace";
@@ -597,13 +590,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									containerCommand = new String[] {"-c", "cp -r -f -p /root/onedev/. /root && sh /onedev-build/job-commands.sh"};
 								else
 									containerCommand = new String[] {"/onedev-build/job-commands.sh"};
-								
-								File scriptFile = new File(hostBuildHome, "job-commands.sh");
-								try {
-									FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\n");
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
 							}
 							
 							jobContext.reportJobWorkspace(containerWorkspace);

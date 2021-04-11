@@ -22,13 +22,9 @@ public abstract class JobContext {
 	
 	private final File projectGitDir;
 	
-	private final String image;
-	
 	private final File serverWorkspace;
 	
 	private final List<Action> actions;
-	
-	private final List<String> commands;
 	
 	private final boolean retrieveSource;
 	
@@ -59,7 +55,7 @@ public abstract class JobContext {
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	public JobContext(String projectName, Long buildNumber, 
-			File projectGitDir, List<Action> actions, String image, File workspace, List<String> commands, 
+			File projectGitDir, List<Action> actions, File workspace,  
 			boolean retrieveSource, Integer cloneDepth, CloneInfo cloneInfo, 
 			String cpuRequirement, String memoryRequirement, ObjectId commitId, 
 			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
@@ -68,9 +64,7 @@ public abstract class JobContext {
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
 		this.actions = actions;
-		this.image = image;
 		this.serverWorkspace = workspace;
-		this.commands = commands;
 		this.retrieveSource = retrieveSource;
 		this.cloneDepth = cloneDepth;
 		this.cloneInfo = cloneInfo;
@@ -101,16 +95,8 @@ public abstract class JobContext {
 		return actions;
 	}
 
-	public String getImage() {
-		return image;
-	}
-
 	public File getServerWorkspace() {
 		return serverWorkspace;
-	}
-
-	public List<String> getCommands() {
-		return commands;
 	}
 
 	public ObjectId getCommitId() {

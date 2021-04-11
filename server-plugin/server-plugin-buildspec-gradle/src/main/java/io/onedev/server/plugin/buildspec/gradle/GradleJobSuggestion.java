@@ -17,6 +17,7 @@ import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
+import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -39,13 +40,18 @@ public class GradleJobSuggestion implements JobSuggestion {
 		if (gradleBlob != null || kotlinGradleBlob != null) {
 			Job job = new Job();
 			job.setName("gradle ci");
-			job.setImage("@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
-			job.setCommands(Lists.newArrayList(
+			
+			CommandStep step = new CommandStep();
+			
+			step.setImage("@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
+			step.setCommands(Lists.newArrayList(
 					"set -e",
 					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"",
 					"buildVersion=$(gradle properties | grep ^version: | grep -v unspecified | cut -c10-)",
 					"echo \"##onedev[SetBuildVersion '$buildVersion']\"",
 					"gradle build"));
+			
+			job.getSteps().add(step);
 			setupTriggers(job);
 			setupCaches(job);
 			jobs.add(job);

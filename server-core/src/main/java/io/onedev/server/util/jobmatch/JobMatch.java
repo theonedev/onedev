@@ -87,7 +87,7 @@ public class JobMatch extends Criteria<Build> {
 					case Build.NAME_JOB:
 						return new NameCriteria(fieldValue);
 					default:
-						return new ImageCriteria(fieldValue);
+						throw new RuntimeException("Unknown job match field: " + fieldName);
 					}
 				}
 				

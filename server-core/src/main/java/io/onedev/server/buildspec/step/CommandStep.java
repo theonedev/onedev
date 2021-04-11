@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
+import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -31,7 +33,7 @@ public class CommandStep extends Step {
 
 	private String image;
 	
-	private List<String> commands;
+	private List<String> commands = new ArrayList<>();
 	
 	@Editable(order=100, description="Specify docker image to execute commands inside")
 	@Interpolative(variableSuggester="suggestVariables")
@@ -55,6 +57,32 @@ public class CommandStep extends Step {
 
 	public void setCommands(List<String> commands) {
 		this.commands = commands;
+	}
+	
+	public static List<InputSuggestion> suggestVariables(String matchWith) {
+		Component component = ComponentContext.get().getComponent();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+		if (buildSpecAware != null) {
+			BuildSpec buildSpec = buildSpecAware.getBuildSpec();
+			if (buildSpec != null) {
+				JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+				if (jobAware != null) {
+					Job job = jobAware.getJob();
+					if (job != null) {
+						RevCommit commit;
+						if (page.getBlobIdent().revision != null)
+							commit = page.getCommit();
+						else
+							commit = null;
+						suggestions.addAll(SuggestionUtils.suggestVariables(
+								page.getProject(), commit, buildSpec, job, matchWith));
+					}
+				}
+			}
+		}
+		return suggestions;
 	}
 	
 	@SuppressWarnings("unused")

@@ -425,8 +425,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										Build build = buildManager.load(buildId);
 										Build.push(build);
 										try {
-											return new JobContext(projectName, buildNumber, projectGitDir, job.getActions(buildSpec), job.getImage(), 
-													serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
+											return new JobContext(projectName, buildNumber, projectGitDir, job.getActions(buildSpec),  
+													serverWorkspace, job.isRetrieveSource(), job.getCloneDepth(), 
 													cloneInfo, job.getCpuRequirement(), job.getMemoryRequirement(), 
 													commitId, caches, new PatternSet(includeFiles, excludeFiles), 
 													executor.getCacheTTL(), retried.get(), services, jobLogger) {

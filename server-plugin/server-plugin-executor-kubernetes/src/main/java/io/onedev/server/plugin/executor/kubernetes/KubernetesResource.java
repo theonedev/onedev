@@ -63,7 +63,6 @@ public class KubernetesResource {
 		if (StringUtils.isNotBlank(jobWorkspace))
 			context.reportJobWorkspace(jobWorkspace);		
 		Map<String, Object> contextMap = new HashMap<>();
-		contextMap.put("commands", context.getCommands());
 		contextMap.put("actions", context.getActions());
 		contextMap.put("retrieveSource", context.isRetrieveSource());
 		contextMap.put("cloneDepth", context.getCloneDepth());
