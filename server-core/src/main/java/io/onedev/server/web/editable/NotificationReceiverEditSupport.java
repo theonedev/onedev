@@ -11,7 +11,6 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.NotificationReceiver;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
-import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public class NotificationReceiverEditSupport implements EditSupport {
@@ -33,21 +32,16 @@ public class NotificationReceiverEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
+					InputAssistBehavior inputAssist = new NotificationReceiverBehavior(
+							new AbstractReadOnlyModel<Project>() {
 
 						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-							return new NotificationReceiverBehavior(new AbstractReadOnlyModel<Project>() {
-
-								@Override
-								public Project getObject() {
-									return ((ProjectPage) getPage()).getProject();
-								}
-								
-							});
+						public Project getObject() {
+							return Project.get();
 						}
-		        		
-		        	};
+						
+					});
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(inputAssist);
 				}
     			
     		};

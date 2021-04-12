@@ -49,10 +49,10 @@ import io.onedev.k8shelper.Executable;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.SshCloneInfo;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
-import io.onedev.server.buildspec.job.JobService;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -277,7 +277,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 	
 	@SuppressWarnings("resource")
-	private void startService(String network, JobService jobService, SimpleLogger jobLogger) {
+	private void startService(String network, Service jobService, SimpleLogger jobLogger) {
 		jobLogger.log("Creating service container...");
 		
 		String containerName = network + "-service-" + jobService.getName();
@@ -438,7 +438,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 					
 					createNetwork(network, jobContext, jobLogger);
 					try {
-						for (JobService jobService: jobContext.getServices()) {
+						for (Service jobService: jobContext.getServices()) {
 							jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 							startService(network, jobService, jobLogger);
 						}

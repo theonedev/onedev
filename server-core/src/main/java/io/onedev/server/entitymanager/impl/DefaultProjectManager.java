@@ -49,7 +49,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -63,7 +62,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Membership;
@@ -104,8 +102,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final BuildManager buildManager;
     
-    private final GroupManager groupManager;
-    
     private final AvatarManager avatarManager;
     
     private final SettingManager settingManager;
@@ -134,7 +130,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
-    		BuildManager buildManager, AvatarManager avatarManager, GroupManager groupManager,
+    		BuildManager buildManager, AvatarManager avatarManager, 
     		SettingManager settingManager, TransactionManager transactionManager, 
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
     		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
@@ -143,7 +139,6 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     	
         this.commitInfoManager = commitInfoManager;
         this.buildManager = buildManager;
-        this.groupManager = groupManager;
         this.avatarManager = avatarManager;
         this.settingManager = settingManager;
         this.transactionManager = transactionManager;
@@ -525,16 +520,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 						projects.add(authorization.getProject());
 				}
 			}
-			Group group = groupManager.findAnonymous();
-			if (group != null) {
-				if (group.isAdministrator()) {
-					projects.addAll(query());
-				} else {
-					for (GroupAuthorization authorization: group.getAuthorizations()) { 
-						if (authorization.getRole().implies(permission))
-							projects.add(authorization.getProject());
-					}
-				}
+			for (Project project: query()) {
+				if (project.getDefaultRole() != null && project.getDefaultRole().implies(permission))
+					projects.add(project);
 			}
 		}
 		

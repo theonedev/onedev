@@ -1,0 +1,18 @@
+.steps>.step {
+	border: 2px dashed var(--secondary);
+	border-radius: 0.42rem;
+	padding: 0.6rem 1.2rem;
+	margin-bottom: 1.2rem;
+	background: white;
+}
+.steps>.step:last-child {
+	margin-bottom: 0;
+}
+
+.steps>.step>.head {
+	margin-bottom: 1rem;
+}
+.steps-viewer>.step>div>div>div>div>.type-selector {
+	display: none;
+}
+

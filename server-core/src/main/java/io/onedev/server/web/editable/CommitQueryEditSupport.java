@@ -13,6 +13,7 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.CommitQuery;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class CommitQueryEditSupport implements EditSupport {
@@ -46,21 +47,15 @@ public class CommitQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
+					InputAssistBehavior inputAssist = new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
-						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-			                return new CommitQueryBehavior(new AbstractReadOnlyModel<Project>() {
-
-			        			@Override
-			        			public Project getObject() {
-			        				return ((ProjectPage) getPage()).getProject();
-			        			}
-			            		
-			            	});
-						}
-		                
-		        	};
+	        			@Override
+	        			public Project getObject() {
+	        				return ((ProjectPage) WicketUtils.getPage()).getProject();
+	        			}
+	            		
+	            	});
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(inputAssist);
 				}
     			
     		};

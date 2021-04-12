@@ -3,7 +3,7 @@ onedev.server.buildSpec = {
 		$(".build-spec>.head>a").removeClass("active").filter(tabClass).addClass("active");		
 	},
     onNamedElementDomReady: function(elementIndex, nameChangeCallback) {
-        var $elements = $(".build-spec>.elements");
+        var $elements = $(".build-spec>.body>.elements");
         var $navs = $elements.find(">.side>.navs");
 		$navs.children().removeClass("active").eq(elementIndex).addClass("active");
 		

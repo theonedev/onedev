@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 
 import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -69,6 +70,10 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		usage.add(settingManager.getIssueSetting().onDeleteRole(role.getName()).prefix("administration"));
 
 		usage.checkInUse("Role '" + role.getName() + "'");
+		
+    	Query<?> query = getSession().createQuery("update Project set defaultRole=null where defaultRole=:role");
+    	query.setParameter("role", role);
+    	query.executeUpdate();
     	
 		dao.remove(role);
 	}

@@ -16,8 +16,9 @@ import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.SubmitReason;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ComponentContext;
@@ -86,10 +87,12 @@ public class RunJobAction extends PostBuildAction {
 	
 	@Override
 	public void execute(Build build) {
-		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(build, getJobParams())) {
+		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(build, 
+				build.getParamCombination(), getJobParams())) {
 			
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
+				
 				SubmitReason reason = new SubmitReason() {
 
 					@Override
@@ -122,19 +125,20 @@ public class RunJobAction extends PostBuildAction {
 	}
 
 	@Override
-	public void validateWithContext(BuildSpec buildSpec, Job job) {
-		super.validateWithContext(buildSpec, job);
+	public void validateWith(BuildSpec buildSpec, Job job) {
+		super.validateWith(buildSpec, job);
 		
 		Job jobToRun = buildSpec.getJobMap().get(jobName);
 		if (jobToRun != null) {
 			try {
-				ParamSupply.validateParams(null, jobToRun.getParamSpecs(), jobParams);
+				ParamUtils.validateParams(jobToRun.getParamSpecs(), jobParams);
 			} catch (ValidationException e) {
-				throw new ValidationException("Error validating parameters of run job '" 
-						+ jobToRun.getName() + "': " + e.getMessage());
+				String errorMessage = String.format("Error validating job parameters (job: %s, error message: %s)", 
+						jobToRun.getName(), e.getMessage());
+				throw new ValidationException(errorMessage);
 			}
 		} else {
-			throw new ValidationException("Run job not found: " + jobName);
+			throw new ValidationException("Job not found (" + jobName + ")");
 		}
 	}
 

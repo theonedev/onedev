@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -18,6 +20,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
@@ -27,6 +30,7 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.Pair;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -2361,6 +2365,88 @@ public class DataMigrator {
 				dom.writeToFile(file, false);
 			}
 		}
+	}
+
+	// Migrate to 4.3.0
+	private void migrate53(File dataDir, Stack<Integer> versions) {
+		String anonymousGroupName = null;
+		Map<String, String> groupIds = new HashMap<>();
+		List<Triple<String, String, String>> authorizations = new ArrayList<>();
+		
+		for (File file: dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				content = StringUtils.replace(content, 
+						"io.onedev.server.model.support.issue.fieldspec.", 
+						"io.onedev.server.model.support.issue.field.spec.");
+				content = StringUtils.replace(content, 
+						"io.onedev.server.model.support.issue.fieldsupply.", 
+						"io.onedev.server.model.support.issue.field.supply.");
+				content = StringUtils.replace(content,
+						"org.server.plugin.report.checkstyle.",
+						"io.onedev.server.plugin.report.checkstyle.");
+				content = StringUtils.replace(content,
+						"org.server.plugin.report.clover.",
+						"io.onedev.server.plugin.report.clover.");
+				
+				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+				
+				if (file.getName().startsWith("Settings.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) { 
+						if (element.elementTextTrim("key").equals("SECURITY")) {
+							Element valueElement = element.element("value");
+							if (valueElement != null) {
+								Element anonymousGroupElement = valueElement.element("anonymousGroup");
+								if (anonymousGroupElement != null) {
+									if (valueElement.elementTextTrim("enableAnonymousAccess").equals("true"))
+										anonymousGroupName = anonymousGroupElement.getText().trim();
+									anonymousGroupElement.detach();
+								}
+							}
+						}
+					}
+					dom.writeToFile(file, false);
+				} else if (file.getName().startsWith("Groups.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) 
+						groupIds.put(element.elementText("name").trim(), element.elementText("id").trim());
+				} else if (file.getName().startsWith("GroupAuthorizations.xml")) {
+					VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+					for (Element element: dom.getRootElement().elements()) { 
+						String groupId = element.elementText("group").trim();
+						String projectId = element.elementText("project").trim();
+						String roleId = element.elementText("role").trim();
+						authorizations.add(Triple.of(groupId, projectId, roleId));
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}	
+
+		Map<String, String> defaultRoles = new HashMap<>();
+		
+		if (anonymousGroupName != null) {
+			String anonymousGroupId = groupIds.get(anonymousGroupName);
+			for (Triple<String, String, String> authorization: authorizations) {
+				if (authorization.getLeft().equals(anonymousGroupId)) 
+					defaultRoles.put(authorization.getMiddle(), authorization.getRight());
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					String defaultRoleId = defaultRoles.get(element.elementText("id").trim());
+					if (defaultRoleId != null)
+						element.addElement("defaultRole").setText(defaultRoleId);
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+		
 	}
 	
 }

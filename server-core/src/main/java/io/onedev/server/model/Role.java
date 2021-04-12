@@ -86,6 +86,9 @@ public class Role extends AbstractEntity implements Permission {
 	@Column(length=65535, nullable=false)
 	private ArrayList<JobPrivilege> jobPrivileges = new ArrayList<>();
 	
+	@OneToMany(mappedBy="defaultRole")
+	private Collection<Project> defaultProjects = new ArrayList<>();
+	
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
 	
@@ -225,6 +228,14 @@ public class Role extends AbstractEntity implements Permission {
 		this.jobPrivileges = (ArrayList<JobPrivilege>) jobPrivileges;
 	}
 	
+	public Collection<Project> getDefaultProjects() {
+		return defaultProjects;
+	}
+
+	public void setDefaultProjects(Collection<Project> defaultProjects) {
+		this.defaultProjects = defaultProjects;
+	}
+
 	public Collection<UserAuthorization> getUserAuthorizations() {
 		return userAuthorizations;
 	}

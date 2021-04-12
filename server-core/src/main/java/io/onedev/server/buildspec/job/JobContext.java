@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CloneInfo;
+import io.onedev.server.buildspec.Service;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -42,7 +43,7 @@ public abstract class JobContext {
 	
 	private final PatternSet collectFiles;
 	
-	private final List<JobService> services;
+	private final List<Service> services;
 	
 	private final int cacheTTL;
 	
@@ -59,7 +60,7 @@ public abstract class JobContext {
 			boolean retrieveSource, Integer cloneDepth, CloneInfo cloneInfo, 
 			String cpuRequirement, String memoryRequirement, ObjectId commitId, 
 			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
-			int retried, List<JobService> services, SimpleLogger logger) {
+			int retried, List<Service> services, SimpleLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
@@ -147,7 +148,7 @@ public abstract class JobContext {
 		return allocatedCaches;
 	}
 
-	public List<JobService> getServices() {
+	public List<Service> getServices() {
 		return services;
 	}
 

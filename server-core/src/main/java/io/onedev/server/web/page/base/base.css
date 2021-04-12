@@ -57,7 +57,7 @@ ul.feedbackPanel {
 ul.feedbackPanel>li {
     border-left: 4px solid;
     margin: 0;
-    padding: 0 0 0 1.25rem;
+    padding: 0 1rem 0 1.25rem;
 }
 
 li.feedbackPanelERROR, li.feedbackPanelFATAL {

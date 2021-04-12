@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
@@ -28,11 +27,8 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.Property;
-import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobVariable;
-import io.onedev.server.buildspec.job.VariableInterpolator;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.GroupManager;
@@ -54,6 +50,7 @@ import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.match.PatternApplied;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.script.ScriptContribution;
@@ -139,8 +136,8 @@ public class SuggestionUtils {
 		return suggest(projectNames, matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestVariables(Project project, @Nullable ObjectId commitId, 
-			BuildSpec buildSpec, Job job, String matchWith) {
+	public static List<InputSuggestion> suggestVariables(Project project, BuildSpec buildSpec, 
+			@Nullable List<ParamSpec> paramSpecs, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -148,10 +145,12 @@ public class SuggestionUtils {
 		Map<String, String> variables = new LinkedHashMap<>();
 		for (JobVariable var: JobVariable.values()) 
 			variables.put(var.name().toLowerCase(), null);
-		for (ParamSpec paramSpec: job.getParamSpecs()) 
-			variables.put(VariableInterpolator.PREFIX_PARAMS + paramSpec.getName(), paramSpec.getDescription());
-		for (Property property: buildSpec.getProperties())
-			variables.put(VariableInterpolator.PREFIX_PROPERTIES + property.getName(), null);
+		if (paramSpecs != null) {
+			for (ParamSpec paramSpec: paramSpecs) 
+				variables.put(VariableInterpolator.PREFIX_PARAMS + paramSpec.getName(), paramSpec.getDescription());
+		}
+		for (String propertyName: buildSpec.getPropertyMap().keySet())
+			variables.put(VariableInterpolator.PREFIX_PROPERTIES + propertyName, null);
 		for (JobSecret secret: project.getBuildSetting().getJobSecrets())
 			variables.put(VariableInterpolator.PREFIX_SECRETS + secret.getName(), null);
 		for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) 

@@ -13,6 +13,7 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.CodeCommentQuery;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
 public class CodeCommentQueryEditSupport implements EditSupport {
@@ -46,21 +47,15 @@ public class CodeCommentQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
+					InputAssistBehavior inputAssist = new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-							return new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
-
-								@Override
-								public Project getObject() {
-									return ((ProjectPage) getPage()).getProject();
-								}
-					    		
-					    	});
+						public Project getObject() {
+							return ((ProjectPage) WicketUtils.getPage()).getProject();
 						}
-		        		
-		        	};
+			    		
+			    	});
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(inputAssist);
 				}
     			
     		};

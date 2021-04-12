@@ -33,35 +33,29 @@ public class SuggestionEditSupport implements EditSupport {
 
     				@Override
     				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-    		        	return new StringPropertyEditor(componentId, descriptor, model) {
+    		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
+    		        			new InputAssistBehavior() {
 
-    						@Override
-    						protected InputAssistBehavior getInputAssistBehavior() {
-    							return new InputAssistBehavior() {
+							@SuppressWarnings("unchecked")
+							@Override
+							protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
+								String suggestionMethod = suggestionProvider.value();
+								return (List<InputCompletion>) ReflectionUtils.invokeStaticMethod(
+										descriptor.getBeanClass(), 
+										suggestionMethod, new Object[] {inputStatus});
+							}
 
-									@SuppressWarnings("unchecked")
-									@Override
-									protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
-										String suggestionMethod = suggestionProvider.value();
-										return (List<InputCompletion>) ReflectionUtils.invokeStaticMethod(
-												descriptor.getBeanClass(), 
-												suggestionMethod, new Object[] {inputStatus});
-									}
+							@Override
+							protected List<LinearRange> getErrors(String inputContent) {
+								return new ArrayList<>();
+							}
 
-									@Override
-									protected List<LinearRange> getErrors(String inputContent) {
-										return new ArrayList<>();
-									}
-
-									@Override
-									protected int getAnchor(String inputContent) {
-										return 0;
-									}
-									
-    							};
-    						}
-    		        		
-    		        	};
+							@Override
+							protected int getAnchor(String inputContent) {
+								return 0;
+							}
+							
+						});
     				}
         			
         		};

@@ -1,0 +1,23 @@
+<wicket:panel>
+	<div class="imports imports-editor flex-grow-1">
+		<div class="alert alert-light-info">
+			<wicket:svg href="bulb" class="icon"></wicket:svg> Import build spec elements (jobs, services, step templates and properties) from other projects. 
+			Imported elements are treated as if they are defined locally. Locally defined elements will 
+			override imported elements with same name
+		</div>
+		<div wicket:id="imports" class="import"></div>
+		<a wicket:id="add" class="add btn btn-light btn-hover-primary btn-block" title="Add new import"><wicket:svg href="plus" class="icon align-middle mr-1"></wicket:svg></a>
+	</div>
+	<wicket:fragment wicket:id="importEditFrag">
+		<div class="head import-head d-flex align-items-center">
+			<span class="drag-indicator mr-2"><wicket:svg href="grip" class="icon"></wicket:svg></span>
+			<a wicket:id="delete" title="Delete this import" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
+				<wicket:svg href="trash" class="icon"/>
+			</a>
+		</div>
+		<div class="body">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="editor"></div>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

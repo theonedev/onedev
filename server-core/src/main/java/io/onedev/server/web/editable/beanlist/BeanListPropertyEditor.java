@@ -25,6 +25,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Indexed;
@@ -134,7 +135,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
 				if (description != null) {
 					WebMarkupContainer help = new WebMarkupContainer("help");
-					help.add(AttributeAppender.append("title", description));
+					help.add(AttributeAppender.append("title", HtmlUtils.parse(description).text()));
 					item.add(help);
 				} else {
 					item.add(new WebMarkupContainer("help").setVisible(false));
@@ -324,6 +325,11 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		} else {
 			error(messagePrefix + errorMessage);
 		}
+	}
+
+	@Override
+	protected String getInvalidClass() {
+		return null;
 	}
 
 	@Override

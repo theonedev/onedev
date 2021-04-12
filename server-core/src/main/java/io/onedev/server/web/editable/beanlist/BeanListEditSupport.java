@@ -34,7 +34,7 @@ public class BeanListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new BeanListPropertyViewer(id, propertyDescriptor, elementClass, model.getObject());
+									return new BeanListPropertyViewer(id, propertyDescriptor, model.getObject());
 								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 								}

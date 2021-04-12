@@ -30,6 +30,7 @@ import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobDependency;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -101,6 +102,11 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					public Job getJob() {
 						return JobDependencyListEditPanel.this.getJob();
+					}
+
+					@Override
+					public List<ParamSpec> getParamSpecs() {
+						return getJob()!=null? getJob().getParamSpecs(): null;
 					}
 
 				};
@@ -193,6 +199,11 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 								return JobDependencyListEditPanel.this.getJob();
 							}
 
+							@Override
+							public List<ParamSpec> getParamSpecs() {
+								return getJob()!=null? getJob().getParamSpecs(): null;
+							}
+							
 						};
 					}
 					

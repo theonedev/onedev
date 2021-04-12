@@ -9,7 +9,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -51,21 +50,16 @@ public class PullRequestQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
+					IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
 
 						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-					        return new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
-
-								@Override
-								public Project getObject() {
-									return Project.get();
-								}
-					    		
-					    	});
+						public Project getObject() {
+							return Project.get();
 						}
-		        		
-		        	};
+			    		
+			    	};
+		        	return new StringPropertyEditor(componentId, descriptor, model)
+		        			.setInputAssist(new PullRequestQueryBehavior(projectModel));
 				}
     			
     		};

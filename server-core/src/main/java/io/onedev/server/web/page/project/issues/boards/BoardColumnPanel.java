@@ -44,9 +44,9 @@ import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choic
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
-import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
+import io.onedev.server.model.support.issue.field.spec.ChoiceField;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;

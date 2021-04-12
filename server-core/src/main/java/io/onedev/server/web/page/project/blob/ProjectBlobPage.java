@@ -407,6 +407,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
+				
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -1021,7 +1022,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		super.onPopState(target, data);
 
 		State popState = (State) data;
-		if (!popState.blobIdent.revision.equals(state.blobIdent.revision)) {
+		if (popState.blobIdent.revision != null 
+				&& !popState.blobIdent.revision.equals(state.blobIdent.revision)) {
 			state = popState;
 			newSearchResult(target, null);
 			onResolvedRevisionChange(target);

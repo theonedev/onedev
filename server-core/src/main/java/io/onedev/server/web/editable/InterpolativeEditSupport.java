@@ -10,7 +10,6 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
@@ -33,40 +32,34 @@ public class InterpolativeEditSupport implements EditSupport {
 
     				@Override
     				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-    		        	return new StringPropertyEditor(componentId, descriptor, model) {
+    		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
+    		        			new InterpolativeAssistBehavior() {
 
-    						@Override
-    						protected InputAssistBehavior getInputAssistBehavior() {
-    							return new InterpolativeAssistBehavior() {
-
-									@SuppressWarnings("unchecked")
-									@Override
-									protected List<InputSuggestion> suggestVariables(String matchWith) {
-										String suggestionMethod = interpolative.variableSuggester();
-										if (suggestionMethod.length() != 0) {
-											return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
-													descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});
-										} else {
-											return Lists.newArrayList();
-										}
-									}
-    								
-									@SuppressWarnings("unchecked")
-									@Override
-									protected List<InputSuggestion> suggestLiterals(String matchWith) {
-										String suggestionMethod = interpolative.literalSuggester();
-										if (suggestionMethod.length() != 0) {
-											return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
-													descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});
-										} else {
-											return Lists.newArrayList();
-										}
-									}
-									
-    							};
-    						}
-    		        		
-    		        	};
+							@SuppressWarnings("unchecked")
+							@Override
+							protected List<InputSuggestion> suggestVariables(String matchWith) {
+								String suggestionMethod = interpolative.variableSuggester();
+								if (suggestionMethod.length() != 0) {
+									return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
+											descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});
+								} else {
+									return Lists.newArrayList();
+								}
+							}
+							
+							@SuppressWarnings("unchecked")
+							@Override
+							protected List<InputSuggestion> suggestLiterals(String matchWith) {
+								String suggestionMethod = interpolative.literalSuggester();
+								if (suggestionMethod.length() != 0) {
+									return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
+											descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});
+								} else {
+									return Lists.newArrayList();
+								}
+							}
+							
+						});
     				}
         			
         		};

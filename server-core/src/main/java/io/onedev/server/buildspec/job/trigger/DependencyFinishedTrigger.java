@@ -5,7 +5,7 @@ import java.util.List;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.SubmitReason;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
@@ -29,7 +29,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 					for (ParamSupply param: dependency.getJobParams()) {
 						if (!param.isSecret()) {
 							List<String> paramValue = build.getParamMap().get(param.getName());
-							if (!param.getValuesProvider().getValues(null, param.getName()).contains(paramValue))
+							if (!param.getValuesProvider().getValues(null, null).contains(paramValue))
 								return null;
 						}
 					}

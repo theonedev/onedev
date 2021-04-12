@@ -25,8 +25,8 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.SubmitReason;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
@@ -91,7 +91,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 			if (refNames.size() > 1 || !job.getParamSpecs().isEmpty()) {
 				Serializable paramBean;
 				try {
-					paramBean = ParamSupply.defineBeanClass(job.getParamSpecs()).newInstance();
+					paramBean = ParamUtils.defineBeanClass(job.getParamSpecs()).newInstance();
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
@@ -101,7 +101,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 					@Override
 					protected void onSave(AjaxRequestTarget target, Collection<String> selectedRefNames, 
 							Serializable populatedParamBean) {
-						Map<String, List<String>> paramMap = ParamSupply.getParamMap(
+						Map<String, List<String>> paramMap = ParamUtils.getParamMap(
 								job, populatedParamBean, job.getParamSpecMap().keySet());
 						List<Build> builds = new ArrayList<>();
 						for (String refName: selectedRefNames) {

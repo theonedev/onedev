@@ -1,14 +1,20 @@
 <wicket:extend>
     <div wicket:id="content" class="build-spec build-spec-view"></div>
-    <wicket:fragment wicket:id="validFrag">
+    <wicket:fragment wicket:id="parseableFrag">
+		<div wicket:id="feedback"></div>
     	<div class="head">
         	<a wicket:id="jobs" class="jobs">Jobs</a>
+        	<a wicket:id="services" class="services">Services</a>
+        	<a wicket:id="stepTemplates" class="step-templates">Step Templates</a>
         	<a wicket:id="properties" class="properties">Properties</a>
+        	<a wicket:id="imports" class="imports">Imports</a>
         </div>
-        <div wicket:id="body" class="body"></div>
+        <div class="body">
+			<div wicket:id="content" class="content"></div>
+		</div>
     </wicket:fragment>
-    <wicket:fragment wicket:id="invalidFrag">
-        <div class="title">Error rendering build spec</div>
+    <wicket:fragment wicket:id="unparseableFrag">
+        <div class="title">Error parsing build spec</div>
         <div wicket:id="errorMessage" class="error-message"></div>
     </wicket:fragment>
     <wicket:fragment wicket:id="jobsFrag">
@@ -18,6 +24,54 @@
             	<a wicket:id="runJob" class="run btn btn-secondary btn-icon flex-grow-0 flex-shrink-0" title="Run this job"><wicket:svg href="play" class="icon"></wicket:svg></a>
 	        </div></div>
 		</div>
-        <div wicket:id="job" class="main ml-4 flex-grow-1"></div>
+        <div wicket:id="job" class="main ml-4 flex-grow-1">
+			<div wicket:id="notice"></div>
+	        <div wicket:id="content" class="content"></div>
+		</div>
     </wicket:fragment>
+    <wicket:fragment wicket:id="servicesFrag">
+        <div class="side flex-shrink-0">
+        	<div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
+            	<a wicket:id="service" class="select btn btn-secondary justify-content-start"><span wicket:id="label"></span></a>
+	        </div></div>
+		</div>
+        <div wicket:id="service" class="main ml-4 flex-grow-1">
+			<div wicket:id="notice"></div>
+	        <div wicket:id="content" class="content"></div>
+		</div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="stepTemplatesFrag">
+        <div class="side flex-shrink-0">
+        	<div class="navs"><div wicket:id="navs" class="nav btn-group btn-block mb-3">
+            	<a wicket:id="template" class="select btn btn-secondary justify-content-start"><span wicket:id="label"></span></a>
+	        </div></div>
+		</div>
+        <div wicket:id="template" class="main ml-4 flex-grow-1">
+			<div wicket:id="notice"></div>
+	        <div wicket:id="content" class="content"></div>
+		</div>
+    </wicket:fragment>
+	<wicket:fragment wicket:id="namedElementImportNoticeFrag">
+		<div class="alert alert-light-info">
+			This <span wicket:id="elementTypeName"></span> is imported from <a wicket:id="link" class="alert-link"><span wicket:id="label"></span></a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="propertiesFrag">
+	    <table class="table">
+	        <thead>
+	            <th>Name</th>
+	            <th>Value</th>
+	        </thead>
+	        <tbody>
+	            <tr wicket:id="properties">
+	                <td>
+	                    <div><span wicket:id="name"></span> <a wicket:id="imported"><wicket:svg href="arrow2" class="icon imported"></wicket:svg></a></div>
+	                </td>
+	                <td>
+	                    <div wicket:id="value"></div>
+	                </td>
+	            </tr>
+	        </tbody>
+	    </table>
+	</wicket:fragment>
 </wicket:extend>

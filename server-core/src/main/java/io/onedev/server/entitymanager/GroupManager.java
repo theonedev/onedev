@@ -21,7 +21,5 @@ public interface GroupManager extends EntityManager<Group> {
 	
 	@Nullable
 	Group find(String name);
-	
-	@Nullable
-	Group findAnonymous();
+
 }

@@ -15,7 +15,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.SecretInput;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 
 public class Input implements Serializable {
 

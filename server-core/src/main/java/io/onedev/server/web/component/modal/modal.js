@@ -3,9 +3,6 @@ onedev.server.modal = {
 		var $modal = $("#" + containerId);
 		
 		$modal.data("closeCallback", closeCallback);
-		$modal.on("shown.bs.modal", function(e) {
-			$(window).resize();
-		});		
 		
 		$modal.data("keydown", function(e) {
 			if (e.keyCode == 27 

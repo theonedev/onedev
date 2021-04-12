@@ -21,7 +21,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.git.Blob;
@@ -29,6 +28,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 
 public class NodeJobSuggestion implements JobSuggestion {
 
@@ -103,7 +103,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			}
 
 			step.setCommands(commands);
-			job.getSteps().add(step);
+			job.setSteps(Lists.newArrayList(step));
 			
 			setupTriggers(job);
 			setupCaches(job);
@@ -156,8 +156,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			}
 
 			step.setCommands(commands);
-			
-			job.getSteps().add(step);
+			job.setSteps(Lists.newArrayList(step));
 			
 			setupTriggers(job);
 			setupCaches(job);
@@ -205,7 +204,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			}
 
 			step.setCommands(commands);
-			job.getSteps().add(step);
+			job.setSteps(Lists.newArrayList(step));
 			
 			setupTriggers(job);
 			setupCaches(job);
@@ -252,7 +251,8 @@ public class NodeJobSuggestion implements JobSuggestion {
 			}
 			step.setCommands(commands);
 			
-			job.getSteps().add(step);
+			job.setSteps(Lists.newArrayList(step));
+			
 			setupTriggers(job);
 			setupCaches(job);
 			jobs.add(job);

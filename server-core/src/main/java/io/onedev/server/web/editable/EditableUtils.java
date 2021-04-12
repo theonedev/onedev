@@ -5,8 +5,12 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 public class EditableUtils {
 	
@@ -70,11 +74,23 @@ public class EditableUtils {
 	 */
 	public static @Nullable String getDescription(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
-		if (editable != null) {
-			if (editable.description().length() != 0)
-				return editable.description();
+		if (editable == null) {
+			return null;
+		} else if (element.getAnnotation(Interpolative.class) != null) {
+			String description = editable.description();
+			if (description.length() != 0) {
+				if (!description.endsWith("."))
+					description += ".";
+				description += " " + VariableInterpolator.HELP;
+			} else {
+				description = VariableInterpolator.HELP;
+			}
+			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
+		} else if (editable.description().length() != 0) {
+			return editable.description();
+		} else {
+			return null;
 		}
-		return null;
 	}
 
 	/**

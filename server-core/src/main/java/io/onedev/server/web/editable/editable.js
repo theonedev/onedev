@@ -22,7 +22,6 @@ onedev.server.editable = {
         var $groups = $container.children(".group");
         $groups.children("a").click(function() {
             $(this).parent().toggleClass("expanded"); 
-            $(window).resize();  
         });
         $groups.each(function() {
         	var $group = $(this);

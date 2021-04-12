@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getActiveNamedElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getUrlSegment;
+
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -42,14 +46,16 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
-import io.onedev.server.buildspec.BuildSpecImport;
+import io.onedev.server.buildspec.Import;
 import io.onedev.server.buildspec.NamedElement;
+import io.onedev.server.buildspec.ParamSpecAware;
 import io.onedev.server.buildspec.Property;
+import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobSuggestion;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.StepTemplate;
-import io.onedev.server.buildspec.step.StepTemplateAware;
 import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -65,10 +71,8 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.EditCompleteAware;
 import io.onedev.server.web.util.AjaxPayload;
@@ -92,18 +96,16 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		}
 	}
 	
-	private void resizeWindow(AjaxRequestTarget target) {
-		((BasePage)getPage()).resizeWindow(target);
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
 		if (parseResult instanceof BuildSpec) {
 			BuildSpec buildSpec = (BuildSpec) parseResult;
-			add(new ValidFragment("content") {
+			add(new ParseableFragment("content") {
 
+				private WebMarkupContainer body;
+				
 				private void setupJobsEditor(@Nullable AjaxRequestTarget target) {
 					Fragment jobsEditor = new NamedElementsEditor<Job>() {
 
@@ -125,7 +127,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 
 						@Override
 						protected int getActiveElementIndex() {
-							return BuildSpecRendererProvider.getActiveJobIndex(context, buildSpec);
+							return getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs());
 						}
 
 						@Override
@@ -141,18 +143,29 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 								public Job getJob() {
 									return (Job) getConvertedInput();
 								}
+
+								@Override
+								public List<ParamSpec> getParamSpecs() {
+									return getJob().getParamSpecs();
+								}
+								
 							}
 							
 							return new JobEditor(componentId, element);
 						}
 
+						@Override
+						protected void setElements(List<Job> elements) {
+							buildSpec.setJobs(elements);
+						}
+
 					};
 					
 					if (target != null) {
-						replace(jobsEditor);
+						body.replace(jobsEditor);
 						target.add(jobsEditor);
 					} else {
-						add(jobsEditor);
+						body.add(jobsEditor);
 					}
 				}
 				
@@ -171,39 +184,83 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 
 						@Override
 						protected int getActiveElementIndex() {
-							return BuildSpecRendererProvider.getActiveStepTemplateIndex(context, buildSpec);
+							return getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates());
 						}
 
 						@Override
 						protected BeanEditor newElementEditor(String componentId, StepTemplate element) {
 							
-							class StepTemplateEditor extends BeanEditor implements StepTemplateAware {
+							class StepTemplateEditor extends BeanEditor implements ParamSpecAware {
 
 								public StepTemplateEditor(String id, NamedElement element) {
 									super(id, new BeanDescriptor(StepTemplate.class), Model.of(element));
 								}
 
 								@Override
-								public StepTemplate getTemplate() {
-									return (StepTemplate) getConvertedInput();
+								public List<ParamSpec> getParamSpecs() {
+									return ((StepTemplate) getConvertedInput()).getParamSpecs();
 								}
+								
 							}
 							
 							return new StepTemplateEditor(componentId, element);
 						}
 
+						@Override
+						protected void setElements(List<StepTemplate> elements) {
+							buildSpec.setStepTemplates(elements);
+						}
+
 					};
 					
 					if (target != null) {
-						replace(stepTemplatesEditor);
+						body.replace(stepTemplatesEditor);
 						target.add(stepTemplatesEditor);
 					} else {
-						add(stepTemplatesEditor);
+						body.add(stepTemplatesEditor);
+					}
+				}
+				
+				private void setupServicesEditor(@Nullable AjaxRequestTarget target) {
+					Fragment servicesEditor = new NamedElementsEditor<Service>() {
+
+						@Override
+						protected List<Service> getElements() {
+							return buildSpec.getServices();
+						}
+
+						@Override
+						protected void setElements(List<Service> elements) {
+							buildSpec.setServices(elements);
+						}
+
+						@Override
+						protected List<Service> getSuggestedElements() {
+							return new ArrayList<>();
+						}
+
+						@Override
+						protected int getActiveElementIndex() {
+							return getActiveNamedElementIndex(context, Service.class, buildSpec.getServices());
+						}
+
+						@Override
+						protected BeanEditor newElementEditor(String componentId, Service element) {
+							return new BeanEditor(componentId, new BeanDescriptor(Service.class), Model.of(element));
+						}
+
+					};
+					
+					if (target != null) {
+						body.replace(servicesEditor);
+						target.add(servicesEditor);
+					} else {
+						body.add(servicesEditor);
 					}
 				}
 				
 				private void setupPropertiesEditor(@Nullable AjaxRequestTarget target) {
-					PropertyEditor<Serializable> propertiesEditor = PropertyContext.edit("body", buildSpec, "properties");
+					PropertyEditor<Serializable> propertiesEditor = PropertyContext.edit("content", buildSpec, "properties");
 					propertiesEditor.add(new Behavior() {
 
 						@SuppressWarnings("unchecked")
@@ -221,18 +278,18 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 						
 					});
-					propertiesEditor.add(AttributeAppender.append("class", "properties d-flex"));
+					propertiesEditor.add(AttributeAppender.append("class", "properties"));
 					propertiesEditor.setOutputMarkupId(true);
 					if (target != null) {
-						replace(propertiesEditor);
+						body.replace(propertiesEditor);
 						target.add(propertiesEditor);
 					} else {
-						add(propertiesEditor);
+						body.add(propertiesEditor);
 					}
 				}
 				
 				private void setupImportsEditor(@Nullable AjaxRequestTarget target) {
-					PropertyEditor<Serializable> importsEditor = PropertyContext.edit("body", buildSpec, "imports");
+					PropertyEditor<Serializable> importsEditor = PropertyContext.edit("content", buildSpec, "imports");
 					importsEditor.add(new Behavior() {
 
 						@SuppressWarnings("unchecked")
@@ -240,7 +297,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						public void onEvent(Component component, IEvent<?> event) {
 							super.onEvent(component, event);
 							if (event.getPayload() instanceof FormSubmitted) 
-								buildSpec.setImports((List<BuildSpecImport>) importsEditor.getConvertedInput());
+								buildSpec.setImports((List<Import>) importsEditor.getConvertedInput());
 						}
 
 						@Override
@@ -250,13 +307,13 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 						
 					});
-					importsEditor.add(AttributeAppender.append("class", "imports d-flex"));
+					importsEditor.add(AttributeAppender.append("class", "imports"));
 					importsEditor.setOutputMarkupId(true);
 					if (target != null) {
-						replace(importsEditor);
+						body.replace(importsEditor);
 						target.add(importsEditor);
 					} else {
-						add(importsEditor);
+						body.add(importsEditor);
 					}
 				}
 
@@ -271,14 +328,29 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target,  "jobs");
 							setupJobsEditor(target);
-							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
-							resizeWindow(target);
+						}
+						
+					});
+					
+					add(new AjaxSubmitLink("services") {
+
+						@Override
+						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+							super.onSubmit(target, form);
+							pushState(target, "services");
+							setupServicesEditor(target);
+						}
+
+						@Override
+						protected void onError(AjaxRequestTarget target, Form<?> form) {
+							super.onError(target, form);
+							target.add(getParent());
 						}
 						
 					});
@@ -290,14 +362,12 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "step-templates");
 							setupStepTemplatesEditor(target);
-							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
-							resizeWindow(target);
 						}
 						
 					});
@@ -309,14 +379,12 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "properties");
 							setupPropertiesEditor(target);
-							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
-							resizeWindow(target);
 						}
 						
 					});
@@ -328,22 +396,25 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							super.onSubmit(target, form);
 							pushState(target, "imports");
 							setupImportsEditor(target);
-							resizeWindow(target);
 						}
 
 						@Override
 						protected void onError(AjaxRequestTarget target, Form<?> form) {
 							super.onError(target, form);
 							target.add(getParent());
-							resizeWindow(target);
 						}
 						
 					});
+					
+					add(body = new WebMarkupContainer("body"));
+					body.add(new FencedFeedbackPanel("feedback", body));
 
 					String selection = getSelection();
 					
 					if (selection == null || selection.startsWith("jobs") || selection.equals("new-job"))
 						setupJobsEditor(null);
+					else if (selection.startsWith("services") || selection.equals("new-service"))
+						setupServicesEditor(null);
 					else if (selection.startsWith("step-templates") || selection.equals("new-step-template"))
 						setupStepTemplatesEditor(null);
 					else if (selection.equals("imports"))
@@ -351,10 +422,11 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					else
 						setupPropertiesEditor(null);
 					
-					add(AttributeAppender.append("class", "valid"));
+					add(AttributeAppender.append("class", "parseable"));
 					setOutputMarkupId(true);
 				}
 
+				@SuppressWarnings("rawtypes")
 				@Override
 				public boolean onEditComplete(AjaxRequestTarget target) {
 					BuildSpec buildSpec = (BuildSpec) parseResult;
@@ -371,51 +443,106 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 							case "jobs":
 								path = new Path(path.getNodes().subList(1, path.getNodes().size()));
 								if (path.getNodes().isEmpty()) {
-									replaceState(target, "jobs");
+									replaceState(target, named.getName());
 									setupJobsEditor(target);
-									error("Jobs: " + violation.getMessage());
+									body.error(violation.getMessage());
 								} else {
 									PathNode.Indexed indexed = (Indexed) path.getNodes().iterator().next();
 									path = new Path(path.getNodes().subList(1, path.getNodes().size()));
-									if (path.getNodes().isEmpty()) {
-										replaceState(target, "jobs");
-										setupJobsEditor(target);
-										error("Job '" + buildSpec.getJobs().get(indexed.getIndex()).getName() + "': " + violation.getMessage());
-									} else {
-										String selection = "jobs/" + buildSpec.getJobs().get(indexed.getIndex()).getName();
-										replaceState(target, selection);
-										setupJobsEditor(target);
-										((BeanEditor)get("body:element")).error(path, violation.getMessage());
-									}
+									String selection = "jobs/" + buildSpec.getJobs().get(indexed.getIndex()).getName();
+									replaceState(target, selection);
+									setupJobsEditor(target);
+									((BeanEditor)body.get("content:element")).error(path, violation.getMessage());
 								}
+								break;
+							case "services":
+								path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+								if (path.getNodes().isEmpty()) {
+									replaceState(target, named.getName());
+									setupServicesEditor(target);
+									body.error(violation.getMessage());
+								} else {
+									PathNode.Indexed indexed = (Indexed) path.getNodes().iterator().next();
+									path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+									String selection = "services/" + buildSpec.getServices().get(indexed.getIndex()).getName();
+									replaceState(target, selection);
+									setupServicesEditor(target);
+									((BeanEditor)body.get("content:element")).error(path, violation.getMessage());
+								}
+								break;
+							case "stepTemplates":
+								path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+								if (path.getNodes().isEmpty()) {
+									replaceState(target, named.getName());
+									setupStepTemplatesEditor(target);
+									body.error(violation.getMessage());
+								} else {
+									PathNode.Indexed indexed = (Indexed) path.getNodes().iterator().next();
+									path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+									String selection = "step-templates/" + buildSpec.getStepTemplates().get(indexed.getIndex()).getName();
+									replaceState(target, selection);
+									setupStepTemplatesEditor(target);
+									((BeanEditor)body.get("content:element")).error(path, violation.getMessage());
+								}
+								break;
+							case "properties":
+								path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+								replaceState(target, "properties");
+								setupPropertiesEditor(target);
+								((PropertyEditor)body.get("content")).error(path, violation.getMessage());
+								break;
+							case "imports":
+								path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+								replaceState(target, "imports");
+								setupImportsEditor(target);
+								((PropertyEditor)body.get("content")).error(path, violation.getMessage());
 								break;
 							default:
 								throw new RuntimeException("Unexpected element name: " + named.getName());
 							}
 						}
-						resizeWindow(target);
 						return false;
 					} else {
-						resizeWindow(target);
+						fixState(target);
 						return true;
 					}
 				}
 				
 				@Override
 				public void onEditCancel(AjaxRequestTarget target) {
-					if ("new-job".equals(getSelection())) 
+					fixState(target);
+				}
+				
+				private void fixState(AjaxRequestTarget target) {
+					String selection = getSelection();
+					if (selection == null || selection.startsWith("jobs")) {
+						int jobIndex = getActiveNamedElementIndex(context, Job.class, buildSpec.getJobs());
+						if (jobIndex < buildSpec.getJobs().size())
+							replaceState(target, "jobs/" + buildSpec.getJobs().get(jobIndex).getName());
+					} else if (selection.startsWith("services")) {
+						int serviceIndex = getActiveNamedElementIndex(context, Service.class, buildSpec.getServices());
+						if (serviceIndex < buildSpec.getServices().size())
+							replaceState(target, "services/" + buildSpec.getServices().get(serviceIndex).getName());
+					} else if (selection.startsWith("step-templates")) {
+						int stepTemplateIndex = getActiveNamedElementIndex(context, StepTemplate.class, buildSpec.getStepTemplates());
+						if (stepTemplateIndex < buildSpec.getStepTemplates().size())
+							replaceState(target, "step-templates/" + buildSpec.getStepTemplates().get(stepTemplateIndex).getName());
+					} else if (selection.equals("new-job")) { 
 						replaceState(target, "jobs");
-					else if ("new-step-template".equals(getSelection()))
+					} else if (selection.equals("new-service")) {
+						replaceState(target, "services");
+					} else if (selection.equals("new-step-template")) {
 						replaceState(target, "step-templates");
+					}
 				}
 				
 			});
 		} else {
-			Fragment invalidFrag = new Fragment("content", "invalidFrag", this);
-			invalidFrag.add(new MultilineLabel("errorMessage", 
+			Fragment unparseableFrag = new Fragment("content", "unparseableFrag", this);
+			unparseableFrag.add(new MultilineLabel("errorMessage", 
 					Throwables.getStackTraceAsString((Throwable) parseResult)));
-			invalidFrag.add(AttributeAppender.append("class", "invalid"));
-			add(invalidFrag);
+			unparseableFrag.add(AttributeAppender.append("class", "unparseable"));
+			add(unparseableFrag);
 		}
 		
 	}
@@ -484,10 +611,10 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 			((EditCompleteAware) content).onEditCancel(target);
 	}
 	
-	private abstract class ValidFragment extends Fragment implements EditCompleteAware {
+	private abstract class ParseableFragment extends Fragment implements EditCompleteAware {
 
-		public ValidFragment(String id) {
-			super(id, "validFrag", BuildSpecEditPanel.this);
+		public ParseableFragment(String id) {
+			super(id, "parseableFrag", BuildSpecEditPanel.this);
 		}
 		
 	}
@@ -498,13 +625,15 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		
 		@SuppressWarnings("unchecked")
 		public NamedElementsEditor() {
-			super("body", "namedElementsFrag", BuildSpecEditPanel.this);
+			super("content", "namedElementsFrag", BuildSpecEditPanel.this);
 			
 			List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(NamedElementsEditor.class, getClass());
 			elementClass = (Class<T>) typeArguments.get(0);
 		}
 
 		protected abstract List<T> getElements();
+		
+		protected abstract void setElements(List<T> elements);
 		
 		protected abstract List<T> getSuggestedElements();
 		
@@ -543,16 +672,14 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				@Override
 				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 					super.onSubmit(target, form);
-					pushState(target, getTypeName(elementClass) + "s/" + getElement().getName());
+					pushState(target, getUrlSegment(elementClass) + "s/" + getElement().getName());
 					setupElementEditor(target, nav);
-					resizeWindow(target);
 				}
 
 				@Override
 				protected void onError(AjaxRequestTarget target, Form<?> form) {
 					super.onError(target, form);
 					target.add(elementsEdit);
-					resizeWindow(target);
 				}
 				
 			});
@@ -574,11 +701,12 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						}
 					}
 					target.appendJavaScript(String.format(
-							"$('.build-spec>.elements>.side>.navs>.nav:eq(%d)').remove();", 
+							"$('.build-spec>.body>.elements>.side>.navs>.nav:eq(%d)').remove();", 
 							elementIndex));
 					getElements().remove(elementIndex);
 					int activeElementIndex = getElements().indexOf(elementEdit.getDefaultModelObject());
-					if (activeElementIndex == -1) { 
+					if (activeElementIndex == -1) {
+						replaceState(target, getUrlSegment(elementClass) + "s");
 						if (!getElements().isEmpty()) {
 							setupElementEditor(target, navsView.iterator().next());
 						} else {
@@ -597,15 +725,11 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 			
 			if (target != null) {
 				String script = String.format(
-						"$('.build-spec>.elements>.side>.navs').append(\"<div id='%s'></div>\");", 
+						"$('.build-spec>.body>.elements>.side>.navs').append(\"<div id='%s'></div>\");", 
 						nav.getMarkupId(true));
 				target.prependJavaScript(script);
 				target.add(nav);
 			}
-		}
-		
-		private String getTypeName(Class<?> typeClass) {
-			return EditableUtils.getDisplayName(typeClass).replace(' ', '-').toLowerCase();
 		}
 		
 		private void setupElementEditor(@Nullable AjaxRequestTarget target, Component nav) {
@@ -616,7 +740,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					IRequestParameters params = RequestCycle.get().getRequest().getRequestParameters();
 					String name = params.getParameterValue("name").toOptionalString();
 					
-					String selection = getTypeName(elementClass) + "s";
+					String selection = getUrlSegment(elementClass) + "s";
 					if (StringUtils.isNotBlank(name)) 
 						selection += "/" + name;
 					replaceState(target, selection);
@@ -635,7 +759,9 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					super.onEvent(component, event);
 					if (event.getPayload() instanceof FormSubmitted) {
 						int elementIndex = (int) nav.getDefaultModelObject();
-						getElements().set(elementIndex, (T) elementEditor.getConvertedInput());
+						List<T> elements = new ArrayList<>(getElements());
+						elements.set(elementIndex, (T) elementEditor.getConvertedInput());
+						setElements(elements);
 					}
 				}
 				
@@ -663,7 +789,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		
 		@SuppressWarnings("deprecation")
 		private void addElement(AjaxRequestTarget target, RepeatingView elementNavs) {
-			pushState(target, "new-" +  getTypeName(elementClass));
+			pushState(target, "new-" +  getUrlSegment(elementClass));
 			int elementIndex = getElements().size()-1;
 			newElementNav(target, elementNavs, elementIndex);
 			setupElementEditor(target, elementNavs.get(elementNavs.size()-1));
@@ -699,19 +825,17 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 						throw new RuntimeException(e);
 					}
 					addElement(target, elementNavs);
-					resizeWindow(target);
 				}
 
 				@Override
 				protected void onError(AjaxRequestTarget target, Form<?> form) {
 					super.onError(target, form);
 					target.add(NamedElementsEditor.this);
-					resizeWindow(target);
 				}
 				
 			};
 			
-			List<T> suggestedElements = new ArrayList<>();
+			List<T> suggestedElements = getSuggestedElements();
 			
 			if (suggestedElements.isEmpty())
 				createLink.add(AttributeAppender.append("class", "no-suggestions"));
@@ -741,7 +865,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											super.onSubmit(target, form);
 											getElements().add(element);
 											addElement(target, elementNavs);
-											resizeWindow(target);
+											dropdown.close();
 										}
 
 										@Override
@@ -749,7 +873,6 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 											super.onError(target, form);
 											dropdown.close();
 											target.add(NamedElementsEditor.this);
-											resizeWindow(target);
 										}
 										
 									};
@@ -788,7 +911,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				
 			}.sortable(".side>.navs"));
 			
-			add(AttributeAppender.append("class", "d-flex flex-nowrap elements " + getTypeName(elementClass) + "s"));
+			add(AttributeAppender.append("class", "elements d-flex flex-nowrap " + getUrlSegment(elementClass) + "s"));
 			setOutputMarkupId(true);
 		}
 		
@@ -796,7 +919,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		public void renderHead(IHeaderResponse response) {
 			super.renderHead(response);
 			response.render(OnDomReadyHeaderItem.forScript(
-					String.format("onedev.server.buildSpec.onTabDomReady('.%ss');", getTypeName(elementClass))));
+					String.format("onedev.server.buildSpec.onTabDomReady('.%ss');", getUrlSegment(elementClass))));
 		}
 		
 	}

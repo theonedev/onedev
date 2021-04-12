@@ -48,7 +48,7 @@ public abstract class CommitStatusPanel extends Panel {
 			try {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
 				if (buildSpec != null)
-					jobs.addAll(buildSpec.getJobs());
+					jobs.addAll(buildSpec.getJobMap().values());
 			} catch (Exception e) {
 				logger.error("Error retrieving build spec (project: {}, commit: {})", 
 						getProject().getName(), commitId.name(), e);

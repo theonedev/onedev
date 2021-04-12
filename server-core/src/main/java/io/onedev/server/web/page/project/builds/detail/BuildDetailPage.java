@@ -31,7 +31,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.LockUtils;
@@ -40,8 +39,8 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.buildspec.job.JobManager;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -64,6 +63,7 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.joblist.JobListPanel;
+import io.onedev.server.web.component.link.BuildSpecLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
@@ -101,7 +101,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		protected List<Job> load() {
 			List<Job> downstreamJobs = new ArrayList<>();
 			BuildSpec buildSpec = getProject().getBuildSpec(getBuild().getCommitId());
-			for (Job job: buildSpec.getJobs()) {
+			for (Job job: buildSpec.getJobMap().values()) {
 				for (JobDependency dependency: job.getJobDependencies()) {
 					if (dependency.getJobName().equals(getBuild().getJobName()) 
 							&& getBuild().matchParams(dependency.getJobParams())) { 
@@ -231,7 +231,7 @@ public abstract class BuildDetailPage extends ProjectPage
 		actionsContainer.add(new AjaxLink<Void>("rebuild") {
 
 			private void resubmit(Serializable paramBean) {
-				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
+				Map<String, List<String>> paramMap = ParamUtils.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
 				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, "Resubmitted manually");
 				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild()));
@@ -289,7 +289,8 @@ public abstract class BuildDetailPage extends ProjectPage
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().isFinished() && SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
+				setVisible(getBuild().isFinished() && getBuild().getJob() != null 
+						&& SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
 			}
 			
 		});
@@ -344,6 +345,28 @@ public abstract class BuildDetailPage extends ProjectPage
 		});
 		
 		add(new SideInfoLink("moreInfo"));
+		
+		WebMarkupContainer jobNotFoundContainer = new WebMarkupContainer("jobNotFound") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getBuild().getJob() == null);
+			}
+			
+		};
+		
+		jobNotFoundContainer.add(new Label("jobName", getBuild().getJobName()));
+		jobNotFoundContainer.add(new BuildSpecLink("buildSpec", getBuild().getCommitId()) {
+
+			@Override
+			protected Project getProject() {
+				return getBuild().getProject();
+			}
+			
+		});
+		
+		add(jobNotFoundContainer);
 		
 		add(new Label("errorMessage", new AbstractReadOnlyModel<String>() {
 
@@ -544,12 +567,18 @@ public abstract class BuildDetailPage extends ProjectPage
 	
 	@Override
 	public List<String> getInputNames() {
-		return new ArrayList<>(getBuild().getJob().getParamSpecMap().keySet());
+		if (getBuild().getJob() != null)
+			return new ArrayList<>(getBuild().getJob().getParamSpecMap().keySet());
+		else
+			return new ArrayList<>();
 	}
 
 	@Override
 	public ParamSpec getInputSpec(String paramName) {
-		return Preconditions.checkNotNull(getBuild().getJob().getParamSpecMap().get(paramName));
+		if (getBuild().getJob() != null)
+			return getBuild().getJob().getParamSpecMap().get(paramName);
+		else
+			return null;
 	}
 
 	@Override

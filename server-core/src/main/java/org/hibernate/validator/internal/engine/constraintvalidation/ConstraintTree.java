@@ -29,6 +29,7 @@ import org.hibernate.validator.internal.util.logging.LoggerFactory;
 import org.hibernate.validator.spi.valuehandling.ValidatedValueUnwrapper;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.validation.InterpolativeValidator;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -465,12 +466,12 @@ public class ConstraintTree<A extends Annotation> {
 							if (valueContext.getCurrentValidatedValue() instanceof Collection) {
 								List<String> list = new ArrayList<>();
 								for (String each: (Collection<String>)validatedValue) { 
-									list.add(io.onedev.server.util.interpolative.Interpolative.parse(each).interpolateWith(it->exampleVar));				
+									list.add(new VariableInterpolator(it->exampleVar).interpolate(each));				
 								}
 								validatedValue = (V) list;
 							} else {
-								validatedValue = (V) io.onedev.server.util.interpolative.Interpolative.parse(
-										(String) valueContext.getCurrentValidatedValue()).interpolateWith(it->exampleVar);
+								validatedValue = (V) new VariableInterpolator(it->exampleVar)
+										.interpolate((String) valueContext.getCurrentValidatedValue());
 							}
 						}
 					}

@@ -35,7 +35,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.BuildMetricManager;
-import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
@@ -68,17 +67,14 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 	
 	private final TransactionManager transactionManager;
 	
-	private final GroupManager groupManager;
-	
 	private final Map<Key, Map<String, Collection<String>>> reportNames = new HashMap<>();
 	
 	private final ReadWriteLock reportNamesLock = new ReentrantReadWriteLock();
 	
 	@Inject
-	public DefaultBuildMetricManager(Dao dao, TransactionManager transactionManager, GroupManager groupManager) {
+	public DefaultBuildMetricManager(Dao dao, TransactionManager transactionManager) {
 		this.dao = dao;
 		this.transactionManager = transactionManager;
-		this.groupManager = groupManager;
 	}
 	
 	@SuppressWarnings("resource")
@@ -290,14 +286,9 @@ public class DefaultBuildMetricManager implements BuildMetricManager {
 							}
 						}
 					}
-					Group group = groupManager.findAnonymous();
-					if (group != null) {
-						for (GroupAuthorization authorization: group.getAuthorizations()) {
-							if (project.equals(authorization.getProject())) {
-								populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
-										project, authorization.getRole());
-							}
-						}
+					if (project.getDefaultRole() != null) {
+						populateAccessibleReportNames(accessibleReportNames, availableReportNames, 
+								project, project.getDefaultRole());
 					}
 				}				
 			}

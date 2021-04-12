@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
@@ -42,9 +42,12 @@ public class CodePropertyViewer extends Panel {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CodeSupportResourceReference()));
 		
-		String script = String.format("onedev.server.codeSupport.onViewerDomReady('%s', '%s');", 
+		String script = String.format("onedev.server.codeSupport.onViewerLoad('%s', '%s');", 
 				input.getMarkupId(), language);
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		
+		// Initialize codemirror via onLoad; otherwise, it will not be shown 
+		// correctly in a modal dialog
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 }

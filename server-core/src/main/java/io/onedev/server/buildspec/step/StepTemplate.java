@@ -5,25 +5,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.NamedElement;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.SuggestionProvider;
 
 @Editable
 public class StepTemplate implements NamedElement, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROP_STEPS = "steps";
+	
 	private String name;
 	
 	private List<Step> steps = new ArrayList<>();
 	
 	private List<ParamSpec> paramSpecs = new ArrayList<>();
 	
+	public StepTemplate() {
+		steps.add(new CommandStep());
+	}
+	
 	@Editable(order=100)
+	@SuggestionProvider("getNameSuggestions")
 	@NotEmpty
 	@Override
 	public String getName() {
@@ -34,7 +46,19 @@ public class StepTemplate implements NamedElement, Serializable {
 		this.name = name;
 	}
 
+	@SuppressWarnings("unused")
+	private static List<InputCompletion> getNameSuggestions(InputStatus status) {
+		BuildSpec buildSpec = BuildSpec.get();
+		if (buildSpec != null) {
+			List<String> candidates = new ArrayList<>(buildSpec.getStepTemplateMap().keySet());
+			buildSpec.getStepTemplates().forEach(it->candidates.remove(it.getName()));
+			return BuildSpec.suggestOverrides(candidates, status);
+		}
+		return new ArrayList<>();
+	}
+	
 	@Editable(order=200, name="Steps to Execute")
+	@Size(min=1, max=1000, message="At least one step needs to be defined")
 	public List<Step> getSteps() {
 		return steps;
 	}

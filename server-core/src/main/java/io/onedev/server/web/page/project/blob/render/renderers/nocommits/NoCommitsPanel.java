@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -15,6 +16,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
@@ -50,6 +52,7 @@ public class NoCommitsPanel extends Panel {
 				@Override
 				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 					List<MenuItem> menuItems = new ArrayList<>();
+					
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -115,6 +118,15 @@ public class NoCommitsPanel extends Panel {
 				}
 				
 			});		
+			
+			add(new AjaxLink<Void>("setupBuildSpec") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					context.onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
+				}
+				
+			});
 			
 			add(new DropdownLink("pushInstructions") {
 

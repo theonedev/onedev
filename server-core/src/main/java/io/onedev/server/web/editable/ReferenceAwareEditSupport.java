@@ -8,7 +8,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.ReferenceAware;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
@@ -44,21 +43,15 @@ public class ReferenceAwareEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
-		        		
-		        		@Override
-		        		protected InputAssistBehavior getInputAssistBehavior() {
-		        	        return new ReferenceInputBehavior(true) {
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
+		        			new ReferenceInputBehavior(true) {
 
-								@Override
-								protected Project getProject() {
-									return Project.get();
-								}
-		        	        	
-		        	        };
-		        		}
-
-		        	};
+						@Override
+						protected Project getProject() {
+							return Project.get();
+						}
+        	        	
+        	        });
 				}
     			
     		};

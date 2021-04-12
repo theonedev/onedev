@@ -20,6 +20,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 
 @SuppressWarnings("serial")
 public class NewProjectPage extends LayoutPage {
@@ -38,6 +39,8 @@ public class NewProjectPage extends LayoutPage {
 		
 		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
 		
+		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
+		
 		Form<?> form = new Form<Void>("form") {
 
 			@Override
@@ -50,6 +53,7 @@ public class NewProjectPage extends LayoutPage {
 					editor.error(new Path(new PathNode.Named("name")),
 							"This name has already been used by another project");
 				} else {
+					project.setDefaultRole(defaultRoleBean.getRole());
 					projectManager.create(project);
 					Session.get().success("New project created");
 					setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
@@ -58,6 +62,7 @@ public class NewProjectPage extends LayoutPage {
 			
 		};
 		form.add(editor);
+		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
 		
 		add(form);
 	}

@@ -20,7 +20,6 @@ import com.google.common.collect.Lists;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.step.CommandStep;
 import io.onedev.server.git.Blob;
@@ -28,6 +27,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 
 public class MavenJobSuggestion implements JobSuggestion {
 
@@ -58,7 +58,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 					"echo", 
 					"mvn clean test"));
 
-			job.getSteps().add(step);
+			job.setSteps(Lists.newArrayList(step));
 			
 			// Trigger the job automatically when there is a push to the branch			
 			BranchUpdateTrigger trigger = new BranchUpdateTrigger();

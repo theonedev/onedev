@@ -46,6 +46,9 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		
 		Collection<String> properties = Sets.newHashSet("name", "description", "issueManagementEnabled");
 		
+		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
+		defaultRoleBean.setRole(getProject().getDefaultRole());
+		
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
 			@Override
@@ -84,6 +87,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 					String errorMessage = "This name has already been used by another project"; 
 					editor.error(new Path(new PathNode.Named("name")), errorMessage);
 				} else {
+					project.setDefaultRole(defaultRoleBean.getRole());
 					projectManager.save(project, oldName);
 					Session.get().success("General setting has been updated");
 					setResponsePage(GeneralProjectSettingPage.class, paramsOf(project));
@@ -92,7 +96,9 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 			
 		};
 		form.add(editor);
-
+		
+		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
+		
 		form.add(new AjaxLink<Void>("delete") {
 
 			@Override

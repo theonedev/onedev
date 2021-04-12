@@ -230,6 +230,10 @@ public class Project extends AbstractEntity {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Project> forks = new ArrayList<>();
     
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=true)
+    private Role defaultRole;
+    
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
@@ -388,6 +392,15 @@ public class Project extends AbstractEntity {
 
 	public void setOutgoingRequests(Collection<PullRequest> outgoingRequests) {
 		this.outgoingRequests = outgoingRequests;
+	}
+
+	@Nullable
+	public Role getDefaultRole() {
+		return defaultRole;
+	}
+
+	public void setDefaultRole(Role defaultRole) {
+		this.defaultRole = defaultRole;
 	}
 
 	public Collection<GroupAuthorization> getGroupAuthorizations() {

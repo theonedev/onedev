@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintValidatorContext;
+
 import org.apache.sshd.common.config.keys.PublicKeyEntry;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -15,11 +17,14 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.SshSetting;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="SSH", order=300)
-public class SshCredential implements GitCredential {
+@ClassValidating
+public class SshCredential implements GitCredential, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -53,6 +58,20 @@ public class SshCredential implements GitCredential {
 			throw new RuntimeException(e);
 		}
 		return new SshCloneInfo(cloneUrl, build.getSecretValue(keySecret), knownHosts.toString());
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (!Project.get().getBuildSetting().getJobSecrets().stream()
+				.anyMatch(it->it.getName().equals(keySecret))) {
+			context.disableDefaultConstraintViolation();
+			context.buildConstraintViolationWithTemplate("Secret not found (" + keySecret + ")")
+					.addPropertyNode("keySecret")
+					.addConstraintViolation();
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 }

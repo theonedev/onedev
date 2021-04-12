@@ -19,7 +19,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;

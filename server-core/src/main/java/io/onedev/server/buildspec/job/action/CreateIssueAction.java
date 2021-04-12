@@ -20,7 +20,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.fieldsupply.FieldSupply;
+import io.onedev.server.model.support.issue.field.FieldUtils;
+import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -118,12 +119,12 @@ public class CreateIssueAction extends PostBuildAction {
 	}
 
 	@Override
-	public void validateWithContext(BuildSpec buildSpec, Job job) {
-		super.validateWithContext(buildSpec, job);
+	public void validateWith(BuildSpec buildSpec, Job job) {
+		super.validateWith(buildSpec, job);
 		
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		try {
-			FieldSupply.validateFields(issueSetting.getFieldSpecMap(getFieldNames()), issueFields);
+			FieldUtils.validateFields(issueSetting.getFieldSpecMap(getFieldNames()), issueFields);
 		} catch (ValidationException e) {
 			throw new ValidationException("Error validating issue fields: " + e.getMessage());
 		}

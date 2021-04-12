@@ -3,7 +3,6 @@ package io.onedev.server.util.interpolative;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -24,15 +23,15 @@ import io.onedev.server.util.interpolative.InterpolativeParser.SegmentContext;
 public class Interpolative implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private final List<Segment> segments;
 	
 	public Interpolative(List<Segment> segments) {
 		this.segments = segments;
 	}
 	
-	public static Interpolative parse(String interpolativeString) {
-		CharStream is = CharStreams.fromString(interpolativeString); 
+	public static Interpolative parse(String value) {
+		CharStream is = CharStreams.fromString(value); 
 		InterpolativeLexer lexer = new InterpolativeLexer(is);
 		lexer.removeErrorListeners();
 		lexer.addErrorListener(new BaseErrorListener() {
@@ -41,7 +40,7 @@ public class Interpolative implements Serializable {
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
 				throw new ExplicitException("Last appearance of @ is a surprise to me. Either use @...@ to reference "
-						+ "a variable, or use @@ for literal @: " + interpolativeString);
+						+ "a variable, or use @@ for literal @: " + value);
 			}
 			
 		});
@@ -62,20 +61,6 @@ public class Interpolative implements Serializable {
 
 	public List<Segment> getSegments(@Nullable Type type) {
 		return segments.stream().filter(it -> type==null || it.getType() == type).collect(Collectors.toList());
-	}
-	
-	public String interpolateWith(Function<String, String> interpolator) {
-		StringBuilder builder = new StringBuilder();
-		for (Segment segment: segments) {
-			if (segment.getType() == Type.LITERAL) {
-				builder.append(segment.getContent());
-			} else {
-				String interpolated = interpolator.apply(segment.getContent()); 
-				if (interpolated != null)
-					builder.append(interpolated);
-			}
-		}
-		return builder.toString();
 	}
 	
 	public static class Segment implements Serializable {

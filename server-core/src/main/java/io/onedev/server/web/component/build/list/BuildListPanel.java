@@ -561,6 +561,12 @@ public abstract class BuildListPanel extends Panel {
 						protected Project getProject() {
 							return rowModel.getObject().getProject();
 						}
+
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setEnabled(isEnabled() && build.getJob() != null);
+						}
 						
 					};
 					link.add(new Label("label", build.getJobName()));

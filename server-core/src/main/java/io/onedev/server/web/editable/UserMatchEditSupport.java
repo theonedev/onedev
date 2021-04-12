@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.behavior.UserMatchBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.UserMatch;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
@@ -30,14 +29,8 @@ public class UserMatchEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
-
-						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-							return new UserMatchBehavior();
-						}
-		        		
-		        	};
+		        	return new StringPropertyEditor(componentId, descriptor, model)
+		        			.setInputAssist(new UserMatchBehavior());
 				}
     			
     		};

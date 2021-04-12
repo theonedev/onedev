@@ -32,7 +32,7 @@ public abstract class PostBuildAction implements Serializable {
 	
 	public abstract String getDescription();
 	
-	public void validateWithContext(BuildSpec buildSpec, Job job) {
+	public void validateWith(BuildSpec buildSpec, Job job) {
 		io.onedev.server.buildspec.job.action.condition.ActionCondition.parse(job, condition);
 	}
 

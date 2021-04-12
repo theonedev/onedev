@@ -5,20 +5,17 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.Executable;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.BuildSpecAware;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -59,30 +56,9 @@ public class CommandStep extends Step {
 		this.commands = commands;
 	}
 	
-	public static List<InputSuggestion> suggestVariables(String matchWith) {
-		Component component = ComponentContext.get().getComponent();
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
-		if (buildSpecAware != null) {
-			BuildSpec buildSpec = buildSpecAware.getBuildSpec();
-			if (buildSpec != null) {
-				JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
-				if (jobAware != null) {
-					Job job = jobAware.getJob();
-					if (job != null) {
-						RevCommit commit;
-						if (page.getBlobIdent().revision != null)
-							commit = page.getCommit();
-						else
-							commit = null;
-						suggestions.addAll(SuggestionUtils.suggestVariables(
-								page.getProject(), commit, buildSpec, job, matchWith));
-					}
-				}
-			}
-		}
-		return suggestions;
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith);
 	}
 	
 	@SuppressWarnings("unused")
@@ -91,16 +67,16 @@ public class CommandStep extends Step {
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 		Project project = page.getProject();
 		ObjectId commitId = page.getCommit();
-		BuildSpec buildSpec = ComponentContext.get().getComponent().findParent(BuildSpecAware.class).getBuildSpec();
-		Job job = ComponentContext.get().getComponent().findParent(JobAware.class).getJob();
-		for (InputSuggestion suggestion: SuggestionUtils.suggestVariables(project, commitId, buildSpec, job, ""))  
+		for (InputSuggestion suggestion: SuggestionUtils
+				.suggestVariables(project, BuildSpec.get(), ParamSpec.list(), "")) {  
 			variables.add(suggestion.getContent());
+		}
 		return variables;
 	}
 
 	@Override
-	public Executable getExecutable(BuildSpec buildSpec) {
-		return new CommandExecutable(image, commands);
+	public Executable getExecutable(Build build, ParamCombination paramCombination) {
+		return new CommandExecutable(getImage(), getCommands());
 	}
 	
 }

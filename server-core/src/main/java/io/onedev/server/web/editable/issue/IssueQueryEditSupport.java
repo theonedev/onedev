@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -54,26 +53,21 @@ public class IssueQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
-		        		
-		        		@Override
-		        		protected InputAssistBehavior getInputAssistBehavior() {
-		        			IssueQuery issueQuery = Preconditions.checkNotNull(
-		        					getDescriptor().getPropertyGetter().getAnnotation(IssueQuery.class));
-		        	        return new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
+        			IssueQuery issueQuery = Preconditions.checkNotNull(
+        					getDescriptor().getPropertyGetter().getAnnotation(IssueQuery.class));
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(
+		        		new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
-		        				@Override
-		        				public Project getObject() {
-		        					return Project.get();
-		        				}
-		        	    		
-		        	    	}, issueQuery.withOrder(), issueQuery.withCurrentUserCriteria(), issueQuery.withCurrentBuildCriteria(), 
-		        	        		issueQuery.withCurrentPullRequestCriteria(), issueQuery.withCurrentCommitCriteria());
-		        		}
-
-		        	};
-				}
-    			
+	        				@Override
+	        				public Project getObject() {
+	        					return Project.get();
+	        				}
+	        	    		
+	        	    	}, issueQuery.withOrder(), issueQuery.withCurrentUserCriteria(), 
+		        				issueQuery.withCurrentBuildCriteria(), 
+		        				issueQuery.withCurrentPullRequestCriteria(), 
+		        				issueQuery.withCurrentCommitCriteria()));
+	        		};
     		};
         } else {
             return null;

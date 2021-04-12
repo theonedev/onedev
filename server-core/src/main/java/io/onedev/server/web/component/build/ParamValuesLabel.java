@@ -4,7 +4,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.Model;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.util.Input;
 

@@ -149,13 +149,21 @@ public abstract class BuildSidePanel extends Panel {
 			protected Project getProject() {
 				return BuildSidePanel.this.getProject();
 			}
-			
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(isEnabled() && getBuild().getJob() != null);
+			}
+
 		};
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		
 		if (branch != null) {
-			if (SecurityUtils.canModify(getProject(), branch, BuildSpec.BLOB_PATH)) {
+			if (SecurityUtils.canModify(getProject(), branch, BuildSpec.BLOB_PATH) 
+					&& getBuild().getSpec() != null 
+					&& getBuild().getSpec().getJobs().stream().anyMatch(it->it.getName().equals(getBuild().getJobName()))) {
 				state = new ProjectBlobPage.State();
 				state.blobIdent = new BlobIdent(getBuild().getBranch(), BuildSpec.BLOB_PATH, 
 						FileMode.REGULAR_FILE.getBits());

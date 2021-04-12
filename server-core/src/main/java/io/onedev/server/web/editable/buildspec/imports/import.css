@@ -1,0 +1,14 @@
+.imports>.import {
+	border: 2px dashed var(--secondary);
+	border-radius: 0.42rem;
+	padding: 0.6rem 1.2rem;
+	margin-bottom: 1.2rem;
+	background: white;
+}
+.imports>.import:last-child {
+	margin-bottom: 0;
+}
+
+.imports>.import>.head {
+	margin-bottom: 1rem;
+}

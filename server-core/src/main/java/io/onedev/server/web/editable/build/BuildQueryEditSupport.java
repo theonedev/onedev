@@ -52,21 +52,16 @@ public class BuildQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
+					InputAssistBehavior inputAssist = new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-							return new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
-
-								@Override
-								public Project getObject() {
-									return Project.get();
-								}
-					    		
-					    	}, buildQuery.withOrder(), buildQuery.withCurrentUserCriteria(), buildQuery.withUnfinishedCriteria());
-						};
-		        		
-		        	};
+						public Project getObject() {
+							return Project.get();
+						}
+			    		
+			    	}, buildQuery.withOrder(), buildQuery.withCurrentUserCriteria(), buildQuery.withUnfinishedCriteria());
+					
+		        	return new StringPropertyEditor(componentId, descriptor, model).setInputAssist(inputAssist);
 				}
     			
     		};

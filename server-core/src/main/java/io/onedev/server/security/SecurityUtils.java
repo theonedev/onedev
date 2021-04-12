@@ -22,7 +22,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
@@ -67,23 +66,22 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	private static final Logger logger = LoggerFactory.getLogger(SecurityUtils.class);
 	
 	public static Collection<User> getAuthorizedUsers(Project project, Permission permission) {
+		UserManager userManager = OneDev.getInstance(UserManager.class);
 		Collection<User> authorizedUsers = new HashSet<>();
-		authorizedUsers.add(OneDev.getInstance(UserManager.class).getRoot());
-		Group anonymousGroup = OneDev.getInstance(GroupManager.class).findAnonymous();
+		authorizedUsers.add(userManager.getRoot());
 		for (GroupAuthorization authorization: project.getGroupAuthorizations()) {
 			Group group = authorization.getGroup();
-			if (group.isAdministrator() || authorization.getRole().implies(permission)) {
-				if (group.equals(anonymousGroup))
-					authorizedUsers.addAll(OneDev.getInstance(UserManager.class).query());
-				else
-					authorizedUsers.addAll(group.getMembers());
-			}
+			if (group.isAdministrator() || authorization.getRole().implies(permission)) 
+				authorizedUsers.addAll(group.getMembers());
 		}
 
 		for (UserAuthorization authorization: project.getUserAuthorizations()) {
 			if (authorization.getRole().implies(permission))
 				authorizedUsers.add(authorization.getUser());
 		}
+		
+		if (project.getDefaultRole() != null && project.getDefaultRole().implies(permission))
+			authorizedUsers.addAll(userManager.query());
 		
 		return authorizedUsers;
 	}
@@ -162,14 +160,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 					}
 				}
 			} 
-			Group group = OneDev.getInstance(GroupManager.class).findAnonymous();
-			if (group != null) {
-				for (GroupAuthorization authorization: group.getAuthorizations()) {
-					if (project.equals(authorization.getProject()) && authorization.getRole().equals(role))
-						return true;
-				}
-			}
-			return false;
+			return role.getDefaultProjects().contains(project);
 		} else {
 			logger.error("Undefined role: " + roleName);
 			return false;
@@ -301,6 +292,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
     public static Subject asSubject(Long userId) {
     	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
         return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
+    }
+    
+    public static Subject asAnonymous() {
+    	return asSubject(0L);
     }
     
 	public static void bindAsSystem() {

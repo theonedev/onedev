@@ -2,7 +2,9 @@ package io.onedev.server.buildspec.job;
 
 import javax.annotation.Nullable;
 
-public interface JobAware {
+import io.onedev.server.buildspec.ParamSpecAware;
+
+public interface JobAware extends ParamSpecAware {
 	
 	@Nullable
 	Job getJob();

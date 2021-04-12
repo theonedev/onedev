@@ -17,20 +17,16 @@ import static io.onedev.server.model.Build.PROP_VERSION;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.Callable;
@@ -65,10 +61,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.VariableInterpolator;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
-import io.onedev.server.buildspec.job.paramspec.SecretParam;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.SecretParam;
+import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -78,7 +75,6 @@ import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Day;
@@ -88,14 +84,12 @@ import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -334,17 +328,15 @@ public class Build extends AbstractEntity implements Referenceable {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private PullRequest request;
 	
-	private transient Map<String, List<String>> paramMap;
-	
 	private transient Collection<Long> fixedIssueNumbers;
 	
 	private transient Map<Build.Status, Collection<RevCommit>> commitsCache;
 	
-	private transient BuildSpec spec;
+	private transient Optional<BuildSpec> spec;
 	
-	private transient Job job;
+	private transient Map<String, List<String>> paramMap;
 	
-	private transient Map<String, Input> paramInputs;
+	private transient ParamCombination paramCombination;
 	
 	private transient Map<Build.Status, Build> streamPreviousCache = new HashMap<>();
 	
@@ -644,7 +636,25 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 		return paramMap;
 	}
-
+	
+	public ParamCombination getParamCombination() {
+		if (paramCombination == null) {
+			if (getJob() != null)
+				paramCombination = new ParamCombination(getJob().getParamSpecs(), getParamMap());
+			else
+				paramCombination = new ParamCombination(new ArrayList<>(), getParamMap());
+		}
+		return paramCombination;
+	}
+	
+	public Map<String, Input> getParamInputs() {
+		return getParamCombination().getParamInputs();
+	}
+	
+	public boolean isParamVisible(String paramName) {
+		return getParamCombination().isParamVisible(paramName);
+	}
+	
 	/**
 	 * Get fixed issue numbers
 	 * 
@@ -694,45 +704,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		return commitsCache.get(sincePrevStatus);
 	}
 	
-	public Map<String, Input> getParamInputs() {
-		if (paramInputs == null) {
-			paramInputs = new LinkedHashMap<>();
-			Map<String, List<BuildParam>> paramMap = new HashMap<>(); 
-			for (BuildParam param: getParams()) {
-				List<BuildParam> paramsOfName = paramMap.get(param.getName());
-				if (paramsOfName == null) {
-					paramsOfName = new ArrayList<>();
-					paramMap.put(param.getName(), paramsOfName);
-				}
-				paramsOfName.add(param);
-			}
-			for (ParamSpec paramSpec: getJob().getParamSpecs()) {
-				String paramName = paramSpec.getName();
-				List<BuildParam> params = paramMap.get(paramName);
-				if (params != null) {
-					String type = params.iterator().next().getType();
-					List<String> values = new ArrayList<>();
-					for (BuildParam param: params) {
-						if (param.getValue() != null)
-							values.add(param.getValue());
-					}
-					Collections.sort(values, new Comparator<String>() {
-
-						@Override
-						public int compare(String o1, String o2) {
-							return (int) (paramSpec.getOrdinal(o1) - paramSpec.getOrdinal(o2));
-						}
-						
-					});
-					if (!paramSpec.isAllowMultiple() && values.size() > 1) 
-						values = Lists.newArrayList(values.iterator().next());
-					paramInputs.put(paramName, new Input(paramName, type, values));
-				}
-			}		
-		}
-		return paramInputs;
-	}
-	
 	public BuildFacade getFacade() {
 		return new BuildFacade(getId(), getProject().getId(), getCommitHash());
 	}
@@ -758,27 +729,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		return secretValuesToMask;
 	}
 	
-	public boolean isParamVisible(String paramName) {
-		return isParamVisible(paramName, Sets.newHashSet());
-	}
-	
-	private boolean isParamVisible(String paramName, Set<String> checkedParamNames) {
-		if (!checkedParamNames.add(paramName))
-			return false;
-		
-		ParamSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
-		if (paramSpec.getShowCondition() != null) {
-			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
-			Preconditions.checkNotNull(dependentInput);
-			if (paramSpec.getShowCondition().getValueMatcher().matches(dependentInput.getValues())) 
-				return isParamVisible(dependentInput.getName(), checkedParamNames);
-			else 
-				return false;
-		} else {
-			return true;
-		}
-	}
-	
 	public String getSecretValue(String secretName) {
 		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
 			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
@@ -795,22 +745,22 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 	}
 	
+	@Nullable
 	public BuildSpec getSpec() {
 		if (spec == null) 
-			spec = Preconditions.checkNotNull(getProject().getBuildSpec(getCommitId()));
-		return spec;
+			spec = Optional.ofNullable(getProject().getBuildSpec(getCommitId()));
+		return spec.orElse(null);
 	}
 	
+	@Nullable
 	public Job getJob() {
-		if (job == null) 
-			job = Preconditions.checkNotNull(getSpec().getJobMap().get(getJobName()));
-		return job;
+		return getSpec()!=null? getSpec().getJobMap().get(getJobName()): null;
 	}
 
 	public Serializable getParamBean() {
 		Serializable paramBean;
 		try {
-			paramBean = (Serializable) ParamSupply.defineBeanClass(getJob().getParamSpecs()).newInstance();
+			paramBean = (Serializable) ParamUtils.defineBeanClass(getJob().getParamSpecs()).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		} 
@@ -819,7 +769,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			for (PropertyDescriptor property: groupProperties) {
 				ParamSpec paramSpec = getJob().getParamSpecMap().get(property.getDisplayName());
 				Preconditions.checkNotNull(paramSpec);
-				Input input = Preconditions.checkNotNull(getParamInputs().get(paramSpec.getName()));
+				Input input = Preconditions.checkNotNull(getParamCombination().getParamInputs().get(paramSpec.getName()));
 				property.setPropertyValue(paramBean, paramSpec.convertToObject(input.getValues()));
 			}
 		}
@@ -911,79 +861,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		return "build-artifacts:" + getId();
 	}
 	
-	public String interpolate(@Nullable String interpolativeString) {
-		if (interpolativeString != null) 
-			return Interpolative.parse(interpolativeString).interpolateWith(new VariableInterpolator(this));
-		else 
-			return null;
-	}	
-	
-	@SuppressWarnings("unchecked")
-	public <T> T interpolateProperties(T object) {
-		Class<T> clazz = VariableInterpolator.getUninterceptedClass(object);
-		
-		T unintercepted;
-		try {
-			unintercepted = clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-
-		for (Field field: BeanUtils.findFields(clazz)) {
-			field.setAccessible(true);
-			try {
-				field.set(unintercepted, field.get(object));
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
-		for (Method getter: BeanUtils.findGetters(clazz)) {
-			if (getter.getAnnotation(Editable.class) != null) {
-				Method setter = BeanUtils.findSetter(getter);
-				if (setter != null) {
-					try {
-						Object propertyValue = getter.invoke(unintercepted);
-						if (propertyValue != null) {
-							Class<?> propertyClass = VariableInterpolator.getUninterceptedClass(propertyValue);
-							if (getter.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
-								try {
-									if (propertyValue instanceof String) {
-										setter.invoke(unintercepted, interpolate((String) propertyValue));
-									} else if (propertyValue instanceof List) {
-										List<String> interpolatedList = new ArrayList<>();
-										for (String element: (List<String>) propertyValue) 
-											interpolatedList.add(interpolate(element));
-										setter.invoke(unintercepted, interpolatedList);
-									}
-								} catch (Exception e) {
-									String message = String.format("Error interpolating (class: %s, property: %s)", 
-											propertyClass, BeanUtils.getPropertyName(getter));
-									throw new RuntimeException(message, e);
-								}
-							} else if (propertyClass.getAnnotation(Editable.class) != null) {
-								setter.invoke(unintercepted, interpolateProperties(propertyValue));
-							} else if (propertyValue instanceof List) {
-								List<Object> uninterceptedList = new ArrayList<>();
-								for (Object element: (List<?>)propertyValue) { 
-									if (element != null && VariableInterpolator.getUninterceptedClass(element).getAnnotation(Editable.class) != null)
-										uninterceptedList.add(interpolateProperties(element));
-									else
-										uninterceptedList.add(element);
-								}
-								setter.invoke(unintercepted, uninterceptedList);
-							}
-						}
-					} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		}
-		
-		return unintercepted;
-	}	
-	
 	public ProjectScopedNumber getFQN() {
 		return new ProjectScopedNumber(getProject(), getNumber());
 	}
@@ -1066,7 +943,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public boolean matchParams(List<ParamSupply> paramSupplies) {
 		AtomicBoolean matches = new AtomicBoolean(false);
-		new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(null, paramSupplies)) {
+		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, paramSupplies)) {
 			
 			@Override
 			public void run(Map<String, List<String>> params) {

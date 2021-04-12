@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
-import io.onedev.server.buildspec.job.VariableInterpolator;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
 import io.onedev.server.buildspec.step.CommandStep;
@@ -23,6 +22,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 
 public class GradleJobSuggestion implements JobSuggestion {
 		
@@ -51,7 +51,8 @@ public class GradleJobSuggestion implements JobSuggestion {
 					"echo \"##onedev[SetBuildVersion '$buildVersion']\"",
 					"gradle build"));
 			
-			job.getSteps().add(step);
+			job.setSteps(Lists.newArrayList(step));
+			
 			setupTriggers(job);
 			setupCaches(job);
 			jobs.add(job);

@@ -54,11 +54,12 @@ import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.CommandVisitor;
 import io.onedev.k8shelper.CompositeExecutable;
+import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
-import io.onedev.server.buildspec.job.JobService;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -539,7 +540,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void startService(String namespace, JobContext jobContext, JobService jobService, 
+	private void startService(String namespace, JobContext jobContext, Service jobService, 
 			@Nullable String imagePullSecretName, SimpleLogger jobLogger) {
 		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
 		
@@ -736,7 +737,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			try {
 				String imagePullSecretName = createImagePullSecret(namespace, jobLogger);
 				if (jobContext != null) {
-					for (JobService jobService: jobContext.getServices()) {
+					for (Service jobService: jobContext.getServices()) {
 						jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 						startService(namespace, jobContext, jobService, imagePullSecretName, jobLogger);
 					}
@@ -809,7 +810,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					List<Action> actions = new ArrayList<>();
 					CommandExecutable executable = new CommandExecutable((String) executionContext, 
 							Lists.newArrayList("this does not matter"));
-					actions.add(new Action(true, executable));
+					actions.add(new Action(executable, ExecuteCondition.ALWAYS));
 					entryExecutable = new CompositeExecutable(actions);
 				}
 				

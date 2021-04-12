@@ -30,6 +30,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.ProjectDependency;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -81,6 +82,11 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 						return ProjectDependencyListEditPanel.this.getJob();
 					}
 
+					@Override
+					public List<ParamSpec> getParamSpecs() {
+						return getJob()!=null? getJob().getParamSpecs(): null;
+					}
+					
 				};
 			}
 			
@@ -158,6 +164,11 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 								return ProjectDependencyListEditPanel.this.getJob();
 							}
 
+							@Override
+							public List<ParamSpec> getParamSpecs() {
+								return getJob()!=null? getJob().getParamSpecs(): null;
+							}
+							
 						};
 					}
 					

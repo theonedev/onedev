@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -13,26 +14,33 @@ import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CompositeExecutable;
 import io.onedev.k8shelper.Executable;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.Job;
-import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
-import io.onedev.server.util.ComponentContext;
+import io.onedev.server.buildspec.param.ParamCombination;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.supply.ParamSupply;
+import io.onedev.server.model.Build;
+import io.onedev.server.util.EditContext;
+import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.interpolative.VariableInterpolator;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable(order=200, name="Use Step Template", description="Step to use specified template")
 public class UseTemplateStep extends Step {
 
 	private static final long serialVersionUID = 1L;
-
+	
+	public static final String PROP_TEMPLATE_NAME = "templateName";
+	
 	private String templateName;
 	
 	private List<ParamSupply> params = new ArrayList<>();
 
 	@Editable(order=100)
+	@ChoiceProvider("getTemplateChoices")
 	@NotEmpty
 	public String getTemplateName() {
 		return templateName;
@@ -40,6 +48,17 @@ public class UseTemplateStep extends Step {
 
 	public void setTemplateName(String templateName) {
 		this.templateName = templateName;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getTemplateChoices() {
+		List<String> templateNames = new ArrayList<>(BuildSpec.get().getStepTemplateMap().keySet());
+		
+		EditContext editContext = EditContext.get(1);
+		BeanEditor beanEditor = ((Component) editContext).findParent(BeanEditor.class);
+		if (beanEditor.getDescriptor().getBeanClass() == StepTemplate.class)
+			templateNames.remove(editContext.getInputValue("name"));
+		return templateNames;
 	}
 
 	@Editable(name="Step Parameters", order=200)
@@ -56,24 +75,39 @@ public class UseTemplateStep extends Step {
 	
 	@SuppressWarnings("unused")
 	private static List<ParamSpec> getParamSpecs() {
-		Component component = ComponentContext.get().getComponent();
-		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
-		if (jobAware != null) {
-			Job job = jobAware.getJob();
-			if (job != null)
-				return job.getParamSpecs();
-		}
+		String templateName = (String) EditContext.get().getInputValue(PROP_TEMPLATE_NAME);
+		if (templateName != null) {
+			BuildSpec buildSpec = BuildSpec.get();	
+			StepTemplate template = buildSpec.getStepTemplateMap().get(templateName);
+			if (template != null) 
+				return template.getParamSpecs();
+		}		
 		return new ArrayList<>();
 	}
 	
 	@Override
-	public Executable getExecutable(BuildSpec buildSpec) {
-		StepTemplate template = buildSpec.getStepTemplateMap().get(templateName);
+	public Executable getExecutable(Build build, ParamCombination paramCombination) {
+		StepTemplate template = build.getSpec().getStepTemplateMap().get(templateName);
 		if (template == null)
 			throw new ExplicitException("Step template not found: " + templateName);
+		
 		List<Action> actions = new ArrayList<>();
-		for (Step step: template.getSteps())
-			actions.add(step.getAction(buildSpec));
+		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(build, paramCombination, getParams())) {
+			
+			@Override
+			public void run(Map<String, List<String>> paramMap) {
+				ParamUtils.validateParamMap(template.getParamSpecs(), paramMap);
+				
+				ParamCombination newParamCombination = new ParamCombination(template.getParamSpecs(), paramMap);
+				VariableInterpolator interpolator = new VariableInterpolator(build, newParamCombination);
+				for (Step step: template.getSteps()) {
+					step = interpolator.interpolateProperties(step);
+					actions.add(step.getAction(build, newParamCombination));
+				}
+			}
+			
+		}.run();
+		
 		return new CompositeExecutable(actions);
 	}
 

@@ -30,6 +30,7 @@ import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.Configuration;
 import javax.validation.Validation;
+import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
@@ -624,7 +625,8 @@ public class CoreModule extends AbstractPluginModule {
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
 						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
-						ExplicitException.class, PageExpiredException.class, StalePageException.class);
+						ExplicitException.class, ValidationException.class, PageExpiredException.class, 
+						StalePageException.class);
 			}
 			
 		});

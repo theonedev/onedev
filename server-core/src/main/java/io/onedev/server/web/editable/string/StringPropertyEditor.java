@@ -2,8 +2,6 @@ package io.onedev.server.web.editable.string;
 
 import java.lang.reflect.Method;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -29,6 +27,8 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 
 	private FormComponent<String> input;
 	
+	private InputAssistBehavior inputAssist;
+	
 	public StringPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
@@ -51,9 +51,8 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		}
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
 		
-		InputAssistBehavior inputAssistBehavior = getInputAssistBehavior();
-		if (inputAssistBehavior != null) {
-			input.add(inputAssistBehavior);
+		if (inputAssist != null) {
+			input.add(inputAssist);
 			input.add(AttributeAppender.append("spellcheck", "false"));
 			input.add(AttributeAppender.append("autocomplete", "off"));
 			if (!getDescriptor().isPropertyRequired())
@@ -83,9 +82,9 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		return input.getConvertedInput();
 	}
 
-	@Nullable
-	protected InputAssistBehavior getInputAssistBehavior() {
-		return null;
+	public StringPropertyEditor setInputAssist(InputAssistBehavior inputAssist) {
+		this.inputAssist = inputAssist;
+		return this;
 	}
 	
 }

@@ -44,6 +44,16 @@
 	background-image: none;
 	height: auto;
 }
+.editable.property-editor table.norecords {
+	display: none;
+}
+.editable.property-editor table+.foot {
+	margin-top: 1rem;
+}
+.editable.property-editor table.norecords+.foot {
+	margin-top: 0;
+}
+
 .editable table.norecords tfoot td>div {
 	display: block;
 }

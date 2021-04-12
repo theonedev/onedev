@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
@@ -30,7 +31,7 @@ public class BeanListPropertyViewer extends Panel {
 	
 	private final List<Serializable> elements;
 	
-	public BeanListPropertyViewer(String id, PropertyDescriptor descriptor, Class<?> elementClass, List<Serializable> elements) {
+	public BeanListPropertyViewer(String id, PropertyDescriptor descriptor, List<Serializable> elements) {
 		super(id);
 		
 		Set<String> excludedProperties = new HashSet<>();
@@ -40,6 +41,8 @@ public class BeanListPropertyViewer extends Panel {
 			for (String each: excludedPropertiesAnnotation.value())
 				excludedProperties.add(each);
 		}
+		
+		Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
 		
 		propertyContexts = new ArrayList<>();
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getProperties().values()) {

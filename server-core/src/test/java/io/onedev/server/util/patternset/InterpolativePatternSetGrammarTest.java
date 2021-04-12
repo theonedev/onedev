@@ -1,6 +1,6 @@
 package io.onedev.server.util.patternset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.function.Function;
 
@@ -8,13 +8,13 @@ import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.util.interpolative.Interpolative;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 
 public class InterpolativePatternSetGrammarTest {
 
 	@Test
 	public void test() {
-		Function<String, String> interpolator = new Function<String, String>() {
+		Function<String, String> variableResolver = new Function<String, String>() {
 
 			@Override
 			public String apply(String t) {
@@ -27,25 +27,25 @@ public class InterpolativePatternSetGrammarTest {
 		String interpolated;
 		
 		expected = new PatternSet(Sets.newHashSet("\"hello\""), Sets.newHashSet("\"hello world\"")); 
-		interpolated = Interpolative.parse("\\\"hello\\\" -@\"\\\"hello world\\\"\"@").interpolateWith(interpolator);
+		interpolated = new VariableInterpolator(variableResolver).interpolate("\\\"hello\\\" -@\"\\\"hello world\\\"\"@");
 		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("hello world"), Sets.newHashSet()); 
-		interpolated = Interpolative.parse("@\"@hello world\"").interpolateWith(interpolator);
+		interpolated = new VariableInterpolator(variableResolver).interpolate("@\"@hello world\"");
 		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("@robin", "-@alive"), Sets.newHashSet("\"@")); 
-		interpolated = Interpolative.parse("@@robin \"-@@alive\" -\\\"@@").interpolateWith(interpolator);
+		interpolated = new VariableInterpolator(variableResolver).interpolate("@@robin \"-@@alive\" -\\\"@@");
 		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());
 		
 		expected = new PatternSet(Sets.newHashSet("@robin", "hello world", "world"), Sets.newHashSet("hello")); 
-		interpolated = Interpolative.parse("@@robin @\"hello world\"@ -@hello world@").interpolateWith(interpolator);
+		interpolated = new VariableInterpolator(variableResolver).interpolate("@@robin @\"hello world\"@ -@hello world@");
 		actual = PatternSet.parse(interpolated);
 		assertEquals(expected.getIncludes(), actual.getIncludes());
 		assertEquals(expected.getExcludes(), actual.getExcludes());

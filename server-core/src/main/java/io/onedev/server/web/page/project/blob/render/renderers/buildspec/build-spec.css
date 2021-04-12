@@ -1,57 +1,62 @@
 .build-spec {
     padding: 1.5rem;
 }
-.build-spec.valid {
+.build-spec.parseable {
 	min-width: 800px;
 }
-.build-spec.invalid>.title {
+.build-spec.unparseable>.title {
     font-size: 1.5rem;
     color: red;
     margin-bottom: 1.5rem;
 }
-.build-spec.invalid>.error-message {
+.build-spec.unparseable>.error-message {
 	white-space: pre-wrap;
     word-wrap: break-word;
     font-size: 1rem;
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.build-spec.valid>.head {
+.build-spec.parseable>.head {
 	margin-bottom: 1.5rem;
 	padding-bottom: 0.6rem;
 	border-bottom: 1px solid var(--light-gray);
 }
-.build-spec.valid>.head>a {
+.build-spec.parseable>.head>a {
     font-weight: bold;
     font-size: 1.2rem;
     margin-bottom: 1.2rem;
     margin-right: 0.6rem;
 }
-.build-spec.valid>.head>a.active {
+.build-spec.parseable>.head>a.active {
 	font-size: 1.5rem;
 	color: var(--primary);
 }
-.build-spec.valid>.body>.side {
+.build-spec.parseable>.body>.content>.side {
 	min-width: 220px;
 }
-.build-spec.valid>.body>.side>.navs:not(:empty) {
+.build-spec.parseable>.body>.content>.side>.navs:not(:empty) {
     margin-bottom: 1.5rem;
 }
-.build-spec.valid>.body>.side>.navs>.nav.active a {
+.build-spec.parseable>.body>.content>.side>.navs>.nav.active a {
 	background: var(--gray-dark);
 	border-color: var(--gray-dark);
 	color: white;
 }
-.build-spec.valid>.body>.side>.navs>.nav.active a.run:hover,
-.build-spec.valid>.body>.side>.navs>.nav.active a.delete:hover {
+.build-spec.parseable>.body>.content>.side>.navs>.nav.active a.run:hover,
+.build-spec.parseable>.body>.content>.side>.navs>.nav.active a.delete:hover {
 	background: #5c5e81;
 	border-color: #5c5e81;
 	color: white;
 }
-.build-spec.valid>.body>.main:not(:empty) {
+.build-spec.parseable>.body>.content>.main>.content:not(:empty) {
     border-radius: 0.42rem;
     border: 1px solid var(--light-gray);
     padding: 1.5rem;
 }
-.build-spec.valid>.properties>.bean-list {
+.build-spec.parseable>.properties>.bean-list {
 	flex-grow: 1;
+}
+
+.build-spec .icon.imported {
+	transform: rotate(135deg);
+	margin-left: 0.5rem;
 }

@@ -29,6 +29,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -103,6 +104,11 @@ class ServiceLocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 						return ServiceLocatorListEditPanel.this.getJob();
 					}
 
+					@Override
+					public List<ParamSpec> getParamSpecs() {
+						return getJob()!=null? getJob().getParamSpecs(): null;
+					}
+					
 				};
 			}
 			
@@ -208,6 +214,11 @@ class ServiceLocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 								return ServiceLocatorListEditPanel.this.getJob();
 							}
 
+							@Override
+							public List<ParamSpec> getParamSpecs() {
+								return getJob()!=null? getJob().getParamSpecs(): null;
+							}
+							
 						};
 					}
 					

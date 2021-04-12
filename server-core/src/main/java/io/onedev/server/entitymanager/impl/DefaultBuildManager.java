@@ -49,7 +49,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -103,8 +102,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final StorageManager storageManager;
 	
-	private final GroupManager groupManager;
-	
 	private final ProjectManager projectManager;
 	
 	private final TaskScheduler taskScheduler;
@@ -126,14 +123,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
-			GroupManager groupManager, StorageManager storageManager, 
-			ProjectManager projectManager, SessionManager sessionManager, 
-			TransactionManager transactionManager) {
+			StorageManager storageManager, ProjectManager projectManager, 
+			SessionManager sessionManager, TransactionManager transactionManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
 		this.storageManager = storageManager;
-		this.groupManager = groupManager;
 		this.projectManager = projectManager;
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
@@ -890,12 +885,9 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 						}
 					}
 				}
-				Group group = groupManager.findAnonymous();
-				if (group != null) {
-					for (GroupAuthorization authorization: group.getAuthorizations()) {
-						populateAccessibleJobNames(accessibleJobNames, jobNames, 
-								authorization.getProject(), authorization.getRole());
-					}
+				for (Project project: projectManager.query()) {
+					if (project.getDefaultRole() != null)
+						populateAccessibleJobNames(accessibleJobNames, jobNames, project, project.getDefaultRole());
 				}
 			}
 			return accessibleJobNames;
@@ -931,15 +923,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 							}
 						}
 					}
-					Group group = groupManager.findAnonymous();
-					if (group != null) {
-						for (GroupAuthorization authorization: group.getAuthorizations()) {
-							if (project == null || project.equals(authorization.getProject())) {
-								populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
-										authorization.getRole());
-							}
-						}
-					}
+					if (project.getDefaultRole() != null)
+						populateAccessibleJobNames(accessibleJobNames, availableJobNames, project.getDefaultRole());
 				}
 			}
 			return accessibleJobNames;

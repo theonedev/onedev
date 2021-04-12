@@ -3,14 +3,19 @@
 	border-radius: 0.42rem;
 	padding: 1px;
 }
+.code-support>div {
+	position: relative;
+	height: 400px;
+}
 .is-invalid .code-support {
-	border-color: #a94442;
+	border-color: var(--danger);
 }
 .code-support .CodeMirror {
-	height: auto;
-}
-.code-support .CodeMirror-scroll {
-    min-height: 120px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
 }
 .property-viewer .CodeMirror .CodeMirror-cursor {
 	border-left: none;

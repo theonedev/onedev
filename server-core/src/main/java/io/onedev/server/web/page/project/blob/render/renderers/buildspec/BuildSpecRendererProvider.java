@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
@@ -7,7 +8,9 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.web.PrioritizedComponentRenderer;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
@@ -38,25 +41,19 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 			return null;
 	}
 	
-	public static int getActiveJobIndex(BlobRenderContext context, BuildSpec buildSpec) {
-		String selection = getSelection(context.getPosition());
-		if (selection != null && selection.startsWith("jobs/")) {
-			String activeJobName = selection.substring("jobs/".length());
-			return IntStream.range(0, buildSpec.getJobs().size())
-				     .filter(i -> activeJobName.equals(buildSpec.getJobs().get(i).getName()))
-				     .findFirst()
-				     .orElse(0);										
-		} else {
-			return 0;
-		}
+	public static String getUrlSegment(Class<?> namedElementClass) {
+		return EditableUtils.getDisplayName(namedElementClass).replace(' ', '-').toLowerCase();
 	}
 	
-	public static int getActiveStepTemplateIndex(BlobRenderContext context, BuildSpec buildSpec) {
+	public static <T extends NamedElement> int getActiveNamedElementIndex(BlobRenderContext context, 
+			Class<T> namedElementClass,  List<T> elements) {
 		String selection = getSelection(context.getPosition());
-		if (selection != null && selection.startsWith("step-templates/")) {
-			String activeTemplateName = selection.substring("step-templates/".length());
-			return IntStream.range(0, buildSpec.getStepTemplates().size())
-				     .filter(i -> activeTemplateName.equals(buildSpec.getStepTemplates().get(i).getName()))
+		String urlSegment = getUrlSegment(namedElementClass) + "s/";
+		
+		if (selection != null && selection.startsWith(urlSegment)) {
+			String activeJobName = selection.substring(urlSegment.length());
+			return IntStream.range(0, elements.size())
+				     .filter(i -> activeJobName.equals(elements.get(i).getName()))
 				     .findFirst()
 				     .orElse(0);										
 		} else {

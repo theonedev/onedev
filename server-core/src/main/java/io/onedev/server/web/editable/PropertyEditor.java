@@ -2,6 +2,7 @@ package io.onedev.server.web.editable;
 
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -11,6 +12,8 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.util.visit.IVisit;
+import org.apache.wicket.util.visit.IVisitor;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 
@@ -60,14 +63,29 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 				
 				// Do not call !isValid() here as otherwise all parent containers with invalid inputs 
 				// will also be marked as is-invalid
-				if (hasErrorMessage())
-					classes += "is-invalid";
+				if (hasErrorMessage() && getInvalidClass() != null) {
+					if (visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, PropertyEditor<?>>() {
+
+						@Override
+						public void component(PropertyEditor<?> object, IVisit<PropertyEditor<?>> visit) {
+							visit.stop(object);
+						}
+						
+					}) == null) {
+						classes += getInvalidClass();
+					}
+				}
 				return classes;
 			}
 			
 		}));
 		
 		setOutputMarkupId(true);
+	}
+	
+	@Nullable
+	protected String getInvalidClass() {
+		return "is-invalid";
 	}
 	
 	protected void markFormDirty(AjaxRequestTarget target) {

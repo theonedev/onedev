@@ -6,10 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -18,7 +15,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -30,8 +26,6 @@ import io.onedev.server.util.usage.Usage;
 @Singleton
 public class DefaultGroupManager extends BaseEntityManager<Group> implements GroupManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultGroupManager.class);
-	
 	private final ProjectManager projectManager;
 	
 	private final SettingManager settingManager;
@@ -66,7 +60,6 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 			
 			issueFieldManager.onRenameGroup(oldName, group.getName());
 			settingManager.getIssueSetting().onRenameGroup(oldName, group.getName());
-			settingManager.getSecuritySetting().onRenameGroup(oldName, group.getName());
 		}
 		dao.persist(group);
 	}
@@ -90,8 +83,6 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 		Authenticator authenticator = settingManager.getAuthenticator();
 		if (authenticator != null)
 			usage.add(authenticator.onDeleteGroup(group.getName()).prefix("administration"));
-		
-		usage.add(settingManager.getSecuritySetting().onDeleteGroup(group.getName()).prefix("administration"));
 		
 		usage.checkInUse("Group '" + group.getName() + "'");
 		
@@ -117,17 +108,4 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 		return count(true);
 	}
 
-	@Override
-	public Group findAnonymous() {
-		SecuritySetting securitySetting = OneDev.getInstance(SettingManager.class).getSecuritySetting();
-		if (securitySetting.isEnableAnonymousAccess()) {
-			Group group = find(securitySetting.getAnonymousGroup());
-			if (group != null) 
-				return group;
-			else
-				logger.error("Undefined anonymous group: " + securitySetting.getAnonymousGroup());
-		}
-		return null;
-	}
-	
 }

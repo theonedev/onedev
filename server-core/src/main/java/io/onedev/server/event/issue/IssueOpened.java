@@ -13,7 +13,7 @@ import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.util.Input;
 
 public class IssueOpened extends IssueEvent implements MarkdownAware {

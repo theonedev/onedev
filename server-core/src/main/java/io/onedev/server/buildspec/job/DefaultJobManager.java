@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,19 +50,22 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.log.LogManager;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
-import io.onedev.server.buildspec.job.paramspec.SecretParam;
-import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
+import io.onedev.server.buildspec.param.ParamUtils;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.buildspec.param.spec.SecretParam;
+import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -105,6 +107,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.SimpleLogger;
+import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -175,7 +178,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Project.push(project);
 		try {
 	    	for (ConstraintViolation<?> violation: validator.validate(project.getBuildSpec(commitId))) {
-	    		String message = String.format("Error validating build spec (project: %s, commit: %s, property: %s, message: %s)", 
+	    		String message = String.format("Error validating build spec (project: %s, commit: %s, location: %s, message: %s)", 
 	    				project.getName(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
 	    		throw new ExplicitException(message);
 	    	}
@@ -204,14 +207,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         	
         	validate(project, commitId);
         	
-			return submit(project, commitId, jobName, paramMap, reason, new LinkedHashSet<>()); 
+			return doSubmit(project, commitId, jobName, paramMap, reason); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
-	private Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, SubmitReason reason, Set<String> checkedJobNames) {
+	private Build doSubmit(Project project, ObjectId commitId, String jobName, 
+			Map<String, List<String>> paramMap, SubmitReason reason) {
 
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
@@ -226,13 +229,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setRefName(reason.getRefName());
 			build.setRequest(reason.getPullRequest());
 			
-			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
+			ParamUtils.validateParamMap(build.getJob().getParamSpecs(), paramMap);
 			
-			if (!checkedJobNames.add(jobName)) {
-				String message = String.format("Circular job dependencies found (%s)", checkedJobNames);
-				throw new ExplicitException(message);
-			}
-	
 			Map<String, List<String>> paramMapToQuery = new HashMap<>(paramMap);
 			for (ParamSpec paramSpec: build.getJob().getParamSpecs()) {
 				if (paramSpec instanceof SecretParam)
@@ -264,18 +262,21 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					}
 				}
 				
+				VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 				for (JobDependency dependency: build.getJob().getJobDependencies()) {
-					new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(build, dependency.getJobParams())) {
+					JobDependency interpolated = interpolator.interpolateProperties(dependency);
+					new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(build, build.getParamCombination(), 
+							interpolated.getJobParams())) {
 						
 						@Override
-						public void run(Map<String, List<String>> params) {
-							Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-									params, reason, new LinkedHashSet<>(checkedJobNames));
+						public void run(Map<String, List<String>> paramMap) {
+							Build dependencyBuild = doSubmit(project, commitId, 
+									interpolated.getJobName(), paramMap, reason);
 							BuildDependence dependence = new BuildDependence();
 							dependence.setDependency(dependencyBuild);
 							dependence.setDependent(build);
-							dependence.setRequireSuccessful(dependency.isRequireSuccessful());
-							dependence.setArtifacts(build.interpolate(dependency.getArtifacts()));
+							dependence.setRequireSuccessful(interpolated.isRequireSuccessful());
+							dependence.setArtifacts(interpolated.getArtifacts());
 							build.getDependencies().add(dependence);
 						}
 						
@@ -283,6 +284,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 				
 				for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
+					dependency = interpolator.interpolateProperties(dependency);
 					Project dependencyProject = projectManager.find(dependency.getProjectName());
 					if (dependencyProject == null)
 						throw new ExplicitException("Unable to find dependency project: " + dependency.getProjectName());
@@ -299,7 +301,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					} else {
 						subject = SecurityUtils.asSubject(0L);
 					}
-					String buildNumberStr = build.interpolate(dependency.getBuildNumber());
+					String buildNumberStr = dependency.getBuildNumber();
 					if (buildNumberStr.startsWith("#"))
 						buildNumberStr = buildNumberStr.substring(1);
 					Long buildNumber = Long.parseLong(buildNumberStr);
@@ -319,7 +321,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					BuildDependence dependence = new BuildDependence();
 					dependence.setDependency(dependencyBuild);
 					dependence.setDependent(build);
-					dependence.setArtifacts(build.interpolate(dependency.getArtifacts()));
+					dependence.setArtifacts(dependency.getArtifacts());
 					build.getDependencies().add(dependence);
 				}
 	
@@ -350,7 +352,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
 			
 			BuildSpec buildSpec = build.getProject().getBuildSpec(build.getCommitId());
-			Job job = (Job) VariableInterpolator.installInterceptor(build.getJob());
+			Job job = build.getJob();
 			
 			JobExecutor executor = getJobExecutor(build);
 			if (executor != null) {
@@ -376,7 +378,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							AtomicInteger maxRetries = new AtomicInteger(0);
 							AtomicInteger retryDelay = new AtomicInteger(0);
 							List<CacheSpec> caches = new ArrayList<>();
-							List<JobService> services = new ArrayList<>();
+							List<Service> services = new ArrayList<>();
+							List<Action> actions = new ArrayList<>();
 							
 							sessionManager.run(new Runnable() {
 
@@ -392,21 +395,34 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														dependence.getArtifacts(), serverWorkspace);
 											}
 										}
+										
+										VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
-										if (job.getArtifacts() != null) {
-											PatternSet patternSet = PatternSet.parse(job.getArtifacts());
+										String artifacts = interpolator.interpolate(job.getArtifacts());
+										if (artifacts != null) {
+											PatternSet patternSet = PatternSet.parse(artifacts);
 											includeFiles.addAll(patternSet.getIncludes());
 											excludeFiles.addAll(patternSet.getExcludes());
 										}
 										for (JobReport report: job.getReports()) {
+											report = interpolator.interpolateProperties(report);
 											PatternSet patternSet = PatternSet.parse(report.getFilePatterns());
 											includeFiles.addAll(patternSet.getIncludes());
 											excludeFiles.addAll(patternSet.getExcludes());
 										}
-										for (CacheSpec cache: job.getCaches())
-											caches.add(build.interpolateProperties(cache));
-										for (JobService service: job.getServices())
-											services.add(build.interpolateProperties(service));
+										
+										for (Step step: job.getSteps()) {
+											step = interpolator.interpolateProperties(step);
+											actions.add(step.getAction(build, build.getParamCombination()));
+										}
+										
+										for (CacheSpec cache: job.getCaches()) 
+											caches.add(interpolator.interpolateProperties(cache));
+										
+										for (String serviceName: job.getRequiredServices()) {
+											Service service = buildSpec.getServiceMap().get(serviceName);
+											services.add(interpolator.interpolateProperties(service));
+										}
 										maxRetries.set(job.getMaxRetries());
 										retryDelay.set(job.getRetryDelay());
 									} finally {
@@ -425,11 +441,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										Build build = buildManager.load(buildId);
 										Build.push(build);
 										try {
-											return new JobContext(projectName, buildNumber, projectGitDir, job.getActions(buildSpec),  
-													serverWorkspace, job.isRetrieveSource(), job.getCloneDepth(), 
-													cloneInfo, job.getCpuRequirement(), job.getMemoryRequirement(), 
-													commitId, caches, new PatternSet(includeFiles, excludeFiles), 
-													executor.getCacheTTL(), retried.get(), services, jobLogger) {
+											return new JobContext(projectName, buildNumber, projectGitDir, 
+													actions, serverWorkspace, job.isRetrieveSource(), 
+													job.getCloneDepth(), cloneInfo, job.getCpuRequirement(), 
+													job.getMemoryRequirement(), commitId, caches, 
+													new PatternSet(includeFiles, excludeFiles), executor.getCacheTTL(), 
+													retried.get(), services, jobLogger) {
 												
 												@Override
 												public void notifyJobRunning() {
@@ -548,15 +565,19 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									public void run() {
 										Build build = buildManager.load(buildId);
 										Build.push(build);
+										VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 										try {
-											if (job.getArtifacts() != null) {
+											String artifacts = interpolator.interpolate(job.getArtifacts());
+											if (artifacts != null) {
 												jobLogger.log("Publishing job artifacts...");
-												build.publishArtifacts(serverWorkspace, job.getArtifacts());
+												build.publishArtifacts(serverWorkspace, artifacts);
 											}
 
-											jobLogger.log("Processing job reports...");
-											for (JobReport report: job.getReports())
+											jobLogger.log("Processing job reports..."); 
+											for (JobReport report: job.getReports()) {
+												report = interpolator.interpolateProperties(report);
 												report.process(build, serverWorkspace, jobLogger);
+											}
 										} finally {
 											Build.pop();
 										}
@@ -627,11 +648,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				try {
 					BuildSpec buildSpec = event.getProject().getBuildSpec(commitId);
 					if (buildSpec != null) {
-						for (Job job: buildSpec.getJobs()) {
+						for (Job job: buildSpec.getJobMap().values()) {
 							JobTriggerMatch match = job.getTriggerMatch(event);
 							if (match != null) {
 								Map<String, List<List<String>>> paramMatrix = 
-										ParamSupply.getParamMatrix(null, match.getTrigger().getParams());						
+										ParamUtils.getParamMatrix(null, null, match.getTrigger().getParams());						
 								Long projectId = event.getProject().getId();
 								
 								// run asynchrously as session may get closed due to exception
@@ -852,7 +873,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					BuildSpec buildSpec = project.getBuildSpec(commitId);
 					if (buildSpec != null) {
 						ScheduledTimeReaches event = new ScheduledTimeReaches(project);
-						for (Job job: buildSpec.getJobs()) {
+						for (Job job: buildSpec.getJobMap().values()) {
 							for (JobTrigger trigger: job.getTriggers()) {
 								if (trigger instanceof ScheduleTrigger) {
 									ScheduleTrigger scheduledTrigger = (ScheduleTrigger) trigger;
@@ -890,7 +911,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						ThreadContext.bind(userManager.getSystem().asSubject());
 						
 						Project project = projectManager.load(projectId);
-						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(null, trigger.getParams())) {
+						new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(null, null, trigger.getParams())) {
 							
 							@Override
 							public void run(Map<String, List<String>> paramMap) {
@@ -1043,9 +1064,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
 						Build.push(build);
 						try {
-							Job job = (Job) VariableInterpolator.installInterceptor(build.getJob());
-							for (PostBuildAction action: job.getPostBuildActions()) {
-								if (ActionCondition.parse(job, action.getCondition()).matches(build))
+							VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+							for (PostBuildAction action: build.getJob().getPostBuildActions()) {
+								action = interpolator.interpolateProperties(action); 
+								if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
 									action.execute(build);
 							}
 						} catch (Throwable e) {

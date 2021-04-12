@@ -76,6 +76,8 @@ import org.hibernate.validator.internal.util.privilegedactions.SetAccessibility;
 import org.hibernate.validator.spi.time.TimeProvider;
 import org.hibernate.validator.spi.valuehandling.ValidatedValueUnwrapper;
 
+import io.onedev.server.util.validation.annotation.ClassValidating;
+
 /**
  * The main Bean Validation class. This is the core processing class of Hibernate Validator.
  *
@@ -550,6 +552,10 @@ public class ValidatorImpl implements Validator, ExecutableValidator {
 		BeanMetaData<?> beanMetaData = beanMetaDataManager.getBeanMetaData( valueContext.getCurrentBeanType() );
 		PathImpl currentPath = valueContext.getPropertyPath();
 		for ( MetaConstraint<?> metaConstraint : beanMetaData.getMetaConstraints() ) {
+			if (metaConstraint.getDescriptor().getAnnotationType() == ClassValidating.class 
+					&& !validationContext.getFailingConstraints().isEmpty()) {
+				continue;
+			}
 			validateConstraint( validationContext, valueContext, false, metaConstraint );
 			if ( shouldFailFast( validationContext ) ) {
 				return;

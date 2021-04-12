@@ -9,7 +9,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
@@ -134,11 +134,14 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 		CallbackParameter start = CallbackParameter.explicit("start");
 		CallbackParameter end = CallbackParameter.explicit("end");
 		String script = String.format(
-				"onedev.server.codeSupport.onEditorDomReady('%s', '%s', %s);", 
+				"onedev.server.codeSupport.onEditorLoad('%s', '%s', %s);", 
 				input.getMarkupId(), 
 				getCode().language(), 
 				behavior.getCallbackFunction(matchWith, line, start, end));
-		response.render(OnDomReadyHeaderItem.forScript(script));
+		
+		// Initialize codemirror via onLoad; otherwise it will not be shown 
+		// correctly in a modal dialog
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 }

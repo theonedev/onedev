@@ -7,7 +7,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.web.behavior.ActionConditionBehavior;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.ActionCondition;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
@@ -43,14 +42,8 @@ public class ActionConditionEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new StringPropertyEditor(componentId, descriptor, model) {
-
-						@Override
-						protected InputAssistBehavior getInputAssistBehavior() {
-							return new ActionConditionBehavior();
-						}
-		        		
-		        	};
+		        	return new StringPropertyEditor(componentId, descriptor, model)
+		        			.setInputAssist(new ActionConditionBehavior());
 				}
     			
     		};
