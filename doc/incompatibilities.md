@@ -1,3 +1,7 @@
+# 4.3.0
+
+1. Service definition is separated from job definition. Previous service defined in job will be moved out of job and take the name _\<job name\>-\<service name\>_ to avoid possible name conflicts. You either need to change it back to use original name in case there is no conflicts, or change your build script to use the new service name. 
+
 # 4.1.3
 
 1. Html report is removed from build spec due to possible XSS vulnerabilities. Check issue #230 for details
