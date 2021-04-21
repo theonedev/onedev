@@ -41,10 +41,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> fields = Lists.newArrayList(
-									Build.NAME_PROJECT, 
-									Build.NAME_JOB, 
-									Build.NAME_IMAGE);
+							List<String> fields = Lists.newArrayList(Build.NAME_PROJECT, Build.NAME_JOB);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);

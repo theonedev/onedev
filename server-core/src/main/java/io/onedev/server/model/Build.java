@@ -130,8 +130,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_JOB = "jobName";
 	
-	public static final String NAME_IMAGE = "Image";
-	
 	public static final String NAME_STATUS = "Status";
 	
 	public static final String PROP_STATUS = "status";
@@ -200,7 +198,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
 			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE,
 			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, 
-			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, NAME_IMAGE, BuildMetric.NAME_REPORT);
+			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, BuildMetric.NAME_REPORT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
