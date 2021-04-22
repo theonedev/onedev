@@ -15,7 +15,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -31,8 +30,6 @@ public class Group extends AbstractEntity {
 	
 	private boolean administrator;
 	
-	private boolean createProjects = true;
-
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> authorizations = new ArrayList<>();
@@ -76,16 +73,6 @@ public class Group extends AbstractEntity {
 		return !(boolean) EditContext.get().getInputValue("administrator");
 	}
 	
-	@Editable(order=400, description="This permission is required to fork projects")
-	@ShowCondition("isAdministratorDisabled")
-	public boolean isCreateProjects() {
-		return createProjects;
-	}
-
-	public void setCreateProjects(boolean createProjects) {
-		this.createProjects = createProjects;
-	}
-
 	public Collection<GroupAuthorization> getAuthorizations() {
 		return authorizations;
 	}

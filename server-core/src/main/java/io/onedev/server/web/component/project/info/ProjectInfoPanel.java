@@ -85,7 +85,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canCreateProjects() && canReadCode));
+		}.setVisible(canReadCode));
 		
 		if (getProject().getDescription() != null)
 			add(new MarkdownViewer("description", Model.of(getProject().getDescription()), null));

@@ -43,7 +43,6 @@ import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
@@ -165,10 +164,6 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			logger.error("Undefined role: " + roleName);
 			return false;
 		}
-	}
-	
-	public static boolean canCreateProjects() {
-		return getSubject().isPermitted(new CreateProjects());
 	}
 	
 	public static boolean canAccess(Project project) {

@@ -269,7 +269,7 @@ public class ProjectListPanel extends Panel {
 		});
 		add(queryForm);
 		
-		add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class).setVisible(SecurityUtils.canCreateProjects()));
+		add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class));
 		
 		SortableDataProvider<Project, Void> dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
 

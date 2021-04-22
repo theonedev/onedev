@@ -188,21 +188,6 @@ public class GroupListPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Can Create Projects")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
-					IModel<Group> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().isCreateProjects()));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "d-none d-lg-table-cell";
-			}
-			
-		});
-		
 		columns.add(new AbstractColumn<Group, Void>(Model.of("Actions")) {
 
 			@Override
