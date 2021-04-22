@@ -81,6 +81,8 @@ jobs:
     - cd onedev-manual
     - if [ "$(git branch -a|grep -c /$branch$)" -eq 0 ]; then
     - '  git push origin main:$branch'
+    - else
+    - '  git push -f origin remotes/origin/$branch:main'
     - fi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   retrieveSource: true
