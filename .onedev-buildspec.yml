@@ -61,17 +61,6 @@ jobs:
     - cd $projectDir/server-product/k8s
     - ./build.sh
     - ''
-    - git config --global user.name "Robin Shen"
-    - git config --global user.email "robin@@onedev.io"
-    - ''
-    - '# Create release branch in onedev-manual if not exist'
-    - branch=${buildVersion%.*}
-    - git clone https://robin:@secrets:pat@@@code.onedev.io/onedev-manual
-    - cd onedev-manual
-    - if [ "$(git branch -a|grep -c /$branch$)" -eq 0 ]; then
-    - '  git push origin main:$branch'
-    - fi
-    - ''
     - cd $projectDir
     - ''
     - cp server-product/target/k8s-resources.zip .
@@ -81,6 +70,18 @@ jobs:
     - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \$(pwd)/onedev:/opt/onedev
       -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
     - EOF
+    - ''
+    - '# Create release branch in onedev-manual if not exist'
+    - git config --global user.name "Robin Shen"
+    - git config --global user.email "robin@@onedev.io"
+    - ''
+    - cd /onedev-build
+    - branch=${buildVersion%.*}
+    - git clone https://robin:@secrets:onedev-token@@@code.onedev.io/onedev-manual
+    - cd onedev-manual
+    - if [ "$(git branch -a|grep -c /$branch$)" -eq 0 ]; then
+    - '  git push origin main:$branch'
+    - fi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   retrieveSource: true
   cloneDepth: 1
