@@ -74,6 +74,7 @@ jobs:
     - '# Create release branch in onedev-manual if not exist'
     - git config --global user.name "Robin Shen"
     - git config --global user.email "robin@@onedev.io"
+    - git config --global --unset http.extraHeader
     - ''
     - cd /onedev-build
     - branch=${buildVersion%.*}
