@@ -5,7 +5,8 @@
 }
 .code-support>div {
 	position: relative;
-	height: 400px;
+	min-height: 100px;
+	max-height: 400px;
 }
 .is-invalid .code-support {
 	border-color: var(--danger);
