@@ -71,7 +71,8 @@ jobs:
       -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
     - EOF
     - ''
-    - '# Create release branch in onedev-manual if not exist'
+    - echo "Creating release branch in onedev-manual..."
+    - ''
     - git config --global user.name "Robin Shen"
     - git config --global user.email "robin@@onedev.io"
     - git config --global --unset http.extraHeader
@@ -84,6 +85,25 @@ jobs:
     - '  git push origin main:$branch'
     - else
     - '  git push -f origin remotes/origin/$branch:main'
+    - fi
+    - ''
+    - echo "Creating release in GitHub..."
+    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$releaseName
+      | jq '.id')
+    - ''
+    - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
+      Online Demo\n\nhttps://code.onedev.io/projects?query=owned+by+%22demo%22\n\n##
+      Downloads\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/artifacts\n\n##
+      Change Log\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
+      Incompatibilities\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/markdown-reports/Incompatibilities/doc/incompatibilities.md\"}"
+    - ''
+    - 'acceptHeader="Accept: application/vnd.github.v3+json"'
+    - if [ "$releaseId" == "null" ]; then
+    - '  curl -u robinshine:@secrets:github-token@ -X POST -H "$acceptHeader" -d "$releaseJson"
+      https://api.github.com/repos/theonedev/onedev/releases'
+    - else
+    - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d
+      "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
     - fi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   retrieveSource: true
