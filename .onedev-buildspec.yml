@@ -112,6 +112,12 @@ jobs:
   jobDependencies:
   - jobName: CI
     requireSuccessful: true
+  - jobName: Sync Main (GitHub)
+    requireSuccessful: true
+    artifacts: '**'
+  - jobName: Sync Tags (GitHub)
+    requireSuccessful: true
+    artifacts: '**'
   artifacts: '*.zip *.sh'
   reports:
   - !JobMarkdownReport
