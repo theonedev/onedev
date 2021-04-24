@@ -88,7 +88,7 @@ jobs:
     - fi
     - ''
     - echo "Creating release in GitHub..."
-    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$releaseName
+    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
       | jq '.id')
     - ''
     - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
