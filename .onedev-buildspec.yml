@@ -17,8 +17,6 @@ jobs:
   cloneDepth: 1
   cloneCredential: !DefaultCredential {}
   triggers:
-  - !BranchUpdateTrigger
-    branches: main
   - !PullRequestUpdateTrigger {}
   retryCondition: never
   maxRetries: 3
