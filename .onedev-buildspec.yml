@@ -33,6 +33,7 @@ jobs:
     image: 1dev/build-environment:1.3
     commands:
     - set -e
+    - set -o pipefail
     - ''
     - echo "Detecting project version (may require some time while downloading maven
       dependencies)..."
@@ -63,6 +64,10 @@ jobs:
     - fi
     - ''
     - echo "Creating release in GitHub..."
+    - ''
+    - curl2 -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
+      > release.json
+    - ''
     - ''
     - releaseId=$(curl2 -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
       | jq '.id')
