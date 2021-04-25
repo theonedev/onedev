@@ -79,8 +79,8 @@ onedev.server = {
 			}
 			if ($form.length != 0 && ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm"))) {
 				var fieldSelector = ":input:not(.no-dirtytrack):not(input[type=submit]):not(input[type=button]):not(button)"; 
-				var events = "change keyup propertychange input";
-				$(container).find(fieldSelector).on(events, function() {
+				var events = "change propertychange input";
+				$(container).find(fieldSelector).on(events, function(e) {
 					onedev.server.form.markDirty($form);
 				});
 				if ($form.find(".is-invalid").length != 0) {
