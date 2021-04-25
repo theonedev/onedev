@@ -36,46 +36,20 @@ jobs:
     commands:
     - set -e
     - ''
-    - projectDir=`pwd`
-    - docker login -u robinshen -p @secrets:dockerhub-password@
-    - ''
     - echo "Detecting project version (may require some time while downloading maven
       dependencies)..."
     - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate
       -Dexpression=project.version -q -DforceStdout)
     - echo "##onedev[SetBuildVersion '$buildVersion']"
     - ''
-    - '# Skip test as we''ve already tested in CI build'
-    - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
-      deploy
-    - ''
-    - curl -u onedev:@secrets:maven-deploy-password@ -f -d @@/root/.m2/archetype-catalog.xml
-      -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"
-    - ''
-    - cd $projectDir/server-product/docker
-    - ./build.sh
-    - docker push 1dev/server:${buildVersion}
-    - docker tag 1dev/server:${buildVersion} 1dev/server:latest
-    - docker push 1dev/server:latest
-    - ''
-    - cd $projectDir/server-product/k8s
-    - ./build.sh
-    - ''
-    - cd $projectDir
-    - ''
-    - cp server-product/target/k8s-resources.zip .
-    - cp server-product/target/onedev-${buildVersion}.zip .
-    - ''
-    - cat << EOF > run-as-docker.sh
-    - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \$(pwd)/onedev:/opt/onedev
-      -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
-    - EOF
+    - echo "Creating release tag..."
+    - git tag v$buildVersion -m "Release tag"
+    - git push -f origin v$buildVersion:v$buildVersion
+    - git config --global --unset http.extraHeader
+    - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev
+      v$buildVersion:v$buildVersion
     - ''
     - echo "Creating release branch in onedev-manual..."
-    - ''
-    - git config --global user.name "Robin Shen"
-    - git config --global user.email "robin@@onedev.io"
-    - git config --global --unset http.extraHeader
     - ''
     - cd /onedev-build
     - branch=${buildVersion%.*}
@@ -88,6 +62,7 @@ jobs:
     - fi
     - ''
     - echo "Creating release in GitHub..."
+    - ''
     - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
       | jq '.id')
     - ''
@@ -108,16 +83,11 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   retrieveSource: true
   cloneDepth: 1
-  cloneCredential: !DefaultCredential {}
+  cloneCredential: !HttpCredential
+    accessTokenSecret: onedev-token
   jobDependencies:
   - jobName: CI
     requireSuccessful: true
-  - jobName: Sync Main (GitHub)
-    requireSuccessful: true
-    artifacts: '**'
-  - jobName: Sync Tags (GitHub)
-    requireSuccessful: true
-    artifacts: '**'
   artifacts: '*.zip *.sh'
   reports:
   - !JobMarkdownReport
@@ -134,9 +104,6 @@ jobs:
     path: /root/.m2/repository
   timeout: 3600
   postBuildActions:
-  - !CreateTagAction
-    condition: successful
-    tagName: v@build_version@
   - !CloseMilestoneAction
     condition: successful
     milestoneName: '@build_version@'
@@ -160,28 +127,4 @@ jobs:
   retryDelay: 30
   cpuRequirement: 250m
   memoryRequirement: 128m
-  timeout: 3600
-- name: Sync Tags (GitHub)
-  steps:
-  - !CommandStep
-    image: alpine/git:1.0.7
-    commands:
-    - set -e
-    - git fetch --tags
-    - git config --global --unset http.extraHeader
-    - git push -f --tags https://robinshine:@secrets:github-token@@@github.com/theonedev/onedev
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  retrieveSource: true
-  cloneCredential: !DefaultCredential {}
-  triggers:
-  - !TagCreateTrigger
-    projects: onedev-server
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  cpuRequirement: 250m
-  memoryRequirement: 128m
-  caches:
-  - key: maven-cache
-    path: /root/.m2/repository
   timeout: 3600
