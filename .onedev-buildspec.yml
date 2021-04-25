@@ -41,6 +41,9 @@ jobs:
     - echo "##onedev[SetBuildVersion '$buildVersion']"
     - ''
     - echo "Creating release tag..."
+    - git config --global user.name "Robin Shen"
+    - git config --global user.email "robin@@onedev.io"
+    - ''
     - git tag v$buildVersion -m "Release tag"
     - git push -f origin v$buildVersion:v$buildVersion
     - git config --global --unset http.extraHeader
