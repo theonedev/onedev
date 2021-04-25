@@ -18,6 +18,7 @@ jobs:
   cloneCredential: !DefaultCredential {}
   triggers:
   - !PullRequestUpdateTrigger {}
+  - !BranchUpdateTrigger {}
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -35,11 +36,40 @@ jobs:
     - set -e
     - set -o pipefail
     - ''
+    - projectDir=`pwd`
+    - docker login -u robinshen -p @secrets:dockerhub-password@
+    - ''
     - echo "Detecting project version (may require some time while downloading maven
       dependencies)..."
     - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate
       -Dexpression=project.version -q -DforceStdout)
     - echo "##onedev[SetBuildVersion '$buildVersion']"
+    - ''
+    - '# Skip test as we''ve already tested in CI build'
+    - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
+      deploy
+    - ''
+    - curl -u onedev:@secrets:maven-deploy-password@ -f -d @@/root/.m2/archetype-catalog.xml
+      -X PUT "https://artifact.onedev.io/artifactory/onedev/archetype-catalog.xml"
+    - ''
+    - cd $projectDir/server-product/docker
+    - ./build.sh
+    - docker push 1dev/server:${buildVersion}
+    - docker tag 1dev/server:${buildVersion} 1dev/server:latest
+    - docker push 1dev/server:latest
+    - ''
+    - cd $projectDir/server-product/k8s
+    - ./build.sh
+    - ''
+    - cd $projectDir
+    - ''
+    - cp server-product/target/k8s-resources.zip .
+    - cp server-product/target/onedev-${buildVersion}.zip .
+    - ''
+    - cat << EOF > run-as-docker.sh
+    - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \$(pwd)/onedev:/opt/onedev
+      -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
+    - EOF
     - ''
     - echo "Creating release tag..."
     - git config --global user.name "Robin Shen"
@@ -65,11 +95,7 @@ jobs:
     - ''
     - echo "Creating release in GitHub..."
     - ''
-    - curl2 -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
-      > release.json
-    - ''
-    - ''
-    - releaseId=$(curl2 -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
+    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
       | jq '.id')
     - ''
     - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
@@ -90,6 +116,9 @@ jobs:
   retrieveSource: true
   cloneCredential: !HttpCredential
     accessTokenSecret: onedev-token
+  jobDependencies:
+  - jobName: CI
+    requireSuccessful: true
   artifacts: '*.zip *.sh'
   reports:
   - !JobMarkdownReport
