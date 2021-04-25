@@ -85,9 +85,6 @@ jobs:
   cloneDepth: 1
   cloneCredential: !HttpCredential
     accessTokenSecret: onedev-token
-  jobDependencies:
-  - jobName: CI
-    requireSuccessful: true
   artifacts: '*.zip *.sh'
   reports:
   - !JobMarkdownReport
