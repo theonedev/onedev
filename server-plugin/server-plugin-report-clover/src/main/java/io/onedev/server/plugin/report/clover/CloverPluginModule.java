@@ -21,7 +21,7 @@ import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.Build;
@@ -52,12 +52,12 @@ public class CloverPluginModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return JobReport.class;
+				return PublishReportStep.class;
 			}
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobJestCoverageReport.class, JobCloverReport.class);
+				return Sets.newHashSet(PublishJestCoverageReportStep.class, PublishCloverReportStep.class);
 			}
 			
 		});
@@ -87,17 +87,17 @@ public class CloverPluginModule extends AbstractPluginModule {
 			
 			@Override
 			public Map<Integer, Integer> getLineCoverages(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportCategoryLockKey(JobCloverReport.DIR), new Callable<Map<Integer, Integer>>() {
+				return LockUtils.read(build.getReportCategoryLockKey(PublishCloverReportStep.DIR), new Callable<Map<Integer, Integer>>() {
 
 					@Override
 					public Map<Integer, Integer> call() throws Exception {
 						Map<Integer, Integer> coverages = new HashMap<>();
-						File categoryDir = build.getReportCategoryDir(JobCloverReport.DIR);
+						File categoryDir = build.getReportCategoryDir(PublishCloverReportStep.DIR);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
 										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
-									File testCountFile = new File(reportDir, JobCloverReport.TEST_COUNTS_DIR + "/" + blobPath);
+									File testCountFile = new File(reportDir, PublishCloverReportStep.TEST_COUNTS_DIR + "/" + blobPath);
 									if (testCountFile.exists()) {
 										try (InputStream is = new BufferedInputStream(new FileInputStream(testCountFile))) {
 											@SuppressWarnings("unchecked")
@@ -124,12 +124,12 @@ public class CloverPluginModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(JobCloverReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(PublishCloverReportStep.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportCategoryDir(JobCloverReport.DIR).exists()) {
-							for (File reportDir: build.getReportCategoryDir(JobCloverReport.DIR).listFiles()) {
+						if (build.getReportCategoryDir(PublishCloverReportStep.DIR).exists()) {
+							for (File reportDir: build.getReportCategoryDir(PublishCloverReportStep.DIR).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) { 
 									tabs.add(new BuildReportTab(reportDir.getName(), CloverReportPage.class, 
 											CloverStatsPage.class));

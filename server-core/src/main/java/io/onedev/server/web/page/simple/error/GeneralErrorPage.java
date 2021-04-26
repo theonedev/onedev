@@ -10,10 +10,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Throwables;
 
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.ExpectedExceptionContribution;
+import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -31,15 +29,7 @@ public class GeneralErrorPage extends SimplePage {
 	public GeneralErrorPage(Exception exception) {
 		super(new PageParameters());
 		
-		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
-			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
-				Exception expectedException = ExceptionUtils.find(exception, expectedExceptionClass);
-				if (expectedException != null)
-					title = expectedException.getMessage();
-				if (title != null)
-					break;
-			}
-		}
+		String title = ExceptionUtils.getExpectedError(exception);
 		if (title == null) {
 			title = "An unexpected exception occurred";
 			detailMessage = Throwables.getStackTraceAsString(exception);

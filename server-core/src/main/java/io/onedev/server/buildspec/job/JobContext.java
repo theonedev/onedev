@@ -13,7 +13,6 @@ import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.util.SimpleLogger;
-import io.onedev.server.util.patternset.PatternSet;
 
 public abstract class JobContext {
 	
@@ -22,8 +21,6 @@ public abstract class JobContext {
 	private final Long buildNumber;
 	
 	private final File projectGitDir;
-	
-	private final File serverWorkspace;
 	
 	private final List<Action> actions;
 	
@@ -41,8 +38,6 @@ public abstract class JobContext {
 	
 	private final Collection<CacheSpec> cacheSpecs; 
 	
-	private final PatternSet collectFiles;
-	
 	private final List<Service> services;
 	
 	private final int cacheTTL;
@@ -55,17 +50,15 @@ public abstract class JobContext {
 	
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
-	public JobContext(String projectName, Long buildNumber, 
-			File projectGitDir, List<Action> actions, File workspace,  
-			boolean retrieveSource, Integer cloneDepth, CloneInfo cloneInfo, 
-			String cpuRequirement, String memoryRequirement, ObjectId commitId, 
-			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
+	public JobContext(String projectName, Long buildNumber, File projectGitDir, 
+			List<Action> actions, boolean retrieveSource, Integer cloneDepth, 
+			CloneInfo cloneInfo, String cpuRequirement, String memoryRequirement, 
+			ObjectId commitId, Collection<CacheSpec> caches, int cacheTTL, 
 			int retried, List<Service> services, SimpleLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
 		this.actions = actions;
-		this.serverWorkspace = workspace;
 		this.retrieveSource = retrieveSource;
 		this.cloneDepth = cloneDepth;
 		this.cloneInfo = cloneInfo;
@@ -73,7 +66,6 @@ public abstract class JobContext {
 		this.memoryRequirement = memoryRequirement;
 		this.commitId = commitId;
 		this.cacheSpecs = caches;
-		this.collectFiles = collectFiles;
 		this.cacheTTL = cacheTTL;
 		this.retried = retried;
 		this.services = services;
@@ -94,10 +86,6 @@ public abstract class JobContext {
 
 	public List<Action> getActions() {
 		return actions;
-	}
-
-	public File getServerWorkspace() {
-		return serverWorkspace;
 	}
 
 	public ObjectId getCommitId() {
@@ -128,10 +116,6 @@ public abstract class JobContext {
 		return cacheSpecs;
 	}
 
-	public PatternSet getCollectFiles() {
-		return collectFiles;
-	}
-
 	public SimpleLogger getLogger() {
 		return logger;
 	}
@@ -159,5 +143,9 @@ public abstract class JobContext {
 	public abstract void notifyJobRunning();
 	
 	public abstract void reportJobWorkspace(String jobWorkspace);
+	
+	public abstract void runServerStep(List<Integer> stepPosition, File filesDir, SimpleLogger logger);
+	
+	public abstract void copyDependencies(File targetDir);
 	
 }

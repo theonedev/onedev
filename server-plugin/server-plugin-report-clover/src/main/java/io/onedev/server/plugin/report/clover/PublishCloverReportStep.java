@@ -22,7 +22,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CloverMetric;
 import io.onedev.server.persistence.dao.Dao;
@@ -32,8 +32,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(name="Clover Coverage Report")
-public class JobCloverReport extends JobReport {
+@Editable(order=410, name="Publish Clover Coverage Report")
+public class PublishCloverReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -64,14 +64,14 @@ public class JobCloverReport extends JobReport {
 	}
 
 	@Override
-	public void process(Build build, File workspace, SimpleLogger logger) {
+	public void run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 		
 		CloverReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CloverReportData>() {
 
 			@Override
 			public CloverReportData call() throws Exception {
-				int baseLen = workspace.getAbsolutePath().length() + 1;
+				int baseLen = filesDir.getAbsolutePath().length() + 1;
 				SAXReader reader = new SAXReader();
 				
 				// Prevent XXE attack as the xml might be provided by malicious users
@@ -88,7 +88,7 @@ public class JobCloverReport extends JobReport {
 
 				List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
 				
-				for (File file: getPatternSet().listFiles(workspace)) {
+				for (File file: getPatternSet().listFiles(filesDir)) {
 					logger.log("Processing clover report: " + file.getAbsolutePath().substring(baseLen));
 					Document doc = reader.read(file);
 					for (Element projectElement: doc.getRootElement().elements("project")) {

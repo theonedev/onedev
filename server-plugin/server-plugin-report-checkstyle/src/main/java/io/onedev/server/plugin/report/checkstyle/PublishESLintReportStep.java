@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.checkstyle;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -6,13 +6,13 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(name="Jest Coverage Report")
-public class JobJestCoverageReport extends JobCloverReport {
+@Editable(order=300, name="Publish ESLint Report")
+public class PublishESLintReportStep extends PublishCheckstyleReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Editable(order=100, description="Specify Jest coverage report file in clover format relative to repository root, "
-			+ "for instance <tt>coverage/clover.xml</tt>. This file can be generated with Jest option <tt>'--coverage'</tt>. "
+	@Editable(order=100, description="Specify ESLint report file in checkstyle format relative to repository root. "
+			+ "This file can be generated with ESLint option <tt>'-f checkstyle'</tt> and <tt>'-o'</tt>. "
 			+ "Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
@@ -26,5 +26,5 @@ public class JobJestCoverageReport extends JobCloverReport {
 	public void setFilePatterns(String filePatterns) {
 		super.setFilePatterns(filePatterns);
 	}
-	
+
 }

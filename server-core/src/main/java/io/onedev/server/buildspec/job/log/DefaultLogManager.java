@@ -25,7 +25,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -434,7 +433,7 @@ public class DefaultLogManager implements LogManager {
 					try {
 						buffer = (renderAsText((JobLogEntry) ois.readObject()) + "\n").getBytes(StandardCharsets.UTF_8);
 					} catch (EOFException e) {
-						IOUtils.closeQuietly(ois);
+						ois.close();
 						ois = null;
 						if (recentBuffer != null) {
 							buffer = recentBuffer;
@@ -460,7 +459,7 @@ public class DefaultLogManager implements LogManager {
 		
 		@Override
 		public void close() throws IOException {
-			IOUtils.closeQuietly(ois);
+			ois.close();
 			lock.unlock();
 		}
 				

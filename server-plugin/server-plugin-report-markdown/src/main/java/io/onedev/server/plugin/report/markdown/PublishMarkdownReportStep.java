@@ -11,14 +11,14 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(name="Markdown Report")
-public class JobMarkdownReport extends JobReport {
+@Editable(order=110, name="Publish Markdown Report")
+public class PublishMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -45,21 +45,21 @@ public class JobMarkdownReport extends JobReport {
 	}
 
 	@Override
-	public void process(Build build, File workspace, SimpleLogger logger) {
+	public void run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
 		LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
-				File startPage = new File(workspace, getStartPage()); 
+				File startPage = new File(filesDir, getStartPage()); 
 				if (startPage.exists()) {
 					FileUtils.createDir(reportDir);
 					File startPageFile = new File(reportDir, START_PAGE);
 					FileUtils.writeFile(startPageFile, getStartPage());
 					
-					int baseLen = workspace.getAbsolutePath().length() + 1;
-					for (File file: getPatternSet().listFiles(workspace)) {
+					int baseLen = filesDir.getAbsolutePath().length() + 1;
+					for (File file: getPatternSet().listFiles(filesDir)) {
 						try {
 							FileUtils.copyFile(file, new File(reportDir, file.getAbsolutePath().substring(baseLen)));
 						} catch (IOException e) {

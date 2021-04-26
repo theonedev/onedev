@@ -1,5 +1,6 @@
 package io.onedev.server.buildspec.job;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SimpleLogger;
 
 public interface JobManager {
 	
@@ -28,5 +30,7 @@ public interface JobManager {
 			Map<CacheInstance, Date> cacheInstances);
 	
 	void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances);
+	
+	void runServerStep(String jobToken, List<Integer> stepPosition, File filesDir, SimpleLogger logger);
 	
 }

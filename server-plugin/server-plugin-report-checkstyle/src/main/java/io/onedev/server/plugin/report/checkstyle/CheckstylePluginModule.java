@@ -19,7 +19,7 @@ import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
 import io.onedev.server.entitymanager.BuildMetricManager;
@@ -53,12 +53,12 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return JobReport.class;
+				return PublishReportStep.class;
 			}
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobESLintReport.class, JobCheckstyleReport.class);
+				return Sets.newHashSet(PublishESLintReportStep.class, PublishCheckstyleReportStep.class);
 			}
 			
 		});
@@ -88,18 +88,18 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			
 			@Override
 			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportCategoryLockKey(JobCheckstyleReport.DIR), new Callable<List<CodeProblem>>() {
+				return LockUtils.read(build.getReportCategoryLockKey(PublishCheckstyleReportStep.DIR), new Callable<List<CodeProblem>>() {
 
 					@SuppressWarnings("unchecked")
 					@Override
 					public List<CodeProblem> call() throws Exception {
 						List<CodeProblem> problems = new ArrayList<>();
-						File categoryDir = build.getReportCategoryDir(JobCheckstyleReport.DIR);
+						File categoryDir = build.getReportCategoryDir(PublishCheckstyleReportStep.DIR);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
 										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
-									File violationsFile = new File(reportDir, JobCheckstyleReport.VIOLATION_FILES + "/" + blobPath);
+									File violationsFile = new File(reportDir, PublishCheckstyleReportStep.VIOLATION_FILES + "/" + blobPath);
 									if (violationsFile.exists()) {
 										try (InputStream is = new BufferedInputStream(new FileInputStream(violationsFile))) {
 											for (ViolationFile.Violation violation: 
@@ -126,12 +126,12 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(JobCheckstyleReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(PublishCheckstyleReportStep.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportCategoryDir(JobCheckstyleReport.DIR).exists()) {
-							for (File reportDir: build.getReportCategoryDir(JobCheckstyleReport.DIR).listFiles()) {
+						if (build.getReportCategoryDir(PublishCheckstyleReportStep.DIR).exists()) {
+							for (File reportDir: build.getReportCategoryDir(PublishCheckstyleReportStep.DIR).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
 									tabs.add(new BuildReportTab(reportDir.getName(), CheckstyleFilesPage.class, 
 											CheckstyleRulesPage.class, CheckstyleStatsPage.class));

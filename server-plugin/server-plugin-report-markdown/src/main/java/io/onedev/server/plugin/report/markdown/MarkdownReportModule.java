@@ -13,7 +13,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
@@ -38,12 +38,12 @@ public class MarkdownReportModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return JobReport.class;
+				return PublishReportStep.class;
 			}
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobMarkdownReport.class, JobPullRequestMarkdownReport.class);
+				return Sets.newHashSet(PublishMarkdownReportStep.class, PublishPullRequestMarkdownReportStep.class);
 			}
 			
 		});
@@ -53,11 +53,11 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(JobMarkdownReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						File categoryDir = build.getReportCategoryDir(JobMarkdownReport.DIR);
+						File categoryDir = build.getReportCategoryDir(PublishMarkdownReportStep.DIR);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()))
@@ -84,12 +84,12 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			public List<PullRequestSummaryPart> getParts(PullRequest request) {
 				List<PullRequestSummaryPart> parts = new ArrayList<>();
 				for (Build build: request.getCurrentBuilds()) {
-					parts.addAll(LockUtils.read(build.getReportCategoryLockKey(JobMarkdownReport.DIR), new Callable<List<PullRequestSummaryPart>>() {
+					parts.addAll(LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.DIR), new Callable<List<PullRequestSummaryPart>>() {
 
 						@Override
 						public List<PullRequestSummaryPart> call() throws Exception {
 							List<PullRequestSummaryPart> parts = new ArrayList<>();
-							File categoryDir = build.getReportCategoryDir(JobPullRequestMarkdownReport.DIR);
+							File categoryDir = build.getReportCategoryDir(PublishPullRequestMarkdownReportStep.DIR);
 							if (categoryDir.exists()) {
 								for (File reportDir: categoryDir.listFiles()) {
 									if (SecurityUtils.canAccessReport(build, reportDir.getName()))

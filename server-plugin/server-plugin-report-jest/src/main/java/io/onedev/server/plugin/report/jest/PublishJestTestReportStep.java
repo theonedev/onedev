@@ -17,7 +17,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.JestTestMetric;
 import io.onedev.server.persistence.dao.Dao;
@@ -26,8 +26,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(name="Jest Test Report")
-public class JobJestTestReport extends JobReport {
+@Editable(order=300, name="Publish Jest Test Report")
+public class PublishJestTestReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -54,7 +54,7 @@ public class JobJestTestReport extends JobReport {
 	}
 
 	@Override
-	public void process(Build build, File workspace, SimpleLogger logger) {
+	public void run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
 		JestTestReportData report = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<JestTestReportData>() {
@@ -64,8 +64,8 @@ public class JobJestTestReport extends JobReport {
 				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 				
 				Collection<JsonNode> rootNodes = new ArrayList<>();
-				int baseLen = workspace.getAbsolutePath().length()+1;
-				for (File file: getPatternSet().listFiles(workspace)) {
+				int baseLen = filesDir.getAbsolutePath().length()+1;
+				for (File file: filesDir.listFiles()) {
 					logger.log("Processing jest test report: " + file.getAbsolutePath().substring(baseLen));
 					try {
 						rootNodes.add(mapper.readTree(file));
@@ -95,8 +95,7 @@ public class JobJestTestReport extends JobReport {
 			metric.setNumOfTestSuites(report.getNumOfTestSuites());
 			metric.setTotalTestDuration(report.getTotalTestDuration());
 			OneDev.getInstance(Dao.class).persist(metric);
-		}
-		
+		}		
 	}
 
 }

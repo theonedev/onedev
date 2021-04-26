@@ -2,6 +2,7 @@ package io.onedev.server.util;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.web.ExpectedExceptionContribution;
 
 public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 
@@ -48,4 +50,19 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 	    String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + OneDev.NAME + "\"";
 	    response.setHeader(HttpHeaders.WWW_AUTHENTICATE, authcHeader);
 	}
+
+	@Nullable
+	public static String getExpectedError(Exception exception) {
+		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
+			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
+				Exception expectedException = ExceptionUtils.find(exception, expectedExceptionClass);
+				if (expectedException != null) {
+					if (expectedException.getMessage() != null)
+						return expectedException.getMessage();
+				}
+			}
+		}
+		return null;
+	}
+	
 }

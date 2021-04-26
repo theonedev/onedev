@@ -32,6 +32,10 @@ public class PatternSet implements Serializable {
 	
 	private final Set<String> excludes;
 	
+	public PatternSet() {
+		this(new HashSet<>(), new HashSet<>());
+	}
+	
 	public PatternSet(Set<String> includes, Set<String> excludes) {
 		this.includes = includes;
 		this.excludes = excludes;

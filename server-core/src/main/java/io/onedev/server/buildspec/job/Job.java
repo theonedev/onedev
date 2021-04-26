@@ -56,8 +56,6 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.RetryCondition;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.editable.annotation.SuggestionProvider;
@@ -101,10 +99,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private List<String> requiredServices = new ArrayList<>();
 	
-	private String artifacts;
-	
-	private List<JobReport> reports = new ArrayList<>();
-
 	private List<JobTrigger> triggers = new ArrayList<>();
 	
 	private List<CacheSpec> caches = new ArrayList<>();
@@ -265,29 +259,6 @@ public class Job implements NamedElement, Serializable, Validatable {
 			}
 		}
 		return choices;
-	}
-
-	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts relative to "
-			+ "repository root. Use * or ? for pattern match")
-	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(path=true)
-	@NameOfEmptyValue("No artifacts")
-	public String getArtifacts() {
-		return artifacts;
-	}
-
-	public void setArtifacts(String artifacts) {
-		this.artifacts = artifacts;
-	}
-
-	@Editable(order=9120, group="Artifacts & Reports", description="Add job reports here")
-	@Valid
-	public List<JobReport> getReports() {
-		return reports;
-	}
-
-	public void setReports(List<JobReport> reports) {
-		this.reports = reports;
 	}
 
 	@Editable(order=9400, group="More Settings", description="Specify condition to retry build upon failure")

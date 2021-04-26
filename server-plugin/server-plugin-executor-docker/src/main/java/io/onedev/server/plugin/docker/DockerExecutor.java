@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -43,10 +44,12 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CommandExecutable;
-import io.onedev.k8shelper.CommandHandler;
 import io.onedev.k8shelper.CompositeExecutable;
 import io.onedev.k8shelper.Executable;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.k8shelper.LeafExecutable;
+import io.onedev.k8shelper.LeafHandler;
+import io.onedev.k8shelper.ServerExecutable;
 import io.onedev.k8shelper.SshCloneInfo;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
@@ -57,10 +60,12 @@ import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.docker.DockerExecutor.TestData;
+import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.concurrent.CapacityRunner;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -409,7 +414,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			SimpleLogger jobLogger = jobContext.getLogger();
 			getCapacityRunner().call(new Callable<Void>() {
 	
-				@SuppressWarnings("resource")
 				@Override
 				public Void call() {
 					String network = getName() + "-" + jobContext.getProjectName() + "-" 
@@ -563,11 +567,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							}
 						
 							jobLogger.log("Copying job dependencies...");
-							try {
-								FileUtils.copyDirectory(jobContext.getServerWorkspace(), hostWorkspace);
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
+							jobContext.copyDependencies(hostWorkspace);
 	
 							String containerBuildHome;
 							String containerWorkspace;
@@ -594,32 +594,33 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							
 							jobContext.reportJobWorkspace(containerWorkspace);
 							Executable entryExecutable = new CompositeExecutable(jobContext.getActions());
-							try {
-								List<String> errorMessages = new ArrayList<>();
-								
-								entryExecutable.execute(new CommandHandler() {
-	
-									@Override
-									public boolean execute(CommandExecutable executable, List<Integer> position) {
+							
+							List<String> errorMessages = new ArrayList<>();
+							
+							entryExecutable.execute(new LeafHandler() {
+
+								@Override
+								public boolean execute(LeafExecutable executable, List<Integer> position) {
+									String positionStr = KubernetesHelper.stringifyPosition(position);
+									if (executable instanceof CommandExecutable) {
+										CommandExecutable commandExecutable = (CommandExecutable) executable;
 										if (SystemUtils.IS_OS_WINDOWS) {
 											File scriptFile = new File(hostBuildHome, "job-commands.bat");
 											try {
-												FileUtils.writeLines(scriptFile, executable.getCommands(), "\r\n");
+												FileUtils.writeLines(scriptFile, commandExecutable.getCommands(), "\r\n");
 											} catch (IOException e) {
 												throw new RuntimeException(e);
 											}
 										} else {
 											File scriptFile = new File(hostBuildHome, "job-commands.sh");
 											try {
-												FileUtils.writeLines(scriptFile, executable.getCommands(), "\n");
+												FileUtils.writeLines(scriptFile, commandExecutable.getCommands(), "\n");
 											} catch (IOException e) {
 												throw new RuntimeException(e);
 											}
 										}
 										
-										String stepName = KubernetesHelper.describe(position);
-										
-										String containerName = network + "-step-" + stepName;
+										String containerName = network + "-step-" + positionStr;
 										Commandline docker = newDocker();
 										docker.clearArgs();
 										docker.addArgs("run", "--name=" + containerName, "--network=" + network);
@@ -651,11 +652,11 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 										}
 										
 										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
-										docker.addArgs(executable.getImage());
+										docker.addArgs(commandExecutable.getImage());
 										
 										docker.addArgs(containerCommand);
 										
-										jobLogger.log("Running step #" + stepName + "...");
+										jobLogger.log("Running step #" + positionStr + "...");
 										
 										ExecutionResult result = docker.execute(logger, logger, null, new ProcessKiller() {
 					
@@ -683,34 +684,51 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 											
 										});
 										if (result.getReturnCode() != 0) {
-											errorMessages.add("Step #" + stepName + ": Command failed with exit code " + result.getReturnCode());
+											errorMessages.add("Step #" + positionStr + ": Command failed with exit code " + result.getReturnCode());
 											return false;
 										} else {
 											return true;
 										}
-									}
-	
-									@Override
-									public void skip(CommandExecutable executable, List<Integer> position) {
-										jobLogger.log("Skipping step #" + KubernetesHelper.describe(position) + "...");
-									}
-									
-								}, new ArrayList<>());
+									} else {
+										jobLogger.log("Running step #" + positionStr + "...");
+										
+										ServerExecutable serverExecutable = (ServerExecutable) executable;
+										PatternSet filePatternSet = new PatternSet(serverExecutable.getIncludeFiles(), 
+												serverExecutable.getExcludeFiles());
+										File filesDir = FileUtils.createTempDir();
+										try {
+											int baseLen = hostWorkspace.getAbsolutePath().length()+1;
+											for (File file: filePatternSet.listFiles(hostWorkspace)) {
+												try {
+													FileUtils.copyFile(file, new File(filesDir, file.getAbsolutePath().substring(baseLen)));
+												} catch (IOException e) {
+													throw new RuntimeException(e);
+												}
+											}
 
-								if (!errorMessages.isEmpty())
-									throw new ExplicitException(errorMessages.iterator().next());
-							} finally {
-								jobLogger.log("Sending job outcomes...");
-								
-								int baseLen = hostWorkspace.getAbsolutePath().length()+1;
-								for (File file: jobContext.getCollectFiles().listFiles(hostWorkspace)) {
-									try {
-										FileUtils.copyFile(file, new File(jobContext.getServerWorkspace(), file.getAbsolutePath().substring(baseLen)));
-									} catch (IOException e) {
-										throw new RuntimeException(e);
+											jobContext.runServerStep(position, filesDir, jobLogger);
+											return true;
+										} catch (Exception e) {
+											String errorMessage = ExceptionUtils.getExpectedError(e);
+											if (errorMessage == null) 
+												errorMessage = Throwables.getStackTraceAsString(e);
+											errorMessages.add("Step #" + positionStr + " is failed: " + errorMessage);
+											return false;
+										} finally {
+											FileUtils.deleteDir(filesDir);
+										}
 									}
 								}
-							}
+
+								@Override
+								public void skip(LeafExecutable executable, List<Integer> position) {
+									jobLogger.log("Skipping step #" + KubernetesHelper.stringifyPosition(position) + "...");
+								}
+								
+							}, new ArrayList<>());
+
+							if (!errorMessages.isEmpty())
+								throw new ExplicitException(errorMessages.iterator().next());
 							
 							jobLogger.log("Reporting job caches...");
 							

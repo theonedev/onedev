@@ -3,7 +3,7 @@ package io.onedev.server.plugin.executor.kubernetes;
 import static io.onedev.k8shelper.KubernetesHelper.ENV_JOB_TOKEN;
 import static io.onedev.k8shelper.KubernetesHelper.ENV_SERVER_URL;
 import static io.onedev.k8shelper.KubernetesHelper.LOG_END_MESSAGE;
-import static io.onedev.k8shelper.KubernetesHelper.describe;
+import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,9 +52,10 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CommandExecutable;
-import io.onedev.k8shelper.CommandVisitor;
+import io.onedev.k8shelper.LeafVisitor;
 import io.onedev.k8shelper.CompositeExecutable;
 import io.onedev.k8shelper.ExecuteCondition;
+import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.CacheSpec;
@@ -816,24 +817,48 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				List<String> containerNames = Lists.newArrayList("init");
 				
-				entryExecutable.traverse(new CommandVisitor<Void>() {
+				String helperImageVersion;
+				try (InputStream is = KubernetesExecutor.class.getClassLoader().getResourceAsStream("k8s-helper-version.properties")) {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					IOUtils.copy(is, baos);
+					helperImageVersion = baos.toString();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				
+				List<Map<Object, Object>> envs = new ArrayList<>();
+				envs.add(CollectionUtils.newLinkedHashMap(
+						"name", ENV_SERVER_URL, 
+						"value", getServerUrl()));
+				envs.add(CollectionUtils.newLinkedHashMap(
+						"name", ENV_JOB_TOKEN, 
+						"value", jobToken));
+
+				entryExecutable.traverse(new LeafVisitor<Void>() {
 
 					@Override
-					public Void visit(CommandExecutable executable, List<Integer> position) {
+					public Void visit(LeafExecutable executable, List<Integer> position) {
 						String containerName = getContainerName(position);
 						containerNames.add(containerName);
+						String image;
+						if (executable instanceof CommandExecutable)
+							image = ((CommandExecutable)executable).getImage();
+						else 
+							image = "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion;
+						
 						Map<Object, Object> stepContainerSpec = CollectionUtils.newHashMap(
 								"name", containerName, 
-								"image", executable.getImage());
+								"image", image);
 				
 						if (baselineOsInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));
-							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + describe(position) + ".sh"));
+							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + stringifyPosition(position) + ".sh"));
 						} else {
 							stepContainerSpec.put("command", Lists.newArrayList("cmd"));
-							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandHome + "\\" + describe(position) + ".bat"));
+							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandHome + "\\" + stringifyPosition(position) + ".bat"));
 						}
-						
+
+						stepContainerSpec.put("env", envs);
 						stepContainerSpec.put("volumeMounts", volumeMounts);
 						containerSpecs.add(stepContainerSpec);
 						
@@ -860,23 +885,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					initArgs.add("test");
 				}
 				
-				String helperImageVersion;
-				try (InputStream is = KubernetesExecutor.class.getClassLoader().getResourceAsStream("k8s-helper-version.properties")) {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					IOUtils.copy(is, baos);
-					helperImageVersion = baos.toString();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				
-				List<Map<Object, Object>> envs = new ArrayList<>();
-				envs.add(CollectionUtils.newLinkedHashMap(
-						"name", ENV_SERVER_URL, 
-						"value", getServerUrl()));
-				envs.add(CollectionUtils.newLinkedHashMap(
-						"name", ENV_JOB_TOKEN, 
-						"value", jobToken));
-
 				Map<Object, Object> initContainerSpec = CollectionUtils.newHashMap(
 						"name", "init", 
 						"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
@@ -1067,7 +1075,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private String getContainerName(List<Integer> stepPosition) {
-		return "step-" + describe(stepPosition);
+		return "step-" + stringifyPosition(stepPosition);
 	}
 	
 	private Map<String, ContainerError> getContainerErrors(Collection<JsonNode> containerStatusNodes) {

@@ -11,15 +11,15 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(name="Markdown Report (for Pull Request)", description="This report will be displayed in pull request overview "
+@Editable(order=120, name="Publish Markdown Report (for Pull Request)", description="This report will be displayed in pull request overview "
 		+ "page if the build belongs to a pull request")
-public class JobPullRequestMarkdownReport extends JobReport {
+public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -51,7 +51,7 @@ public class JobPullRequestMarkdownReport extends JobReport {
 	}
 
 	@Override
-	public void process(Build build, File workspace, SimpleLogger logger) {
+	public void run(Build build, File workspace, SimpleLogger logger) {
 		if (build.getRequest() != null) {
 			File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 

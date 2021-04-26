@@ -1,15 +1,11 @@
-package io.onedev.server.buildspec.job;
+package io.onedev.server.buildspec.step;
 
-import java.io.File;
-import java.io.Serializable;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.model.Build;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.PathSegment;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -17,7 +13,7 @@ import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
-public abstract class JobReport implements Serializable {
+public abstract class PublishReportStep extends ServerStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -36,6 +32,11 @@ public abstract class JobReport implements Serializable {
 
 	public void setReportName(String reportName) {
 		this.reportName = reportName;
+	}
+	
+	@Override
+	protected PatternSet getFiles() {
+		return PatternSet.parse(getFilePatterns());
 	}
 	
 	@Editable(order=100, description="Specify files relative to repository root to publish. Use * or ? for pattern match")
@@ -61,6 +62,4 @@ public abstract class JobReport implements Serializable {
 		return patternSet;
 	}
 	
-	public abstract void process(Build build, File workspace, SimpleLogger logger);
-
 }

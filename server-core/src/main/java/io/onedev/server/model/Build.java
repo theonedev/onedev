@@ -832,29 +832,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		return streamPreviousNumbersCache.get(limit);
 	}
 	
-	public void retrieveArtifacts(Build dependency, String artifacts, File workspaceDir) {
-		LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
-				File artifactsDir = dependency.getArtifactsDir();
-				if (artifactsDir.exists()) {
-					PatternSet patternSet = PatternSet.parse(artifacts);
-					int baseLen = artifactsDir.getAbsolutePath().length() + 1;
-					for (File file: patternSet.listFiles(artifactsDir)) {
-						try {
-							FileUtils.copyFile(file, new File(workspaceDir, file.getAbsolutePath().substring(baseLen)));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-				}
-				return null;
-			}
-			
-		});
-	}
-	
 	public String getArtifactsLockKey() {
 		return "build-artifacts:" + getId();
 	}

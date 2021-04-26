@@ -82,12 +82,12 @@ public class CloverReportPage extends BuildReportPage {
 
 		@Override
 		protected CloverReportData load() {
-			return LockUtils.read(getBuild().getReportCategoryLockKey(JobCloverReport.DIR), new Callable<CloverReportData>() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(PublishCloverReportStep.DIR), new Callable<CloverReportData>() {
 
 				@Override
 				public CloverReportData call() throws Exception {
 					return CloverReportData.readFrom(new File(
-							getBuild().getReportCategoryDir(JobCloverReport.DIR), getReportName()));
+							getBuild().getReportCategoryDir(PublishCloverReportStep.DIR), getReportName()));
 				}
 				
 			});

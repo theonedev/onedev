@@ -24,7 +24,7 @@ public class PullRequestSummaryMarkdownPart extends PullRequestSummaryPart {
 	@Override
 	public Component render(String componentId) {
 		try {
-			File file = new File(reportDir, JobPullRequestMarkdownReport.FILE);
+			File file = new File(reportDir, PublishPullRequestMarkdownReportStep.FILE);
 			String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 			return new MarkdownViewer(componentId, Model.of(markdown), null)
 					.add(AttributeAppender.append("class", "mb-n3"));

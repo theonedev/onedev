@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.job;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -11,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -53,6 +53,11 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CloneInfo;
+import io.onedev.k8shelper.CompositeExecutable;
+import io.onedev.k8shelper.Executable;
+import io.onedev.k8shelper.LeafExecutable;
+import io.onedev.k8shelper.LeafVisitor;
+import io.onedev.k8shelper.ServerExecutable;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.Service;
@@ -65,6 +70,7 @@ import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.SecretParam;
+import io.onedev.server.buildspec.step.ServerStep;
 import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -370,11 +376,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 					@Override
 					public void run() {
-						jobLogger.log("Creating server workspace...");
-						File serverWorkspace = FileUtils.createTempDir("server-workspace");
 						try {
-							Set<String> includeFiles = new HashSet<>();
-							Set<String> excludeFiles = new HashSet<>();
 							AtomicInteger maxRetries = new AtomicInteger(0);
 							AtomicInteger retryDelay = new AtomicInteger(0);
 							List<CacheSpec> caches = new ArrayList<>();
@@ -388,29 +390,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									Build build = buildManager.load(buildId);
 									Build.push(build);
 									try {
-										jobLogger.log("Retrieving dependency artifacts...");
-										for (BuildDependence dependence: build.getDependencies()) {
-											if (dependence.getArtifacts() != null) {
-												build.retrieveArtifacts(dependence.getDependency(), 
-														dependence.getArtifacts(), serverWorkspace);
-											}
-										}
-										
 										VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
 
-										String artifacts = interpolator.interpolate(job.getArtifacts());
-										if (artifacts != null) {
-											PatternSet patternSet = PatternSet.parse(artifacts);
-											includeFiles.addAll(patternSet.getIncludes());
-											excludeFiles.addAll(patternSet.getExcludes());
-										}
-										for (JobReport report: job.getReports()) {
-											report = interpolator.interpolateProperties(report);
-											PatternSet patternSet = PatternSet.parse(report.getFilePatterns());
-											includeFiles.addAll(patternSet.getIncludes());
-											excludeFiles.addAll(patternSet.getExcludes());
-										}
-										
 										for (Step step: job.getSteps()) {
 											step = interpolator.interpolateProperties(step);
 											actions.add(step.getAction(build, build.getParamCombination()));
@@ -442,11 +423,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										Build.push(build);
 										try {
 											return new JobContext(projectName, buildNumber, projectGitDir, 
-													actions, serverWorkspace, job.isRetrieveSource(), 
-													job.getCloneDepth(), cloneInfo, job.getCpuRequirement(), 
-													job.getMemoryRequirement(), commitId, caches, 
-													new PatternSet(includeFiles, excludeFiles), executor.getCacheTTL(), 
-													retried.get(), services, jobLogger) {
+													actions, job.isRetrieveSource(), job.getCloneDepth(), 
+													cloneInfo, job.getCpuRequirement(), job.getMemoryRequirement(), 
+													commitId, caches, executor.getCacheTTL(), retried.get(), 
+													services, jobLogger) {
 												
 												@Override
 												public void notifyJobRunning() {
@@ -473,6 +453,71 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 															Build build = buildManager.load(buildId);
 															build.setJobWorkspace(jobWorkspace);
 															buildManager.save(build);
+														}
+														
+													});
+												}
+
+												@Override
+												public void runServerStep(List<Integer> stepPosition, File filesDir, SimpleLogger logger) {
+													sessionManager.run(new Runnable() {
+
+														@Override
+														public void run() {
+															Executable entryExecutable = new CompositeExecutable(getActions());
+															
+															LeafVisitor<LeafExecutable> visitor = new LeafVisitor<LeafExecutable>() {
+
+																@Override
+																public LeafExecutable visit(LeafExecutable executable, List<Integer> position) {
+																	if (position.equals(stepPosition))
+																		return executable;
+																	else
+																		return null;
+																}
+																
+															};															
+															
+															ServerExecutable serverExecutable = (ServerExecutable) entryExecutable.traverse(visitor, new ArrayList<>());
+															ServerStep serverStep = (ServerStep) serverExecutable.getStep();
+															serverStep.run(buildManager.load(buildId), filesDir, logger);
+														}
+														
+													});
+												}
+
+												@Override
+												public void copyDependencies(File targetDir) {
+													sessionManager.run(new Runnable() {
+
+														@Override
+														public void run() {
+															Build build = buildManager.load(buildId);
+															for (BuildDependence dependence: build.getDependencies()) {
+																if (dependence.getArtifacts() != null) {
+																	Build dependency = dependence.getDependency();
+																	LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
+
+																		@Override
+																		public Void call() throws Exception {
+																			File artifactsDir = dependency.getArtifactsDir();
+																			if (artifactsDir.exists()) {
+																				PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
+																				int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+																				for (File file: patternSet.listFiles(artifactsDir)) {
+																					try {
+																						FileUtils.copyFile(file, new File(targetDir, file.getAbsolutePath().substring(baseLen)));
+																					} catch (IOException e) {
+																						throw new RuntimeException(e);
+																					}
+																				}
+																			}
+																			return null;
+																		}
+																		
+																	});
+																}
+															}
 														}
 														
 													});
@@ -558,36 +603,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						} catch (Throwable e) {
 							throw maskSecrets(e, jobSecretsToMask);
 						} finally {
-							try {
-								transactionManager.run(new Runnable() {
-	
-									@Override
-									public void run() {
-										Build build = buildManager.load(buildId);
-										Build.push(build);
-										VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
-										try {
-											String artifacts = interpolator.interpolate(job.getArtifacts());
-											if (artifacts != null) {
-												jobLogger.log("Publishing job artifacts...");
-												build.publishArtifacts(serverWorkspace, artifacts);
-											}
-
-											jobLogger.log("Processing job reports..."); 
-											for (JobReport report: job.getReports()) {
-												report = interpolator.interpolateProperties(report);
-												report.process(build, serverWorkspace, jobLogger);
-											}
-										} finally {
-											Build.pop();
-										}
-									}
-									
-								});
-								FileUtils.deleteDir(serverWorkspace);
-							} catch (Throwable e) {
-								throw maskSecrets(e, jobSecretsToMask);
-							} 
 							jobLogger.log("Job finished");
 						}
 					}
@@ -1183,4 +1198,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 
+	@Override
+	public void runServerStep(String jobToken, List<Integer> stepPosition, File filesDir, SimpleLogger logger) {
+		getJobContext(jobToken, true).runServerStep(stepPosition, filesDir, logger);
+	}
+	
 }

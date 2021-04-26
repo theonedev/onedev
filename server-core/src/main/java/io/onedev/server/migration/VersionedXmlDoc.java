@@ -17,7 +17,6 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.ObjectUtils.Null;
 import org.dom4j.Attribute;
@@ -387,9 +386,7 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 	}
 	
 	public void writeToFile(File file, boolean pretty) {
-		OutputStream os = null;
-		try {
-			os = new FileOutputStream(file);
+		try (OutputStream os = new FileOutputStream(file)){
 			OutputFormat format = new OutputFormat();
 			format.setIndent(pretty);
 			format.setNewlines(pretty);
@@ -398,8 +395,6 @@ public final class VersionedXmlDoc implements Document, Externalizable {
 			writer.write(this);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
-		} finally {
-			IOUtils.closeQuietly(os);
 		}
 	}
 	

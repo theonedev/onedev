@@ -15,7 +15,7 @@ import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.JestTestMetric;
@@ -45,12 +45,12 @@ public class JestTestReportModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return JobReport.class;
+				return PublishReportStep.class;
 			}
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(JobJestTestReport.class);
+				return Sets.newHashSet(PublishJestTestReportStep.class);
 			}
 			
 		});
@@ -60,11 +60,11 @@ public class JestTestReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(JobJestTestReport.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(PublishJestTestReportStep.DIR), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						File categoryDir = build.getReportCategoryDir(JobJestTestReport.DIR);
+						File categoryDir = build.getReportCategoryDir(PublishJestTestReportStep.DIR);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {

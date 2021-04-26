@@ -20,7 +20,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.job.JobReport;
+import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.code.CodeProblem.Severity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CheckstyleMetric;
@@ -30,8 +30,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(name="Checkstyle Report")
-public class JobCheckstyleReport extends JobReport {
+@Editable(order=310, name="Publish Checkstyle Report")
+public class PublishCheckstyleReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -62,14 +62,14 @@ public class JobCheckstyleReport extends JobReport {
 	}
 
 	@Override
-	public void process(Build build, File workspace, SimpleLogger logger) {
+	public void run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 		
 		CheckstyleReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CheckstyleReportData>() {
 
 			@Override
 			public CheckstyleReportData call() throws Exception {
-				int baseLen = workspace.getAbsolutePath().length() + 1;
+				int baseLen = filesDir.getAbsolutePath().length() + 1;
 				SAXReader reader = new SAXReader();
 				
 				// Prevent XXE attack as the xml might be provided by malicious users
@@ -78,7 +78,7 @@ public class JobCheckstyleReport extends JobReport {
 				List<CheckstyleViolation> violations = new ArrayList<>();
 				
 				boolean hasReports = false;
-				for (File file: getPatternSet().listFiles(workspace)) {
+				for (File file: getPatternSet().listFiles(filesDir)) {
 					logger.log("Processing checkstyle report: " + file.getAbsolutePath().substring(baseLen));
 					Document doc = reader.read(file);
 					for (Element fileElement: doc.getRootElement().elements("file")) {

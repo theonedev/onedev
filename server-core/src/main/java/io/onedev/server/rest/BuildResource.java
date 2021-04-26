@@ -31,8 +31,8 @@ import io.onedev.server.security.SecurityUtils;
 public class BuildResource {
 
 	private final BuildManager buildManager;
-	
-	@Inject
+    
+    @Inject
 	public BuildResource(BuildManager buildManager) {
 		this.buildManager = buildManager;
 	}
@@ -42,6 +42,7 @@ public class BuildResource {
     public Response query(@QueryParam("job") String jobName, @QueryParam("commit") String commit, 
     		@QueryParam("number") Long number, @QueryParam("offset") Integer offset, 
     		@QueryParam("count") Integer count, @Context UriInfo uriInfo) {
+		
 		EntityCriteria<Build> criteria = buildManager.newCriteria();
 		if (jobName != null)
 			criteria.add(Restrictions.eq("jobName", jobName));
