@@ -1,6 +1,8 @@
-package io.onedev.server.buildspec.job.action;
+package io.onedev.server.buildspec.step;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
@@ -14,12 +16,13 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Multiline;
 
-@Editable(name="Create tag", order=400)
-public class CreateTagAction extends PostBuildAction {
+@Editable(name="Create Tag", order=30)
+public class CreateTagStep extends ServerStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -51,18 +54,16 @@ public class CreateTagAction extends PostBuildAction {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	@Override
-	public void execute(Build build) {
+	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
 		PersonIdent tagIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 		Project project = build.getProject();
 		String tagName = getTagName();
 
-		CreateTagAction instance = new CreateTagAction();
-		instance.setTagName(tagName);
-		if (project.getBuildSetting().isActionAuthorized(build, instance)) {
+		if (build.canCreateTag(tagName)) {
 			Ref tagRef = project.getTagRef(tagName);
 			if (tagRef != null) {
 				OneDev.getInstance(ProjectManager.class).deleteTag(project, tagName);
@@ -71,13 +72,10 @@ public class CreateTagAction extends PostBuildAction {
 				project.createTag(tagName, build.getCommitHash(), tagIdent, getTagMessage());
 			}
 		} else {
-			throw new ExplicitException("Creating tag '" + tagName + "' is not allowed in this build");
+			throw new ExplicitException("This build is not authorized to create tag '" + tagName + "'");
 		}
-	}
-
-	@Override
-	public String getDescription() {
-		return "Create tag";
+		
+		return null;
 	}
 
 }

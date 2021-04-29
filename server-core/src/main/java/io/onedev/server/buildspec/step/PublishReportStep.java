@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.ExecuteCondition;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.PathSegment;
@@ -34,12 +35,16 @@ public abstract class PublishReportStep extends ServerStep {
 		this.reportName = reportName;
 	}
 	
+	public PublishReportStep() {
+		setCondition(ExecuteCondition.ALWAYS);
+	}
+	
 	@Override
 	protected PatternSet getFiles() {
 		return PatternSet.parse(getFilePatterns());
 	}
 	
-	@Editable(order=100, description="Specify files relative to repository root to publish. Use * or ? for pattern match")
+	@Editable(order=100, description="Specify files relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a> to publish. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty
@@ -53,7 +58,7 @@ public abstract class PublishReportStep extends ServerStep {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	public PatternSet getPatternSet() {

@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.Executable;
 import io.onedev.k8shelper.ExecuteCondition;
@@ -18,7 +20,19 @@ public abstract class Step implements Serializable {
 
 	private ExecuteCondition condition = ExecuteCondition.ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL;
 	
-	public abstract Executable getExecutable(Build build, ParamCombination paramCombination);
+	public abstract Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination);
+	
+	private String name;
+
+	@Editable(order=10)
+	@NotEmpty
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	@Editable(order=10000, description="Under which condition this step should run")
 	@NotNull
@@ -30,8 +44,12 @@ public abstract class Step implements Serializable {
 		this.condition = condition;
 	}
 
-	public Action getAction(Build build, ParamCombination paramCombination) {
-		return new Action(getExecutable(build, paramCombination), condition);
+	public Action getAction(String name, Build build, String jobToken, ParamCombination paramCombination) {
+		return new Action(name, getExecutable(build, jobToken, paramCombination), condition);
+	}
+	
+	public Action getAction(Build build, String jobToken, ParamCombination paramCombination) {
+		return getAction(name, build, jobToken, paramCombination);
 	}
 	
 }

@@ -4,16 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.job.action.CreateTagAction;
-import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=100, name="Create tag")
+@Editable(order=20, name="Create tag")
 public class CreateTagAuthorization extends ActionAuthorization {
 
 	private static final long serialVersionUID = 1L;
@@ -40,16 +37,6 @@ public class CreateTagAuthorization extends ActionAuthorization {
 			return new ArrayList<>();
 	}
 
-	@Override
-	public boolean matches(PostBuildAction postBuildAction) {
-		if (postBuildAction instanceof CreateTagAction) {
-			CreateTagAction createTagAction = (CreateTagAction) postBuildAction;
-			return tagNames == null || WildcardUtils.matchPath(tagNames, createTagAction.getTagName());
-		} else {
-			return false;
-		}
-	}
-	
 	@Override
 	public String getActionDescription() {
 		if (tagNames != null)

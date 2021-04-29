@@ -128,7 +128,7 @@ public class Service implements NamedElement, Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, false, false);
 	}
 	
 }

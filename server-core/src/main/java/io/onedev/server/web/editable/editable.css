@@ -38,9 +38,8 @@
 }
 .editable table.norecords tfoot td {
 	border: none;
-	border-radius: 0.42rem;
-	background-color: var(--light);
-	opacity: 0.5;
+	padding: 0;
+	font-style: italic;
 	background-image: none;
 	height: auto;
 }

@@ -25,6 +25,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.editable.annotation.VariableOption;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -58,6 +59,7 @@ public abstract class JobTrigger implements Serializable {
 
 	@Editable(name="Job Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
+	@VariableOption(withBuildVersion=false, withFile=false)
 	@OmitName
 	@Valid
 	public List<ParamSupply> getParams() {

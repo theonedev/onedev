@@ -3,6 +3,7 @@ package io.onedev.server.plugin.report.markdown;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -47,11 +48,11 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	@Override
-	public void run(Build build, File workspace, SimpleLogger logger) {
+	public Map<String, byte[]> run(Build build, File workspace, SimpleLogger logger) {
 		if (build.getRequest() != null) {
 			File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
@@ -72,6 +73,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 				
 			});
 		}
+		return null;
 	}
 
 }

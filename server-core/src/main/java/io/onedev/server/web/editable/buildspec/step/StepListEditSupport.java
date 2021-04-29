@@ -31,10 +31,11 @@ public class StepListEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-								if (model.getObject() != null) 
+								if (model.getObject() != null) {
 									return new StepListViewPanel(id, model.getObject());
-								else 
+								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								}
 							}
 							
 						};

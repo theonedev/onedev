@@ -10,7 +10,7 @@ onedev.server.buildSpec = {
 		if (nameChangeCallback) {
 	        var $main = $elements.children(".main");
 	        
-	        var $input = $main.find(">div>div>.property-name input");
+	        var $input = $main.find(">div>div>div>.property-name input");
 	
 	        function syncName() {
 	            var name = $input.val().trim();

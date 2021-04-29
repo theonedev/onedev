@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -41,8 +40,6 @@ public abstract class ActionAuthorization implements Serializable {
 		else
 			return new ArrayList<>();
 	}
-	
-	public abstract boolean matches(PostBuildAction postBuildAction);
 	
 	public abstract String getActionDescription();
 	

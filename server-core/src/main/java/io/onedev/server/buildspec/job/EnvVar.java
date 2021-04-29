@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.util.validation.annotation.VariableName;
+import io.onedev.server.util.validation.annotation.EnvironmentName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -22,7 +22,7 @@ public class EnvVar implements Serializable {
 
 	@Editable(order=100, description="Specify name of the environment variable")
 	@Interpolative(variableSuggester="suggestVariables")
-	@VariableName
+	@EnvironmentName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -45,7 +45,7 @@ public class EnvVar implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, false, false);
 	}
 
 }

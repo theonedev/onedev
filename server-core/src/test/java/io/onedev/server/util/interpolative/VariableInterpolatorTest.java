@@ -51,7 +51,7 @@ public class VariableInterpolatorTest {
 	}
 
 	@Editable
-	static class TestBean {
+	public static class TestBean {
 		
 		private String name;
 		
@@ -91,7 +91,7 @@ public class VariableInterpolatorTest {
 	}
 
 	@Editable
-	static class TestParentBean {
+	public static class TestParentBean {
 		
 		private String name;
 

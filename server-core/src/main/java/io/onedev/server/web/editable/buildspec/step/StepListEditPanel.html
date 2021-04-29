@@ -1,19 +1,12 @@
 <wicket:panel>
-	<div class="steps steps-editor">
-		<div wicket:id="steps" class="step"></div>
-		<a wicket:id="add" class="add btn btn-light btn-hover-primary btn-block" title="Add new step"><wicket:svg href="plus" class="icon align-middle mr-1"></wicket:svg></a>
+	<div class="step-list">
+		<table wicket:id="steps"></table>
+		<div class="foot">
+			<a wicket:id="addNew" title="Add new step" class="btn btn-light btn-hover-primary btn-block"><wicket:svg href="plus" class="icon"></wicket:svg></a>
+		</div>
 	</div>
-	<wicket:fragment wicket:id="stepEditFrag">
-		<div class="head step-head d-flex align-items-center">
-			<span class="index badge badge-light-warning mr-2"></span>
-			<span class="drag-indicator mr-2"><wicket:svg href="grip" class="icon"></wicket:svg></span>
-			<a wicket:id="delete" title="Delete this step" class="btn btn-light btn-xs btn-icon btn-hover-danger text-muted mr-4">
-				<wicket:svg href="trash" class="icon"/>
-			</a>
-		</div>
-		<div class="body">
-			<div wicket:id="feedback"></div>
-			<div wicket:id="editor"></div>
-		</div>
-	</wicket:fragment>
+	<wicket:fragment wicket:id="actionColumnFrag">
+		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
+		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
+  </wicket:fragment>
 </wicket:panel>

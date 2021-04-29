@@ -2,29 +2,42 @@ package io.onedev.server.web.editable.buildspec.step;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.ParamSpecAware;
+import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
-import io.onedev.server.util.Path;
-import io.onedev.server.util.PathNode;
-import io.onedev.server.util.PathNode.Indexed;
+import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -32,98 +45,197 @@ import io.onedev.server.web.editable.PropertyUpdating;
 @SuppressWarnings("serial")
 class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<StepEditBean> beans;
-	
-	private RepeatingView stepsView;
+	private final List<Step> steps;
 	
 	public StepListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		beans = new ArrayList<>();
-		for (Serializable each: model.getObject()) { 
-			StepEditBean bean = new StepEditBean();
-			bean.setStep((Step) each);
-			beans.add(bean);
+		steps = new ArrayList<>();
+		for (Serializable each: model.getObject()) {
+			steps.add((Step) each);
 		}
-	}
-	
-	@Override
-	protected String getInvalidClass() {
-		return null;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		stepsView = new RepeatingView("steps");
-		for (StepEditBean bean: beans) 
-			stepsView.add(newStepEditor(stepsView.newChildId(), bean));
-		add(stepsView);
-		
-		add(new AjaxLink<Void>("add") {
+		add(new ModalLink("addNew") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				StepEditBean bean = new StepEditBean();
-				bean.setStep(new CommandStep());
-				Component stepEditor = newStepEditor(stepsView.newChildId(), bean);
-				stepsView.add(stepEditor);
-				target.add(stepEditor);
-				
-				String script = String.format(""
-						+ "$('#%s').before('<div id=\"%s\"/>');",
-						getMarkupId(), stepEditor.getMarkupId());
-				target.prependJavaScript(script);
-				target.appendJavaScript("onedev.server.stepEdit.renderStepIndex();");
+			protected Component newContent(String id, ModalPanel modal) {
+				return new StepEditPanel(id, steps, -1) {
+
+					@Override
+					public BuildSpec getBuildSpec() {
+						return StepListEditPanel.this.getBuildSpec();
+					}
+
+					@Override
+					public List<ParamSpec> getParamSpecs() {
+						return StepListEditPanel.this.getParamSpecs();
+					}
+					
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						markFormDirty(target);
+						modal.close();
+						onPropertyUpdating(target);
+						target.add(StepListEditPanel.this);
+					}
+
+				};
 			}
 			
 		});
 		
-		add(new SortBehavior() {
+		List<IColumn<Step, Void>> columns = new ArrayList<>();
+		
+		columns.add(new AbstractColumn<Step, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
+				cellItem.add(new SpriteImage(componentId, "grip") {
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("svg");
+						tag.put("class", "icon drag-indicator");
+					}
+					
+				});
+			}
 			
-			@SuppressWarnings("deprecation")
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<Step, Void>(Model.of("Name")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<Step, Void>(Model.of("Condition")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getCondition().getDisplayName()));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<Step, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Step>> cellItem, String componentId, IModel<Step> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StepListEditPanel.this);
+				fragment.add(new ModalLink("edit") {
+
+					@Override
+					protected Component newContent(String id, ModalPanel modal) {
+						return new StepEditPanel(id, steps, cellItem.findParent(Item.class).getIndex()) {
+
+							@Override
+							public BuildSpec getBuildSpec() {
+								return StepListEditPanel.this.getBuildSpec();
+							}
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								modal.close();
+							}
+
+							@Override
+							protected void onSave(AjaxRequestTarget target) {
+								markFormDirty(target);
+								modal.close();
+								onPropertyUpdating(target);
+								target.add(StepListEditPanel.this);
+							}
+
+							@Override
+							public List<ParamSpec> getParamSpecs() {
+								return StepListEditPanel.this.getParamSpecs();
+							}
+							
+						};
+					}
+					
+				});
+				fragment.add(new AjaxLink<Void>("delete") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						markFormDirty(target);
+						steps.remove(rowModel.getObject());
+						onPropertyUpdating(target);
+						target.add(StepListEditPanel.this);
+					}
+					
+				});
+				cellItem.add(fragment);
+			}
+
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
+		
+		IDataProvider<Step> dataProvider = new ListDataProvider<Step>() {
+
+			@Override
+			protected List<Step> getData() {
+				return steps;			
+			}
+
+		};
+		
+		DataTable<Step, Void> dataTable;
+		add(dataTable = new DataTable<Step, Void>("steps", columns, dataProvider, Integer.MAX_VALUE));
+		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable, Model.of("Not defined")));
+		dataTable.add(new NoRecordsBehavior());
+		
+		dataTable.add(new SortBehavior() {
+
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
 				int fromIndex = from.getItemIndex();
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
-					for (int i=0; i<toIndex-fromIndex; i++)  
-						stepsView.swap(fromIndex+i, fromIndex+i+1);
+					for (int i=0; i<toIndex-fromIndex; i++) 
+						Collections.swap(steps, fromIndex+i, fromIndex+i+1);
 				} else {
-					for (int i=0; i<fromIndex-toIndex; i++)
-						stepsView.swap(fromIndex-i, fromIndex-i-1);
+					for (int i=0; i<fromIndex-toIndex; i++) 
+						Collections.swap(steps, fromIndex-i, fromIndex-i-1);
 				}
-				target.appendJavaScript("onedev.server.stepEdit.renderStepIndex();");
+				onPropertyUpdating(target);
+				target.add(StepListEditPanel.this);
 			}
 			
-		}.sortable(">.steps").items(".step").handle(".step-head"));
-		
+		}.sortable("tbody"));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new StepCssResourceReference()));
 	}
 	
-	protected Component newStepEditor(String componentId, StepEditBean bean) {
-		Fragment fragment = new Fragment(componentId, "stepEditFrag", this);
-		fragment.add(new AjaxLink<Void>("delete") {
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				stepsView.remove(fragment);
-				
-				String script = String.format(""
-						+ "$('#%s').remove();"
-						+ "onedev.server.stepEdit.renderStepIndex();", 
-						fragment.getMarkupId());
-				target.appendJavaScript(script);
-			}
-			
-		});
-		fragment.add(new FencedFeedbackPanel("feedback", fragment));
-		fragment.add(PropertyContext.edit("editor", bean, "step"));
-		fragment.setOutputMarkupId(true);
-		
-		return fragment;
-	}
-
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
@@ -134,30 +246,28 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		}		
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (Component each: stepsView) {
-			PropertyEditor<Serializable> editor = (PropertyEditor<Serializable>) each.get("editor");
-			value.add(editor.getConvertedInput());
-		}
+		for (Step each: steps)
+			value.add(each);
 		return value;
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
-		int index = ((Indexed) propertyNode).getIndex();
-		PropertyEditor<?> editor = (PropertyEditor<?>) stepsView.get(index).get("editor");
-		editor.error(pathInProperty, errorMessage);
+	private BuildSpec getBuildSpec() {
+		BuildSpecAware buildSpecAware = findParent(BuildSpecAware.class);
+		if (buildSpecAware != null)
+			return buildSpecAware.getBuildSpec();
+		else
+			return null;
 	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new StepResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.stepEdit.renderStepIndex();"));
+
+	private List<ParamSpec> getParamSpecs() {
+		ParamSpecAware paramSpecAware = findParent(ParamSpecAware.class);
+		if (paramSpecAware != null)
+			return paramSpecAware.getParamSpecs();
+		else
+			return null;
 	}
 	
 }

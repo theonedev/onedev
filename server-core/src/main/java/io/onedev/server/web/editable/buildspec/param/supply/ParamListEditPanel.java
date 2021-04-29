@@ -55,6 +55,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.Password;
+import io.onedev.server.web.editable.annotation.VariableOption;
 import io.onedev.server.web.editable.buildspec.job.trigger.JobTriggerEditPanel;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
@@ -66,6 +67,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	private final Map<String, ParamSupply> params = new HashMap<>();
 	
 	private final String paramSpecProviderMethodName;
+	
+	private final boolean withBuildVersion;
+	
+	private final boolean withFiles;
 	
 	private transient Map<String, ParamSpec> paramSpecs;
 	
@@ -81,6 +86,15 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		for (Serializable each: model.getObject()) {
 			ParamSupply param = (ParamSupply) each;
 			params.put(param.getName(), param);
+		}
+		
+		VariableOption variableOption = propertyDescriptor.getPropertyGetter().getAnnotation(VariableOption.class);
+		if (variableOption != null) {
+			withBuildVersion = variableOption.withBuildVersion();
+			withFiles = variableOption.withFile();
+		} else {
+			withBuildVersion = true;
+			withFiles = true;
 		}
 	}
 	
@@ -296,7 +310,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 					@Override
 					protected List<InputSuggestion> suggestVariables(String matchWith) {
-						return BuildSpec.suggestVariables(matchWith);
+						return BuildSpec.suggestVariables(matchWith, withBuildVersion, withFiles);
 					}
 					
 					@Override

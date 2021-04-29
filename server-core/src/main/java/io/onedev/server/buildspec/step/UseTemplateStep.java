@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.step;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.validation.Valid;
 
@@ -27,6 +28,7 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.editable.annotation.VariableOption;
 
 @Editable(order=10000, name="Use Step Template", description="Step to use specified template")
 public class UseTemplateStep extends Step {
@@ -63,6 +65,7 @@ public class UseTemplateStep extends Step {
 
 	@Editable(name="Step Parameters", order=200)
 	@ParamSpecProvider("getParamSpecs")
+	@VariableOption(withBuildVersion=true, withFile=true)
 	@OmitName
 	@Valid
 	public List<ParamSupply> getParams() {
@@ -86,23 +89,26 @@ public class UseTemplateStep extends Step {
 	}
 	
 	@Override
-	public Executable getExecutable(Build build, ParamCombination paramCombination) {
+	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
 		StepTemplate template = build.getSpec().getStepTemplateMap().get(templateName);
 		if (template == null)
 			throw new ExplicitException("Step template not found: " + templateName);
 		
 		List<Action> actions = new ArrayList<>();
+		AtomicInteger repeatRef = new AtomicInteger(0);
 		new MatrixRunner<List<String>>(ParamUtils.getParamMatrix(build, paramCombination, getParams())) {
 			
 			@Override
 			public void run(Map<String, List<String>> paramMap) {
+				int repeat = repeatRef.incrementAndGet();
 				ParamUtils.validateParamMap(template.getParamSpecs(), paramMap);
 				
 				ParamCombination newParamCombination = new ParamCombination(template.getParamSpecs(), paramMap);
 				VariableInterpolator interpolator = new VariableInterpolator(build, newParamCombination);
 				for (Step step: template.getSteps()) {
 					step = interpolator.interpolateProperties(step);
-					actions.add(step.getAction(build, newParamCombination));
+					String actionName = step.getName() + " (" + repeat + ")";
+					actions.add(step.getAction(actionName, build, jobToken, newParamCombination));
 				}
 			}
 			

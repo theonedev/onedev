@@ -16,7 +16,9 @@ import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.buildspec.job.trigger.PullRequestUpdateTrigger;
+import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -41,17 +43,30 @@ public class GradleJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("gradle ci");
 			
-			CommandStep step = new CommandStep();
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout");
+			job.getSteps().add(checkout);
 			
-			step.setImage("@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
-			step.setCommands(Lists.newArrayList(
-					"set -e",
+			String imageName = "@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@";
+			
+			CommandStep detectBuildVersion = new CommandStep();
+			detectBuildVersion.setName("detect build version");
+			detectBuildVersion.setImage(imageName);
+			detectBuildVersion.setCommands(Lists.newArrayList(
 					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"",
-					"buildVersion=$(gradle properties | grep ^version: | grep -v unspecified | cut -c10-)",
-					"echo \"##onedev[SetBuildVersion '$buildVersion']\"",
-					"gradle build"));
+					"echo $(gradle properties | grep ^version: | grep -v unspecified | cut -c10-) > buildVersion"));
+			job.getSteps().add(detectBuildVersion);
 			
-			job.setSteps(Lists.newArrayList(step));
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@file:buildVersion@");
+			job.getSteps().add(setBuildVersion);
+			
+			CommandStep runGradle = new CommandStep();
+			runGradle.setName("run gradle");
+			runGradle.setImage(imageName);
+			runGradle.setCommands(Lists.newArrayList("gradle build"));
+			job.getSteps().add(runGradle);
 			
 			setupTriggers(job);
 			setupCaches(job);

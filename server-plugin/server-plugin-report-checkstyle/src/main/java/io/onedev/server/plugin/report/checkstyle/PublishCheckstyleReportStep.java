@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -39,7 +40,7 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 	
 	public static final String VIOLATION_FILES = "violation-files";
 	
-	@Editable(order=100, description="Specify checkstyle result xml file relative to repository root, "
+	@Editable(order=100, description="Specify checkstyle result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
 			+ "Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> "
 			+ "on how to generate the result xml file. Use * or ? for pattern match")
@@ -58,11 +59,11 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	@Override
-	public void run(Build build, File filesDir, SimpleLogger logger) {
+	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 		
 		CheckstyleReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CheckstyleReportData>() {
@@ -136,6 +137,8 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 						
 			OneDev.getInstance(Dao.class).persist(metric);
 		}
+		
+		return null;
 	}
 
 }

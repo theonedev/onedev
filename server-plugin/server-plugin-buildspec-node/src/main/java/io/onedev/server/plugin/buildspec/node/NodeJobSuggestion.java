@@ -22,7 +22,9 @@ import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
+import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -57,12 +59,20 @@ public class NodeJobSuggestion implements JobSuggestion {
 		if (content.indexOf("angular/core") != -1) { // Recognize angular projects
 			Job job = new Job();
 			job.setName("angular ci");
+
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout");
+			job.getSteps().add(checkout);
 			
-			CommandStep step = new CommandStep();
-			step.setImage("1dev/buildspec-node:10.16-alpine-chrome");
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			job.getSteps().add(setBuildVersion);
+			
+			CommandStep runCommands = new CommandStep();
+			runCommands.setName("build & test");
+			runCommands.setImage("1dev/buildspec-node:10.16-alpine-chrome");
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
-					"echo", 
 					"npm install",
 					"npm install @@angular/cli");
 
@@ -102,8 +112,8 @@ public class NodeJobSuggestion implements JobSuggestion {
 						"npx ng build"));
 			}
 
-			step.setCommands(commands);
-			job.setSteps(Lists.newArrayList(step));
+			runCommands.setCommands(commands);
+			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
 			setupCaches(job);
@@ -114,12 +124,20 @@ public class NodeJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("react ci");
 			
-			CommandStep step = new CommandStep();
-			step.setImage("node:10.16-alpine");
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout");
+			job.getSteps().add(checkout);
+			
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			job.getSteps().add(setBuildVersion);
+			
+			CommandStep runCommands = new CommandStep();
+			runCommands.setName("build & test");
+			runCommands.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
-					"echo",
 					"npm install typescript", 
 					"npm install", 
 					"export CI=TRUE");
@@ -155,8 +173,8 @@ public class NodeJobSuggestion implements JobSuggestion {
 						"npx react-scripts build"));
 			}
 
-			step.setCommands(commands);
-			job.setSteps(Lists.newArrayList(step));
+			runCommands.setCommands(commands);
+			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
 			setupCaches(job);
@@ -167,14 +185,20 @@ public class NodeJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("vue ci");
 			
-			CommandStep step = new CommandStep();
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout");
+			job.getSteps().add(checkout);
 			
-			step.setImage("node:10.16-alpine");
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			job.getSteps().add(setBuildVersion);
+			
+			CommandStep runCommands = new CommandStep();
+			runCommands.setName("build & test");
+			runCommands.setImage("node:10.16-alpine");
 
-			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
-					"echo", 
-					"npm install");
+			List<String> commands = Lists.newArrayList("npm install");
 
 			if (jsonNode.has("scripts")) {
 				JsonNode jsonScripts = jsonNode.get("scripts");
@@ -203,8 +227,8 @@ public class NodeJobSuggestion implements JobSuggestion {
 				commands.add("npx jest");
 			}
 
-			step.setCommands(commands);
-			job.setSteps(Lists.newArrayList(step));
+			runCommands.setCommands(commands);
+			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
 			setupCaches(job);
@@ -215,14 +239,20 @@ public class NodeJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("express ci");
 			
-			CommandStep step = new CommandStep();
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout");
+			job.getSteps().add(checkout);
 			
-			step.setImage("node:10.16-alpine");
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@");
+			job.getSteps().add(setBuildVersion);
+			
+			CommandStep runCommands = new CommandStep();
+			runCommands.setName("build & test");
+			runCommands.setImage("node:10.16-alpine");
 
-			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
-					"echo", 
-					"npm install");
+			List<String> commands = Lists.newArrayList("npm install");
 
 			if (jsonNode.has("scripts")) {
 				JsonNode jsonScripts = jsonNode.get("scripts");
@@ -249,9 +279,9 @@ public class NodeJobSuggestion implements JobSuggestion {
 			} else {
 				commands.add("npx mocha");
 			}
-			step.setCommands(commands);
+			runCommands.setCommands(commands);
 			
-			job.setSteps(Lists.newArrayList(step));
+			job.getSteps().add(runCommands);
 			
 			setupTriggers(job);
 			setupCaches(job);

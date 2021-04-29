@@ -21,6 +21,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.editable.annotation.VariableOption;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -59,6 +60,7 @@ public class JobDependency implements Serializable {
 
 	@Editable(order=200, name="Job Parameters")
 	@ParamSpecProvider("getParamSpecs")
+	@VariableOption(withBuildVersion=false, withFile=false)
 	@OmitName
 	public List<ParamSupply> getJobParams() {
 		return jobParams;
@@ -69,7 +71,7 @@ public class JobDependency implements Serializable {
 	}
 	
 	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
-			+ "from the dependency into repository root. Leave empty to do not retrieve any artifacts")
+			+ "from the dependency into <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. Leave empty to do not retrieve any artifacts")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NameOfEmptyValue("Do not retrieve")
@@ -83,7 +85,7 @@ public class JobDependency implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, false, false);
 	}
 	
 	@SuppressWarnings("unused")

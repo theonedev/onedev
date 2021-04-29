@@ -26,6 +26,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.ComponentContext;
@@ -88,13 +89,14 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 				if (variableProvider.length() != 0) {
 					ComponentContext.push(new ComponentContext(input));
 					try { 
-						for (String each: (List<String>) ReflectionUtils.invokeStaticMethod(
-								descriptor.getBeanClass(), variableProvider)) {
-							if (each.toLowerCase().contains(matchWith)) {
-								ObjectNode variableNode = mapper.createObjectNode();
-								variableNode.put("text", "@" + StringUtils.escape(each, "@") + "@"); 
-								variablesNode.add(variableNode);
-							}
+						for (InputSuggestion suggestion: ((List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
+								descriptor.getBeanClass(), variableProvider, matchWith))) {
+							ObjectNode variableNode = mapper.createObjectNode();
+							String text = "@" + suggestion.getContent() + "@";
+							variableNode.put("text", text); 
+							if (suggestion.getDescription() != null)
+								variableNode.put("description", suggestion.getDescription());
+							variablesNode.add(variableNode);
 						}
 					} finally {
 						ComponentContext.pop();

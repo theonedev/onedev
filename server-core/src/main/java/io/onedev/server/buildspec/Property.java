@@ -10,7 +10,6 @@ import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.SuggestionProvider;
 
 @Editable
@@ -46,7 +45,6 @@ public class Property implements NamedElement, Serializable {
 	}
 	
 	@Editable(order=200)
-	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getValue() {
 		return value;
@@ -58,7 +56,7 @@ public class Property implements NamedElement, Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, false, false);
 	}
 	
 }

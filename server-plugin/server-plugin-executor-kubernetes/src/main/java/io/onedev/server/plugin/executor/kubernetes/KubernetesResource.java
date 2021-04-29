@@ -1,11 +1,13 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
+import static io.onedev.k8shelper.KubernetesHelper.readInt;
+import static io.onedev.k8shelper.KubernetesHelper.readString;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +29,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.SerializationUtils;
 
 import com.google.common.base.Splitter;
@@ -40,6 +41,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
+import io.onedev.k8shelper.ServerExecutionResult;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
@@ -72,10 +74,7 @@ public class KubernetesResource {
 			context.reportJobWorkspace(jobWorkspace);		
 		Map<String, Object> contextMap = new HashMap<>();
 		contextMap.put("actions", context.getActions());
-		contextMap.put("retrieveSource", context.isRetrieveSource());
-		contextMap.put("cloneDepth", context.getCloneDepth());
 		contextMap.put("projectName", context.getProjectName());
-		contextMap.put("cloneInfo", context.getCloneInfo());
 		contextMap.put("commitHash", context.getCommitId().name());
 		return SerializationUtils.serialize((Serializable) contextMap);
     }
@@ -106,21 +105,21 @@ public class KubernetesResource {
 	public Response runServerStep(InputStream is) {
 		File filesDir = FileUtils.createTempDir();
 		try {
-			byte[] intBytes = new byte[4];
-			if (IOUtils.readFully(is, intBytes) != intBytes.length)
-				throw new ExplicitException("Invalid input stream to run server step");
-			int length = ByteBuffer.wrap(intBytes).getInt();
+			int length = readInt(is);
 			List<Integer> stepPosition = new ArrayList<>();
-			for (int i=0; i<length; i++) {
-				if (IOUtils.readFully(is, intBytes) != intBytes.length)
-					throw new ExplicitException("Invalid input stream to run server step");
-				stepPosition.add(ByteBuffer.wrap(intBytes).getInt());
-			}
-				
+			for (int i=0; i<length; i++) 
+				stepPosition.add(readInt(is));
+			
+			Map<String, String> placeholderValues = new HashMap<>();
+			length = readInt(is);
+			for (int i=0; i<length; i++) 
+				placeholderValues.put(readString(is), readString(is));
+			
 			TarUtils.untar(is, filesDir);
 			
 			List<String> logMessages = new ArrayList<>();
-			jobManager.runServerStep(getJobToken(), stepPosition, filesDir, new SimpleLogger() {
+			Map<String, byte[]> outputFiles = jobManager.runServerStep(getJobToken(), stepPosition, 
+					filesDir, placeholderValues, new SimpleLogger() {
 
 				@Override
 				public void log(String message) {
@@ -129,13 +128,8 @@ public class KubernetesResource {
 				
 			});
 			
-			byte[] logBytes = SerializationUtils.serialize((Serializable) logMessages);
-			
-			/* 
-			 * Send log statements back to job pod for logging as otherwise log statements 
-			 * from command step and server step may be dis-ordered
-			 */
-			return Response.ok(logBytes).build();
+			ServerExecutionResult result = new ServerExecutionResult(logMessages, outputFiles);
+			return Response.ok(SerializationUtils.serialize(result)).build();
 		} catch (Exception e) {
 			String errorMessage = ExceptionUtils.getExpectedError(e);
 			if (errorMessage == null)

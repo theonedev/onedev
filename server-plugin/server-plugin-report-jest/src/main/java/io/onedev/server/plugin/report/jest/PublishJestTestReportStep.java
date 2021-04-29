@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -33,7 +34,7 @@ public class PublishJestTestReportStep extends PublishReportStep {
 	
 	public static final String DIR = "jest-reports";
 	
-	@Editable(order=100, description="Specify Jest test result file in json format relative to repository root. "
+	@Editable(order=100, description="Specify Jest test result file in json format relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. "
 			+ "This file can be generated via Jest option <tt>'--json'</tt> and <tt>'--outputFile'</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
@@ -50,11 +51,11 @@ public class PublishJestTestReportStep extends PublishReportStep {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	@Override
-	public void run(Build build, File filesDir, SimpleLogger logger) {
+	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
 		JestTestReportData report = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<JestTestReportData>() {
@@ -95,7 +96,9 @@ public class PublishJestTestReportStep extends PublishReportStep {
 			metric.setNumOfTestSuites(report.getNumOfTestSuites());
 			metric.setTotalTestDuration(report.getTotalTestDuration());
 			OneDev.getInstance(Dao.class).persist(metric);
-		}		
+		}	
+		
+		return null;
 	}
 
 }

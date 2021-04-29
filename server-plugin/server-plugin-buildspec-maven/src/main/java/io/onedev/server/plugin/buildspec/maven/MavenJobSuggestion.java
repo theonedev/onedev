@@ -21,7 +21,9 @@ import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger;
+import io.onedev.server.buildspec.step.CheckoutStep;
 import io.onedev.server.buildspec.step.CommandStep;
+import io.onedev.server.buildspec.step.SetBuildVersionStep;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
@@ -44,21 +46,31 @@ public class MavenJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("maven ci");
 
-			CommandStep step = new CommandStep();
+			CheckoutStep checkout = new CheckoutStep();
+			checkout.setName("checkout");
+			job.getSteps().add(checkout);
 			
-			step.setImage("@" + VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
-			/*
-			 * Before running maven test, we extract version of the project and use LogInstruction to tell 
-			 * OneDev using extracted version for current build
-			 */
-			step.setCommands(Lists.newArrayList(
+			String imageName = "@" + VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@";
+			
+			CommandStep detectBuildVersion = new CommandStep();
+			detectBuildVersion.setName("detect build version");
+			detectBuildVersion.setImage(imageName);
+			detectBuildVersion.setCommands(Lists.newArrayList(
 					"echo \"Detecting project version (may require some time while downloading maven dependencies)...\"",
-					"buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)",
-					"echo \"##onedev[SetBuildVersion '$buildVersion']\"",
-					"echo", 
-					"mvn clean test"));
+					"echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout) > buildVersion"));
+			job.getSteps().add(detectBuildVersion);
+			
+			SetBuildVersionStep setBuildVersion = new SetBuildVersionStep();
+			setBuildVersion.setName("set build version");
+			setBuildVersion.setBuildVersion("@file:buildVersion@");
+			job.getSteps().add(setBuildVersion);
+			
+			CommandStep runMaven = new CommandStep();
+			runMaven.setName("run maven");
+			runMaven.setImage(imageName);
+			runMaven.setCommands(Lists.newArrayList("mvn clean test"));
 
-			job.setSteps(Lists.newArrayList(step));
+			job.getSteps().add(runMaven);
 			
 			// Trigger the job automatically when there is a push to the branch			
 			BranchUpdateTrigger trigger = new BranchUpdateTrigger();

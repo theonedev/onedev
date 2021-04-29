@@ -41,30 +41,34 @@ onedev.server.codeSupport = {
 		});
 		
 		onedev.server.codeSupport.adjustHeight($input);
-		
-		cm.on("keypress", function(cm, event) {
-			if (event.key == "@") {
-				// Give codemirror a chance to handle keypress first
-				setTimeout(function() {
-			    	var cursor = cm.getCursor();
-			    	var line = cursor.line;
-			    	var start = cursor.ch;
-					
-			    	var beforeCursor = cm.doc.getLine(line).substring(0, start);
-			    	
-			    	var escapeFiltered = beforeCursor.replace("@@", "");
-			    	if ((escapeFiltered.match(/@/g) || []).length % 2 == 1) { // only show hint when type left @
-			    		function hint(cm, showHintCallback) {
-					    	var end = cm.getCursor().ch;
-					    	var matchWith = cm.doc.getLine(line).substring(start, end);
-					    	$input.data("showHintCallback", showHintCallback);
-					    	varQueryCallback(matchWith, line, start);
+			
+		function getLineBeforeCursor(cm) {
+	    	var cursor = cm.getCursor();
+	    	var line = cursor.line;
+	    	return cm.doc.getLine(line).substring(0, cursor.ch);
+		}
+		cm.on("cursorActivity", function(cm, event) {
+			setTimeout(function() {
+		    	var lineBeforeCursor = getLineBeforeCursor(cm);
+		    	if ($(".CodeMirror-hints").length == 0 && $(lineBeforeCursor.replace("@@", "").match(/@/g) || []).length % 2 == 1) { 
+		    		function hint(cm, showHintCallback) {
+				    	$input.data("showHintCallback", showHintCallback);
+				    	var lineBeforeCursor = getLineBeforeCursor(cm);
+						var lastIndex = lineBeforeCursor.lastIndexOf('@') + 1;
+						var matchWith = lineBeforeCursor.substring(lastIndex, cm.getCursor().ch);
+				    	varQueryCallback(matchWith, cm.getCursor().line, lastIndex);
+					}
+		    		hint.async = true;
+					var extraKeys = {
+						Esc: function(cm, handle) {
+							// Close in a timeout so modal can check existance of 
+							// hints to determine if Esc should be handled
+							setTimeout(function() {handle.close();}, 0);
 						}
-			    		hint.async = true;
-						CodeMirror.showHint(cm, hint, {completeSingle: false});
-			    	}
-				}, 0);
-			}
+					};
+					CodeMirror.showHint(cm, hint, {completeSingle: false, closeCharacters: /@/, extraKeys: extraKeys});
+		    	}
+			}, 0);
 		});
 		
 		$input.on("beforeDelete", function() {
@@ -74,10 +78,36 @@ onedev.server.codeSupport = {
     showVariables: function(inputId, variables, line, start) {
     	var $input = $("#" + inputId);
 		var cm = $input.next(".CodeMirror")[0].CodeMirror;		
+		for (var i = 0; i < variables.length; i++) {
+			variables[i].render = function(element, self, data) {
+				if (data.description) {
+					var $hint = $(document.createElement("div"));
+					$hint.addClass("d-flex flex-nowrap justify-content-between");
+					var $text = $(document.createElement("div"));
+					$text.text(data.text);
+					$hint.append($text);
+					var $description = $(document.createElement("div"));
+					$description.addClass("text-muted ml-4");
+					$description.text(data.description);
+					$hint.append($description);
+					element.append($hint[0]);
+				} else {
+					element.append(data.text);
+				}				
+			}
+		}		
+		
+	    var afterCursor = cm.doc.getLine(line).substring(start);
+		var to = afterCursor.indexOf('@');
+		if (to == -1)
+			to = cm.getCursor().ch;
+		else
+			to += start+1;
+		
     	$input.data("showHintCallback")({
     		list: variables,
     		from: CodeMirror.Pos(line, start-1),
-    		to: CodeMirror.Pos(line, cm.getCursor().ch)
+    		to: CodeMirror.Pos(line, to)
     	});
     },
 	onViewerLoad: function(inputId, modeName) {

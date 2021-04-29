@@ -28,6 +28,7 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.editable.annotation.VariableOption;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable(name="Run job", order=100)
@@ -57,6 +58,7 @@ public class RunJobAction extends PostBuildAction {
 	
 	@Editable(name="Job Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
+	@VariableOption(withBuildVersion=true, withFile=false)
 	@OmitName
 	@Valid
 	public List<ParamSupply> getJobParams() {

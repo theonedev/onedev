@@ -87,7 +87,7 @@ public class EditableUtils {
 			}
 			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
 		} else if (editable.description().length() != 0) {
-			return editable.description();
+			return StringUtils.replace(editable.description(), "$docRoot", OneDev.getInstance().getDocRoot());
 		} else {
 			return null;
 		}

@@ -72,6 +72,9 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.support.BuildMetric;
 import io.onedev.server.model.support.build.JobSecret;
+import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
+import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
+import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
@@ -85,6 +88,7 @@ import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -874,6 +878,34 @@ public class Build extends AbstractEntity implements Referenceable {
 		Build build = stack.get().pop();
 		if (build != null)
 			ScriptIdentity.pop();
+	}
+	
+	public boolean canCreateTag(String tagName) {
+		for (ActionAuthorization authorization: getProject().getBuildSetting().getActionAuthorizations()) {
+			if (isOnBranches(authorization.getAuthorizedBranches())) {
+				if (authorization instanceof CreateTagAuthorization) {
+					CreateTagAuthorization createTagAuthorization = (CreateTagAuthorization) authorization;
+					String tagNames = createTagAuthorization.getTagNames();
+					if (tagNames == null || WildcardUtils.matchPath(tagNames, tagName))
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean canCloseMilestone(String milestoneName) {
+		for (ActionAuthorization authorization: getProject().getBuildSetting().getActionAuthorizations()) {
+			if (isOnBranches(authorization.getAuthorizedBranches())) {
+				if (authorization instanceof CloseMilestoneAuthorization) {
+					CloseMilestoneAuthorization closeMilestoneAuthorization = (CloseMilestoneAuthorization) authorization;
+					String milestoneNames = closeMilestoneAuthorization.getMilestoneNames();
+					if (milestoneNames == null || WildcardUtils.matchPath(milestoneNames, milestoneName))
+						return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public boolean isValid() {

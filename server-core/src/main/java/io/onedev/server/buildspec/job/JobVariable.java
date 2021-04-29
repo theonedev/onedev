@@ -1,5 +1,8 @@
 package io.onedev.server.buildspec.job;
 
+import static io.onedev.k8shelper.KubernetesHelper.*;
+
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.model.Build;
 
 public enum JobVariable {
@@ -64,7 +67,10 @@ public enum JobVariable {
 
 		@Override
 		public String getValue(Build build) {
-			return build.getVersion();
+			if (build.getVersion() != null)
+				return build.getVersion();
+			else
+				return PLACEHOLDER_PREFIX + KubernetesHelper.BUILD_VERSION + PLACEHOLDER_SUFFIX;
 		}
 		
 	},

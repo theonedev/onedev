@@ -58,3 +58,6 @@
 .CodeMirror-fullscreen {
 	z-index: 210;
 }
+.CodeMirror-hints {
+	z-index: 10000;
+}

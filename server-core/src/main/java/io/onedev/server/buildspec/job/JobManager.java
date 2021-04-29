@@ -31,6 +31,7 @@ public interface JobManager {
 	
 	void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances);
 	
-	void runServerStep(String jobToken, List<Integer> stepPosition, File filesDir, SimpleLogger logger);
+	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
+			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger);
 	
 }

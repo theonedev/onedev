@@ -30,10 +30,6 @@ public class StepTemplate implements NamedElement, Serializable {
 	
 	private List<ParamSpec> paramSpecs = new ArrayList<>();
 	
-	public StepTemplate() {
-		steps.add(new CommandStep());
-	}
-	
 	@Editable(order=100)
 	@SuggestionProvider("getNameSuggestions")
 	@NotEmpty
@@ -57,7 +53,7 @@ public class StepTemplate implements NamedElement, Serializable {
 		return new ArrayList<>();
 	}
 	
-	@Editable(order=200, name="Steps to Execute")
+	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>")
 	@Size(min=1, max=1000, message="At least one step needs to be defined")
 	public List<Step> getSteps() {
 		return steps;

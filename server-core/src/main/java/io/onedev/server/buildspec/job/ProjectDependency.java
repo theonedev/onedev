@@ -101,7 +101,7 @@ public class ProjectDependency implements Serializable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into repository root")
+	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(suggester="suggestArtifacts", path=true)
 	@NotEmpty
@@ -115,7 +115,7 @@ public class ProjectDependency implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, false, false);
 	}
 	
 	@SuppressWarnings("unused")

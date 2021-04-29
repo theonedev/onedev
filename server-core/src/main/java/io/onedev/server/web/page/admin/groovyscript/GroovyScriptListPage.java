@@ -254,7 +254,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new GroovyScriptResourceReference()));
+		response.render(CssHeaderItem.forReference(new GroovyScriptCssResourceReference()));
 	}
 
 	@Override

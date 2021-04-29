@@ -3,6 +3,7 @@ package io.onedev.server.plugin.report.markdown;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -28,7 +29,7 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	
 	private String startPage;
 	
-	@Editable(order=1100, description="Specify start page of the report relative to repository root, for instance: <tt>manual/index.md</tt>")
+	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {
@@ -41,11 +42,11 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	@Override
-	public void run(Build build, File filesDir, SimpleLogger logger) {
+	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 
 		LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<Void>() {
@@ -74,6 +75,8 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 			}
 			
 		});
+		
+		return null;
 	}
 
 }

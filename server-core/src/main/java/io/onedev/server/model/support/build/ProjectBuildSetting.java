@@ -12,9 +12,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
@@ -123,15 +121,6 @@ public class ProjectBuildSetting implements Serializable {
 				return namedQuery;
 		}
 		return null;
-	}
-	
-	public boolean isActionAuthorized(Build build, PostBuildAction action) {
-		List<ActionAuthorization> authorizations = getActionAuthorizations();
-		for (ActionAuthorization authorization: authorizations) {
-			if (authorization.matches(action) && build.isOnBranches(authorization.getAuthorizedBranches())) 
-				return true;
-		}
-		return false;
 	}
 	
 	@Nullable

@@ -55,6 +55,7 @@ import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.LeafVisitor;
 import io.onedev.k8shelper.CompositeExecutable;
 import io.onedev.k8shelper.ExecuteCondition;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.Service;
@@ -86,7 +87,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final int POD_WATCH_TIMEOUT = 120;
+	private static final int POD_WATCH_TIMEOUT = 60;
 	
 	private static final Logger logger = LoggerFactory.getLogger(KubernetesExecutor.class);
 	
@@ -693,6 +694,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return map;
 	}
 	
+	private String getContainerDisplayName(CompositeExecutable entryExecutable, String containerName) {
+		if (containerName.startsWith("step-")) {
+			List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
+			return "Step \"" + entryExecutable.getNamesAsString(position) + "\"";
+		} else {
+			return containerName;
+		}
+	}
+	
 	private void execute(String jobToken, SimpleLogger jobLogger, Object executionContext) {
 		jobLogger.log("Checking cluster access...");
 		JobContext jobContext;
@@ -811,7 +821,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					List<Action> actions = new ArrayList<>();
 					CommandExecutable executable = new CommandExecutable((String) executionContext, 
 							Lists.newArrayList("this does not matter"));
-					actions.add(new Action(executable, ExecuteCondition.ALWAYS));
+					actions.add(new Action("test", executable, ExecuteCondition.ALWAYS));
 					entryExecutable = new CompositeExecutable(actions);
 				}
 				
@@ -850,12 +860,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								"name", containerName, 
 								"image", image);
 				
+						String positionStr = stringifyPosition(position);
 						if (baselineOsInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));
-							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + stringifyPosition(position) + ".sh"));
+							stepContainerSpec.put("args", Lists.newArrayList(containerCommandHome + "/" + positionStr + ".sh"));
 						} else {
 							stepContainerSpec.put("command", Lists.newArrayList("cmd"));
-							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandHome + "\\" + stringifyPosition(position) + ".bat"));
+							stepContainerSpec.put("args", Lists.newArrayList("/c", containerCommandHome + "\\" + positionStr + ".bat"));
 						}
 
 						stepContainerSpec.put("env", envs);
@@ -1009,10 +1020,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								 * without an exception, and will continue to collect the container log which 
 								 * might contain error details
 								 */
-								if (error.isFatal())
-									return new Abort(containerName + ": " + error.getMessage());
-								else
+								if (error.isFatal()) {
+									return new Abort(getContainerDisplayName(entryExecutable, containerName) 
+											+ ": " + error.getMessage());
+								} else {
 									return new Abort(null);
+								}
 							} else if (getStartedContainers(containerStatusNodes).contains(containerName)) {
 								return new Abort(null);
 							} else {
@@ -1036,7 +1049,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
 							ContainerError error = getContainerErrors(containerStatusNodes).get(containerName);
 							if (error != null) {
-								String errorMessage = containerName + ": " + error.getMessage();
+								String errorMessage = getContainerDisplayName(entryExecutable, containerName) 
+										+ ": " + error.getMessage();
 								errorMessages.add(errorMessage);
 								/*
 								 * We abort the watch with an exception for two reasons:

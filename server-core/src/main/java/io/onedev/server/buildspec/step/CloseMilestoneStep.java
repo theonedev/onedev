@@ -1,6 +1,8 @@
-package io.onedev.server.buildspec.job.action;
+package io.onedev.server.buildspec.step;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -13,11 +15,12 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
-@Editable(name="Close milestone", order=500)
-public class CloseMilestoneAction extends PostBuildAction {
+@Editable(name="Close Milestone", order=40)
+public class CloseMilestoneStep extends ServerStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -36,11 +39,11 @@ public class CloseMilestoneAction extends PostBuildAction {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 
 	@Override
-	public void execute(Build build) {
+	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
 		OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 
 			@Override
@@ -50,13 +53,11 @@ public class CloseMilestoneAction extends PostBuildAction {
 				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
 				Milestone milestone = milestoneManager.find(project, milestoneName);
 				if (milestone != null) {
-					CloseMilestoneAction instance = new CloseMilestoneAction();
-					instance.setMilestoneName(getMilestoneName());
-					if (project.getBuildSetting().isActionAuthorized(build, instance)) {
+					if (build.canCloseMilestone(milestoneName)) {
 						milestone.setClosed(true);
 						milestoneManager.save(milestone);
 					} else {
-						throw new ExplicitException("Closing milestone '" + milestoneName + "' is not allowed in this build");
+						throw new ExplicitException("This build is not authorized to close milestone '" + milestoneName + "'");
 					}
 				} else {
 					throw new ExplicitException("Unable to find milestone '" + milestoneName + "'");
@@ -64,11 +65,7 @@ public class CloseMilestoneAction extends PostBuildAction {
 			}
 			
 		});
-	}
-
-	@Override
-	public String getDescription() {
-		return "Close milestone";
+		return null;
 	}
 
 }

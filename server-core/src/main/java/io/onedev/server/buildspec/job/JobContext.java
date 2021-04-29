@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.k8shelper.Action;
-import io.onedev.k8shelper.CloneInfo;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.util.SimpleLogger;
 
@@ -23,12 +22,6 @@ public abstract class JobContext {
 	private final File projectGitDir;
 	
 	private final List<Action> actions;
-	
-	private final boolean retrieveSource;
-	
-	private final Integer cloneDepth;
-	
-	private final CloneInfo cloneInfo;
 	
 	private final String cpuRequirement;
 	
@@ -51,17 +44,13 @@ public abstract class JobContext {
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	public JobContext(String projectName, Long buildNumber, File projectGitDir, 
-			List<Action> actions, boolean retrieveSource, Integer cloneDepth, 
-			CloneInfo cloneInfo, String cpuRequirement, String memoryRequirement, 
+			List<Action> actions, String cpuRequirement, String memoryRequirement, 
 			ObjectId commitId, Collection<CacheSpec> caches, int cacheTTL, 
 			int retried, List<Service> services, SimpleLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
 		this.actions = actions;
-		this.retrieveSource = retrieveSource;
-		this.cloneDepth = cloneDepth;
-		this.cloneInfo = cloneInfo;
 		this.cpuRequirement = cpuRequirement;
 		this.memoryRequirement = memoryRequirement;
 		this.commitId = commitId;
@@ -90,18 +79,6 @@ public abstract class JobContext {
 
 	public ObjectId getCommitId() {
 		return commitId;
-	}
-
-	public boolean isRetrieveSource() {
-		return retrieveSource;
-	}
-
-	public Integer getCloneDepth() {
-		return cloneDepth;
-	}
-
-	public CloneInfo getCloneInfo() {
-		return cloneInfo;
 	}
 
 	public String getCpuRequirement() {
@@ -144,7 +121,8 @@ public abstract class JobContext {
 	
 	public abstract void reportJobWorkspace(String jobWorkspace);
 	
-	public abstract void runServerStep(List<Integer> stepPosition, File filesDir, SimpleLogger logger);
+	public abstract Map<String, byte[]> runServerStep(List<Integer> stepPosition, 
+			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger);
 	
 	public abstract void copyDependencies(File targetDir);
 	

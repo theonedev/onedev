@@ -1,5 +1,8 @@
 package io.onedev.server.buildspec.job;
 
+import static io.onedev.k8shelper.KubernetesHelper.BUILD_VERSION;
+import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -52,7 +56,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CompositeExecutable;
 import io.onedev.k8shelper.Executable;
 import io.onedev.k8shelper.LeafExecutable;
@@ -119,6 +122,8 @@ import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.web.editable.EditableStringTransformer;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource {
@@ -369,8 +374,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Long buildNumber = build.getNumber();
 				String projectName = build.getProject().getName();
 				File projectGitDir = build.getProject().getGitDir();
-				CloneInfo cloneInfo = job.getCloneCredential().newCloneInfo(build, jobToken);
-				
+
 				AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
 				executionRef.set(new JobExecution(executorService.submit(new Runnable() {
 
@@ -394,7 +398,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 										for (Step step: job.getSteps()) {
 											step = interpolator.interpolateProperties(step);
-											actions.add(step.getAction(build, build.getParamCombination()));
+											actions.add(step.getAction(build, jobToken, build.getParamCombination()));
 										}
 										
 										for (CacheSpec cache: job.getCaches()) 
@@ -423,8 +427,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										Build.push(build);
 										try {
 											return new JobContext(projectName, buildNumber, projectGitDir, 
-													actions, job.isRetrieveSource(), job.getCloneDepth(), 
-													cloneInfo, job.getCpuRequirement(), job.getMemoryRequirement(), 
+													actions, job.getCpuRequirement(), job.getMemoryRequirement(), 
 													commitId, caches, executor.getCacheTTL(), retried.get(), 
 													services, jobLogger) {
 												
@@ -459,11 +462,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												}
 
 												@Override
-												public void runServerStep(List<Integer> stepPosition, File filesDir, SimpleLogger logger) {
-													sessionManager.run(new Runnable() {
+												public Map<String, byte[]> runServerStep(List<Integer> stepPosition, File filesDir, 
+														Map<String, String> placeholderValues, SimpleLogger logger) {
+													return sessionManager.call(new Callable<Map<String, byte[]>>() {
 
 														@Override
-														public void run() {
+														public Map<String, byte[]> call() {
 															Executable entryExecutable = new CompositeExecutable(getActions());
 															
 															LeafVisitor<LeafExecutable> visitor = new LeafVisitor<LeafExecutable>() {
@@ -480,7 +484,17 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 															
 															ServerExecutable serverExecutable = (ServerExecutable) entryExecutable.traverse(visitor, new ArrayList<>());
 															ServerStep serverStep = (ServerStep) serverExecutable.getStep();
-															serverStep.run(buildManager.load(buildId), filesDir, logger);
+															
+															serverStep = new EditableStringTransformer(new Function<String, String>() {
+
+																@Override
+																public String apply(String t) {
+																	return replacePlaceholders(t, placeholderValues);
+																}
+																
+															}).transformProperties(serverStep, Interpolative.class);
+
+															return serverStep.run(buildManager.load(buildId), filesDir, logger);
 														}
 														
 													});
@@ -1080,6 +1094,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						Build.push(build);
 						try {
 							VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+							Map<String, String> placeholderValues = new HashMap<>();
+							placeholderValues.put(BUILD_VERSION, build.getVersion());
 							for (PostBuildAction action: build.getJob().getPostBuildActions()) {
 								action = interpolator.interpolateProperties(action); 
 								if (ActionCondition.parse(build.getJob(), action.getCondition()).matches(build))
@@ -1199,8 +1215,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public void runServerStep(String jobToken, List<Integer> stepPosition, File filesDir, SimpleLogger logger) {
-		getJobContext(jobToken, true).runServerStep(stepPosition, filesDir, logger);
+	public Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
+			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger) {
+		return getJobContext(jobToken, true).runServerStep(stepPosition, filesDir, placeholderValues, logger);
 	}
 	
 }

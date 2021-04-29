@@ -137,37 +137,52 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestVariables(Project project, BuildSpec buildSpec, 
-			@Nullable List<ParamSpec> paramSpecs, String matchWith) {
-		matchWith = matchWith.toLowerCase();
+			@Nullable List<ParamSpec> paramSpecs, String matchWith, boolean withBuildVersion, 
+			boolean withFile) {
+		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
 		Map<String, String> variables = new LinkedHashMap<>();
-		for (JobVariable var: JobVariable.values()) 
-			variables.put(var.name().toLowerCase(), null);
+		for (JobVariable var: JobVariable.values()) {
+			if (var != JobVariable.BUILD_VERSION || withBuildVersion)
+				variables.put(var.name().toLowerCase(), null);
+		}
 		if (paramSpecs != null) {
 			for (ParamSpec paramSpec: paramSpecs) 
-				variables.put(VariableInterpolator.PREFIX_PARAMS + paramSpec.getName(), paramSpec.getDescription());
+				variables.put(VariableInterpolator.PREFIX_PARAM + paramSpec.getName(), paramSpec.getDescription());
 		}
 		for (String propertyName: buildSpec.getPropertyMap().keySet())
-			variables.put(VariableInterpolator.PREFIX_PROPERTIES + propertyName, null);
+			variables.put(VariableInterpolator.PREFIX_PROPERTY + propertyName, null);
 		for (JobSecret secret: project.getBuildSetting().getJobSecrets())
-			variables.put(VariableInterpolator.PREFIX_SECRETS + secret.getName(), null);
+			variables.put(VariableInterpolator.PREFIX_SECRET + secret.getName(), null);
+
+		if (withFile) {
+			String filePath;
+			if (lowerCaseMatchWith.startsWith(VariableInterpolator.PREFIX_FILE))
+				filePath = matchWith.substring(VariableInterpolator.PREFIX_FILE.length());
+			else
+				filePath = "";
+			if (filePath.length() == 0)
+				filePath = "example.txt";
+			variables.put(VariableInterpolator.PREFIX_FILE + filePath, "Use content of specified file");
+		}
+		
 		for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) 
-			variables.put(VariableInterpolator.PREFIX_SCRIPTS + script.getName(), null);
+			variables.put(VariableInterpolator.PREFIX_SCRIPT + script.getName(), null);
 		
 		for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
-			String varName = VariableInterpolator.PREFIX_SCRIPTS + GroovyScript.BUILTIN_PREFIX 
+			String varName = VariableInterpolator.PREFIX_SCRIPT + GroovyScript.BUILTIN_PREFIX 
 					+ contribution.getScript().getName();
 			if (!variables.containsKey(varName))
 				variables.put(varName, null);
 		}
 		
 		for (Map.Entry<String, String> entry: variables.entrySet()) {
-			int index = entry.getKey().toLowerCase().indexOf(matchWith);
+			int index = entry.getKey().toLowerCase().indexOf(lowerCaseMatchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				suggestions.add(new InputSuggestion(entry.getKey(), entry.getValue(), 
-						new LinearRange(index, index+matchWith.length())));
+						new LinearRange(index, index+lowerCaseMatchWith.length())));
 			}
 		}
 		return suggestions;

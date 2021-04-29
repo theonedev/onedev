@@ -11,6 +11,7 @@ onedev.server.modal = {
 					&& $("body>.floating").length == 0 
 					&& $(".sp-container:visible").length == 0
 					&& $(".atwho-view:visible").length == 0
+					&& $(".CodeMirror-hints:visible").length == 0
 					&& $(".flatpickr-calendar.open").length == 0
 					&& $modal.nextAll(".modal").length == 0
 					&& !$("body").hasClass("fullscreen")) {

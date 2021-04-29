@@ -2,6 +2,7 @@ package io.onedev.server.buildspec.step;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -25,7 +26,7 @@ public class PublishArtifactStep extends ServerStep {
 	private String artifacts;
 	
 	@Editable(order=100, description="Specify files to publish as job artifacts relative to "
-			+ "repository root. Use * or ? for pattern match")
+			+ "<a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty
@@ -39,7 +40,7 @@ public class PublishArtifactStep extends ServerStep {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
-		return BuildSpec.suggestVariables(matchWith);
+		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
 	
 	@Override
@@ -48,7 +49,7 @@ public class PublishArtifactStep extends ServerStep {
 	}
 
 	@Override
-	public void run(Build build, File filesDir, SimpleLogger jobLogger) {
+	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger jobLogger) {
 		LockUtils.write(build.getArtifactsLockKey(), new Callable<Void>() {
 
 			@Override
@@ -60,6 +61,7 @@ public class PublishArtifactStep extends ServerStep {
 			}
 			
 		});
+		return null;
 	}
 
 }

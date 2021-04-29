@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.buildspec.job.action.CloseMilestoneAction;
-import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -38,16 +35,6 @@ public class CloseMilestoneAuthorization extends ActionAuthorization {
 			return SuggestionUtils.suggestMilestones(Project.get(), matchWith);
 		else
 			return new ArrayList<>();
-	}
-
-	@Override
-	public boolean matches(PostBuildAction postBuildAction) {
-		if (postBuildAction instanceof CloseMilestoneAction) {
-			CloseMilestoneAction closeMilestoneAction = (CloseMilestoneAction) postBuildAction;
-			return milestoneNames == null || WildcardUtils.matchPath(milestoneNames, closeMilestoneAction.getMilestoneName());
-		} else {
-			return false;
-		}
 	}
 
 	@Override
