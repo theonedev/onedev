@@ -1,21 +1,32 @@
-version: 5
+version: 6
 jobs:
 - name: CI
   steps:
+  - !CheckoutStep
+    name: 'checkout'
+    cloneCredential: !DefaultCredential {}
+    cloneDepth: 1
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
+    name: 'detect build version'
     image: 1dev/build-environment:1.3
     commands:
     - set -e
     - echo "Detecting project version (may require some time while downloading maven
       dependencies)..."
-    - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate
-      -Dexpression=project.version -q -DforceStdout)
-    - echo "##onedev[SetBuildVersion '$buildVersion']"
+    - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate
+      -Dexpression=project.version -q -DforceStdout) > buildVersion
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SetBuildVersion
+    name: 'set build version'
+    buildVersion: '@file:buildVersion@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: 'test'
+    image: 1dev/build-environment:1.3
+    commands:
     - mvn test
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  retrieveSource: true
-  cloneDepth: 1
-  cloneCredential: !DefaultCredential {}
   triggers:
   - !PullRequestUpdateTrigger {}
   - !BranchUpdateTrigger {}
@@ -30,7 +41,27 @@ jobs:
   timeout: 3600
 - name: Release
   steps:
+  - !CheckoutStep
+    name: 'checkout'
+    cloneCredential: !HttpCredential
+      accessTokenSecret: onedev-token
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
+    name: 'detect build version '
+    image: 1dev/build-environment:1.3
+    commands:
+    - set -e
+    - echo "Detecting project version (may require some time while downloading maven
+      dependencies)..."
+    - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate
+      -Dexpression=project.version -q -DforceStdout) > buildVersion
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL    
+  - !SetBuildVersionStep
+    name: 'set build version'
+    buildVersion: '@file:buildVersion@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: 'build & deploy'
     image: 1dev/build-environment:1.3
     commands:
     - set -e
@@ -38,12 +69,6 @@ jobs:
     - ''
     - projectDir=`pwd`
     - docker login -u robinshen -p @secrets:dockerhub-password@
-    - ''
-    - echo "Detecting project version (may require some time while downloading maven
-      dependencies)..."
-    - buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate
-      -Dexpression=project.version -q -DforceStdout)
-    - echo "##onedev[SetBuildVersion '$buildVersion']"
     - ''
     - '# Skip test as we''ve already tested in CI build'
     - mvn -Dmaven.test.skip=true -Dmaven.deploy.password=@secrets:maven-deploy-password@
@@ -75,11 +100,11 @@ jobs:
     - git config --global user.name "Robin Shen"
     - git config --global user.email "robin@@onedev.io"
     - ''
-    - git tag v$buildVersion -m "Release tag"
-    - git push -f origin v$buildVersion:v$buildVersion
+    - git tag v@build_version@ -m "Release tag"
+    - git push -f origin v@build_version@:v@build_version@
     - git config --global --unset http.extraHeader
     - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev
-      v$buildVersion:v$buildVersion
+      v@build_version@:v@build_version@
     - ''
     - echo "Creating release branch in onedev-manual..."
     - ''
@@ -95,10 +120,10 @@ jobs:
     - ''
     - echo "Creating release in GitHub..."
     - ''
-    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
+    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v@build_version@
       | jq '.id')
     - ''
-    - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
+    - releaseJson="{\"name\":\"@build_version@\",\"tag_name\":\"v@build_version@\",\"body\":\"##
       Online Demo\n\nhttps://code.onedev.io/projects?query=owned+by+%22demo%22\n\n##
       Downloads\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/artifacts\n\n##
       Change Log\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
@@ -113,18 +138,23 @@ jobs:
       "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
     - fi
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  retrieveSource: true
-  cloneCredential: !HttpCredential
-    accessTokenSecret: onedev-token
-  jobDependencies:
-  - jobName: CI
-    requireSuccessful: true
-  artifacts: '*.zip *.sh'
-  reports:
-  - !JobMarkdownReport
+  - !PublishArtifactStep
+    name: 'publish artifact'
+    artifacts: '*.zip *.sh'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishMarkdownReportStep
+    name: 'publish markdown report'
     reportName: Incompatibilities
     filePatterns: doc/**
     startPage: doc/incompatibilities.md
+    condition: ALWAYS
+  - !CloseMilestoneStep
+    name: 'close milestone'
+    milestoneName: '@build_version@'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  jobDependencies:
+  - jobName: CI
+    requireSuccessful: true
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
@@ -134,21 +164,20 @@ jobs:
   - key: maven-cache
     path: /root/.m2/repository
   timeout: 3600
-  postBuildActions:
-  - !CloseMilestoneAction
-    condition: successful
-    milestoneName: '@build_version@'
 - name: Sync Main (GitHub)
   steps:
+  - !CheckoutStep
+    name: 'checkout '
+    cloneCredential: !DefaultCredential {}
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
+    name: 'command '
     image: alpine/git:1.0.7
     commands:
     - git config --global --unset http.extraHeader
     - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/server
       HEAD:main
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  retrieveSource: true
-  cloneCredential: !DefaultCredential {}
   triggers:
   - !BranchUpdateTrigger
     branches: main
