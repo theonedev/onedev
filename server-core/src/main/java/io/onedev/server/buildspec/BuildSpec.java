@@ -869,7 +869,7 @@ public class BuildSpec implements Serializable, Validatable {
 							for (Node stepsNodeItem: stepsNode.getValue()) {
 								MappingNode stepNode = (MappingNode) stepsNodeItem;
 								String tagName = stepNode.getTag().getValue();
-								String stepName = WordUtils.uncamel(tagName.substring(1)).replace("Step", "").toLowerCase();
+								String stepName = WordUtils.uncamel(tagName.substring(1).replace("Step", "")).toLowerCase();
 								stepNode.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "name"), 
 										new ScalarNode(Tag.STR, stepName)));
 							}
@@ -887,7 +887,7 @@ public class BuildSpec implements Serializable, Validatable {
 							for (Node stepsNodeItem: stepsNode.getValue()) {
 								MappingNode stepNode = (MappingNode) stepsNodeItem;
 								String tagName = stepNode.getTag().getValue();
-								String stepName = WordUtils.uncamel(tagName.substring(1)).replace("Step", "").toLowerCase();
+								String stepName = WordUtils.uncamel(tagName.substring(1).replace("Step", "")).toLowerCase();
 								stepNode.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "name"), 
 										new ScalarNode(Tag.STR, stepName)));
 							}
