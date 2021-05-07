@@ -62,6 +62,11 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 		add(new ModalLink("addNew") {
 
 			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+			
+			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new StepEditPanel(id, steps, -1) {
 
@@ -143,6 +148,11 @@ class StepListEditPanel extends PropertyEditor<List<Serializable>> {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", StepListEditPanel.this);
 				fragment.add(new ModalLink("edit") {
 
+					@Override
+					protected String getModalCssClass() {
+						return "modal-lg";
+					}
+					
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						return new StepEditPanel(id, steps, cellItem.findParent(Item.class).getIndex()) {
