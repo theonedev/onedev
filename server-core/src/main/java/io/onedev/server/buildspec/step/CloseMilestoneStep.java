@@ -60,7 +60,7 @@ public class CloseMilestoneStep extends ServerStep {
 						throw new ExplicitException("This build is not authorized to close milestone '" + milestoneName + "'");
 					}
 				} else {
-					throw new ExplicitException("Unable to find milestone '" + milestoneName + "'");
+					logger.log("WARNING: Unable to find milestone '" + milestoneName + "'");
 				}
 			}
 			
