@@ -149,11 +149,11 @@ jobs:
     reportName: Incompatibilities
     filePatterns: doc/**
     startPage: doc/incompatibilities.md
-    condition: ALWAYS
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CloseMilestoneStep
     name: close milestone
     milestoneName: '@build_version@'
-    condition: NEVER
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   jobDependencies:
   - jobName: CI
     requireSuccessful: true
