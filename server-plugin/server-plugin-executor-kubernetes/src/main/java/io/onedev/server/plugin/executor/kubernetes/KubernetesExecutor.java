@@ -635,7 +635,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			checkConditions(statusNode, jobLogger);
 			
 			List<JsonNode> containerStatusNodes = new ArrayList<>();
-			containerStatusNodes.add(statusNode.get("containerStatuses").iterator().next());				
+			JsonNode containerStatusesNode = statusNode.get("containerStatuses");
+			if (containerStatusesNode != null)
+				containerStatusNodes.add(containerStatusesNode.iterator().next());				
 			
 			Map<String, ContainerError> containerErrors = getContainerErrors(containerStatusNodes);
 			if (!containerErrors.isEmpty()) {
