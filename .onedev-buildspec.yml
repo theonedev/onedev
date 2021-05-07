@@ -67,6 +67,8 @@ jobs:
     - set -e
     - set -o pipefail
     - ''
+    - buildVersion=@build_version@
+    - ''
     - projectDir=`pwd`
     - docker login -u robinshen -p @secrets:dockerhub-password@
     - ''
@@ -100,11 +102,11 @@ jobs:
     - git config --global user.name "Robin Shen"
     - git config --global user.email "robin@@onedev.io"
     - ''
-    - git tag v@build_version@ -m "Release tag"
-    - git push -f origin v@build_version@:v@build_version@
+    - git tag v$buildVersion -m "Release tag"
+    - git push -f origin v$buildVersion:v$buildVersion
     - git config --global --unset http.extraHeader
     - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev
-      v@build_version@:v@build_version@
+      v$buildVersion:v$buildVersion
     - ''
     - echo "Creating release branch in onedev-manual..."
     - ''
@@ -120,10 +122,10 @@ jobs:
     - ''
     - echo "Creating release in GitHub..."
     - ''
-    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v@build_version@
+    - releaseId=$(curl -u robinshine:@secrets:github-token@ https://api.github.com/repos/theonedev/onedev/releases/tags/v$buildVersion
       | jq '.id')
     - ''
-    - releaseJson="{\"name\":\"@build_version@\",\"tag_name\":\"v@build_version@\",\"body\":\"##
+    - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
       Online Demo\n\nhttps://code.onedev.io/projects?query=owned+by+%22demo%22\n\n##
       Downloads\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/artifacts\n\n##
       Change Log\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
