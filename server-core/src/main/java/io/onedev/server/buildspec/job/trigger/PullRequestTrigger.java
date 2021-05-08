@@ -98,10 +98,7 @@ public abstract class PullRequestTrigger extends JobTrigger {
 
 				@Override
 				public String getDescription() {
-					if (request.getUpdates().size() == 1)
-						return "Pull request #" + request.getNumber() + " is opened";
-					else
-						return "Pull request #" + request.getNumber() + " is updated";
+					return "Pull request #" + request.getNumber() + " is opened/updated";
 				}
 				
 			};
