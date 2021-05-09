@@ -24,7 +24,7 @@ Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. N
 
 Build spec is defined in a yaml file together with your code, and OneDev provides a GUI to create the build spec without any learning curve.
 
-![Cispec](doc/images/cispec.gif)
+![Cispec](doc/images/build-spec.gif)
 
 ### Flexible Build Workflow and Pipeline
 
