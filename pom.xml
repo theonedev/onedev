@@ -573,8 +573,8 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>2.0.7</commons.version>
-		<k8shelper.version>2.1.0</k8shelper.version>
+		<commons.version>2.0.8</commons.version>
+		<k8shelper.version>2.1.1</k8shelper.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.11</logback.version>
 		<antlr.version>4.7.2</antlr.version>

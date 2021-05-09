@@ -1376,8 +1376,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						logger.debug(line);
 					} else if (logEndMessage != null && line.contains(logEndMessage)) {
 						endOfLogSeenRef.set(true);
+						String lastLogMessage = StringUtils.substringBefore(line, logEndMessage);
+						if (StringUtils.substringAfter(lastLogMessage, " ").length() != 0)
+							consume(lastLogMessage);
 					} else if (line.startsWith("Error from server") || line.startsWith("error:")) {
-						System.out.println(line);
 						jobLogger.log(line);
 						if (!abortError.get()) {
 							abortError.set(true);
@@ -1484,26 +1486,28 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	private static class OsInfo {
 		
-		private static final Map<String, Integer> WINDOWS_VERSIONS = new LinkedHashMap<>();
+		private static final Map<Integer, String> WINDOWS_VERSIONS = new LinkedHashMap<>();
 		
 		static {
 			// update this according to 
 			// https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
-			WINDOWS_VERSIONS.put(".18363.", 1909);
-			WINDOWS_VERSIONS.put(".18362.", 1903);
-			WINDOWS_VERSIONS.put(".17763.", 1809);
-			WINDOWS_VERSIONS.put(".17134.", 1803); 
-			WINDOWS_VERSIONS.put(".16299.", 1709); 
-			WINDOWS_VERSIONS.put(".14393.", 1607);
+			WINDOWS_VERSIONS.put(14393, "1607");
+			WINDOWS_VERSIONS.put(16299, "1709"); 
+			WINDOWS_VERSIONS.put(17134, "1803"); 
+			WINDOWS_VERSIONS.put(17763, "1809");
+			WINDOWS_VERSIONS.put(18362, "1903");
+			WINDOWS_VERSIONS.put(18363, "1909");
+			WINDOWS_VERSIONS.put(19041, "2004");
+			WINDOWS_VERSIONS.put(19042, "20H2");
 		}
 		
 		private final String osName;
 		
-		private final String kernelVersion;
+		private final String osVersion;
 		
-		public OsInfo(String osName, String kernelVersion) {
+		public OsInfo(String osName, String osVersion) {
 			this.osName = osName;
-			this.kernelVersion = kernelVersion;
+			this.osVersion = osVersion;
 		}
 
 		public boolean isLinux() {
@@ -1512,6 +1516,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		public boolean isWindows() {
 			return osName.equalsIgnoreCase("windows");
+		}
+		
+		public int getWindowsBuildNumber() {
+			Preconditions.checkState(isWindows());
+			List<String> fields = Splitter.on(".").splitToList(osVersion);
+			return Integer.parseInt(fields.get(fields.size()-2));
 		}
 		
 		public String getCacheHome() {
@@ -1533,7 +1543,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				for (OsInfo osInfo: osInfos) {
 					if (!osInfo.isWindows())
 						throw new ExplicitException("Windows and non-windows nodes should not be included in same executor");
-					if (baseline == null || baseline.getWindowsVersion() > osInfo.getWindowsVersion())
+					if (baseline == null || baseline.getWindowsBuildNumber() > osInfo.getWindowsBuildNumber())
 						baseline = osInfo;
 				}
 				return baseline;
@@ -1542,20 +1552,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 		}
 		
-		public int getWindowsVersion() {
-			Preconditions.checkState(isWindows());
-			for (Map.Entry<String, Integer> entry: WINDOWS_VERSIONS.entrySet()) {
-				if (kernelVersion.contains(entry.getKey()))
-					return entry.getValue();
-			}
-			throw new ExplicitException("Unsupported windows kernel version: " + kernelVersion);
+		public String getWindowsVersion() {
+			int buildNumber = getWindowsBuildNumber();
+			String windowsVersion = WINDOWS_VERSIONS.get(buildNumber);
+			if (windowsVersion != null)
+				return windowsVersion;
+			else
+				throw new ExplicitException("Unsupported windows build number: " + buildNumber);
 		}
 		
 		public String getHelperImageSuffix() {
 			if (isLinux())  
 				return "linux";
 			else 
-				return "windows-" + getWindowsVersion();
+				return "windows-" + getWindowsVersion().toLowerCase();
 		}
 		
 	}
