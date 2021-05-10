@@ -5,7 +5,6 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -144,7 +143,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
-			Collection<String> excludedProps = new HashSet<>();
+			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add("gitConfig");
 				excludedProps.add("curlConfig");

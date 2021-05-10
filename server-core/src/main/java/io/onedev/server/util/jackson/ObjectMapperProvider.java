@@ -36,7 +36,6 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 	@Override
 	public ObjectMapper get() {
         ObjectMapper mapper = new ObjectMapper();
-        
         TypeResolverBuilder<?> typer = new StdTypeResolverBuilder() {
 
             @Override
@@ -55,7 +54,7 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 				return  !Collection.class.isAssignableFrom(t.getRawClass()) 
 						&& !Map.class.isAssignableFrom(t.getRawClass()) 
 						&& t.getRawClass() != JsonNode.class
-						&& (t.getRawClass() == Object.class || !t.isConcrete());				
+						&& !t.isConcrete();				
 			}
 
         };
@@ -71,8 +70,6 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 		
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);
-		
-		mapper.setConfig(mapper.getSerializationConfig().withView(DefaultView.class));
 		
 		return mapper;
 	}

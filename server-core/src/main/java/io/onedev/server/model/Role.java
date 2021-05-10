@@ -44,6 +44,7 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.NameAware;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -55,7 +56,7 @@ import io.onedev.server.web.editable.annotation.ShowCondition;
 @Table(indexes={@Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Role extends AbstractEntity implements Permission {
+public class Role extends AbstractEntity implements Permission, NameAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -99,6 +100,7 @@ public class Role extends AbstractEntity implements Permission {
 			+ "Permission to view issues will be granted implicitly even if no other permissions "
 			+ "are specified here")
 	@NotEmpty
+	@Override
 	public String getName() {
 		return name;
 	}

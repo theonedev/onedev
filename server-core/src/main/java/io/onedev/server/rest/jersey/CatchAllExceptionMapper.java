@@ -9,6 +9,8 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.server.util.ExceptionUtils;
+
 @Provider
 public class CatchAllExceptionMapper implements ExceptionMapper<Throwable> {
 	
@@ -18,12 +20,17 @@ public class CatchAllExceptionMapper implements ExceptionMapper<Throwable> {
         if (t instanceof WebApplicationException) {
             return ((WebApplicationException)t).getResponse();
         } else {
-            logger.error("Uncaught exception thrown by RESTful service", t);
-
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-            		.entity("Http response code 500: internal server error: check server log for details")
-            		.type(MediaType.TEXT_PLAIN)
-            		.build();
+            String errorMessage = ExceptionUtils.getExpectedError(t);
+            if (errorMessage != null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                		.entity(errorMessage).type(MediaType.TEXT_PLAIN).build();
+            } else {
+            	logger.error("Error handling restful service", t);
+	            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+	            		.entity("Http response code 500: internal server error: check server log for details")
+	            		.type(MediaType.TEXT_PLAIN)
+	            		.build();
+            }
         }
     }
 }

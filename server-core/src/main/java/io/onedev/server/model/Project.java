@@ -59,7 +59,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -111,9 +111,9 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.NameAware;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -132,7 +132,7 @@ import io.onedev.server.web.util.WicketUtils;
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate 
 @Editable
-public class Project extends AbstractEntity {
+public class Project extends AbstractEntity implements NameAware {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -188,10 +188,6 @@ public class Project extends AbstractEntity {
 	@JoinColumn(nullable=true)
 	private Project forkedFrom;
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
-	private User owner;
-	
 	@Column(nullable=false, unique=true)
 	private String name;
 	
@@ -201,14 +197,14 @@ public class Project extends AbstractEntity {
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
     
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
-	@JsonView(DefaultView.class)
 	private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 	
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
-	@JsonView(DefaultView.class)
 	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
 	
 	@Column(nullable=false)
@@ -265,34 +261,34 @@ public class Project extends AbstractEntity {
 	
 	private boolean issueManagementEnabled = true;
 	
+	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
 	private ProjectIssueSetting issueSetting = new ProjectIssueSetting();
 	
+	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
 	private ProjectBuildSetting buildSetting = new ProjectBuildSetting();
 	
+	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
 	private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
 	
+	@JsonIgnore
 	@Lob
 	@Column(length=65535)
-	@JsonView(DefaultView.class)
 	private ArrayList<NamedCommitQuery> namedCommitQueries;
 	
+	@JsonIgnore
 	@Lob
 	@Column(length=65535)
-	@JsonView(DefaultView.class)
 	private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries;
 	
+	@JsonIgnore
 	@Lob
 	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
 	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
 	private transient Repository repository;
@@ -328,6 +324,7 @@ public class Project extends AbstractEntity {
 	@Editable(order=100)
 	@ProjectName
 	@NotEmpty
+	@Override
 	public String getName() {
 		return name;
 	}

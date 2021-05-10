@@ -16,6 +16,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.NameAware;
 
 @SuppressWarnings("serial")
 public class EntityDeserializer extends BeanDeserializer {
@@ -24,17 +25,17 @@ public class EntityDeserializer extends BeanDeserializer {
 	
 	private final BeanDeserializer defaultDeserializer;
 	
-	private final Dao generalDao;
+	private final Dao dao;
 	
 	public EntityDeserializer(
 			Class<? extends AbstractEntity> entityClass, 
 			BeanDeserializer defaultDeserializer, 
-			Dao generalDao) {
+			Dao dao) {
 		super(defaultDeserializer);
 		
 		this.entityClass = entityClass;
 		this.defaultDeserializer = defaultDeserializer;
-		this.generalDao = generalDao;
+		this.dao = dao;
 	}
 
 	@Override
@@ -52,7 +53,11 @@ public class EntityDeserializer extends BeanDeserializer {
         		Object value = property.deserialize(jp, ctxt);
             	if (property.getName().equals("id") && value != null) {
         			jp.nextToken();
-        			AbstractEntity entity = generalDao.load(entityClass, (Long)value);
+        			AbstractEntity entity = dao.load(entityClass, (Long)value);
+        			if (entity instanceof NameAware) {
+        				String oldName = ((NameAware) entity).getName();
+        				entity.setCustomData(oldName);
+        			}
         			Object bean;
         			if (entity instanceof HibernateProxy) 
         				bean = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();

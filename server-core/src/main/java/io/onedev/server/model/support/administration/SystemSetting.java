@@ -26,7 +26,7 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private CurlConfig curlConfig = new SystemCurl();
 	
-	private boolean gravatarEnabled = true;
+	private boolean gravatarEnabled;
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. Build jobs "
 			+ "running in Kubernetes cluster will access this url to download source and artifacts")

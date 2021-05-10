@@ -52,7 +52,7 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 	}
 
 	@Nullable
-	public static String getExpectedError(Exception exception) {
+	public static String getExpectedError(Throwable exception) {
 		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
 			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
 				Exception expectedException = ExceptionUtils.find(exception, expectedExceptionClass);

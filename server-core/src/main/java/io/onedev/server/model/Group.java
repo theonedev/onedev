@@ -14,12 +14,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.NameAware;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Group extends AbstractEntity {
+public class Group extends AbstractEntity implements NameAware {
 
 	private static final long serialVersionUID = 1L;
 
@@ -42,6 +43,7 @@ public class Group extends AbstractEntity {
 	
 	@Editable(order=100)
 	@NotEmpty
+	@Override
 	public String getName() {
 		return name;
 	}

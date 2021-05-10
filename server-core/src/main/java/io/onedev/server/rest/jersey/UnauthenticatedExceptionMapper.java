@@ -21,6 +21,8 @@ public class UnauthenticatedExceptionMapper implements ExceptionMapper<Unauthent
 		builder.header("WWW-Authenticate", HttpServletRequest.BASIC_AUTH + " realm=\"" + appName + "\"");
     	if (exception.getMessage() != null)
     		builder = builder.entity(exception.getMessage()).type("text/plain");
+    	else
+    		builder = builder.entity("Not authenticated").type("text/plain");
     	
     	return builder.build();
     }

@@ -67,6 +67,7 @@ public class HibernateObjectMapperModule extends Module {
 				}
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public JsonSerializer<?> findMapSerializer(SerializationConfig config, MapType type,
 					BeanDescription beanDesc, JsonSerializer<Object> keySerializer,

@@ -42,7 +42,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -67,7 +67,6 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.IssueFacade;
-import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -205,7 +204,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	// used for title search in markdown editor
 	@Column(nullable=false)
-	@JsonView(DefaultView.class)
+	@JsonIgnore
 	private String noSpaceTitle;
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)

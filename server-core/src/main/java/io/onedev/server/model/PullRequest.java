@@ -49,7 +49,7 @@ import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -72,8 +72,6 @@ import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
-import io.onedev.server.util.jackson.DefaultView;
-import io.onedev.server.util.jackson.RestView;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -249,7 +247,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	// used for title search in markdown editor
 	@Column(nullable=false)
-	@JsonView(DefaultView.class)
+	@JsonIgnore
 	@OptimisticLock(excluded=true)
 	private String noSpaceTitle;
 	
@@ -559,7 +557,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	 * 			it will trigger a re-calculation, and client should call this method later 
 	 * 			to get the calculated result 
 	 */
-	@JsonView(RestView.class)
 	@Nullable
 	public MergePreview getMergePreview() {
 		if (isOpen()) {
@@ -614,24 +611,20 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.mergeStrategy = mergeStrategy;
 	}
 
-	@JsonView(RestView.class)
 	public PullRequestUpdate getLatestUpdate() {
 		return getSortedUpdates().get(getSortedUpdates().size()-1);
 	}
 	
-	@JsonView(RestView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
 		return PullRequest.REFS_PREFIX + getNumber() + "/base";
 	}
 
-	@JsonView(RestView.class)
 	public String getMergeRef() {
 		Preconditions.checkNotNull(getId());
 		return PullRequest.REFS_PREFIX + getNumber() + "/merge";
 	}
 
-	@JsonView(RestView.class)
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
 		return PullRequest.REFS_PREFIX + getNumber() + "/head";

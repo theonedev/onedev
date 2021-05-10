@@ -6,8 +6,6 @@ import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.server.util.jackson.RestView;
-
 @Provider
 public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
 
@@ -15,8 +13,7 @@ public class JacksonContextResolver implements ContextResolver<ObjectMapper> {
 	
 	@Inject
 	public JacksonContextResolver(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper.copy();
-		this.objectMapper.setConfig(this.objectMapper.getSerializationConfig().withView(RestView.class));
+		this.objectMapper = objectMapper;
 	}
 	
 	@Override

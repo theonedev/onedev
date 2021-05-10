@@ -27,6 +27,8 @@ public class UnauthorizedExceptionMapper implements ExceptionMapper<Unauthorized
 		}
     	if (exception.getMessage() != null)
     		builder = builder.entity(exception.getMessage()).type("text/plain");
+    	else
+    		builder = builder.entity("Permission denied").type("text/plain");
     	
     	return builder.build();
     }

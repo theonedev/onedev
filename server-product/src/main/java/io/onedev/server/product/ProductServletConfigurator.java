@@ -44,7 +44,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final WicketServlet wicketServlet;
 	
 	private final ServletContainer jerseyServlet;
-
+	
 	private final WebSocketManager webSocketManager;
 	
 	@Inject
@@ -107,7 +107,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.addServlet(fileServletHolder, "/site/*");
 		context.addServlet(fileServletHolder, "/robots.txt");
 		
-		context.addServlet(new ServletHolder(jerseyServlet), "/rest/*");		
+		context.addServlet(new ServletHolder(jerseyServlet), "/api/*");	
 	}
 	
 }

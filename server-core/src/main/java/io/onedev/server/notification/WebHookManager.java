@@ -27,7 +27,6 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.jackson.RestView;
 
 @Singleton
 public class WebHookManager {
@@ -42,8 +41,7 @@ public class WebHookManager {
 
 	@Inject
 	public WebHookManager(ObjectMapper mapper, ExecutorService executor) {
-		this.mapper = mapper.copy();
-		this.mapper.setConfig(this.mapper.getSerializationConfig().withView(RestView.class));
+		this.mapper = mapper;
 		this.executor = executor;
 	}
 	

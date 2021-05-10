@@ -24,6 +24,8 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 
 	private static final long serialVersionUID = 1L;
 	
+	private transient Object customData;
+	
 	@Id
 	@GenericGenerator(name="entity_id", strategy="io.onedev.server.persistence.IdGenerator")
 	@GeneratedValue(generator="entity_id") 	
@@ -89,6 +91,14 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		} else {
 			return 0;
 		}
+	}
+
+	public Object getCustomData() {
+		return customData;
+	}
+
+	public void setCustomData(Object customData) {
+		this.customData = customData;
 	}
 
 	public boolean isNew() {

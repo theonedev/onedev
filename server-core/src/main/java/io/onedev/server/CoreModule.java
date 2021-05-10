@@ -560,7 +560,7 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public void configure(FilterChainManager filterChainManager) {
-				filterChainManager.createChain("/rest/**", "noSessionCreation, authcBasic");
+				filterChainManager.createChain("/api/**", "noSessionCreation, authcBasic");
 			}
 			
 		});

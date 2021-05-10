@@ -1,9 +1,9 @@
 package io.onedev.server.model;
 
+import static io.onedev.server.model.User.PROP_ACCESS_TOKEN;
 import static io.onedev.server.model.User.PROP_EMAIL;
 import static io.onedev.server.model.User.PROP_FULL_NAME;
 import static io.onedev.server.model.User.PROP_NAME;
-import static io.onedev.server.model.User.PROP_ACCESS_TOKEN;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
 
 import io.onedev.server.OneDev;
@@ -48,7 +48,7 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.jackson.DefaultView;
+import io.onedev.server.util.NameAware;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -64,7 +64,7 @@ import io.onedev.server.web.editable.annotation.Password;
 		uniqueConstraints={@UniqueConstraint(columnNames={SsoInfo.COLUMN_CONNECTOR, SsoInfo.COLUMN_SUBJECT})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class User extends AbstractEntity implements AuthenticationInfo {
+public class User extends AbstractEntity implements AuthenticationInfo, NameAware {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -107,12 +107,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private String name;
 
     @Column(length=1024, nullable=false)
-	@JsonView(DefaultView.class)
+    @JsonIgnore
     private String password;
 
 	private String fullName;
-	
-	@JsonView(DefaultView.class)
+
+	@JsonIgnore
 	@Embedded
 	private SsoInfo ssoInfo = new SsoInfo();
 	
@@ -120,7 +120,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private String email;
 	
 	@Column(unique=true, nullable=false)
-	@JsonView(DefaultView.class)
 	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
@@ -164,43 +163,53 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<SshKey> sshKeys = new ArrayList<>();
-    
+
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedProjectQuery> userProjectQueries = new ArrayList<>();
 	
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedIssueQuery> userIssueQueries = new ArrayList<>();
 
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> userIssueQueryWatches = new LinkedHashMap<>();
 	
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> issueQueryWatches = new LinkedHashMap<>();
 	
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedPullRequestQuery> userPullRequestQueries = new ArrayList<>();
 
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> userPullRequestQueryWatches = new LinkedHashMap<>();
 
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> pullRequestQueryWatches = new LinkedHashMap<>();
 	
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedBuildQuery> userBuildQueries = new ArrayList<>();
 
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> userBuildQuerySubscriptions = new LinkedHashSet<>();
 
+    @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
@@ -404,6 +413,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Editable(name="Login Name", order=100)
 	@UserName
 	@NotEmpty
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -611,5 +621,165 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 			return AUTH_SOURCE_BUILTIN_USER_STORE;
 		}
     }
+
+	public Collection<PullRequestReview> getPullRequestReviews() {
+		return pullRequestReviews;
+	}
+
+	public void setPullRequestReviews(Collection<PullRequestReview> pullRequestReviews) {
+		this.pullRequestReviews = pullRequestReviews;
+	}
+
+	public Collection<PullRequestAssignment> getPullRequestAssignments() {
+		return pullRequestAssignments;
+	}
+
+	public void setPullRequestAssignments(Collection<PullRequestAssignment> pullRequestAssignments) {
+		this.pullRequestAssignments = pullRequestAssignments;
+	}
+
+	public Collection<PullRequestWatch> getPullRequestWatches() {
+		return pullRequestWatches;
+	}
+
+	public void setPullRequestWatches(Collection<PullRequestWatch> pullRequestWatches) {
+		this.pullRequestWatches = pullRequestWatches;
+	}
+
+	public Collection<IssueWatch> getIssueWatches() {
+		return issueWatches;
+	}
+
+	public void setIssueWatches(Collection<IssueWatch> issueWatches) {
+		this.issueWatches = issueWatches;
+	}
+
+	public Collection<IssueVote> getIssueVotes() {
+		return issueVotes;
+	}
+
+	public void setIssueVotes(Collection<IssueVote> issueVotes) {
+		this.issueVotes = issueVotes;
+	}
+
+	public Collection<IssueQuerySetting> getProjectIssueQuerySettings() {
+		return projectIssueQuerySettings;
+	}
+
+	public void setProjectIssueQuerySettings(Collection<IssueQuerySetting> projectIssueQuerySettings) {
+		this.projectIssueQuerySettings = projectIssueQuerySettings;
+	}
+
+	public Collection<BuildQuerySetting> getProjectBuildQuerySettings() {
+		return projectBuildQuerySettings;
+	}
+
+	public void setProjectBuildQuerySettings(Collection<BuildQuerySetting> projectBuildQuerySettings) {
+		this.projectBuildQuerySettings = projectBuildQuerySettings;
+	}
+
+	public Collection<PullRequestQuerySetting> getProjectPullRequestQuerySettings() {
+		return projectPullRequestQuerySettings;
+	}
+
+	public void setProjectPullRequestQuerySettings(Collection<PullRequestQuerySetting> projectPullRequestQuerySettings) {
+		this.projectPullRequestQuerySettings = projectPullRequestQuerySettings;
+	}
+
+	public Collection<CommitQuerySetting> getProjectCommitQuerySettings() {
+		return projectCommitQuerySettings;
+	}
+
+	public void setProjectCommitQuerySettings(Collection<CommitQuerySetting> projectCommitQuerySettings) {
+		this.projectCommitQuerySettings = projectCommitQuerySettings;
+	}
+
+	public Collection<CodeCommentQuerySetting> getProjectCodeCommentQuerySettings() {
+		return projectCodeCommentQuerySettings;
+	}
+
+	public void setProjectCodeCommentQuerySettings(Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings) {
+		this.projectCodeCommentQuerySettings = projectCodeCommentQuerySettings;
+	}
+
+	public ArrayList<NamedProjectQuery> getUserProjectQueries() {
+		return userProjectQueries;
+	}
+
+	public void setUserProjectQueries(ArrayList<NamedProjectQuery> userProjectQueries) {
+		this.userProjectQueries = userProjectQueries;
+	}
+
+	public ArrayList<NamedIssueQuery> getUserIssueQueries() {
+		return userIssueQueries;
+	}
+
+	public void setUserIssueQueries(ArrayList<NamedIssueQuery> userIssueQueries) {
+		this.userIssueQueries = userIssueQueries;
+	}
+
+	public LinkedHashMap<String, Boolean> getUserIssueQueryWatches() {
+		return userIssueQueryWatches;
+	}
+
+	public void setUserIssueQueryWatches(LinkedHashMap<String, Boolean> userIssueQueryWatches) {
+		this.userIssueQueryWatches = userIssueQueryWatches;
+	}
+
+	public LinkedHashMap<String, Boolean> getIssueQueryWatches() {
+		return issueQueryWatches;
+	}
+
+	public void setIssueQueryWatches(LinkedHashMap<String, Boolean> issueQueryWatches) {
+		this.issueQueryWatches = issueQueryWatches;
+	}
+
+	public ArrayList<NamedPullRequestQuery> getUserPullRequestQueries() {
+		return userPullRequestQueries;
+	}
+
+	public void setUserPullRequestQueries(ArrayList<NamedPullRequestQuery> userPullRequestQueries) {
+		this.userPullRequestQueries = userPullRequestQueries;
+	}
+
+	public LinkedHashMap<String, Boolean> getUserPullRequestQueryWatches() {
+		return userPullRequestQueryWatches;
+	}
+
+	public void setUserPullRequestQueryWatches(LinkedHashMap<String, Boolean> userPullRequestQueryWatches) {
+		this.userPullRequestQueryWatches = userPullRequestQueryWatches;
+	}
+
+	public LinkedHashMap<String, Boolean> getPullRequestQueryWatches() {
+		return pullRequestQueryWatches;
+	}
+
+	public void setPullRequestQueryWatches(LinkedHashMap<String, Boolean> pullRequestQueryWatches) {
+		this.pullRequestQueryWatches = pullRequestQueryWatches;
+	}
+
+	public ArrayList<NamedBuildQuery> getUserBuildQueries() {
+		return userBuildQueries;
+	}
+
+	public void setUserBuildQueries(ArrayList<NamedBuildQuery> userBuildQueries) {
+		this.userBuildQueries = userBuildQueries;
+	}
+
+	public LinkedHashSet<String> getUserBuildQuerySubscriptions() {
+		return userBuildQuerySubscriptions;
+	}
+
+	public void setUserBuildQuerySubscriptions(LinkedHashSet<String> userBuildQuerySubscriptions) {
+		this.userBuildQuerySubscriptions = userBuildQuerySubscriptions;
+	}
+
+	public LinkedHashSet<String> getBuildQuerySubscriptions() {
+		return buildQuerySubscriptions;
+	}
+
+	public void setBuildQuerySubscriptions(LinkedHashSet<String> buildQuerySubscriptions) {
+		this.buildQuerySubscriptions = buildQuerySubscriptions;
+	}
 	    
 }
