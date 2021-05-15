@@ -732,7 +732,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Transactional
 	@Override
-	public void resubmit(Build build, Map<String, List<String>> paramMap, String resubmitReason) {
+	public void resubmit(Build build, Map<String, List<String>> paramMap, String reason) {
 		if (build.isFinished()) {
         	validate(build.getProject(), build.getCommitId());
 			
@@ -743,7 +743,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setSubmitter(SecurityUtils.getUser());
-			build.setSubmitReason(resubmitReason);
+			build.setSubmitReason(reason);
 			build.setCanceller(null);
 			build.setCancellerName(null);
 			

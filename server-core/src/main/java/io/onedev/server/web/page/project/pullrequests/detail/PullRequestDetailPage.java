@@ -59,7 +59,6 @@ import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
@@ -1215,14 +1214,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				MergePreview preview = request.getMergePreview();
-				return request.isOpen()
-						&& request.getCheckError() == null 
-						&& preview != null 
-						&& preview.getMergeCommitHash() != null
-						&& request.isAllReviewsApproved() 
-						&& request.isRequiredBuildsSuccessful()
-						&& SecurityUtils.canWriteCode(request.getTargetProject());
+				return SecurityUtils.canWriteCode(request.getProject()) && request.checkMerge() == null;
 			}
 			
 			@Override
@@ -1299,15 +1291,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-				return !request.isOpen() 
-						&& SecurityUtils.canModify(request)
-						&& request.getTarget().getObjectName(false) != null
-						&& request.getSourceProject() != null 
-						&& request.getSource().getObjectName(false) != null
-						&& pullRequestManager.findEffective(request.getTarget(), request.getSource()) == null
-						&& !GitUtils.isMergedInto(request.getTargetProject().getRepository(), null,
-								request.getSource().getObjectId(), request.getTarget().getObjectId());
+				return SecurityUtils.canModify(request) && request.checkReopen() == null;
 			}
 			
 			@Override
@@ -1348,18 +1332,9 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-				MergePreview preview = request.getLastMergePreview();
-				return request.isMerged()
-						&& request.getSourceProject() != null		
-						&& request.getSource().getObjectName(false) != null
-						&& !request.getSource().isDefault()
-						&& preview != null
-						&& (request.getSource().getObjectName().equals(preview.getHeadCommitHash()) 
-								|| request.getSource().getObjectName().equals(preview.getMergeCommitHash()))
+				return request.checkDeleteSourceBranch() == null
 						&& SecurityUtils.canModify(request)
-						&& SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch())
-						&& pullRequestManager.queryOpenTo(request.getSource()).isEmpty();
+						&& SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch());
 			}
 			
 			@Override
@@ -1401,8 +1376,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 			private boolean canOperate() {
 				PullRequest request = getPullRequest();
-				return request.getSourceProject() != null 
-						&& request.getSource().getObjectName(false) == null 
+				return request.checkRestoreSourceBranch() == null 
 						&& SecurityUtils.canModify(request) 
 						&& SecurityUtils.canWriteCode(request.getSourceProject());
 			}

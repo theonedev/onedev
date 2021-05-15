@@ -1,0 +1,475 @@
+package io.onedev.server.rest;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthenticatedException;
+import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.joda.time.DateTime;
+
+import com.google.common.collect.Lists;
+
+import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.rest.jersey.InvalidParamException;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ProjectAndBranch;
+
+@Path("/pull-requests")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Singleton
+public class PullRequestResource {
+
+	private final PullRequestManager pullRequestManager;
+	
+	private final PullRequestChangeManager pullRequestChangeManager;
+	
+	private final UserManager userManager;
+	
+	@Inject
+	public PullRequestResource(PullRequestManager pullRequestManager, 
+			PullRequestChangeManager pullRequestChangeManager, UserManager userManager) {
+		this.pullRequestManager = pullRequestManager;
+		this.pullRequestChangeManager = pullRequestChangeManager;
+		this.userManager = userManager;
+	}
+
+	@Path("/{requestId}")
+    @GET
+    public PullRequest get(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest;
+    }
+
+	@Path("/{requestId}/merge-preview")
+    @GET
+    public MergePreview getMergePreview(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getMergePreview();
+    }
+	
+	@Path("/{requestId}/assignments")
+    @GET
+    public Collection<PullRequestAssignment> getAssignments(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getAssignments();
+    }
+	
+	@Path("/{requestId}/reviews")
+    @GET
+    public Collection<PullRequestReview> getReviews(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getReviews();
+    }
+	
+	@Path("/{requestId}/comments")
+    @GET
+    public Collection<PullRequestComment> getComments(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getComments();
+    }
+	
+	@Path("/{requestId}/watches")
+    @GET
+    public Collection<PullRequestWatch> getWatches(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getWatches();
+    }
+	
+	@Path("/{requestId}/updates")
+    @GET
+    public Collection<PullRequestUpdate> getUpdates(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getSortedUpdates();
+    }
+	
+	@Path("/{requestId}/current-builds")
+    @GET
+    public Collection<Build> getCurrentBuilds(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getCurrentBuilds();
+    }
+	
+	@Path("/{requestId}/changes")
+    @GET
+    public Collection<PullRequestChange> getChanges(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getChanges();
+    }
+	
+	@Path("/{requestId}/fixed-issue-numbers")
+    @GET
+    public Collection<Long> getFixedIssueNumbers(@PathParam("requestId") Long requestId) {
+		PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canReadCode(pullRequest.getProject())) 
+			throw new UnauthorizedException();
+    	return pullRequest.getFixedIssueNumbers();
+    }
+	
+	@GET
+    public List<PullRequest> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
+    		@QueryParam("count") int count) {
+		
+    	if (count > RestConstants.PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+
+    	PullRequestQuery parsedQuery;
+		try {
+			parsedQuery = PullRequestQuery.parse(null, query);
+		} catch (Exception e) {
+			throw new InvalidParamException("Error parsing query", e);
+		}
+    	
+    	return pullRequestManager.query(null, parsedQuery, offset, count, false, false);
+    }
+
+	@POST
+    public Long open(@NotNull PullRequestOpenData data) {
+		User user = SecurityUtils.getUser();
+		if (user == null)
+			throw new UnauthenticatedException();
+		
+		ProjectAndBranch target = new ProjectAndBranch(data.getTargetProjectId(), data.getTargetBranch());
+		ProjectAndBranch source = new ProjectAndBranch(data.getSourceProjectId(), data.getSourceBranch());
+		
+		if (!SecurityUtils.canReadCode(target.getProject()) || !SecurityUtils.canReadCode(source.getProject()))
+			throw new UnauthorizedException();
+		
+		if (target.equals(source))
+			throw new InvalidParamException("Source and target are the same");
+		
+		PullRequest request = pullRequestManager.findLatest(target.getProject());
+		if (request != null && source.equals(request.getSource()) && target.equals(request.getTarget()) && request.isOpen())
+			throw new InvalidParamException("Another pull request already open for this change");
+		
+		request = pullRequestManager.findEffective(target, source);
+		if (request != null) { 
+			if (request.isOpen())
+				throw new InvalidParamException("Another pull request already open for this change");
+			else
+				throw new InvalidParamException("Change already merged");
+		}
+
+		request = new PullRequest();
+		ObjectId baseCommitId = GitUtils.getMergeBase(
+				target.getProject().getRepository(), target.getObjectId(), 
+				source.getProject().getRepository(), source.getObjectId());
+		
+		if (baseCommitId == null)
+			throw new InvalidParamException("No common base for target and source");
+
+		request.setTitle(data.getTitle());
+		request.setTarget(target);
+		request.setSource(source);
+		request.setSubmitter(user);
+		request.setBaseCommitHash(baseCommitId.name());
+		request.setDescription(data.getDescription());
+		request.setMergeStrategy(data.getMergeStrategy());
+		
+		if (request.getBaseCommitHash().equals(source.getObjectName())) 
+			throw new InvalidParamException("Change already merged");
+
+		PullRequestUpdate update = new PullRequestUpdate();
+		update.setDate(new DateTime(request.getSubmitDate()).plusSeconds(1).toDate());
+		request.getUpdates().add(update);
+		request.setUpdates(request.getUpdates());
+		update.setRequest(request);
+		update.setHeadCommitHash(source.getObjectName());
+		update.setTargetHeadCommitHash(request.getTarget().getObjectName());
+		request.getUpdates().add(update);
+
+		pullRequestManager.checkReviews(request, Lists.newArrayList());
+		for (Long reviewerId: data.getReviewerIds()) {
+			User reviewer = userManager.load(reviewerId);
+			if (request.getReview(reviewer) == null) {
+				PullRequestReview review = new PullRequestReview();
+				review.setRequest(request);
+				review.setUser(reviewer);
+				request.getReviews().add(review);
+			}
+		}
+
+		for (Long assigneeId: data.getAssigneeIds()) {
+			PullRequestAssignment assignment = new PullRequestAssignment();
+			assignment.setRequest(request);
+			assignment.setUser(userManager.load(assigneeId));
+			request.getAssignments().add(assignment);
+		}
+				
+		pullRequestManager.open(request);
+		return request.getId();
+    }
+	
+	@Path("/{requestId}/title")
+    @POST
+    public Response setTitle(@PathParam("requestId") Long requestId, @NotEmpty String title) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canModify(request))
+			throw new UnauthorizedException();
+		pullRequestChangeManager.changeTitle(request, title);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/description")
+    @POST
+    public Response setDescription(@PathParam("requestId") Long requestId, String description) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canModify(request))
+			throw new UnauthorizedException();
+		pullRequestChangeManager.changeDescription(request, description);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/merge-strategy")
+    @POST
+    public Response setMergeStrategy(@PathParam("requestId") Long requestId, @NotNull MergeStrategy mergeStrategy) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canModify(request))
+			throw new UnauthorizedException();
+		pullRequestChangeManager.changeMergeStrategy(request, mergeStrategy);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/reopen")
+    @POST
+    public Response reopen(@PathParam("requestId") Long requestId, String note) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canModify(request))
+			throw new UnauthorizedException();
+    	String errorMessage = request.checkReopen();
+    	if (errorMessage != null)
+    		throw new ExplicitException(errorMessage);
+    	
+		pullRequestManager.reopen(request, note);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/discard")
+    @POST
+    public Response discard(@PathParam("requestId") Long requestId, String note) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canModify(request))
+			throw new UnauthorizedException();
+    	if (!request.isOpen())
+    		throw new ExplicitException("Pull request already closed");
+    	
+		pullRequestManager.discard(request, note);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/merge")
+    @POST
+    public Response merge(@PathParam("requestId") Long requestId, String note) {
+		PullRequest request = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canWriteCode(request.getProject()))
+			throw new UnauthorizedException();
+    	String errorMessage = request.checkMerge();
+    	if (errorMessage != null)
+    		throw new ExplicitException(errorMessage);
+		
+		pullRequestManager.merge(request, note);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/delete-source-branch")
+    @POST
+    public Response deleteSourceBranch(@PathParam("requestId") Long requestId, String note) {
+		PullRequest request = pullRequestManager.load(requestId);
+		
+		if (!SecurityUtils.canModify(request) 
+				|| !SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch())) {
+			throw new UnauthorizedException();
+		}
+		
+    	String errorMessage = request.checkDeleteSourceBranch();
+    	if (errorMessage != null)
+    		throw new ExplicitException(errorMessage);
+		
+		pullRequestManager.deleteSourceBranch(request, note);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}/restore-source-branch")
+    @POST
+    public Response restoreSourceBranch(@PathParam("requestId") Long requestId, String note) {
+		PullRequest request = pullRequestManager.load(requestId);
+		
+		if (!SecurityUtils.canModify(request) || 
+				!SecurityUtils.canWriteCode(request.getSourceProject())) {
+			throw new UnauthorizedException();
+		}
+		
+    	String errorMessage = request.checkRestoreSourceBranch();
+    	if (errorMessage != null)
+    		throw new ExplicitException(errorMessage);
+		
+		pullRequestManager.restoreSourceBranch(request, note);
+		return Response.ok().build();
+    }
+	
+	@Path("/{requestId}")
+    @DELETE
+    public Response delete(@PathParam("requestId") Long requestId) {
+    	PullRequest pullRequest = pullRequestManager.load(requestId);
+    	if (!SecurityUtils.canManagePullRequests(pullRequest.getProject()))
+			throw new UnauthorizedException();
+    	pullRequestManager.delete(pullRequest);
+    	return Response.ok().build();
+    }
+	
+	public static class PullRequestOpenData implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private Long targetProjectId;
+		
+		private Long sourceProjectId;
+		
+		private String targetBranch;
+		
+		private String sourceBranch;
+		
+		private String title;
+		
+		private String description;
+		
+		private MergeStrategy mergeStrategy = MergeStrategy.CREATE_MERGE_COMMIT;
+		
+		private Collection<Long> reviewerIds = new ArrayList<>();
+		
+		private Collection<Long> assigneeIds = new ArrayList<>();
+
+		@NotNull
+		public Long getTargetProjectId() {
+			return targetProjectId;
+		}
+
+		public void setTargetProjectId(Long targetProjectId) {
+			this.targetProjectId = targetProjectId;
+		}
+
+		@NotNull
+		public Long getSourceProjectId() {
+			return sourceProjectId;
+		}
+
+		public void setSourceProjectId(Long sourceProjectId) {
+			this.sourceProjectId = sourceProjectId;
+		}
+
+		@NotNull
+		public String getTargetBranch() {
+			return targetBranch;
+		}
+
+		public void setTargetBranch(String targetBranch) {
+			this.targetBranch = targetBranch;
+		}
+
+		@NotNull
+		public String getSourceBranch() {
+			return sourceBranch;
+		}
+
+		public void setSourceBranch(String sourceBranch) {
+			this.sourceBranch = sourceBranch;
+		}
+
+		@NotEmpty
+		public String getTitle() {
+			return title;
+		}
+
+		public void setTitle(String title) {
+			this.title = title;
+		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public void setDescription(String description) {
+			this.description = description;
+		}
+
+		@NotNull
+		public MergeStrategy getMergeStrategy() {
+			return mergeStrategy;
+		}
+
+		public void setMergeStrategy(MergeStrategy mergeStrategy) {
+			this.mergeStrategy = mergeStrategy;
+		}
+
+		@NotNull
+		public Collection<Long> getReviewerIds() {
+			return reviewerIds;
+		}
+
+		public void setReviewerIds(Collection<Long> reviewerIds) {
+			this.reviewerIds = reviewerIds;
+		}
+
+		@NotNull
+		public Collection<Long> getAssigneeIds() {
+			return assigneeIds;
+		}
+
+		public void setAssigneeIds(Collection<Long> assigneeIds) {
+			this.assigneeIds = assigneeIds;
+		}
+
+	}
+}

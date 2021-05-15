@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
@@ -36,8 +37,9 @@ public class SsoAuthorizingRealm extends AbstractAuthorizingRealm {
 	@Inject
     public SsoAuthorizingRealm(UserManager userManager, MembershipManager membershipManager, 
     		GroupManager groupManager, ProjectManager projectManager, SessionManager sessionManager, 
-    		TransactionManager transactionManager, SshKeyManager sshKeyManager) {
-		super(userManager, groupManager, projectManager, sessionManager);
+    		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
+    		SettingManager settingManager) {
+		super(userManager, groupManager, projectManager, sessionManager, settingManager);
 		setCredentialsMatcher(new AllowAllCredentialsMatcher());
 		
     	this.membershipManager = membershipManager;

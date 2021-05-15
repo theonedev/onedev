@@ -2,6 +2,8 @@ package io.onedev.server.rest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -20,9 +22,14 @@ import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.hibernate.criterion.Restrictions;
 
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
@@ -31,6 +38,7 @@ import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -43,9 +51,12 @@ public class ProjectResource {
 
 	private final ProjectManager projectManager;
 	
+	private final MilestoneManager milestoneManager;
+	
 	@Inject
-	public ProjectResource(ProjectManager projectManager) {
+	public ProjectResource(ProjectManager projectManager, MilestoneManager milestoneManager) {
 		this.projectManager = projectManager;
+		this.milestoneManager = milestoneManager;
 	}
 
 	@Path("/{projectId}")
@@ -75,16 +86,64 @@ public class ProjectResource {
 		return setting;
     }
 	
-	@GET
-    public List<Project> query(@QueryParam("query") String query, @QueryParam("offset") Integer offset, 
-    		@QueryParam("count") Integer count) {
-		
-    	if (offset == null)
-    		offset = 0;
+	@Path("/{projectId}/forks")
+    @GET
+    public Collection<Project> getForks(@PathParam("projectId") Long projectId) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canAccess(project)) 
+			throw new UnauthorizedException();
+    	return project.getForks();
+    }
+	
+	@Path("/{projectId}/group-authorizations")
+    @GET
+    public Collection<GroupAuthorization> getGroupAuthorizations(@PathParam("projectId") Long projectId) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return projectManager.load(projectId).getGroupAuthorizations();
+    }
+	
+	@Path("/{projectId}/user-authorizations")
+    @GET
+    public Collection<UserAuthorization> getUserAuthorizations(@PathParam("projectId") Long projectId) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canManage(project)) 
+			throw new UnauthorizedException();
+    	return project.getUserAuthorizations();
+    }
+	
+	@Path("/{projectId}/milestones")
+    @GET
+    public List<Milestone> queryMilestones(@PathParam("projectId") Long projectId, @QueryParam("name") String name, 
+    		@QueryParam("dueBefore") Date dueBefore, @QueryParam("dueAfter") Date dueAfter, 
+    		@QueryParam("closed") Boolean closed, @QueryParam("offset") int offset, 
+    		@QueryParam("count") int count) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canAccess(project)) 
+			throw new UnauthorizedException();
+
+    	if (count > RestConstants.PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
     	
-    	if (count == null) 
-    		count = RestConstants.PAGE_SIZE;
-    	else if (count > RestConstants.PAGE_SIZE)
+    	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
+    	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
+    	if (name != null)
+    		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
+    	if (dueBefore != null)
+    		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, dueBefore));
+    	if (dueAfter != null)
+    		criteria.add(Restrictions.ge(Milestone.PROP_DUE_DATE, dueAfter));
+    	if (closed != null)
+    		criteria.add(Restrictions.eq(Milestone.PROP_CLOSED, closed));
+    	
+    	return milestoneManager.query(criteria, offset, count);
+    }
+	
+	@GET
+    public List<Project> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
+    		@QueryParam("count") int count) {
+		
+    	if (count > RestConstants.PAGE_SIZE)
     		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
 
     	ProjectQuery parsedQuery;

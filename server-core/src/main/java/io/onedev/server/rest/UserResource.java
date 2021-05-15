@@ -1,7 +1,12 @@
 package io.onedev.server.rest;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,13 +28,28 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.BuildQuerySetting;
+import io.onedev.server.model.CodeCommentQuerySetting;
+import io.onedev.server.model.CommitQuerySetting;
+import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.IssueVote;
+import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.Membership;
+import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.model.PullRequestQuerySetting;
+import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.build.NamedBuildQuery;
@@ -37,7 +57,9 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.InvalidParamException;
+import io.onedev.server.security.CipherUtils;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.ssh.SshKeyUtils;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -47,11 +69,14 @@ public class UserResource {
 
 	private final UserManager userManager;
 	
+	private final SshKeyManager sshKeyManager;
+	
 	private final PasswordService passwordService;
 	
 	@Inject
-	public UserResource(UserManager userManager, PasswordService passwordService) {
+	public UserResource(UserManager userManager, SshKeyManager sshKeyManager, PasswordService passwordService) {
 		this.userManager = userManager;
+		this.sshKeyManager = sshKeyManager;
 		this.passwordService = passwordService;
 	}
 
@@ -64,6 +89,31 @@ public class UserResource {
 		return user;
     }
 
+	@Path("/me")
+    @GET
+    public User getMe() {
+		User user = SecurityUtils.getUser();
+		if (user == null)
+			throw new UnauthenticatedException();
+		return user;
+    }
+	
+	@Path("/{userId}/authorizations")
+    @GET
+    public Collection<UserAuthorization> getAuthorizations(@PathParam("userId") Long userId) {
+		if (!SecurityUtils.isAdministrator())
+			throw new UnauthorizedException();
+    	return userManager.load(userId).getAuthorizations();
+    }
+	
+	@Path("/{userId}/memberships")
+    @GET
+    public Collection<Membership> getMemberships(@PathParam("userId") Long userId) {
+		if (!SecurityUtils.isAdministrator())
+			throw new UnauthorizedException();
+    	return userManager.load(userId).getMemberships();
+    }
+	
 	@Path("/{userId}/sso-info")
     @GET
     public SsoInfo getSsoInfo(@PathParam("userId") Long userId) {
@@ -71,6 +121,105 @@ public class UserResource {
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
     	return user.getSsoInfo();
+    }
+	
+	@Path("/{userId}/pull-request-reviews")
+    @GET
+    public Collection<PullRequestReview> getPullRequestReviews(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getPullRequestReviews();
+    }
+	
+	@Path("/{userId}/issue-votes")
+    @GET
+    public Collection<IssueVote> getIssueVotes(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getIssueVotes();
+    }
+	
+	@Path("/{userId}/issue-watches")
+    @GET
+    public Collection<IssueWatch> getIssueWatches(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getIssueWatches();
+    }
+	
+	@Path("/{userId}/project-build-query-settings")
+    @GET
+    public Collection<BuildQuerySetting> getProjectBuildQuerySettings(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getProjectBuildQuerySettings();
+    }
+	
+	@Path("/{userId}/project-code-comment-query-settings")
+    @GET
+    public Collection<CodeCommentQuerySetting> getProjectCodeCommentQuerySettings(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getProjectCodeCommentQuerySettings();
+    }
+	
+	@Path("/{userId}/project-commit-query-settings")
+    @GET
+    public Collection<CommitQuerySetting> getProjectCommitQuerySettings(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getProjectCommitQuerySettings();
+    }
+	
+	@Path("/{userId}/project-issue-query-settings")
+    @GET
+    public Collection<IssueQuerySetting> getProjecIssueQuerySettings(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getProjectIssueQuerySettings();
+    }
+	
+	@Path("/{userId}/project-pull-request-query-settings")
+    @GET
+    public Collection<PullRequestQuerySetting> getProjecPullRequestQuerySettings(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getProjectPullRequestQuerySettings();
+    }
+	
+	@Path("/{userId}/pull-request-assignments")
+    @GET
+    public Collection<PullRequestAssignment> getPullRequestAssignments(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getPullRequestAssignments();
+    }
+	
+	@Path("/{userId}/pull-request-watches")
+    @GET
+    public Collection<PullRequestWatch> getPullRequestWatches(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getPullRequestWatches();
+    }
+	
+	@Path("/{userId}/ssh-keys")
+    @GET
+    public Collection<SshKey> getSshKeys(@PathParam("userId") Long userId) {
+    	User user = userManager.load(userId);
+    	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	return user.getSshKeys();
     }
 	
 	@Path("/{userId}/queries-and-watches")
@@ -95,18 +244,13 @@ public class UserResource {
 	
 	@GET
     public List<User> query(@QueryParam("name") String name, @QueryParam("fullName") String fullName, 
-    		@QueryParam("email") String email, @QueryParam("offset") Integer offset, 
-    		@QueryParam("count") Integer count) {
+    		@QueryParam("email") String email, @QueryParam("offset") int offset, 
+    		@QueryParam("count") int count) {
 		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (offset == null)
-    		offset = 0;
-    	
-    	if (count == null) 
-    		count = RestConstants.PAGE_SIZE;
-    	else if (count > RestConstants.PAGE_SIZE)
+    	if (count > RestConstants.PAGE_SIZE)
     		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
 
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
@@ -125,9 +269,9 @@ public class UserResource {
     public Long save(@NotNull User user) {
     	if (user.isNew()) {
     		if (!SecurityUtils.isAdministrator()) {
-    			throw new UnauthenticatedException();
+    			throw new UnauthorizedException();
     		} else {
-    			user.setPassword("12345");
+    			user.setPassword("impossible_password");
     			userManager.save(user);
     		}
     	} else {
@@ -141,7 +285,7 @@ public class UserResource {
 	
 	@Path("/{userId}/password")
     @POST
-    public Response savePassword(@PathParam("userId") Long userId, @NotEmpty String password) {
+    public Response setPassword(@PathParam("userId") Long userId, @NotEmpty String password) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();
@@ -162,7 +306,7 @@ public class UserResource {
 	
 	@Path("/{userId}/sso-info")
     @POST
-    public Response saveSsoInfo(@PathParam("userId") Long userId, @NotNull SsoInfo ssoInfo) {
+    public Response setSsoInfo(@PathParam("userId") Long userId, @NotNull SsoInfo ssoInfo) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	User user = userManager.load(userId);
@@ -173,7 +317,7 @@ public class UserResource {
 	
 	@Path("/{userId}/queries-and-watches")
     @POST
-    public Response saveQueriesAndWatches(@PathParam("userId") Long userId, @NotNull QueriesAndWatches queriesAndWatches) {
+    public Response setQueriesAndWatches(@PathParam("userId") Long userId, @NotNull QueriesAndWatches queriesAndWatches) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
@@ -190,6 +334,30 @@ public class UserResource {
 		userManager.save(user);
 		return Response.ok().build();
     }
+	
+	@Path("/{userId}/ssh-keys")
+	@POST
+	public Long addSshKey(@PathParam("userId") Long userId, @NotNull String content) {
+		User user = SecurityUtils.getUser();
+		if (user == null)
+			throw new UnauthenticatedException();
+		
+		SshKey sshKey = new SshKey();
+		sshKey.setContent(content);
+		sshKey.setDate(new Date());
+		sshKey.setOwner(user);
+		
+        try {
+            PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
+            String fingerPrint = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
+            sshKey.setDigest(fingerPrint);
+        } catch (IOException | GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
+        
+		sshKeyManager.save(sshKey);
+		return sshKey.getId();
+	}
 	
 	@Path("/{userId}")
     @DELETE

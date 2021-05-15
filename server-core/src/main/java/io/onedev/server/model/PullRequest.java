@@ -54,6 +54,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.PullRequestInfoManager;
@@ -1097,6 +1098,84 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 			}
 		}
 		return requiredJobs;
+	}
+	
+	@Nullable
+	public String checkMerge() {
+    	if (!isOpen())
+    		return "Pull request already closed";
+    	String checkError = getCheckError();
+    	if (checkError != null)
+    		return "Pull request is in error: " + checkError;
+    	MergePreview preview = getMergePreview();
+    	if (preview == null)
+    		return "Merge preview not calculated yet";
+    	if (preview.getMergeCommitHash() == null)
+    		return "There are merge conflicts";
+    	if (!isAllReviewsApproved())
+    		return "Waiting for approvals";
+    	if (!isRequiredBuildsSuccessful())
+    		return "Some required builds not passed";
+    	return null;
+	}
+
+	@Nullable
+	public String checkReopen() {
+		if (isOpen())
+			return "Pull request already opened";
+		if (getTarget().getObjectName(false) == null)
+			return "Target branch no longer exists";
+		if (getSourceProject() == null)
+			return "Source project no longer exists";
+		if (getSource().getObjectName(false) == null)
+			return "Source branch no longer exists";
+		PullRequestManager manager = OneDev.getInstance(PullRequestManager.class);
+		PullRequest request = manager.findEffective(getTarget(), getSource());
+		if (request != null) {
+			if (request.isOpen())
+				return "Another pull request already open for this change";
+			else
+				return "Change already merged";
+		}
+		
+		if (GitUtils.isMergedInto(getTargetProject().getRepository(), null,
+						getSource().getObjectId(), getTarget().getObjectId())) {
+			return "Source branch already merged into target branch";
+		}
+		
+		return null;
+	}
+	
+	@Nullable
+	public String checkDeleteSourceBranch() {
+		if (!isMerged())
+			return "Pull request not merged";
+		if (getSourceProject() == null)
+			return "Source project no longer exists";
+		if (getSource().getObjectName(false) == null)
+			return "Source branch no longer exists";
+		if (getSource().isDefault())
+			return "Source branch is default branch";
+		MergePreview preview = getMergePreview();
+		if (preview == null)
+			return "Merge preview not calculated yet";
+		if (!getSource().getObjectName().equals(preview.getHeadCommitHash()) 
+				&& !getSource().getObjectName().equals(preview.getMergeCommitHash())) {
+			return "Change not updated yet";
+		}
+		PullRequestManager manager = OneDev.getInstance(PullRequestManager.class);
+		if (!manager.queryOpenTo(getSource()).isEmpty())
+			return "Some other pull requests are opening to this branch";
+		return null;
+	}
+	
+	@Nullable
+	public String checkRestoreSourceBranch() {
+		if (getSourceProject() == null)
+			return "Source project no longer exists";
+		if (getSource().getObjectName(false) != null)
+			return "Source branch already exists";
+		return null;
 	}
 	
 }

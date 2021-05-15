@@ -37,8 +37,6 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 
 	private static final Logger logger = LoggerFactory.getLogger(PasswordAuthorizingRealm.class);
 	
-    private final SettingManager settingManager;
-    
     private final TransactionManager transactionManager;
     
     private final MembershipManager membershipManager;
@@ -51,13 +49,12 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
     		ProjectManager projectManager, SessionManager sessionManager, 
     		TransactionManager transactionManager, SshKeyManager sshKeyManager, 
     		PasswordService passwordService) {
-		super(userManager, groupManager, projectManager, sessionManager);
+		super(userManager, groupManager, projectManager, sessionManager, settingManager);
 		
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(passwordService);
 		setCredentialsMatcher(passwordMatcher);
 		
-    	this.settingManager = settingManager;
     	this.transactionManager = transactionManager;
     	this.membershipManager = membershipManager;
     	this.sshKeyManager = sshKeyManager;

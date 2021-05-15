@@ -1,0 +1,65 @@
+package io.onedev.server.rest;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.security.SecurityUtils;
+
+@Path("/code-comment-replies")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Singleton
+public class CodeCommentReplyResource {
+
+	private final CodeCommentReplyManager replyManager;
+
+	@Inject
+	public CodeCommentReplyResource(CodeCommentReplyManager replyManager) {
+		this.replyManager = replyManager;
+	}
+
+	@Path("/{replyId}")
+	@GET
+	public CodeCommentReply get(@PathParam("commentId") Long replyId) {
+		CodeCommentReply reply = replyManager.load(replyId);
+    	if (!SecurityUtils.canReadCode(reply.getComment().getProject()))  
+			throw new UnauthorizedException();
+    	return reply;
+	}
+	
+	@POST
+	public Long save(@NotNull CodeCommentReply reply) {
+    	if (!SecurityUtils.canReadCode(reply.getComment().getProject()) || 
+    			!SecurityUtils.isAdministrator() && !reply.getUser().equals(SecurityUtils.getUser())) { 
+			throw new UnauthorizedException();
+    	}
+    	
+    	replyManager.save(reply);
+		return reply.getId();
+	}
+	
+	@Path("/{replyId}")
+	@DELETE
+	public Response delete(@PathParam("replyId") Long replyId) {
+		CodeCommentReply reply = replyManager.load(replyId);
+    	if (!SecurityUtils.canModifyOrDelete(reply)) 
+			throw new UnauthorizedException();
+    	replyManager.delete(reply);
+		return Response.ok().build();
+	}
+	
+}

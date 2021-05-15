@@ -37,9 +37,13 @@ public class Milestone extends AbstractEntity {
 
 	public static final String PROP_ID = "id";
 	
+	public static final String PROP_PROJECT = "project";
+	
 	public static final String PROP_NAME = "name";
 	
 	public static final String PROP_DUE_DATE = "dueDate";
+	
+	public static final String PROP_CLOSED = "closed";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

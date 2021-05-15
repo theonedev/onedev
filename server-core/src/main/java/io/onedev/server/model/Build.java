@@ -49,6 +49,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -301,6 +302,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private Date retryDate;
 	
+	@JsonIgnore
 	private Integer finishDay;
 	
 	@Column(nullable=false, length=1000)

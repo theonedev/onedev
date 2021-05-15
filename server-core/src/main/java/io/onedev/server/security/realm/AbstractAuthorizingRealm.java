@@ -49,17 +49,21 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     
     protected final SessionManager sessionManager;
     
+    protected final SettingManager settingManager;
+    
     @SuppressWarnings("serial")
 	private static final MetaDataKey<Map<Long, AuthorizationInfo>> AUTHORIZATION_INFOS = 
 			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
     
 	@Inject
     public AbstractAuthorizingRealm(UserManager userManager, GroupManager groupManager, 
-    		ProjectManager projectManager, SessionManager sessionManager) {
+    		ProjectManager projectManager, SessionManager sessionManager, 
+    		SettingManager settingManager) {
     	this.userManager = userManager;
     	this.groupManager = groupManager;
     	this.projectManager = projectManager;
     	this.sessionManager = sessionManager;
+    	this.settingManager = settingManager;
     }
 
 	private Collection<Permission> getGroupPermissions(Group group, @Nullable User user) {
@@ -88,9 +92,8 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 			public Collection<Permission> call() throws Exception {
 				Collection<Permission> permissions = new ArrayList<>();
 
-				User user = null;
 		        if (userId != 0L) { 
-		            user = userManager.load(userId);
+		            User user = userManager.load(userId);
 		        	if (user.isRoot() || user.isSystem()) 
 		        		permissions.add(new SystemAdministration());
 		        	permissions.add(new UserAdministration(user));
@@ -99,9 +102,11 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 		        	for (UserAuthorization authorization: user.getAuthorizations()) 
     					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 		        } 
-		        for (Project project: projectManager.query()) {
-		        	if (project.getDefaultRole() != null)
-		        		permissions.add(new ProjectPermission(project, project.getDefaultRole()));
+		        if (userId != 0L || settingManager.getSecuritySetting().isEnableAnonymousAccess()) {
+			        for (Project project: projectManager.query()) {
+			        	if (project.getDefaultRole() != null)
+			        		permissions.add(new ProjectPermission(project, project.getDefaultRole()));
+			        }
 		        }
 				return permissions;
 			}

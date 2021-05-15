@@ -7,10 +7,10 @@ import io.onedev.server.model.PullRequest;
 public interface SubmitReason {
 
 	String getRefName();
-	
+
 	@Nullable
 	PullRequest getPullRequest();
-	
+
 	String getDescription();
 	
 }

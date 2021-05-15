@@ -1,0 +1,268 @@
+package io.onedev.server.rest;
+
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.shiro.authz.UnauthorizedException;
+
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.SshSetting;
+import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.security.SecurityUtils;
+
+@Path("/settings")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Singleton
+public class SettingResource {
+
+	private final SettingManager settingManager;
+	
+	@Inject
+	public SettingResource(SettingManager settingManager) {
+		this.settingManager = settingManager;
+	}
+
+	@Path("/system")
+    @GET
+    public SystemSetting getSystemSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getSystemSetting();
+    }
+
+	@Path("/authenticator")
+    @GET
+    public Authenticator getAuthenticator() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getAuthenticator();
+    }
+	
+	@Path("/backup")
+    @GET
+    public BackupSetting getBackupSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getBackupSetting();
+    }
+	
+	@Path("/build")
+    @GET
+    public GlobalBuildSetting getBuildSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getBuildSetting();
+    }
+	
+	@Path("/groovy-scripts")
+    @GET
+    public List<GroovyScript> getGroovyScripts() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getGroovyScripts();
+    }
+	
+	@Path("/issue")
+    @GET
+    public GlobalIssueSetting getIssueSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getIssueSetting();
+    }
+	
+	@Path("/job-executors")
+    @GET
+    public List<JobExecutor> getJobExecutors() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getJobExecutors();
+    }
+
+	@Path("/mail")
+    @GET
+    public MailSetting getMailSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getMailSetting();
+    }
+	
+	@Path("/project")
+    @GET
+    public GlobalProjectSetting getProjectSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getProjectSetting();
+    }
+	
+	@Path("/pull-request")
+    @GET
+    public GlobalPullRequestSetting getPullRequestSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getPullRequestSetting();
+    }
+	
+	@Path("/security")
+    @GET
+    public SecuritySetting getSecuritySetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getSecuritySetting();
+    }
+	
+	@Path("/ssh")
+    @GET
+    public SshSetting getSshSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getSshSetting();
+    }
+	
+	@Path("/sso-connectors")
+    @GET
+    public List<SsoConnector> getSsoConnectors() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getSsoConnectors();
+    }
+	
+	@Path("/system")
+    @POST
+    public Response setSystemSetting(@NotNull SystemSetting systemSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveSystemSetting(systemSetting);
+    	return Response.ok().build();
+    }
+
+	@Path("/authenticator")
+    @POST
+    public Response setAuthenticator(Authenticator authenticator) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveAuthenticator(authenticator);
+    	return Response.ok().build();
+    }
+	
+	@Path("/backup")
+    @POST
+    public Response setBackupSetting(BackupSetting backupSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveBackupSetting(backupSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/build")
+    @POST
+    public Response setBuildSetting(@NotNull GlobalBuildSetting buildSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveBuildSetting(buildSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/groovy-scripts")
+	@POST
+    public Response setGroovyScripts(@NotNull List<GroovyScript> groovyScripts) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveGroovyScripts(groovyScripts);
+    	return Response.ok().build();
+    }
+	
+	@Path("/issue")
+	@POST
+    public Response setIssueSetting(@NotNull GlobalIssueSetting issueSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveIssueSetting(issueSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/job-executors")
+	@POST
+    public Response setJobExecutors(@NotNull List<JobExecutor> jobExecutors) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveJobExecutors(jobExecutors);
+    	return Response.ok().build();
+    }
+
+	@Path("/mail")
+	@POST
+    public Response setMailSetting(MailSetting mailSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveMailSetting(mailSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/project")
+	@POST
+    public Response setProjectSetting(@NotNull GlobalProjectSetting projectSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveProjectSetting(projectSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/pull-request")
+	@POST
+    public Response setPullRequestSetting(@NotNull GlobalPullRequestSetting pullRequestSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.savePullRequestSetting(pullRequestSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/security")
+	@POST
+    public Response setSecuritySetting(@NotNull SecuritySetting securitySetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveSecuritySetting(securitySetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/ssh")
+	@POST
+    public Response setSshSetting(@NotNull SshSetting sshSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveSshSetting(sshSetting);
+    	return Response.ok().build();
+    }
+	
+	@Path("/sso-connectors")
+	@POST
+    public Response setSsoConnectors(@NotNull List<SsoConnector> ssoConnectors) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveSsoConnectors(ssoConnectors);
+    	return Response.ok().build();
+    }
+	
+}
