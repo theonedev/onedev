@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>4.3.3</version>
+		<version>4.3.4</version>
 	</parent>
 	<build>
 		<plugins>
@@ -157,7 +157,7 @@
 			<artifactId>groovy</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.googlecode.juniversalchardet</groupId>
+			<groupId>com.github.albfernandez</groupId>
 			<artifactId>juniversalchardet</artifactId>
 		</dependency>
 		<dependency>
@@ -203,7 +203,7 @@
 		<dependency>
 			<groupId>net.i2p.crypto</groupId>
 			<artifactId>eddsa</artifactId>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>

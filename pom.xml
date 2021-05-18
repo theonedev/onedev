@@ -9,7 +9,7 @@
 		<version>1.0.5</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>4.3.3</version>
+	<version>4.3.4</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -490,9 +490,9 @@
 				<version>${groovy.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.googlecode.juniversalchardet</groupId>
+				<groupId>com.github.albfernandez</groupId>
 				<artifactId>juniversalchardet</artifactId>
-				<version>1.0.3</version>
+				<version>2.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
@@ -540,10 +540,10 @@
 				<version>${jgit.version}</version>
 			</dependency>
 			<dependency>
-			  	<groupId>net.i2p.crypto</groupId>
-			  	<artifactId>eddsa</artifactId>
-			  	<version>0.3.0</version>
-			</dependency>			
+				<groupId>net.i2p.crypto</groupId>
+				<artifactId>eddsa</artifactId>
+				<version>0.3.0</version>
+			</dependency>
 			<dependency>
 				<groupId>org.apache.sshd</groupId>
 				<artifactId>sshd-core</artifactId>
@@ -554,7 +554,7 @@
 				<artifactId>json</artifactId>
 				<version>20090211</version>
 			</dependency>
-  		</dependencies>
+		</dependencies>
 	</dependencyManagement>
 	<repositories>
 		<repository>
