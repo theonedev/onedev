@@ -9,7 +9,7 @@
 		<version>1.0.5</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>4.3.3</version>
+	<version>4.3.5</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -32,85 +32,30 @@
 						<visitor>true</visitor>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>io.onedev</groupId>
-										<artifactId>plugin-maven</artifactId>
-										<versionRange>[2.0.0,]</versionRange>
-										<goals>
-											<goal>populate-resources</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-											<runOnConfiguration>true</runOnConfiguration>
-										</execute>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.gmaven</groupId>
-										<artifactId>groovy-maven-plugin</artifactId>
-										<versionRange>[2.0,]</versionRange>
-										<goals>
-											<goal>execute</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-											<runOnConfiguration>true</runOnConfiguration>
-										</execute>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.apache.maven.plugins</groupId>
-										<artifactId>maven-jar-plugin</artifactId>
-										<versionRange>[1.0.0,]</versionRange>
-										<goals>
-											<goal>jar</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore />
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
-					<executions>
-						<execution>
-							<id>default-jar</id>
-							<phase>never</phase>
-							<configuration>
-								<finalName>unwanted</finalName>
-								<classifier>unwanted</classifier>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<executions>
+					<execution>
+						<id>default-jar</id>
+						<phase>never</phase>
+						<configuration>
+							<finalName>unwanted</finalName>
+							<classifier>unwanted</classifier>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>io.onedev</groupId>
 				<artifactId>plugin-maven</artifactId>
 				<version>2.0.5</version>
 				<executions>
 					<execution>
+						<?m2e execute onConfiguration,onIncremental?>
 						<id>populate-resources</id>
 						<phase>process-resources</phase>
 						<goals>
@@ -477,7 +422,7 @@
 			<dependency>
 				<groupId>com.thoughtworks.xstream</groupId>
 				<artifactId>xstream</artifactId>
-				<version>1.4.16</version>
+				<version>1.4.17</version>
 			</dependency>
 			<dependency>
 				<groupId>com.joestelmach</groupId>
@@ -490,9 +435,9 @@
 				<version>${groovy.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.googlecode.juniversalchardet</groupId>
+				<groupId>com.github.albfernandez</groupId>
 				<artifactId>juniversalchardet</artifactId>
-				<version>1.0.3</version>
+				<version>2.4.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
