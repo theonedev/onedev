@@ -42,7 +42,7 @@ public class BeanListPropertyViewer extends Panel {
 				excludedProperties.add(each);
 		}
 		
-		Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
+		Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
 		
 		propertyContexts = new ArrayList<>();
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getProperties().values()) {

@@ -16,6 +16,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExceptionUtils;
@@ -93,7 +95,8 @@ public class ReflectionUtils {
 	 * @return 
 	 * 			the underlying class, or <tt>null</tt> if the type is a variable type
 	 */
-	private static Class<?> getClass(Type type) {
+	@Nullable
+	public static Class<?> getClass(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
 		} else if (type instanceof ParameterizedType) {
@@ -382,55 +385,39 @@ public class ReflectionUtils {
 		return null;
 	}
 	
-	public static Class<?> getCollectionElementType(Type type) {
+	@Nullable
+	public static Class<?> getCollectionElementClass(Type type) {
+		Type elementType = getCollectionElementType(type);
+		return elementType!=null? getClass(elementType): null; 
+	}
+
+	@Nullable
+	public static Type getCollectionElementType(Type type) {
 		if (type instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType)type;
 			Type rawType = parameterizedType.getRawType();
-			if (rawType instanceof Class<?>) {
-				Class<?> rawClazz = (Class<?>) rawType;
-				if (Collection.class.isAssignableFrom(rawClazz)) {
-					Type elementType = parameterizedType.getActualTypeArguments()[0];
-					if (elementType instanceof Class<?>) 
-						return (Class<?>) elementType;
-				}
-			}
+			Preconditions.checkState(Collection.class.isAssignableFrom((Class<?>) rawType));
+			return parameterizedType.getActualTypeArguments()[0];
 		}
 		return null;
 	}
 	
-	public static Class<?> getMapKeyType(Type type) {
-		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType)type;
-			Type rawType = parameterizedType.getRawType();
-
-			if (rawType instanceof Class<?>) {
-				Class<?> rawClazz = (Class<?>) rawType;
-				if (Map.class.isAssignableFrom(rawClazz)) {
-					Type valueType = parameterizedType.getActualTypeArguments()[0];
-					if (valueType instanceof Class<?>) 
-						return (Class<?>) valueType;
-				}
-			}
-		}
-		return null;
+	public static Type getMapKeyType(Type type) {
+		return getMapElementType(type, 0);
 	}
-
-	public static Class<?> getMapValueType(Type type) {
+	
+	@Nullable
+	public static Type getMapValueType(Type type) {
+		return getMapElementType(type, 1);
+	}
+	
+	@Nullable
+	private static Type getMapElementType(Type type, int index) {
 		if (type instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType)type;
 			Type rawType = parameterizedType.getRawType();
-
-			if (rawType instanceof Class<?>) {
-				Class<?> rawClazz = (Class<?>) rawType;
-				if (Map.class.isAssignableFrom(rawClazz)) {
-					Type valueType = parameterizedType.getActualTypeArguments()[1];
-					if (valueType instanceof Class<?>) {
-						return (Class<?>) valueType;
-					} else if (valueType instanceof ParameterizedType) {
-						return (Class<?>) ((ParameterizedType)valueType).getRawType();
-					}
-				}
-			}
+			Preconditions.checkState(Map.class.isAssignableFrom((Class<?>) rawType));
+			return parameterizedType.getActualTypeArguments()[index];
 		}
 		return null;
 	}

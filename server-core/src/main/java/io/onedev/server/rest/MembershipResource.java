@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.model.Membership;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=6100)
 @Path("/memberships")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class MembershipResource {
 		this.membershipManager = membershipManager;
 	}
 
+	@Api(order=100)
 	@Path("/{membershipId}")
 	@GET
 	public Membership get(@PathParam("membershipId") Long membershipId) {
@@ -40,6 +43,7 @@ public class MembershipResource {
 		return membershipManager.load(membershipId);
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull Membership membership) {
 		if (!SecurityUtils.isAdministrator())
@@ -48,6 +52,7 @@ public class MembershipResource {
 		return membership.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{membershipId}")
 	@DELETE
 	public Response delete(@PathParam("membershipId") Long membershipId) {

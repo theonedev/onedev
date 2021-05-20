@@ -14,7 +14,7 @@ import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import io.onedev.commons.launcher.loader.AppLoader;
 
 public class JerseyApplication extends ResourceConfig {
-
+	
 	@Inject
 	public JerseyApplication(ServiceLocator serviceLocator) {
 		GuiceBridge.getGuiceBridge().initializeGuiceBridge(serviceLocator);
@@ -35,6 +35,7 @@ public class JerseyApplication extends ResourceConfig {
 	    for (JerseyConfigurator configurator: AppLoader.getExtensions(JerseyConfigurator.class)) {
 	    	configurator.configure(this);
 	    }
+	    
 	}
 	
 }

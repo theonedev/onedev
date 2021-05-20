@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=3400)
 @Path("/pull-request-watches")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class PullRequestWatchResource {
 		this.watchManager = watchManager;
 	}
 
+	@Api(order=100)
 	@Path("/{watchId}")
 	@GET
 	public PullRequestWatch get(@PathParam("watchId") Long watchId) {
@@ -41,6 +44,7 @@ public class PullRequestWatchResource {
 		return watch;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull PullRequestWatch watch) {
 		if (!SecurityUtils.canReadCode(watch.getRequest().getProject()) 
@@ -51,6 +55,7 @@ public class PullRequestWatchResource {
 		return watch.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{watchId}")
 	@DELETE
 	public Response delete(@PathParam("watchId") Long watchId) {

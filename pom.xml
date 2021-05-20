@@ -450,6 +450,11 @@
 				<version>${flexmark.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.objenesis</groupId>
+				<artifactId>objenesis</artifactId>
+				<version>3.2</version>
+			</dependency>
+			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
 				<artifactId>flexmark-ext-anchorlink</artifactId>
 				<version>${flexmark.version}</version>

@@ -23,7 +23,7 @@ public class CodeEditSupport implements EditSupport {
 		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
 		Code annotation = descriptor.getPropertyGetter().getAnnotation(Code.class);
 		if (annotation != null) {
-			if (List.class.isAssignableFrom(propertyClass) && ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType()) == String.class) {
+			if (List.class.isAssignableFrom(propertyClass) && ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType()) == String.class) {
 				return new PropertyContext<List<String>>(descriptor) {
 
 					@Override

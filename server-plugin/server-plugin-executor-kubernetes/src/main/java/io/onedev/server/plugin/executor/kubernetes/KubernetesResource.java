@@ -45,9 +45,11 @@ import io.onedev.k8shelper.ServerExecutionResult;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.SimpleLogger;
 
+@Api(exclude=true)
 @Path("/k8s")
 @Consumes(MediaType.WILDCARD)
 @Singleton

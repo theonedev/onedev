@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=8000)
 @Path("/user-authorizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class UserAuthorizationResource {
 		this.authorizationManager = authorizationManager;
 	}
 
+	@Api(order=100)
 	@Path("/{authorizationId}")
 	@GET
 	public UserAuthorization get(@PathParam("authorizationId") Long authorizationId) {
@@ -41,6 +44,7 @@ public class UserAuthorizationResource {
 		return authorization;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull UserAuthorization authorization) {
 		if (!SecurityUtils.canManage(authorization.getProject()))
@@ -49,6 +53,7 @@ public class UserAuthorizationResource {
 		return authorization.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response delete(@PathParam("authorizationId") Long authorizationId) {

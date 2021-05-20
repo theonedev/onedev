@@ -26,7 +26,7 @@ public class BuildChoiceEditSupport implements EditSupport {
         BuildChoice buildChoice = propertyGetter.getAnnotation(BuildChoice.class);
         if (buildChoice != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == Long.class) {
+        			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == Long.class) {
         		return new PropertyContext<List<Long>>(descriptor) {
 
 					@Override

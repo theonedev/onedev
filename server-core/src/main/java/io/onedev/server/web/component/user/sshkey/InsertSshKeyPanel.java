@@ -72,7 +72,7 @@ public abstract class InsertSshKeyPanel extends Panel {
 					target.add(form);
                 } else {
                     sshKey.setOwner(getUser());
-                    sshKey.setDate(new Date());
+                    sshKey.setCreatedAt(new Date());
                     sshKeyManager.save(sshKey);
                     onSave(target);
                 }

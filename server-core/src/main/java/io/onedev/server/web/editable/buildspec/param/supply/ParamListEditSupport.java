@@ -22,7 +22,7 @@ public class ParamListEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
+			Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass == ParamSupply.class && descriptor.getPropertyGetter().getAnnotation(ParamSpecProvider.class) != null) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 

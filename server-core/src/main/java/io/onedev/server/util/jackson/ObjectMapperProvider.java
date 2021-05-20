@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
 
 @Singleton
 public class ObjectMapperProvider implements Provider<ObjectMapper> {
@@ -54,6 +56,7 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 				return  !Collection.class.isAssignableFrom(t.getRawClass()) 
 						&& !Map.class.isAssignableFrom(t.getRawClass()) 
 						&& t.getRawClass() != JsonNode.class
+						&& !Enum.class.isAssignableFrom(t.getRawClass())
 						&& !t.isConcrete();				
 			}
 
@@ -61,12 +64,14 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
         typer = typer.init(JsonTypeInfo.Id.CLASS, null);
         typer = typer.inclusion(JsonTypeInfo.As.PROPERTY);
         mapper.setDefaultTyping(typer);
+        mapper.setDateFormat(new StdDateFormat().withColonInTimeZone(true));
         
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);	
+		mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);		
 		
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);

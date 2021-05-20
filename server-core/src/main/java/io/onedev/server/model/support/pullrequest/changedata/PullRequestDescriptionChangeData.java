@@ -44,5 +44,5 @@ public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 	public CommentAware getCommentAware() {
 		return null;
 	}
-
+	
 }

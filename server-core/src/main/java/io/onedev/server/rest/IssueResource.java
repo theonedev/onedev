@@ -25,7 +25,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -45,10 +44,13 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=2000)
 @Path("/issues")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -76,6 +78,7 @@ public class IssueResource {
 		this.projectManager = projectManager;
 	}
 
+	@Api(order=100)
 	@Path("/{issueId}")
     @GET
     public Issue get(@PathParam("issueId") Long issueId) {
@@ -85,6 +88,7 @@ public class IssueResource {
     	return issue;
     }
 
+	@Api(order=200)
 	@Path("/{issueId}/fields")
     @GET
     public Collection<IssueField> getFields(@PathParam("issueId") Long issueId) {
@@ -94,6 +98,7 @@ public class IssueResource {
     	return issue.getFields();
     }
 	
+	@Api(order=300)
 	@Path("/{issueId}/changes")
     @GET
     public Collection<IssueChange> getChanges(@PathParam("issueId") Long issueId) {
@@ -103,6 +108,7 @@ public class IssueResource {
     	return issue.getChanges();
     }
 	
+	@Api(order=400)
 	@Path("/{issueId}/comments")
     @GET
     public Collection<IssueComment> getComments(@PathParam("issueId") Long issueId) {
@@ -112,6 +118,7 @@ public class IssueResource {
     	return issue.getComments();
     }
 	
+	@Api(order=500)
 	@Path("/{issueId}/votes")
     @GET
     public Collection<IssueVote> getVotes(@PathParam("issueId") Long issueId) {
@@ -121,6 +128,7 @@ public class IssueResource {
     	return issue.getVotes();
     }
 	
+	@Api(order=600)
 	@Path("/{issueId}/watches")
     @GET
     public Collection<IssueWatch> getWatches(@PathParam("issueId") Long issueId) {
@@ -130,6 +138,7 @@ public class IssueResource {
     	return issue.getWatches();
     }
 	
+	@Api(order=700)
 	@Path("/{issueId}/pull-requests")
     @GET
     public Collection<PullRequest> getPullRequests(@PathParam("issueId") Long issueId) {
@@ -139,6 +148,7 @@ public class IssueResource {
     	return issue.getPullRequests();
     }
 	
+	@Api(order=800)
 	@Path("/{issueId}/commits")
     @GET
     public Collection<String> getCommits(@PathParam("issueId") Long issueId) {
@@ -148,12 +158,13 @@ public class IssueResource {
     	return issue.getCommits().stream().map(it->it.name()).collect(Collectors.toList());
     }
 	
+	@Api(order=900)
 	@GET
     public List<Issue> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
     		@QueryParam("count") int count) {
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
     	IssueQuery parsedQuery;
 		try {
@@ -165,11 +176,10 @@ public class IssueResource {
     	return issueManager.query(null, parsedQuery, offset, count, false);
     }
 	
+	@Api(order=1000)
     @POST
     public Long open(@NotNull @Valid IssueOpenData data) {
     	User user = SecurityUtils.getUser();
-    	if (user == null)
-    		throw new UnauthenticatedException();
     	
     	Project project = projectManager.load(data.getProjectId());
     	if (!SecurityUtils.canAccess(project))
@@ -211,6 +221,7 @@ public class IssueResource {
 		return issue.getId();
     }
 	
+	@Api(order=1100)
 	@Path("/{issueId}/title")
     @POST
     public Response setTitle(@PathParam("issueId") Long issueId, @NotEmpty String title) {
@@ -221,6 +232,7 @@ public class IssueResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1200)
 	@Path("/{issueId}/description")
     @POST
     public Response setDescription(@PathParam("issueId") Long issueId, String description) {
@@ -231,6 +243,7 @@ public class IssueResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1300)
 	@Path("/{issueId}/milestone")
     @POST
     public Response setMilestone(@PathParam("issueId") Long issueId, Long milestoneId) {
@@ -249,6 +262,7 @@ public class IssueResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1400)
 	@Path("/{issueId}/fields")
     @POST
     public Response setFields(@PathParam("issueId") Long issueId, @NotNull Map<String, String> fields) {
@@ -277,6 +291,7 @@ public class IssueResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1500)
 	@Path("/{issueId}/state-transitions")
     @POST
     public Response transitState(@PathParam("issueId") Long issueId, @NotNull @Valid StateTransitionData data) {
@@ -310,6 +325,7 @@ public class IssueResource {
     	return fieldObjs;
 	}
 	
+	@Api(order=1600)
 	@Path("/{issueId}")
     @DELETE
     public Response delete(@PathParam("issueId") Long issueId) {
@@ -324,12 +340,14 @@ public class IssueResource {
 
 		private static final long serialVersionUID = 1L;
 
+		@EntityId(Project.class)
 		private Long projectId;
 		
 		private String title;
 		
 		private String description;
 		
+		@EntityId(Project.class)
 		private Long milestoneId;
 		
 		private Map<String, String> fields = new HashMap<>();

@@ -10,6 +10,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 
@@ -17,6 +18,7 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
+	@EntityId(Issue.class)
 	private final Long issueId;
 	
 	public IssueReferencedFromIssueData(Issue issue) {

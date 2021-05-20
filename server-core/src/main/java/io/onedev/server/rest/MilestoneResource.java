@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=2500)
 @Path("/milestones")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class MilestoneResource {
 		this.milestoneManager = milestoneManager;
 	}
 
+	@Api(order=100)
 	@Path("/{milestoneId}")
 	@GET
 	public Milestone get(@PathParam("milestoneId") Long milestoneId) {
@@ -41,6 +44,7 @@ public class MilestoneResource {
 		return milestone;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull Milestone milestone) {
 		if (!SecurityUtils.canManageIssues(milestone.getProject()))
@@ -49,6 +53,7 @@ public class MilestoneResource {
 		return milestone.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{milestoneId}")
 	@DELETE
 	public Response delete(@PathParam("milestoneId") Long milestoneId) {

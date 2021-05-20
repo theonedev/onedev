@@ -63,7 +63,7 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
     	        sshKey.setDigest(digest);
     	        sshKey.setContent(content);
     	        sshKey.setOwner(user);
-    	        sshKey.setDate(new Date());
+    	        sshKey.setCreatedAt(new Date());
     	        syncMap.put(content, sshKey);
     		} catch (IOException | GeneralSecurityException e) {
     			logger.error("Error parsing SSH key", e);

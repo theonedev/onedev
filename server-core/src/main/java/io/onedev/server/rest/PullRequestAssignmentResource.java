@@ -18,8 +18,10 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=3100)
 @Path("/pull-request-assignments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,6 +35,7 @@ public class PullRequestAssignmentResource {
 		this.assignmentManager = assignmentManager;
 	}
 
+	@Api(order=100)
 	@Path("/{assignmentId}")
 	@GET
 	public PullRequestAssignment get(@PathParam("assignmentId") Long assignmentId) {
@@ -42,6 +45,7 @@ public class PullRequestAssignmentResource {
 		return assignment;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(PullRequestAssignment assignment) {
 		PullRequest pullRequest = assignment.getRequest();
@@ -54,6 +58,7 @@ public class PullRequestAssignmentResource {
 		return assignment.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{assignmentId}")
 	@DELETE
 	public Response delete(@PathParam("assignmentId") Long assignmentId) {

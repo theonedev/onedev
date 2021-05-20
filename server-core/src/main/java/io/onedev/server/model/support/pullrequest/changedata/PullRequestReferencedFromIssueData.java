@@ -5,6 +5,7 @@ import org.apache.wicket.Component;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 
@@ -12,6 +13,7 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 
 	private static final long serialVersionUID = 1L;
 
+	@EntityId(Issue.class)
 	private final Long issueId;
 	
 	public PullRequestReferencedFromIssueData(Issue issue) {
@@ -39,6 +41,5 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 	public CommentAware getCommentAware() {
 		return null;
 	}
-
 
 }

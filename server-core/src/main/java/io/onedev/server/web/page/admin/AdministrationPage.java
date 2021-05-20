@@ -30,7 +30,7 @@ public abstract class AdministrationPage extends LayoutPage implements ScriptIde
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new AdministrationResourceReference()));
+		response.render(CssHeaderItem.forReference(new AdministrationCssResourceReference()));
 	}
 
 	@Override

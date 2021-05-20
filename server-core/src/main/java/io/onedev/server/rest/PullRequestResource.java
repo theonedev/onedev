@@ -19,7 +19,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -33,6 +32,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestChange;
@@ -43,11 +43,14 @@ import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ProjectAndBranch;
 
+@Api(order=3000)
 @Path("/pull-requests")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -68,6 +71,7 @@ public class PullRequestResource {
 		this.userManager = userManager;
 	}
 
+	@Api(order=100)
 	@Path("/{requestId}")
     @GET
     public PullRequest get(@PathParam("requestId") Long requestId) {
@@ -77,6 +81,7 @@ public class PullRequestResource {
     	return pullRequest;
     }
 
+	@Api(order=200)
 	@Path("/{requestId}/merge-preview")
     @GET
     public MergePreview getMergePreview(@PathParam("requestId") Long requestId) {
@@ -86,6 +91,7 @@ public class PullRequestResource {
     	return pullRequest.getMergePreview();
     }
 	
+	@Api(order=300)
 	@Path("/{requestId}/assignments")
     @GET
     public Collection<PullRequestAssignment> getAssignments(@PathParam("requestId") Long requestId) {
@@ -95,6 +101,7 @@ public class PullRequestResource {
     	return pullRequest.getAssignments();
     }
 	
+	@Api(order=400)
 	@Path("/{requestId}/reviews")
     @GET
     public Collection<PullRequestReview> getReviews(@PathParam("requestId") Long requestId) {
@@ -104,6 +111,7 @@ public class PullRequestResource {
     	return pullRequest.getReviews();
     }
 	
+	@Api(order=500)
 	@Path("/{requestId}/comments")
     @GET
     public Collection<PullRequestComment> getComments(@PathParam("requestId") Long requestId) {
@@ -113,6 +121,7 @@ public class PullRequestResource {
     	return pullRequest.getComments();
     }
 	
+	@Api(order=600)
 	@Path("/{requestId}/watches")
     @GET
     public Collection<PullRequestWatch> getWatches(@PathParam("requestId") Long requestId) {
@@ -122,6 +131,7 @@ public class PullRequestResource {
     	return pullRequest.getWatches();
     }
 	
+	@Api(order=700)
 	@Path("/{requestId}/updates")
     @GET
     public Collection<PullRequestUpdate> getUpdates(@PathParam("requestId") Long requestId) {
@@ -131,6 +141,7 @@ public class PullRequestResource {
     	return pullRequest.getSortedUpdates();
     }
 	
+	@Api(order=800)
 	@Path("/{requestId}/current-builds")
     @GET
     public Collection<Build> getCurrentBuilds(@PathParam("requestId") Long requestId) {
@@ -140,6 +151,7 @@ public class PullRequestResource {
     	return pullRequest.getCurrentBuilds();
     }
 	
+	@Api(order=900)
 	@Path("/{requestId}/changes")
     @GET
     public Collection<PullRequestChange> getChanges(@PathParam("requestId") Long requestId) {
@@ -149,6 +161,7 @@ public class PullRequestResource {
     	return pullRequest.getChanges();
     }
 	
+	@Api(order=1000)
 	@Path("/{requestId}/fixed-issue-numbers")
     @GET
     public Collection<Long> getFixedIssueNumbers(@PathParam("requestId") Long requestId) {
@@ -158,12 +171,13 @@ public class PullRequestResource {
     	return pullRequest.getFixedIssueNumbers();
     }
 	
+	@Api(order=1100)
 	@GET
     public List<PullRequest> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
     		@QueryParam("count") int count) {
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
     	PullRequestQuery parsedQuery;
 		try {
@@ -175,11 +189,10 @@ public class PullRequestResource {
     	return pullRequestManager.query(null, parsedQuery, offset, count, false, false);
     }
 
+	@Api(order=1200)
 	@POST
     public Long open(@NotNull PullRequestOpenData data) {
 		User user = SecurityUtils.getUser();
-		if (user == null)
-			throw new UnauthenticatedException();
 		
 		ProjectAndBranch target = new ProjectAndBranch(data.getTargetProjectId(), data.getTargetBranch());
 		ProjectAndBranch source = new ProjectAndBranch(data.getSourceProjectId(), data.getSourceBranch());
@@ -252,6 +265,7 @@ public class PullRequestResource {
 		return request.getId();
     }
 	
+	@Api(order=1300)
 	@Path("/{requestId}/title")
     @POST
     public Response setTitle(@PathParam("requestId") Long requestId, @NotEmpty String title) {
@@ -262,6 +276,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1400)
 	@Path("/{requestId}/description")
     @POST
     public Response setDescription(@PathParam("requestId") Long requestId, String description) {
@@ -272,6 +287,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1500)
 	@Path("/{requestId}/merge-strategy")
     @POST
     public Response setMergeStrategy(@PathParam("requestId") Long requestId, @NotNull MergeStrategy mergeStrategy) {
@@ -282,6 +298,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1600)
 	@Path("/{requestId}/reopen")
     @POST
     public Response reopen(@PathParam("requestId") Long requestId, String note) {
@@ -296,6 +313,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1700)
 	@Path("/{requestId}/discard")
     @POST
     public Response discard(@PathParam("requestId") Long requestId, String note) {
@@ -309,6 +327,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1800)
 	@Path("/{requestId}/merge")
     @POST
     public Response merge(@PathParam("requestId") Long requestId, String note) {
@@ -323,6 +342,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1900)
 	@Path("/{requestId}/delete-source-branch")
     @POST
     public Response deleteSourceBranch(@PathParam("requestId") Long requestId, String note) {
@@ -341,6 +361,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=2000)
 	@Path("/{requestId}/restore-source-branch")
     @POST
     public Response restoreSourceBranch(@PathParam("requestId") Long requestId, String note) {
@@ -359,6 +380,7 @@ public class PullRequestResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=2100)
 	@Path("/{requestId}")
     @DELETE
     public Response delete(@PathParam("requestId") Long requestId) {
@@ -373,8 +395,10 @@ public class PullRequestResource {
 
 		private static final long serialVersionUID = 1L;
 
+		@EntityId(Project.class)
 		private Long targetProjectId;
 		
+		@EntityId(Project.class)
 		private Long sourceProjectId;
 		
 		private String targetBranch;

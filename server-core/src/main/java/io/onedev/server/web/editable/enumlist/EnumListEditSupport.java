@@ -20,7 +20,7 @@ public class EnumListEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			final Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
+			final Class<?> elementClass = ReflectionUtils.getCollectionElementClass(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass != null && Enum.class.isAssignableFrom(elementClass)) {
 	            return new PropertyContext<List<Enum<?>>>(descriptor) {
 

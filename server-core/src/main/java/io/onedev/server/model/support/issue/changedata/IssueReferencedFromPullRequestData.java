@@ -11,6 +11,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
 
@@ -18,6 +19,7 @@ public class IssueReferencedFromPullRequestData implements IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
+	@EntityId(PullRequest.class)
 	private final Long requestId;
 	
 	public IssueReferencedFromPullRequestData(PullRequest request) {
@@ -60,5 +62,5 @@ public class IssueReferencedFromPullRequestData implements IssueChangeData {
 	public boolean affectsBoards() {
 		return false;
 	}
-	
+	 
 }

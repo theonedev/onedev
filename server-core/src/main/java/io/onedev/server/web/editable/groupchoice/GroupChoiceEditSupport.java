@@ -25,7 +25,7 @@ public class GroupChoiceEditSupport implements EditSupport {
 		Method propertyGetter = descriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(GroupChoice.class) != null) {
         	if (Collection.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == String.class) {
+        			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<Collection<String>>(descriptor) {
 
 					@Override

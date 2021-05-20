@@ -26,9 +26,11 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=6000)
 @Path("/groups")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -42,6 +44,7 @@ public class GroupResource {
 		this.groupManager = groupManager;
 	}
 
+	@Api(order=100)
 	@Path("/{groupId}")
     @GET
     public Group get(@PathParam("groupId") Long groupId) {
@@ -50,6 +53,7 @@ public class GroupResource {
     	return groupManager.load(groupId);
     }
 
+	@Api(order=200)
 	@Path("/{groupId}/authorizations")
     @GET
     public Collection<GroupAuthorization> getAuthorizations(@PathParam("groupId") Long groupId) {
@@ -58,6 +62,7 @@ public class GroupResource {
     	return groupManager.load(groupId).getAuthorizations();
     }
 	
+	@Api(order=300)
 	@Path("/{groupId}/memberships")
     @GET
     public Collection<Membership> getMemberships(@PathParam("groupId") Long groupId) {
@@ -66,6 +71,7 @@ public class GroupResource {
     	return groupManager.load(groupId).getMemberships();
     }
 	
+	@Api(order=400)
 	@GET
     public List<Group> query(@QueryParam("name") String name, @QueryParam("offset") int offset, 
     		@QueryParam("count") int count) {
@@ -73,8 +79,8 @@ public class GroupResource {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
 		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
 		if (name != null) 
@@ -83,6 +89,7 @@ public class GroupResource {
     	return groupManager.query(criteria, offset, count);
     }
 	
+	@Api(order=500)
     @POST
     public Long save(@NotNull Group group) {
     	if (!SecurityUtils.isAdministrator()) 
@@ -91,6 +98,7 @@ public class GroupResource {
     	return group.getId();
     }
 	
+	@Api(order=600)
 	@Path("/{groupId}")
     @DELETE
     public Response delete(@PathParam("groupId") Long groupId) {

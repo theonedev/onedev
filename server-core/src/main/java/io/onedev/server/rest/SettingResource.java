@@ -29,8 +29,10 @@ import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=100000)
 @Path("/settings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -44,6 +46,7 @@ public class SettingResource {
 		this.settingManager = settingManager;
 	}
 
+	@Api(order=100)
 	@Path("/system")
     @GET
     public SystemSetting getSystemSetting() {
@@ -52,6 +55,7 @@ public class SettingResource {
     	return settingManager.getSystemSetting();
     }
 
+	@Api(order=200)
 	@Path("/authenticator")
     @GET
     public Authenticator getAuthenticator() {
@@ -60,6 +64,7 @@ public class SettingResource {
     	return settingManager.getAuthenticator();
     }
 	
+	@Api(order=300)
 	@Path("/backup")
     @GET
     public BackupSetting getBackupSetting() {
@@ -68,6 +73,7 @@ public class SettingResource {
     	return settingManager.getBackupSetting();
     }
 	
+	@Api(order=400)
 	@Path("/build")
     @GET
     public GlobalBuildSetting getBuildSetting() {
@@ -76,6 +82,7 @@ public class SettingResource {
     	return settingManager.getBuildSetting();
     }
 	
+	@Api(order=500)
 	@Path("/groovy-scripts")
     @GET
     public List<GroovyScript> getGroovyScripts() {
@@ -84,6 +91,7 @@ public class SettingResource {
     	return settingManager.getGroovyScripts();
     }
 	
+	@Api(order=600)
 	@Path("/issue")
     @GET
     public GlobalIssueSetting getIssueSetting() {
@@ -92,6 +100,7 @@ public class SettingResource {
     	return settingManager.getIssueSetting();
     }
 	
+	@Api(order=700)
 	@Path("/job-executors")
     @GET
     public List<JobExecutor> getJobExecutors() {
@@ -100,6 +109,7 @@ public class SettingResource {
     	return settingManager.getJobExecutors();
     }
 
+	@Api(order=800)
 	@Path("/mail")
     @GET
     public MailSetting getMailSetting() {
@@ -108,6 +118,7 @@ public class SettingResource {
     	return settingManager.getMailSetting();
     }
 	
+	@Api(order=1000)
 	@Path("/project")
     @GET
     public GlobalProjectSetting getProjectSetting() {
@@ -116,6 +127,7 @@ public class SettingResource {
     	return settingManager.getProjectSetting();
     }
 	
+	@Api(order=1100)
 	@Path("/pull-request")
     @GET
     public GlobalPullRequestSetting getPullRequestSetting() {
@@ -124,6 +136,7 @@ public class SettingResource {
     	return settingManager.getPullRequestSetting();
     }
 	
+	@Api(order=1200)
 	@Path("/security")
     @GET
     public SecuritySetting getSecuritySetting() {
@@ -132,6 +145,7 @@ public class SettingResource {
     	return settingManager.getSecuritySetting();
     }
 	
+	@Api(order=1300)
 	@Path("/ssh")
     @GET
     public SshSetting getSshSetting() {
@@ -140,6 +154,7 @@ public class SettingResource {
     	return settingManager.getSshSetting();
     }
 	
+	@Api(order=1400)
 	@Path("/sso-connectors")
     @GET
     public List<SsoConnector> getSsoConnectors() {
@@ -148,6 +163,7 @@ public class SettingResource {
     	return settingManager.getSsoConnectors();
     }
 	
+	@Api(order=1500)
 	@Path("/system")
     @POST
     public Response setSystemSetting(@NotNull SystemSetting systemSetting) {
@@ -157,6 +173,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 
+	@Api(order=1600)
 	@Path("/authenticator")
     @POST
     public Response setAuthenticator(Authenticator authenticator) {
@@ -166,6 +183,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=1700)
 	@Path("/backup")
     @POST
     public Response setBackupSetting(BackupSetting backupSetting) {
@@ -175,6 +193,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=1800)
 	@Path("/build")
     @POST
     public Response setBuildSetting(@NotNull GlobalBuildSetting buildSetting) {
@@ -184,6 +203,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=1900)
 	@Path("/groovy-scripts")
 	@POST
     public Response setGroovyScripts(@NotNull List<GroovyScript> groovyScripts) {
@@ -193,6 +213,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2000)
 	@Path("/issue")
 	@POST
     public Response setIssueSetting(@NotNull GlobalIssueSetting issueSetting) {
@@ -202,6 +223,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2100)
 	@Path("/job-executors")
 	@POST
     public Response setJobExecutors(@NotNull List<JobExecutor> jobExecutors) {
@@ -211,6 +233,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 
+	@Api(order=2200)
 	@Path("/mail")
 	@POST
     public Response setMailSetting(MailSetting mailSetting) {
@@ -220,6 +243,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2300)
 	@Path("/project")
 	@POST
     public Response setProjectSetting(@NotNull GlobalProjectSetting projectSetting) {
@@ -229,6 +253,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2400)
 	@Path("/pull-request")
 	@POST
     public Response setPullRequestSetting(@NotNull GlobalPullRequestSetting pullRequestSetting) {
@@ -238,6 +263,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2500)
 	@Path("/security")
 	@POST
     public Response setSecuritySetting(@NotNull SecuritySetting securitySetting) {
@@ -247,6 +273,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2600)
 	@Path("/ssh")
 	@POST
     public Response setSshSetting(@NotNull SshSetting sshSetting) {
@@ -256,6 +283,7 @@ public class SettingResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2700)
 	@Path("/sso-connectors")
 	@POST
     public Response setSsoConnectors(@NotNull List<SsoConnector> ssoConnectors) {

@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=9000)
 @Path("/group-authorizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class GroupAuthorizationResource {
 		this.authorizationManager = authorizationManager;
 	}
 
+	@Api(order=100)
 	@Path("/{authorizationId}")
 	@GET
 	public GroupAuthorization get(@PathParam("authorizationId") Long authorizationId) {
@@ -40,6 +43,7 @@ public class GroupAuthorizationResource {
 		return authorizationManager.load(authorizationId);
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.isAdministrator())
@@ -48,6 +52,7 @@ public class GroupAuthorizationResource {
 		return authorization.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{authorizationId}")
 	@DELETE
 	public Response delete(@PathParam("authorizationId") Long authorizationId) {

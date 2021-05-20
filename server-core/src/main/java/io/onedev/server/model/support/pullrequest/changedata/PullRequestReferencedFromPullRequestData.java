@@ -4,6 +4,7 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
 
@@ -11,6 +12,7 @@ public class PullRequestReferencedFromPullRequestData implements PullRequestChan
 
 	private static final long serialVersionUID = 1L;
 
+	@EntityId(PullRequest.class)
 	private final Long requestId;
 	
 	public PullRequestReferencedFromPullRequestData(PullRequest request) {

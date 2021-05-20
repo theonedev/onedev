@@ -5,6 +5,7 @@ import org.apache.wicket.Component;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
 
@@ -12,6 +13,7 @@ public class PullRequestReferencedFromCodeCommentData implements PullRequestChan
 
 	private static final long serialVersionUID = 1L;
 
+	@EntityId(CodeComment.class)
 	private final Long commentId;
 	
 	public PullRequestReferencedFromCodeCommentData(CodeComment comment) {

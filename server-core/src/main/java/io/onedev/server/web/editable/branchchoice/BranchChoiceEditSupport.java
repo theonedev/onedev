@@ -26,7 +26,7 @@ public class BranchChoiceEditSupport implements EditSupport {
 		Method propertyGetter = descriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(BranchChoice.class) != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == String.class) {
+        			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<List<String>>(descriptor) {
 
 					@Override

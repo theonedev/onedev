@@ -1,0 +1,26 @@
+.api-help dd>dl {
+	margin-left: 2rem;
+}
+.api-help dt {
+	font-weight: 600;
+}
+.api-help dl {
+	margin-bottom: 0;
+}
+
+.example-value-scalar, .example-value-brace, 
+.example-value-bracket, .example-value-comma {
+	font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+	font-size: 87.5%;
+}
+
+a.example-value-hint {
+	margin-left: 0.2rem;
+}
+a.example-value-implementations>.icon {
+	width: 12px;
+	height: 12px;
+}
+.floating>.content>.example-value-hint {
+	padding: 1rem;
+}

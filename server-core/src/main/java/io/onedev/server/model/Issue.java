@@ -286,7 +286,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 	
 	@Override
-	public String getPrefix() {
+	public String getType() {
 		return "issue";
 	}
 	

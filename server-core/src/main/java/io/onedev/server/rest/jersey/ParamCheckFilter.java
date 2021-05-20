@@ -18,7 +18,7 @@ import javax.ws.rs.ext.Provider;
 import org.hibernate.validator.constraints.NotEmpty;
 
 @Provider
-public class ResourceParamFilter implements ContainerRequestFilter {
+public class ParamCheckFilter implements ContainerRequestFilter {
 
 	@Context
 	private ResourceInfo resourceInfo;
@@ -34,12 +34,8 @@ public class ResourceParamFilter implements ContainerRequestFilter {
 			QueryParam queryParam = param.getAnnotation(QueryParam.class);
 			if (queryParam != null) {
 				definedQueryParams.add(queryParam.value());
-				if (param.getType().isPrimitive() 
-						|| param.getAnnotation(NotNull.class) != null 
-						|| param.getAnnotation(NotEmpty.class) != null 
-						|| param.getAnnotation(Size.class)!=null && param.getAnnotation(Size.class).min()>0) {
+				if (isRequired(param)) 
 					requiredQueryParams.add(queryParam.value());
-				}
 			}
 		}
 		
@@ -53,4 +49,10 @@ public class ResourceParamFilter implements ContainerRequestFilter {
 			throw new InvalidParamException("Missing query params: " + requiredQueryParams);
 	}
 
+	public static boolean isRequired(Parameter param) {
+		return param.getType().isPrimitive() 
+				|| param.getAnnotation(NotNull.class) != null 
+				|| param.getAnnotation(NotEmpty.class) != null 
+				|| param.getAnnotation(Size.class)!=null && param.getAnnotation(Size.class).min()>0;
+	}
 }

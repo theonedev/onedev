@@ -3,7 +3,6 @@ package io.onedev.server.rest;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -20,7 +19,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
@@ -39,10 +37,12 @@ import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=1000)
 @Path("/projects")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -59,15 +59,17 @@ public class ProjectResource {
 		this.milestoneManager = milestoneManager;
 	}
 
+	@Api(order=100)
 	@Path("/{projectId}")
     @GET
-    public Project get(@PathParam("projectId") Long projectId) {
+    public Project get(@Api(description="Internal id of project") @PathParam("projectId") Long projectId) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canAccess(project))
 			throw new UnauthorizedException();
     	return project;
     }
 	
+	@Api(order=200)
 	@Path("/{projectId}/setting")
     @GET
     public ProjectSetting getSetting(@PathParam("projectId") Long projectId) {
@@ -86,6 +88,7 @@ public class ProjectResource {
 		return setting;
     }
 	
+	@Api(order=300)
 	@Path("/{projectId}/forks")
     @GET
     public Collection<Project> getForks(@PathParam("projectId") Long projectId) {
@@ -95,6 +98,7 @@ public class ProjectResource {
     	return project.getForks();
     }
 	
+	@Api(order=400)
 	@Path("/{projectId}/group-authorizations")
     @GET
     public Collection<GroupAuthorization> getGroupAuthorizations(@PathParam("projectId") Long projectId) {
@@ -103,6 +107,7 @@ public class ProjectResource {
     	return projectManager.load(projectId).getGroupAuthorizations();
     }
 	
+	@Api(order=500)
 	@Path("/{projectId}/user-authorizations")
     @GET
     public Collection<UserAuthorization> getUserAuthorizations(@PathParam("projectId") Long projectId) {
@@ -112,39 +117,13 @@ public class ProjectResource {
     	return project.getUserAuthorizations();
     }
 	
-	@Path("/{projectId}/milestones")
-    @GET
-    public List<Milestone> queryMilestones(@PathParam("projectId") Long projectId, @QueryParam("name") String name, 
-    		@QueryParam("dueBefore") Date dueBefore, @QueryParam("dueAfter") Date dueAfter, 
-    		@QueryParam("closed") Boolean closed, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
-    	Project project = projectManager.load(projectId);
-    	if (!SecurityUtils.canAccess(project)) 
-			throw new UnauthorizedException();
-
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
-    	
-    	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
-    	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
-    	if (name != null)
-    		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
-    	if (dueBefore != null)
-    		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, dueBefore));
-    	if (dueAfter != null)
-    		criteria.add(Restrictions.ge(Milestone.PROP_DUE_DATE, dueAfter));
-    	if (closed != null)
-    		criteria.add(Restrictions.eq(Milestone.PROP_CLOSED, closed));
-    	
-    	return milestoneManager.query(criteria, offset, count);
-    }
-	
+	@Api(order=700)
 	@GET
     public List<Project> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
     		@QueryParam("count") int count) {
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
     	ProjectQuery parsedQuery;
 		try {
@@ -156,22 +135,48 @@ public class ProjectResource {
     	return projectManager.query(parsedQuery, offset, count);
     }
 	
+	@Api(order=750)
+	@Path("/{projectId}/milestones")
+    @GET
+    public List<Milestone> queryMilestones(@PathParam("projectId") Long projectId, @QueryParam("name") String name, 
+    		@QueryParam("dueBefore") String dueBefore, @QueryParam("dueAfter") String dueAfter, 
+    		@QueryParam("closed") Boolean closed, @QueryParam("offset") int offset, 
+    		@QueryParam("count") int count) {
+    	Project project = projectManager.load(projectId);
+    	if (!SecurityUtils.canAccess(project)) 
+			throw new UnauthorizedException();
+
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	
+    	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
+    	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
+    	if (name != null)
+    		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
+    	if (dueBefore != null)
+    		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, RestUtils.toDate(dueBefore)));
+    	if (dueAfter != null)
+    		criteria.add(Restrictions.ge(Milestone.PROP_DUE_DATE, RestUtils.toDate(dueAfter)));
+    	if (closed != null)
+    		criteria.add(Restrictions.eq(Milestone.PROP_CLOSED, closed));
+    	
+    	return milestoneManager.query(criteria, offset, count);
+    }
+	
+	@Api(order=800)
     @POST
     public Long save(@NotNull Project project) {
-    	if (project.isNew()) {
-    		if (SecurityUtils.getUser() == null)
-    			throw new UnauthenticatedException();
-    		else 
-    			projectManager.create(project);
-    	} else {
-	    	if (!SecurityUtils.canManage(project))
-				throw new UnauthorizedException();
-	    	else
-	    		projectManager.save(project, (String) project.getCustomData());
-    	}
+    	if (project.isNew()) 
+    		projectManager.create(project);
+    	else if (!SecurityUtils.canManage(project))
+			throw new UnauthorizedException();
+    	else
+    		projectManager.save(project, (String) project.getCustomData());
+    	
     	return project.getId();
     }
 	
+	@Api(order=900)
 	@Path("/{projectId}/setting")
     @POST
     public Response saveSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
@@ -190,6 +195,7 @@ public class ProjectResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=1000)
 	@Path("/{projectId}")
     @DELETE
     public Response delete(@PathParam("projectId") Long projectId) {
@@ -204,21 +210,85 @@ public class ProjectResource {
 		
 		private static final long serialVersionUID = 1L;
 
-		ArrayList<BranchProtection> branchProtections;
+		private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 		
-		ArrayList<TagProtection> tagProtections;
+		private ArrayList<TagProtection> tagProtections = new ArrayList<>();
 		
-		ProjectIssueSetting issueSetting;
+		private ProjectIssueSetting issueSetting = new ProjectIssueSetting();
 		
-		ProjectBuildSetting buildSetting;
+		private ProjectBuildSetting buildSetting = new ProjectBuildSetting();
 		
-		ProjectPullRequestSetting pullRequestSetting;
+		private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
 		
-		ArrayList<NamedCommitQuery> namedCommitQueries;
+		private ArrayList<NamedCommitQuery> namedCommitQueries = new ArrayList<>();
 		
-		ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries;
+		private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries = new ArrayList<>();
 		
-		ArrayList<WebHook> webHooks;
+		private ArrayList<WebHook> webHooks = new ArrayList<>();
+
+		public ArrayList<BranchProtection> getBranchProtections() {
+			return branchProtections;
+		}
+
+		public void setBranchProtections(ArrayList<BranchProtection> branchProtections) {
+			this.branchProtections = branchProtections;
+		}
+
+		public ArrayList<TagProtection> getTagProtections() {
+			return tagProtections;
+		}
+
+		public void setTagProtections(ArrayList<TagProtection> tagProtections) {
+			this.tagProtections = tagProtections;
+		}
+
+		public ProjectIssueSetting getIssueSetting() {
+			return issueSetting;
+		}
+
+		public void setIssueSetting(ProjectIssueSetting issueSetting) {
+			this.issueSetting = issueSetting;
+		}
+
+		public ProjectBuildSetting getBuildSetting() {
+			return buildSetting;
+		}
+
+		public void setBuildSetting(ProjectBuildSetting buildSetting) {
+			this.buildSetting = buildSetting;
+		}
+
+		public ProjectPullRequestSetting getPullRequestSetting() {
+			return pullRequestSetting;
+		}
+
+		public void setPullRequestSetting(ProjectPullRequestSetting pullRequestSetting) {
+			this.pullRequestSetting = pullRequestSetting;
+		}
+
+		public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
+			return namedCommitQueries;
+		}
+
+		public void setNamedCommitQueries(ArrayList<NamedCommitQuery> namedCommitQueries) {
+			this.namedCommitQueries = namedCommitQueries;
+		}
+
+		public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
+			return namedCodeCommentQueries;
+		}
+
+		public void setNamedCodeCommentQueries(ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries) {
+			this.namedCodeCommentQueries = namedCodeCommentQueries;
+		}
+
+		public ArrayList<WebHook> getWebHooks() {
+			return webHooks;
+		}
+
+		public void setWebHooks(ArrayList<WebHook> webHooks) {
+			this.webHooks = webHooks;
+		}
 		
 	}
 }

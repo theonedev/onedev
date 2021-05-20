@@ -65,6 +65,7 @@ import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
@@ -206,6 +207,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Embedded
 	private CloseInfo closeInfo;
 
+	@Api(order=100)
 	@Column(nullable=false)
 	@OptimisticLock(excluded=true)
 	private String title;
@@ -252,6 +254,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@OptimisticLock(excluded=true)
 	private String noSpaceTitle;
 	
+	@JsonIgnore
 	@Embedded
 	private MergePreview lastMergePreview;
 	
@@ -282,6 +285,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	 * after pull request is discarded 
 	 */
 	@Version
+	@JsonIgnore
 	private int revision;
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
@@ -1044,7 +1048,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	@Override
-	public String getPrefix() {
+	public String getType() {
 		return "pull request";
 	}
 	

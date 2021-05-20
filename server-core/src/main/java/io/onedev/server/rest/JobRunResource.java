@@ -30,9 +30,12 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.validation.annotation.CommitHash;
 
+@Api(order=3500)
 @Path("/job-runs")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,8 +59,9 @@ public class JobRunResource {
 		this.pullRequestManager = pullRequestManager;
 	}
 
+	@Api(order=100)
     @POST
-    public Long save(@NotNull @Valid JobRun jobRun) {
+    public Long run(@NotNull @Valid JobRun jobRun) {
     	Project project = projectManager.load(jobRun.projectId);
 		if (!SecurityUtils.canRunJob(project, jobRun.jobName))		
 			throw new UnauthorizedException();
@@ -87,9 +91,10 @@ public class JobRunResource {
 				jobRun.jobName, jobRun.params, reason).getId();
     }
 
+	@Api(order=200)
     @Path("/rerun")
     @POST
-    public Response save(@NotNull @Valid JobRerun jobRerun) {
+    public Response rerun(@NotNull @Valid JobRerun jobRerun) {
     	Build  build = buildManager.load(jobRerun.buildId);
 		if (!SecurityUtils.canRunJob(build.getProject(), build.getJobName()))		
 			throw new UnauthorizedException();
@@ -97,6 +102,7 @@ public class JobRunResource {
 		return Response.ok().build();
     }
     
+	@Api(order=300)
 	@Path("/{buildId}")
     @DELETE
     public Response delete(@PathParam("buildId") Long buildId) {
@@ -112,6 +118,7 @@ public class JobRunResource {
 		
 		private static final long serialVersionUID = 1L;
 
+		@EntityId(Project.class)
 		private Long projectId; 
 		
 		private String commitHash;
@@ -122,6 +129,7 @@ public class JobRunResource {
 		
 		private String refName;
 		
+		@EntityId(PullRequest.class)
 		private Long pullRequestId;
 		
 		private String reason;

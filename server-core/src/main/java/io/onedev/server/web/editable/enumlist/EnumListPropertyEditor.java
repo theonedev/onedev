@@ -30,7 +30,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 	
 	public EnumListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Enum<?>>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
-		enumClass = (Class<Enum>) ReflectionUtils.getCollectionElementType(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+		enumClass = (Class<Enum>) ReflectionUtils.getCollectionElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 	}
 
 	private String getDisplayValue(String choice) {

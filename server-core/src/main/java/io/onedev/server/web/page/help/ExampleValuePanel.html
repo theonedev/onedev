@@ -1,0 +1,66 @@
+<wicket:panel>
+	<wicket:container wicket:id="content"></wicket:container> 
+	<a wicket:id="hint" class="example-value-hint" title="More info about this property"><wicket:svg href="info-circle" class="icon icon-sm"/></a>
+	
+	<wicket:fragment wicket:id="objectFrag">
+	<span class="example-value-brace">{</span>
+	<div class="example-value-properties ml-5">
+		<div wicket:id="typeInfo"></div>
+		<div wicket:id="properties">
+			<wicket:container wicket:id="name"></wicket:container> 
+			<span class="example-value-code">:</span> 
+			<span wicket:id="value"></span> 
+			<span wicket:id="comma" class="example-value-comma">,</span> 
+		</div>
+	</div>
+	<span class="example-value-brace">}</span>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="arrayFrag">
+	<span class="example-value-bracket">[</span>
+	<wicket:container wicket:id="elements">
+		<span wicket:id="element"></span>
+		<span wicket:id="comma" class="example-value-comma">,</span> 
+	</wicket:container>
+	<span class="example-value-bracket">]</span>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="scalarFrag">
+		<span wicket:id="value" class="example-value-scalar"></span> 
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="hintFrag">
+		<div class="example-value-hint">
+			<div wicket:id="typeHint"></div>
+			<div wicket:id="description"></div>
+		</div>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="idOfCurrentEntityHintFrag">
+		Internal id of current object		
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="idOfCurrentEntityInRequestBodyHintFrag">
+		Update object with this id. Remove this property or set this property as <i>null</i> if you want to create new object 
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="entityIdHintFrag">
+		Internal id of <a wicket:id="entity"><span wicket:id="label"></span></a>		
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="enumHintFrag">
+		Possible values: <i wicket:id="possibleValues"></i>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="dateHintFrag">
+		This date is using <a href="https://www.w3.org/TR/NOTE-datetime">ISO 8601 format</a>	
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="typeInfoFrag">
+		<wicket:container wicket:id="name"></wicket:container> 
+		<span class="example-value-code">:</span> 
+		<wicket:container wicket:id="value"></wicket:container> 
+		<a wicket:id="implementations" class="example-value-implementations" title="All possible classes"><wicket:svg href="play" class="icon rotate-90"/></a>
+		<span wicket:id="comma" class="example-value-comma">,</span> 
+	</wicket:fragment>
+</wicket:panel>

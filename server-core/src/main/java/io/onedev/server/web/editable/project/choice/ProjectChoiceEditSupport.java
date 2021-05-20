@@ -26,7 +26,7 @@ public class ProjectChoiceEditSupport implements EditSupport {
         ProjectChoice projectChoice = propertyGetter.getAnnotation(ProjectChoice.class);
         if (projectChoice != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == String.class) {
+        			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<List<String>>(descriptor) {
 
 					@Override

@@ -26,7 +26,7 @@ public class RoleChoiceEditSupport implements EditSupport {
         RoleChoice roleChoice = propertyGetter.getAnnotation(RoleChoice.class);
         if (roleChoice != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == String.class) {
+        			&& ReflectionUtils.getCollectionElementClass(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<List<String>>(descriptor) {
 
 					@Override

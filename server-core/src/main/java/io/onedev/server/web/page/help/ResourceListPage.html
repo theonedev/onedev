@@ -1,0 +1,14 @@
+<wicket:extend>
+	<h5 class="mb-4">All RESTful Resources</h5>
+	<div class="alert alert-light-info">
+		In case anonymous access is disabled or anonymous user does not have enough permission for a resource operation, 
+		you will need to authenticate by providing user name and password (or access token) via http basic auth header
+	</div>
+	<table class="table resources">
+		<tr wicket:id="resources" class="resource">
+			<td>
+				<a wicket:id="link" class="title"><span wicket:id="label"></span></a>
+			</td>
+		</tr>
+	</table>
+</wicket:extend>

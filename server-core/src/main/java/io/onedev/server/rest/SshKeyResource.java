@@ -15,8 +15,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=5100)
 @Path("/ssh-keys")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -30,6 +32,7 @@ public class SshKeyResource {
 		this.sshKeyManager = sshKeyManager;
 	}
 
+	@Api(order=100)
 	@Path("/{sshKeyId}")
 	@GET
 	public SshKey get(@PathParam("sshKeyId") Long sshKeyId) {
@@ -39,6 +42,7 @@ public class SshKeyResource {
     	return sshKey;
 	}
 	
+	@Api(order=200)
 	@Path("/{sshKeyId}")
 	@DELETE
 	public Response delete(@PathParam("sshKeyId") Long sshKeyId) {

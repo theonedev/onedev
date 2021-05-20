@@ -25,10 +25,12 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=4500)
 @Path("/code-comments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -49,6 +51,7 @@ public class CodeCommentResource {
 		this.pullRequestManager = pullRequestManager;
 	}
 
+	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
 	public CodeComment get(@PathParam("commentId") Long commentId) {
@@ -58,6 +61,7 @@ public class CodeCommentResource {
     	return comment;
 	}
 	
+	@Api(order=200)
 	@Path("/{commentId}/replies")
 	@GET
 	public Collection<CodeCommentReply> getReplies(@PathParam("commentId") Long commentId) {
@@ -67,13 +71,14 @@ public class CodeCommentResource {
     	return comment.getReplies();
 	}
 	
+	@Api(order=300)
     @GET
     public Collection<CodeComment> query(@QueryParam("projectId") Long projectId,
     		@QueryParam("pullRequestId") Long pullRequestId, @QueryParam("query") String query, 
     		@QueryParam("offset") int offset, @QueryParam("count") int count) {
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
     	Project project;
     	if (projectId != null)
@@ -109,6 +114,7 @@ public class CodeCommentResource {
 		return commentManager.query(project, pullRequest, parsedQuery, offset, count);
     }
 	
+	@Api(order=400)
 	@POST
 	public Long save(@NotNull CodeComment comment) {
     	if (!SecurityUtils.canReadCode(comment.getProject()) || 
@@ -120,6 +126,7 @@ public class CodeCommentResource {
 		return comment.getId();
 	}
 	
+	@Api(order=500)
 	@Path("/{commentId}")
 	@DELETE
 	public Response delete(@PathParam("commentId") Long commentId) {

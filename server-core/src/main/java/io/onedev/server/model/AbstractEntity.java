@@ -17,6 +17,7 @@ import org.hibernate.proxy.HibernateProxy;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.rest.annotation.Api;
 
 @MappedSuperclass
 @JsonIgnoreProperties("handler")
@@ -24,8 +25,11 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PROP_ID = "id";
+	
 	private transient Object customData;
 	
+	@Api(order=1)
 	@Id
 	@GenericGenerator(name="entity_id", strategy="io.onedev.server.persistence.IdGenerator")
 	@GeneratedValue(generator="entity_id") 	

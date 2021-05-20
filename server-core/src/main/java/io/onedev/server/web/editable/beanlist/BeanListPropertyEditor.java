@@ -56,7 +56,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	public BeanListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		elementClass = ReflectionUtils.getCollectionElementType(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+		elementClass = ReflectionUtils.getCollectionElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 
 		propertyContexts = new ArrayList<>();
 		

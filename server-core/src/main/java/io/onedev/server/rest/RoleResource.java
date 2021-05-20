@@ -23,9 +23,11 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Role;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=7000)
 @Path("/roles")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,6 +41,7 @@ public class RoleResource {
 		this.roleManager = roleManager;
 	}
 
+	@Api(order=100)
 	@Path("/{roleId}")
     @GET
     public Role get(@PathParam("roleId") Long roleId) {
@@ -47,6 +50,7 @@ public class RoleResource {
     	return roleManager.load(roleId);
     }
 
+	@Api(order=200)
 	@GET
     public List<Role> query(@QueryParam("name") String name, @QueryParam("offset") int offset, 
     		@QueryParam("count") int count) {
@@ -54,8 +58,8 @@ public class RoleResource {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
 		EntityCriteria<Role> criteria = EntityCriteria.of(Role.class);
 		if (name != null) 
@@ -64,6 +68,7 @@ public class RoleResource {
     	return roleManager.query(criteria, offset, count);
     }
 	
+	@Api(order=300)
     @POST
     public Long save(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
@@ -72,6 +77,7 @@ public class RoleResource {
     	return role.getId();
     }
 	
+	@Api(order=400)
 	@Path("/{roleId}")
     @DELETE
     public Response delete(@PathParam("roleId") Long roleId) {

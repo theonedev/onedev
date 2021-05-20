@@ -33,6 +33,15 @@ public class BeanUtils {
 		}
 	}
 	
+	public static boolean isSetter(Method method) {
+		if (method.getName().startsWith("set") && 
+				!Modifier.isStatic(method.getModifiers()) && method.getParameterTypes().length == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Get declared fields in the whole class hierarchy.
 	 * If there are fields with the same name in super-class and sub-class, 
@@ -124,6 +133,21 @@ public class BeanUtils {
 		return new ArrayList<Method>(getters.values());
 	}
 
+	public static List<Method> findSetters(Class<?> clazz) {
+		Map<String, Method> setters = new LinkedHashMap<>();
+		
+		Class<?> current = clazz;
+		while (current != null) {
+			for (Method method: current.getDeclaredMethods()) {
+				if (!method.isSynthetic() && isSetter(method) && !setters.containsKey(method.getName())) {
+					setters.put(method.getName(), method);
+				}
+			}
+			current = current.getSuperclass();
+		}
+		return new ArrayList<Method>(setters.values());
+	}
+	
 	/**
 	 * Find getter method by property name in specified class and super classes.
 	 * 
@@ -164,6 +188,11 @@ public class BeanUtils {
 		return getter;
 	}
 
+	public static Method findSetter(Class<?> clazz, String propertyName, Class<?> paramType) {
+		String methodSuffix = getAccessorSuffix(propertyName);
+		return ReflectionUtils.findMethod(clazz, "set" + methodSuffix, paramType);
+	}
+	
 	/**
 	 * Get property name associated with the getter method.
 	 * 

@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.model.CodeCommentReply;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=4600)
 @Path("/code-comment-replies")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class CodeCommentReplyResource {
 		this.replyManager = replyManager;
 	}
 
+	@Api(order=100)
 	@Path("/{replyId}")
 	@GET
 	public CodeCommentReply get(@PathParam("commentId") Long replyId) {
@@ -41,6 +44,7 @@ public class CodeCommentReplyResource {
     	return reply;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull CodeCommentReply reply) {
     	if (!SecurityUtils.canReadCode(reply.getComment().getProject()) || 
@@ -52,6 +56,7 @@ public class CodeCommentReplyResource {
 		return reply.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{replyId}")
 	@DELETE
 	public Response delete(@PathParam("replyId") Long replyId) {

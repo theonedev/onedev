@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import io.onedev.server.rest.annotation.Api;
+
 @Entity
 @Table(
 		indexes={@Index(columnList="o_dependent_id"), @Index(columnList="o_dependency_id")},
@@ -22,6 +24,7 @@ public class BuildDependence extends AbstractEntity {
 	
 	public static final String PROP_DEPENDENCY = "dependency";
 	
+	@Api(exampleProvider="getDependentExample")
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Build dependent;
@@ -67,4 +70,11 @@ public class BuildDependence extends AbstractEntity {
 		this.artifacts = artifacts;
 	}
 
+	@SuppressWarnings("unused")
+	private static Build getDependentExample() {
+		Build build = new Build();
+		build.setId(2L);
+		return build;
+	}
+	
 }

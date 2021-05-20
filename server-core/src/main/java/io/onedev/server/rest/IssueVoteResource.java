@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.model.IssueVote;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=2100)
 @Path("/issue-votes")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class IssueVoteResource {
 		this.voteManager = voteManager;
 	}
 
+	@Api(order=100)
 	@Path("/{voteId}")
 	@GET
 	public IssueVote get(@PathParam("voteId") Long voteId) {
@@ -41,6 +44,7 @@ public class IssueVoteResource {
 		return vote;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull IssueVote vote) {
 		if (!SecurityUtils.canAccess(vote.getIssue().getProject()) 
@@ -51,6 +55,7 @@ public class IssueVoteResource {
 		return vote.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{voteId}")
 	@DELETE
 	public Response delete(@PathParam("voteId") Long voteId) {

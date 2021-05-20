@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.model.IssueWatch;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=2200)
 @Path("/issue-watches")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class IssueWatchResource {
 		this.watchManager = watchManager;
 	}
 
+	@Api(order=100)
 	@Path("/{watchId}")
 	@GET
 	public IssueWatch get(@PathParam("watchId") Long watchId) {
@@ -41,6 +44,7 @@ public class IssueWatchResource {
 		return watch;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull IssueWatch watch) {
 		if (!SecurityUtils.canAccess(watch.getIssue().getProject()) 
@@ -51,6 +55,7 @@ public class IssueWatchResource {
 		return watch.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{watchId}")
 	@DELETE
 	public Response delete(@PathParam("watchId") Long watchId) {

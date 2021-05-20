@@ -114,8 +114,6 @@ import io.onedev.server.web.util.WicketUtils;
 public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String PROP_ID = "id";
 
 	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
@@ -360,7 +358,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	@Override
-	public String getPrefix() {
+	public String getType() {
 		return "build";
 	}
 	

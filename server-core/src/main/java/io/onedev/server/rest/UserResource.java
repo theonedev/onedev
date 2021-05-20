@@ -56,11 +56,13 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.security.CipherUtils;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.ssh.SshKeyUtils;
 
+@Api(order=5000)
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -80,6 +82,7 @@ public class UserResource {
 		this.passwordService = passwordService;
 	}
 
+	@Api(order=100)
 	@Path("/{userId}")
     @GET
     public User get(@PathParam("userId") Long userId) {
@@ -89,6 +92,7 @@ public class UserResource {
 		return user;
     }
 
+	@Api(order=200)
 	@Path("/me")
     @GET
     public User getMe() {
@@ -98,6 +102,7 @@ public class UserResource {
 		return user;
     }
 	
+	@Api(order=300)
 	@Path("/{userId}/authorizations")
     @GET
     public Collection<UserAuthorization> getAuthorizations(@PathParam("userId") Long userId) {
@@ -106,6 +111,7 @@ public class UserResource {
     	return userManager.load(userId).getAuthorizations();
     }
 	
+	@Api(order=400)
 	@Path("/{userId}/memberships")
     @GET
     public Collection<Membership> getMemberships(@PathParam("userId") Long userId) {
@@ -114,6 +120,7 @@ public class UserResource {
     	return userManager.load(userId).getMemberships();
     }
 	
+	@Api(order=500)
 	@Path("/{userId}/sso-info")
     @GET
     public SsoInfo getSsoInfo(@PathParam("userId") Long userId) {
@@ -123,6 +130,7 @@ public class UserResource {
     	return user.getSsoInfo();
     }
 	
+	@Api(order=600)
 	@Path("/{userId}/pull-request-reviews")
     @GET
     public Collection<PullRequestReview> getPullRequestReviews(@PathParam("userId") Long userId) {
@@ -132,6 +140,7 @@ public class UserResource {
     	return user.getPullRequestReviews();
     }
 	
+	@Api(order=700)
 	@Path("/{userId}/issue-votes")
     @GET
     public Collection<IssueVote> getIssueVotes(@PathParam("userId") Long userId) {
@@ -141,6 +150,7 @@ public class UserResource {
     	return user.getIssueVotes();
     }
 	
+	@Api(order=800)
 	@Path("/{userId}/issue-watches")
     @GET
     public Collection<IssueWatch> getIssueWatches(@PathParam("userId") Long userId) {
@@ -150,6 +160,7 @@ public class UserResource {
     	return user.getIssueWatches();
     }
 	
+	@Api(order=900)
 	@Path("/{userId}/project-build-query-settings")
     @GET
     public Collection<BuildQuerySetting> getProjectBuildQuerySettings(@PathParam("userId") Long userId) {
@@ -159,6 +170,7 @@ public class UserResource {
     	return user.getProjectBuildQuerySettings();
     }
 	
+	@Api(order=1000)
 	@Path("/{userId}/project-code-comment-query-settings")
     @GET
     public Collection<CodeCommentQuerySetting> getProjectCodeCommentQuerySettings(@PathParam("userId") Long userId) {
@@ -168,6 +180,7 @@ public class UserResource {
     	return user.getProjectCodeCommentQuerySettings();
     }
 	
+	@Api(order=1100)
 	@Path("/{userId}/project-commit-query-settings")
     @GET
     public Collection<CommitQuerySetting> getProjectCommitQuerySettings(@PathParam("userId") Long userId) {
@@ -177,6 +190,7 @@ public class UserResource {
     	return user.getProjectCommitQuerySettings();
     }
 	
+	@Api(order=1200)
 	@Path("/{userId}/project-issue-query-settings")
     @GET
     public Collection<IssueQuerySetting> getProjecIssueQuerySettings(@PathParam("userId") Long userId) {
@@ -186,6 +200,7 @@ public class UserResource {
     	return user.getProjectIssueQuerySettings();
     }
 	
+	@Api(order=1300)
 	@Path("/{userId}/project-pull-request-query-settings")
     @GET
     public Collection<PullRequestQuerySetting> getProjecPullRequestQuerySettings(@PathParam("userId") Long userId) {
@@ -195,6 +210,7 @@ public class UserResource {
     	return user.getProjectPullRequestQuerySettings();
     }
 	
+	@Api(order=1400)
 	@Path("/{userId}/pull-request-assignments")
     @GET
     public Collection<PullRequestAssignment> getPullRequestAssignments(@PathParam("userId") Long userId) {
@@ -204,6 +220,7 @@ public class UserResource {
     	return user.getPullRequestAssignments();
     }
 	
+	@Api(order=1500)
 	@Path("/{userId}/pull-request-watches")
     @GET
     public Collection<PullRequestWatch> getPullRequestWatches(@PathParam("userId") Long userId) {
@@ -213,6 +230,7 @@ public class UserResource {
     	return user.getPullRequestWatches();
     }
 	
+	@Api(order=1600)
 	@Path("/{userId}/ssh-keys")
     @GET
     public Collection<SshKey> getSshKeys(@PathParam("userId") Long userId) {
@@ -222,6 +240,7 @@ public class UserResource {
     	return user.getSshKeys();
     }
 	
+	@Api(order=1700)
 	@Path("/{userId}/queries-and-watches")
     @GET
     public QueriesAndWatches getQueriesAndWatches(@PathParam("userId") Long userId) {
@@ -242,6 +261,7 @@ public class UserResource {
 		return queriesAndWatches;
     }
 	
+	@Api(order=1800)
 	@GET
     public List<User> query(@QueryParam("name") String name, @QueryParam("fullName") String fullName, 
     		@QueryParam("email") String email, @QueryParam("offset") int offset, 
@@ -250,8 +270,8 @@ public class UserResource {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (count > RestConstants.PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.PAGE_SIZE);
+    	if (count > RestUtils.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
 
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
@@ -265,6 +285,7 @@ public class UserResource {
     	return userManager.query(criteria, offset, count);
     }
 	
+	@Api(order=1900)
     @POST
     public Long save(@NotNull User user) {
     	if (user.isNew()) {
@@ -283,6 +304,7 @@ public class UserResource {
     	return user.getId();
     }
 	
+	@Api(order=2000)
 	@Path("/{userId}/password")
     @POST
     public Response setPassword(@PathParam("userId") Long userId, @NotEmpty String password) {
@@ -304,6 +326,7 @@ public class UserResource {
 		}
     }
 	
+	@Api(order=2100)
 	@Path("/{userId}/sso-info")
     @POST
     public Response setSsoInfo(@PathParam("userId") Long userId, @NotNull SsoInfo ssoInfo) {
@@ -315,6 +338,7 @@ public class UserResource {
     	return Response.ok().build();
     }
 	
+	@Api(order=2100)
 	@Path("/{userId}/queries-and-watches")
     @POST
     public Response setQueriesAndWatches(@PathParam("userId") Long userId, @NotNull QueriesAndWatches queriesAndWatches) {
@@ -335,16 +359,15 @@ public class UserResource {
 		return Response.ok().build();
     }
 	
+	@Api(order=2200)
 	@Path("/{userId}/ssh-keys")
 	@POST
 	public Long addSshKey(@PathParam("userId") Long userId, @NotNull String content) {
 		User user = SecurityUtils.getUser();
-		if (user == null)
-			throw new UnauthenticatedException();
 		
 		SshKey sshKey = new SshKey();
 		sshKey.setContent(content);
-		sshKey.setDate(new Date());
+		sshKey.setCreatedAt(new Date());
 		sshKey.setOwner(user);
 		
         try {
@@ -359,6 +382,7 @@ public class UserResource {
 		return sshKey.getId();
 	}
 	
+	@Api(order=2300)
 	@Path("/{userId}")
     @DELETE
     public Response delete(@PathParam("userId") Long userId) {

@@ -25,7 +25,6 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExceptionUtils;
@@ -88,7 +87,6 @@ public class PullRequestUpdate extends AbstractEntity {
 		this.date = date;
 	}
 
-	@JsonProperty
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
 		return REFS_PREFIX + getId();

@@ -20,8 +20,10 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=3300)
 @Path("/pull-request-reviews")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,6 +37,7 @@ public class PullRequestReviewResource {
 		this.reviewManager = reviewManager;
 	}
 
+	@Api(order=100)
 	@Path("/{reviewId}")
 	@GET
 	public PullRequestReview get(@PathParam("reviewId") Long reviewId) {
@@ -44,6 +47,7 @@ public class PullRequestReviewResource {
 		return review;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull PullRequestReview review) {
 		if (!SecurityUtils.canReadCode(review.getRequest().getProject()) 
@@ -61,6 +65,7 @@ public class PullRequestReviewResource {
 		return review.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{reviewId}")
 	@DELETE
 	public Response delete(@PathParam("reviewId") Long reviewId) {

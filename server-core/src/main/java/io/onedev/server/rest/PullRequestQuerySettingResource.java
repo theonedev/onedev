@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
 import io.onedev.server.model.PullRequestQuerySetting;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=5200)
 @Path("/pull-request-query-settings")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class PullRequestQuerySettingResource {
 		this.querySettingManager = querySettingManager;
 	}
 
+	@Api(order=100)
 	@Path("/{querySettingId}")
 	@GET
 	public PullRequestQuerySetting get(@PathParam("querySettingId") Long querySettingId) {
@@ -41,6 +44,7 @@ public class PullRequestQuerySettingResource {
     	return querySetting;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull PullRequestQuerySetting querySetting) {
     	if (!SecurityUtils.canAccess(querySetting.getProject()) 
@@ -51,6 +55,7 @@ public class PullRequestQuerySettingResource {
 		return querySetting.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{querySettingId}")
 	@DELETE
 	public Response delete(@PathParam("querySettingId") Long querySettingId) {

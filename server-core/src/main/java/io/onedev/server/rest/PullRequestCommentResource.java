@@ -17,8 +17,10 @@ import org.apache.shiro.authz.UnauthorizedException;
 
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 
+@Api(order=3200)
 @Path("/pull-request-comments")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -32,6 +34,7 @@ public class PullRequestCommentResource {
 		this.commentManager = commentManager;
 	}
 
+	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
 	public PullRequestComment get(@PathParam("commentId") Long commentId) {
@@ -41,6 +44,7 @@ public class PullRequestCommentResource {
     	return comment;
 	}
 	
+	@Api(order=200)
 	@POST
 	public Long save(@NotNull PullRequestComment comment) {
     	if (!SecurityUtils.canReadCode(comment.getProject()) || 
@@ -52,6 +56,7 @@ public class PullRequestCommentResource {
 		return comment.getId();
 	}
 	
+	@Api(order=300)
 	@Path("/{commentId}")
 	@DELETE
 	public Response delete(@PathParam("commentId") Long commentId) {

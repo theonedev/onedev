@@ -46,6 +46,9 @@ import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.admin.user.ssh.UserSshKeysPage;
 import io.onedev.server.web.page.builds.BuildListPage;
+import io.onedev.server.web.page.help.MethodDetailPage;
+import io.onedev.server.web.page.help.ResourceDetailPage;
+import io.onedev.server.web.page.help.ResourceListPage;
 import io.onedev.server.web.page.issues.IssueListPage;
 import io.onedev.server.web.page.my.accesstoken.MyAccessTokenPage;
 import io.onedev.server.web.page.my.avatar.MyAvatarPage;
@@ -133,12 +136,17 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		addMyPages();
 		addAdministrationPages();
 		addSecurityPages();
-				
 		addResources();
-		
+		addHelpPages();
 		addErrorPages();
 	}
 
+	private void addHelpPages() {
+		add(new DynamicPathPageMapper("help/api", ResourceListPage.class));
+		add(new DynamicPathPageMapper("help/api/${resource}", ResourceDetailPage.class));
+		add(new DynamicPathPageMapper("help/api/${resource}/${method}", MethodDetailPage.class));
+	}
+	
 	private void addMyPages() {
 		add(new DynamicPathPageMapper("my/profile", MyProfilePage.class));
 		add(new DynamicPathPageMapper("my/avatar", MyAvatarPage.class));

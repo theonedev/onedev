@@ -79,7 +79,7 @@ public class SshKey extends AbstractEntity implements Validatable {
         return createdAt;
     }
 
-    public void setDate(Date createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
     
