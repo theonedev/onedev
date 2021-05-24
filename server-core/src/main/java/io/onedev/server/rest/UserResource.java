@@ -1,9 +1,6 @@
 package io.onedev.server.rest;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,7 +25,6 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -58,9 +54,7 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
-import io.onedev.server.security.CipherUtils;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.ssh.SshKeyUtils;
 
 @Api(order=5000)
 @Path("/users")
@@ -85,7 +79,7 @@ public class UserResource {
 	@Api(order=100)
 	@Path("/{userId}")
     @GET
-    public User get(@PathParam("userId") Long userId) {
+    public User getBasicInfo(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
@@ -95,7 +89,7 @@ public class UserResource {
 	@Api(order=200)
 	@Path("/me")
     @GET
-    public User getMe() {
+    public User getMyBasicInfo() {
 		User user = SecurityUtils.getUser();
 		if (user == null)
 			throw new UnauthenticatedException();
@@ -263,15 +257,15 @@ public class UserResource {
 	
 	@Api(order=1800)
 	@GET
-    public List<User> query(@QueryParam("name") String name, @QueryParam("fullName") String fullName, 
-    		@QueryParam("email") String email, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    public List<User> queryBasicInfo(@QueryParam("name") String name, @QueryParam("fullName") String fullName, 
+    		@QueryParam("email") String email, @QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
 		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
 		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
@@ -285,9 +279,9 @@ public class UserResource {
     	return userManager.query(criteria, offset, count);
     }
 	
-	@Api(order=1900)
+	@Api(order=1900, description="Update user of specified id in request body, or create new if id property not provided")
     @POST
-    public Long save(@NotNull User user) {
+    public Long createOrUpdate(@NotNull User user) {
     	if (user.isNew()) {
     		if (!SecurityUtils.isAdministrator()) {
     			throw new UnauthorizedException();
@@ -369,14 +363,7 @@ public class UserResource {
 		sshKey.setContent(content);
 		sshKey.setCreatedAt(new Date());
 		sshKey.setOwner(user);
-		
-        try {
-            PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-            String fingerPrint = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
-            sshKey.setDigest(fingerPrint);
-        } catch (IOException | GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        }
+		sshKey.digest();
         
 		sshKeyManager.save(sshKey);
 		return sshKey.getId();

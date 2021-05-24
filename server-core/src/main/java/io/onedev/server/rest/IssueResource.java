@@ -45,12 +45,15 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=2000)
+@Api(order=2000, description="In most cases, issue resource is operated with issue id, which is different from issue number. "
+		+ "To get issue id of a particular issue number, use the <a href='/help/api/io.onedev.server.rest.IssueResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
+		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
 @Path("/issues")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -81,7 +84,7 @@ public class IssueResource {
 	@Api(order=100)
 	@Path("/{issueId}")
     @GET
-    public Issue get(@PathParam("issueId") Long issueId) {
+    public Issue getBasicInfo(@PathParam("issueId") Long issueId) {
 		Issue issue = issueManager.load(issueId);
     	if (!SecurityUtils.canAccess(issue.getProject())) 
 			throw new UnauthorizedException();
@@ -160,11 +163,13 @@ public class IssueResource {
 	
 	@Api(order=900)
 	@GET
-    public List<Issue> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    public List<Issue> queryBasicInfo(
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/issues'>issues page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
     	IssueQuery parsedQuery;
 		try {
@@ -178,7 +183,7 @@ public class IssueResource {
 	
 	@Api(order=1000)
     @POST
-    public Long open(@NotNull @Valid IssueOpenData data) {
+    public Long create(@NotNull @Valid IssueOpenData data) {
     	User user = SecurityUtils.getUser();
     	
     	Project project = projectManager.load(data.getProjectId());
@@ -336,6 +341,7 @@ public class IssueResource {
     	return Response.ok().build();
     }
 	
+	@EntityCreate(Issue.class)
 	public static class IssueOpenData implements Serializable {
 
 		private static final long serialVersionUID = 1L;

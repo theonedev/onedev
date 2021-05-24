@@ -1,11 +1,7 @@
 package io.onedev.server.web.component.user.sshkey;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.Date;
 
-import org.apache.sshd.common.config.keys.KeyUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -18,8 +14,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.model.SshKey;
 import io.onedev.server.model.User;
-import io.onedev.server.security.CipherUtils;
-import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -58,14 +52,7 @@ public abstract class InsertSshKeyPanel extends Panel {
                 
                 SshKeyManager sshKeyManager = OneDev.getInstance(SshKeyManager.class);
                 SshKey sshKey = (SshKey) editor.getModelObject();
-                
-                try {
-                    PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(sshKey.getContent());
-                    String fingerPrint = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
-                    sshKey.setDigest(fingerPrint);
-                } catch (IOException | GeneralSecurityException e) {
-                    throw new RuntimeException(e);
-                }
+                sshKey.digest();
                 
                 if (sshKeyManager.findByDigest(sshKey.getDigest()) != null) {
 					editor.error(new Path(new PathNode.Named("content")), "This key is already in use");

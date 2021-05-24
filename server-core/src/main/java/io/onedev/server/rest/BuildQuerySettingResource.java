@@ -44,13 +44,11 @@ public class BuildQuerySettingResource {
     	return querySetting;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update build query setting of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull BuildQuerySetting querySetting) {
-    	if (!SecurityUtils.canAccess(querySetting.getProject()) 
-    			|| !SecurityUtils.isAdministrator() && !querySetting.getUser().equals(SecurityUtils.getUser())) { 
+	public Long createOrUpdate(@NotNull BuildQuerySetting querySetting) {
+    	if (!SecurityUtils.isAdministrator() && !querySetting.getUser().equals(SecurityUtils.getUser()))  
 			throw new UnauthorizedException();
-    	}
 		querySettingManager.save(querySetting);
 		return querySetting.getId();
 	}

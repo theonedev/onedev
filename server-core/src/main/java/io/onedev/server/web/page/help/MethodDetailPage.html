@@ -1,43 +1,53 @@
 <wicket:extend>
-	<h5 wicket:id="title" class="mb-4"></h5>
-	<div class="method-detail">
+	<div wicket:id="title" class="title"></div>
+	<div wicket:id="description" class="alert alert-notice alert-light mb-4"></div>
+	<div class="method-detail border-top pt-3">
 		<dl class="content">
-			<dt>Method</dt>
+			<dt>Http Method</dt>
 			<dd wicket:id="method"></dd>
-			<dt>Path</dt>
-			<dd wicket:id="path"></dd>
-			<wicket:enclosure child="pathPlaceholders">
-			<dt>Path Placeholders</dt>
+			<dt>End Point</dt>
 			<dd>
-				<dl wicket:id="pathPlaceholders">
-					<dt wicket:id="name"></dt>
-					<dd>
-						<dl>
-							<dt>Description</dt>
-							<dd wicket:id="description"></dd>
-							<dt>Example</dt>
-							<dd wicket:id="example"></dd>
-						</dl>
-					</dd>
-				</dl>
+				<div wicket:id="path"></div>
+				<wicket:enclosure child="pathPlaceholders">
+				<table class="table mt-4">
+					<thead>
+						<tr>
+							<td>Placeholder</td>
+							<td>Description</td>
+							<td>Example</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr wicket:id="pathPlaceholders">
+							<td wicket:id="name"></td>
+							<td wicket:id="description"></td>
+							<td wicket:id="example"></td>
+						</tr>
+					</tbody>
+				</table>
+				</wicket:enclosure>
 			</dd>
-			</wicket:enclosure>
 			<wicket:enclosure child="queryParams">
 			<dt>Query Parameters</dt>
 			<dd>
-				<dl wicket:id="queryParams">
-					<dt wicket:id="name"></dt>
-					<dd>
-						<dl>
-							<dt>Description</dt>
-							<dd wicket:id="description"></dd>
-							<dt>Required</dt>
-							<dd wicket:id="required"></dd>
-							<dt>Example</dt>
-							<dd wicket:id="example"></dd>
-						</dl>
-					</dd>
-				</dl>
+			<table class="table">
+				<thead>
+					<tr>
+						<td>Parameter</td>
+						<td>Description</td>
+						<td>Required</td>
+						<td>Example</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr wicket:id="queryParams">
+						<td wicket:id="name"></td>
+						<td wicket:id="description"></td>
+						<td wicket:id="required"></td>
+						<td wicket:id="example"></td>
+					</tr>
+				</tbody>
+			</table>
 			</dd>
 			</wicket:enclosure>
 			<wicket:enclosure child="requestBodyExample">
@@ -46,13 +56,11 @@
 				<dl>
 					<dt>Content Type</dt>
 					<dd>application/json</dd>
-					<dt>Example</dt>
+					<dt>Example <a wicket:id="copyRequestBodyExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
 					<dd wicket:id="requestBodyExample"></dd>
 				</dl>
 			</dd>
 			</wicket:enclosure>
-			<dt>Required Permission</dt>
-			<dd wicket:id="permission"></dd>
 			<dt>Response</dt>
 			<dd>
 				<dl>
@@ -76,6 +84,10 @@
 					</dd>
 				</dl>
 			</dd>
+			<dt>cURL Example <a wicket:id="copyCurlExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
+			<dd>
+				<code wicket:id="curlExample"></code>
+			</dd>
 		</dl>
 	</div>
 	<wicket:fragment wicket:id="topbarTitleFrag">
@@ -89,7 +101,7 @@
 		<dl>
 			<dt>Content Type</dt>
 			<dd>application/json</dd>
-			<dt>Example</dt>
+			<dt>Example <a wicket:id="copyExample" class="ml-1" title="Copy to clipboard"><wicket:svg href="copy" class="icon icon-sm"/></a></dt>
 			<dd wicket:id="example"></dd>
 		</dl>
 	</wicket:fragment>

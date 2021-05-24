@@ -1,10 +1,13 @@
 package io.onedev.server.rest;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -40,6 +43,20 @@ public class SshKeyResource {
     	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
     	return sshKey;
+	}
+	
+	@Api(order=150, description="Update ssh key of specified id in request body, or create new if id property not provided")
+	@POST
+	public Long createOrUpdate(SshKey sshKey) {
+    	if (!SecurityUtils.isAdministrator() && !sshKey.getOwner().equals(SecurityUtils.getUser())) 
+			throw new UnauthorizedException();
+    	if (sshKey.isNew())
+    		sshKey.setCreatedAt(new Date());
+    	
+    	sshKey.digest();
+    	
+    	sshKeyManager.save(sshKey);
+    	return sshKey.getId();
 	}
 	
 	@Api(order=200)

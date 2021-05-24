@@ -1,11 +1,23 @@
 <wicket:extend>
-	<h5 wicket:id="title" class="mb-4"></h5>
-	<table class="table resource-detail">
-		<tr wicket:id="methods" class="method">
-			<td>
-				<a wicket:id="link" class="title`"><span wicket:id="label"></span></a>
-			</td>
-		</tr>
+	<div wicket:id="title" class="title"></div>
+	<div wicket:id="description" class="alert alert-notice alert-light mb-5"></div>
+	<table class="table">
+		<thead>
+			<tr>
+				<td>Operation</td>
+				<td>Http Method</td>
+				<td>End Point</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr wicket:id="methods" class="method">
+				<td>
+					<a wicket:id="link" class="title`"><span wicket:id="label"></span></a>
+				</td>
+				<td wicket:id="httpMethod"></td>
+				<td wicket:id="path"></td>
+			</tr>
+		</tbody>
 	</table>
 	<wicket:fragment wicket:id="topbarTitleFrag">
 		<a wicket:id="resources">Resources</a> <span class="dot"></span> <span wicket:id="resource"></span>

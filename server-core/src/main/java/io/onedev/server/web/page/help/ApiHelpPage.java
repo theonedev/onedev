@@ -2,6 +2,11 @@ package io.onedev.server.web.page.help;
 
 import java.lang.reflect.Method;
 
+import javax.annotation.Nullable;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -31,30 +36,49 @@ public abstract class ApiHelpPage extends LayoutPage {
 	}
 	
 	protected String getResourceTitle(Class<?> resourceClass) {
-		return StringUtils.capitalize(
+		return WordUtils.capitalize(
 				WordUtils.uncamel(
 						StringUtils.substringBeforeLast(
-								resourceClass.getSimpleName(), "Resource")).toLowerCase());
+								resourceClass.getSimpleName(), "Resource")));
 	}
 	
+	@Nullable
 	protected String getResourceDescription(Class<?> resourceClass) {
+		String description = "";
 		Api api = resourceClass.getAnnotation(Api.class);
 		if (api != null && api.description().length() != 0) 
-			return api.description();
+			description = api.description();
+		if (description.length() != 0)
+			return description;
 		else
-			return getResourceTitle(resourceClass);
+			return null;
 	}
 	
 	protected String getMethodTitle(Method resourceMethod) {
-		return StringUtils.capitalize(WordUtils.uncamel(resourceMethod.getName()).toLowerCase());
+		return WordUtils.capitalize(WordUtils.uncamel(resourceMethod.getName()));
 	}
-	
+
+	@Nullable
 	protected String getMethodDescription(Method resourceMethod) {
+		String description = "";
 		Api api = resourceMethod.getAnnotation(Api.class);
 		if (api != null && api.description().length() != 0) 
-			return api.description();
+			description = api.description();
+		if (description.length() != 0)
+			return description;
 		else
-			return getMethodTitle(resourceMethod);
+			return null;
+	}
+	
+	protected String getHttpMethod(Method resourceMethod) {
+		if (resourceMethod.getAnnotation(GET.class) != null)
+			return "GET";
+		else if (resourceMethod.getAnnotation(POST.class) != null)
+			return "POST";
+		else if (resourceMethod.getAnnotation(PUT.class) != null)
+			return "PUT";
+		else
+			return "DELETE";
 	}
 
 	@Override

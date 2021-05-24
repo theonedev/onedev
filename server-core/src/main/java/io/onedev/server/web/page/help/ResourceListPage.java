@@ -55,9 +55,11 @@ public class ResourceListPage extends ApiHelpPage {
 				
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link", ResourceDetailPage.class, 
 						ResourceDetailPage.paramsOf(clazz));				
-				link.add(new Label("label", getResourceDescription(clazz)));
+				link.add(new Label("label", getResourceTitle(clazz)));
 						
 				item.add(link);
+				
+				item.add(new Label("path", clazz.getAnnotation(Path.class).value()));
 			}
 			
 		});

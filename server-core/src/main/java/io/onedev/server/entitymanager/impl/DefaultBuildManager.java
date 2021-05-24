@@ -319,7 +319,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		try {
 			for (Project each: projects) {
 				Collection<String> availableJobNames = jobNames.get(each.getId());
-				if (!availableJobNames.isEmpty()) {
+				if (availableJobNames != null && !availableJobNames.isEmpty()) {
 					Collection<String> accessibleJobNames = getAccessibleJobNames(each);
 					if (accessibleJobNames.containsAll(availableJobNames)) {
 						projectCriterions.add(Restrictions.eq(Build.PROP_PROJECT, each));

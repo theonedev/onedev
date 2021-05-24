@@ -44,9 +44,9 @@ public class MilestoneResource {
 		return milestone;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update milestone of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull Milestone milestone) {
+	public Long createOrUpdate(@NotNull Milestone milestone) {
 		if (!SecurityUtils.canManageIssues(milestone.getProject()))
 			throw new UnauthorizedException();
 		milestoneManager.save(milestone);

@@ -44,9 +44,9 @@ public class CodeCommentReplyResource {
     	return reply;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update code comment reply of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull CodeCommentReply reply) {
+	public Long createOrUpdate(@NotNull CodeCommentReply reply) {
     	if (!SecurityUtils.canReadCode(reply.getComment().getProject()) || 
     			!SecurityUtils.isAdministrator() && !reply.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();

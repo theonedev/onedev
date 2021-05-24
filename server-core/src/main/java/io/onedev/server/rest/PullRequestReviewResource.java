@@ -47,9 +47,9 @@ public class PullRequestReviewResource {
 		return review;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update pull request review of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull PullRequestReview review) {
+	public Long createOrUpdate(@NotNull PullRequestReview review) {
 		if (!SecurityUtils.canReadCode(review.getRequest().getProject()) 
 				|| !SecurityUtils.isAdministrator() && !review.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();

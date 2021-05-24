@@ -1,5 +1,8 @@
 package io.onedev.server.model;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.Date;
 
 import javax.annotation.Nullable;
@@ -13,9 +16,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.ConstraintValidatorContext;
 
+import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.security.CipherUtils;
 import io.onedev.server.ssh.SshKeyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -34,12 +41,14 @@ public class SshKey extends AbstractEntity implements Validatable {
     
     private static final long serialVersionUID = 1L;
     
-    @Column(nullable=false, length = 5000)
+    @Column(nullable=false, length=5000)
     private String content;
     
+    @JsonIgnore
     @Column(nullable=false)
     private String digest;
-    
+
+    @JsonIgnore
     @Column(nullable=false)
     private Date createdAt;
     
@@ -90,6 +99,15 @@ public class SshKey extends AbstractEntity implements Validatable {
     		return StringUtils.substringAfter(tempStr, " ");
     	else
     		return null;
+    }
+    
+    public void digest() {
+        try {
+            PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
+            digest = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
+        } catch (IOException | GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
     }
     
 	@Override

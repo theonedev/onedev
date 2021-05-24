@@ -43,9 +43,9 @@ public class MembershipResource {
 		return membershipManager.load(membershipId);
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update membership of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull Membership membership) {
+	public Long createOrUpdate(@NotNull Membership membership) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		membershipManager.save(membership);

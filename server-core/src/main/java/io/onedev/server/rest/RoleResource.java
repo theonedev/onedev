@@ -52,14 +52,14 @@ public class RoleResource {
 
 	@Api(order=200)
 	@GET
-    public List<Role> query(@QueryParam("name") String name, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    public List<Role> query(@QueryParam("name") String name, @QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
 		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<Role> criteria = EntityCriteria.of(Role.class);
 		if (name != null) 
@@ -68,9 +68,9 @@ public class RoleResource {
     	return roleManager.query(criteria, offset, count);
     }
 	
-	@Api(order=300)
+	@Api(order=300, description="Update role of specified id in request body, or create new if id property not provided")
     @POST
-    public Long save(@NotNull Role role) {
+    public Long createOrUpdate(@NotNull Role role) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 	    roleManager.save(role, (String) role.getCustomData());

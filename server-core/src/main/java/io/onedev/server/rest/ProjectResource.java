@@ -3,6 +3,7 @@ package io.onedev.server.rest;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -41,6 +42,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
 
 @Api(order=1000)
 @Path("/projects")
@@ -62,7 +64,7 @@ public class ProjectResource {
 	@Api(order=100)
 	@Path("/{projectId}")
     @GET
-    public Project get(@Api(description="Internal id of project") @PathParam("projectId") Long projectId) {
+    public Project getBasicInfo(@PathParam("projectId") Long projectId) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canAccess(project))
 			throw new UnauthorizedException();
@@ -119,11 +121,13 @@ public class ProjectResource {
 	
 	@Api(order=700)
 	@GET
-    public List<Project> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    public List<Project> queryBasicInfo(
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/projects'>projects page</a>", example="\"Name\" is \"projectName\"") String query, 
+    		@QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
     	ProjectQuery parsedQuery;
 		try {
@@ -139,33 +143,39 @@ public class ProjectResource {
 	@Path("/{projectId}/milestones")
     @GET
     public List<Milestone> queryMilestones(@PathParam("projectId") Long projectId, @QueryParam("name") String name, 
-    		@QueryParam("dueBefore") String dueBefore, @QueryParam("dueAfter") String dueAfter, 
-    		@QueryParam("closed") Boolean closed, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    		@QueryParam("dueBefore") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueBefore, 
+    		@QueryParam("dueAfter") @Api(exampleProvider="getDateExample", description="ISO 8601 date") String dueAfter, 
+    		@QueryParam("closed") Boolean closed, @QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canAccess(project)) 
 			throw new UnauthorizedException();
 
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
     	
     	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
     	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
     	if (name != null)
     		criteria.add(Restrictions.ilike(Milestone.PROP_NAME, name.replace('%', '*')));
     	if (dueBefore != null)
-    		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, RestUtils.toDate(dueBefore)));
+    		criteria.add(Restrictions.le(Milestone.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueBefore)));
     	if (dueAfter != null)
-    		criteria.add(Restrictions.ge(Milestone.PROP_DUE_DATE, RestUtils.toDate(dueAfter)));
+    		criteria.add(Restrictions.ge(Milestone.PROP_DUE_DATE, DateUtils.parseISO8601Date(dueAfter)));
     	if (closed != null)
     		criteria.add(Restrictions.eq(Milestone.PROP_CLOSED, closed));
     	
     	return milestoneManager.query(criteria, offset, count);
     }
 	
-	@Api(order=800)
+	@SuppressWarnings("unused")
+	private static String getDateExample() {
+		return DateUtils.formatISO8601Date(new Date());
+	}
+	
+	@Api(order=800, description="Update project of specified id in request body, or create new if id property not provided")
     @POST
-    public Long save(@NotNull Project project) {
+    public Long createOrUpdate(@NotNull Project project) {
     	if (project.isNew()) 
     		projectManager.create(project);
     	else if (!SecurityUtils.canManage(project))
@@ -176,10 +186,10 @@ public class ProjectResource {
     	return project.getId();
     }
 	
-	@Api(order=900)
+	@Api(order=900, description="Update project setting")
 	@Path("/{projectId}/setting")
     @POST
-    public Response saveSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
+    public Response updateSetting(@PathParam("projectId") Long projectId, @NotNull ProjectSetting setting) {
     	Project project = projectManager.load(projectId);
     	if (!SecurityUtils.canManage(project)) 
 			throw new UnauthorizedException();

@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.shiro.crypto.AesCipherService;
 import org.apache.sshd.common.digest.BaseDigest;
 import org.apache.sshd.common.digest.Digest;
-import org.apache.sshd.common.digest.DigestUtils;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -48,14 +47,6 @@ public class CipherUtils {
 	
 	public static byte[] decrypt(byte[] data) {
 		return cipherService.decrypt(data, getCipherKey()).getBytes();
-	}
-	
-	public static String digest(String content) {
-		try {
-			return DigestUtils.getFingerPrint(DIGEST_FORMAT, content);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
 	}
 	
 	private static class KeyPair {

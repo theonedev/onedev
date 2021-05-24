@@ -13,10 +13,10 @@ public @interface Api {
 	
 	String exampleProvider() default "";
 	
+	String example() default "";
+	
 	String description() default "";
 	
 	int order() default 100;
-	
-	String permission() default "";
 	
 }

@@ -31,6 +31,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.rest.annotation.Api;
+import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.validation.annotation.CommitHash;
@@ -61,7 +62,7 @@ public class JobRunResource {
 
 	@Api(order=100)
     @POST
-    public Long run(@NotNull @Valid JobRun jobRun) {
+    public Long runBuild(@NotNull @Valid JobRun jobRun) {
     	Project project = projectManager.load(jobRun.projectId);
 		if (!SecurityUtils.canRunJob(project, jobRun.jobName))		
 			throw new UnauthorizedException();
@@ -92,9 +93,9 @@ public class JobRunResource {
     }
 
 	@Api(order=200)
-    @Path("/rerun")
+    @Path("/rebuild")
     @POST
-    public Response rerun(@NotNull @Valid JobRerun jobRerun) {
+    public Response rebuild(@NotNull @Valid JobRerun jobRerun) {
     	Build  build = buildManager.load(jobRerun.buildId);
 		if (!SecurityUtils.canRunJob(build.getProject(), build.getJobName()))		
 			throw new UnauthorizedException();
@@ -105,7 +106,7 @@ public class JobRunResource {
 	@Api(order=300)
 	@Path("/{buildId}")
     @DELETE
-    public Response delete(@PathParam("buildId") Long buildId) {
+    public Response cancelBuild(@PathParam("buildId") Long buildId) {
 		Build build = buildManager.load(buildId);
 		if (!SecurityUtils.canRunJob(build.getProject(), build.getJobName()))		
 			throw new UnauthorizedException();
@@ -114,6 +115,7 @@ public class JobRunResource {
     	return Response.ok().build();
     }
 	
+	@EntityCreate(Build.class)
 	public static class JobRun implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
@@ -125,6 +127,9 @@ public class JobRunResource {
 		
 		private String jobName;
 		
+		@Api(description="A map of param name to value list. Normally the value list contains only one "
+				+ "param value. However in case the job param is defined as multi-valued in build spec, "
+				+ "you can add multiple param values")
 		private Map<String, List<String>> params = new HashMap<>();
 		
 		private String refName;
@@ -203,8 +208,12 @@ public class JobRunResource {
 		
 		private static final long serialVersionUID = 1L;
 
+		@EntityId(Build.class)
 		private Long buildId;
 		
+		@Api(description="A map of param name to value list. Normally the value list contains only one "
+				+ "param value. However in case the job param is defined as multi-valued in build spec, "
+				+ "you can add multiple param values")
 		private Map<String, List<String>> params = new HashMap<>();
 		
 		private String reason;

@@ -35,17 +35,17 @@
 			<div wicket:id="description"></div>
 		</div>
 	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="idOfCurrentEntityHintFrag">
-		Internal id of current object		
+		
+	<wicket:fragment wicket:id="idAsResultOfEntityCreateOrUpdateHintFrag">
+		Id of created/updated <a wicket:id="entity"><span wicket:id="label"></span></a>
 	</wicket:fragment>
 	
-	<wicket:fragment wicket:id="idOfCurrentEntityInRequestBodyHintFrag">
-		Update object with this id. Remove this property or set this property as <i>null</i> if you want to create new object 
+	<wicket:fragment wicket:id="idAsResultOfEntityCreateHintFrag">
+		Id of created <a wicket:id="entity"><span wicket:id="label"></span></a>
 	</wicket:fragment>
 	
 	<wicket:fragment wicket:id="entityIdHintFrag">
-		Internal id of <a wicket:id="entity"><span wicket:id="label"></span></a>		
+		Id of <a wicket:id="entity"><span wicket:id="label"></span></a>		
 	</wicket:fragment>
 	
 	<wicket:fragment wicket:id="enumHintFrag">

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.ISODateTimeFormat;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import com.google.common.collect.Lists;
@@ -49,4 +50,13 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     		durationMillis = 0;
     	return DurationFormatUtils.formatDurationWords(durationMillis, true, true);
     }
+    
+	public static Date parseISO8601Date(String dateString) {
+		return ISODateTimeFormat.dateTimeParser().parseDateTime(dateString).toDate();
+	}
+	
+	public static String formatISO8601Date(Date date) {
+		return ISODateTimeFormat.dateTime().print(date.getTime());
+	}
+	
 }

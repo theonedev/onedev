@@ -44,9 +44,9 @@ public class PullRequestWatchResource {
 		return watch;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update pull request watch of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull PullRequestWatch watch) {
+	public Long createOrUpdate(@NotNull PullRequestWatch watch) {
 		if (!SecurityUtils.canReadCode(watch.getRequest().getProject()) 
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();

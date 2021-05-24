@@ -43,9 +43,9 @@ public class GroupAuthorizationResource {
 		return authorizationManager.load(authorizationId);
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update group authorization of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull GroupAuthorization authorization) {
+	public Long createOrUpdate(@NotNull GroupAuthorization authorization) {
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		authorizationManager.save(authorization);

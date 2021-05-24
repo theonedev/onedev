@@ -44,9 +44,9 @@ public class CodeCommentQuerySettingResource {
     	return querySetting;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update code comment query setting of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull CodeCommentQuerySetting querySetting) {
+	public Long createOrUpdate(@NotNull CodeCommentQuerySetting querySetting) {
     	if (!SecurityUtils.canAccess(querySetting.getProject()) 
     			|| !SecurityUtils.isAdministrator() && !querySetting.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();

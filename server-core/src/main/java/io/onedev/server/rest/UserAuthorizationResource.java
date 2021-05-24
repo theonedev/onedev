@@ -44,9 +44,9 @@ public class UserAuthorizationResource {
 		return authorization;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update user authorization of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull UserAuthorization authorization) {
+	public Long createOrUpdate(@NotNull UserAuthorization authorization) {
 		if (!SecurityUtils.canManage(authorization.getProject()))
 			throw new UnauthorizedException();
 		authorizationManager.save(authorization);

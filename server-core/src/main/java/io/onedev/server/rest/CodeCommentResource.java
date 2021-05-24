@@ -54,7 +54,7 @@ public class CodeCommentResource {
 	@Api(order=100)
 	@Path("/{commentId}")
 	@GET
-	public CodeComment get(@PathParam("commentId") Long commentId) {
+	public CodeComment getBasicInfo(@PathParam("commentId") Long commentId) {
 		CodeComment comment = commentManager.load(commentId);
     	if (!SecurityUtils.canReadCode(comment.getProject()))  
 			throw new UnauthorizedException();
@@ -73,12 +73,14 @@ public class CodeCommentResource {
 	
 	@Api(order=300)
     @GET
-    public Collection<CodeComment> query(@QueryParam("projectId") Long projectId,
-    		@QueryParam("pullRequestId") Long pullRequestId, @QueryParam("query") String query, 
-    		@QueryParam("offset") int offset, @QueryParam("count") int count) {
+    public Collection<CodeComment> queryBasicInfo(
+    		@QueryParam("projectId") Long projectId,
+    		@QueryParam("pullRequestId") Long pullRequestId, 
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in project code comments page", example="created by me") String query, 
+    		@QueryParam("offset") @Api(example="0") int offset, @QueryParam("count") @Api(example="100") int count) {
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
     	Project project;
     	if (projectId != null)
@@ -114,9 +116,9 @@ public class CodeCommentResource {
 		return commentManager.query(project, pullRequest, parsedQuery, offset, count);
     }
 	
-	@Api(order=400)
+	@Api(order=400, description="Update code comment of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull CodeComment comment) {
+	public Long createOrUpdate(@NotNull CodeComment comment) {
     	if (!SecurityUtils.canReadCode(comment.getProject()) || 
     			!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();

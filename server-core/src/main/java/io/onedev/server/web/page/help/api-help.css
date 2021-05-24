@@ -2,10 +2,21 @@
 	margin-left: 2rem;
 }
 .api-help dt {
-	font-weight: 600;
+	font-weight: 500;
+	font-size: 1.1rem;
+	margin-bottom: 0.8rem;
+}
+.api-help dd {
+	margin-bottom: 1.6rem;
 }
 .api-help dl {
 	margin-bottom: 0;
+}
+
+.api-help>.card-body>.title {
+	font-size: 18px;
+	font-weight: 500;
+	margin-bottom: 1.5rem;
 }
 
 .example-value-scalar, .example-value-brace, 
@@ -24,3 +35,4 @@ a.example-value-implementations>.icon {
 .floating>.content>.example-value-hint {
 	padding: 1rem;
 }
+

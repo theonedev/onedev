@@ -26,7 +26,9 @@ import io.onedev.server.rest.jersey.InvalidParamException;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 
-@Api(order=4000)
+@Api(order=4000, description="In most cases, build resource is operated with build id, which is different from build number. "
+		+ "To get build id of a particular build number, use the <a href='/help/api/io.onedev.server.rest.BuildResource/queryBasicInfo'>Query Basic Info</a> operation with query for "
+		+ "instance <code>&quot;Number&quot; is &quot;projectName#100&quot;</code>")
 @Path("/builds")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,7 +45,7 @@ public class BuildResource {
 	@Api(order=100)
 	@Path("/{buildId}")
     @GET
-    public Build get(@PathParam("buildId") Long buildId) {
+    public Build getBasicInfo(@PathParam("buildId") Long buildId) {
 		Build build = buildManager.load(buildId);
     	if (!SecurityUtils.canAccess(build)) 
 			throw new UnauthorizedException();
@@ -92,11 +94,13 @@ public class BuildResource {
 	
 	@Api(order=600)
 	@GET
-    public List<Build> query(@QueryParam("query") String query, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    public List<Build> queryBasicInfo(
+    		@QueryParam("query") @Api(description="Syntax of this query is the same as query box in <a href='/builds'>builds page</a>", example="\"Number\" is \"projectName#100\"") String query, 
+    		@QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
     	BuildQuery parsedQuery;
 		try {

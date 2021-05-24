@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.help;
 
+import java.io.Serializable;
+
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
@@ -19,12 +21,15 @@ class ExampleProvider {
 	}
 	
 	@Nullable
-	public Object getExample() {
-		if (api != null && api.exampleProvider().length() != 0) { 
-			return Preconditions.checkNotNull(ReflectionUtils.invokeStaticMethod(
-					apiDeclaringClass, api.exampleProvider()));
-		} else {
-			return null;
-		}
+	public Serializable getExample() {
+		if (api != null) {
+			if (api.example().length() != 0) {
+				return api.example();
+			} else if (api.exampleProvider().length() != 0) {
+				return (Serializable) Preconditions.checkNotNull(ReflectionUtils.invokeStaticMethod(
+						apiDeclaringClass, api.exampleProvider()));
+			} 
+		} 
+		return null;
 	}
 }

@@ -8,6 +8,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
@@ -41,7 +42,10 @@ public class ResourceDetailPage extends ApiHelpPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("title", getResourceDescription(resourceClass)));
+		add(new Label("title", getResourceTitle(resourceClass)));
+		
+		String description = getResourceDescription(resourceClass);
+		add(new Label("description", description).setEscapeModelStrings(false).setVisible(description!=null));
 		
 		add(new ListView<Method>("methods", new LoadableDetachableModel<List<Method>>() {
 
@@ -70,9 +74,18 @@ public class ResourceDetailPage extends ApiHelpPage {
 				
 				Link<Void> link = new ViewStateAwarePageLink<Void>("link", MethodDetailPage.class, 
 						MethodDetailPage.paramsOf(resourceClass, method.getName()));
-				link.add(new Label("label", getMethodDescription(method)));
+				link.add(new Label("label", getMethodTitle(method)));
 				
 				item.add(link);
+				
+				item.add(new Label("httpMethod", getHttpMethod(method)));
+
+				String resourcePathValue = resourceClass.getAnnotation(Path.class).value();
+				Path methodPath = method.getAnnotation(Path.class);
+				if (methodPath != null)
+					item.add(new Label("path", resourcePathValue + methodPath.value()));
+				else
+					item.add(new Label("path", resourcePathValue));
 			}
 			
 		});

@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.help;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -34,12 +36,12 @@ import io.onedev.server.util.ReflectionUtils;
 
 public class ApiHelpUtils {
 
-	public static Object getExampleValue(Type valueType) {
+	public static Serializable getExampleValue(Type valueType) {
 		return getExampleValue(valueType, Sets.newHashSet());
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Object getExampleValue(Type valueType, Set<Class<?>> parsedTypes) {
+	public static Serializable getExampleValue(Type valueType, Set<Class<?>> parsedTypes) {
 		Class<?> valueClass = ReflectionUtils.getClass(valueType);
 		Object value = new ExampleProvider(valueClass, valueClass.getAnnotation(Api.class)).getExample();
 		if (value == null) {
@@ -72,7 +74,7 @@ public class ApiHelpUtils {
 					}
 				}
 				collection.add(getExampleValue(collectionElementType, parsedTypes));
-				return collection;
+				return (Serializable) collection;
 			} else if (Map.class.isAssignableFrom(valueClass)) {
 				Type mapKeyType = ReflectionUtils.getMapKeyType(valueType);
 				if (mapKeyType == null)
@@ -94,14 +96,23 @@ public class ApiHelpUtils {
 				
 				map.put(getExampleValue(mapKeyType, parsedTypes), getExampleValue(mapValueType, parsedTypes));
 				
-				return map;
+				return (Serializable) map;
 			} else {
 				try {
 					if (parsedTypes.add(valueClass)) {
 						Class<?> instantiationClass;
 						if (Modifier.isAbstract(valueClass.getModifiers())) {
-							instantiationClass = OneDev.getInstance(ImplementationRegistry.class)
-									.getImplementations(valueClass).iterator().next();
+							List<Class<?>> implementations = new ArrayList<>(
+									OneDev.getInstance(ImplementationRegistry.class).getImplementations(valueClass));
+							Collections.sort(implementations, new Comparator<Class<?>>() {
+
+								@Override
+								public int compare(Class<?> o1, Class<?> o2) {
+									return o1.getName().compareTo(o2.getName());
+								}
+								
+							});
+							instantiationClass = implementations.iterator().next();
 						} else {
 							instantiationClass = valueClass;
 						}
@@ -130,7 +141,7 @@ public class ApiHelpUtils {
 				}
 			}
 		}
-		return value;
+		return (Serializable) value;
 	}
 	
 	public static List<Field> getJsonFields(Class<?> beanClass) {

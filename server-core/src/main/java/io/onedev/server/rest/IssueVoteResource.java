@@ -44,9 +44,9 @@ public class IssueVoteResource {
 		return vote;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update issue vote of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull IssueVote vote) {
+	public Long createOrUpdate(@NotNull IssueVote vote) {
 		if (!SecurityUtils.canAccess(vote.getIssue().getProject()) 
 				|| !SecurityUtils.isAdministrator() && !vote.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();

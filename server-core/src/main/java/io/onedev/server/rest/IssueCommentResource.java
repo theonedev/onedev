@@ -44,9 +44,9 @@ public class IssueCommentResource {
     	return comment;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update issue comment of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull IssueComment comment) {
+	public Long createOrUpdate(@NotNull IssueComment comment) {
     	if (!SecurityUtils.canAccess(comment.getIssue().getProject()) || 
     			!SecurityUtils.isAdministrator() && !comment.getUser().equals(SecurityUtils.getUser())) { 
 			throw new UnauthorizedException();

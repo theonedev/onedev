@@ -47,7 +47,7 @@ public class GroupResource {
 	@Api(order=100)
 	@Path("/{groupId}")
     @GET
-    public Group get(@PathParam("groupId") Long groupId) {
+    public Group getBasicInfo(@PathParam("groupId") Long groupId) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	return groupManager.load(groupId);
@@ -73,14 +73,14 @@ public class GroupResource {
 	
 	@Api(order=400)
 	@GET
-    public List<Group> query(@QueryParam("name") String name, @QueryParam("offset") int offset, 
-    		@QueryParam("count") int count) {
+    public List<Group> queryBasicInfo(@QueryParam("name") String name, @QueryParam("offset") @Api(example="0") int offset, 
+    		@QueryParam("count") @Api(example="100") int count) {
 		
 		if (!SecurityUtils.isAdministrator())
 			throw new UnauthorizedException();
 		
-    	if (count > RestUtils.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestUtils.MAX_PAGE_SIZE);
+    	if (count > RestConstants.MAX_PAGE_SIZE)
+    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
 		if (name != null) 
@@ -89,9 +89,9 @@ public class GroupResource {
     	return groupManager.query(criteria, offset, count);
     }
 	
-	@Api(order=500)
+	@Api(order=500, description="Update group of specified id in request body, or create new if id property not provided")
     @POST
-    public Long save(@NotNull Group group) {
+    public Long createOrUpdate(@NotNull Group group) {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
 	    groupManager.save(group, (String) group.getCustomData());

@@ -44,9 +44,9 @@ public class IssueWatchResource {
 		return watch;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update issue watch of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(@NotNull IssueWatch watch) {
+	public Long createOrUpdate(@NotNull IssueWatch watch) {
 		if (!SecurityUtils.canAccess(watch.getIssue().getProject()) 
 				|| !SecurityUtils.isAdministrator() && !watch.getUser().equals(SecurityUtils.getUser())) {
 			throw new UnauthorizedException();

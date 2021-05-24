@@ -1,19 +1,21 @@
 package io.onedev.server.web.page.help;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
+import javax.annotation.Nullable;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
@@ -22,14 +24,21 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.ParamCheckFilter;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
@@ -80,28 +89,82 @@ public class MethodDetailPage extends ApiHelpPage {
 		return methodModel.getObject();
 	}
 
+	@Nullable
+	private Parameter getRequestBodyParam() {
+		for (Parameter param: getResourceMethod().getParameters()) {
+			if (param.getAnnotation(PathParam.class) == null && param.getAnnotation(QueryParam.class) == null) 
+				return param;
+		}
+		return null;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
 		Method method = getResourceMethod();
-		add(new Label("title", getMethodDescription(method)));
 		
-		if (method.getAnnotation(GET.class) != null)
-			add(new Label("method", "GET"));
-		else if (method.getAnnotation(POST.class) != null)
-			add(new Label("method", "POST"));
-		else if (method.getAnnotation(PUT.class) != null)
-			add(new Label("method", "PUT"));
-		else
-			add(new Label("method", "DELETE"));
+		add(new Label("title", getMethodTitle(getResourceMethod())));
+		
+		String description = getMethodDescription(method);
+		add(new Label("description", description).setVisible(description!=null));
+
+		String httpMethod = getHttpMethod(method);
+		add(new Label("method", httpMethod));
+		
+		Class<?> requestBodyClass;
+		
+		Parameter param = getRequestBodyParam();
+		
+		if (param != null) { 
+			Serializable exampleValue = new ExampleProvider(resourceClass, param.getAnnotation(Api.class)).getExample(); 
+			if (exampleValue == null) 
+				exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType());
+			requestBodyClass = exampleValue.getClass();
+			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+
+				@Override
+				protected ValueInfo load() {
+					return new ValueInfo(ValueInfo.Origin.REQUEST_BODY, 
+							getRequestBodyParam().getParameterizedType(), null);
+				}
+				
+			};
+			
+			Model<Serializable> valueModel = Model.of(exampleValue);
+			add(new ExampleValuePanel("requestBodyExample", valueModel, valueInfoModel, requestBodyClass));
+			add(new CopyToClipboardLink("copyRequestBodyExample", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return toJson(valueModel.getObject());
+				}
+				
+			}) {
+				
+				@Override
+				public void onEvent(IEvent<?> event) {
+					super.onEvent(event);
+					if (event.getPayload() instanceof ExampleValueChanged)
+						((ExampleValueChanged)event.getPayload()).getHandler().add(this);
+				}
+				
+			}.setOutputMarkupId(true));
+		} else { 
+			requestBodyClass = null;
+			add(new WebMarkupContainer("requestBodyExample").setVisible(false));
+		}
 		
 		String resourcePathValue = resourceClass.getAnnotation(Path.class).value();
 		Path methodPath = method.getAnnotation(Path.class);
+		
+		String endPoint;
 		if (methodPath != null)
-			add(new Label("path", "/api" + resourcePathValue + methodPath.value()));
+			endPoint = "/api" + resourcePathValue + methodPath.value();
 		else
-			add(new Label("path", "/api" + resourcePathValue));
+			endPoint = "/api" + resourcePathValue;
+		
+		add(new Label("path", endPoint));
 		
 		add(new ListView<Parameter>("pathPlaceholders", new LoadableDetachableModel<List<Parameter>>() {
 
@@ -128,10 +191,27 @@ public class MethodDetailPage extends ApiHelpPage {
 				else
 					item.add(new Label("description", StringUtils.capitalize(WordUtils.uncamel(pathParam.value()))));
 				
-				Object exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample(); 
+				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample(); 
 				if (exampleValue == null)
 					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType());
-				item.add(new ExampleValuePanel("example", exampleValue, false));
+				
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+
+					@Override
+					protected ValueInfo load() {
+						return new ValueInfo(ValueInfo.Origin.PATH_PLACEHOLDER, 
+								item.getModelObject().getParameterizedType(), null);
+					}
+					
+				};
+				
+				item.add(new ExampleValuePanel("example", Model.of(exampleValue), valueInfoModel, requestBodyClass));
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getModelObject().isEmpty());
 			}
 			
 		});
@@ -157,15 +237,26 @@ public class MethodDetailPage extends ApiHelpPage {
 				item.add(new Label("name", queryParam.value()));
 				Api api = param.getAnnotation(Api.class);
 				if (api != null && api.description().length() != 0)
-					item.add(new Label("description", api.description()));
+					item.add(new Label("description", api.description()).setEscapeModelStrings(false));
 				else
-					item.add(new Label("description", StringUtils.capitalize(WordUtils.uncamel(queryParam.value()))));
+					item.add(new Label("description", StringUtils.capitalize(WordUtils.uncamel(queryParam.value()).toLowerCase())));
 				item.add(new Label("required", TextUtils.describe(ParamCheckFilter.isRequired(param))));
 
-				Object exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample();
+				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample();
 				if (exampleValue == null)
 					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType());
-				item.add(new ExampleValuePanel("example", exampleValue, false));
+				
+				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+
+					@Override
+					protected ValueInfo load() {
+						return new ValueInfo(ValueInfo.Origin.QUERY_PARAM, 
+								item.getModelObject().getParameterizedType(), null);
+					}
+					
+				};
+				
+				item.add(new ExampleValuePanel("example", Model.of(exampleValue), valueInfoModel, requestBodyClass));
 			}
 
 			@Override
@@ -176,43 +267,114 @@ public class MethodDetailPage extends ApiHelpPage {
 			
 		});
 		
-		Parameter requestBodyParam = null;
-		for (Parameter param: method.getParameters()) {
-			if (param.getAnnotation(PathParam.class) == null && param.getAnnotation(QueryParam.class) == null) {
-				requestBodyParam = param;
-				break;
-			}
-		}
-		
-		if (requestBodyParam != null) { 
-			Object exampleValue = new ExampleProvider(resourceClass, requestBodyParam.getAnnotation(Api.class)).getExample(); 
-			if (exampleValue == null) {
-				exampleValue = ApiHelpUtils.getExampleValue(requestBodyParam.getParameterizedType());
-			}
-			add(new ExampleValuePanel("requestBodyExample", exampleValue, true));
-		} else { 
-			add(new WebMarkupContainer("requestBodyExample").setVisible(false));
-		}
-		
-		Api api = method.getAnnotation(Api.class);
-		if (api != null && api.permission().length() != 0) 
-			add(new Label("permission", api.permission()));
-		else 
-			add(new Label("permission", "Anyone can perform this operation"));
-		
 		if (method.getReturnType() == Response.class) {
 			add(new Label("successResponseBody", "No response body if successful; error"));
 		} else {
 			Fragment fragment = new Fragment("successResponseBody", "hasResponseBodyFrag", MethodDetailPage.this);
-			Object exampleValue = new ExampleProvider(resourceClass, method.getAnnotation(Api.class)).getExample();
+			Serializable exampleValue = new ExampleProvider(resourceClass, method.getAnnotation(Api.class)).getExample();
 			if (exampleValue == null) 
 				exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType());
-			fragment.add(new ExampleValuePanel("example", exampleValue, false));
+			
+			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
+
+				@Override
+				protected ValueInfo load() {
+					return new ValueInfo(ValueInfo.Origin.RESPONSE_BODY, 
+							getResourceMethod().getGenericReturnType(), null);
+				}
+				
+			};
+			
+			IModel<Serializable> valueModel = Model.of(exampleValue);
+			
+			fragment.add(new ExampleValuePanel("example", valueModel, valueInfoModel, requestBodyClass));
+			
+			fragment.add(new CopyToClipboardLink("copyExample", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return toJson(valueModel.getObject());
+				}
+				
+			}) {
+				
+				@Override
+				public void onEvent(IEvent<?> event) {
+					super.onEvent(event);
+					if (event.getPayload() instanceof ExampleValueChanged)
+						((ExampleValueChanged)event.getPayload()).getHandler().add(this);
+				}
+				
+			}.setOutputMarkupId(true));
+
 			add(fragment);
 		}
 
+		for (Parameter pathParam: getResourceMethod().getParameters()) {
+			if (pathParam.getAnnotation(PathParam.class) != null) {
+				Api api = pathParam.getAnnotation(Api.class);
+				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample(); 
+				if (exampleValue == null)
+					exampleValue = ApiHelpUtils.getExampleValue(pathParam.getParameterizedType());
+				endPoint = endPoint.replace("{" + pathParam.getAnnotation(PathParam.class).value() + "}", String.valueOf(exampleValue));
+			}
+		}
+		
+		Map<String, String> queryParams = new LinkedHashMap<>();
+		
+		for (Parameter queryParam: getResourceMethod().getParameters()) {
+			if (queryParam.getAnnotation(QueryParam.class) != null) {
+				String paramName = queryParam.getAnnotation(QueryParam.class).value();
+				
+				Api api = queryParam.getAnnotation(Api.class);
+				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample();
+				if (exampleValue == null)
+					exampleValue = ApiHelpUtils.getExampleValue(queryParam.getParameterizedType());
+				
+				queryParams.put(paramName, String.valueOf(exampleValue));
+			}
+		}
+		
+		StringBuilder curlExample = new StringBuilder();
+
+		curlExample.append("$ curl -u <login name>:<password or access token> ");
+		if (!queryParams.isEmpty())
+			curlExample.append("-G ");
+		
+		switch (getHttpMethod(method)) {
+		case "DELETE":
+			curlExample.append("-X DELETE ");
+			break;
+		case "PUT":
+			curlExample.append("-X PUT -d@request-body.json -H \"Content-Type: application/json\" ");
+			break;
+		case "POST":
+			curlExample.append("-d@request-body.json -H \"Content-Type: application/json\" ");
+			break;
+		}
+		
+		curlExample.append(OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl()).append(endPoint);
+		
+		for (Map.Entry<String, String> entry: queryParams.entrySet()) {
+			if (entry.getValue().contains(" "))
+				curlExample.append(" --data-urlencode '").append(entry.getKey()).append("=").append(entry.getValue()).append("'");
+			else
+				curlExample.append(" --data-urlencode ").append(entry.getKey()).append("=").append(entry.getValue());
+		}
+		
+		add(new Label("curlExample", curlExample));
+		
+		add(new CopyToClipboardLink("copyCurlExample", Model.of(curlExample.toString().substring(1))));
 	}
 
+	private String toJson(Object value) {
+		try {
+			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(value);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
@@ -231,5 +393,5 @@ public class MethodDetailPage extends ApiHelpPage {
 		params.add(PARAM_METHOD, resourceMethod);
 		return params;
 	}
-	
+
 }

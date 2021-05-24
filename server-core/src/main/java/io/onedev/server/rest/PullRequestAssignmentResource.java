@@ -45,9 +45,9 @@ public class PullRequestAssignmentResource {
 		return assignment;
 	}
 	
-	@Api(order=200)
+	@Api(order=200, description="Update pull request assignment of specified id in request body, or create new if id property not provided")
 	@POST
-	public Long save(PullRequestAssignment assignment) {
+	public Long createOrUpdate(PullRequestAssignment assignment) {
 		PullRequest pullRequest = assignment.getRequest();
 		if (!SecurityUtils.canReadCode(pullRequest.getProject()) || !SecurityUtils.canModify(pullRequest)) 
 			throw new UnauthorizedException();

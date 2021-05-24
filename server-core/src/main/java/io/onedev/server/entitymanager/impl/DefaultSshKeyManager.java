@@ -1,8 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,7 +8,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.sshd.common.config.keys.KeyUtils;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
 import org.slf4j.Logger;
@@ -28,8 +24,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.security.CipherUtils;
-import io.onedev.server.ssh.SshKeyUtils;
 
 @Singleton
 public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements SshKeyManager {
@@ -55,19 +49,12 @@ public class DefaultSshKeyManager extends BaseEntityManager<SshKey> implements S
     public void syncSshKeys(User user, Collection<String> sshKeys) {
     	Map<String, SshKey> syncMap = new HashMap<>();
     	for (String content: sshKeys) {
-    		try {
-    			PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-    	        String digest = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
-    			
-    	        SshKey sshKey = new SshKey();
-    	        sshKey.setDigest(digest);
-    	        sshKey.setContent(content);
-    	        sshKey.setOwner(user);
-    	        sshKey.setCreatedAt(new Date());
-    	        syncMap.put(content, sshKey);
-    		} catch (IOException | GeneralSecurityException e) {
-    			logger.error("Error parsing SSH key", e);
-    		}
+	        SshKey sshKey = new SshKey();
+	        sshKey.setContent(content);
+	        sshKey.setOwner(user);
+	        sshKey.setCreatedAt(new Date());
+	        sshKey.digest();
+	        syncMap.put(content, sshKey);
     	}
 
     	Map<String, SshKey> currentMap = new HashMap<>();
