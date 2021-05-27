@@ -1,8 +1,10 @@
 package io.onedev.server.util.jackson;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -25,13 +27,18 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
+import io.onedev.commons.launcher.loader.ImplementationRegistry;
+
 @Singleton
 public class ObjectMapperProvider implements Provider<ObjectMapper> {
 
 	private final Set<ObjectMapperConfigurator> configurators;
 	
+	private final ImplementationRegistry implementationRegistry;
+	
 	@Inject
-	public ObjectMapperProvider(Set<ObjectMapperConfigurator> configurators) {
+	public ObjectMapperProvider(ImplementationRegistry implementationRegistry, Set<ObjectMapperConfigurator> configurators) {
+		this.implementationRegistry = implementationRegistry;
 		this.configurators = configurators;
 	}
 	
@@ -43,25 +50,34 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
             @Override
             public TypeDeserializer buildTypeDeserializer(DeserializationConfig config,
                     JavaType baseType, Collection<NamedType> subtypes) {
-                return useForType(baseType) ? super.buildTypeDeserializer(config, baseType, subtypes) : null;
+                return useForType(baseType) ? super.buildTypeDeserializer(config, baseType, getSubTypes(baseType)) : null;
             }
 
+            private Collection<NamedType> getSubTypes(JavaType baseType) {
+            	return implementationRegistry.getImplementations(baseType.getRawClass())
+            			.stream()
+            			.map(it->new NamedType(it))
+            			.collect(Collectors.toList());
+            }
+            
             @Override
             public TypeSerializer buildTypeSerializer(SerializationConfig config,
                     JavaType baseType, Collection<NamedType> subtypes) {
-                return useForType(baseType) ? super.buildTypeSerializer(config, baseType, subtypes) : null;            
+                return useForType(baseType) ? super.buildTypeSerializer(config, baseType, getSubTypes(baseType)) : null;            
             }
         	
 			private boolean useForType(JavaType t) {
 				return  !Collection.class.isAssignableFrom(t.getRawClass()) 
 						&& !Map.class.isAssignableFrom(t.getRawClass()) 
 						&& t.getRawClass() != JsonNode.class
+						&& t.getRawClass() != Object.class
+						&& t.getRawClass() != Serializable.class
 						&& !Enum.class.isAssignableFrom(t.getRawClass())
 						&& !t.isConcrete();				
 			}
 
         };
-        typer = typer.init(JsonTypeInfo.Id.CLASS, null);
+        typer = typer.init(JsonTypeInfo.Id.NAME, null);
         typer = typer.inclusion(JsonTypeInfo.As.PROPERTY);
         mapper.setDefaultTyping(typer);
         mapper.setDateFormat(new StdDateFormat().withColonInTimeZone(true));

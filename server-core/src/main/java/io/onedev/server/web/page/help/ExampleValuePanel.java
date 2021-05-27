@@ -414,7 +414,7 @@ public class ExampleValuePanel extends Panel {
 
 				@Override
 				public Serializable getObject() {
-					return getValue().getClass().getName();
+					return getValue().getClass().getSimpleName();
 				}
 				
 			}, valueInfoModel, requestBodyClass));
@@ -440,7 +440,7 @@ public class ExampleValuePanel extends Panel {
 
 							@Override
 							public String getLabel() {
-								return clazz.getName();
+								return clazz.getSimpleName();
 							}
 
 							@Override
