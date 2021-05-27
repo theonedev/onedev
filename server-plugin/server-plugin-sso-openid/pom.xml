@@ -12,6 +12,12 @@
 		<dependency>
 			<groupId>com.nimbusds</groupId>
 			<artifactId>oauth2-oidc-sdk</artifactId>
+			<exclusions>
+				<exclusion>
+				    <groupId>javax.mail</groupId>
+				    <artifactId>mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 	<properties>
