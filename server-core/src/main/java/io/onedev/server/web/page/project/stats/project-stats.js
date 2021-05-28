@@ -64,7 +64,7 @@ onedev.server.stats = {
 				for (var i=0; i<days.length; i++) {
 					var contribution = overallContributions[days[i]];
 					if (contribution) 
-						data.push(contribution[1][$contribType[0].selectedIndex]);
+						data.push(contribution[$contribType[0].selectedIndex]);
 					else 
 						data.push(0);
 				}

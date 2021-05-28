@@ -90,6 +90,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}
+		
 		CharSequence callback = userCardBehavior.getCallbackFunction(
 				CallbackParameter.explicit("name"), CallbackParameter.explicit("emailAddress"));
 		String script = String.format("onedev.server.stats.contribs.onDomReady(%s, '%s', %s);", 
