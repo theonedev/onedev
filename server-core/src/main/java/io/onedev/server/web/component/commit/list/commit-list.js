@@ -97,7 +97,6 @@ onedev.server.commitList = {
 		}
 		
 		for (var i in commits) {
-			commits[i] = commits[i][1];
 			var parents = commits[i];
 			for (var j in parents) {
 				var parent = parents[j];
