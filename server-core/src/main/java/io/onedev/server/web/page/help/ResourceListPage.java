@@ -39,7 +39,7 @@ public class ResourceListPage extends ApiHelpPage {
 				for (Class<?> clazz: config.getClasses()) {
 					if (clazz.getAnnotation(Path.class) != null) { 
 						Api api = clazz.getAnnotation(Api.class);
-						if (api == null || !api.exclude())
+						if (api == null || !api.internal())
 							clazzes.add(clazz);
 					}
 				}

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 public @interface Api {
 
-	boolean exclude() default false;
+	boolean internal() default false;
 	
 	String exampleProvider() default "";
 	

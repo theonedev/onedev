@@ -49,7 +49,7 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.SimpleLogger;
 
-@Api(exclude=true)
+@Api(internal=true)
 @Path("/k8s")
 @Consumes(MediaType.WILDCARD)
 @Singleton
