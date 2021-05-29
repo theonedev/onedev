@@ -208,10 +208,6 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Project set owner=null where owner=:user");
-    	query.setParameter("user", user);
-    	query.executeUpdate();
-    	
 		dao.remove(user);
     }
 
