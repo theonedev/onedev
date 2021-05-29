@@ -181,7 +181,9 @@ public class LdapAuthenticator extends Authenticator {
 		} catch (InvalidNameException e) {
 			throw new RuntimeException(e);
 		}
-        String userSearchFilter = StringUtils.replace(getUserSearchFilter(), "{0}", token.getUsername());
+		
+        String userSearchFilter = StringUtils.replace(getUserSearchFilter(), "{0}", 
+        		escape(token.getUsername()));
         userSearchFilter = StringUtils.replace(userSearchFilter, "\\", "\\\\");
         logger.debug("Evaluated user search filter: " + userSearchFilter);
         
@@ -436,5 +438,47 @@ public class LdapAuthenticator extends Authenticator {
 	public boolean isManagingSshKeys() {
 		return getUserSshKeyAttribute() != null;
 	}
+	
+	/* Copied from Spring LdapEncoder.java */
+    private static String[] FILTER_ESCAPE_TABLE = new String['\\' + 1];
+
+    static {
+
+        // Filter encoding table -------------------------------------
+
+        // fill with char itself
+        for (char c = 0; c < FILTER_ESCAPE_TABLE.length; c++) {
+            FILTER_ESCAPE_TABLE[c] = String.valueOf(c);
+        }
+
+        // escapes (RFC2254)
+        FILTER_ESCAPE_TABLE['*'] = "\\2a";
+        FILTER_ESCAPE_TABLE['('] = "\\28";
+        FILTER_ESCAPE_TABLE[')'] = "\\29";
+        FILTER_ESCAPE_TABLE['\\'] = "\\5c";
+        FILTER_ESCAPE_TABLE[0] = "\\00";
+
+    }
+
+    private static String escape(String value) {
+        // make buffer roomy
+        StringBuilder encodedValue = new StringBuilder(value.length() * 2);
+
+        int length = value.length();
+
+        for (int i = 0; i < length; i++) {
+
+            char c = value.charAt(i);
+
+            if (c < FILTER_ESCAPE_TABLE.length) {
+                encodedValue.append(FILTER_ESCAPE_TABLE[c]);
+            } else {
+                // default: add the char
+                encodedValue.append(c);
+            }
+        }
+
+        return encodedValue.toString();
+    }	
 	
 }
