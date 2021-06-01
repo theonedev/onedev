@@ -29,6 +29,7 @@
 	color: var(--gray);
 }
 .text-diff>tbody>tr>td.number>.coverage {
+	display: block;
 	position: absolute;
 	width: 4px;
 	right: 0;
