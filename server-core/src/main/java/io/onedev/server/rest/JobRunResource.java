@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -19,7 +20,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.buildspec.job.JobManager;
@@ -27,14 +30,17 @@ import io.onedev.server.buildspec.job.SubmitReason;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.rest.annotation.EntityCreate;
 import io.onedev.server.rest.annotation.EntityId;
+import io.onedev.server.rest.support.JobRun;
+import io.onedev.server.rest.support.JobRunOnCommit;
+import io.onedev.server.rest.support.JobRunOnPullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.validation.annotation.CommitHash;
 
 @Api(order=3500)
 @Path("/job-runs")
@@ -63,33 +69,82 @@ public class JobRunResource {
 	@Api(order=100)
     @POST
     public Long runBuild(@NotNull @Valid JobRun jobRun) {
-    	Project project = projectManager.load(jobRun.projectId);
-		if (!SecurityUtils.canRunJob(project, jobRun.jobName))		
-			throw new UnauthorizedException();
+		Project project;
+		SubmitReason reason;
+		ObjectId commitId;
 		
-		SubmitReason reason = new SubmitReason() {
-
-			@Override
-			public String getRefName() {
-				return jobRun.refName;
-			}
-
-			@Override
-			public PullRequest getPullRequest() {
-				if (jobRun.pullRequestId != null)
-					return pullRequestManager.load(jobRun.pullRequestId);
-				else
-					return null;
-			}
-
-			@Override
-			public String getDescription() {
-				return jobRun.reason;
-			}
+		if (jobRun instanceof JobRunOnCommit) {
+			JobRunOnCommit jobRunOnCommit = (JobRunOnCommit) jobRun;
 			
-		};
-		return jobManager.submit(project, ObjectId.fromString(jobRun.commitHash), 
-				jobRun.jobName, jobRun.params, reason).getId();
+	    	project = projectManager.load(jobRunOnCommit.getProjectId());
+			if (!SecurityUtils.canRunJob(project, jobRun.getJobName()))		
+				throw new UnauthorizedException();
+
+			if (!jobRunOnCommit.getRefName().startsWith(Constants.R_REFS)) 
+				throw new ValidationException("Ref name should start with " + Constants.R_REFS);
+			
+			RevCommit refCommit = project.getRevCommit(jobRunOnCommit.getRefName(), true);
+			
+			commitId = ObjectId.fromString(jobRunOnCommit.getCommitHash());
+			
+			if (!GitUtils.isMergedInto(project.getRepository(), null, commitId, refCommit)) 
+				throw new ValidationException("Specified commit is not reachable from specified ref");
+			
+			reason = new SubmitReason() {
+
+				@Override
+				public String getRefName() {
+					return jobRunOnCommit.getRefName();
+				}
+
+				@Override
+				public PullRequest getPullRequest() {
+					return null;
+				}
+
+				@Override
+				public String getDescription() {
+					return jobRun.getReason();
+				}
+				
+			};
+		} else {
+			JobRunOnPullRequest jobRunOnPullRequest = (JobRunOnPullRequest) jobRun;
+			PullRequest pullRequest = pullRequestManager.load(jobRunOnPullRequest.getPullRequestId());
+			project = pullRequest.getProject();
+			
+			if (!SecurityUtils.canRunJob(pullRequest.getProject(), jobRun.getJobName()))		
+				throw new UnauthorizedException();
+
+			MergePreview preview = pullRequest.getMergePreview();
+			if (preview == null)
+				throw new ValidationException("Pull request merge preview not calcualted yet");
+			if (preview.getMergeCommitHash() == null)
+				throw new ValidationException("Pull request has merge conflicts");
+			
+			commitId = ObjectId.fromString(preview.getMergeCommitHash());
+			
+			reason = new SubmitReason() {
+
+				@Override
+				public String getRefName() {
+					return pullRequest.getMergeRef();
+				}
+
+				@Override
+				public PullRequest getPullRequest() {
+					return pullRequest;
+				}
+
+				@Override
+				public String getDescription() {
+					return jobRun.getReason();
+				}
+				
+			};
+		}
+		
+		return jobManager.submit(project, commitId, jobRun.getJobName(), jobRun.getParams(), reason).getId();
     }
 
 	@Api(order=200)
@@ -115,107 +170,20 @@ public class JobRunResource {
     	return Response.ok().build();
     }
 	
-	@EntityCreate(Build.class)
-	public static class JobRun implements Serializable {
-		
-		private static final long serialVersionUID = 1L;
-
-		@EntityId(Project.class)
-		private Long projectId; 
-		
-		private String commitHash;
-		
-		private String jobName;
-		
-		@Api(description="A map of param name to value list. Normally the value list contains only one "
-				+ "param value. However in case the job param is defined as multi-valued in build spec, "
-				+ "you can add multiple param values")
-		private Map<String, List<String>> params = new HashMap<>();
-		
-		private String refName;
-		
-		@EntityId(PullRequest.class)
-		private Long pullRequestId;
-		
-		private String reason;
-
-		@NotNull
-		public Long getProjectId() {
-			return projectId;
-		}
-
-		public void setProjectId(Long projectId) {
-			this.projectId = projectId;
-		}
-
-		@CommitHash
-		@NotEmpty
-		public String getCommitHash() {
-			return commitHash;
-		}
-
-		public void setCommitHash(String commitHash) {
-			this.commitHash = commitHash;
-		}
-
-		@NotEmpty
-		public String getJobName() {
-			return jobName;
-		}
-
-		public void setJobName(String jobName) {
-			this.jobName = jobName;
-		}
-
-		@NotNull
-		public Map<String, List<String>> getParams() {
-			return params;
-		}
-
-		public void setParams(Map<String, List<String>> params) {
-			this.params = params;
-		}
-
-		@NotEmpty
-		public String getRefName() {
-			return refName;
-		}
-
-		public void setRefName(String refName) {
-			this.refName = refName;
-		}
-
-		public Long getPullRequestId() {
-			return pullRequestId;
-		}
-
-		public void setPullRequestId(Long pullRequestId) {
-			this.pullRequestId = pullRequestId;
-		}
-
-		@NotEmpty
-		public String getReason() {
-			return reason;
-		}
-
-		public void setReason(String reason) {
-			this.reason = reason;
-		}
-		
-	}
-	
 	public static class JobRerun implements Serializable {
 		
 		private static final long serialVersionUID = 1L;
 
+		@Api(order=100)
 		@EntityId(Build.class)
 		private Long buildId;
 		
-		@Api(description="A map of param name to value list. Normally the value list contains only one "
+		@Api(order=200, description="A map of param name to value list. Normally the value list contains only one "
 				+ "param value. However in case the job param is defined as multi-valued in build spec, "
 				+ "you can add multiple param values")
 		private Map<String, List<String>> params = new HashMap<>();
 		
+		@Api(order=300)
 		private String reason;
 
 		@NotNull

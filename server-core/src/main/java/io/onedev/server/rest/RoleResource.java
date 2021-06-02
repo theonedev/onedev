@@ -25,6 +25,7 @@ import io.onedev.server.model.Role;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.rest.jersey.InvalidParamException;
+import io.onedev.server.rest.support.RestConstants;
 import io.onedev.server.security.SecurityUtils;
 
 @Api(order=7000)

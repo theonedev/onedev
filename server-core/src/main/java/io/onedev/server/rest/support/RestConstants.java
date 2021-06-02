@@ -1,4 +1,4 @@
-package io.onedev.server.rest;
+package io.onedev.server.rest.support;
 
 public class RestConstants {
 

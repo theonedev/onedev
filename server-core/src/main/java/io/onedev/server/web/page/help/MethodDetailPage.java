@@ -27,9 +27,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
@@ -132,16 +129,26 @@ public class MethodDetailPage extends ApiHelpPage {
 			};
 			
 			Model<Serializable> valueModel = Model.of(exampleValue);
-			add(new ExampleValuePanel("requestBodyExample", valueModel, valueInfoModel, requestBodyClass));
+			
+			ExampleValuePanel valuePanel = new ExampleValuePanel("requestBodyExample", valueModel, 
+					valueInfoModel, requestBodyClass);
+			add(valuePanel);
+			
 			add(new CopyToClipboardLink("copyRequestBodyExample", new LoadableDetachableModel<String>() {
 
 				@Override
 				protected String load() {
-					return toJson(valueModel.getObject());
+					return valuePanel.getValueAsJson();
 				}
 				
 			}) {
 				
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!valuePanel.isScalarValue());
+				}
+
 				@Override
 				public void onEvent(IEvent<?> event) {
 					super.onEvent(event);
@@ -287,16 +294,23 @@ public class MethodDetailPage extends ApiHelpPage {
 			
 			IModel<Serializable> valueModel = Model.of(exampleValue);
 			
-			fragment.add(new ExampleValuePanel("example", valueModel, valueInfoModel, requestBodyClass));
+			ExampleValuePanel valuePanel = new ExampleValuePanel("example", valueModel, valueInfoModel, requestBodyClass);
+			fragment.add(valuePanel);
 			
 			fragment.add(new CopyToClipboardLink("copyExample", new LoadableDetachableModel<String>() {
 
 				@Override
 				protected String load() {
-					return toJson(valueModel.getObject());
+					return valuePanel.getValueAsJson();
 				}
 				
 			}) {
+				
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(!valuePanel.isScalarValue());
+				}
 				
 				@Override
 				public void onEvent(IEvent<?> event) {
@@ -305,7 +319,7 @@ public class MethodDetailPage extends ApiHelpPage {
 						((ExampleValueChanged)event.getPayload()).getHandler().add(this);
 				}
 				
-			}.setOutputMarkupId(true));
+			}.setOutputMarkupPlaceholderTag(true));
 
 			add(fragment);
 		}
@@ -367,14 +381,6 @@ public class MethodDetailPage extends ApiHelpPage {
 		add(new CopyToClipboardLink("copyCurlExample", Model.of(curlExample.toString().substring(1))));
 	}
 
-	private String toJson(Object value) {
-		try {
-			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(value);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	@Override
 	protected Component newTopbarTitle(String componentId) {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
