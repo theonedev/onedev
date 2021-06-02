@@ -87,7 +87,7 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 
 		mapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
 		mapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);	
-		mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);		
+		mapper.configure(MapperFeature.PROPAGATE_TRANSIENT_MARKER, true);
 		
 		for (ObjectMapperConfigurator each: configurators)
 			each.configure(mapper);

@@ -1,12 +1,16 @@
 package io.onedev.server.util;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.DateTime;
 
+import io.onedev.server.rest.annotation.Api;
+
+@Api(description="Date in yyyy-MM-dd format", example="2021-01-01")
 public class Day implements Serializable, Comparable<Day> {
 
 	private static final long serialVersionUID = 1L;
@@ -29,6 +33,10 @@ public class Day implements Serializable, Comparable<Day> {
 		this.year = year;
 		this.monthOfYear = monthOfYear;
 		this.dayOfMonth = dayOfMonth;
+	}
+	
+	public Day(LocalDate date) {
+		this(date.getYear(), date.getMonthValue()-1, date.getDayOfMonth());
 	}
 	
 	public Day(int value) {
@@ -92,6 +100,11 @@ public class Day implements Serializable, Comparable<Day> {
 				.append(monthOfYear)
 				.append(dayOfMonth)
 				.toHashCode();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%04d-%02d-%02d", year, monthOfYear+1, dayOfMonth);
 	}
 	
 }

@@ -1,9 +1,11 @@
 package io.onedev.server.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,4 +37,16 @@ public class CollectionUtils extends org.apache.commons.collections.CollectionUt
 			map.put(args[i*2], args[i*2+1]);
 	}
 
+	public static List<Map<String, ?>> mapAsList(Map<?, ?> map, 
+			String keyName, String valueName) {
+		List<Map<String, ?>> list = new ArrayList<>();
+		for (Map.Entry<?, ?> entry: map.entrySet()) {
+			Map<String, Object> entryMap = new LinkedHashMap<>();
+			entryMap.put(keyName, entry.getKey());
+			entryMap.put(valueName, entry.getValue());
+			list.add(entryMap);
+		}
+		return list;
+	}
+	
 }
