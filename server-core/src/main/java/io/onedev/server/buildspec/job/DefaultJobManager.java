@@ -78,6 +78,7 @@ import io.onedev.server.buildspec.step.Step;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.ProjectCreated;
@@ -99,6 +100,7 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
@@ -158,6 +160,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final BuildParamManager buildParamManager;
 	
+	private final PullRequestManager pullRequestManager;
+	
 	private final TaskScheduler taskScheduler;
 	
 	private final Validator validator;
@@ -170,7 +174,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
-			ProjectManager projectManager, Validator validator, TaskScheduler taskScheduler) {
+			PullRequestManager pullRequestManager, ProjectManager projectManager, Validator validator, 
+			TaskScheduler taskScheduler) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -181,6 +186,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.sessionManager = sessionManager;
 		this.buildParamManager = buildParamManager;
 		this.projectManager = projectManager;
+		this.pullRequestManager = pullRequestManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
 	}
@@ -253,6 +259,32 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					paramMapToQuery);
 			
 			if (builds.isEmpty()) {
+				Long projectId = project.getId();
+				Long pullRequestId;
+				if (reason.getPullRequest() != null)
+					pullRequestId = reason.getPullRequest().getId();
+				else
+					pullRequestId = null;
+				sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(userManager.getSystem().asSubject());
+						Project project = projectManager.load(projectId);
+						PullRequest pullRequest;
+						if (pullRequestId != null)
+							pullRequest = pullRequestManager.load(pullRequestId);
+						else
+							pullRequest = null;
+						for (Build unfinished: buildManager.queryUnfinished(project, jobName, reason.getRefName(), 
+								Optional.ofNullable(pullRequest), paramMapToQuery)) {
+							if (GitUtils.isMergedInto(project.getRepository(), null, unfinished.getCommitId(), commitId)) 
+								cancel(unfinished);
+						}
+					}
+					
+				});
+				
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 					ParamSpec paramSpec = Preconditions.checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
 					if (!entry.getValue().isEmpty()) {

@@ -274,19 +274,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 				predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
 		}
 			
-		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
-			if (!entry.getValue().isEmpty()) {
-				for (String value: entry.getValue()) {
-					Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
-					predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
-					predicates.add(builder.equal(join.get(BuildParam.PROP_VALUE), value));
-				}
-			} else {
-				Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
-				predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
-				predicates.add(builder.isNull(join.get(BuildParam.PROP_VALUE)));
-			}
-		}
+		predicates.addAll(getPredicates(root, builder, params));
 		
 		query.where(predicates.toArray(new Predicate[0]));
 		return getSession().createQuery(query).list();
@@ -304,6 +292,59 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		return query(criteria);
 	}
 
+	@Sessional
+	@Override
+	public Collection<Build> queryUnfinished(Project project, String jobName, @Nullable String refName, 
+			@Nullable Optional<PullRequest> request, Map<String, List<String>> params) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
+		Root<Build> root = query.from(Build.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.or(
+				builder.equal(root.get(Build.PROP_STATUS), Build.Status.PENDING),
+				builder.equal(root.get(Build.PROP_STATUS), Build.Status.RUNNING),
+				builder.equal(root.get(Build.PROP_STATUS), Build.Status.WAITING)));
+		predicates.add(builder.equal(root.get(Build.PROP_PROJECT), project));
+		predicates.add(builder.equal(root.get(Build.PROP_JOB), jobName));
+		
+		if (refName != null)
+			predicates.add(builder.equal(root.get(Build.PROP_REF_NAME), refName));
+
+		if (request != null) {
+			if (request.isPresent())
+				predicates.add(builder.equal(root.get(Build.PROP_PULL_REQUEST), request.get()));
+			else
+				predicates.add(builder.isNull(root.get(Build.PROP_PULL_REQUEST)));
+		}
+			
+		predicates.addAll(getPredicates(root, builder, params));
+		
+		query.where(predicates.toArray(new Predicate[0]));
+		return getSession().createQuery(query).list();
+	}
+	
+	private List<Predicate> getPredicates(Root<Build> root, CriteriaBuilder builder, 
+			Map<String, List<String>> params) {
+		List<Predicate> predicates = new ArrayList<>();
+		
+		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
+			if (!entry.getValue().isEmpty()) {
+				for (String value: entry.getValue()) {
+					Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
+					predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
+					predicates.add(builder.equal(join.get(BuildParam.PROP_VALUE), value));
+				}
+			} else {
+				Join<?, ?> join = root.join(Build.PROP_PARAMS, JoinType.INNER);
+				predicates.add(builder.equal(join.get(BuildParam.PROP_NAME), entry.getKey()));
+				predicates.add(builder.isNull(join.get(BuildParam.PROP_VALUE)));
+			}
+		}
+		
+		return predicates;
+	}
+	
 	@Sessional
 	@Override
 	public List<Build> query(Project project, String term, int count) {
