@@ -95,7 +95,16 @@ public class Upgrade extends DefaultPersistManager {
 			}
 		}
 		Commandline cmdline= new Commandline(System.getProperty("java.home") + "/bin/java");
-		cmdline.addArgs("-Xmx" + Runtime.getRuntime().maxMemory()/1024/1024 + "m",  "-classpath", "*", bootstrapClass, 
+		cmdline.addArgs(
+				"-Xmx" + Runtime.getRuntime().maxMemory()/1024/1024 + "m",
+				"-XX:+IgnoreUnrecognizedVMOptions",
+				"--add-opens=java.base/java.lang=ALL-UNNAMED",
+				"--add-opens=java.base/java.util=ALL-UNNAMED",
+				"--add-opens=java.base/java.text=ALL-UNNAMED",
+				"--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+				"--add-opens=java.xml/com.sun.org.apache.xerces.internal.parsers=ALL-UNNAMED",
+				"--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED",
+				"-classpath", "*", bootstrapClass, 
 				command);
 		cmdline.addArgs(commandArgs);
 		cmdline.workingDir(new File(upgradeDir, "boot"));
