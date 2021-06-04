@@ -27,6 +27,7 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
@@ -216,6 +217,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/settings/state-transitions", StateTransitionListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-templates", IssueTemplateListPage.class));
+		
+		add(new DynamicPathPageMapper("administration/settings/${setting}", ContributedAdministrationSettingPage.class));
 		
 		add(new DynamicPathPageMapper("administration/server-log", ServerLogPage.class));
 		add(new DynamicPathPageMapper("administration/server-information", ServerInformationPage.class));

@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import javax.annotation.Nullable;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -77,7 +79,7 @@ public class EditableUtils {
 		if (editable == null) {
 			return null;
 		} else if (element.getAnnotation(Interpolative.class) != null) {
-			String description = editable.description();
+			String description = getDescription(element, editable);
 			if (description.length() != 0) {
 				if (!description.endsWith("."))
 					description += ".";
@@ -86,10 +88,30 @@ public class EditableUtils {
 				description = VariableInterpolator.HELP;
 			}
 			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
-		} else if (editable.description().length() != 0) {
-			return StringUtils.replace(editable.description(), "$docRoot", OneDev.getInstance().getDocRoot());
 		} else {
-			return null;
+			String description = getDescription(element, editable);
+			if (description.length() != 0) 
+				return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
+			else 
+				return null;
+		} 
+	}
+	
+	private static String getDescription(AnnotatedElement element, Editable editable) {
+		String description = editable.description();
+		if (description.length() != 0) {
+			return description;
+		} else if (editable.descriptionProvider().length() != 0) {
+			Class<?> clazz;
+			if (element instanceof Class) 
+				clazz = (Class<?>) element;
+			else if (element instanceof Method)
+				clazz = ((Method) element).getDeclaringClass();
+			else 
+				throw new RuntimeException("Unexpected element type: " + element);
+			return (String) ReflectionUtils.invokeStaticMethod(clazz, editable.descriptionProvider());
+		} else {
+			return "";
 		}
 	}
 

@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager.impl;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -63,6 +64,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     private volatile Long sshSettingId;
     
     private volatile Long ssoConnectorsId;
+    
+    private volatile Long contributedSettingsId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -105,7 +108,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Setting getSetting(Key key) {
 		return find(EntityCriteria.of(Setting.class).add(Restrictions.eq("key", key)));
 	}
-
+	
 	@Sessional
 	@Override
 	public MailSetting getMailSetting() {
@@ -420,6 +423,46 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		}
 		setting.setValue((Serializable) ssoProviders);
 		dao.persist(setting);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<Class<? extends Serializable>, Serializable> getContributedSettings() {
+        Setting setting;
+        if (contributedSettingsId == null) {
+    		setting = getSetting(Key.CONTRIBUTED_SETTINGS);
+    		Preconditions.checkNotNull(setting);
+    		contributedSettingsId = setting.getId();
+        } else {
+            setting = load(contributedSettingsId);
+        }
+        return (Map<Class<? extends Serializable>, Serializable>) setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveContributedSettings(Map<Class<? extends Serializable>, Serializable> contributedSettings) {
+		Setting setting = getSetting(Key.CONTRIBUTED_SETTINGS);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.CONTRIBUTED_SETTINGS);
+		}
+		setting.setValue((Serializable) contributedSettings);
+		dao.persist(setting);
+	}
+ 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Serializable> T getContributedSetting(Class<T> settingClass) {
+		return (T) getContributedSettings().get(settingClass);
+	}
+
+	@Transactional
+	@Override
+	public void saveContributedSetting(Class<? extends Serializable> settingClass, Serializable setting) {
+		Map<Class<? extends Serializable>, Serializable> contributedSettings = getContributedSettings();
+		contributedSettings.put(settingClass, setting);
+		saveContributedSettings(contributedSettings);
 	}
 	
 }

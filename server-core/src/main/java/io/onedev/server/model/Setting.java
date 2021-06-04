@@ -21,7 +21,7 @@ public class Setting extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 
 	public enum Key {SYSTEM, MAIL, BACKUP, SECURITY, AUTHENTICATOR, ISSUE, JOB_EXECUTORS, 
-		GROOVY_SCRIPTS, PULL_REQUEST, BUILD, PROJECT, SSH, SSO_CONNECTORS};
+		GROOVY_SCRIPTS, PULL_REQUEST, BUILD, PROJECT, SSH, SSO_CONNECTORS, CONTRIBUTED_SETTINGS};
 	
 	@Column(nullable=false, unique=true)
 	private Key key;

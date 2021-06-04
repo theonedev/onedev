@@ -2,17 +2,23 @@ package io.onedev.server.model.support.administration.sso;
 
 import java.io.Serializable;
 
+import javax.validation.ConstraintValidatorContext;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
-public abstract class SsoConnector implements Serializable {
+@ClassValidating
+public abstract class SsoConnector implements Serializable, Validatable {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -77,5 +83,22 @@ public abstract class SsoConnector implements Serializable {
 	public abstract void initiateLogin();
 
 	public abstract boolean isManagingMemberships();
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (getName() != null) {
+			for (SsoConnectorContribution contribution: OneDev.getExtensions(SsoConnectorContribution.class)) {
+				for (SsoConnector ssoConnector: contribution.getSsoConnectors()) {
+					if (getName().equalsIgnoreCase(ssoConnector.getName())) {
+						context.disableDefaultConstraintViolation();
+						context.buildConstraintViolationWithTemplate("This name is reserved")
+								.addPropertyNode("name").addConstraintViolation();
+						return false;
+					}
+				}
+			}
+		} 
+		return true;
+	}
 	
 }

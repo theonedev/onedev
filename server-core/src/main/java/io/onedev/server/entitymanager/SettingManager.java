@@ -1,6 +1,8 @@
 package io.onedev.server.entitymanager;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -134,5 +136,14 @@ public interface SettingManager extends EntityManager<Setting> {
     List<SsoConnector> getSsoConnectors();
     
     void saveSsoConnectors(List<SsoConnector> ssoConnectors);
+    
+    Map<Class<? extends Serializable>, Serializable> getContributedSettings();
+    
+    void saveContributedSettings(Map<Class<? extends Serializable>, Serializable> contributedSettings);
+
+    @Nullable
+    <T extends Serializable> T getContributedSetting(Class<T> settingClass);
+    
+    void saveContributedSetting(Class<? extends Serializable> settingClass, @Nullable Serializable setting);
     
 }

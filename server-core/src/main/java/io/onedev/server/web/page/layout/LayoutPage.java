@@ -42,6 +42,7 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.component.user.UserAvatar;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
@@ -56,6 +57,7 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
@@ -152,6 +154,16 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 
 							GroovyScriptListPage.class, new PageParameters()));
 					
+
+					for (AdministrationSettingContribution contribution: 
+							OneDev.getExtensions(AdministrationSettingContribution.class)) {
+						administrationMenuItems.add(new SidebarMenuItem.Page(
+								null, 
+								EditableUtils.getDisplayName(contribution.getSettingClass()), 
+								ContributedAdministrationSettingPage.class, 
+								ContributedAdministrationSettingPage.paramsOf(contribution.getSettingClass())));
+					}
+
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();
 					maintenanceMenuItems.add(new SidebarMenuItem.Page(null, "Database Backup", 
 							DatabaseBackupPage.class, new PageParameters()));

@@ -1,5 +1,8 @@
 package io.onedev.server.web.page.admin.sso;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.RestartResponseException;
@@ -13,6 +16,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
+import io.onedev.server.model.support.administration.sso.SsoConnectorContribution;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.DashboardPage;
 import io.onedev.server.web.page.base.BasePage;
@@ -44,7 +48,12 @@ public class SsoProcessPage extends BasePage {
 		
 		try {
 			String connectorName = params.get(PARAM_CONNECTOR).toString();
-			connector = OneDev.getInstance(SettingManager.class).getSsoConnectors().stream()
+
+			Collection<SsoConnector> connectors = new ArrayList<>();
+			for (SsoConnectorContribution contribution: OneDev.getExtensions(SsoConnectorContribution.class))
+				connectors.addAll(contribution.getSsoConnectors());
+			connectors.addAll(OneDev.getInstance(SettingManager.class).getSsoConnectors());
+			connector = connectors.stream()
 					.filter(it->it.getName().equals(connectorName))
 					.findFirst()
 					.orElse(null);
@@ -76,6 +85,11 @@ public class SsoProcessPage extends BasePage {
 		} catch (AuthenticationException e) {
 			throw new RestartResponseException(new LoginPage(e.getMessage()));
 		}
+	}
+	
+	public static void addParams(PageParameters params, String stage, String connector) {
+		params.add(PARAM_STAGE, stage);
+		params.add(PARAM_CONNECTOR, connector);
 	}
 	
 }

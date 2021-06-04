@@ -309,6 +309,10 @@
 			<artifactId>json</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.github.scribejava</groupId>
+			<artifactId>scribejava-apis</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>k8s-helper</artifactId>
 		</dependency>

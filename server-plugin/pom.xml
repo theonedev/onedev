@@ -28,5 +28,6 @@
    		<module>server-plugin-report-jest</module>
     <module>server-plugin-report-clover</module>
     <module>server-plugin-report-checkstyle</module>
+    <module>server-plugin-github</module>
   </modules>
 </project>
