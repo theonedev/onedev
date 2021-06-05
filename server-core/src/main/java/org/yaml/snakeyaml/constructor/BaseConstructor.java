@@ -27,12 +27,14 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.composer.Composer;
 import org.yaml.snakeyaml.composer.ComposerException;
@@ -82,10 +84,18 @@ public abstract class BaseConstructor {
     private boolean explicitPropertyUtils;
     private boolean allowDuplicateKeys = true;
 
+    private boolean wrappedToRootException = false;
+
     protected final Map<Class<? extends Object>, TypeDescription> typeDefinitions;
     protected final Map<Tag, Class<? extends Object>> typeTags;
 
+    protected LoaderOptions loadingConfig;
+
     public BaseConstructor() {
+        this(new LoaderOptions());
+    }
+
+    public BaseConstructor(LoaderOptions loadingConfig) {
         constructedObjects = new HashMap<Node, Object>();
         recursiveObjects = new HashSet<Node>();
         maps2fill = new ArrayList<RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>>();
@@ -100,6 +110,7 @@ public abstract class BaseConstructor {
                 TreeMap.class));
         typeDefinitions.put(SortedSet.class, new TypeDescription(SortedSet.class, Tag.SET,
                 TreeSet.class));
+        this.loadingConfig = loadingConfig;
     }
 
     public void setComposer(Composer composer) {
@@ -121,9 +132,9 @@ public abstract class BaseConstructor {
      *
      * @return constructed instance
      */
-    public Object getData() {
+    public Object getData() throws NoSuchElementException {
         // Construct and return the next document.
-        composer.checkNode();
+        if (!composer.checkNode()) throw new NoSuchElementException("No document is available.");
         Node node = composer.getNode();
         if (rootTag != null) {
             node.setTag(rootTag);
@@ -140,7 +151,7 @@ public abstract class BaseConstructor {
      */
     public Object getSingleData(Class<?> type) {
         // Ensure that the stream contains a single document and construct it
-        Node node = composer.getSingleNode();
+        final Node node = composer.getSingleNode();
         if (node != null && !Tag.NULL.equals(node.getTag())) {
             if (Object.class != type) {
                 node.setTag(new Tag(type));
@@ -148,8 +159,10 @@ public abstract class BaseConstructor {
                 node.setTag(rootTag);
             }
             return constructDocument(node);
+        } else {
+            Construct construct = yamlConstructors.get(Tag.NULL);
+            return construct.construct(node);
         }
-        return null;
     }
 
     /**
@@ -160,13 +173,26 @@ public abstract class BaseConstructor {
      * @return Java instance
      */
     protected final Object constructDocument(Node node) {
-        Object data = constructObject(node);
-        fillRecursive();
-        constructedObjects.clear();
-        recursiveObjects.clear();
-        return data;
+        try {
+            Object data = constructObject(node);
+            fillRecursive();
+            return data;
+        } catch (RuntimeException e) {
+            if (wrappedToRootException && !(e instanceof YAMLException)) {
+                throw new YAMLException(e);
+            } else {
+                throw e;
+            }
+        } finally {
+            //clean up resources
+            constructedObjects.clear();
+            recursiveObjects.clear();
+        }
     }
 
+    /**
+     * Fill the recursive structures and clean the internal collections
+     */
     private void fillRecursive() {
         if (!maps2fill.isEmpty()) {
             for (RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>> entry : maps2fill) {
@@ -472,19 +498,26 @@ public abstract class BaseConstructor {
             }
             Object value = constructObject(valueNode);
             if (keyNode.isTwoStepsConstruction()) {
-                /*
-                 * if keyObject is created it 2 steps we should postpone putting
-                 * it in map because it may have different hash after
-                 * initialization compared to clean just created one. And map of
-                 * course does not observe key hashCode changes.
-                 */
-                maps2fill.add(0,
-                        new RecursiveTuple<Map<Object, Object>, RecursiveTuple<Object, Object>>(
-                                mapping, new RecursiveTuple<Object, Object>(key, value)));
+                if (loadingConfig.getAllowRecursiveKeys()) {
+                    postponeMapFilling(mapping, key, value);
+                } else {
+                    throw new YAMLException("Recursive key for mapping is detected but it is not configured to be allowed.");
+                }
             } else {
                 mapping.put(key, value);
             }
         }
+    }
+
+    /*
+     * if keyObject is created it 2 steps we should postpone putting
+     * it in map because it may have different hash after
+     * initialization compared to clean just created one. And map of
+     * course does not observe key hashCode changes.
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	protected void postponeMapFilling(Map<Object, Object> mapping, Object key, Object value) {
+        maps2fill.add(0, new RecursiveTuple(mapping, new RecursiveTuple(key, value)));
     }
 
     protected void constructSet2ndStep(MappingNode node, Set<Object> set) {
@@ -501,17 +534,21 @@ public abstract class BaseConstructor {
                 }
             }
             if (keyNode.isTwoStepsConstruction()) {
-                /*
-                 * if keyObject is created it 2 steps we should postpone putting
-                 * it into the set because it may have different hash after
-                 * initialization compared to clean just created one. And set of
-                 * course does not observe value hashCode changes.
-                 */
-                sets2fill.add(0, new RecursiveTuple<Set<Object>, Object>(set, key));
+                postponeSetFilling(set, key);
             } else {
                 set.add(key);
             }
         }
+    }
+
+    /*
+     * if keyObject is created it 2 steps we should postpone putting
+     * it into the set because it may have different hash after
+     * initialization compared to clean just created one. And set of
+     * course does not observe value hashCode changes.
+     */
+    protected void postponeSetFilling(Set<Object> set, Object key) {
+        sets2fill.add(0, new RecursiveTuple<Set<Object>, Object>(set, key));
     }
 
     // <<<< Costruct => NEW, 2ndStep(filling)
@@ -591,5 +628,13 @@ public abstract class BaseConstructor {
 
     public void setAllowDuplicateKeys(boolean allowDuplicateKeys) {
         this.allowDuplicateKeys = allowDuplicateKeys;
+    }
+
+    public boolean isWrappedToRootException() {
+        return wrappedToRootException;
+    }
+
+    public void setWrappedToRootException(boolean wrappedToRootException) {
+        this.wrappedToRootException = wrappedToRootException;
     }
 }
