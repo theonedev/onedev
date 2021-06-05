@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
@@ -42,7 +40,7 @@ public class GitHubSetting implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static String getDescription() {
-		String callbackUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl() + "/" + GitHubCallbackPage.MOUNT_PATH;
+		String callbackUrl = GitHubCallbackPage.getUrl();
 		
 		String copyClipboardScript = String.format("new Clipboard(\"#copy-github-callback-url\", {text: function() {return \"%s\";}});", callbackUrl);
 		return String.format("Register OneDev as an OAuth application in GitHub and you will be able to:"

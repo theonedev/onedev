@@ -299,7 +299,7 @@ public class OpenIdConnector extends SsoConnector {
 		try {
 			ClientID clientID = new ClientID(getClientId());
 			
-			State state = new State(UUID.randomUUID().toString());
+			State state = new State("OIDC-" + UUID.randomUUID().toString());
 			Session.get().setAttribute(SESSION_ATTR_STATE, state.getValue());
 			Session.get().setAttribute(SESSION_ATTR_PROVIDER_METADATA, discoverProviderMetadata());
 			

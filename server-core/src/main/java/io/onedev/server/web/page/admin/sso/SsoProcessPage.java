@@ -12,6 +12,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoAuthenticated;
@@ -64,7 +65,7 @@ public class SsoProcessPage extends BasePage {
 			if (stage.equals(STAGE_INITIATE)) {
 				String redirectUrlAfterLogin;
 				Url url = RestartResponseAtInterceptPageException.getOriginalUrl();
-				if (url != null) 
+				if (url != null && url.toString().length() != 0) 
 					redirectUrlAfterLogin = url.toString();
 				else 
 					redirectUrlAfterLogin = RequestCycle.get().urlFor(DashboardPage.class, new PageParameters()).toString(); 
@@ -75,7 +76,7 @@ public class SsoProcessPage extends BasePage {
 				SsoAuthenticated authenticated = connector.processLoginResponse();
 				
 				String redirectUrlAfterLogin = (String) Session.get().getAttribute(SESSION_ATTR_REDIRECT_URL);
-				if (redirectUrlAfterLogin == null)
+				if (StringUtils.isBlank(redirectUrlAfterLogin))
 					throw new AuthenticationException("unsolicited OIDC authentication response");
 				
 				WebSession.get().login(authenticated);

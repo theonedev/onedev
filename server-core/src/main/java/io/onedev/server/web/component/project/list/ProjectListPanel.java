@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.project.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -40,6 +42,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
@@ -55,12 +58,17 @@ import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
+import io.onedev.server.web.page.project.imports.ProjectImportPage;
+import io.onedev.server.web.page.project.imports.ProjectImporter;
+import io.onedev.server.web.page.project.imports.ProjectImporterContribution;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -269,7 +277,53 @@ public class ProjectListPanel extends Panel {
 		});
 		add(queryForm);
 		
-		add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class));
+		Collection<ProjectImporter> importers = new ArrayList<>();
+		for (ProjectImporterContribution contribution: OneDev.getExtensions(ProjectImporterContribution.class))
+			importers.addAll(contribution.getImporters());
+		
+		if (importers.isEmpty()) {
+			add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class));
+		} else {
+			add(new MenuLink("addProject") {
+
+				@Override
+				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+					List<MenuItem> menuItems = new ArrayList<>();
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "Create New";
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new BookmarkablePageLink<Void>(id, NewProjectPage.class);
+						}
+						
+					});
+					for (ProjectImporter importer: importers) {
+						menuItems.add(new MenuItem() {
+
+							@Override
+							public String getLabel() {
+								return "Import from " + importer.getName();
+							}
+
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+								return new ExternalLink(id, Model.of(serverUrl + "/projects/" + ProjectImportPage.MOUNT_PATH + "/" 
+										+ ProjectImportPage.STAGE_INITIATE + "/" + importer.getName()));
+							}
+							
+						});
+					}
+					return menuItems;
+				}
+				
+			});
+		}
 		
 		SortableDataProvider<Project, Void> dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
 
