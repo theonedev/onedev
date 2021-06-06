@@ -534,11 +534,6 @@
 				<artifactId>jackson-jaxrs-json-provider</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.github.scribejava</groupId>
-				<artifactId>scribejava-apis</artifactId>
-				<version>8.3.1</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>

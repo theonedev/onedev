@@ -47,4 +47,5 @@ public interface StorageManager {
      */
     File getBuildDir(Long projectId, Long buildNumber);
     
+    void deleteProjectDir(Long projectId);
 }

@@ -37,8 +37,14 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 		
 		for (AdministrationSettingContribution contribution: 
 				OneDev.getExtensions(AdministrationSettingContribution.class)) {
-			if (getSettingName(contribution.getSettingClass()).equals(settingName)) 
-				settingClass = contribution.getSettingClass();
+			for (Class<? extends Serializable> each: contribution.getSettingClasses()) {
+				if (getSettingName(each).equals(settingName)) { 
+					settingClass = each;
+					break;
+				}
+			}
+			if (settingClass != null)
+				break;
 		}
 
 		if (settingClass == null)

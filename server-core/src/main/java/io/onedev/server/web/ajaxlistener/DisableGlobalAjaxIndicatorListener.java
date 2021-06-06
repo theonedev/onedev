@@ -3,7 +3,7 @@ package io.onedev.server.web.ajaxlistener;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 
-public class ShowGlobalLoadingIndicatorImmediatelyListener implements IAjaxCallListener {
+public class DisableGlobalAjaxIndicatorListener implements IAjaxCallListener {
 
 	@Override
 	public CharSequence getBeforeHandler(Component component) {
@@ -16,13 +16,10 @@ public class ShowGlobalLoadingIndicatorImmediatelyListener implements IAjaxCallL
 	}
 
 	@Override
-	public CharSequence getBeforeSendHandler(Component component) {
-		return "$('#ajax-loading-indicator').show();";
-	}
-
-	@Override
 	public CharSequence getAfterHandler(Component component) {
-		return null;
+		return ""
+				+ "clearTimeout($('#ajax-loading-indicator')[0].timer);"
+				+ "$('#ajax-loading-indicator')[0].timer = null;";
 	}
 
 	@Override
@@ -47,6 +44,11 @@ public class ShowGlobalLoadingIndicatorImmediatelyListener implements IAjaxCallL
 
 	@Override
 	public CharSequence getDoneHandler(Component component) {
+		return null;
+	}
+
+	@Override
+	public CharSequence getBeforeSendHandler(Component component) {
 		return null;
 	}
 

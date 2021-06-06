@@ -1,30 +1,33 @@
 package io.onedev.server.web.component.taskbutton;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.AbstractAjaxTimerBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.util.time.Duration;
-import org.unbescape.html.HtmlEscape;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
 @SuppressWarnings("serial")
 abstract class TaskFeedbackPanel extends Panel {
 
 	private final String title;
-	
-	private String prevMessages;
 	
 	public TaskFeedbackPanel(String id, String title) {
 		super(id);
@@ -78,37 +81,6 @@ abstract class TaskFeedbackPanel extends Panel {
 			
 		})));
 
-		Component messagesLabel = new Label("messages", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				List<String> messages = getMessages();
-				StringBuilder builder = new StringBuilder();
-				for (String message: messages)
-					builder.append(HtmlEscape.escapeHtml5(message)).append("<br>");
-				return builder.toString();
-			}
-			
-		}) {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				String script = String.format("$('#%s').scrollTop($('#%s')[0].scrollHeight);", 
-						getMarkupId(), getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-
-			@Override
-			protected void onBeforeRender() {
-				prevMessages = getDefaultModelObjectAsString();
-				super.onBeforeRender();
-			}
-			
-		}.setEscapeModelStrings(false).setOutputMarkupId(true);
-		
-		add(messagesLabel);
-
 		Component resultLabel = new Label("result", new LoadableDetachableModel<String>() {
 
 			@Override
@@ -128,17 +100,38 @@ abstract class TaskFeedbackPanel extends Panel {
 		
 		add(resultLabel);
 		
-		add(new AbstractAjaxTimerBehavior(Duration.ONE_SECOND) {
-
+		add(new AbstractPostAjaxBehavior() {
+			
 			@Override
-			protected void onTimer(AjaxRequestTarget target) {
+			protected void respond(AjaxRequestTarget target) {
 				if (getResult() != null) {
 					target.add(closeButton);
 					target.add(resultLabel);
-					stop(target);
 				}
-				if (!messagesLabel.getDefaultModelObjectAsString().equals(prevMessages)) 
-					target.add(messagesLabel);
+				target.appendJavaScript(
+						String.format("onedev.server.taskFeedback.processData('%s', %s, %s);", 
+						getMarkupId(), getCallbackFunction(), getData()));
+			}
+
+			private String getData() {
+				Map<String, Object> data = new HashMap<>();
+				data.put("messages", getMessages());
+				data.put("finished", getResult() != null);
+				
+				try {
+					return OneDev.getInstance(ObjectMapper.class).writeValueAsString(data);
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+			@Override
+			public void renderHead(Component component, IHeaderResponse response) {
+				super.renderHead(component, response);
+				
+				String script = String.format("onedev.server.taskFeedback.processData('%s', %s, %s);", 
+						getMarkupId(), getCallbackFunction(), getData());
+				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
 		});
@@ -147,7 +140,7 @@ abstract class TaskFeedbackPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new TaskFeedbackCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new TaskFeedbackResourceReference()));
 	}
 
 	protected abstract void onClose(AjaxRequestTarget target);

@@ -1,7 +1,13 @@
 <wicket:extend>
 	<div class="project-import card m-2 m-sm-5">
 		<div class="card-body">
-			<div wicket:id="content"></div>
+			<form wicket:id="form">
+				<div wicket:id="feedback"></div>
+				<div wicket:id="editor"></div>
+				<input wicket:id="next" type="submit" class="btn btn-primary" value="Next">
+				<input wicket:id="import" type="submit" class="btn btn-primary mr-1" value="Import">
+				<input wicket:id="dryRun" type="submit" class="btn btn-light-primary" value="Dry Run">
+			</form>
 		</div>
 	</div>
 </wicket:extend>

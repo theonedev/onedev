@@ -72,7 +72,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-github</artifactId>
+			<artifactId>server-plugin-import-github</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

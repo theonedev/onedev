@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -35,6 +36,8 @@ public class Milestone extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_DESCRIPTION_LEN = 15000;
+	
 	public static final String PROP_ID = "id";
 	
 	public static final String PROP_PROJECT = "project";
@@ -52,6 +55,7 @@ public class Milestone extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 	
+	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
 	
 	private Date dueDate;
@@ -86,7 +90,7 @@ public class Milestone extends AbstractEntity {
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 
 	@Editable(order=300, description="Optionally specify due date of the milestone")

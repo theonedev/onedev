@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.layout;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -157,11 +158,13 @@ public abstract class LayoutPage extends BasePage {
 
 					for (AdministrationSettingContribution contribution: 
 							OneDev.getExtensions(AdministrationSettingContribution.class)) {
-						administrationMenuItems.add(new SidebarMenuItem.Page(
-								null, 
-								EditableUtils.getDisplayName(contribution.getSettingClass()), 
-								ContributedAdministrationSettingPage.class, 
-								ContributedAdministrationSettingPage.paramsOf(contribution.getSettingClass())));
+						for (Class<? extends Serializable> settingClass: contribution.getSettingClasses()) {
+							administrationMenuItems.add(new SidebarMenuItem.Page(
+									null, 
+									EditableUtils.getDisplayName(settingClass), 
+									ContributedAdministrationSettingPage.class, 
+									ContributedAdministrationSettingPage.paramsOf(settingClass)));
+						}
 					}
 
 					List<SidebarMenuItem> maintenanceMenuItems = new ArrayList<>();

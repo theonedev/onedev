@@ -30,7 +30,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ChangeTextListener;
-import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.ajaxlistener.SelfDisableListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValueResolution.FixType;
@@ -74,7 +74,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 			}
 
 			@Override
@@ -127,7 +127,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+							attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 							attributes.getAjaxCallListeners().add(new SelfDisableListener());
 							attributes.getAjaxCallListeners().add(new ChangeTextListener("Fixing..."));
 						}
@@ -165,7 +165,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 			}
 
 			@Override
@@ -216,7 +216,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+							attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 							attributes.getAjaxCallListeners().add(new SelfDisableListener());
 							attributes.getAjaxCallListeners().add(new ChangeTextListener("Fixing..."));
 						}
@@ -254,7 +254,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 			}
 
 			@Override
@@ -305,7 +305,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+							attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 							attributes.getAjaxCallListeners().add(new SelfDisableListener());
 							attributes.getAjaxCallListeners().add(new ChangeTextListener("Fixing..."));
 						}

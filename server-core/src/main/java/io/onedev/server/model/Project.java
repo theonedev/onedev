@@ -136,6 +136,8 @@ public class Project extends AbstractEntity implements NameAware {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final int MAX_DESCRIPTION_LEN = 15000;
+	
 	public static final String NAME_NAME = "Name";
 	
 	public static final String PROP_NAME = "name";
@@ -191,7 +193,7 @@ public class Project extends AbstractEntity implements NameAware {
 	@Column(nullable=false, unique=true)
 	private String name;
 	
-	@Column(length=15000)
+	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
 	
     @OneToMany(mappedBy="project")
@@ -340,7 +342,7 @@ public class Project extends AbstractEntity implements NameAware {
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 
 	public ArrayList<BranchProtection> getBranchProtections() {

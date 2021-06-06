@@ -231,14 +231,16 @@ public class DefaultDataManager implements DataManager, Serializable {
 		
 		Collection<Class<? extends Serializable>> contributedSettingClasses = new HashSet<>();
 		for (AdministrationSettingContribution contribution: administrationSettingContributions) {
-			contributedSettingClasses.add(contribution.getSettingClass());
-			if (contributedSettings.get(contribution.getSettingClass()) == null) {
-				try {
-					Serializable contributedSetting = contribution.getSettingClass().newInstance();
-					if (validator.validate(contributedSetting).isEmpty()) 
-						contributedSettings.put(contribution.getSettingClass(), contributedSetting);
-				} catch (InstantiationException | IllegalAccessException e) {
-					throw new RuntimeException(e);
+			contributedSettingClasses.addAll(contribution.getSettingClasses());
+			for (Class<? extends Serializable> settingClass: contribution.getSettingClasses()) {
+				if (contributedSettings.get(settingClass) == null) {
+					try {
+						Serializable contributedSetting = settingClass.newInstance();
+						if (validator.validate(contributedSetting).isEmpty()) 
+							contributedSettings.put(settingClass, contributedSetting);
+					} catch (InstantiationException | IllegalAccessException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 		}

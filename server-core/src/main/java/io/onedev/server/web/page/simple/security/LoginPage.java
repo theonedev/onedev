@@ -3,9 +3,6 @@ package io.onedev.server.web.page.simple.security;
 import static io.onedev.server.web.page.admin.sso.SsoProcessPage.MOUNT_PATH;
 import static io.onedev.server.web.page.admin.sso.SsoProcessPage.STAGE_INITIATE;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.IncorrectCredentialsException;
@@ -30,7 +27,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
-import io.onedev.server.model.support.administration.sso.SsoConnectorContribution;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.simple.SimpleCssResourceReference;
@@ -161,19 +157,15 @@ public class LoginPage extends SimplePage {
 
 		String serverUrl = settingManager.getSystemSetting().getServerUrl();
 		
-		List<SsoConnector> ssoConnectors = new ArrayList<>(settingManager.getSsoConnectors());
-		for (SsoConnectorContribution contribution: OneDev.getExtensions(SsoConnectorContribution.class)) 
-			ssoConnectors.addAll(contribution.getSsoConnectors());
-		
 		RepeatingView ssoButtonsView = new RepeatingView("ssoButtons");
-		for (SsoConnector connector: ssoConnectors) {
+		for (SsoConnector connector: settingManager.getSsoConnectors()) {
 			ExternalLink ssoButton = new ExternalLink(ssoButtonsView.newChildId(), 
 					Model.of(serverUrl + "/" + MOUNT_PATH + "/" + STAGE_INITIATE + "/" + connector.getName()));
 			ssoButton.add(new ExternalImage("image", connector.getButtonImageUrl()));
 			ssoButton.add(new Label("label", "Login with " + connector.getName()));
 			ssoButtonsView.add(ssoButton);
 		}
-		add(ssoButtonsView.setVisible(!ssoConnectors.isEmpty()));
+		add(ssoButtonsView.setVisible(!settingManager.getSsoConnectors().isEmpty()));
 	}
 
 	@Override

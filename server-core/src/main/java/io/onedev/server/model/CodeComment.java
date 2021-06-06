@@ -23,6 +23,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
@@ -44,6 +45,8 @@ import io.onedev.server.util.CollectionUtils;
 public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final int MAX_CONTENT_LEN = 14000;
 	
 	public static final String PROP_PROJECT = "project";
 	
@@ -95,7 +98,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	private String userName;
 
-	@Column(nullable=false, length=14000)
+	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
 	
 	@Column(nullable=false)
@@ -163,7 +166,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	}
 	
 	public void setContent(String content) {
-		this.content = content;
+		this.content = StringUtils.abbreviate(content, MAX_CONTENT_LEN);
 	}
 
 	public Date getCreateDate() {

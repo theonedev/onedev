@@ -288,6 +288,7 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
@@ -511,6 +512,15 @@ public class CoreModule extends AbstractPluginModule {
 			}
 			
 		});
+		contribute(AdministrationSettingContribution.class, new AdministrationSettingContribution() {
+			
+			@Override
+			public List<Class<? extends Serializable>> getSettingClasses() {
+				return new ArrayList<>();
+			}
+			
+		});
+		
 	}
 	
 	private void configureSsh() {

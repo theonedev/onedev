@@ -76,7 +76,7 @@ import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
@@ -788,7 +788,7 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 			}
 
 			@Override

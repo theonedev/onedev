@@ -11,11 +11,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
+
 @Entity
 @Table(indexes={@Index(columnList="o_comment_id"), @Index(columnList="o_user_id")})
 public class CodeCommentReply extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
+	
+	public static final int MAX_CONTENT_LEN = 14000;
 	
 	public static final String PROP_CONTENT = "content";
 	
@@ -32,7 +36,7 @@ public class CodeCommentReply extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
-	@Column(nullable=false, length=14000)
+	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
 	
 	public CodeComment getComment() {
@@ -78,7 +82,7 @@ public class CodeCommentReply extends AbstractEntity {
 	}
 
 	public void setContent(String content) {
-		this.content = content;
+		this.content = StringUtils.abbreviate(content, MAX_CONTENT_LEN);
 	}
 
 }

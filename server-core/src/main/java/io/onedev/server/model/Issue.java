@@ -87,6 +87,10 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class Issue extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final int MAX_TITLE_LEN = 255;
+	
+	public static final int MAX_DESCRIPTION_LEN = 14000;
 
 	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
@@ -165,10 +169,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@Column(nullable=false)
 	private String state;
 	
-	@Column(nullable=false)
+	@Column(nullable=false, length=MAX_TITLE_LEN)
 	private String title;
 	
-	@Column(length=14000)
+	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -188,7 +192,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private String submitterName;
 	
 	@Column(nullable=false)
-	private Date submitDate;
+	private Date submitDate = new Date();
 	
 	private int voteCount;
 	
@@ -243,8 +247,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 
 	public void setTitle(String title) {
-		this.title = title;
-		noSpaceTitle = StringUtils.deleteWhitespace(title);
+		this.title = StringUtils.abbreviate(title, MAX_TITLE_LEN);
+		noSpaceTitle = StringUtils.deleteWhitespace(this.title);
 	}
 
 	public String getDescription() {
@@ -252,7 +256,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 
 	public Project getNumberScope() {
@@ -313,6 +317,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@Nullable
 	public String getSubmitterName() {
 		return submitterName;
+	}
+	
+	public void setSubmitterName(String submitterName) {
+		this.submitterName = submitterName;
 	}
 
 	public Date getSubmitDate() {

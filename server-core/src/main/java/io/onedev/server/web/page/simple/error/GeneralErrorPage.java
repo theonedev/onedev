@@ -29,7 +29,7 @@ public class GeneralErrorPage extends SimplePage {
 	public GeneralErrorPage(Exception exception) {
 		super(new PageParameters());
 		
-		String title = ExceptionUtils.getExpectedError(exception);
+		title = ExceptionUtils.getExpectedError(exception);
 		if (title == null) {
 			title = "An unexpected exception occurred";
 			detailMessage = Throwables.getStackTraceAsString(exception);

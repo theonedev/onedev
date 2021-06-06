@@ -95,6 +95,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final int MAX_TITLE_LEN = 255;
+	
+	public static final int MAX_DESCRIPTION_LEN = 12000;
+	
 	public static final String PROP_NUMBER_SCOPE = "numberScope";
 	
 	public static final String NAME_NUMBER = "Number";
@@ -208,11 +212,11 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private CloseInfo closeInfo;
 
 	@Api(order=100)
-	@Column(nullable=false)
+	@Column(nullable=false, length=MAX_TITLE_LEN)
 	@OptimisticLock(excluded=true)
 	private String title;
 	
-	@Column(length=12000)
+	@Column(length=MAX_DESCRIPTION_LEN)
 	@OptimisticLock(excluded=true)
 	private String description;
 	
@@ -341,8 +345,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 
 	public void setTitle(String title) {
-		this.title = title;
-		noSpaceTitle = StringUtils.deleteWhitespace(title);
+		this.title = StringUtils.abbreviate(title, MAX_TITLE_LEN);
+		noSpaceTitle = StringUtils.deleteWhitespace(this.title);
 	}
 
 	public String getDescription() {
@@ -350,7 +354,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 
 	public void setDescription(String description) {
-		this.description = description;
+		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
 	}
 	
 	/**

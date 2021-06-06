@@ -58,7 +58,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
-import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
+import io.onedev.server.web.ajaxlistener.AppendAjaxIndicatorListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -199,7 +199,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AppendLoadingIndicatorListener(false));
+				attributes.getAjaxCallListeners().add(new AppendAjaxIndicatorListener(false));
 			}
 
 			@Override

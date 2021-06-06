@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
+
 @Entity
 @Table(indexes={
 		@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")})
@@ -17,6 +19,8 @@ public class IssueComment extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_CONTENT_LEN = 15000;
+	
 	public static final String PATH_CONTENT = "content";
 	
 	@ManyToOne
@@ -30,9 +34,9 @@ public class IssueComment extends AbstractEntity {
 	private String userName;
 	
 	@Column(nullable=false)
-	private Date date;
+	private Date date = new Date();
 	
-	@Column(nullable=false, length=15000)
+	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
 
 	public Issue getIssue() {
@@ -72,7 +76,7 @@ public class IssueComment extends AbstractEntity {
 	}
 
 	public void setContent(String content) {
-		this.content = content;
+		this.content = StringUtils.abbreviate(content, MAX_CONTENT_LEN);
 	}
 
 	public String getAnchor() {

@@ -26,8 +26,8 @@
 	    <module>server-plugin-sso-openid</module>
     	<module>server-plugin-report-markdown</module>
    		<module>server-plugin-report-jest</module>
-    <module>server-plugin-report-clover</module>
-    <module>server-plugin-report-checkstyle</module>
-    <module>server-plugin-github</module>
+	    <module>server-plugin-report-clover</module>
+	    <module>server-plugin-report-checkstyle</module>
+	    <module>server-plugin-import-github</module>
   </modules>
 </project>

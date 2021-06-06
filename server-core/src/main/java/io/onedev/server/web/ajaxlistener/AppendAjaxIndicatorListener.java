@@ -10,11 +10,11 @@ import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.svg.SpriteImage;
 
-public class AppendLoadingIndicatorListener implements IAjaxCallListener {
+public class AppendAjaxIndicatorListener implements IAjaxCallListener {
 
 	private final boolean indicateSuccessful;
 	
-	public AppendLoadingIndicatorListener(boolean indicateSuccessful) {
+	public AppendAjaxIndicatorListener(boolean indicateSuccessful) {
 		this.indicateSuccessful = indicateSuccessful;
 	}
 	

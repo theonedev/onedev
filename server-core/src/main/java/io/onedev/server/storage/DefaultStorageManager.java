@@ -136,6 +136,14 @@ public class DefaultStorageManager implements StorageManager {
 			
 		});
 	}
+	
+	public void deleteProjectDir(Long projectId) {
+		try {
+			new File(getProjectDir(projectId), DELETE_MARK).createNewFile();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
     private File getUsersDir() {
     	File usersDir = new File(Bootstrap.getSiteDir(), "users");

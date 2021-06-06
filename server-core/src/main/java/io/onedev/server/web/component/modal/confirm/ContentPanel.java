@@ -43,7 +43,7 @@ abstract class ContentPanel extends Panel {
 				return getConfirmMessage();
 			}
 			
-		}));
+		}).setEscapeModelStrings(false));
 
 		add(new FencedFeedbackPanel("feedback", this).setEscapeModelStrings(false));
 		

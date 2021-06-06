@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.project.list;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,7 +31,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -42,7 +42,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
@@ -277,7 +276,7 @@ public class ProjectListPanel extends Panel {
 		});
 		add(queryForm);
 		
-		Collection<ProjectImporter> importers = new ArrayList<>();
+		Collection<ProjectImporter<? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
 		for (ProjectImporterContribution contribution: OneDev.getExtensions(ProjectImporterContribution.class))
 			importers.addAll(contribution.getImporters());
 		
@@ -302,7 +301,7 @@ public class ProjectListPanel extends Panel {
 						}
 						
 					});
-					for (ProjectImporter importer: importers) {
+					for (ProjectImporter<? extends Serializable, ? extends Serializable> importer: importers) {
 						menuItems.add(new MenuItem() {
 
 							@Override
@@ -312,9 +311,8 @@ public class ProjectListPanel extends Panel {
 
 							@Override
 							public WebMarkupContainer newLink(String id) {
-								String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
-								return new ExternalLink(id, Model.of(serverUrl + "/projects/" + ProjectImportPage.MOUNT_PATH + "/" 
-										+ ProjectImportPage.STAGE_INITIATE + "/" + importer.getName()));
+								return new BookmarkablePageLink<Void>(id, ProjectImportPage.class, 
+										ProjectImportPage.paramsOf(importer.getName()));
 							}
 							
 						});

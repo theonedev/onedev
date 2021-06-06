@@ -28,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.WordUtils;
@@ -65,12 +63,17 @@ public abstract class TaskButton extends AjaxButton {
 		return TaskFutureManager.taskFutures;
 	}
 	
+	protected String getTitle() {
+		return WordUtils.uncamel(getId());
+	}
+	
 	protected void submitTask(AjaxRequestTarget target) {
 		String path = getPath();
-		String title = WordUtils.uncamel(getId()).toLowerCase();
+		String title = getTitle().toLowerCase();
 		
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
-		List<String> messages = Lists.newArrayList("Please wait...");
+		List<String> messages = new ArrayList<>();
+		messages.add("Please wait...");
 		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<String>() {
 
 			@Override
@@ -78,8 +81,8 @@ public abstract class TaskButton extends AjaxButton {
 				String result;
 				try {
 					result = String.format(
-						"<div class='task-result text-break alert alert-light-success'>%s</div>", 
-						HtmlEscape.escapeHtml5(runTask(new SimpleLogger() {
+						"<div class='task-result text-break alert alert-light-info'>%s</div>", 
+						runTask(new SimpleLogger() {
 
 							@Override
 							public void log(String message) {
@@ -88,7 +91,7 @@ public abstract class TaskButton extends AjaxButton {
 								}
 							}
 							
-						})));					
+						}));					
 				} catch (Exception e) {	
 					logger.error("Error " + title, e);
 					String suggestedSolution = ExceptionUtils.suggestSolution(e);
@@ -101,8 +104,8 @@ public abstract class TaskButton extends AjaxButton {
 					result = String.format(
 							"<div class='task-result text-break alert alert-light-danger'>%s</div>", 
 							HtmlEscape.escapeHtml5(result));					
+					result = StringUtils.replace(result, "\n", "<br>");
 				} 
-				result = StringUtils.replace(result, "\n", "<br>");
 				return result;
 			}
 			
@@ -119,6 +122,11 @@ public abstract class TaskButton extends AjaxButton {
 				Future<?> future = getTaskFutures().remove(path);
 				if (future != null && !future.isDone())
 					future.cancel(true);
+			}
+
+			@Override
+			protected String getCssClass() {
+				return "modal-lg";
 			}
 
 			@Override
@@ -163,9 +171,14 @@ public abstract class TaskButton extends AjaxButton {
 	protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		super.onSubmit(target, form);
 		target.focusComponent(null);
+		target.add(form);
 		submitTask(target);
 	}
 	
+	/**
+	 * @param logger
+	 * @return html display to user showing task execution result
+	 */
 	protected abstract String runTask(SimpleLogger logger);
 
 	@Singleton
@@ -206,18 +219,18 @@ public abstract class TaskButton extends AjaxButton {
 
 		@Override
 		public ScheduleBuilder<?> getScheduleBuilder() {
-			return SimpleScheduleBuilder.repeatHourlyForever();
+			return SimpleScheduleBuilder.repeatMinutelyForever();
 		}
 		
 	}
 	
 	private static class TaskFuture implements Future<String> {
 
-		private final Date timestamp = new Date();
-		
 		private final Future<String> wrapped;
 		
 		private final List<String> messages;
+		
+		private volatile Date lastActive = new Date();
 		
 		public TaskFuture(Future<String> wrapped, List<String> messages) {
 			this.wrapped = wrapped;
@@ -240,7 +253,7 @@ public abstract class TaskButton extends AjaxButton {
 		}
 		
 		public boolean isTimedout() {
-			return timestamp.before(new DateTime().minusHours(1).toDate());
+			return lastActive.before(new DateTime().minusMinutes(1).toDate());
 		}
 
 		@Override
@@ -255,8 +268,11 @@ public abstract class TaskButton extends AjaxButton {
 		}
 		
 		public List<String> getMessages() {
+			lastActive = new Date();
 			synchronized (messages) {
-				return new ArrayList<>(messages);
+				List<String> copy = new ArrayList<>(messages);
+				messages.clear();
+				return copy;
 			}
 		}
 		

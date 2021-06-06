@@ -11,12 +11,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
+
 @Entity
 @Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")})
 public class PullRequestComment extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_CONTENT_LEN = 14000;
+	
 	public static final int DIFF_CONTEXT_SIZE = 3;
 	
 	public static final String PROP_CONTENT = "content";
@@ -31,7 +35,7 @@ public class PullRequestComment extends AbstractEntity {
 	
 	private String userName;
 	
-	@Column(nullable=false, length=14000)
+	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
 	
 	@Column(nullable=false)
@@ -68,7 +72,7 @@ public class PullRequestComment extends AbstractEntity {
 	}
 
 	public void setContent(String content) {
-		this.content = content;
+		this.content = StringUtils.abbreviate(content, MAX_CONTENT_LEN);
 	}
 
 	public Date getDate() {

@@ -43,7 +43,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.server.web.ajaxlistener.DisableGlobalAjaxIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
@@ -234,7 +234,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
+				attributes.getAjaxCallListeners().add(new DisableGlobalAjaxIndicatorListener());
 			}
 
 			@Override

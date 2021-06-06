@@ -228,8 +228,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 	private void addProjectPages() {
 		add(new DynamicPathPageMapper("projects", ProjectListPage.class));
 		add(new DynamicPathPageMapper("projects/new", NewProjectPage.class));
-		add(new DynamicPathPageMapper("projects/" + ProjectImportPage.MOUNT_PATH + "/${stage}/${importer}", 
-				ProjectImportPage.class));
+		add(new DynamicPathPageMapper("projects/import/${importer}", ProjectImportPage.class));
 		add(new DynamicPathPageMapper("projects/${project}", ProjectDashboardPage.class));
 
 		add(new DynamicPathPageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class));

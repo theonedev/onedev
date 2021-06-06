@@ -318,7 +318,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		if (named != null) {
 			for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
 				if (propertyEditor.getDescriptor().getPropertyName().equals(named.getName())) {
-					error(pathInProperty, errorMessage);
+					propertyEditor.error(pathInProperty, errorMessage);
 					break;
 				}
 			}
