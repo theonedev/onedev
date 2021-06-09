@@ -26,7 +26,11 @@ public class JerseyApplication extends ResourceConfig {
                 getConfiguration().getRuntimeType());
         property(disableMoxy, true);
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
-
+        
+        // Add this in order to send build log entries as soon as possible in 
+        // KubernetesResource.runServerStep
+        property(ServerProperties.OUTBOUND_CONTENT_LENGTH_BUFFER, 0);
+        
         // add the default Jackson exception mappers
         register(JacksonFeature.class);
         

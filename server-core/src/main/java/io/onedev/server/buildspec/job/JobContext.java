@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec.job;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,8 @@ public abstract class JobContext {
 	private final Collection<String> allocatedCaches = new HashSet<>();
 	
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
+	
+	protected final Collection<Thread> serverStepThreads = new ArrayList<>();
 	
 	public JobContext(String projectName, Long buildNumber, File projectGitDir, 
 			List<Action> actions, String cpuRequirement, String memoryRequirement, 
@@ -116,14 +119,36 @@ public abstract class JobContext {
 	public Map<String, Integer> getCacheCounts() {
 		return cacheCounts;
 	}
-
+	
 	public abstract void notifyJobRunning();
 	
 	public abstract void reportJobWorkspace(String jobWorkspace);
 	
-	public abstract Map<String, byte[]> runServerStep(List<Integer> stepPosition, 
+	public Map<String, byte[]> runServerStep(List<Integer> stepPosition, 
+			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger) {
+		Thread thread = Thread.currentThread();
+		synchronized (serverStepThreads) {
+			serverStepThreads.add(thread);
+		}
+		try {
+			return doRunServerStep(stepPosition, filesDir, placeholderValues, logger);
+		} finally {
+			synchronized (serverStepThreads) {
+				serverStepThreads.remove(thread);
+			}
+		}
+	}
+	
+	protected abstract Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, 
 			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger);
 	
 	public abstract void copyDependencies(File targetDir);
+	
+	public void onJobFinished() {
+		synchronized (serverStepThreads) {
+			for (Thread thread: serverStepThreads)
+				thread.interrupt();
+		}
+	}
 	
 }

@@ -32,7 +32,6 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang.SerializationUtils;
 
 import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ExplicitException;
@@ -41,12 +40,11 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
-import io.onedev.k8shelper.ServerExecutionResult;
+import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.SimpleLogger;
 
 @Api(internal=true)
@@ -105,41 +103,54 @@ public class KubernetesResource {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@POST
 	public Response runServerStep(InputStream is) {
-		File filesDir = FileUtils.createTempDir();
-		try {
-			int length = readInt(is);
-			List<Integer> stepPosition = new ArrayList<>();
-			for (int i=0; i<length; i++) 
-				stepPosition.add(readInt(is));
-			
-			Map<String, String> placeholderValues = new HashMap<>();
-			length = readInt(is);
-			for (int i=0; i<length; i++) 
-				placeholderValues.put(readString(is), readString(is));
-			
-			TarUtils.untar(is, filesDir);
-			
-			List<String> logMessages = new ArrayList<>();
-			Map<String, byte[]> outputFiles = jobManager.runServerStep(getJobToken(), stepPosition, 
-					filesDir, placeholderValues, new SimpleLogger() {
+		StreamingOutput os = new StreamingOutput() {
 
-				@Override
-				public void log(String message) {
-					logMessages.add(message);
-				}
-				
-			});
-			
-			ServerExecutionResult result = new ServerExecutionResult(logMessages, outputFiles);
-			return Response.ok(SerializationUtils.serialize(result)).build();
-		} catch (Exception e) {
-			String errorMessage = ExceptionUtils.getExpectedError(e);
-			if (errorMessage == null)
-				errorMessage = Throwables.getStackTraceAsString(e);
-			return Response.serverError().entity(errorMessage).build();
-		} finally {
-			FileUtils.deleteDir(filesDir);
-		}
+			@Override
+		   public void write(OutputStream output) throws IOException {
+				File filesDir = FileUtils.createTempDir();
+				try {
+					int length = readInt(is);
+					List<Integer> stepPosition = new ArrayList<>();
+					for (int i=0; i<length; i++) 
+						stepPosition.add(readInt(is));
+					
+					Map<String, String> placeholderValues = new HashMap<>();
+					length = readInt(is);
+					for (int i=0; i<length; i++) 
+						placeholderValues.put(readString(is), readString(is));
+					
+					TarUtils.untar(is, filesDir);
+					
+					Map<String, byte[]> outputFiles = jobManager.runServerStep(getJobToken(), stepPosition, 
+							filesDir, placeholderValues, new SimpleLogger() {
+
+						@Override
+						public void log(String message) {
+							// While testing, ngrok.io buffers response and build can not get log entries 
+							// timely. This won't happen on pagekite however
+							KubernetesHelper.writeInt(output, 1);
+							KubernetesHelper.writeString(output, message);
+							try {
+								output.flush();
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+						
+					});
+					if (outputFiles == null)
+						outputFiles = new HashMap<>();
+					byte[] bytes = SerializationUtils.serialize((Serializable) outputFiles); 
+					KubernetesHelper.writeInt(output, 2);
+					KubernetesHelper.writeInt(output, bytes.length);
+					output.write(bytes);
+				} finally {
+					FileUtils.deleteDir(filesDir);
+				}						
+		   }				   
+		   
+		};
+		return Response.ok(os).build();
 	}
 	
 	@Path("/download-dependencies")

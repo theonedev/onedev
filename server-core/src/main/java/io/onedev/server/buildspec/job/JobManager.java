@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.k8shelper.CacheInstance;
@@ -31,6 +33,7 @@ public interface JobManager {
 	
 	void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances);
 	
+	@Nullable
 	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
 			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger);
 	

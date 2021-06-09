@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 public class JobExecution {
 
 	private final Future<?> future;
-	
+
 	private final long timeout;
 	
 	private volatile long beginTime;
