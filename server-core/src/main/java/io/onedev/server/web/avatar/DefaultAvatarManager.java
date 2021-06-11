@@ -26,6 +26,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 
 @Singleton
@@ -60,7 +61,7 @@ public class DefaultAvatarManager implements AvatarManager {
 			return AVATARS_BASE_URL + "onedev.png";
 		} else {
 			User user = OneDev.getInstance(UserManager.class).load(userId);
-			File uploadedFile = getUploaded(user);
+			File uploadedFile = getUploaded(new UserFacade(user));
 			if (uploadedFile.exists())
 				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
 			if (settingManager.getSystemSetting().isGravatarEnabled())
@@ -79,16 +80,22 @@ public class DefaultAvatarManager implements AvatarManager {
 			else  
 				return AVATARS_BASE_URL + "user.png";
 		} else {
-			User user = userManager.findByEmail(personIdent.getEmailAddress());
+			UserFacade user = userManager.findFacadeByEmail(personIdent.getEmailAddress());
 			if (user != null) {
 				File uploadedFile = getUploaded(user);
 				if (uploadedFile.exists())
 					return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
+				
+				if (settingManager.getSystemSetting().isGravatarEnabled())
+					return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
+				else 
+					return generateAvatar(user.getDisplayName(), user.getEmail());
+			} else {
+				if (settingManager.getSystemSetting().isGravatarEnabled())
+					return Gravatar.getURL(personIdent.getEmailAddress(), GRAVATAR_SIZE);
+				else 
+					return generateAvatar(personIdent.getName(), personIdent.getEmailAddress());
 			}
-			if (settingManager.getSystemSetting().isGravatarEnabled())
-				return Gravatar.getURL(personIdent.getEmailAddress(), GRAVATAR_SIZE);
-			else 
-				return generateAvatar(personIdent.getName(), personIdent.getEmailAddress());
 		}
 	}
 	
@@ -135,7 +142,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 	
 	@Override
-	public File getUploaded(User user) {
+	public File getUploaded(UserFacade user) {
 		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/users/" + user.getId() + ".jpg");
 	}
 
@@ -145,7 +152,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		Lock avatarLock = LockUtils.getLock("uploaded-user-avatar:" + user.getId());
 		avatarLock.lock();
 		try {
-			File avatarFile = getUploaded(user);
+			File avatarFile = getUploaded(new UserFacade(user));
 			FileUtils.createDir(avatarFile.getParentFile());
 			AvatarUploadField.writeToFile(avatarFile, avatarData);
 		} finally {

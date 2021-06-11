@@ -123,7 +123,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (administrator == null) {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
-			Set<String> excludedProperties = Sets.newHashSet("administrator", "canCreateProjects"); 
+			Set<String> excludedProperties = Sets.newHashSet(User.PROP_ALTERNATE_EMAILS); 
 			manualConfigs.add(new ManualConfig("Create Administrator Account", null, administrator, excludedProperties) {
 
 				@Override

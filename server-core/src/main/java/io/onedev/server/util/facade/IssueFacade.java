@@ -1,5 +1,7 @@
 package io.onedev.server.util.facade;
 
+import io.onedev.server.model.Issue;
+
 public class IssueFacade extends EntityFacade {
 	
 	private static final long serialVersionUID = 1L;
@@ -14,6 +16,10 @@ public class IssueFacade extends EntityFacade {
 		this.number = number;
 	}
 
+	public IssueFacade(Issue issue) {
+		this(issue.getId(), issue.getProject().getId(), issue.getNumber());
+	}
+	
 	public Long getProjectId() {
 		return projectId;
 	}

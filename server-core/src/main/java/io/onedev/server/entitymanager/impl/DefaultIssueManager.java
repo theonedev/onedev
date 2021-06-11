@@ -104,9 +104,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final RoleManager roleManager;
 	
-	private final Map<Long, IssueFacade> issues = new HashMap<>();
+	private final Map<Long, IssueFacade> cache = new HashMap<>();
 	
-	private final ReadWriteLock issuesLock = new ReentrantReadWriteLock();
+	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, 
@@ -133,7 +133,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		Query<?> query = dao.getSession().createQuery("select id, project.id, number from Issue");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long issueId = (Long) fields[0];
-			issues.put(issueId, new IssueFacade(issueId, (Long)fields[1], (Long)fields[2]));
+			cache.put(issueId, new IssueFacade(issueId, (Long)fields[1], (Long)fields[2]));
 		}
 	}
 	
@@ -189,11 +189,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 			@Override
 			public void run() {
-				issuesLock.writeLock().lock();
+				cacheLock.writeLock().lock();
 				try {
-					issues.put(facade.getId(), facade);
+					cache.put(facade.getId(), facade);
 				} finally {
-					issuesLock.writeLock().unlock();
+					cacheLock.writeLock().unlock();
 				}
 			}
 			
@@ -656,11 +656,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 			@Override
 			public void run() {
-				issuesLock.writeLock().lock();
+				cacheLock.writeLock().lock();
 				try {
-					issues.remove(issueId);
+					cache.remove(issueId);
 				} finally {
-					issuesLock.writeLock().unlock();
+					cacheLock.writeLock().unlock();
 				}
 			}
 		});
@@ -675,15 +675,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 				@Override
 				public void run() {
-					issuesLock.writeLock().lock();
+					cacheLock.writeLock().lock();
 					try {
-						for (Iterator<Map.Entry<Long, IssueFacade>> it = issues.entrySet().iterator(); it.hasNext();) {
+						for (Iterator<Map.Entry<Long, IssueFacade>> it = cache.entrySet().iterator(); it.hasNext();) {
 							IssueFacade issue = it.next().getValue();
 							if (issue.getProjectId().equals(projectId))
 								it.remove();
 						}
 					} finally {
-						issuesLock.writeLock().unlock();
+						cacheLock.writeLock().unlock();
 					}
 				}
 			});
@@ -692,16 +692,16 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Override
 	public Collection<Long> getIssueNumbers(Long projectId) {
-		issuesLock.readLock().lock();
+		cacheLock.readLock().lock();
 		try {
 			Collection<Long> issueNumbers = new HashSet<>();
-			for (IssueFacade issue: issues.values()) {
+			for (IssueFacade issue: cache.values()) {
 				if (projectId.equals(issue.getProjectId()))
 					issueNumbers.add(issue.getNumber());
 			}
 			return issueNumbers;
 		} finally {
-			issuesLock.readLock().unlock();
+			cacheLock.readLock().unlock();
 		}
 	}
 

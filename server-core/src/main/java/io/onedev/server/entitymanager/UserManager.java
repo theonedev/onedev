@@ -10,6 +10,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.util.facade.UserFacade;
 
 public interface UserManager extends EntityManager<User> {
 	
@@ -73,6 +74,9 @@ public interface UserManager extends EntityManager<User> {
 	 */
 	@Nullable 
 	User findByEmail(String email);
+
+	@Nullable
+	UserFacade findFacadeByEmail(String email);
 	
 	/**
 	 * Find user by person
@@ -84,6 +88,12 @@ public interface UserManager extends EntityManager<User> {
 	 */
 	@Nullable 
 	User find(PersonIdent person);
+	
+	@Nullable
+	UserFacade findFacade(PersonIdent person);
+	
+	@Nullable
+	UserFacade getFacade(Long userId);
 	
 	List<User> queryAndSort(Collection<User> topUsers);
 	

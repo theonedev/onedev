@@ -11,6 +11,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
@@ -38,7 +40,8 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor editor = BeanContext.edit("editor", user);
+		BeanEditor editor = BeanContext.edit("editor", user, 
+				Sets.newHashSet(User.PROP_ALTERNATE_EMAILS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -47,15 +50,17 @@ public class NewUserPage extends AdministrationPage {
 				super.onSubmit();
 				
 				UserManager userManager = OneDev.getInstance(UserManager.class);
+				
 				User userWithSameName = userManager.findByName(user.getName());
 				if (userWithSameName != null) {
-					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another user.");
+					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
+							"Login name already used by another account");
 				} 
+				
 				User userWithSameEmail = userManager.findByEmail(user.getEmail());
 				if (userWithSameEmail != null) {
-					editor.error(new Path(new PathNode.Named("email")),
-							"This email has already been used by another user.");
+					editor.error(new Path(new PathNode.Named(User.PROP_EMAIL)),
+							"Email already used by another account");
 				} 
 				if (editor.isValid()){
 					user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(user.getPassword()));

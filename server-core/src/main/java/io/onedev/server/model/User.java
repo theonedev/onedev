@@ -50,6 +50,7 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.NameAware;
 import io.onedev.server.util.match.MatchScoreUtils;
+import io.onedev.server.util.validation.annotation.EmailList;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
@@ -79,6 +80,8 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	public static final String PROP_NAME = "name";
 	
 	public static final String PROP_EMAIL = "email";
+	
+	public static final String PROP_ALTERNATE_EMAILS = "alternateEmails";
 	
 	public static final String PROP_PASSWORD = "password";
 	
@@ -118,6 +121,10 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	
 	@Column(unique=true, nullable=false)
 	private String email;
+	
+	@Lob
+	@Column(nullable=false, length=1024)
+	private ArrayList<String> alternateEmails = new ArrayList<>();
 	
 	@Column(unique=true, nullable=false)
 	private String accessToken = RandomStringUtils.randomAlphanumeric(ACCESS_TOKEN_LEN);
@@ -479,6 +486,18 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 		this.email = email;
 	}
 
+	@Editable(order=400, description="Optionally specify one or more alternate emails with one email per line. "
+			+ "With alternate emails, git commits authored/committed via your old emails can be associated with "
+			+ "your current account")
+	@EmailList
+	public ArrayList<String> getAlternateEmails() {
+		return alternateEmails;
+	}
+
+	public void setAlternateEmails(ArrayList<String> alternateEmails) {
+		this.alternateEmails = alternateEmails;
+	}
+	
 	public Collection<Membership> getMemberships() {
 		return memberships;
 	}
@@ -781,5 +800,5 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	public void setBuildQuerySubscriptions(LinkedHashSet<String> buildQuerySubscriptions) {
 		this.buildQuerySubscriptions = buildQuerySubscriptions;
 	}
-	    
+
 }

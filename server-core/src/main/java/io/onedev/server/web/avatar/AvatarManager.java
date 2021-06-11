@@ -8,6 +8,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.util.facade.UserFacade;
 
 public interface AvatarManager {
 	
@@ -23,7 +24,7 @@ public interface AvatarManager {
 	
 	void useAvatar(Project project, @Nullable String avatarData);
 	
-	File getUploaded(User user);
+	File getUploaded(UserFacade user);
 	
 	File getUploaded(Project project);
 	

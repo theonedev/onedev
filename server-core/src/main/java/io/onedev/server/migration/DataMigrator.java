@@ -2474,4 +2474,16 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate56(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("alternateEmails");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

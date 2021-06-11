@@ -17,10 +17,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -64,6 +66,7 @@ class LastCommitsResource extends AbstractResource {
 				
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 				
+				UserManager userManager = OneDev.getInstance(UserManager.class);
 				Map<String, LastCommitInfo> map = new HashMap<>();
 				for (Map.Entry<String, LastCommitsOfChildren.Value> entry: lastCommits.entrySet()) {
 					LastCommitInfo info = new LastCommitInfo();
@@ -77,8 +80,14 @@ class LastCommitsResource extends AbstractResource {
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					info.authorName = author.getName();
-					info.authorEmailAddress = author.getEmailAddress();
+					UserFacade user = userManager.findFacadeByEmail(author.getEmailAddress());
+					if (user != null) {
+						info.authorName = user.getDisplayName();
+						info.authorEmailAddress = user.getEmail();
+					} else {
+						info.authorName = author.getName();
+						info.authorEmailAddress = author.getEmailAddress();
+					}
 					info.authorAvatarUrl = avatarManager.getAvatarUrl(author);
 					map.put(entry.getKey(), info);
 				}

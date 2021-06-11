@@ -65,17 +65,27 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				super.onSubmit();
 				
 				User user = getUser();
+				user.getAlternateEmails().remove(user.getEmail());
+				
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				User userWithSameName = userManager.findByName(user.getName());
 				if (userWithSameName != null && !userWithSameName.equals(user)) {
-					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another user.");
+					editor.error(new Path(new PathNode.Named(User.PROP_NAME)),
+							"Login name already used by another account");
 				} 
 				User userWithSameEmail = userManager.findByEmail(user.getEmail());
 				if (userWithSameEmail != null && !userWithSameEmail.equals(user)) {
-					editor.error(new Path(new PathNode.Named("email")),
-							"This email has already been used by another user.");
+					editor.error(new Path(new PathNode.Named(User.PROP_EMAIL)),
+							"Email already used by another account");
 				} 
+				for (String email: user.getAlternateEmails()) {
+					userWithSameEmail = userManager.findByEmail(email);
+					if (userWithSameEmail != null && !userWithSameEmail.equals(user)) {
+						editor.error(new Path(new PathNode.Named(User.PROP_ALTERNATE_EMAILS)),
+								"Email '" + email + "' already used by another account");
+					}
+				}
+				
 				if (editor.isValid()) {
 					userManager.save(user, oldName);
 					Session.get().success("Profile updated");

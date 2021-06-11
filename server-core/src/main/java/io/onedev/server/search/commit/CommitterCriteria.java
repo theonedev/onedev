@@ -30,10 +30,13 @@ public class CommitterCriteria extends CommitCriteria {
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values) {
 			if (value == null) { // committed by me
-				if (SecurityUtils.getUser() != null)
+				if (SecurityUtils.getUser() != null) {
 					command.committers().add("<" + SecurityUtils.getUser().getEmail() + ">");
-				else
+					for (String email: SecurityUtils.getUser().getAlternateEmails())
+						command.committers().add("<" + email + ">");
+				} else {
 					throw new ExplicitException("Please login to perform this query");
+				}
 			} else {
 				command.committers().add(StringUtils.replace(value, "*", ".*"));
 			}
@@ -46,10 +49,12 @@ public class CommitterCriteria extends CommitCriteria {
 		String committerEmail = commit.getCommitterIdent().getEmailAddress();
 		for (String value: values) {
 			if (value == null) { // committed by me
-				if (User.get() == null)
+				if (User.get() == null) {
 					throw new ExplicitException("Please login to perform this query");
-				else if (User.get().getEmail().equals(committerEmail)) 
+				} else if (User.get().getEmail().equals(committerEmail)  
+						|| User.get().getAlternateEmails().contains(committerEmail)) { 
 					return true;
+				}
 			} else {
 				if (matches("*" + value + "*", commit.getCommitterIdent())) 
 					return true;

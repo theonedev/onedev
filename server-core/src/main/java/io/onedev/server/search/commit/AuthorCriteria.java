@@ -30,10 +30,13 @@ public class AuthorCriteria extends CommitCriteria {
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values) {
 			if (value == null) { // authored by me
-				if (SecurityUtils.getUser() != null)
+				if (SecurityUtils.getUser() != null) {
 					command.authors().add("<" + SecurityUtils.getUser().getEmail() + ">");
-				else
+					for (String email: SecurityUtils.getUser().getAlternateEmails()) 
+						command.authors().add("<" + email + ">");
+				} else {
 					throw new ExplicitException("Please login to perform this query");
+				}
 			} else {
 				command.authors().add(StringUtils.replace(value, "*", ".*"));
 			}
@@ -46,10 +49,12 @@ public class AuthorCriteria extends CommitCriteria {
 		String authorEmail = commit.getAuthorIdent().getEmailAddress();
 		for (String value: values) {
 			if (value == null) { // authored by me
-				if (User.get() == null)
+				if (User.get() == null) {
 					throw new ExplicitException("Please login to perform this query");
-				else if (User.get().getEmail().equals(authorEmail)) 
+				} else if (User.get().getEmail().equals(authorEmail) 
+						|| User.get().getAlternateEmails().contains(authorEmail)) { 
 					return true;
+				}
 			} else {
 				if (matches("*" + value + "*", commit.getAuthorIdent())) 
 					return true;

@@ -13,8 +13,10 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +30,6 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -39,12 +40,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
@@ -68,6 +71,7 @@ import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.NameAndEmail;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 import jetbrains.exodus.ArrayByteIterable;
@@ -282,6 +286,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private final SessionManager sessionManager;
 	
+	private final UserManager userManager;
+	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Integer> totalCommitCountCache = new ConcurrentHashMap<>();
@@ -290,11 +296,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, SessionManager sessionManager) {
+			BatchWorkManager batchWorkManager, SessionManager sessionManager, UserManager userManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
+		this.userManager = userManager;
 	}
 	
 	private boolean isCommitCollected(byte[] commitBytes) {
@@ -898,7 +905,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		commitCountCache.put(commitCountKey, commitCountOfPathByUser);
 	}
 	
-	@Override
 	public List<NameAndEmail> getUsers(Project project) {
 		List<NameAndEmail> users = usersCache.get(project.getId());
 		if (users == null) {
@@ -1006,29 +1012,30 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Override
 	public int getCommitCount(Project project, User user, String path) {
-		if (user.getEmail() != null) {
-			Environment env = getEnv(project.getId().toString());
-			Store emailToIndexStore = getStore(env, USER_TO_INDEX_STORE);
-			Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
-			Store commitCountStore = getStore(env, COMMIT_COUNTS_STORE);
-			return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
+		Environment env = getEnv(project.getId().toString());
+		Store emailToIndexStore = getStore(env, USER_TO_INDEX_STORE);
+		Store pathToIndexStore = getStore(env, PATH_TO_INDEX_STORE);
+		Store commitCountStore = getStore(env, COMMIT_COUNTS_STORE);
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Integer>() {
 
-				@Override
-				public Integer compute(Transaction txn) {
-					int userIndex = readInt(emailToIndexStore, txn, new StringByteIterable(user.getEmail()), -1);
+			@Override
+			public Integer compute(Transaction txn) {
+				Collection<String> emails = Sets.newHashSet(user.getEmail());
+				emails.addAll(user.getAlternateEmails());
+				int count = 0;
+				for (String email: emails) {
+					int userIndex = readInt(emailToIndexStore, txn, new StringByteIterable(email), -1);
 					if (userIndex != -1) {
 						int pathIndex = readInt(pathToIndexStore, txn, new StringByteIterable(path), -1);
 						if (pathIndex != -1) {
 							long commitCountKey = (userIndex<<32)|pathIndex;
-							return readInt(commitCountStore, txn, new LongByteIterable(commitCountKey), 0);
+							count += readInt(commitCountStore, txn, new LongByteIterable(commitCountKey), 0);
 						} 
 					} 
-					return 0;
 				}
-			});
-		} else {
-			return 0;
-		}
+				return count;
+			}
+		});
 	}
 	
 	@Override
@@ -1324,37 +1331,63 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		
 		return env.computeInReadonlyTransaction(new TransactionalComputable<List<GitContributor>>() {
 
+			@Nullable
+			private NameAndEmail getUser(Transaction txn, Map<Integer, Optional<NameAndEmail>> users, 
+					Integer userIndex) {
+				Optional<NameAndEmail> userOpt = users.get(userIndex);
+				if (userOpt == null) {
+					byte[] userBytes = readBytes(indexToUserStore, txn, new IntByteIterable(userIndex));
+					if (userBytes != null) { 
+						NameAndEmail user = (NameAndEmail) SerializationUtils.deserialize(userBytes);
+						UserFacade facade = userManager.findFacadeByEmail(user.getEmailAddress());
+						if (facade != null)
+							user = facade.getNameAndEmail();
+						userOpt = Optional.of(user);
+					} else { 
+						userOpt = Optional.empty();
+					}
+					users.put(userIndex, userOpt);
+				}
+				return userOpt.orElse(null);
+			}
+			
 			@Override
 			public List<GitContributor> compute(Transaction txn) {
 				Map<Integer, GitContribution> overallContributions = 
 						deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
-				Map<Integer, GitContribution> totalContributions = new HashMap<>();
+				Map<NameAndEmail, GitContribution> totalContributions = new HashMap<>();
+				Map<Integer, Optional<NameAndEmail>> users = new HashMap<>();
+				Map<Integer, Map<Integer, GitContribution>> contributionsByDay = new LinkedHashMap<>();
+				
 				for (int dayValue: overallContributions.keySet()) {
 					if (dayValue >= fromDay && dayValue <= toDay) {
 						ByteIterable dayKey = new IntByteIterable(dayValue);
 						Map<Integer, GitContribution> contributionsOnDay = 
 								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
+						contributionsByDay.put(dayValue, contributionsOnDay);
 						for (Map.Entry<Integer, GitContribution> entry: contributionsOnDay.entrySet()) {
-							Integer userIndex = entry.getKey();
-							GitContribution totalContribution = totalContributions.get(userIndex);
-							if (totalContribution == null) {
-								totalContribution = entry.getValue();
-							} else {
-								totalContribution = new GitContribution(
-										totalContribution.getCommits() + entry.getValue().getCommits(), 
-										totalContribution.getAdditions() + entry.getValue().getAdditions(), 
-										totalContribution.getDeletions() + entry.getValue().getDeletions());
+							NameAndEmail user = getUser(txn, users, entry.getKey());
+							if (user != null) {
+								GitContribution totalContribution = totalContributions.get(user);
+								if (totalContribution == null) {
+									totalContribution = entry.getValue();
+								} else {
+									totalContribution = new GitContribution(
+											totalContribution.getCommits() + entry.getValue().getCommits(), 
+											totalContribution.getAdditions() + entry.getValue().getAdditions(), 
+											totalContribution.getDeletions() + entry.getValue().getDeletions());
+								}
+								totalContributions.put(user, totalContribution);
 							}
-							totalContributions.put(userIndex, totalContribution);
 						}
 					}
 				}
 				
-				List<Integer> topUserIndexes = new ArrayList<>(totalContributions.keySet());
-				Collections.sort(topUserIndexes, new Comparator<Integer>() {
+				List<NameAndEmail> topUsers = new ArrayList<>(totalContributions.keySet());
+				Collections.sort(topUsers, new Comparator<NameAndEmail>() {
 
 					@Override
-					public int compare(Integer o1, Integer o2) {
+					public int compare(NameAndEmail o1, NameAndEmail o2) {
 						if (type == GitContribution.Type.COMMITS)
 							return totalContributions.get(o2).getCommits() - totalContributions.get(o1).getCommits();
 						else if (type == GitContribution.Type.ADDITIONS)
@@ -1365,50 +1398,41 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 					
 				});
 
-				if (top < topUserIndexes.size())
-					topUserIndexes = topUserIndexes.subList(0, top);
+				if (top < topUsers.size())
+					topUsers = topUsers.subList(0, top);
 				
-				Set<Integer> topUserIndexSet = new HashSet<>(topUserIndexes);
+				Set<NameAndEmail> topUserSet = new HashSet<>(topUsers);
 				
-				Map<Integer, Map<Day, Integer>> userContributions = new HashMap<>();
+				Map<NameAndEmail, Map<Day, Integer>> userContributions = new HashMap<>();
 				
-				for (int dayValue: overallContributions.keySet()) {
-					if (dayValue >= fromDay && dayValue <= toDay) {
-						ByteIterable dayKey = new IntByteIterable(dayValue);
-						Map<Integer, GitContribution> contributionsOnDay = 
-								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
-						Day day = new Day(dayValue);
-						for (Map.Entry<Integer, GitContribution> entry: contributionsOnDay.entrySet()) {
-							Integer userIndex = entry.getKey();
-							if (topUserIndexSet.contains(userIndex)) {
-								Map<Day, Integer> contributionsByUser = userContributions.get(userIndex);
-								if (contributionsByUser == null) {
-									contributionsByUser = new HashMap<>();
-									userContributions.put(userIndex, contributionsByUser);
-								}
-								if (type == GitContribution.Type.COMMITS)
-									contributionsByUser.put(day, entry.getValue().getCommits());
-								else if (type == GitContribution.Type.ADDITIONS)
-									contributionsByUser.put(day, entry.getValue().getAdditions());
-								else
-									contributionsByUser.put(day, entry.getValue().getDeletions());
+				for (Map.Entry<Integer, Map<Integer, GitContribution>> dayEntry: contributionsByDay.entrySet()) {
+					for (Map.Entry<Integer, GitContribution> userEntry: dayEntry.getValue().entrySet()) {
+						NameAndEmail user = getUser(txn, users, userEntry.getKey());
+						if (user != null && topUserSet.contains(user)) {
+							Map<Day, Integer> contributionsOfUser = userContributions.get(user);
+							if (contributionsOfUser == null) {
+								contributionsOfUser = new HashMap<>();
+								userContributions.put(user, contributionsOfUser);
 							}
+							Day day = new Day(dayEntry.getKey());
+							if (type == GitContribution.Type.COMMITS)
+								contributionsOfUser.put(day, userEntry.getValue().getCommits());
+							else if (type == GitContribution.Type.ADDITIONS)
+								contributionsOfUser.put(day, userEntry.getValue().getAdditions());
+							else
+								contributionsOfUser.put(day, userEntry.getValue().getDeletions());
 						}
 					}
 				}
 
-				List<GitContributor> contributors = new ArrayList<>();
+				List<GitContributor> topContributors = new ArrayList<>();
 				
-				for (int userIndex: topUserIndexes) {
-					byte[] userBytes = readBytes(indexToUserStore, txn, new IntByteIterable(userIndex));
-					Map<Day, Integer> contributionsByUser = userContributions.get(userIndex);
-					if (userBytes != null && contributionsByUser != null) {
-						PersonIdent user = ((NameAndEmail)SerializationUtils.deserialize(userBytes)).asPersonIdent();
-						contributors.add(new GitContributor(user, totalContributions.get(userIndex), contributionsByUser));
-					}
+				for (NameAndEmail user: topUsers) {
+					topContributors.add(new GitContributor(user.asPersonIdent(), 
+							totalContributions.get(user), userContributions.get(user)));
 				}
 				
-				return contributors;
+				return topContributors;
 			}
 			
 		});

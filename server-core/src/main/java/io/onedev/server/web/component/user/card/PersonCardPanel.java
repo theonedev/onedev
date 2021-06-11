@@ -11,7 +11,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.UserAvatar;
 
 @SuppressWarnings("serial")
@@ -37,8 +37,14 @@ public class PersonCardPanel extends Panel {
 		container.add(new UserAvatar("avatar", personIdent));
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append("<div>" + HtmlEscape.escapeHtml5(personIdent.getName()) + 
-				" <i>(" + gitRole + ")</i></div>");
+		
+		String displayName;
+		UserFacade user = OneDev.getInstance(UserManager.class).findFacadeByEmail(personIdent.getEmailAddress());
+		if (user != null)
+			displayName = user.getDisplayName();
+		else
+			displayName = personIdent.getName();
+		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
 		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
 			if (personIdent.getName().equals(OneDev.NAME))
@@ -46,7 +52,6 @@ public class PersonCardPanel extends Panel {
 			else
 				builder.append("<i>No OneDev Account</i>");
 		} else {
-			User user = OneDev.getInstance(UserManager.class).findByEmail(personIdent.getEmailAddress());
 			if (user != null) 
 				builder.append("<i>@" + HtmlEscape.escapeHtml5(user.getName()) + "</i>"); 
 			else 

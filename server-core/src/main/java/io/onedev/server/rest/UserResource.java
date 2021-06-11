@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,6 +29,8 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.SshKeyManager;
@@ -288,16 +291,29 @@ public class UserResource {
     			throw new UnauthorizedException();
     		} else {
     			user.setPassword("impossible_password");
+    			checkEmails(user);
     			userManager.save(user);
     		}
     	} else {
-        	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
+        	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) { 
 				throw new UnauthorizedException();
-	    	else
+        	} else {
+        		checkEmails(user);
 	    		userManager.save(user, (String) user.getCustomData());
+	    	}
     	}
     	return user.getId();
     }
+	
+	private void checkEmails(User user) {
+		Set<String> emails = Sets.newHashSet(user.getEmail());
+		emails.addAll(user.getAlternateEmails());
+		for (String email: emails) {
+			User userWithSameEmail = userManager.findByEmail(email);
+			if (userWithSameEmail != null && !userWithSameEmail.equals(user)) 
+				throw new ExplicitException("Email '" + email + "' already used by another user.");
+		}
+	}
 	
 	@Api(order=2000)
 	@Path("/{userId}/password")

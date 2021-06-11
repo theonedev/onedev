@@ -101,7 +101,7 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 		return customData;
 	}
 
-	public void setCustomData(String customData) {
+	public void setCustomData(Object customData) {
 		this.customData = customData;
 	}
 

@@ -9,6 +9,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.UserAvatar;
@@ -35,7 +38,12 @@ public class PersonIdentPanel extends Panel {
 		super.onInitialize();
 		
 		add(new UserAvatar("avatar", personIdent).setVisible(mode != Mode.NAME));
-		add(new Label("name", personIdent.getName()).setVisible(mode != Mode.AVATAR));
+		
+		UserFacade user = OneDev.getInstance(UserManager.class).findFacadeByEmail(personIdent.getEmailAddress());
+		if (user != null)
+			add(new Label("name", user.getDisplayName()).setVisible(mode != Mode.AVATAR));
+		else
+			add(new Label("name", personIdent.getName()).setVisible(mode != Mode.AVATAR));
 		
 		add(AttributeAppender.append("class", "user"));
 		
