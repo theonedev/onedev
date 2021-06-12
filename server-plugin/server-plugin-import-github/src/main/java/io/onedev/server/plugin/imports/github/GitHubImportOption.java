@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
@@ -50,9 +51,10 @@ public class GitHubImportOption implements Serializable, Validatable {
 		this.imports = imports;
 	}
 
-	@Editable(order=200, name="Public Role", description="Specify default role for public repositories")
+	@Editable(order=200, name="Public Role", description="If specified, all public repositories imported from GitHub "
+			+ "will use this as default role. Private repositories are not affected")
 	@RoleChoice
-	@NotEmpty
+	@Nullable
 	public String getPublicRoleName() {
 		return publicRoleName;
 	}
@@ -61,8 +63,12 @@ public class GitHubImportOption implements Serializable, Validatable {
 		this.publicRoleName = publicRoleName;
 	}
 	
+	@Nullable
 	public Role getPublicRole() {
-		return OneDev.getInstance(RoleManager.class).find(publicRoleName);
+		if (publicRoleName != null)
+			return OneDev.getInstance(RoleManager.class).find(publicRoleName);
+		else
+			return null;
 	}
 
 	@Editable(order=300, description="Specify which issue state to use for closed GitHub issues")

@@ -118,7 +118,7 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 				project.setDescription(repoNode.get("description").asText(null));
 				project.setIssueManagementEnabled(repoNode.get("has_issues").asBoolean());
 				boolean isPrivate = repoNode.get("private").asBoolean();
-				if (!isPrivate)
+				if (!isPrivate && importOption.getPublicRole() != null)
 					project.setDefaultRole(importOption.getPublicRole());
 				URIBuilder builder = new URIBuilder(repoNode.get("clone_url").asText());
 				if (isPrivate)
