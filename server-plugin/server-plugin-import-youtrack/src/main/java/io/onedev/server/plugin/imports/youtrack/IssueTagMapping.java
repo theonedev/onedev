@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.youtrack;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,43 +15,43 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class LabelMapping implements Serializable {
+public class IssueTagMapping implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String issueLabel;
+	private String youTrackIssueTag;
 	
-	private String issueField;
+	private String oneDevIssueField;
 
-	@Editable(order=100)
+	@Editable(order=100, name="YouTrack Issue Tag")
 	@NotEmpty
-	public String getIssueLabel() {
-		return issueLabel;
+	public String getYouTrackIssueTag() {
+		return youTrackIssueTag;
 	}
 
-	public void setIssueLabel(String issueLabel) {
-		this.issueLabel = issueLabel;
+	public void setYouTrackIssueTag(String youTrackIssueTag) {
+		this.youTrackIssueTag = youTrackIssueTag;
 	}
 
-	@Editable(order=200)
-	@ChoiceProvider("getIssueFieldChoices")
+	@Editable(order=200, name="OneDev Issue Field", description="Specify a multi-value enum custom field")
+	@ChoiceProvider("getOneDevIssueFieldChoices")
 	@NotEmpty
-	public String getIssueField() {
-		return issueField;
+	public String getOneDevIssueField() {
+		return oneDevIssueField;
 	}
 
-	public void setIssueField(String issueField) {
-		this.issueField = issueField;
+	public void setOneDevIssueField(String oneDevIssueField) {
+		this.oneDevIssueField = oneDevIssueField;
 	}
 
 	@SuppressWarnings("unused")
-	private static List<String> getIssueFieldChoices() {
+	private static List<String> getOneDevIssueFieldChoices() {
 		List<String> choices = new ArrayList<>();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		for (FieldSpec field: issueSetting.getFieldSpecs()) {
-			if (field.getType().equals(InputSpec.ENUMERATION)) {
+			if (field.getType().equals(InputSpec.ENUMERATION) && field.isAllowMultiple()) {
 				for (String value: field.getPossibleValues()) 
-					choices.add(field.getName() + " : " + value);
+					choices.add(field.getName() + "::" + value);
 			}
 		}
 		return choices;

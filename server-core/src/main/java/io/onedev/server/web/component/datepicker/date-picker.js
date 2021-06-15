@@ -1,5 +1,5 @@
 onedev.server.datePicker = {
-	onDomReady: function(inputId) {
+	onDomReady: function(inputId, withTime) {
 		// set locale if available
 		var locale = (navigator.language || 'en').toLowerCase();
 		var shortLocale = locale.substr(0, 2);
@@ -9,9 +9,11 @@ onedev.server.datePicker = {
 
 		var $input = $("#" + inputId);
 		var calendar = flatpickr($input[0], {
-			dateFormat: 'Y-m-d', 
+			dateFormat: withTime? 'Y-m-d H:i': 'Y-m-d', 
+			enableTime: withTime,
 			allowInput: true
 		});
+	
 		$input.keydown(function(e) {
 			/* 
 			 * Perform actions in a timeout for two reasons:

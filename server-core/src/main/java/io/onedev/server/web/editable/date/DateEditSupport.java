@@ -14,6 +14,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.WithTime;
 
 @SuppressWarnings("serial")
 public class DateEditSupport implements EditSupport {
@@ -24,6 +25,7 @@ public class DateEditSupport implements EditSupport {
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
 		if (propertyClass == Date.class) {
+			boolean withTime = descriptor.getPropertyGetter().getAnnotation(WithTime.class) != null;
 			return new PropertyContext<Date>(descriptor) {
 
 				@Override
@@ -33,7 +35,10 @@ public class DateEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new Label(id, DateUtils.formatDate(model.getObject()));
+								if (withTime)
+									return new Label(id, DateUtils.formatDateTime(model.getObject()));
+								else
+									return new Label(id, DateUtils.formatDate(model.getObject()));
 							} else {
 								NameOfEmptyValue nameOfEmptyValue = propertyDescriptor.getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
 								if (nameOfEmptyValue != null)
@@ -48,7 +53,7 @@ public class DateEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<Date> renderForEdit(String componentId, IModel<Date> model) {
-					return new DatePropertyEditor(componentId, descriptor, model);
+					return new DatePropertyEditor(componentId, descriptor, model, withTime);
 				}
 				
 			};

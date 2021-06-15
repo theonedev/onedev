@@ -286,7 +286,7 @@ abstract class InsertUrlPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<String> item) {
 						String attachmentName = item.getModelObject();
-						String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
+						String attachmentUrl = attachmentSupport.getAttachmentUrlPath(attachmentName);
 						
 						AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
 
@@ -340,7 +340,7 @@ abstract class InsertUrlPanel extends Panel {
 					@Override
 					protected void populateItem(final ListItem<String> item) {
 						String attachmentName = item.getModelObject();
-						String attachmentUrl = attachmentSupport.getAttachmentUrl(attachmentName);
+						String attachmentUrl = attachmentSupport.getAttachmentUrlPath(attachmentName);
 						
 						AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
 
@@ -409,7 +409,7 @@ abstract class InsertUrlPanel extends Panel {
 						throw new RuntimeException(e);
 					}
 					markdownEditor.insertUrl(target, isImage, 
-							attachmentSupport.getAttachmentUrl(attachmentName), UrlUtils.describe(attachmentName), null);
+							attachmentSupport.getAttachmentUrlPath(attachmentName), UrlUtils.describe(attachmentName), null);
 					onClose(target);
 				}
 

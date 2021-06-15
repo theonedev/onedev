@@ -4,8 +4,10 @@ import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_UPDATE_DATE;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,6 +68,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
@@ -108,6 +111,7 @@ import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
@@ -137,6 +141,10 @@ public class Project extends AbstractEntity implements NameAware {
 	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
+	
+	public static final int MAX_ATTACHMENT_SIZE = 25*1024*1024; // mega bytes
+	
+	private static final int BUFFER_SIZE = 1024*64;
 	
 	public static final String NAME_NAME = "Name";
 	
@@ -1480,6 +1488,53 @@ public class Project extends AbstractEntity implements NameAware {
 					return projectAware.getProject();
 			}
 			return null;
+		}
+	}
+	
+	public String getAttachmentUrlPath(String attachmentGroup, String attachmentName) {
+		return String.format("/projects/%s/attachment/%s/%s", getName(), attachmentGroup, attachmentName);
+	}
+	
+	public String saveAttachment(String attachmentGroup, String suggestedAttachmentName, InputStream attachmentStream) {
+		String attachmentName = suggestedAttachmentName;
+		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getAttachmentGroupDir(this, attachmentGroup);
+
+		FileUtils.createDir(attachmentDir);
+		int index = 2;
+		while (new File(attachmentDir, attachmentName).exists()) {
+			if (suggestedAttachmentName.contains(".")) {
+				String nameBeforeExt = StringUtils.substringBeforeLast(suggestedAttachmentName, ".");
+				String ext = StringUtils.substringAfterLast(suggestedAttachmentName, ".");
+				attachmentName = nameBeforeExt + "_" + index + "." + ext;
+			} else {
+				attachmentName = suggestedAttachmentName + "_" + index;
+			}
+			index++;
+		}
+		
+		Exception ex = null;
+		File file = new File(attachmentDir, attachmentName);
+		try (OutputStream os = new FileOutputStream(file)) {
+			byte[] buffer = new byte[BUFFER_SIZE];
+	        long count = 0;
+	        int n = 0;
+	        while (-1 != (n = attachmentStream.read(buffer))) {
+	            count += n;
+		        if (count > MAX_ATTACHMENT_SIZE) {
+		        	throw new RuntimeException("Upload must be less than " 
+		        			+ FileUtils.byteCountToDisplaySize(MAX_ATTACHMENT_SIZE));
+		        }
+	            os.write(buffer, 0, n);
+	        }
+		} catch (Exception e) {
+			ex = e;
+		} 
+		if (ex != null) {
+			if (file.exists())
+				FileUtils.deleteFile(file);
+			throw ExceptionUtils.unchecked(ex);
+		} else {
+			return file.getName();
 		}
 	}
 	

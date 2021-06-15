@@ -15,6 +15,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.BuildChoice;
 import io.onedev.server.web.editable.annotation.IssueChoice;
 import io.onedev.server.web.editable.annotation.PullRequestChoice;
+import io.onedev.server.web.editable.annotation.WorkingPeriod;
 
 @SuppressWarnings("serial")
 public class NumericEditSupport implements EditSupport {
@@ -24,10 +25,13 @@ public class NumericEditSupport implements EditSupport {
 		Method propertyGetter = descriptor.getPropertyGetter();
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if ((propertyClass == int.class || propertyClass == long.class 
-				|| propertyClass == Integer.class || propertyClass == Long.class) 
+				|| propertyClass == Integer.class || propertyClass == Long.class 
+				|| propertyClass == Float.class || propertyClass == float.class
+				|| propertyClass == Double.class || propertyClass == double.class)
 				&& propertyGetter.getAnnotation(IssueChoice.class) == null
 				&& propertyGetter.getAnnotation(PullRequestChoice.class) == null
-				&& propertyGetter.getAnnotation(BuildChoice.class) == null) {
+				&& propertyGetter.getAnnotation(BuildChoice.class) == null
+				&& propertyGetter.getAnnotation(WorkingPeriod.class) == null) {
 			return new PropertyContext<Number>(descriptor) {
 
 				@Override

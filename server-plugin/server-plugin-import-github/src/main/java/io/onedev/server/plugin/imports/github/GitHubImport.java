@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -11,32 +12,35 @@ public class GitHubImport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String PROP_PROJECT_NAME = "projectName";
+	public static final String PROP_ONEDEV_PROJECT = "oneDevProject";
 	
-	private String githubRepo;
+	private String gitHubRepo;
 	
-	private String projectName;
+	private String oneDevProject;
 	
 	private boolean importIssues = true;
 	
-	@Editable(order=100, name="Repository")
+	@Editable(order=100, name="GitHub Repository", description="Specify GitHub repository to import "
+			+ "code and issues (optional) from")
 	@NotEmpty
-	public String getGithubRepo() {
-		return githubRepo;
+	public String getGitHubRepo() {
+		return gitHubRepo;
 	}
 
-	public void setGithubRepo(String githubRepo) {
-		this.githubRepo = githubRepo;
+	public void setGitHubRepo(String gitHubRepo) {
+		this.gitHubRepo = gitHubRepo;
 	}
 
-	@Editable(order=200, name="Import as Project")
+	@Editable(order=200, name="OneDev Project", description="Specify OneDev project to be created as "
+			+ "result of importing")
+	@ProjectName
 	@NotEmpty
-	public String getProjectName() {
-		return projectName;
+	public String getOneDevProject() {
+		return oneDevProject;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setOneDevProject(String oneDevProject) {
+		this.oneDevProject = oneDevProject;
 	}
 
 	@Editable(order=400)

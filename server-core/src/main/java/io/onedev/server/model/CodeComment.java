@@ -249,7 +249,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	}
 	
 	@Override
-	public String getAttachmentStorageUUID() {
+	public String getAttachmentGroup() {
 		return uuid;
 	}
 

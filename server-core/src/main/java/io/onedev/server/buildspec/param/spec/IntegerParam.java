@@ -5,13 +5,13 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.onedev.server.model.support.inputspec.numberinput.NumberInput;
-import io.onedev.server.model.support.inputspec.numberinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.model.support.inputspec.integerinput.IntegerInput;
+import io.onedev.server.model.support.inputspec.integerinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
-@Editable(order=400, name=ParamSpec.NUMBER)
-public class NumberParam extends ParamSpec {
+@Editable(order=400, name=ParamSpec.INTEGER)
+public class IntegerParam extends ParamSpec {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -52,17 +52,17 @@ public class NumberParam extends ParamSpec {
 
 	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
-		return NumberInput.getPropertyDef(this, indexes, minValue, maxValue, defaultValueProvider);
+		return IntegerInput.getPropertyDef(this, indexes, minValue, maxValue, defaultValueProvider);
 	}
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return NumberInput.convertToObject(strings);
+		return IntegerInput.convertToObject(strings);
 	}
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return NumberInput.convertToStrings(value);
+		return IntegerInput.convertToStrings(value);
 	}
 
 	@Editable

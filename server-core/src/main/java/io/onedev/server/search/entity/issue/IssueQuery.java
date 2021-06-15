@@ -32,7 +32,7 @@ import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
-import io.onedev.server.model.support.issue.field.spec.NumberField;
+import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
@@ -248,7 +248,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 									return new CommitFieldCriteria(fieldName, project, value);
 								} else if (field instanceof BooleanField) {
 									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
-								} else if (field instanceof NumberField) {
+								} else if (field instanceof IntegerField) {
 									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else if (field instanceof ChoiceField) { 
 									long ordinal = getValueOrdinal((ChoiceField) field, value);
@@ -270,7 +270,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
-								if (field instanceof NumberField) {
+								if (field instanceof IntegerField) {
 									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else {
 									long ordinal;
@@ -318,7 +318,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 				if (validate && !Issue.ORDER_FIELDS.containsKey(fieldName)) {
 					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (validate && !(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
-							&& !(fieldSpec instanceof NumberField)) {
+							&& !(fieldSpec instanceof IntegerField)) {
 						throw new ExplicitException("Can not order by field: " + fieldName);
 					}
 				}
@@ -403,7 +403,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !(fieldSpec instanceof PullRequestChoiceField)
 					&& !(fieldSpec instanceof BuildChoiceField)
 					&& !(fieldSpec instanceof BooleanField)
-					&& !(fieldSpec instanceof NumberField) 
+					&& !(fieldSpec instanceof IntegerField) 
 					&& !(fieldSpec instanceof CommitField) 
 					&& !(fieldSpec instanceof ChoiceField) 
 					&& !(fieldSpec instanceof UserChoiceField)
@@ -417,7 +417,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			if (!fieldName.equals(Issue.NAME_VOTE_COUNT)
 					&& !fieldName.equals(Issue.NAME_COMMENT_COUNT)
 					&& !fieldName.equals(Issue.NAME_NUMBER)
-					&& !(fieldSpec instanceof NumberField) 
+					&& !(fieldSpec instanceof IntegerField) 
 					&& !(fieldSpec instanceof ChoiceField && !fieldSpec.isAllowMultiple()))
 				throw newOperatorException(fieldName, operator);
 			break;

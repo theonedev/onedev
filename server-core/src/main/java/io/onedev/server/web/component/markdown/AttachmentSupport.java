@@ -10,7 +10,7 @@ public interface AttachmentSupport extends Serializable {
 	
 	List<String> getAttachments();
 	
-	String getAttachmentUrl(String attachmentName);
+	String getAttachmentUrlPath(String attachmentName);
 	
 	String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream);
 	

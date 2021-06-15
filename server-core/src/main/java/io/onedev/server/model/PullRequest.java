@@ -966,7 +966,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	
 	@Override
-	public String getAttachmentStorageUUID() {
+	public String getAttachmentGroup() {
 		return uuid;
 	}
 	

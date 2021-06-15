@@ -6,7 +6,7 @@ import java.util.Map;
 import io.onedev.server.model.support.inputspec.PullRequestChoiceInput;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=1000, name=ParamSpec.PULLREQUEST)
+@Editable(order=1000, name=ParamSpec.PULL_REQUEST)
 public class PullRequestChoiceParam extends ParamSpec {
 	
 	private static final long serialVersionUID = 1L;
