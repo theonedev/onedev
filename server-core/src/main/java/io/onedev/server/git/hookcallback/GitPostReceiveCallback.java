@@ -2,6 +2,7 @@ package io.onedev.server.git.hookcallback;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -27,6 +29,7 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 
 @SuppressWarnings("serial")
@@ -50,6 +53,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         this.listenerRegistry = listenerRegistry;
     }
 
+    @Sessional
     @Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String clientIp = request.getHeader("X-Forwarded-For");
@@ -64,7 +68,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        Long projectId = Long.valueOf(fields.get(0));
+        Project project = projectManager.load(Long.valueOf(fields.get(0)));
         Long userId = Long.valueOf(fields.get(1));
         ThreadContext.bind(SecurityUtils.asSubject(userId));
 
@@ -77,6 +81,8 @@ public class GitPostReceiveCallback extends HttpServlet {
         	} 
         }
         Preconditions.checkState(refUpdateInfo != null, "Git ref update information is not available");
+
+		Output output = new Output(response.getOutputStream());
         
         /*
          * If multiple refs are updated, the hook stdin will put each ref update info into
@@ -88,50 +94,78 @@ public class GitPostReceiveCallback extends HttpServlet {
         
         fields.clear();
         fields.addAll(StringUtils.splitAndTrim(refUpdateInfo, " "));
+
+        List<ImmutableTriple<String, ObjectId, ObjectId>> eventData = new ArrayList<>();
+        
+        int pos = 0;
+        while (true) {
+        	String refName = StringUtils.reverse(fields.get(pos));
+        	pos++;
+        	ObjectId newObjectId = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
+        	pos++;
+        	String field = fields.get(pos);
+        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
+        	
+        	String branch = GitUtils.ref2branch(refName);
+        	if (branch != null && project.getDefaultBranch() == null) {
+        		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), "HEAD");
+        		GitUtils.linkRef(refUpdate, refName);
+        	}
+
+        	if (branch != null && project.getDefaultBranch() != null && !branch.equals(project.getDefaultBranch()))
+        		showPullRequestLink(output, project, branch);
+        	
+        	eventData.add(new ImmutableTriple<>(refName, oldObjectId, newObjectId));
+    		
+        	field = field.substring(40);
+        	if (field.length() == 0)
+        		break;
+        	else
+        		fields.set(pos, field);
+        }
+        
+        Long projectId = project.getId();
         
         sessionManager.runAsync(new Runnable() {
 
 			@Override
 			public void run() {
 		        try {
+		        	// We can not use a hibernate entity safely in a different thread. Let's reload it 
 		            Project project = projectManager.load(projectId);
-		            
-			        int pos = 0;
-			        while (true) {
-			        	String refName = StringUtils.reverse(fields.get(pos));
-			        	pos++;
-			        	ObjectId newObjectId = ObjectId.fromString(StringUtils.reverse(fields.get(pos)));
-			        	pos++;
-			        	String field = fields.get(pos);
-			        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
-			        	
-			        	if (!newObjectId.equals(ObjectId.zeroId())) {
-			        		project.cacheObjectId(refName, newObjectId);
-			        	} else {
-			        		newObjectId = ObjectId.zeroId();
-			        		project.cacheObjectId(refName, null);
-			        	}
-			        	
-			        	String branch = GitUtils.ref2branch(refName);
-			        	if (branch != null && project.getDefaultBranch() == null) {
-			        		RefUpdate refUpdate = GitUtils.getRefUpdate(project.getRepository(), "HEAD");
-			        		GitUtils.linkRef(refUpdate, refName);
-			        	}
 
+		            for (ImmutableTriple<String, ObjectId, ObjectId> each: eventData) {
+		            	String refName = each.getLeft();
+		            	ObjectId oldObjectId = each.getMiddle();
+		            	ObjectId newObjectId = each.getRight();
+			        	if (!newObjectId.equals(ObjectId.zeroId()))
+			        		project.cacheObjectId(refName, newObjectId);
+			        	else 
+			        		project.cacheObjectId(refName, null);
+		            	
 			        	listenerRegistry.post(new RefUpdated(project, refName, oldObjectId, newObjectId));
-			    		
-			        	field = field.substring(40);
-			        	if (field.length() == 0)
-			        		break;
-			        	else
-			        		fields.set(pos, field);
-			        }
+		            }
 		        } catch (Exception e) {
-		        	logger.error("Error executing post-receive callback", e);
+		        	logger.error("Error posting ref updated event", e);
 				}
 			}
         	
         });
 	}
 
+	private void showPullRequestLink(Output output, Project project, String branch) {
+    	output.writeLine();
+    	output.writeLine("Create a pull request for '"+ branch +"' by visiting:");
+		output.writeLine("    " + project.getUrl() 
+				+"/pulls/new?target=" 
+				+ project.getId() 
+				+ ":" 
+				+ project.getDefaultBranch() 
+				+ "&source=" 
+				+ project.getId()
+				+ ":"
+				+ branch);
+		output.writeLine();
+	}
+	
 }
