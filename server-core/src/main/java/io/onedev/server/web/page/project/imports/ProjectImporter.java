@@ -33,7 +33,7 @@ public abstract class ProjectImporter<T extends Serializable, S extends Serializ
 	
 	public abstract String getName();
 
-	public abstract S initImportOption(T importSource, SimpleLogger logger);
+	public abstract S getImportOption(T importSource, SimpleLogger logger);
 	
 	@Nullable
 	public abstract String doImport(T importSource, S importOption, boolean dryRun, SimpleLogger logger);

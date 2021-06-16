@@ -79,7 +79,7 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				importOption = importer.initImportOption(importSource, new SimpleLogger() {
+				importOption = importer.getImportOption(importSource, new SimpleLogger() {
 
 					@Override
 					public void log(String message) {

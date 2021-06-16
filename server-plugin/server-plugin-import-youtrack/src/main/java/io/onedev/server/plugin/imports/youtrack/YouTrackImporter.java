@@ -28,24 +28,19 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
@@ -59,6 +54,7 @@ import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
 import io.onedev.server.model.support.issue.field.spec.WorkingPeriodField;
+import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.DateUtils;
@@ -72,7 +68,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 	
 	public static final String NAME = "YouTrack";
 
-	private static final int PER_PAGE = 25;
+	private static final int PER_PAGE = 100;
 	
 	@Override
 	public String getName() {
@@ -80,61 +76,63 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 	}
 
 	@Override
-	public YouTrackImportOption initImportOption(YouTrackImportSource importSource, SimpleLogger logger) {
+	public YouTrackImportOption getImportOption(YouTrackImportSource importSource, SimpleLogger logger) {
 		YouTrackImportOption importOption = new YouTrackImportOption();
-		Client client = newClient(importSource);
-		try {
-			String fields = "name,customFields(field(name),bundle(values(name)))";
-			
-			Set<String> youTrackIssueStates = new LinkedHashSet<>();
-			Set<String> youTrackIssueFields = new LinkedHashSet<>();
-			
-			for (JsonNode projectNode: list(client, importSource, "/admin/projects?fields=" + fields, logger)) {
-				YouTrackImport aImport = new YouTrackImport();
-				aImport.setYouTrackProject(projectNode.get("name").asText());
-				aImport.setOneDevProject(aImport.getYouTrackProject().replace(' ', '-'));
-				importOption.getImports().add(aImport);
+		if (importSource.isPrepopulateImportOptions()) {
+			Client client = newClient(importSource);
+			try {
+				String fields = "name,customFields(field(name),bundle(values(name)))";
 				
-				for (JsonNode customFieldNode: projectNode.get("customFields")) {
-					String fieldName = customFieldNode.get("field").get("name").asText();
-					JsonNode bundleNode = customFieldNode.get("bundle");
-					if (bundleNode != null) {
-						String bundleType = bundleNode.get("$type").asText();
-						if (bundleType.equals("StateBundle")) {
-							for (JsonNode valueNode: bundleNode.get("values")) 
-								youTrackIssueStates.add(valueNode.get("name").asText());
-						} else if (bundleType.equals("EnumBundle") || bundleType.equals("OwnedBundle")) {
-							for (JsonNode valueNode: bundleNode.get("values")) 
-								youTrackIssueFields.add(fieldName + "::" + valueNode.get("name").asText());
+				Set<String> youTrackIssueStates = new LinkedHashSet<>();
+				Set<String> youTrackIssueFields = new LinkedHashSet<>();
+				
+				for (JsonNode projectNode: list(client, importSource, "/admin/projects?fields=" + fields, logger)) {
+					YouTrackImport aImport = new YouTrackImport();
+					aImport.setYouTrackProject(projectNode.get("name").asText());
+					aImport.setOneDevProject(aImport.getYouTrackProject().replace(' ', '-'));
+					importOption.getImports().add(aImport);
+					
+					for (JsonNode customFieldNode: projectNode.get("customFields")) {
+						String fieldName = customFieldNode.get("field").get("name").asText();
+						JsonNode bundleNode = customFieldNode.get("bundle");
+						if (bundleNode != null) {
+							String bundleType = bundleNode.get("$type").asText();
+							if (bundleType.equals("StateBundle")) {
+								for (JsonNode valueNode: bundleNode.get("values")) 
+									youTrackIssueStates.add(valueNode.get("name").asText());
+							} else if (bundleType.equals("EnumBundle") || bundleType.equals("OwnedBundle")) {
+								for (JsonNode valueNode: bundleNode.get("values")) 
+									youTrackIssueFields.add(fieldName + "::" + valueNode.get("name").asText());
+							} else {
+								youTrackIssueFields.add(fieldName);
+							}
 						} else {
 							youTrackIssueFields.add(fieldName);
 						}
-					} else {
-						youTrackIssueFields.add(fieldName);
 					}
 				}
+				
+				for (String youTrackIssueState: youTrackIssueStates) {
+					IssueStateMapping mapping = new IssueStateMapping();
+					mapping.setYouTrackIssueState(youTrackIssueState);
+					importOption.getIssueStateMappings().add(mapping);
+				}
+				
+				for (String youTrackIssueField: youTrackIssueFields) {
+					IssueFieldMapping mapping = new IssueFieldMapping();
+					mapping.setYouTrackIssueField(youTrackIssueField);
+					importOption.getIssueFieldMappings().add(mapping);
+				}
+				
+				for (JsonNode tagNode: list(client, importSource, "/issueTags?fields=name", logger)) {
+					IssueTagMapping mapping = new IssueTagMapping();
+					mapping.setYouTrackIssueTag(tagNode.get("name").asText());
+					importOption.getIssueTagMappings().add(mapping);
+				}
+				
+			} finally {
+				client.close();
 			}
-			
-			for (String youTrackIssueState: youTrackIssueStates) {
-				IssueStateMapping mapping = new IssueStateMapping();
-				mapping.setYouTrackIssueState(youTrackIssueState);
-				importOption.getIssueStateMappings().add(mapping);
-			}
-			
-			for (String youTrackIssueField: youTrackIssueFields) {
-				IssueFieldMapping mapping = new IssueFieldMapping();
-				mapping.setYouTrackIssueField(youTrackIssueField);
-				importOption.getIssueFieldMappings().add(mapping);
-			}
-			
-			for (JsonNode tagNode: list(client, importSource, "/issueTags?fields=name", logger)) {
-				IssueTagMapping mapping = new IssueTagMapping();
-				mapping.setYouTrackIssueTag(tagNode.get("name").asText());
-				importOption.getIssueTagMappings().add(mapping);
-			}
-			
-		} finally {
-			client.close();
 		}
 		return importOption;
 	}
@@ -194,25 +192,18 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 			for (YouTrackImport aImport: importOption.getImports()) {
 				logger.log("Importing project '" + aImport.getYouTrackProject() + "'...");
 				
-				String youTrackProjectId = Preconditions.checkNotNull(youTrackProjectIds.get(aImport.getYouTrackProject()));
+				String youTrackProjectId = youTrackProjectIds.get(aImport.getYouTrackProject());
+				if (youTrackProjectId == null)
+					throw new ExplicitException("Unable to find YouTrack project: " + aImport.getYouTrackProject());
 				
 				Project project = new Project();
 				project.setName(aImport.getOneDevProject());
 				project.setDescription(projectDescriptions.get(aImport.getYouTrackProject()));
 				project.setIssueManagementEnabled(true);
 				
-				User user = SecurityUtils.getUser();
-		       	UserAuthorization authorization = new UserAuthorization();
-		       	authorization.setProject(project);
-		       	authorization.setUser(user);
-		       	authorization.setRole(OneDev.getInstance(RoleManager.class).getOwner());
-		       	project.getUserAuthorizations().add(authorization);
-		       	user.getAuthorizations().add(authorization);
-
 		       	if (!dryRun) {
-					OneDev.getInstance(ProjectManager.class).save(project);
+					OneDev.getInstance(ProjectManager.class).create(project);
 					projectIds.add(project.getId());
-					OneDev.getInstance(UserAuthorizationManager.class).save(authorization);
 		       	}
 				
 				AtomicInteger numOfImportedIssues = new AtomicInteger(0);
@@ -300,9 +291,21 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 						return StringUtils.join(escapedValues, "<br>");
 					}
 					
+					@Nullable
+					private String getEmail(JsonNode userNode) {
+						JsonNode emailNode = userNode.get("email");
+						if (emailNode != null)
+							return emailNode.asText(null);
+						else
+							return null;
+					}
+					
 					@Override
 					public void consume(List<JsonNode> pageData) throws InterruptedException {
 						for (JsonNode issueNode: pageData) {
+							if (Thread.interrupted())
+								throw new InterruptedException();
+							
 							Issue issue = new Issue();
 							String readableId = issueNode.get("idReadable").asText();
 							issue.setNumber(issueNode.get("numberInProject").asLong());
@@ -321,12 +324,12 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 								issue.setDescription(processAttachments(issue.getUUID(), readableId, 
 										issue.getDescription(), attachmentNodes, tooLargeAttachments));
 							}
-
+							
 							Map<String, String> extraIssueInfo = new LinkedHashMap<>();
 							
 							if (issueNode.hasNonNull("reporter")) {
 								JsonNode reporterNode = issueNode.get("reporter");
-								String email = reporterNode.get("email").asText(null);
+								String email = getEmail(reporterNode);
 								String fullName = reporterNode.get("name").asText();
 								String login = reporterNode.get("login").asText();
 								if (email != null) {
@@ -472,7 +475,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 										
 										String login = valueNode.get("login").asText();
 										String fullName = valueNode.get("name").asText();
-										String email = valueNode.get("email").asText(null);
+										String email = getEmail(valueNode);
 										
 										Pair<FieldSpec, String> mapped = fieldMappings.get(fieldName);
 										if (mapped == null) {
@@ -520,7 +523,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 											for (JsonNode valueNode: customFieldNode.get("value")) {
 												String login = valueNode.get("login").asText();
 												String fullName = valueNode.get("name").asText();
-												String email = valueNode.get("email").asText(null);
+												String email = getEmail(valueNode);
 												
 												if (email != null) {
 													User user = OneDev.getInstance(UserManager.class).findByEmail(email);
@@ -751,7 +754,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 									comment.setDate(new Date(commentNode.get("created").asLong(System.currentTimeMillis())));
 									if (commentNode.hasNonNull("author")) {
 										JsonNode authorNode = commentNode.get("author");
-										String email = authorNode.get("email").asText(null);
+										String email = getEmail(authorNode);
 										String fullName = authorNode.get("name").asText();
 										String login = authorNode.get("login").asText();
 										if (email != null) {
@@ -794,10 +797,11 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 							if (!dryRun) {
 								OneDev.getInstance(IssueManager.class).save(issue);
 								for (IssueField field: issue.getFields())
-									OneDev.getInstance(IssueFieldManager.class).save(field);
+									OneDev.getInstance(Dao.class).persist(field);
 								for (IssueComment comment: issue.getComments())
-									OneDev.getInstance(IssueCommentManager.class).save(comment);
+									OneDev.getInstance(Dao.class).persist(comment);
 							}
+							
 						}
 						logger.log("Imported " + numOfImportedIssues.addAndGet(pageData.size()) + " issues");
 					}
@@ -858,7 +862,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 		} catch (Exception e) {
 			for (Long projectId: projectIds)
 				OneDev.getInstance(StorageManager.class).deleteProjectDir(projectId);
-			throw new RuntimeException(e);
+			throw ExceptionUtils.unchecked(e);
 		} finally {
 			client.close();
 		}
@@ -913,14 +917,12 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 	private JsonNode get(Client client, String apiEndpoint, SimpleLogger logger) {
 		WebTarget target = client.target(apiEndpoint);
 		Invocation.Builder builder =  target.request();
-		while (true) {
-			try (Response response = builder.get()) {
-				String errorMessage = checkStatus(response);
-				if (errorMessage != null)
-					throw new ExplicitException(errorMessage);
-				else
-					return response.readEntity(JsonNode.class);
-			}
+		try (Response response = builder.get()) {
+			String errorMessage = checkStatus(response);
+			if (errorMessage != null)
+				throw new ExplicitException(errorMessage);
+			else
+				return response.readEntity(JsonNode.class);
 		}
 	}
 	

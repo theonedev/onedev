@@ -37,6 +37,8 @@ public class YouTrackImportSource implements Serializable, Validatable {
 	private String userName;
 	
 	private String password;
+	
+	private boolean prepopulateImportOptions = true;
 
 	@Editable(order=10, name="YouTrack API URL", description="Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>")
 	@NotEmpty
@@ -72,6 +74,17 @@ public class YouTrackImportSource implements Serializable, Validatable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	@Editable(order=400, description="If checked, import options will be pre-populated based on all accessible "
+			+ "projects and its settings. In case there are too many projects and settings, you may want to "
+			+ "uncheck this and provide import option manually")
+	public boolean isPrepopulateImportOptions() {
+		return prepopulateImportOptions;
+	}
+
+	public void setPrepopulateImportOptions(boolean prepopulateImportOptions) {
+		this.prepopulateImportOptions = prepopulateImportOptions;
 	}
 
 	public String getApiEndpoint(String apiPath) {

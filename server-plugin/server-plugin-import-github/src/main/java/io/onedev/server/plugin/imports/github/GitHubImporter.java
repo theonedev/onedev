@@ -67,7 +67,7 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 	}
 	
 	@Override
-	public GitHubImportOption initImportOption(GitHubImportSource importSource, SimpleLogger logger) {
+	public GitHubImportOption getImportOption(GitHubImportSource importSource, SimpleLogger logger) {
 		GitHubImportOption importOption = new GitHubImportOption();
 		Client client = newClient(importSource);
 		try {

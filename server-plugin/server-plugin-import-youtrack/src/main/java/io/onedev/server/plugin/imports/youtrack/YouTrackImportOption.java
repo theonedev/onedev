@@ -48,7 +48,9 @@ public class YouTrackImportOption implements Serializable, Validatable {
 	}
 
 	@Editable(order=300, description="Specify how to map YouTrack issue custom fields to OneDev issue "
-			+ "custom fields. Unmapped fields will be reflected in issue description")
+			+ "custom fields. Unmapped fields will be reflected in issue description.<br>"
+			+ "<b>Note: </b>Enum field needs to be mapped in form of <tt>&lt;Field Name&gt;::&lt;Field Value&gt;</tt>, "
+			+ "for instance <tt>Priority::Critical</tt>")
 	public List<IssueFieldMapping> getIssueFieldMappings() {
 		return issueFieldMappings;
 	}
