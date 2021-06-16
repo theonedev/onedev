@@ -680,7 +680,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 
 	@Override
-	public String getAttachmentStorageUUID() {
+	public String getAttachmentGroup() {
 		return uuid;
 	}
 

@@ -305,10 +305,13 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     public void clone(Project project, String repositoryUrl) {
     	dao.persist(project);
     	
+    	User user = SecurityUtils.getUser();
        	UserAuthorization authorization = new UserAuthorization();
        	authorization.setProject(project);
-       	authorization.setUser(SecurityUtils.getUser());
+       	authorization.setUser(user);
        	authorization.setRole(roleManager.getOwner());
+       	project.getUserAuthorizations().add(authorization);
+       	user.getAuthorizations().add(authorization);
        	userAuthorizationManager.save(authorization);
     	
         FileUtils.cleanDir(project.getGitDir());

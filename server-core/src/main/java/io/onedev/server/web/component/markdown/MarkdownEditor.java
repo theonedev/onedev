@@ -459,7 +459,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						throw new RuntimeException(e);
 					}
 					String replaceMessage = params.getParameterValue("param2").toString();
-					String url = getAttachmentSupport().getAttachmentUrl(name);
+					String url = getAttachmentSupport().getAttachmentUrlPath(name);
 					insertUrl(target, isWebSafeImage(name), url, name, replaceMessage);
 					
 					break;

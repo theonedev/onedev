@@ -20,23 +20,29 @@ import io.onedev.server.web.editable.annotation.OmitName;
 @SuppressWarnings("serial")
 public class DatePropertyEditor extends PropertyEditor<Date> {
 
+	private final boolean withTime;
+	
 	private FormComponent<Date> input;
 	
-	public DatePropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Date> propertyModel) {
+	public DatePropertyEditor(String id, PropertyDescriptor propertyDescriptor, 
+			IModel<Date> propertyModel, boolean withTime) {
 		super(id, propertyDescriptor, propertyModel);
+		this.withTime = withTime;
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new DatePicker("input", Model.of(getModelObject()));
+		input = new DatePicker("input", Model.of(getModelObject()), withTime);
 		input.setType(getDescriptor().getPropertyClass());
 		Method propertyGetter = getDescriptor().getPropertyGetter();
-		if (propertyGetter.getAnnotation(OmitName.class) != null)
+		if (propertyGetter.getAnnotation(OmitName.class) != null) {
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(propertyGetter)));
-		else if (getDescriptor().isPropertyRequired())
-			input.add(AttributeModifier.replace("placeholder", "Choose date..."));
+		} else if (getDescriptor().isPropertyRequired()) {
+			input.add(AttributeModifier.replace("placeholder", 
+					withTime? "Choose date and time...": "Choose date..."));
+		}
 
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(input);

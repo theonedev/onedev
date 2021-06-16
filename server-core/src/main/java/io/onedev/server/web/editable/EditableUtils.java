@@ -9,10 +9,12 @@ import javax.annotation.Nullable;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.BeanUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.web.editable.annotation.WorkingPeriod;
 
 public class EditableUtils {
 	
@@ -86,6 +88,16 @@ public class EditableUtils {
 				description += " " + VariableInterpolator.HELP;
 			} else {
 				description = VariableInterpolator.HELP;
+			}
+			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
+		} else if (element.getAnnotation(WorkingPeriod.class) != null) {
+			String description = getDescription(element, editable);
+			if (description.length() != 0) {
+				if (!description.endsWith("."))
+					description += ".";
+				description += " " + DateUtils.WORKING_PERIOD_HELP;
+			} else {
+				description = DateUtils.WORKING_PERIOD_HELP;
 			}
 			return StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
 		} else {

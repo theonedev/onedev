@@ -34,6 +34,7 @@ import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
@@ -42,10 +43,12 @@ import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.page.project.imports.ProjectImporter;
@@ -62,9 +65,9 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 	public String getName() {
 		return NAME;
 	}
-
+	
 	@Override
-	public GitHubImportOption getImportOption(GitHubImportSource importSource, SimpleLogger logger) {
+	public GitHubImportOption initImportOption(GitHubImportSource importSource, SimpleLogger logger) {
 		GitHubImportOption importOption = new GitHubImportOption();
 		Client client = newClient(importSource);
 		try {
@@ -72,8 +75,8 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 				String repoName = repoNode.get("name").asText();
 				String ownerName = repoNode.get("owner").get("login").asText();
 				GitHubImport aImport = new GitHubImport();
-				aImport.setGithubRepo(ownerName + "/" + repoName);
-				aImport.setProjectName(ownerName + "-" + repoName);
+				aImport.setGitHubRepo(ownerName + "/" + repoName);
+				aImport.setOneDevProject(ownerName + "-" + repoName);
 				importOption.getImports().add(aImport);
 			}
 			return importOption;
@@ -111,10 +114,10 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 		try {
 			Map<String, Optional<User>> users = new HashMap<>();
 			for (GitHubImport aImport: importOption.getImports()) {
-				logger.log("Cloning code of repository " + aImport.getGithubRepo() + "...");
-				JsonNode repoNode = get(client, importSource, "/repos/" + aImport.getGithubRepo(), logger);
+				logger.log("Cloning code of repository " + aImport.getGitHubRepo() + "...");
+				JsonNode repoNode = get(client, importSource, "/repos/" + aImport.getGitHubRepo(), logger);
 				Project project = new Project();
-				project.setName(aImport.getProjectName());
+				project.setName(aImport.getOneDevProject());
 				project.setDescription(repoNode.get("description").asText(null));
 				project.setIssueManagementEnabled(repoNode.get("has_issues").asBoolean());
 				boolean isPrivate = repoNode.get("private").asBoolean();
@@ -127,13 +130,21 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 				if (!dryRun) {
 					projectManager.clone(project, builder.build().toString());
 					projectIds.add(project.getId());
+				} else {
+					User user = SecurityUtils.getUser();
+			       	UserAuthorization authorization = new UserAuthorization();
+			       	authorization.setProject(project);
+			       	authorization.setUser(user);
+			       	authorization.setRole(OneDev.getInstance(RoleManager.class).getOwner());
+			       	project.getUserAuthorizations().add(authorization);
+			       	user.getAuthorizations().add(authorization);
 				}
 
 				if (aImport.isImportIssues()) {
 					Map<Long, Milestone> milestones = new HashMap<>();
-					logger.log("Importing milestones of repository " + aImport.getGithubRepo() + "...");
-					String apiUrl = "/repos/" + aImport.getGithubRepo() + "/milestones?state=all";
-					for (JsonNode milestoneNode: list(client, importSource, apiUrl, logger)) {
+					logger.log("Importing milestones of repository " + aImport.getGitHubRepo() + "...");
+					String apiEndpoint = "/repos/" + aImport.getGitHubRepo() + "/milestones?state=all";
+					for (JsonNode milestoneNode: list(client, importSource, apiEndpoint, logger)) {
 						Milestone milestone = new Milestone();
 						milestone.setName(milestoneNode.get("title").asText());
 						milestone.setDescription(milestoneNode.get("description").asText(null));
@@ -149,15 +160,15 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 						milestones.put(milestoneNode.get("number").asLong(), milestone);
 					}
 					
-					logger.log("Importing issues of repository " + aImport.getGithubRepo() + "...");
+					logger.log("Importing issues of repository " + aImport.getGitHubRepo() + "...");
 					String initialIssueState = getIssueSetting().getInitialStateSpec().getName();
 					
 					AtomicInteger numOfImportedIssues = new AtomicInteger(0);
-					PageDataConsumer pageHandler = new PageDataConsumer() {
+					PageDataConsumer pageDataConsumer = new PageDataConsumer() {
 
 						@Override
-						public void consume(List<JsonNode> page) throws InterruptedException {
-							for (JsonNode issueNode: page) {
+						public void consume(List<JsonNode> pageData) throws InterruptedException {
+							for (JsonNode issueNode: pageData) {
 								if (Thread.interrupted())
 									throw new InterruptedException();
 								Issue issue = new Issue();
@@ -217,9 +228,9 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 										getIssueFieldManager().save(assigneeField);
 								}
 
-								String apiUrl = "/repos/" + aImport.getGithubRepo() 
+								String apiEndpoint = "/repos/" + aImport.getGitHubRepo() 
 										+ "/issues/" + issue.getNumber() + "/comments";
-								for (JsonNode commentNode: list(client, importSource, apiUrl, logger)) {
+								for (JsonNode commentNode: list(client, importSource, apiEndpoint, logger)) {
 									IssueComment comment = new IssueComment();
 									comment.setIssue(issue);
 									comment.setContent(commentNode.get("body").asText(null));
@@ -240,19 +251,19 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 										OneDev.getInstance(IssueCommentManager.class).save(comment);
 								}
 								
-								apiUrl = "/repos/" + aImport.getGithubRepo() 
+								apiEndpoint = "/repos/" + aImport.getGitHubRepo() 
 										+ "/issues/" + issue.getNumber() + "/labels";
-								for (JsonNode labelNode: list(client, importSource, apiUrl, logger)) {
+								for (JsonNode labelNode: list(client, importSource, apiEndpoint, logger)) {
 									String labelName = labelNode.get("name").asText();
 									IssueField labelField = null;
-									for (LabelMapping mapping: importOption.getLabelMappings()) {
-										if (mapping.getIssueLabel().equals(labelName)) {
-											String fieldName = StringUtils.substringBefore(mapping.getIssueField(), ":").trim();
+									for (IssueLabelMapping mapping: importOption.getLabelMappings()) {
+										if (mapping.getGitHubIssueLabel().equals(labelName)) {
+											String fieldName = StringUtils.substringBefore(mapping.getOneDevIssueField(), "::");
 											FieldSpec fieldSpec = getIssueSetting().getFieldSpecMap(null).get(fieldName);
 											if (fieldSpec != null) {
 												labelField = new IssueField();
 												labelField.setIssue(issue);
-												String fieldValue = StringUtils.substringAfter(mapping.getIssueField(), ":").trim();
+												String fieldValue = StringUtils.substringAfter(mapping.getOneDevIssueField(), "::");
 												labelField.setName(fieldName);
 												labelField.setType(InputSpec.ENUMERATION);
 												labelField.setValue(fieldValue);
@@ -272,8 +283,8 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 						}
 						
 					};
-					apiUrl = "/repos/" + aImport.getGithubRepo() + "/issues?state=all";
-					list(client, importSource, apiUrl, pageHandler, logger);
+					apiEndpoint = "/repos/" + aImport.getGitHubRepo() + "/issues?state=all";
+					list(client, importSource, apiEndpoint, pageDataConsumer, logger);
 				}
 			}
 			List<String> result = new ArrayList<>();
@@ -322,7 +333,7 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 			PageDataConsumer pageDataConsumer, SimpleLogger logger) {
 		URI uri;
 		try {
-			uri = new URIBuilder(importSource.getApiUrl(apiPath))
+			uri = new URIBuilder(importSource.getApiEndpoint(apiPath))
 					.addParameter("per_page", String.valueOf(PER_PAGE)).build();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
@@ -347,11 +358,11 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 	}
 	
 	private JsonNode get(Client client, GitHubImportSource importSource, String apiPath, SimpleLogger logger) {
-		return get(client, importSource.getApiUrl(apiPath), logger);
+		return get(client, importSource.getApiEndpoint(apiPath), logger);
 	}
 	
-	private JsonNode get(Client client, String apiUrl, SimpleLogger logger) {
-		WebTarget target = client.target(apiUrl);
+	private JsonNode get(Client client, String apiEndpoint, SimpleLogger logger) {
+		WebTarget target = client.target(apiEndpoint);
 		Invocation.Builder builder =  target.request();
 		while (true) {
 			try (Response response = builder.get()) {
@@ -390,7 +401,8 @@ public class GitHubImporter extends ProjectImporter<GitHubImportSource, GitHubIm
 
 	private static interface PageDataConsumer {
 		
-		void consume(List<JsonNode> page) throws InterruptedException;
+		void consume(List<JsonNode> pageData) throws InterruptedException;
 		
 	}
+	
 }

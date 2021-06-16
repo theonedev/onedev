@@ -15,9 +15,20 @@ public class TextField extends FieldSpec {
 
 	private static final long serialVersionUID = 1L;
 
+	private boolean multiline;
+	
 	private String pattern;
 	
 	private DefaultValueProvider defaultValueProvider;
+
+	@Editable(order=1050)
+	public boolean isMultiline() {
+		return multiline;
+	}
+
+	public void setMultiline(boolean multiline) {
+		this.multiline = multiline;
+	}
 
 	@Editable(order=1100, description="Optionally specify a <a href='http://docs.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html'>regular expression pattern</a> for valid values of " +
 			"the text input")
@@ -48,7 +59,7 @@ public class TextField extends FieldSpec {
 
 	@Override
 	public String getPropertyDef(Map<String, Integer> indexes) {
-		return TextInput.getPropertyDef(this, indexes, pattern, defaultValueProvider);
+		return TextInput.getPropertyDef(this, indexes, pattern, multiline, defaultValueProvider);
 	}
 
 	@Override

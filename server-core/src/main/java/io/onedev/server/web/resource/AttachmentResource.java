@@ -83,7 +83,7 @@ public class AttachmentResource extends AbstractResource {
 	}
 
 	private static File getAttachmentDir(Project project, String uuid) {
-		return OneDev.getInstance(AttachmentStorageManager.class).getAttachmentStorage(project, uuid);		
+		return OneDev.getInstance(AttachmentStorageManager.class).getAttachmentGroupDir(project, uuid);		
 	}
 	
 	public static PageParameters paramsOf(Project project, String attachmentStorageUUID, String attachmentName) {

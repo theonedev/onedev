@@ -39,7 +39,7 @@ public class GitHubImportOption implements Serializable, Validatable {
 	
 	private String assigneesIssueField;
 	
-	private List<LabelMapping> labelMappings = new ArrayList<>();
+	private List<IssueLabelMapping> labelMappings = new ArrayList<>();
 	
 	@Editable(order=100, name="Repositories to Import")
 	@Size(min=1, max=10000, message="No repositories to import")
@@ -117,11 +117,11 @@ public class GitHubImportOption implements Serializable, Validatable {
 	}
 
 	@Editable(order=400, description="Map GitHub issue label to OneDev issue custom field of enum type")
-	public List<LabelMapping> getLabelMappings() {
+	public List<IssueLabelMapping> getLabelMappings() {
 		return labelMappings;
 	}
 
-	public void setLabelMappings(List<LabelMapping> labelMappings) {
+	public void setLabelMappings(List<IssueLabelMapping> labelMappings) {
 		this.labelMappings = labelMappings;
 	}
 
@@ -130,18 +130,18 @@ public class GitHubImportOption implements Serializable, Validatable {
 		boolean isValid = true;
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		for (int i=0; i<imports.size(); i++) {
-			if (projectManager.find(imports.get(i).getProjectName()) != null) {
+			if (projectManager.find(imports.get(i).getOneDevProject()) != null) {
 				context.buildConstraintViolationWithTemplate("Project name already used")
 						.addPropertyNode("imports")
-						.addPropertyNode(GitHubImport.PROP_PROJECT_NAME)
+						.addPropertyNode(GitHubImport.PROP_ONEDEV_PROJECT)
 						.inIterable().atIndex(i).addConstraintViolation();
 				isValid = false;
 			} else {
 				for (int j=0; j<imports.size(); j++) {
-					if (j != i && imports.get(j).getProjectName().equals(imports.get(i).getProjectName())) {
+					if (j != i && imports.get(j).getOneDevProject().equals(imports.get(i).getOneDevProject())) {
 						context.buildConstraintViolationWithTemplate("Duplicate project name")
 								.addPropertyNode("imports")
-								.addPropertyNode(GitHubImport.PROP_PROJECT_NAME)
+								.addPropertyNode(GitHubImport.PROP_ONEDEV_PROJECT)
 								.inIterable().atIndex(i).addConstraintViolation();
 						isValid = false;
 						break;

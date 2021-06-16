@@ -106,7 +106,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						} else {
 							item.add(new Label("value", "#" + value));
 						}
-					} else if (getField().getType().equals(FieldSpec.PULLREQUEST)) {
+					} else if (getField().getType().equals(FieldSpec.PULL_REQUEST)) {
 						PullRequest request = OneDev.getInstance(PullRequestManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));
 						if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {

@@ -14,19 +14,23 @@ public class DatePicker extends DateTextField {
 
 	private static final long serialVersionUID = 1L;
 
-    public DatePicker(String id) {
-        this(id, null);
+	private final boolean withTime;
+	
+    public DatePicker(String id, boolean withTime) {
+        this(id, null, withTime);
     }
 
-    public DatePicker(String id, IModel<Date> model) {
-    	super(id, model, Constants.DATE_FORMAT);
+    public DatePicker(String id, IModel<Date> model, boolean withTime) {
+    	super(id, model, withTime?Constants.DATETIME_FORMAT: Constants.DATE_FORMAT);
+    	this.withTime = withTime;
     }
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new DatePickerResourceReference()));
-		String script = String.format("onedev.server.datePicker.onDomReady('%s')", getMarkupId());
+		String script = String.format("onedev.server.datePicker.onDomReady('%s', %b)", 
+				getMarkupId(), withTime);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

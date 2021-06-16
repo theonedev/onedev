@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.inputspec.numberinput.defaultvalueprovider;
+package io.onedev.server.model.support.inputspec.floatinput.defaultvalueprovider;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -14,7 +14,7 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 
 	private String scriptName;
 
-	@Editable(description="Groovy script to be evaluated. It should return a <i>Integer</i> value. "
+	@Editable(description="Groovy script to be evaluated. It should return a <i>Float</i> value. "
 			+ "Check <a href='$docRoot/pages/scripting.md' target='_blank'>scripting help</a> for details")
 	@ScriptChoice
 	@OmitName
@@ -28,7 +28,7 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 	}
 
 	@Override
-	public int getDefaultValue() {
+	public float getDefaultValue() {
 		return (int) GroovyUtils.evalScriptByName(scriptName);
 	}
 

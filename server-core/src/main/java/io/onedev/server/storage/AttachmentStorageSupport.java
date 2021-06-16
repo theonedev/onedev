@@ -6,6 +6,6 @@ public interface AttachmentStorageSupport {
 	
 	Project getAttachmentProject();
 	
-	String getAttachmentStorageUUID();
+	String getAttachmentGroup();
 	
 }

@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.inputspec.numberinput;
+package io.onedev.server.model.support.inputspec.integerinput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,9 @@ import javax.validation.ValidationException;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.model.support.inputspec.numberinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.model.support.inputspec.integerinput.defaultvalueprovider.DefaultValueProvider;
 
-public class NumberInput {
+public class IntegerInput {
 	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
 			Integer minValue, Integer maxValue, DefaultValueProvider defaultValueProvider) {
@@ -42,7 +42,7 @@ public class NumberInput {
 			try {
 				return Integer.valueOf(strings.iterator().next());
 			} catch (NumberFormatException e) {
-				throw new ValidationException("Invalid number value");
+				throw new ValidationException("Invalid integer value");
 			}
 		} else {
 			throw new ValidationException("Not eligible for multi-value");

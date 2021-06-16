@@ -50,7 +50,7 @@ import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
 import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
-import io.onedev.server.model.support.issue.field.spec.NumberField;
+import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -662,7 +662,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					List<String> orderFields = new ArrayList<>(Issue.ORDER_FIELDS.keySet());
 					orderFields.remove(Issue.NAME_PROJECT);
 					for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
-						if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
+						if (field instanceof IntegerField || field instanceof ChoiceField || field instanceof DateField) 
 							orderFields.add(field.getName());
 					}
 					

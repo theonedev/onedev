@@ -58,7 +58,7 @@ import io.onedev.server.model.support.issue.field.spec.DateField;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.GroupChoiceField;
 import io.onedev.server.model.support.issue.field.spec.IssueChoiceField;
-import io.onedev.server.model.support.issue.field.spec.NumberField;
+import io.onedev.server.model.support.issue.field.spec.IntegerField;
 import io.onedev.server.model.support.issue.field.spec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.field.spec.TextField;
 import io.onedev.server.model.support.issue.field.spec.UserChoiceField;
@@ -133,7 +133,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if (getProject() != null)
 								candidates.remove(Issue.NAME_PROJECT);
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
-								if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
+								if (field instanceof IntegerField || field instanceof ChoiceField || field instanceof DateField) 
 									candidates.add(field.getName());
 							}
 							return SuggestionUtils.suggest(candidates, matchWith);
@@ -220,7 +220,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											return null;
 									} else if (fieldName.equals(NAME_TITLE) || fieldName.equals(NAME_DESCRIPTION) 
 											|| fieldName.equals(NAME_COMMENT) || fieldName.equals(NAME_VOTE_COUNT) 
-											|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof NumberField 
+											|| fieldName.equals(NAME_COMMENT_COUNT) || fieldSpec instanceof IntegerField 
 											|| fieldSpec instanceof TextField) {
 										return null;
 									}

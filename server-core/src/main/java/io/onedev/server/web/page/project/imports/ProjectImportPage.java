@@ -31,6 +31,8 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 	
 	private ProjectImporter<T, S> importer;
 	
+	private T importSource;
+	
 	private S importOption;
 	
 	@SuppressWarnings("unchecked")
@@ -55,9 +57,8 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		T importSource;
 		try {
-			importSource = importer.getTokenClass().newInstance();
+			importSource = importer.getSourceClass().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
@@ -78,7 +79,7 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				importOption = importer.getImportOption(importSource, new SimpleLogger() {
+				importOption = importer.initImportOption(importSource, new SimpleLogger() {
 
 					@Override
 					public void log(String message) {
@@ -171,6 +172,14 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 		PageParameters params = new PageParameters();
 		params.add(PARAM_IMPORTER, importer);
 		return params;
+	}
+	
+	public T getImportSource() {
+		return importSource;
+	}
+	
+	public S getImportOption() {
+		return importOption;
 	}
 	
 }

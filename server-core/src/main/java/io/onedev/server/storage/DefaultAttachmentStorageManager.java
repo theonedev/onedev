@@ -57,24 +57,24 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 	}
 	
 	@Override
-	public File getAttachmentStorage(Project project, String attachmentStorageUUID) {
-		File attachmentBase = storageManager.getProjectAttachmentDir(project.getId());
-		File attachmentStorage = getPermanentAttachmentStorage(attachmentBase, attachmentStorageUUID);
-		if (attachmentStorage.exists())
-			return attachmentStorage;
+	public File getAttachmentGroupDir(Project project, String attachmentGroup) {
+		File attachmentBaseDir = storageManager.getProjectAttachmentDir(project.getId());
+		File attachmentGroupDir = getPermanentAttachmentGroupDir(attachmentBaseDir, attachmentGroup);
+		if (attachmentGroupDir.exists())
+			return attachmentGroupDir;
 		else
-			return new File(attachmentBase, TEMP + "/" + attachmentStorageUUID); 
+			return new File(attachmentBaseDir, TEMP + "/" + attachmentGroup); 
 	}
 
-	private File getPermanentAttachmentStorage(File attachmentBase, String attachmentStorageUUID) {
-		String prefix = attachmentStorageUUID.substring(0, 2);
-		return new File(attachmentBase, PERMANENT + "/" + prefix + "/" + attachmentStorageUUID);
+	private File getPermanentAttachmentGroupDir(File attachmentBase, String attachmentGroup) {
+		String prefix = attachmentGroup.substring(0, 2);
+		return new File(attachmentBase, PERMANENT + "/" + prefix + "/" + attachmentGroup);
 	}
 	
-	private void permanentizeAttachmentStorage(File attachmentBase, String attachmentStorageUUID) {
-		File permanentAttachmentStorage = getPermanentAttachmentStorage(attachmentBase, attachmentStorageUUID);
+	private void permanentizeAttachmentGroup(File attachmentBase, String attachmentGroup) {
+		File permanentAttachmentStorage = getPermanentAttachmentGroupDir(attachmentBase, attachmentGroup);
 		if (!permanentAttachmentStorage.exists()) {
-			File tempAttachmentStorage = new File(attachmentBase, TEMP + "/" + attachmentStorageUUID);
+			File tempAttachmentStorage = new File(attachmentBase, TEMP + "/" + attachmentGroup);
 			if (tempAttachmentStorage.exists()) {
 				try {
 					FileUtils.moveDirectory(tempAttachmentStorage, permanentAttachmentStorage);
@@ -129,12 +129,12 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 		if (event.isNew() && event.getEntity() instanceof AttachmentStorageSupport) {
 			AttachmentStorageSupport storageSupport = (AttachmentStorageSupport) event.getEntity();
 			File attachmentBase = storageManager.getProjectAttachmentDir(storageSupport.getAttachmentProject().getId());
-			String attachmentStorageUUID = storageSupport.getAttachmentStorageUUID();
+			String attachmentGroup = storageSupport.getAttachmentGroup();
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
-					permanentizeAttachmentStorage(attachmentBase, attachmentStorageUUID);
+					permanentizeAttachmentGroup(attachmentBase, attachmentGroup);
 				}
 				
 			});
@@ -146,8 +146,8 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 	public void on(EntityRemoved event) {
 		if (event.getEntity() instanceof AttachmentStorageSupport) {
 			AttachmentStorageSupport storageSupport = (AttachmentStorageSupport) event.getEntity();
-			File attachmentStorage = getPermanentAttachmentStorage(
-					storageManager.getProjectAttachmentDir(storageSupport.getAttachmentProject().getId()), storageSupport.getAttachmentStorageUUID());
+			File attachmentStorage = getPermanentAttachmentGroupDir(
+					storageManager.getProjectAttachmentDir(storageSupport.getAttachmentProject().getId()), storageSupport.getAttachmentGroup());
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override

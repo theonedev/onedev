@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.inputspec.numberinput.defaultvalueprovider;
+package io.onedev.server.model.support.inputspec.integerinput.defaultvalueprovider;
 
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;

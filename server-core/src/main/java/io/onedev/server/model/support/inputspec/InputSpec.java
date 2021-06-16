@@ -33,9 +33,15 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String DATE = "Date";
 	
+	public static final String DATE_TIME = "Date Time";
+	
 	public static final String SECRET = "Secret";
 	
-	public static final String NUMBER = "Number";
+	public static final String INTEGER = "Integer";
+	
+	public static final String FLOAT = "Float";
+	
+	public static final String WORKING_PERIOD = "Working Period";
 	
 	public static final String COMMIT = "Commit";
 	
@@ -49,7 +55,7 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String BUILD = "Build";
 
-	public static final String PULLREQUEST = "Pull request";
+	public static final String PULL_REQUEST = "Pull Request";
 	
 	private String name;
 

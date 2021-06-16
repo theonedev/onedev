@@ -12,19 +12,19 @@ public abstract class ProjectImporter<T extends Serializable, S extends Serializ
 
 	private static final long serialVersionUID = 1L;
 	
-	private final Class<T> tokenClass;
+	private final Class<T> sourceClass;
 	
 	private final Class<S> optionClass;
 
 	@SuppressWarnings("unchecked")
 	public ProjectImporter() {
 		List<Class<?>> typeArguments = ReflectionUtils.getTypeArguments(ProjectImporter.class, getClass());
-		tokenClass = (Class<T>) typeArguments.get(0);
+		sourceClass = (Class<T>) typeArguments.get(0);
 		optionClass = (Class<S>) typeArguments.get(1);
 	}
 	
-	public Class<T> getTokenClass() {
-		return tokenClass;
+	public Class<T> getSourceClass() {
+		return sourceClass;
 	}
 	
 	public Class<S> getOptionClass() {
@@ -33,7 +33,7 @@ public abstract class ProjectImporter<T extends Serializable, S extends Serializ
 	
 	public abstract String getName();
 
-	public abstract S getImportOption(T importSource, SimpleLogger logger);
+	public abstract S initImportOption(T importSource, SimpleLogger logger);
 	
 	@Nullable
 	public abstract String doImport(T importSource, S importOption, boolean dryRun, SimpleLogger logger);

@@ -15,7 +15,7 @@ import io.onedev.server.model.support.inputspec.textinput.defaultvalueprovider.D
 public class TextInput {
 
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
-			@Nullable String pattern, DefaultValueProvider defaultValueProvider) {
+			@Nullable String pattern, boolean multiline, DefaultValueProvider defaultValueProvider) {
 		if (pattern != null)
 			pattern = InputSpec.escape(pattern);
 		int index = indexes.get(inputSpec.getName());
@@ -24,6 +24,8 @@ public class TextInput {
 		inputSpec.appendCommonAnnotations(buffer, index);
 		if (!inputSpec.isAllowEmpty())
 			buffer.append("    @NotEmpty\n");
+		if (multiline)
+			buffer.append("    @Multiline\n");
 		if (pattern != null)
 			buffer.append("    @Pattern(regexp=\"" + pattern + "\", message=\"Should match regular expression: " + pattern + "\")\n");
 		inputSpec.appendMethods(buffer, index, "String", null, defaultValueProvider);
