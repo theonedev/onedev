@@ -76,20 +76,23 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		String queryString = String.format("select id, %s, %s, %s, %s from User", 
-				User.PROP_NAME, User.PROP_FULL_NAME, User.PROP_EMAIL, User.PROP_ALTERNATE_EMAILS);
+		String queryString = String.format("select id, %s, %s, %s, %s, %s from User", 
+				User.PROP_NAME, User.PROP_FULL_NAME, User.PROP_EMAIL, User.PROP_GIT_EMAIL, User.PROP_ALTERNATE_EMAILS);
 		Query<?> query = dao.getSession().createQuery(queryString);
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long userId = (Long) fields[0];
 			String name = (String) fields[1];
 			String fullName = (String) fields[2];
 			String email = (String) fields[3];
-			List<String> alternateEmails = (List<String>) fields[4];
+			String gitEmail = (String) fields[4];
+			List<String> alternateEmails = (List<String>) fields[5];
 			
 			userIdByEmail.put(email, userId);
+			if (gitEmail != null)
+				userIdByEmail.put(gitEmail, userId);
 			for (String alternateEmail: alternateEmails)
 				userIdByEmail.put(alternateEmail, userId);
-			cache.put(userId, new UserFacade(userId, name, fullName, email, alternateEmails));
+			cache.put(userId, new UserFacade(userId, name, fullName, email, gitEmail, alternateEmails));
 		}
 	}
 	
@@ -126,6 +129,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			@Override
 			public void run() {
 				userIdByEmail.put(user.getEmail(), user.getId());
+				if (user.getGitEmail() != null)
+					userIdByEmail.put(user.getGitEmail(), user.getId());
 				for (String alternateEmail: user.getAlternateEmails())
 					userIdByEmail.put(alternateEmail, user.getId());
 				cache.put(user.getId(), new UserFacade(user));
@@ -262,6 +267,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			public void run() {
 				cache.remove(user.getId());
 				userIdByEmail.remove(user.getEmail());
+				if (user.getGitEmail() != null)
+					userIdByEmail.remove(user.getGitEmail());
 				for (String email: user.getAlternateEmails())
 					userIdByEmail.remove(email);
 			}

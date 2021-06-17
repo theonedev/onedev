@@ -1021,6 +1021,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			@Override
 			public Integer compute(Transaction txn) {
 				Collection<String> emails = Sets.newHashSet(user.getEmail());
+				if (user.getGitEmail() != null)
+					emails.add(user.getGitEmail());
 				emails.addAll(user.getAlternateEmails());
 				int count = 0;
 				for (String email: emails) {

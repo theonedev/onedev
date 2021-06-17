@@ -307,6 +307,8 @@ public class UserResource {
 	
 	private void checkEmails(User user) {
 		Set<String> emails = Sets.newHashSet(user.getEmail());
+		if (user.getGitEmail() != null)
+			emails.add(user.getGitEmail());
 		emails.addAll(user.getAlternateEmails());
 		for (String email: emails) {
 			User userWithSameEmail = userManager.findByEmail(email);

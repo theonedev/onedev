@@ -66,6 +66,8 @@ public class ProfileEditPanel extends GenericPanel<User> {
 				
 				User user = getUser();
 				user.getAlternateEmails().remove(user.getEmail());
+				if (user.getGitEmail() != null)
+					user.getAlternateEmails().remove(user.getGitEmail());
 				
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				User userWithSameName = userManager.findByName(user.getName());
@@ -78,6 +80,13 @@ public class ProfileEditPanel extends GenericPanel<User> {
 					editor.error(new Path(new PathNode.Named(User.PROP_EMAIL)),
 							"Email already used by another account");
 				} 
+				if (user.getGitEmail() != null) {
+					userWithSameEmail = userManager.findByEmail(user.getGitEmail());
+					if (userWithSameEmail != null && !userWithSameEmail.equals(user)) {
+						editor.error(new Path(new PathNode.Named(User.PROP_GIT_EMAIL)),
+								"Email already used by another account");
+					} 
+				}
 				for (String email: user.getAlternateEmails()) {
 					userWithSameEmail = userManager.findByEmail(email);
 					if (userWithSameEmail != null && !userWithSameEmail.equals(user)) {

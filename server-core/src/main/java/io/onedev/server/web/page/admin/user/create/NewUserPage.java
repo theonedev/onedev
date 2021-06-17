@@ -41,7 +41,7 @@ public class NewUserPage extends AdministrationPage {
 		super.onInitialize();
 		
 		BeanEditor editor = BeanContext.edit("editor", user, 
-				Sets.newHashSet(User.PROP_ALTERNATE_EMAILS), true);
+				Sets.newHashSet(User.PROP_GIT_EMAIL, User.PROP_ALTERNATE_EMAILS), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

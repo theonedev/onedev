@@ -81,6 +81,8 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	
 	public static final String PROP_EMAIL = "email";
 	
+	public static final String PROP_GIT_EMAIL = "gitEmail";
+	
 	public static final String PROP_ALTERNATE_EMAILS = "alternateEmails";
 	
 	public static final String PROP_PASSWORD = "password";
@@ -121,6 +123,9 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	
 	@Column(unique=true, nullable=false)
 	private String email;
+	
+	@Column(unique=true)
+	private String gitEmail;
 	
 	@Lob
 	@Column(nullable=false, length=1024)
@@ -486,6 +491,16 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 		this.email = email;
 	}
 
+	@Editable(order=350, description="Specify an email to use for web based git operations if you want to "
+			+ "keep your primary email secret")
+	public String getGitEmail() {
+		return gitEmail;
+	}
+
+	public void setGitEmail(String gitEmail) {
+		this.gitEmail = gitEmail;
+	}
+
 	@Editable(order=400, description="Optionally specify one or more alternate emails with one email per line. "
 			+ "With alternate emails, git commits authored/committed via your old emails can be associated with "
 			+ "your current account")
@@ -516,6 +531,8 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	public PersonIdent asPerson() {
 		if (isSystem())
 			return new PersonIdent(getDisplayName(), "");
+		else if (getGitEmail() != null)
+			return new PersonIdent(getDisplayName(), getGitEmail());
 		else
 			return new PersonIdent(getDisplayName(), getEmail());
 	}
@@ -788,7 +805,7 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	public LinkedHashSet<String> getUserBuildQuerySubscriptions() {
 		return userBuildQuerySubscriptions;
 	}
-
+	
 	public void setUserBuildQuerySubscriptions(LinkedHashSet<String> userBuildQuerySubscriptions) {
 		this.userBuildQuerySubscriptions = userBuildQuerySubscriptions;
 	}

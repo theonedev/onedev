@@ -30,9 +30,12 @@ public class AuthorCriteria extends CommitCriteria {
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values) {
 			if (value == null) { // authored by me
-				if (SecurityUtils.getUser() != null) {
-					command.authors().add("<" + SecurityUtils.getUser().getEmail() + ">");
-					for (String email: SecurityUtils.getUser().getAlternateEmails()) 
+				User user = SecurityUtils.getUser();
+				if (user != null) {
+					command.authors().add("<" + user.getEmail() + ">");
+					if (user.getGitEmail() != null)
+						command.authors().add("<" + user.getGitEmail() + ">");
+					for (String email: user.getAlternateEmails()) 
 						command.authors().add("<" + email + ">");
 				} else {
 					throw new ExplicitException("Please login to perform this query");
@@ -49,10 +52,12 @@ public class AuthorCriteria extends CommitCriteria {
 		String authorEmail = commit.getAuthorIdent().getEmailAddress();
 		for (String value: values) {
 			if (value == null) { // authored by me
-				if (User.get() == null) {
+				User user = User.get();
+				if (user == null) {
 					throw new ExplicitException("Please login to perform this query");
-				} else if (User.get().getEmail().equals(authorEmail) 
-						|| User.get().getAlternateEmails().contains(authorEmail)) { 
+				} else if (user.getEmail().equals(authorEmail)
+						|| user.getGitEmail()!=null && user.getGitEmail().equals(authorEmail)
+						|| user.getAlternateEmails().contains(authorEmail)) { 
 					return true;
 				}
 			} else {

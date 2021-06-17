@@ -17,18 +17,23 @@ public class UserFacade extends EntityFacade {
 	
 	private final String email;
 	
+	private final String gitEmail;
+	
 	private final List<String> alternateEmails;
 	
-	public UserFacade(Long userId, String name, String fullName, String email, List<String> alternateEmails) {
+	public UserFacade(Long userId, String name, @Nullable String fullName, String email, 
+			@Nullable String gitEmail, List<String> alternateEmails) {
 		super(userId);
 		this.name = name;
 		this.fullName = fullName;
 		this.email = email;
+		this.gitEmail = gitEmail;
 		this.alternateEmails = alternateEmails;
 	}
 	
 	public UserFacade(User user) {
-		this(user.getId(), user.getName(), user.getFullName(), user.getEmail(), user.getAlternateEmails());
+		this(user.getId(), user.getName(), user.getFullName(), user.getEmail(), 
+				user.getGitEmail(), user.getAlternateEmails());
 	}
 
 	public String getName() {
@@ -51,12 +56,16 @@ public class UserFacade extends EntityFacade {
 		return email;
 	}
 
+	public String getGitEmail() {
+		return gitEmail;
+	}
+
 	public List<String> getAlternateEmails() {
 		return alternateEmails;
 	}
 
 	public boolean isUsingEmail(String email) {
-		return this.email.equals(email) || alternateEmails.contains(email);
+		return email.equals(this.email) || email.equals(gitEmail) || alternateEmails.contains(email);
 	}
 	
 	public NameAndEmail getNameAndEmail() {
