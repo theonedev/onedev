@@ -6,6 +6,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -42,6 +45,8 @@ public class Upgrade extends DefaultPersistManager {
 	public static final String BACKUP_DATETIME_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 	
 	public static final String DB_BACKUP_DIR = "db-backup";
+	
+	private static final Pattern PRODUCT_FILE_NAME_PATTERN = Pattern.compile("io\\.onedev\\.server-product-(.*?)\\.jar");
 	
 	@Inject
 	public Upgrade(PhysicalNamingStrategy physicalNamingStrategy,
@@ -146,213 +151,227 @@ public class Upgrade extends DefaultPersistManager {
 				System.exit(1);
 			}
 
-			logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
-			
-			if (Bootstrap.isServerRunning(upgradeDir)) {
-				logger.error("Please stop server running at \"{}\" before upgrading", upgradeDir.getAbsolutePath());
-				System.exit(1);
-			}
-			if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
-				logger.error("Please stop server running at \"{}\" before upgrading", Bootstrap.installDir.getAbsolutePath());
-				System.exit(1);
-			}
-
+			String oldAppVersion = null;
 			for (File file: new File(upgradeDir, "lib").listFiles()) {
-				if (file.getName().contains("mariadb") || file.getName().contains("mysql") 
-						|| file.getName().contains("ojdbc") || file.getName().contains("postgresql") 
-						|| file.getName().contains("sqljdbc")) {
-					try {
-						File destDir = new File(upgradeDir, "site/lib");
-						FileUtils.createDir(destDir);
-						FileUtils.copyFileToDirectory(file, destDir);
-						FileUtils.deleteFile(file);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
+				Matcher matcher = PRODUCT_FILE_NAME_PATTERN.matcher(file.getName());
+				if (matcher.matches()) {
+					oldAppVersion = matcher.group(1);
+					break;
+				}
+			}
+			
+			if (oldAppVersion == null || !oldAppVersion.equals(AppLoader.getProduct().getVersion())) {
+				logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
+				
+				if (Bootstrap.isServerRunning(upgradeDir)) {
+					logger.error("Please stop server running at \"{}\" before upgrading", upgradeDir.getAbsolutePath());
+					System.exit(1);
+				}
+				if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
+					logger.error("Please stop server running at \"{}\" before upgrading", Bootstrap.installDir.getAbsolutePath());
+					System.exit(1);
+				}
+
+				for (File file: new File(upgradeDir, "lib").listFiles()) {
+					if (file.getName().contains("mariadb") || file.getName().contains("mysql") 
+							|| file.getName().contains("ojdbc") || file.getName().contains("postgresql") 
+							|| file.getName().contains("sqljdbc")) {
+						try {
+							File destDir = new File(upgradeDir, "site/lib");
+							FileUtils.createDir(destDir);
+							FileUtils.copyFileToDirectory(file, destDir);
+							FileUtils.deleteFile(file);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 					}
 				}
-			}
-			
-			AtomicInteger oldDataVersion = new AtomicInteger(0);
-			
-			int ret = buildCommandline(upgradeDir, "check-data-version").execute(new LineConsumer() {
 				
-				@Override
-				public void consume(String line) {
-					String prefix = "Data version: ";
-					if (line.startsWith(prefix)) {
-						oldDataVersion.set(Integer.parseInt(line.substring(prefix.length())));
-						logger.info("Old data version: " + oldDataVersion.get());
-					} else {
-						logger.info(prefixUpgradeTargetLog(line));
-					}
-				}
+				AtomicInteger oldDataVersion = new AtomicInteger(0);
 				
-			}, new LineConsumer() {
-
-				@Override
-				public void consume(String line) {
-					logger.error(prefixUpgradeTargetLog(line));
-				}}
-			
-			).getReturnCode();
-			
-			if (ret != 0) {
-				logger.error("Unable to upgrade specified installation due to above error");
-				System.exit(1);
-			}
-			
-			int newDataVersion = Integer.parseInt(MigrationHelper.getVersion(DataMigrator.class));
-			
-			if (oldDataVersion.get() > newDataVersion) {
-				logger.error("Unable to upgrade as specified installation is more recent");
-				System.exit(1);
-			}
-			
-			String timestamp = DateTimeFormat.forPattern(BACKUP_DATETIME_FORMAT).print(new DateTime());
-			File programBackup = new File(upgradeDir, "site/program-backup/" + timestamp);
-			FileUtils.createDir(programBackup);
-			
-			logger.info("Backing up old program files as {}...", programBackup.getAbsolutePath());
-			try {
-				for (File each: upgradeDir.listFiles()) {
-					if (each.isFile()) 
-						FileUtils.copyFileToDirectory(each, programBackup);
-					else if (!each.getName().equals("temp") && !each.getName().equals("site"))
-						FileUtils.copyDirectoryToDirectory(each, programBackup);
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			restoreExecutables(programBackup);
-			
-			File dbBackupFile = null;
-			boolean failed = false;
-			try {
-				if (oldDataVersion.get() != newDataVersion) {
-					dbBackupFile = new File(upgradeDir, "site/" + DB_BACKUP_DIR + "/" + timestamp + ".zip");
-					logger.info("Backing up database as {}...", dbBackupFile.getAbsolutePath());
+				int ret = buildCommandline(upgradeDir, "check-data-version").execute(new LineConsumer() {
 					
-					FileUtils.createDir(dbBackupFile.getParentFile());
-					
-					ret = buildCommandline(upgradeDir, "backup-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
+					@Override
+					public void consume(String line) {
+						String prefix = "Data version: ";
+						if (line.startsWith(prefix)) {
+							oldDataVersion.set(Integer.parseInt(line.substring(prefix.length())));
+							logger.info("Old data version: " + oldDataVersion.get());
+						} else {
 							logger.info(prefixUpgradeTargetLog(line));
 						}
-						
-					}, new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							logger.error(prefixUpgradeTargetLog(line));
-						}
-						
-					}).getReturnCode();
-					
-					if (ret == 0) {
-						logger.info("Cleaning database with old program...");
-						ret = buildCommandline(upgradeDir, "clean-db").execute(new LineConsumer() {
-	
-							@Override
-							public void consume(String line) {
-								logger.info(prefixUpgradeTargetLog(line));
-							}
-							
-						}, new LineConsumer() {
-	
-							@Override
-							public void consume(String line) {
-								logger.error(prefixUpgradeTargetLog(line));
-							}
-							
-						}).getReturnCode();
 					}
 					
-					if (ret == 0) {
-						logger.info("Updating program files...");
-						updateProgramFiles(upgradeDir);
+				}, new LineConsumer() {
 
-						logger.info("Restoring database with new program...");
-						ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								logger.info(prefixUpgradeTargetLog(line));
-							}
-							
-						}, new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								logger.error(prefixUpgradeTargetLog(line));
-							}
-							
-						}).getReturnCode();
-					}
-					
-					if (ret != 0) {
-						logger.error("Failed to upgrade {}", upgradeDir.getAbsolutePath());
-						failed = true;
-					} 
-					
-				} else {
-					logger.info("Copying new program files into {}...", upgradeDir.getAbsolutePath());
-					updateProgramFiles(upgradeDir);
-				}
-			} catch (Exception e) {
-				logger.error("Error upgrading " + upgradeDir.getAbsolutePath(), e);
-				failed = true;
-			}
-			
-			if (failed) {
-				logger.info("Restoring old program files due to upgrade failure...");
-				try {
-					for (File child: programBackup.listFiles()) {
-						if (!child.getName().equals("site")) {
-							File target = new File(upgradeDir, child.getName());
-							if (target.isDirectory()) {
-								FileUtils.cleanDir(target);
-								FileUtils.copyDirectory(child, target);
-							} else {
-								FileUtils.copyFile(child, target);
-							}
-						}
-					}
-					
-					restoreExecutables(upgradeDir);
-					logger.info("Old program files restored");
-					FileUtils.deleteDir(programBackup);
-				} catch (Exception e) {
-					logger.error("Error restoring old program files", e);
-					logger.warn("Please restore manually from \"{}\"", programBackup.getAbsolutePath());
-				}
-				if (dbBackupFile != null) {
-					logger.warn("The database might be in an inconsistent state due to upgrade failure. In that case, "
-							+ "you need to restore the database by first cleaning it, and then running below command:");
-					if (SystemUtils.IS_OS_WINDOWS) {
-						logger.info(upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
-					} else {
-						logger.info(upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
-					}
-				}
-				System.exit(1);
-			} else {
-				logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
+					@Override
+					public void consume(String line) {
+						logger.error(prefixUpgradeTargetLog(line));
+					}}
 				
-				if (oldDataVersion.get() <= 5) {
-					logger.warn("\n"
-							+ "************************* IMPORTANT NOTICE *************************\n"
-							+ "* OneDev password hash algorithm has been changed for security    *\n"
-							+ "* reason. Please reset administrator password with the             *\n"
-							+ "* reset_admin_password command. Other users' password will be      *\n"
-							+ "* reset and sent to their mail box automatically when they logs    *\n"
-							+ "* into OneDev.                                                    *\n"
-							+ "********************************************************************");
+				).getReturnCode();
+				
+				if (ret != 0) {
+					logger.error("Unable to upgrade specified installation due to above error");
+					System.exit(1);
 				}
-				FileUtils.deleteDir(programBackup);
+				
+				int newDataVersion = Integer.parseInt(MigrationHelper.getVersion(DataMigrator.class));
+				
+				if (oldDataVersion.get() > newDataVersion) {
+					logger.error("Unable to upgrade as specified installation is more recent");
+					System.exit(1);
+				}
+				
+				String timestamp = DateTimeFormat.forPattern(BACKUP_DATETIME_FORMAT).print(new DateTime());
+				File programBackup = new File(upgradeDir, "site/program-backup/" + timestamp);
+				FileUtils.createDir(programBackup);
+				
+				logger.info("Backing up old program files as {}...", programBackup.getAbsolutePath());
+				try {
+					for (File each: upgradeDir.listFiles()) {
+						if (each.isFile()) 
+							FileUtils.copyFileToDirectory(each, programBackup);
+						else if (!each.getName().equals("temp") && !each.getName().equals("site"))
+							FileUtils.copyDirectoryToDirectory(each, programBackup);
+					}
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				restoreExecutables(programBackup);
+				
+				File dbBackupFile = null;
+				boolean failed = false;
+				try {
+					if (oldDataVersion.get() != newDataVersion) {
+						dbBackupFile = new File(upgradeDir, "site/" + DB_BACKUP_DIR + "/" + timestamp + ".zip");
+						logger.info("Backing up database as {}...", dbBackupFile.getAbsolutePath());
+						
+						FileUtils.createDir(dbBackupFile.getParentFile());
+						
+						ret = buildCommandline(upgradeDir, "backup-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.info(prefixUpgradeTargetLog(line));
+							}
+							
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.error(prefixUpgradeTargetLog(line));
+							}
+							
+						}).getReturnCode();
+						
+						if (ret == 0) {
+							logger.info("Cleaning database with old program...");
+							ret = buildCommandline(upgradeDir, "clean-db").execute(new LineConsumer() {
+		
+								@Override
+								public void consume(String line) {
+									logger.info(prefixUpgradeTargetLog(line));
+								}
+								
+							}, new LineConsumer() {
+		
+								@Override
+								public void consume(String line) {
+									logger.error(prefixUpgradeTargetLog(line));
+								}
+								
+							}).getReturnCode();
+						}
+						
+						if (ret == 0) {
+							logger.info("Updating program files...");
+							updateProgramFiles(upgradeDir);
+
+							logger.info("Restoring database with new program...");
+							ret = buildCommandline(upgradeDir, "restore-db", dbBackupFile.getAbsolutePath()).execute(new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									logger.info(prefixUpgradeTargetLog(line));
+								}
+								
+							}, new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									logger.error(prefixUpgradeTargetLog(line));
+								}
+								
+							}).getReturnCode();
+						}
+						
+						if (ret != 0) {
+							logger.error("Failed to upgrade {}", upgradeDir.getAbsolutePath());
+							failed = true;
+						} 
+						
+					} else {
+						logger.info("Copying new program files into {}...", upgradeDir.getAbsolutePath());
+						updateProgramFiles(upgradeDir);
+					}
+				} catch (Exception e) {
+					logger.error("Error upgrading " + upgradeDir.getAbsolutePath(), e);
+					failed = true;
+				}
+				
+				if (failed) {
+					logger.info("Restoring old program files due to upgrade failure...");
+					try {
+						for (File child: programBackup.listFiles()) {
+							if (!child.getName().equals("site")) {
+								File target = new File(upgradeDir, child.getName());
+								if (target.isDirectory()) {
+									FileUtils.cleanDir(target);
+									FileUtils.copyDirectory(child, target);
+								} else {
+									FileUtils.copyFile(child, target);
+								}
+							}
+						}
+						
+						restoreExecutables(upgradeDir);
+						logger.info("Old program files restored");
+						FileUtils.deleteDir(programBackup);
+					} catch (Exception e) {
+						logger.error("Error restoring old program files", e);
+						logger.warn("Please restore manually from \"{}\"", programBackup.getAbsolutePath());
+					}
+					if (dbBackupFile != null) {
+						logger.warn("The database might be in an inconsistent state due to upgrade failure. In that case, "
+								+ "you need to restore the database by first cleaning it, and then running below command:");
+						if (SystemUtils.IS_OS_WINDOWS) {
+							logger.info(upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
+						} else {
+							logger.info(upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.sh " + dbBackupFile.getAbsolutePath());
+						}
+					}
+					System.exit(1);
+				} else {
+					logger.info("Successfully upgraded {}", upgradeDir.getAbsolutePath());
+					
+					if (oldDataVersion.get() <= 5) {
+						logger.warn("\n"
+								+ "************************* IMPORTANT NOTICE *************************\n"
+								+ "* OneDev password hash algorithm has been changed for security    *\n"
+								+ "* reason. Please reset administrator password with the             *\n"
+								+ "* reset_admin_password command. Other users' password will be      *\n"
+								+ "* reset and sent to their mail box automatically when they logs    *\n"
+								+ "* into OneDev.                                                    *\n"
+								+ "********************************************************************");
+					}
+					FileUtils.deleteDir(programBackup);
+					System.exit(0);
+				}			
+			} else {
+				logger.info("Successfully checked {}", upgradeDir.getAbsolutePath());
 				System.exit(0);
-			}			
+			}
 		} else {
 			logger.info("Populating {}...", upgradeDir.getAbsolutePath());
 			
