@@ -42,8 +42,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		this.htmlTransformers = htmlTransformers;
 	}
 
-	@Override
-	public String render(String markdown) {
+	private MutableDataHolder setupOptions() {
 		List<Extension> extensions = new ArrayList<>();
 		extensions.add(AnchorLinkExtension.create());
 		extensions.add(TablesExtension.create());
@@ -53,7 +52,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 		extensions.add(AutolinkExtension.create());
 		extensions.addAll(contributedExtensions);
 
-		MutableDataHolder options = new MutableDataSet()
+		return new MutableDataSet()
 				.set(HtmlRenderer.GENERATE_HEADER_ID, true)
 				.set(AnchorLinkExtension.ANCHORLINKS_SET_NAME, true)
 				.set(AnchorLinkExtension.ANCHORLINKS_WRAP_TEXT, false)
@@ -65,13 +64,13 @@ public class DefaultMarkdownManager implements MarkdownManager {
 				.set(TablesExtension.DISCARD_EXTRA_COLUMNS, true)
 				.set(TablesExtension.HEADER_SEPARATOR_COLUMN_MATCH, true)
 				.set(Parser.EXTENSIONS, extensions);
-
-		Parser parser = Parser.builder(options).build();
-
-		HtmlRenderer htmlRenderer = HtmlRenderer.builder(options).build();
-		
-		Node document = parser.parse(markdown);
-		return htmlRenderer.render(document);
+	}
+	
+	@Override
+	public String render(String markdown) {
+		MutableDataHolder options = setupOptions();
+		Node node = parse(markdown);
+		return HtmlRenderer.builder(options).build().render(node);
 	}
 
 	@Override
@@ -92,6 +91,13 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	@Override
 	public String process(String html, Project project, Object context) {
 		return process(HtmlUtils.parse(html), project, context).body().html();
+	}
+
+	@Override
+	public Node parse(String markdown) {
+		MutableDataHolder options = setupOptions();
+		Parser parser = Parser.builder(options).build();
+		return parser.parse(markdown);
 	}
 
 }

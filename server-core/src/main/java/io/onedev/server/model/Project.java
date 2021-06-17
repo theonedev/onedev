@@ -113,6 +113,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.NameAware;
@@ -1521,7 +1522,7 @@ public class Project extends AbstractEntity implements NameAware {
 	        while (-1 != (n = attachmentStream.read(buffer))) {
 	            count += n;
 		        if (count > MAX_ATTACHMENT_SIZE) {
-		        	throw new RuntimeException("Upload must be less than " 
+		        	throw new AttachmentTooLargeException("Upload must be less than " 
 		        			+ FileUtils.byteCountToDisplaySize(MAX_ATTACHMENT_SIZE));
 		        }
 	            os.write(buffer, 0, n);

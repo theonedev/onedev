@@ -39,7 +39,7 @@ public class GitHubImportOption implements Serializable, Validatable {
 	
 	private String assigneesIssueField;
 	
-	private List<IssueLabelMapping> labelMappings = new ArrayList<>();
+	private List<IssueLabelMapping> issueLabelMappings = new ArrayList<>();
 	
 	@Editable(order=100, name="Repositories to Import")
 	@Size(min=1, max=10000, message="No repositories to import")
@@ -94,7 +94,7 @@ public class GitHubImportOption implements Serializable, Validatable {
 		return choices;
 	}
 	
-	@Editable(order=350, description="Specify a multi-value issue custom field of type user to "
+	@Editable(order=350, description="Specify a multi-value user field to "
 			+ "hold assignees information")
 	@ChoiceProvider("getAssigneesIssueFieldChoices")
 	@NotEmpty
@@ -116,13 +116,15 @@ public class GitHubImportOption implements Serializable, Validatable {
 		return choices;
 	}
 
-	@Editable(order=400, description="Map GitHub issue label to OneDev issue custom field of enum type")
-	public List<IssueLabelMapping> getLabelMappings() {
-		return labelMappings;
+	@Editable(order=400, description="Specify how to map GitHub issue labels to OneDev custom "
+			+ "fields. Only multi-valued enum field can be used here. Unmapped labels will be "
+			+ "reflected in issue description")
+	public List<IssueLabelMapping> getIssueLabelMappings() {
+		return issueLabelMappings;
 	}
 
-	public void setLabelMappings(List<IssueLabelMapping> labelMappings) {
-		this.labelMappings = labelMappings;
+	public void setIssueLabelMappings(List<IssueLabelMapping> issueLabelMappings) {
+		this.issueLabelMappings = issueLabelMappings;
 	}
 
 	@Override

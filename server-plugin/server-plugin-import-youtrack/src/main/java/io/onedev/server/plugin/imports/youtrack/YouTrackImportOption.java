@@ -60,7 +60,8 @@ public class YouTrackImportOption implements Serializable, Validatable {
 	}
 
 	@Editable(order=300, description="Specify how to map YouTrack issue tags to OneDev issue custom "
-			+ "fields. Unmapped tags will be reflected in issue description")
+			+ "fields. Only multi-valued enum field can be used here. Unmapped tags will be "
+			+ "reflected in issue description")
 	public List<IssueTagMapping> getIssueTagMappings() {
 		return issueTagMappings;
 	}

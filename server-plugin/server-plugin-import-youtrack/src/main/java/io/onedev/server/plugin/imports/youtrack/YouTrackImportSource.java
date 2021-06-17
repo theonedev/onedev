@@ -15,6 +15,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -77,8 +78,7 @@ public class YouTrackImportSource implements Serializable, Validatable {
 	}
 
 	@Editable(order=400, description="If checked, import options will be pre-populated based on all accessible "
-			+ "projects and its settings. In case there are too many projects and settings, you may want to "
-			+ "uncheck this and provide import option manually")
+			+ "projects and its settings")
 	public boolean isPrepopulateImportOptions() {
 		return prepopulateImportOptions;
 	}
@@ -99,7 +99,7 @@ public class YouTrackImportSource implements Serializable, Validatable {
 			WebTarget target = client.target(getApiEndpoint("/users/me?fields=guest"));
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
-				String errorMessage = YouTrackImporter.checkStatus(response);
+				String errorMessage = JerseyUtils.checkStatus(response);
 				if (errorMessage != null) {
 					context.disableDefaultConstraintViolation();
 					context.buildConstraintViolationWithTemplate(errorMessage)

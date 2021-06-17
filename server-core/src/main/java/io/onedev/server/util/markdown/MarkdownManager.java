@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import org.jsoup.nodes.Document;
 
+import com.vladsch.flexmark.ast.Node;
+
 import io.onedev.server.model.Project;
 
 public interface MarkdownManager {
@@ -18,6 +20,8 @@ public interface MarkdownManager {
 	 * 			rendered html
 	 */
 	String render(String markdown);
+	
+	Node parse(String markdown);
 	
 	Document process(Document document, @Nullable Project project, @Nullable Object context);
 

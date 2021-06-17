@@ -58,6 +58,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.page.project.imports.ProjectImporter;
@@ -182,7 +183,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 				projectDescriptions.put(projectName, projectNode.get("description").asText(null));
 			}				
 			
-			Set<String> unmappedAccounts = new LinkedHashSet<>();
+			Set<String> nonExistentLogins = new LinkedHashSet<>();
 			Set<String> unmappedIssueTags = new LinkedHashSet<>();
 			Set<String> unmappedIssueFields = new LinkedHashSet<>();
 			Set<String> unmappedIssueStates = new LinkedHashSet<>();
@@ -241,32 +242,28 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 									if (!attachmentUrl.startsWith("/api"))
 										throw new ExplicitException("Unexpected attachment url: " + attachmentUrl);
 									attachmentUrl = attachmentUrl.substring("/api".length());
-									
-									WebTarget target = client.target(importSource.getApiEndpoint(attachmentUrl));
+
+									String endpoint = importSource.getApiEndpoint(attachmentUrl);
+									WebTarget target = client.target(endpoint);
 									Invocation.Builder builder =  target.request();
 									try (Response response = builder.get()) {
-										int status = response.getStatus();
-										if (status != 200) {
-											String errorMessage = response.readEntity(String.class);
-											if (StringUtils.isNotBlank(errorMessage)) {
-												throw new ExplicitException("Error downloading attachment: " + errorMessage);
-											} else {
-												throw new RuntimeException("Attachment download failed with status " + status 
-														+ ", check server log for detaiils");
-											}
-										} else {
-											try (InputStream is = response.readEntity(InputStream.class)) {
-												String oneDevAttachmentName = project.saveAttachment(issueUUID, attachmentName, is);
-												String oneDevAttachmentUrl = project.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
-												if (markdown.contains("(" + attachmentName + ")")) { 
-													markdown = markdown.replace("(" + attachmentName + ")", "(" + oneDevAttachmentUrl + ")");
-												} else { 
-													unreferencedAttachments.put(attachmentName, oneDevAttachmentUrl);
-												}
-											} catch (IOException e) {
-												throw new RuntimeException(e);
-											} 
+										String errorMessage = JerseyUtils.checkStatus(response);
+										if (errorMessage != null) { 
+											throw new ExplicitException(String.format(
+													"Error downloading attachment (url: %s, error message: %s)", 
+													endpoint, errorMessage));
 										}
+										try (InputStream is = response.readEntity(InputStream.class)) {
+											String oneDevAttachmentName = project.saveAttachment(issueUUID, attachmentName, is);
+											String oneDevAttachmentUrl = project.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
+											if (markdown.contains("(" + attachmentName + ")")) { 
+												markdown = markdown.replace("(" + attachmentName + ")", "(" + oneDevAttachmentUrl + ")");
+											} else { 
+												unreferencedAttachments.put(attachmentName, oneDevAttachmentUrl);
+											}
+										} catch (IOException e) {
+											throw new RuntimeException(e);
+										} 
 									}
 								}
 							}
@@ -338,11 +335,11 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 										issue.setSubmitter(user);
 									} else {
 										issue.setSubmitterName(fullName);
-										unmappedAccounts.add(login);
+										nonExistentLogins.add(login);
 									}
 								} else {
 									issue.setSubmitterName(fullName);
-									unmappedAccounts.add(login);
+									nonExistentLogins.add(login);
 								}
 							} else {
 								issue.setSubmitter(SecurityUtils.getUser());
@@ -491,11 +488,11 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 													fieldValue = user.getName();
 												} else {
 													fieldValue = fullName;
-													unmappedAccounts.add(login);
+													nonExistentLogins.add(login);
 												}
 											} else {
 												fieldValue = fullName;
-												unmappedAccounts.add(login);
+												nonExistentLogins.add(login);
 											}
 											
 											IssueField issueField = new IssueField();
@@ -531,11 +528,11 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 														fieldValue = user.getName();
 													} else {
 														fieldValue = fullName;
-														unmappedAccounts.add(login);
+														nonExistentLogins.add(login);
 													}
 												} else {
 													fieldValue = fullName;
-													unmappedAccounts.add(login);
+													nonExistentLogins.add(login);
 												}
 												
 												IssueField issueField = new IssueField();
@@ -763,11 +760,11 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 												comment.setUser(user);
 											} else {
 												comment.setUserName(fullName);
-												unmappedAccounts.add(login);
+												nonExistentLogins.add(login);
 											}
 										} else {
 											comment.setUserName(fullName);
-											unmappedAccounts.add(login);
+											nonExistentLogins.add(login);
 										}
 									} else {
 										issue.setSubmitter(SecurityUtils.getUser());
@@ -817,7 +814,7 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 					|| !unmappedIssueFields.isEmpty() 
 					|| !mismatchedIssueFields.isEmpty() 
 					|| !unmappedIssueTags.isEmpty()
-					|| !unmappedAccounts.isEmpty()
+					|| !nonExistentLogins.isEmpty()
 					|| !tooLargeAttachments.isEmpty();
 
 			if (hasNotes)
@@ -846,9 +843,9 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 				feedback.append("<li> YouTrack issue tags not mapped to OneDev custom field (mentioned as extra info in issue description): " 
 						+ HtmlEscape.escapeHtml5(unmappedIssueTags.toString()));
 			}
-			if (!unmappedAccounts.isEmpty()) {
+			if (!nonExistentLogins.isEmpty()) {
 				feedback.append("<li> YouTrack logins without email or email can not be mapped to OneDev account: " 
-						+ HtmlEscape.escapeHtml5(unmappedAccounts.toString()));
+						+ HtmlEscape.escapeHtml5(nonExistentLogins.toString()));
 			}
 			if (!tooLargeAttachments.isEmpty()) {
 				feedback.append("<li> Too large attachments: " 
@@ -918,27 +915,11 @@ public class YouTrackImporter extends ProjectImporter<YouTrackImportSource, YouT
 		WebTarget target = client.target(apiEndpoint);
 		Invocation.Builder builder =  target.request();
 		try (Response response = builder.get()) {
-			String errorMessage = checkStatus(response);
+			String errorMessage = JerseyUtils.checkStatus(response);
 			if (errorMessage != null)
 				throw new ExplicitException(errorMessage);
 			else
 				return response.readEntity(JsonNode.class);
-		}
-	}
-	
-	@Nullable
-	public static String checkStatus(Response response) {
-		int status = response.getStatus();
-		if (status != 200) {
-			String errorMessage = response.readEntity(String.class);
-			if (StringUtils.isNotBlank(errorMessage)) {
-				return String.format("Http request failed (status code: %d, error message: %s)", 
-						status, errorMessage);
-			} else {
-				return String.format("Http request failed (status code: %d)", status);
-			}
-		} else {
-			return null;
 		}
 	}
 	
