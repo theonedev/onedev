@@ -2486,4 +2486,56 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate57(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			try {
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				content = StringUtils.replace(content, 
+						"io.onedev.server.model.support.inputspec.numberinput.", 
+						"io.onedev.server.model.support.inputspec.integerinput.");
+				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			
+			if (file.getName().startsWith("BuildParams.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String type = element.elementText("type").trim();
+					if (type.equals("Number"))
+						element.setText("Integer");
+					else if (type.equals("Pull request"))
+						element.setText("Pull Request");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueFields.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String type = element.elementText("type").trim();
+					if (type.equals("Number"))
+						element.setText("Integer");
+					else if (type.equals("Pull request"))
+						element.setText("Pull Request");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element fieldSpecElement: valueElement.element("fieldSpecs").elements()) {
+								if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.NumberField"))
+									fieldSpecElement.setName("io.onedev.server.model.support.issue.field.spec.IntegerField");
+								else if (fieldSpecElement.getName().equals("io.onedev.server.model.support.issue.field.spec.TextField"))
+									fieldSpecElement.addElement("multiline").setText("false");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

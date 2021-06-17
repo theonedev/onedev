@@ -124,7 +124,7 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	@Column(unique=true, nullable=false)
 	private String email;
 	
-	@Column(unique=true)
+	@Column
 	private String gitEmail;
 	
 	@Lob

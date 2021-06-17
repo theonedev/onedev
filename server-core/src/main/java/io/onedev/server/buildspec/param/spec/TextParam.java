@@ -21,7 +21,7 @@ public class TextParam extends ParamSpec {
 	
 	private DefaultValueProvider defaultValueProvider;
 
-	@Editable(order=1050)
+	@Editable(order=1050, name="Multiple Lines")
 	public boolean isMultiline() {
 		return multiline;
 	}
