@@ -17,16 +17,17 @@ import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Password;
 
 @Editable
 @ClassValidating
-public class GitHubImportSource implements Serializable, Validatable {
+public class GitHubProjectImportSource implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String PROP_API_URL = "apiUrl";
+	static final String PROP_API_URL = "apiUrl";
 	
-	private static final String PROP_ACCESS_TOKEN = "accessToken";
+	static final String PROP_ACCESS_TOKEN = "accessToken";
 	
 	private String apiUrl = "https://api.github.com";
 	
@@ -46,6 +47,7 @@ public class GitHubImportSource implements Serializable, Validatable {
 
 	@Editable(order=100, name="GitHub Personal Access Token", description="GitHub personal access token should be generated with "
 			+ "scope <b>repo</b> and <b>read:org</b>")
+	@Password
 	@NotEmpty
 	public String getAccessToken() {
 		return accessToken;
@@ -55,7 +57,7 @@ public class GitHubImportSource implements Serializable, Validatable {
 		this.accessToken = accessToken;
 	}
 	
-	@Editable(order=200, description="If checked, import options will be pre-populated based on all accessible "
+	@Editable(order=1000, description="If checked, import options will be pre-populated based on all accessible "
 			+ "repositories and its settings")
 	public boolean isPrepopulateImportOptions() {
 		return prepopulateImportOptions;
@@ -65,8 +67,12 @@ public class GitHubImportSource implements Serializable, Validatable {
 		this.prepopulateImportOptions = prepopulateImportOptions;
 	}
 
-	public String getApiEndpoint(String apiPath) {
+	public static String getApiEndpoint(String apiUrl, String apiPath) {
 		return StringUtils.stripEnd(apiUrl, "/") + "/" + StringUtils.stripStart(apiPath, "/");
+	}
+	
+	public String getApiEndpoint(String apiPath) {
+		return getApiEndpoint(apiUrl, apiPath);
 	}
 
 	@Override
@@ -74,7 +80,8 @@ public class GitHubImportSource implements Serializable, Validatable {
 		Client client = ClientBuilder.newClient();
 		client.register(HttpAuthenticationFeature.basic("git", getAccessToken()));
 		try {
-			WebTarget target = client.target(getApiEndpoint("/user"));
+			String apiEndpoint = getApiEndpoint("/user");
+			WebTarget target = client.target(apiEndpoint);
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
 				if (response.getStatus() == 401) {
@@ -84,7 +91,7 @@ public class GitHubImportSource implements Serializable, Validatable {
 							.addPropertyNode(PROP_ACCESS_TOKEN).addConstraintViolation();
 					return false;
 				} else {
-					String errorMessage = JerseyUtils.checkStatus(response);
+					String errorMessage = JerseyUtils.checkStatus(apiEndpoint, response);
 					if (errorMessage != null) {
 						context.disableDefaultConstraintViolation();
 						context.buildConstraintViolationWithTemplate(errorMessage)

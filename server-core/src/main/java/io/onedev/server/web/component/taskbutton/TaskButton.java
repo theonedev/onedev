@@ -21,6 +21,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.joda.time.DateTime;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
@@ -65,6 +66,12 @@ public abstract class TaskButton extends AjaxButton {
 	
 	protected String getTitle() {
 		return WordUtils.uncamel(getId());
+	}
+	
+	protected void onCompleted(AjaxRequestTarget target) {
+	}
+	
+	protected void onCancelled(AjaxRequestTarget target) {
 	}
 	
 	protected void submitTask(AjaxRequestTarget target) {
@@ -120,8 +127,14 @@ public abstract class TaskButton extends AjaxButton {
 			protected void onClosed() {
 				super.onClosed();
 				Future<?> future = getTaskFutures().remove(path);
-				if (future != null && !future.isDone())
+				
+				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
+				if (future != null && !future.isDone()) {
 					future.cancel(true);
+					onCancelled(target);
+				} else {
+					onCompleted(target);
+				}
 			}
 
 			@Override

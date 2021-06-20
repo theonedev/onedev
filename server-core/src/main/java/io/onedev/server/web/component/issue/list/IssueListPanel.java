@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.issue.list;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -85,6 +86,8 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
@@ -97,6 +100,10 @@ import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
+import io.onedev.server.web.page.project.issues.imports.IssueImporter;
+import io.onedev.server.web.page.project.issues.imports.IssueImporterContribution;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -297,6 +304,43 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});	
+		
+		add(new MenuLink("importIssues") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				Collection<IssueImporter<? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+				for (IssueImporterContribution contribution: OneDev.getExtensions(IssueImporterContribution.class))
+					importers.addAll(contribution.getImporters());
+				
+				List<MenuItem> menuItems = new ArrayList<>();
+				for (IssueImporter<? extends Serializable, ? extends Serializable> importer: importers) {
+					menuItems.add(new MenuItem() {
+
+						@Override
+						public String getLabel() {
+							return "From " + importer.getName();
+						}
+
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							String url = urlFor(getPage().getClass(), getPage().getPageParameters()).toString();
+							return new BookmarkablePageLink<Void>(id, IssueImportPage.class, 
+									IssueImportPage.paramsOf(getProject(), importer.getName(), url));
+						}
+						
+					});
+				}
+				return menuItems;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPage() instanceof ProjectIssueListPage);
+			}
+			
+		});
 		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {

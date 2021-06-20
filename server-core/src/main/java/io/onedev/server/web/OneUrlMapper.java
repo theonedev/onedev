@@ -80,6 +80,7 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.detail.IssueBuildsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueCommitsPage;
 import io.onedev.server.web.page.project.issues.detail.IssuePullRequestsPage;
+import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
@@ -258,6 +259,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/pull-requests", IssuePullRequestsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/${issue}/builds", IssueBuildsPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/issues/new", NewIssuePage.class));
+		add(new DynamicPathPageMapper("projects/${project}/issues/import/${importer}", IssueImportPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/milestones", MilestoneListPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/milestones/${milestone}", MilestoneDetailPage.class));
 		add(new DynamicPathPageMapper("projects/${project}/milestones/${milestone}/edit", MilestoneEditPage.class));

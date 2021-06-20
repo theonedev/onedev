@@ -164,10 +164,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void open(Issue issue) {
 		Preconditions.checkArgument(issue.isNew());
 		issue.setNumberScope(issue.getProject().getForkRoot());
-		Query<?> query = getSession().createQuery(String.format("select max(%s) from Issue where %s=:numberScope", 
-				Issue.PROP_NUMBER, Issue.PROP_NUMBER_SCOPE));
-		query.setParameter("numberScope", issue.getNumberScope());
-		issue.setNumber(getNextNumber(issue.getNumberScope(), query));
+		issue.setNumber(getNextNumber(issue.getNumberScope()));
 		
 		IssueOpened event = new IssueOpened(issue);
 		issue.setLastUpdate(event.getLastUpdate());
@@ -177,6 +174,14 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		issueFieldManager.saveFields(issue);
 		
 		listenerRegistry.post(event);
+	}
+
+	@Sessional
+	public Long getNextNumber(Project numberScope) {
+		Query<?> query = getSession().createQuery(String.format("select max(%s) from Issue where %s=:numberScope", 
+				Issue.PROP_NUMBER, Issue.PROP_NUMBER_SCOPE));
+		query.setParameter(Issue.PROP_NUMBER_SCOPE, numberScope);
+		return getNextNumber(numberScope, query);
 	}
 	
 	@Transactional

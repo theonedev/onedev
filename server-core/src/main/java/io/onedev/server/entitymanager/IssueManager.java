@@ -32,6 +32,8 @@ public interface IssueManager extends EntityManager<Issue> {
     
 	void open(Issue issue);
 	
+	Long getNextNumber(Project numberScope);
+	
 	List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
 			int firstResult, int maxResults, boolean loadFields);
 	

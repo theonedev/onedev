@@ -65,8 +65,16 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		};
 		
 		String selection = getModelObject();
+		
+		/*
+		 * Avoid loading choicesModel which might be time-consuming. Otherwise, when this component 
+		 * is re-created due to a dependency property updating, there is a high chance we are 
+		 * operating on the old select2 component and may cause UI clutter 
+		 */
+		/*
 		if (!choicesModel.getObject().containsKey(selection))
 			selection = null;
+		*/
 		input = new StringSingleChoice("input", Model.of(selection), choicesModel) {
 
 			@Override

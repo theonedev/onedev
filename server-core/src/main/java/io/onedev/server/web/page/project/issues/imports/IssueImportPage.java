@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.imports;
+package io.onedev.server.web.page.project.issues.imports;
 
 import java.io.Serializable;
 import java.util.concurrent.Callable;
@@ -18,40 +18,42 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.layout.LayoutPage;
-import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
 @SuppressWarnings("serial")
-public class ProjectImportPage<T extends Serializable, S extends Serializable> extends LayoutPage {
+public class IssueImportPage<T extends Serializable, S extends Serializable> extends ProjectPage {
 
 	private static final String PARAM_IMPORTER = "importer";
 	
-	private static final Logger logger = LoggerFactory.getLogger(ProjectImportPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(IssueImportPage.class);
 	
-	private ProjectImporter<T, S> importer;
+	private IssueImporter<T, S> importer;
 	
 	private T importSource;
 	
 	private S importOption;
 	
 	@SuppressWarnings("unchecked")
-	public ProjectImportPage(PageParameters params) {
+	public IssueImportPage(PageParameters params) {
 		super(params);
 		
 		String importerName = params.get(PARAM_IMPORTER).toString();
-		for (ProjectImporterContribution contribution: OneDev.getExtensions(ProjectImporterContribution.class)) {
-			for (ProjectImporter<? extends Serializable, ? extends Serializable> importer: contribution.getImporters()) {
+		for (IssueImporterContribution contribution: OneDev.getExtensions(IssueImporterContribution.class)) {
+			for (IssueImporter<? extends Serializable, ? extends Serializable> importer: contribution.getImporters()) {
 				if (importer.getName().equals(importerName)) {
-					this.importer = (ProjectImporter<T, S>) importer;
+					this.importer = (IssueImporter<T, S>) importer;
 					break;
 				}
 			}
@@ -113,18 +115,21 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 
 		});
 		
+		Long projectId = getProject().getId();
+		
 		form.add(new TaskButton("import") {
 
 			@Override
 			protected void onCompleted(AjaxRequestTarget target) {
 				super.onCompleted(target);
-
+				
 				EntitySort sort = new EntitySort();
-				sort.setField(Project.NAME_UPDATE_DATE);
+				sort.setField(Issue.NAME_NUMBER);
 				sort.setDirection(Direction.DESCENDING);
-				ProjectQuery query = new ProjectQuery(null, Lists.newArrayList(sort));
-				PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);
-				throw new RestartResponseException(ProjectListPage.class, params); 
+				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
+				
+				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
+				throw new RestartResponseException(ProjectIssueListPage.class, params);
 			}
 
 			@Override
@@ -133,7 +138,8 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 
 					@Override
 					public String call() throws Exception {
-						return importer.doImport(importSource, importOption, false, logger);
+						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+						return importer.doImport(project, importSource, importOption, false, logger);
 					}
 					
 				});
@@ -160,7 +166,8 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 
 					@Override
 					public String call() throws Exception {
-						return importer.doImport(importSource, importOption, true, logger);
+						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+						return importer.doImport(project, importSource, importOption, true, logger);
 					}
 					
 				});
@@ -183,13 +190,8 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 		add(form);
 	}
 
-	@Override
-	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Importing Projects from " + importer.getName());
-	}
-	
-	public static PageParameters paramsOf(String importer) {
-		PageParameters params = new PageParameters();
+	public static PageParameters paramsOf(Project project, String importer, String prevUrl) {
+		PageParameters params = ProjectPage.paramsOf(project);
 		params.add(PARAM_IMPORTER, importer);
 		return params;
 	}
@@ -200,6 +202,11 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 	
 	public S getImportOption() {
 		return importOption;
+	}
+
+	@Override
+	protected Component newProjectTitle(String componentId) {
+		return new Label(componentId, "Import Issues frmo " + importer.getName());
 	}
 	
 }

@@ -23,15 +23,15 @@ import io.onedev.server.web.editable.annotation.Password;
 
 @Editable
 @ClassValidating
-public class YouTrackImportSource implements Serializable, Validatable {
+public class YouTrackProjectImportSource implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String PROP_API_URL = "apiUrl";
+	protected static final String PROP_API_URL = "apiUrl";
 	
-	private static final String PROP_USER_NAME = "userName";
+	protected static final String PROP_USER_NAME = "userName";
 	
-	private static final String PROP_PASSWORD = "password";
+	protected static final String PROP_PASSWORD = "password";
 	
 	private String apiUrl;
 	
@@ -77,7 +77,7 @@ public class YouTrackImportSource implements Serializable, Validatable {
 		this.password = password;
 	}
 
-	@Editable(order=400, description="If checked, import options will be pre-populated based on all accessible "
+	@Editable(order=1000, description="If checked, import options will be pre-populated based on all accessible "
 			+ "projects and its settings")
 	public boolean isPrepopulateImportOptions() {
 		return prepopulateImportOptions;
@@ -87,19 +87,24 @@ public class YouTrackImportSource implements Serializable, Validatable {
 		this.prepopulateImportOptions = prepopulateImportOptions;
 	}
 
-	public String getApiEndpoint(String apiPath) {
+	static String getApiEndpoint(String apiUrl, String apiPath) {
 		return StringUtils.stripEnd(apiUrl, "/") + "/" + StringUtils.stripStart(apiPath, "/");
 	}
 
+	public String getApiEndpoint(String apiPath) {
+		return getApiEndpoint(apiUrl, apiPath);
+	}
+	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		Client client = ClientBuilder.newClient();
-		client.register(HttpAuthenticationFeature.basic(getUserName(), getPassword()));
 		try {
-			WebTarget target = client.target(getApiEndpoint("/users/me?fields=guest"));
+			client.register(HttpAuthenticationFeature.basic(getUserName(), getPassword()));
+			String apiEndpoint = getApiEndpoint("/users/me?fields=guest");
+			WebTarget target = client.target(apiEndpoint);
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
-				String errorMessage = JerseyUtils.checkStatus(response);
+				String errorMessage = JerseyUtils.checkStatus(apiEndpoint, response);
 				if (errorMessage != null) {
 					context.disableDefaultConstraintViolation();
 					context.buildConstraintViolationWithTemplate(errorMessage)

@@ -68,9 +68,19 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 		};
 		
 		List<String> selections = getModelObject();
+		
+		/*
+		 * Avoid loading choicesModel which might be time-consuming. Otherwise, when this component 
+		 * is re-created due to a dependency property updating, there is a high chance we are 
+		 * operating on the old select2 component and may cause UI clutter 
+		 */
+		/*
 		if (selections != null) 
 			selections.retainAll(choicesModel.getObject().keySet());
 		else
+			selections = new ArrayList<>();
+		*/
+		if (selections == null) 
 			selections = new ArrayList<>();
 		input = new StringMultiChoice("input", Model.of(selections), choicesModel) {
 

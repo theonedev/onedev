@@ -8,7 +8,7 @@ import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class GitHubImport implements Serializable {
+public class ProjectMapping implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
