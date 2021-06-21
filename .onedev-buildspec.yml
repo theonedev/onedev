@@ -1,4 +1,4 @@
-version: 6
+version: 7
 jobs:
 - name: CI
   steps:
@@ -181,30 +181,6 @@ jobs:
   triggers:
   - !BranchUpdateTrigger
     branches: main
-    projects: onedev-server
-  retryCondition: never
-  maxRetries: 3
-  retryDelay: 30
-  cpuRequirement: 250m
-  memoryRequirement: 128m
-  timeout: 3600
-- name: Sync Stable (GitHub)
-  steps:
-  - !CheckoutStep
-    name: 'checkout '
-    cloneCredential: !DefaultCredential {}
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
-    name: sync
-    image: alpine/git:1.0.7
-    commands:
-    - git config --global --unset http.extraHeader
-    - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/server
-      HEAD:stable
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  triggers:
-  - !BranchUpdateTrigger
-    branches: stable
     projects: onedev-server
   retryCondition: never
   maxRetries: 3
