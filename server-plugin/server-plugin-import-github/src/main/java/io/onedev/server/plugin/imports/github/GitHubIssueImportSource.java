@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -62,7 +63,7 @@ public class GitHubIssueImportSource extends GitHubProjectImportSource {
 				SimpleLogger logger = new SimpleLogger() {
 
 					@Override
-					public void log(String message) {
+					public void log(String message, StyleBuilder styleBuilder) {
 						GitHubIssueImportSource.logger.info(message);
 					}
 					

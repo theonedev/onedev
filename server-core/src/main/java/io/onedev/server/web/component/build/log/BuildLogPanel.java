@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.JobLogEntry;
+import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.LogSnippet;
 import io.onedev.server.model.Build;
@@ -39,7 +39,7 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		add(new WebSocketObserver() {
 			
 			private void appendRecentLogEntries(IPartialPageRequestHandler handler) {
-				List<JobLogEntry> logEntries = getLogManager().readLogEntries(getBuild(), nextOffset, 0);
+				List<JobLogEntryEx> logEntries = getLogManager().readLogEntries(getBuild(), nextOffset, 0);
 
 				if (!logEntries.isEmpty()) {
 					nextOffset += logEntries.size();

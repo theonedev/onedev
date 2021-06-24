@@ -1,29 +1,41 @@
 onedev.server.buildLog = {
-    renderLogEntry: function(logEntry) {
-		var $logEntry = $("<div class='log-entry'></div>");
-		$logEntry.append("<span class='date mr-3'>" + moment(logEntry.date).format("HH:mm:ss") + "</span>");
-		var $message = $("<span class='message'></span>");
-		$message.text(logEntry.message);
-		$logEntry.append($message); 
-		return $logEntry;
-    },
-    appendLogEntries: function(containerId, logEntries, maxNumOfLogEntries) {
+    appendLogEntries: function(containerId, logEntries, maxNumOfEntries) {
         var $buildLog = $("#" + containerId + ">.build-log");
 
-        for (var i=0; i<logEntries.length; i++)
-            $buildLog.append(onedev.server.buildLog.renderLogEntry(logEntries[i]));
+        for (var i=0; i<logEntries.length; i++) {
+			var logEntry = logEntries[i];
+			var $logEntry = $("<div class='log-entry'></div>");
+			$buildLog.append($logEntry);
+			$logEntry.append("<span class='date mr-3'>" + moment(logEntry.date).format("HH:mm:ss") + "</span>");
+			for (var j=0; j<logEntries[i].messages.length; j++) {	
+				var message = logEntries[i].messages[j];
+				var $message = $("<span class='message'></span>")
+				if (message.style.bold)
+					$message.addClass("font-weight-bold");
+				if ((message.style.color == "37" || message.style.color == "97") 
+						&& message.style.backgroundColor == "bg-default") {
+					$message.addClass("text-black");
+				} else {
+					$message.addClass("fg-" + message.style.color);
+					$message.addClass("bg-" + message.style.backgroundColor);
+				}
+				$message.text(message.text);
+				$logEntry.append($message);
+			}
+			$buildLog.append($logEntry);
+		}
         
-        var $logEntries = $buildLog.children(".log-entry");
+        var $entries = $buildLog.children(".log-entry");
         
-        var numOfEntriesToRemove = $logEntries.length - maxNumOfLogEntries;
+        var numOfEntriesToRemove = $entries.length - maxNumOfEntries;
         if (numOfEntriesToRemove > 0) {
-            $logEntries.slice(0, numOfEntriesToRemove).remove();
+            $entries.slice(0, numOfEntriesToRemove).remove();
             if ($buildLog.children(".too-many-entries").length == 0)
-                $buildLog.prepend("<h6 class='too-many-entries text-warning'>Too many log entries, displaying recent " + maxNumOfLogEntries + "</h6>")
+                $buildLog.prepend("<h6 class='too-many-entries text-info'>Too many logs, displaying recent " + maxNumOfEntries + "</h6>")
         } 
-        if ($logEntries.length == 0) {
+        if ($entries.length == 0) {
             if ($buildLog.children(".no-entries").length == 0)
-                $buildLog.prepend("<h6 class='no-entries text-warning'>No log entries</h6>");    
+                $buildLog.prepend("<h6 class='no-entries text-info'>No logs</h6>");    
         } else {
             $buildLog.children(".no-entries").remove();
         }
@@ -32,3 +44,4 @@ onedev.server.buildLog = {
     }
 
 }
+

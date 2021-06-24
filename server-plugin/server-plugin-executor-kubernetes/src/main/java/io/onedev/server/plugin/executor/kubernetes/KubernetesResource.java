@@ -44,6 +44,7 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.SimpleLogger;
 
@@ -125,7 +126,7 @@ public class KubernetesResource {
 							filesDir, placeholderValues, new SimpleLogger() {
 
 						@Override
-						public void log(String message) {
+						public void log(String message, StyleBuilder styleBuilder) {
 							// While testing, ngrok.io buffers response and build can not get log entries 
 							// timely. This won't happen on pagekite however
 							KubernetesHelper.writeInt(output, 1);

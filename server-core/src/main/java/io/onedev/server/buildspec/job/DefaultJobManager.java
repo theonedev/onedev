@@ -602,7 +602,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											
 										})) {
 											log(e, jobLogger);
-											jobLogger.log("Job will be retried after a while...");
+											jobLogger.warning("Job will be retried after a while...");
 											transactionManager.run(new Runnable() {
 
 												@Override
@@ -667,9 +667,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private void log(Throwable e, SimpleLogger logger) {
 		if (e instanceof ExplicitException)
-			logger.log(e.getMessage());
+			logger.error(e.getMessage());
 		else
-			logger.log(e);
+			logger.error("Exception catched", e);
 	}
 	
 	private RuntimeException maskSecrets(Throwable e, Collection<String> jobSecretsToMask) {

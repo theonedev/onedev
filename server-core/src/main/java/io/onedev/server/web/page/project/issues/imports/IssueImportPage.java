@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -92,7 +93,7 @@ public class IssueImportPage<T extends Serializable, S extends Serializable> ext
 				importOption = importer.getImportOption(importSource, new SimpleLogger() {
 
 					@Override
-					public void log(String message) {
+					public void log(String message, StyleBuilder styleBuilder) {
 						logger.info(message);
 					}
 					

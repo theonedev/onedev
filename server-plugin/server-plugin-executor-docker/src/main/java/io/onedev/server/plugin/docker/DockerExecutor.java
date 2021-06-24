@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -65,6 +66,7 @@ import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -384,9 +386,9 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				}
 			} else if (stateNode.get("Status").asText().equals("exited")) {
 				if (stateNode.get("OOMKilled").asText().equals("true"))  
-					jobLogger.log("Out of memory");
+					jobLogger.error("Out of memory");
 				else if (stateNode.get("Error").asText().length() != 0)  
-					jobLogger.log(stateNode.get("Error").asText());
+					jobLogger.error(stateNode.get("Error").asText());
 				
 				docker.clearArgs();
 				docker.addArgs("logs", containerName);
@@ -415,6 +417,30 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				throw new RuntimeException(e);
 			}
 		}		
+	}
+	
+	private LineConsumer newStyledLogger(SimpleLogger jobLogger) {
+		return new LineConsumer(StandardCharsets.UTF_8.name()) {
+
+			private final StyleBuilder styleBuilder = new StyleBuilder();
+			
+			@Override
+			public void consume(String line) {
+				jobLogger.log(line, styleBuilder);
+			}
+			
+		};
+	}
+	
+	private LineConsumer newErrorLogger(SimpleLogger jobLogger) {
+		return new LineConsumer(StandardCharsets.UTF_8.name()) {
+
+			@Override
+			public void consume(String line) {
+				jobLogger.warning(line);
+			}
+			
+		};
 	}
 	
 	@Override
@@ -474,16 +500,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						}
 						
 						AtomicReference<File> hostHome = new AtomicReference<>(null);
-						try {
-							LineConsumer logger = new LineConsumer(UTF_8.name()) {
-
-								@Override
-								public void consume(String line) {
-									jobContext.getLogger().log(line);
-								}
-								
-							};
-						
+						try {						
 							jobLogger.log("Copying job dependencies...");
 							jobContext.copyDependencies(hostWorkspace);
 	
@@ -578,11 +595,10 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 										
 										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
 										docker.addArgs(commandExecutable.getImage());
-										
 										docker.addArgs(containerCommand);
 										
-										ExecutionResult result = docker.execute(logger, logger, null, new ProcessKiller() {
-					
+										ProcessKiller killer = new ProcessKiller() {
+											
 											@Override
 											public void kill(Process process, String executionId) {
 												jobLogger.log("Stopping step container...");
@@ -605,7 +621,9 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 												}).checkReturnCode();
 											}
 											
-										});
+										};
+										
+										ExecutionResult result = docker.execute(newStyledLogger(jobLogger), newErrorLogger(jobLogger), null, killer);
 										if (result.getReturnCode() != 0) {
 											errorMessages.add("Step \"" + stepNames + "\": Command failed with exit code " + result.getReturnCode());
 											return false;
@@ -623,7 +641,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	
 											CloneInfo cloneInfo = checkoutExecutable.getCloneInfo();
 											
-											cloneInfo.writeAuthData(hostHome.get(), git, logger, logger);
+											cloneInfo.writeAuthData(hostHome.get(), git, newStyledLogger(jobLogger), newErrorLogger(jobLogger));
 											
 											List<String> trustCertContent = new ArrayList<>();
 											ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
@@ -642,17 +660,18 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				
 											if (!trustCertContent.isEmpty()) {
 												installGitCert(new File(hostHome.get(), "trust-cert.pem"), trustCertContent, 
-														git, logger, logger);
+														git, newStyledLogger(jobLogger), newErrorLogger(jobLogger));
 											}
 	
 											int cloneDepth = checkoutExecutable.getCloneDepth();
 											
 											cloneRepository(hostWorkspace, jobContext.getProjectGitDir().getAbsolutePath(), 
-													jobContext.getCommitId().name(), cloneDepth, git, logger, logger);
+													jobContext.getCommitId().name(), cloneDepth, git, 
+													newStyledLogger(jobLogger), newErrorLogger(jobLogger));
 											
 											git.clearArgs();
 											git.addArgs("remote", "add", "origin", cloneInfo.getCloneUrl());
-											git.execute(logger, logger).checkReturnCode();
+											git.execute(newStyledLogger(jobLogger), newErrorLogger(jobLogger)).checkReturnCode();
 											
 											if (new File(hostWorkspace, ".gitmodules").exists()) {
 												if (SystemUtils.IS_OS_WINDOWS || !(cloneInfo instanceof SshCloneInfo)) {
@@ -662,7 +681,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 													git.addArgs("submodule", "update", "--init", "--recursive", "--force", "--quiet");
 													if (cloneDepth != 0)
 														git.addArgs("--depth=" + cloneDepth);						
-													git.execute(logger, logger).checkReturnCode();
+													git.execute(newStyledLogger(jobLogger), newErrorLogger(jobLogger)).checkReturnCode();
 												} else {
 													/*
 													 * We need to update submodules within a helper image in order to use our own .ssh folder. 
@@ -680,7 +699,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				
 													jobLogger.log("Retrieving submodules with helper image...");
 													
-													cmd.execute(logger, logger, null, new ProcessKiller() {
+													cmd.execute(newStyledLogger(jobLogger), newErrorLogger(jobLogger), null, new ProcessKiller() {
 														
 														@Override
 														public void kill(Process process, String executionId) {

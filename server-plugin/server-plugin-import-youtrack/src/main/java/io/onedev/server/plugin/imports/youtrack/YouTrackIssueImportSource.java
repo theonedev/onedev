@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -61,7 +62,7 @@ public class YouTrackIssueImportSource extends YouTrackProjectImportSource {
 				SimpleLogger logger = new SimpleLogger() {
 
 					@Override
-					public void log(String message) {
+					public void log(String message, StyleBuilder styleBuilder) {
 						YouTrackIssueImportSource.logger.info(message);
 					}
 					

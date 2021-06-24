@@ -26,7 +26,7 @@ public interface LogManager {
 	 * 			log entries. Number of entries may be less than required count if there is no 
 	 * 			enough log entries
 	 */
-	List<JobLogEntry> readLogEntries(Build build, int offset, int count);
+	List<JobLogEntryEx> readLogEntries(Build build, int offset, int count);
 	
 	boolean matches(Build build, Pattern pattern);
 	

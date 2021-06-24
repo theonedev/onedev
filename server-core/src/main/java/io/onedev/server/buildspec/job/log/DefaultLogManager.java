@@ -13,7 +13,6 @@ import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +94,7 @@ public class DefaultLogManager implements LogManager {
 		secretValuesToMask.addAll(jobSecretsToMask);
 		return new SimpleLogger() {
 			
-			private void doLog(String message) {
+			private void doLog(String message, StyleBuilder styleBuilder) {
 				for (String maskSecret: secretValuesToMask)
 					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
 				
@@ -111,21 +110,28 @@ public class DefaultLogManager implements LogManager {
 						}
 					}
 					if (snippet != null) {
-						snippet.entries.add(new JobLogEntry(new Date(), message));
-						if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
-							File logFile = getLogFile(projectId, buildNumber);
-							try (ObjectOutputStream oos = newOutputStream(logFile)) {
-								while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
-									JobLogEntry entry = snippet.entries.remove(0);
-									oos.writeObject(entry);
-									snippet.offset++;
-								}
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
+						boolean entryAdded = false;
+						try {
+							snippet.entries.add(JobLogEntryEx.parse(message, styleBuilder));
+							entryAdded = true;
+						} catch (Exception e) {
+							logger.error("Failed to parse job log message: " +  message, e);
 						}
-						
-						webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId));
+						if (entryAdded) {
+							if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
+								File logFile = getLogFile(projectId, buildNumber);
+								try (ObjectOutputStream oos = newOutputStream(logFile)) {
+									while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
+										writeLogEntry(oos, snippet.entries.remove(0));
+										snippet.offset++;
+									}
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+							
+							webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId));
+						}
 					}
 				} finally {
 					lock.unlock();
@@ -133,10 +139,10 @@ public class DefaultLogManager implements LogManager {
 			}
 			
 			@Override
-			public void log(String message) {
+			public void log(String message, StyleBuilder styleBuilder) {
 				try {
 					if (message.startsWith(LogInstruction.PREFIX)) {
-						doLog(message);
+						doLog(message, styleBuilder);
 						
 						InstructionContext instructionContext = LogInstruction.parse(message);
 						String name = instructionContext.Identifier().getText();
@@ -162,13 +168,13 @@ public class DefaultLogManager implements LogManager {
 									paramValues.add(LogInstruction.getValue(terminalNode));
 								params.put(paramName, paramValues);
 							}
-							doLog("Executing log instruction '" + name + "'...");
+							doLog("Executing log instruction '" + name + "'...", new StyleBuilder());
 							doInSession(instruction, buildId, params);
 						} else {
-							doLog("Unsupported log instruction: " + name);
+							doLog("Unsupported log instruction: " + name, new StyleBuilder());
 						}
 					} else {
-						doLog(message);
+						doLog(message, styleBuilder);
 					}
 				} catch (Exception e) {
 					logger.error("Error logging", e);
@@ -194,9 +200,9 @@ public class DefaultLogManager implements LogManager {
 		try {
 			LogSnippet snippet = recentSnippets.get(build.getId());
 			if (snippet != null) {
-				for (JobLogEntry entry: snippet.entries) {
+				for (JobLogEntryEx entry: snippet.entries) {
 					if ((build.getRetryDate() == null || !entry.getDate().before(build.getRetryDate())) 
-							&& pattern.matcher(entry.getMessage()).find()) {
+							&& pattern.matcher(entry.getMessageText()).find()) {
 						return true;
 					}
 				}
@@ -224,8 +230,8 @@ public class DefaultLogManager implements LogManager {
 		}
 	}
 	
-	private List<JobLogEntry> readLogEntries(File logFile, int from, int count) {
-		List<JobLogEntry> entries = new ArrayList<>();
+	private List<JobLogEntryEx> readLogEntries(File logFile, int from, int count) {
+		List<JobLogEntryEx> entries = new ArrayList<>();
 		if (logFile.exists()) {
 			try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 				int numOfReadEntries = 0;
@@ -234,7 +240,7 @@ public class DefaultLogManager implements LogManager {
 					numOfReadEntries++;
 				}
 				while (count == 0 || numOfReadEntries - from < count) {
-					entries.add((JobLogEntry) ois.readObject());
+					entries.add(readLogEntry(ois));
 					numOfReadEntries++;
 				}
 			} catch (EOFException e) {
@@ -245,12 +251,28 @@ public class DefaultLogManager implements LogManager {
 		return entries;
 	}
 	
+	private JobLogEntryEx readLogEntry(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+		Object obj = ois.readObject();
+		if (obj instanceof JobLogEntry)
+			return new JobLogEntryEx((JobLogEntry) obj);
+		else
+			return (JobLogEntryEx) obj;
+	}
+	
+	private void writeLogEntry(ObjectOutputStream oos, JobLogEntryEx logEntry) throws IOException {
+		JobLogEntry spaceEfficientVersion = logEntry.getSpaceEfficientVersion();
+		if (spaceEfficientVersion != null)
+			oos.writeObject(spaceEfficientVersion);
+		else
+			oos.writeObject(logEntry);
+	}
+	
 	private LogSnippet readLogSnippetReversely(File logFile, int count) {
 		LogSnippet snippet = new LogSnippet();
 		if (logFile.exists()) {
 			try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 				while (true) {
-					snippet.entries.add((JobLogEntry) ois.readObject());
+					snippet.entries.add(readLogEntry(ois));
 					if (snippet.entries.size() > count) {
 						snippet.entries.remove(0);
 						snippet.offset ++;
@@ -264,7 +286,7 @@ public class DefaultLogManager implements LogManager {
 		return snippet;
 	}
 	
-	private List<JobLogEntry> readLogEntries(List<JobLogEntry> cachedEntries, int from, int count) {
+	private List<JobLogEntryEx> readLogEntries(List<JobLogEntryEx> cachedEntries, int from, int count) {
 		if (from < cachedEntries.size()) {
 			int to = from + count;
 			if (to == from || to > cachedEntries.size())
@@ -277,7 +299,7 @@ public class DefaultLogManager implements LogManager {
 	
 	@Sessional
 	@Override
-	public List<JobLogEntry> readLogEntries(Build build, int from, int count) {
+	public List<JobLogEntryEx> readLogEntries(Build build, int from, int count) {
 		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 		lock.lock();
 		try {
@@ -287,7 +309,7 @@ public class DefaultLogManager implements LogManager {
 				if (from >= snippet.offset) {
 					return readLogEntries(snippet.entries, from - snippet.offset, count);
 				} else {
-					List<JobLogEntry> entries = new ArrayList<>();
+					List<JobLogEntryEx> entries = new ArrayList<>();
 					entries.addAll(readLogEntries(logFile, from, count));
 					if (count == 0)
 						entries.addAll(snippet.entries);
@@ -360,8 +382,8 @@ public class DefaultLogManager implements LogManager {
 			if (snippet != null) {
 				File logFile = getLogFile(build.getProject().getId(), build.getNumber());
 				try (ObjectOutputStream oos = newOutputStream(logFile)) {
-					for (JobLogEntry entry: snippet.entries)
-						oos.writeObject(entry);
+					for (JobLogEntryEx entry: snippet.entries)
+						writeLogEntry(oos, entry);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				} 
@@ -400,7 +422,7 @@ public class DefaultLogManager implements LogManager {
 				LogSnippet snippet = recentSnippets.get(build.getId());
 				if (snippet != null) {
 					StringBuilder builder = new StringBuilder();
-					for (JobLogEntry entry: snippet.entries)
+					for (JobLogEntryEx entry: snippet.entries)
 						builder.append(renderAsText(entry) + "\n");
 					recentBuffer = builder.toString().getBytes(StandardCharsets.UTF_8);
 				}
@@ -410,10 +432,10 @@ public class DefaultLogManager implements LogManager {
 			}
 		}
 		
-		private String renderAsText(JobLogEntry entry) {
+		private String renderAsText(JobLogEntryEx entry) {
 			String prefix = DATE_FORMATTER.print(new DateTime(entry.getDate())) + " ";
 			StringBuilder builder = new StringBuilder();
-			for (String line: Splitter.on(EOL_PATTERN).split(entry.getMessage())) {
+			for (String line: Splitter.on(EOL_PATTERN).split(entry.getMessageText())) {
 				if (builder.length() == 0) {
 					builder.append(prefix).append(line);
 				} else {
@@ -431,7 +453,7 @@ public class DefaultLogManager implements LogManager {
 			if (pos == buffer.length) {
 				if (ois != null) {
 					try {
-						buffer = (renderAsText((JobLogEntry) ois.readObject()) + "\n").getBytes(StandardCharsets.UTF_8);
+						buffer = (renderAsText(readLogEntry(ois)) + "\n").getBytes(StandardCharsets.UTF_8);
 					} catch (EOFException e) {
 						ois.close();
 						ois = null;
@@ -459,8 +481,12 @@ public class DefaultLogManager implements LogManager {
 		
 		@Override
 		public void close() throws IOException {
-			ois.close();
-			lock.unlock();
+			try {
+				if (ois != null)
+					ois.close();
+			} finally {
+				lock.unlock();
+			}
 		}
 				
 	}

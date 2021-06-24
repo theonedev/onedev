@@ -33,6 +33,7 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.util.SimpleLogger;
@@ -92,7 +93,7 @@ public abstract class TaskButton extends AjaxButton {
 						runTask(new SimpleLogger() {
 
 							@Override
-							public void log(String message) {
+							public void log(String message, StyleBuilder styleBuilder) {
 								synchronized (messages) {
 									messages.add(message);
 								}
