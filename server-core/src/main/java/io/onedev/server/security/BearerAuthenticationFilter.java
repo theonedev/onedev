@@ -18,6 +18,7 @@ import org.apache.shiro.web.util.WebUtils;
 import com.google.common.net.HttpHeaders;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
@@ -39,6 +40,8 @@ public class BearerAuthenticationFilter extends PathMatchingFilter {
 		if (!subject.isAuthenticated()) {
 	        HttpServletRequest httpRequest = WebUtils.toHttp(request);
 	        String authzHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+	        if (authzHeader == null)
+	        	authzHeader = httpRequest.getHeader(CloneInfo.ONEDEV_AUTHORIZATION);
 	        if (authzHeader != null && authzHeader.startsWith(KubernetesHelper.BEARER + " ")) {
             	String tokenValue = StringUtils.substringAfter(authzHeader, " ");
             	User user = userManager.findByAccessToken(tokenValue);

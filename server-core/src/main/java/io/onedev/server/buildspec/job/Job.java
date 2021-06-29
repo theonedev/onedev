@@ -32,6 +32,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
@@ -443,9 +444,11 @@ public class Job implements NamedElement, Serializable, Validatable {
 
 	@Nullable
 	public static String getToken(HttpServletRequest request) {
-		String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (bearer != null && bearer.startsWith(KubernetesHelper.BEARER + " "))
-			return bearer.substring(KubernetesHelper.BEARER.length() + 1);
+		String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+		if (authHeader == null)
+			authHeader = request.getHeader(CloneInfo.ONEDEV_AUTHORIZATION);
+		if (authHeader != null && authHeader.startsWith(KubernetesHelper.BEARER + " "))
+			return authHeader.substring(KubernetesHelper.BEARER.length() + 1);
 		else
 			return null;
 	}

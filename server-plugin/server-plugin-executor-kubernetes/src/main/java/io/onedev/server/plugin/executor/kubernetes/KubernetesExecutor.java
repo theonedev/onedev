@@ -862,7 +862,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						Map<Object, Object> stepContainerSpec = CollectionUtils.newHashMap(
 								"name", containerName, 
 								"image", image);
-						
+
 						String positionStr = stringifyPosition(position);
 						if (baselineOsInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));

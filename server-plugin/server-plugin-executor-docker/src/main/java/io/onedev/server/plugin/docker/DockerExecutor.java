@@ -592,8 +592,9 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 												docker.addArgs("-v", outerPath + ":/root/onedev");
 											}
 										}
-										
+
 										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
+										
 										docker.addArgs(commandExecutable.getImage());
 										docker.addArgs(containerCommand);
 										
