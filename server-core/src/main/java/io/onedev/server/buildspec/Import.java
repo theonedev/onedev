@@ -22,7 +22,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
@@ -114,7 +113,7 @@ public class Import implements Serializable, Validatable {
 	}
 
 	private boolean canReadCode(Project project) {
-		return SecurityUtils.asAnonymous().isPermitted(new ProjectPermission(project, new ReadCode()));
+		return project.getDefaultRole() != null && project.getDefaultRole().implies(new ReadCode());
 	}
 	
 	public BuildSpec getBuildSpec() {
