@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.buildspec.job.privilege;
+package io.onedev.server.web.editable.jobprivilege;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -26,6 +27,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.support.role.JobPrivilege;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -128,7 +130,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Actions")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {
@@ -159,6 +161,12 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete this privilege?"));
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
 						markFormDirty(target);
 						privileges.remove(rowModel.getObject());
@@ -172,7 +180,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public String getCssClass() {
-				return "actions minimum";
+				return "actions";
 			}
 			
 		});		

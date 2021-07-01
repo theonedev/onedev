@@ -89,19 +89,6 @@
 	border-bottom-right-radius: 0.42rem;
 }
 
-.editable table>thead>tr>th.minimum, table>tbody>tr>td.minimum {
-    width: 1px;
-	white-space: nowrap;
-	padding-left: 0;
-	padding-right: 0;
-}
-.editable table>thead>tr>th.minimum:first-child, table>tbody>tr>td.minimum:first-child {
-	padding-left: 1rem;
-}
-.editable table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
-	padding-right: 1rem;
-}
-
 .editable .polymorphic>.type-selector {
 	margin-bottom: 1rem;
 }

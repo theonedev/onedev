@@ -10,7 +10,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.authc.AuthenticationException;
-import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -290,11 +289,6 @@ public class OpenIdConnector extends SsoConnector {
 	}
 
 	@Override
-	public Component renderAdditionalInfo(String componentId) {
-		return new CallbackUrlPanel(componentId, getCallbackUri().toString());
-	}
-
-	@Override
 	public void initiateLogin() {
 		try {
 			ClientID clientID = new ClientID(getClientId());
@@ -344,7 +338,8 @@ public class OpenIdConnector extends SsoConnector {
 		return metadata;
 	}
 	
-	protected URI getCallbackUri() {
+	@Override
+	public URI getCallbackUri() {
 		String serverUrl = OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
 		try {
 			return new URI(serverUrl + "/" + SsoProcessPage.MOUNT_PATH + "/" 

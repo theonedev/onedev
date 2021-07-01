@@ -544,6 +544,18 @@ table.norecords tfoot td, div.norecords, td.norecords {
 table.norecords tfoot td>div {
 	display: none;
 }
+table>thead>tr>th.minimum, table>tbody>tr>td.minimum {
+    width: 1px;
+	white-space: nowrap;
+	padding-left: 0;
+	padding-right: 0;
+}
+table>thead>tr>th.minimum:first-child, table>tbody>tr>td.minimum:first-child {
+	padding-left: 1rem;
+}
+table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
+	padding-right: 1rem;
+}
 
 .form-group .control-label {
 	font-weight: 500;

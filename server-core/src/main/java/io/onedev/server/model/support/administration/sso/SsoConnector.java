@@ -1,9 +1,8 @@
 package io.onedev.server.model.support.administration.sso;
 
 import java.io.Serializable;
+import java.net.URI;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.usage.Usage;
@@ -56,9 +55,7 @@ public abstract class SsoConnector implements Serializable {
 		return usage;
 	}
 	
-	public Component renderAdditionalInfo(String componentId) {
-		return new WebMarkupContainer(componentId).setVisible(false);
-	}
+	public abstract URI getCallbackUri();
 	
 	/**
 	 * Authenticate specified user name and password against the authentication system 

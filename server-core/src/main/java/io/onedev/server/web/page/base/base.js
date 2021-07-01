@@ -653,6 +653,27 @@ onedev.server = {
 		doSetup($(document));
 	},
 	
+	setupTable: function() {
+		function doSetup($container) {
+			$container.find("table").addBack("table").each(function() {
+				$(this).find(">tbody>tr").each(function() {
+					var $moreInfoLink = $(this).find(">td.ellipsis a");
+					if ($moreInfoLink.length != 0) {
+						$(this).css("cursor", "pointer");
+						$(this).click(function(e) {
+							if ($(e.target).closest("a").length == 0)
+								$moreInfoLink.click();
+						});
+					}					
+				});
+			});
+		}	
+		$(document).on("afterElementReplace", function(event, componentId) {
+			doSetup($("#" + componentId));
+		});
+		doSetup($(document));
+	},
+	
 	setupRadio: function() {
 		function doSetup($container) {
 			$container.find(".radio").addBack(".radio").each(function() {
@@ -813,6 +834,7 @@ onedev.server = {
 		onedev.server.setupCheckbox();
 		onedev.server.setupRadio();
 		onedev.server.setupSwitch();
+		onedev.server.setupTable();
 		onedev.server.history.init(popStateCallback);
 		onedev.server.perfectScrollbar.setup();
 

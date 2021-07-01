@@ -1614,8 +1614,7 @@ input[type="radio"], input[type="checkbox"] {
     padding: 0.3rem;
 }
 .table-hover tbody tr:hover {
-    color: var(--gray-dark);
-    background-color: var(--secondary);
+    background-color: var(--light);
 }
 .table-borderless tbody+tbody, .table-borderless td, .table-borderless th, .table-borderless thead th {
     border: 0;

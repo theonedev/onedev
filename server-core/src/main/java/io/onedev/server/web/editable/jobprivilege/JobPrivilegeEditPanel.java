@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.buildspec.job.privilege;
+package io.onedev.server.web.editable.jobprivilege;
 
 import java.util.List;
 
