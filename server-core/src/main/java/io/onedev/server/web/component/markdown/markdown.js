@@ -343,7 +343,7 @@ onedev.server.markdown = {
                 	callback("emojiQuery", query);
 	        	}
 	        },
-	        displayTpl: "<li><i class='emoji' style='background-image:url(${url})'></i> ${name} </li>",
+	        displayTpl: "<li><span class='emoji'>${unicode}</span> ${name} </li>",
 	        insertTpl: ':${name}:',
 	        limit: atWhoLimit
 	    });		
@@ -987,7 +987,7 @@ onedev.server.markdown = {
 		var contentHtml = "";
 		for (var i in emojis) {
 			var emoji = emojis[i];
-			contentHtml += "<a class='emoji' title='" + emoji.name + "'><img src='" + emoji.url + "'></img></a> ";
+			contentHtml += "<a class='emoji' title='" + emoji.name + "'>" + emoji.unicode + "</a> ";
 		}
 		$emojis.html(contentHtml);
 		$emojis.removeClass("loading");

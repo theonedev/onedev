@@ -42,8 +42,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.apache.wicket.request.resource.PackageResourceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.javascript.JavaScriptEscape;
@@ -60,6 +58,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.validation.ProjectNameValidator;
@@ -67,7 +66,7 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
+import io.onedev.server.web.component.markdown.emoji.Emojis;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -281,33 +280,30 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					target.appendJavaScript(script);
 					break;
 				case "emojiQuery":
-					List<String> emojiNames = new ArrayList<>();
+					List<String> emojiAliases = new ArrayList<>();
 					String emojiQuery = params.getParameterValue("param1").toOptionalString();
 					if (StringUtils.isNotBlank(emojiQuery)) {
 						emojiQuery = emojiQuery.toLowerCase();
-						for (String emojiName: EmojiOnes.getInstance().all().keySet()) {
-							if (emojiName.toLowerCase().contains(emojiQuery))
-								emojiNames.add(emojiName);
+						for (String emojiAlias: Emojis.getInstance().getAliases()) {
+							if (emojiAlias.toLowerCase().contains(emojiQuery))
+								emojiAliases.add(emojiAlias);
 						}
-						emojiNames.sort((name1, name2) -> name1.length() - name2.length());
+						emojiAliases.sort((name1, name2) -> name1.length() - name2.length());
 					} else {
-						emojiNames.add("smile");
-						emojiNames.add("worried");
-						emojiNames.add("blush");
-						emojiNames.add("+1");
-						emojiNames.add("-1");
+						emojiAliases.add("smiley");
+						emojiAliases.add("worried");
+						emojiAliases.add("ok_hand");
+						emojiAliases.add("thumbsup");
+						emojiAliases.add("thumbsdown");
+						emojiAliases.add("heart");
 					}
-
 					List<Map<String, String>> emojis = new ArrayList<>();
-					for (String emojiName: emojiNames) {
+					for (String emojiAlias: emojiAliases) {
 						if (emojis.size() < ATWHO_LIMIT) {
-							String emojiCode = EmojiOnes.getInstance().all().get(emojiName);
-							CharSequence url = RequestCycle.get().urlFor(new PackageResourceReference(
-									EmojiOnes.class, "icon/" + emojiCode + ".png"), new PageParameters());
-							Map<String, String> emoji = new HashMap<>();
-							emoji.put("name", emojiName);
-							emoji.put("url", url.toString());
-							emojis.add(emoji);
+							String emojiUnicode = Emojis.getInstance().getUnicode(emojiAlias);
+							emojis.add(CollectionUtils.newHashMap(
+									"name", emojiAlias, 
+									"unicode", emojiUnicode));
 						}
 					}
 					String json;
@@ -320,19 +316,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					target.appendJavaScript(script);
 					break;
 				case "loadEmojis":
-					emojis = new ArrayList<>();
-					String urlPattern =  RequestCycle.get().urlFor(new PackageResourceReference(EmojiOnes.class,
-					        "icon/FILENAME.png"), new PageParameters()).toString();
-					
-					for (Map.Entry<String, String> entry: EmojiOnes.getInstance().all().entrySet()) {
-						Map<String, String> emoji = new HashMap<>();
-						emoji.put("name", entry.getKey());
-						emoji.put("url", urlPattern.replace("FILENAME", entry.getValue()));
-						emojis.add(emoji);
-					}
-
 					try {
-						json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(emojis);
+						json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(Emojis.getInstance().list());
 					} catch (JsonProcessingException e) {
 						throw new RuntimeException(e);
 					}

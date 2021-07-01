@@ -84,14 +84,8 @@
 	color: var(--gray-dark);
 }
 .markdown-editor>.head>.emojis .emoji {
-	margin-right: 1rem;
-}
-.markdown-editor>.head>.emojis .emoji img {
-	width: 1.25rem; 
-	height: 1.25rem;
-}
-.markdown-editor.preview>.emojis .emoji img {
-	opacity: 0.5;
+	margin-right: 0.8rem;
+	font-size: 1.25rem;
 }
 
 .markdown-editor>.head>.help {
