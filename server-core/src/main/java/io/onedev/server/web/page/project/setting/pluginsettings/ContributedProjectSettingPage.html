@@ -1,0 +1,20 @@
+<wicket:extend>
+	<div class="card contributed-setting">
+		<div class="card-body">
+			<wicket:enclosure child="help">
+			<div class="text-muted mb-4">
+				<wicket:svg href="bulb" class="icon"/> <span wicket:id="help"></span>
+			</div>
+			</wicket:enclosure>
+			<form wicket:id="form" class="leave-confirm">
+				<span class="switch switch-sm switch-primary mb-3">
+					<label>
+						<input wicket:id="enable" type="checkbox" class="enable">
+					</label>
+				</span>
+				<div wicket:id="editor" class="mb-4"></div>
+				<input type="submit" class="btn btn-primary dirty-aware mr-1" value="Save Setting">
+			</form>
+		</div>
+	</div>
+</wicket:extend>

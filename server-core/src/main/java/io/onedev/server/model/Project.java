@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +37,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.jgit.api.CreateBranchCommand;
@@ -217,6 +220,11 @@ public class Project extends AbstractEntity implements NameAware {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
+
+    @JsonIgnore
+    @Lob
+    @Column(nullable=false, length=65535)
+	private LinkedHashMap<Class<? extends Serializable>, Serializable> contributedSettings = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
@@ -1537,6 +1545,27 @@ public class Project extends AbstractEntity implements NameAware {
 		} else {
 			return file.getName();
 		}
+	}
+	
+	@Nullable
+	@SuppressWarnings("unchecked")
+	public <T extends Serializable> T getContributedSetting(Class<T> settingClass) {
+		T contributedSetting = (T) contributedSettings.get(settingClass);
+		if (contributedSetting == null) {
+			try {
+				T value = settingClass.newInstance();
+				if (OneDev.getInstance(Validator.class).validate(value).isEmpty()) 
+					contributedSetting = value;
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		return contributedSetting;
+	}
+
+	public void setContributedSetting(Class<? extends Serializable> settingClass, @Nullable Serializable setting) {
+		contributedSettings.put(settingClass, setting);
 	}
 	
 }

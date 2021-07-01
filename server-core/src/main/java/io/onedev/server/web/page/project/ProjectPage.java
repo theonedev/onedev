@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -32,6 +33,7 @@ import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.SidebarMenu;
 import io.onedev.server.web.page.layout.SidebarMenuItem;
@@ -57,6 +59,7 @@ import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionsPage;
@@ -65,6 +68,7 @@ import io.onedev.server.web.page.project.setting.build.BuildPreservationsPage;
 import io.onedev.server.web.page.project.setting.build.DefaultFixedIssueFiltersPage;
 import io.onedev.server.web.page.project.setting.build.JobSecretsPage;
 import io.onedev.server.web.page.project.setting.general.GeneralProjectSettingPage;
+import io.onedev.server.web.page.project.setting.pluginsettings.ContributedProjectSettingPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionsPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -231,6 +235,17 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			settingMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build Setting", buildSettingMenuItems));
 			settingMenuItems.add(new SidebarMenuItem.Page(null, "Web Hooks", 
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject())));
+			
+			for (ProjectSettingContribution contribution:OneDev.getExtensions(ProjectSettingContribution.class)) {
+				for (Class<? extends Serializable> settingClass: contribution.getSettingClasses()) {
+					settingMenuItems.add(new SidebarMenuItem.Page(
+							null, 
+							EditableUtils.getDisplayName(settingClass), 
+							ContributedProjectSettingPage.class, 
+							ContributedProjectSettingPage.paramsOf(getProject(), settingClass)));
+				}
+			}
+			
 			menuItems.add(new SidebarMenuItem.SubMenu("sliders", "Settings", settingMenuItems));
 		}
 		

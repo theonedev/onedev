@@ -292,6 +292,7 @@ import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
+import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.websocket.BuildEventBroadcaster;
 import io.onedev.server.web.websocket.CodeCommentEventBroadcaster;
@@ -513,6 +514,14 @@ public class CoreModule extends AbstractPluginModule {
 			
 		});
 		contribute(AdministrationSettingContribution.class, new AdministrationSettingContribution() {
+			
+			@Override
+			public List<Class<? extends Serializable>> getSettingClasses() {
+				return new ArrayList<>();
+			}
+			
+		});
+		contribute(ProjectSettingContribution.class, new ProjectSettingContribution() {
 			
 			@Override
 			public List<Class<? extends Serializable>> getSettingClasses() {
