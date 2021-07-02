@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -50,6 +51,7 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Day;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 
 @Api(order=1000)
 @Path("/projects")
@@ -98,6 +100,7 @@ public class ProjectResource {
 		setting.namedCommitQueries = project.getNamedCommitQueries();
 		setting.pullRequestSetting = project.getPullRequestSetting();
 		setting.webHooks = project.getWebHooks();
+		setting.contributedSettings = project.getContributedSettings();
 		return setting;
     }
 	
@@ -267,6 +270,8 @@ public class ProjectResource {
 		private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries = new ArrayList<>();
 		
 		private ArrayList<WebHook> webHooks = new ArrayList<>();
+		
+		private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
 
 		public ArrayList<BranchProtection> getBranchProtections() {
 			return branchProtections;
@@ -330,6 +335,14 @@ public class ProjectResource {
 
 		public void setWebHooks(ArrayList<WebHook> webHooks) {
 			this.webHooks = webHooks;
+		}
+
+		public LinkedHashMap<String, ContributedProjectSetting> getContributedSettings() {
+			return contributedSettings;
+		}
+
+		public void setContributedSettings(LinkedHashMap<String, ContributedProjectSetting> contributedSettings) {
+			this.contributedSettings = contributedSettings;
 		}
 		
 	}

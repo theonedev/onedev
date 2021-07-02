@@ -5,11 +5,8 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -63,7 +60,6 @@ import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.init.Skippable;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
-import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -84,16 +80,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final RoleManager roleManager;
 	
-	private final Set<AdministrationSettingContribution> administrationSettingContributions;
-	
 	private String backupTaskId;
 
 	@Inject
 	public DefaultDataManager(UserManager userManager, 
 			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
-			PasswordService passwordService, RoleManager roleManager, 
-			Set<AdministrationSettingContribution> administrationSettingContributions) {
+			PasswordService passwordService, RoleManager roleManager) {
 		this.userManager = userManager;
 		this.settingManager = settingManager;
 		this.validator = validator;
@@ -102,10 +95,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 		this.mailManager = mailManager;
 		this.passwordService = passwordService;
 		this.roleManager = roleManager;
-		this.administrationSettingContributions = administrationSettingContributions;
 	}
 	
-	@SuppressWarnings({ "serial", "unchecked" })
+	@SuppressWarnings({"serial"})
 	@Transactional
 	@Override
 	public List<ManualConfig> init() {
@@ -223,33 +215,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		
 		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);
-		Map<Class<? extends Serializable>, Serializable> contributedSettings;
 		if (setting == null) 
-			contributedSettings = new LinkedHashMap<>();
-		else
-			contributedSettings = (Map<Class<? extends Serializable>, Serializable>) setting.getValue();
-		
-		Collection<Class<? extends Serializable>> contributedSettingClasses = new HashSet<>();
-		for (AdministrationSettingContribution contribution: administrationSettingContributions) {
-			contributedSettingClasses.addAll(contribution.getSettingClasses());
-			for (Class<? extends Serializable> settingClass: contribution.getSettingClasses()) {
-				if (contributedSettings.get(settingClass) == null) {
-					try {
-						Serializable contributedSetting = settingClass.newInstance();
-						if (validator.validate(contributedSetting).isEmpty()) 
-							contributedSettings.put(settingClass, contributedSetting);
-					} catch (InstantiationException | IllegalAccessException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		}
-		for (Iterator<Map.Entry<Class<? extends Serializable>, Serializable>> it = contributedSettings.entrySet().iterator(); it.hasNext();) {
-			if (!contributedSettingClasses.contains(it.next().getKey()))
-				it.remove();
-		}
-		
-		settingManager.saveContributedSettings(contributedSettings);
+			settingManager.saveContributedSettings(new LinkedHashMap<>());
 		
 		setting = settingManager.getSetting(Key.MAIL);
 		if (setting == null) {

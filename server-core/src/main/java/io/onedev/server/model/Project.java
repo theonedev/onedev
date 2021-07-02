@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,6 +129,7 @@ import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -224,7 +224,7 @@ public class Project extends AbstractEntity implements NameAware {
     @JsonIgnore
     @Lob
     @Column(nullable=false, length=65535)
-	private LinkedHashMap<Class<? extends Serializable>, Serializable> contributedSettings = new LinkedHashMap<>();
+	private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
@@ -1547,10 +1547,14 @@ public class Project extends AbstractEntity implements NameAware {
 		}
 	}
 	
+	public LinkedHashMap<String, ContributedProjectSetting> getContributedSettings() {
+		return contributedSettings;
+	}
+	
 	@Nullable
 	@SuppressWarnings("unchecked")
-	public <T extends Serializable> T getContributedSetting(Class<T> settingClass) {
-		T contributedSetting = (T) contributedSettings.get(settingClass);
+	public <T extends ContributedProjectSetting> T getContributedSetting(Class<T> settingClass) {
+		T contributedSetting = (T) contributedSettings.get(settingClass.getName());
 		if (contributedSetting == null) {
 			try {
 				T value = settingClass.newInstance();
@@ -1564,8 +1568,9 @@ public class Project extends AbstractEntity implements NameAware {
 		return contributedSetting;
 	}
 
-	public void setContributedSetting(Class<? extends Serializable> settingClass, @Nullable Serializable setting) {
-		contributedSettings.put(settingClass, setting);
+	public void setContributedSetting(Class<? extends ContributedProjectSetting> settingClass, 
+			@Nullable ContributedProjectSetting setting) {
+		contributedSettings.put(settingClass.getName(), setting);
 	}
 	
 }

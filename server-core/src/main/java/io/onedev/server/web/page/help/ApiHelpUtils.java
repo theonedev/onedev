@@ -33,6 +33,10 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
+import io.onedev.server.web.page.layout.AdministrationSettingContribution;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
+import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 
 public class ApiHelpUtils {
 
@@ -102,16 +106,7 @@ public class ApiHelpUtils {
 					if (parsedTypes.add(valueClass)) {
 						Class<?> instantiationClass;
 						if (Modifier.isAbstract(valueClass.getModifiers())) {
-							List<Class<?>> implementations = new ArrayList<>(
-									OneDev.getInstance(ImplementationRegistry.class).getImplementations(valueClass));
-							Collections.sort(implementations, new Comparator<Class<?>>() {
-
-								@Override
-								public int compare(Class<?> o1, Class<?> o2) {
-									return o1.getName().compareTo(o2.getName());
-								}
-								
-							});
+							List<Class<?>> implementations = getImplementations(valueClass);
 							instantiationClass = implementations.iterator().next();
 						} else {
 							instantiationClass = valueClass;
@@ -144,6 +139,38 @@ public class ApiHelpUtils {
 		return (Serializable) value;
 	}
 	
+	public static List<Class<?>> getImplementations(Class<?> clazz) {
+		List<Class<?>> implementations = new ArrayList<>();
+		if (clazz == ContributedAdministrationSetting.class) {
+			for (AdministrationSettingContribution contribution: 
+					OneDev.getExtensions(AdministrationSettingContribution.class)) {
+				implementations.addAll(contribution.getSettingClasses());
+			}
+			if (implementations.isEmpty())
+				implementations.add(ExamplePluginSetting.class);
+		} else if (clazz == ContributedProjectSetting.class) {
+			for (ProjectSettingContribution contribution: 
+					OneDev.getExtensions(ProjectSettingContribution.class)) {
+				implementations.addAll(contribution.getSettingClasses());
+			}
+			if (implementations.isEmpty())
+				implementations.add(ExamplePluginSetting.class);
+		} else {
+			implementations.addAll(OneDev.getInstance(ImplementationRegistry.class).getImplementations(clazz));
+		}
+		
+		Collections.sort(implementations, new Comparator<Class<?>>() {
+
+			@Override
+			public int compare(Class<?> o1, Class<?> o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+			
+		});
+		
+		return implementations;
+	}
+	
 	public static List<Field> getJsonFields(Class<?> beanClass) {
 		List<Field> fields = new ArrayList<>();
 		for (Field field: BeanUtils.findFields(beanClass)) {
@@ -168,6 +195,5 @@ public class ApiHelpUtils {
 		Collections.sort(fields, new ApiComparator());
 		
 		return fields;
-	}	
-	
+	}
 }

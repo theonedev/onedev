@@ -288,10 +288,12 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.layout.DefaultMainMenuCustomization;
 import io.onedev.server.web.page.layout.MainMenuCustomization;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.websocket.BuildEventBroadcaster;
@@ -516,7 +518,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(AdministrationSettingContribution.class, new AdministrationSettingContribution() {
 			
 			@Override
-			public List<Class<? extends Serializable>> getSettingClasses() {
+			public List<Class<? extends ContributedAdministrationSetting>> getSettingClasses() {
 				return new ArrayList<>();
 			}
 			
@@ -524,7 +526,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(ProjectSettingContribution.class, new ProjectSettingContribution() {
 			
 			@Override
-			public List<Class<? extends Serializable>> getSettingClasses() {
+			public List<Class<? extends ContributedProjectSetting>> getSettingClasses() {
 				return new ArrayList<>();
 			}
 			

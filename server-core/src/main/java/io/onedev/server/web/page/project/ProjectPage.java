@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -59,6 +58,7 @@ import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
@@ -237,7 +237,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					WebHooksPage.class, WebHooksPage.paramsOf(getProject())));
 			
 			for (ProjectSettingContribution contribution:OneDev.getExtensions(ProjectSettingContribution.class)) {
-				for (Class<? extends Serializable> settingClass: contribution.getSettingClasses()) {
+				for (Class<? extends ContributedProjectSetting> settingClass: contribution.getSettingClasses()) {
 					settingMenuItems.add(new SidebarMenuItem.Page(
 							null, 
 							EditableUtils.getDisplayName(settingClass), 

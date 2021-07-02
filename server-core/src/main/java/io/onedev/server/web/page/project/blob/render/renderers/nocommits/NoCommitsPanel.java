@@ -173,6 +173,15 @@ public class NoCommitsPanel extends Panel {
 				}
 				
 			});
+			add(new WebMarkupContainer("setupBuildSpec") {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("span");
+				}
+				
+			});
 			add(new WebMarkupContainer("pushInstructions") {
 				
 				@Override

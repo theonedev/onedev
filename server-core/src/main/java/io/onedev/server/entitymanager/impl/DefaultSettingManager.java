@@ -4,13 +4,16 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.Validator;
 
 import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
@@ -33,6 +36,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 @Singleton
 public class DefaultSettingManager extends BaseEntityManager<Setting> implements SettingManager {
@@ -427,7 +431,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<Class<? extends Serializable>, Serializable> getContributedSettings() {
+	public Map<String, ContributedAdministrationSetting> getContributedSettings() {
         Setting setting;
         if (contributedSettingsId == null) {
     		setting = getSetting(Key.CONTRIBUTED_SETTINGS);
@@ -436,12 +440,12 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
         } else {
             setting = load(contributedSettingsId);
         }
-        return (Map<Class<? extends Serializable>, Serializable>) setting.getValue();
+        return (Map<String, ContributedAdministrationSetting>) setting.getValue();
 	}
 
 	@Transactional
 	@Override
-	public void saveContributedSettings(Map<Class<? extends Serializable>, Serializable> contributedSettings) {
+	public void saveContributedSettings(Map<String, ContributedAdministrationSetting> contributedSettings) {
 		Setting setting = getSetting(Key.CONTRIBUTED_SETTINGS);
 		if (setting == null) {
 			setting = new Setting();
@@ -451,17 +455,27 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		dao.persist(setting);
 	}
  
+	@Nullable
 	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends Serializable> T getContributedSetting(Class<T> settingClass) {
-		return (T) getContributedSettings().get(settingClass);
+	public <T extends ContributedAdministrationSetting> T getContributedSetting(Class<T> settingClass) {
+		T contributedSetting = (T) getContributedSettings().get(settingClass.getName());
+		if (contributedSetting == null) {
+			try {
+				T value = settingClass.newInstance();
+				if (OneDev.getInstance(Validator.class).validate(value).isEmpty()) 
+					contributedSetting = value;
+			} catch (InstantiationException | IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		return contributedSetting;
 	}
 
-	@Transactional
-	@Override
-	public void saveContributedSetting(Class<? extends Serializable> settingClass, Serializable setting) {
-		Map<Class<? extends Serializable>, Serializable> contributedSettings = getContributedSettings();
-		contributedSettings.put(settingClass, setting);
+	public void saveContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass, 
+			@Nullable ContributedAdministrationSetting setting) {
+		Map<String, ContributedAdministrationSetting> contributedSettings = getContributedSettings();
+		contributedSettings.put(settingClass.getName(), setting);
 		saveContributedSettings(contributedSettings);
 	}
 	

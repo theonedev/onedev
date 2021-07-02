@@ -31,6 +31,7 @@ public class NodePluginModule extends AbstractPluginModule {
 			}
 			
 		});
+		
 	}
 
 }

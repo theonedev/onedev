@@ -1,6 +1,5 @@
 package io.onedev.server.entitymanager;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +20,7 @@ import io.onedev.server.model.support.administration.authenticator.Authenticator
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 public interface SettingManager extends EntityManager<Setting> {
 	
@@ -137,13 +137,14 @@ public interface SettingManager extends EntityManager<Setting> {
     
     void saveSsoConnectors(List<SsoConnector> ssoConnectors);
     
-    Map<Class<? extends Serializable>, Serializable> getContributedSettings();
+    Map<String, ContributedAdministrationSetting> getContributedSettings();
     
-    void saveContributedSettings(Map<Class<? extends Serializable>, Serializable> contributedSettings);
+    void saveContributedSettings(Map<String, ContributedAdministrationSetting> contributedSettings);
 
     @Nullable
-    <T extends Serializable> T getContributedSetting(Class<T> settingClass);
+    <T extends ContributedAdministrationSetting> T getContributedSetting(Class<T> settingClass);
     
-    void saveContributedSetting(Class<? extends Serializable> settingClass, @Nullable Serializable setting);
+    void saveContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass, 
+    		@Nullable ContributedAdministrationSetting setting);
     
 }

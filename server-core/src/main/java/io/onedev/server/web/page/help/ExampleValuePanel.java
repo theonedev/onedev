@@ -7,7 +7,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -45,8 +44,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.launcher.loader.ImplementationRegistry;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -498,24 +495,14 @@ public class ExampleValuePanel extends Panel {
 				}
 				
 			}, valueInfoModel, requestBodyClass));
-			
+
 			typeInfoFragment.add(new MenuLink("implementations") {
 
 				@Override
 				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 					List<MenuItem> items = new ArrayList<>();
-					List<Class<?>> implementations = new ArrayList<>(
-							OneDev.getInstance(ImplementationRegistry.class).getImplementations(getDeclaredClass()));
-					Collections.sort(implementations, new Comparator<Class<?>>() {
-
-						@Override
-						public int compare(Class<?> o1, Class<?> o2) {
-							return o1.getName().compareTo(o2.getName());
-						}
-						
-					});
 					
-					for (Class<?> clazz: implementations) {
+					for (Class<?> clazz: ApiHelpUtils.getImplementations(getDeclaredClass())) {
 						items.add(new MenuItem() {
 
 							@Override

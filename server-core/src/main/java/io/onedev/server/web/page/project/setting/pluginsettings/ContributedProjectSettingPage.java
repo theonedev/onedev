@@ -21,6 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
@@ -29,7 +30,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 
 	public static final String PARAM_SETTING = "setting";
 	
-	private Class<? extends Serializable> settingClass;
+	private Class<? extends ContributedProjectSetting> settingClass;
 	
 	public ContributedProjectSettingPage(PageParameters params) {
 		super(params);
@@ -38,7 +39,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 		
 		for (ProjectSettingContribution contribution: 
 				OneDev.getExtensions(ProjectSettingContribution.class)) {
-			for (Class<? extends Serializable> each: contribution.getSettingClasses()) {
+			for (Class<? extends ContributedProjectSetting> each: contribution.getSettingClasses()) {
 				if (getSettingName(each).equals(settingName)) { 
 					settingClass = each;
 					break;
@@ -70,7 +71,7 @@ public class ContributedProjectSettingPage extends ProjectSettingPage {
 				
 				Component editor = get("editor");
 				if (editor instanceof BeanEditor && editor.isVisible()) 
-					getProject().setContributedSetting(settingClass, ((BeanEditor)editor).getModelObject());
+					getProject().setContributedSetting(settingClass, (ContributedProjectSetting) ((BeanEditor)editor).getModelObject());
 				else 
 					getProject().setContributedSetting(settingClass, null);
 				

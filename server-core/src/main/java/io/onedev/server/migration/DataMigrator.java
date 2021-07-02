@@ -2538,4 +2538,16 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate58(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("contributedSettings");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

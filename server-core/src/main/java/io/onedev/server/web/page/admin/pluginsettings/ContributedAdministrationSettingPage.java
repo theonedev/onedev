@@ -21,6 +21,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 
 @SuppressWarnings("serial")
@@ -28,7 +29,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 
 	public static final String PARAM_SETTING = "setting";
 	
-	private Class<? extends Serializable> settingClass;
+	private Class<? extends ContributedAdministrationSetting> settingClass;
 	
 	public ContributedAdministrationSettingPage(PageParameters params) {
 		super(params);
@@ -37,7 +38,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 		
 		for (AdministrationSettingContribution contribution: 
 				OneDev.getExtensions(AdministrationSettingContribution.class)) {
-			for (Class<? extends Serializable> each: contribution.getSettingClasses()) {
+			for (Class<? extends ContributedAdministrationSetting> each: contribution.getSettingClasses()) {
 				if (getSettingName(each).equals(settingName)) { 
 					settingClass = each;
 					break;
@@ -73,7 +74,7 @@ public class ContributedAdministrationSettingPage extends AdministrationPage {
 				
 				Component editor = get("editor");
 				if (editor instanceof BeanEditor && editor.isVisible())
-					getSettingManager().saveContributedSetting(settingClass, ((BeanEditor)editor).getModelObject());
+					getSettingManager().saveContributedSetting(settingClass, (ContributedAdministrationSetting) ((BeanEditor)editor).getModelObject());
 				else
 					getSettingManager().saveContributedSetting(settingClass, null);
 				

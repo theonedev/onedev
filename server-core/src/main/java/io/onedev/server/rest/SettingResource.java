@@ -1,6 +1,7 @@
 package io.onedev.server.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -31,6 +32,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 @Api(order=100000)
 @Path("/settings")
@@ -163,6 +165,15 @@ public class SettingResource {
     	return settingManager.getSsoConnectors();
     }
 	
+	@Api(order=1450)
+	@Path("/contributed-settings")
+    @GET
+    public Map<String, ContributedAdministrationSetting> getContributedSettings() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getContributedSettings();
+    }
+	
 	@Api(order=1500)
 	@Path("/system")
     @POST
@@ -290,6 +301,16 @@ public class SettingResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	settingManager.saveSsoConnectors(ssoConnectors);
+    	return Response.ok().build();
+    }
+	
+	@Api(order=2800)
+	@Path("/contributed-settings")
+	@POST
+    public Response setContributedSettings(@NotNull Map<String, ContributedAdministrationSetting> contributedSettings) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveContributedSettings(contributedSettings);
     	return Response.ok().build();
     }
 	
