@@ -11,8 +11,9 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.ProjectDependency;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -20,7 +21,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-abstract class ProjectDependencyEditPanel extends Panel implements JobAware {
+abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAware, JobAware {
 
 	private final List<ProjectDependency> dependencies;
 	

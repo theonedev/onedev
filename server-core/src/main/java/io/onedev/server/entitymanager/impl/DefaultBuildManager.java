@@ -168,6 +168,18 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	@Sessional
 	@Override
+	public Build findLastFinished(Project project, String jobName) {
+		EntityCriteria<Build> criteria = newCriteria();
+		criteria.add(Restrictions.eq(Build.PROP_PROJECT, project));
+		criteria.add(Restrictions.eq(Build.PROP_JOB, jobName));
+		criteria.add(Build.Status.ofFinished());
+		criteria.addOrder(Order.desc(Build.PROP_NUMBER));
+		criteria.setCacheable(true);
+		return find(criteria);
+	}
+	
+	@Sessional
+	@Override
 	public Build find(String buildFQN) {
 		return find(ProjectScopedNumber.from(buildFQN));
 	}

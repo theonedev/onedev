@@ -48,6 +48,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Objects;
@@ -249,6 +251,14 @@ public class Build extends AbstractEntity implements Referenceable {
 					return status;
 			}
 			return null;
+		}
+		
+		public static Criterion ofFinished() {
+			return Restrictions.or(
+					Restrictions.eq(PROP_STATUS, Status.FAILED), 
+					Restrictions.eq(PROP_STATUS, Status.CANCELLED), 
+					Restrictions.eq(PROP_STATUS, Status.TIMED_OUT), 
+					Restrictions.eq(PROP_STATUS, Status.SUCCESSFUL));
 		}
 		
 	};

@@ -38,6 +38,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.NamedElement;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;

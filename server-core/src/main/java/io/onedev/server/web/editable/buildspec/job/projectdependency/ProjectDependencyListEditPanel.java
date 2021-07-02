@@ -27,9 +27,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
-import io.onedev.server.buildspec.job.ProjectDependency;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -83,6 +85,11 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 					}
 
 					@Override
+					public BuildSpec getBuildSpec() {
+						return ProjectDependencyListEditPanel.this.getBuildSpec();
+					}
+					
+					@Override
 					public List<ParamSpec> getParamSpecs() {
 						return getJob()!=null? getJob().getParamSpecs(): null;
 					}
@@ -130,7 +137,8 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getBuildNumber()));
+				ProjectDependency dependency = rowModel.getObject();
+				cellItem.add(new Label(componentId, dependency.getBuildProvider().getDescription()));
 			}
 			
 		});		
@@ -167,6 +175,11 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 							@Override
 							public List<ParamSpec> getParamSpecs() {
 								return getJob()!=null? getJob().getParamSpecs(): null;
+							}
+
+							@Override
+							public BuildSpec getBuildSpec() {
+								return ProjectDependencyListEditPanel.this.getBuildSpec();
 							}
 							
 						};
@@ -229,6 +242,14 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 		}.sortable("tbody"));
 	}
 
+	private BuildSpec getBuildSpec() {
+		BuildSpecAware buildSpecAware = findParent(BuildSpecAware.class);
+		if (buildSpecAware != null)
+			return buildSpecAware.getBuildSpec();
+		else
+			return null;
+	}
+	
 	private Job getJob() {
 		JobAware jobAware = findParent(JobAware.class);
 		if (jobAware != null)

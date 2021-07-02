@@ -952,4 +952,44 @@ public class BuildSpec implements Serializable, Validatable {
 		}			
 	}	
 	
+	@SuppressWarnings("unused")
+	private void migrate8(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("projectDependencies")) {
+							SequenceNode projectDependenciesNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node projectDependenciesNodeItem: projectDependenciesNode.getValue()) {
+								MappingNode projectDependencyNode = (MappingNode) projectDependenciesNodeItem;
+								String buildNumber = null;
+								for (Iterator<NodeTuple> itProjectDependencyTuple = projectDependencyNode.getValue().iterator(); itProjectDependencyTuple.hasNext();) {
+									NodeTuple projectDependencyTuple = itProjectDependencyTuple.next();
+									String projectDependencyTupleKey = ((ScalarNode)projectDependencyTuple.getKeyNode()).getValue();
+									if (projectDependencyTupleKey.equals("buildNumber")) {
+										buildNumber = ((ScalarNode)projectDependencyTuple.getValueNode()).getValue();
+										itProjectDependencyTuple.remove();
+										break;
+									}
+								}
+								Preconditions.checkNotNull(buildNumber);
+								
+								List<NodeTuple> buildProviderTuples = new ArrayList<>();
+								buildProviderTuples.add(new NodeTuple(
+										new ScalarNode(Tag.STR, "buildNumber"), 
+										new ScalarNode(Tag.STR, buildNumber)));
+								Node buildProviderNode = new MappingNode(new Tag("!SpecifiedBuild"), buildProviderTuples, FlowStyle.BLOCK);
+								projectDependencyNode.getValue().add(new NodeTuple(new ScalarNode(Tag.STR, "buildProvider"), buildProviderNode));
+							}
+						}
+					}
+				}
+			}
+		}			
+	}	
+	
 }

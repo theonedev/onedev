@@ -25,7 +25,7 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.buildspec.job.ProjectDependency;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.offcanvas.OffCanvasCardPanel;
 import io.onedev.server.web.component.offcanvas.OffCanvasPanel;
@@ -62,7 +62,8 @@ class ProjectDependencyListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getBuildNumber()));
+				ProjectDependency dependency = rowModel.getObject();
+				cellItem.add(new Label(componentId, dependency.getBuildProvider().getDescription()));
 			}
 			
 		});		

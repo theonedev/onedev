@@ -67,6 +67,7 @@ import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
 import io.onedev.server.buildspec.job.log.LogManager;
+import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.job.trigger.ScheduleTrigger;
@@ -344,14 +345,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					} else {
 						subject = SecurityUtils.asSubject(0L);
 					}
-					String buildNumberStr = dependency.getBuildNumber();
-					if (buildNumberStr.startsWith("#"))
-						buildNumberStr = buildNumberStr.substring(1);
-					Long buildNumber = Long.parseLong(buildNumberStr);
-					Build dependencyBuild = buildManager.find(dependencyProject, buildNumber);
+					
+					Build dependencyBuild = dependency.getBuildProvider().getBuild(dependencyProject);
 					if (dependencyBuild == null) {
-						String errorMessage = String.format("Unable to find dependency build (project: %s, build number: %d)", 
-								dependency.getProjectName(), buildNumber);
+						String errorMessage = String.format("Unable to find dependency build in project '" 
+								+ dependencyProject.getName() + "'");
 						throw new ExplicitException(errorMessage);
 					}
 					
