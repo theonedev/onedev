@@ -101,7 +101,7 @@ public class BuildResource {
     		@QueryParam("count") @Api(example="100") int count) {
 		
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	BuildQuery parsedQuery;
 		try {

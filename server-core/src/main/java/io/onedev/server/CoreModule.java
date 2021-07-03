@@ -646,7 +646,8 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
-						ObjectNotFoundException.class, StaleStateException.class, UnauthorizedException.class, 
+						ObjectNotFoundException.class, io.onedev.server.git.exception.ObjectNotFoundException.class, 
+						StaleStateException.class, UnauthorizedException.class, 
 						ExplicitException.class, ValidationException.class, PageExpiredException.class, 
 						StalePageException.class);
 			}

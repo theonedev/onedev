@@ -141,7 +141,7 @@ public class ProjectResource {
     		@QueryParam("count") @Api(example="100") int count) {
 		
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
     	ProjectQuery parsedQuery;
 		try {
@@ -166,7 +166,7 @@ public class ProjectResource {
 			throw new UnauthorizedException();
 
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
     	EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
     	criteria.add(Restrictions.eq(Milestone.PROP_PROJECT, project));
@@ -195,7 +195,7 @@ public class ProjectResource {
 			throw new UnauthorizedException();
     	
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
     	
     	Day sinceDay = new Day(LocalDate.parse(since));
     	Day untilDay = new Day(LocalDate.parse(until));

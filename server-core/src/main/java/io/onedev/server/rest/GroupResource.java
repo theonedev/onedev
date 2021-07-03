@@ -81,7 +81,7 @@ public class GroupResource {
 			throw new UnauthorizedException();
 		
     	if (count > RestConstants.MAX_PAGE_SIZE)
-    		throw new InvalidParamException("Count should be less than " + RestConstants.MAX_PAGE_SIZE);
+    		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
 		if (name != null) 

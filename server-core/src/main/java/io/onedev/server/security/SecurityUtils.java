@@ -107,6 +107,13 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			return false;
 	}
 	
+	public static boolean canDeleteTag(Project project, String tagName) {
+		if (canWriteCode(project)) 
+			return !project.getTagProtection(tagName, getUser()).isPreventDeletion();
+		else 
+			return false;
+	}
+	
 	public static boolean canCreateTag(Project project, String tagName) {
 		if (canWriteCode(project)) 
 			return !project.getTagProtection(tagName, getUser()).isPreventCreation();

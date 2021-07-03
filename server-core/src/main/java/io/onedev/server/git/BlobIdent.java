@@ -11,8 +11,8 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.MoreObjects;
 
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.RevisionAndPath;
 
 public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	
@@ -45,35 +45,14 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	public BlobIdent() {
 	}
 	
-	public BlobIdent(Project project, List<String> urlSegments) {
-		StringBuilder revisionBuilder = new StringBuilder();
-		for (int i=0; i<urlSegments.size(); i++) {
-			if (i != 0)
-				revisionBuilder.append("/");
-			revisionBuilder.append(urlSegments.get(i));
-			if (project.getObjectId(revisionBuilder.toString(), false) != null) {
-				revision = revisionBuilder.toString();
-				StringBuilder pathBuilder = new StringBuilder();
-				for (int j=i+1; j<urlSegments.size(); j++) {
-					if (j != i+1)
-						pathBuilder.append("/");
-					pathBuilder.append(urlSegments.get(j));
-				}
-				if (pathBuilder.length() != 0) {
-					path = pathBuilder.toString();
-					mode = project.getMode(revision, path);
-				} else {
-					mode = FileMode.TREE.getBits();
-				}
-				return;
-			}
-		}
-		if (revisionBuilder.length() != 0) {
-			throw new ObjectNotFoundException("Revision not found: " + revisionBuilder.toString());
-		} else {
-			revision = project.getDefaultBranch();
+	public BlobIdent(Project project, List<String> segments) {
+		RevisionAndPath revisionAndPath = RevisionAndPath.parse(project, segments); 
+		revision = revisionAndPath.getRevision();
+		path = revisionAndPath.getPath();
+		if (path != null)
+			mode = project.getMode(revision, path);
+		else
 			mode = FileMode.TREE.getBits();
-		}
 	}
 	
 	public boolean isTree() {
