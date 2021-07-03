@@ -22,6 +22,7 @@ import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.Component;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -54,6 +55,7 @@ import io.onedev.server.buildspec.step.UseTemplateStep;
 import io.onedev.server.migration.VersionedYamlDoc;
 import io.onedev.server.migration.XmlBuildSpecMigrator;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -177,8 +179,15 @@ public class BuildSpec implements Serializable, Validatable {
 					Collection<String> newProjectChain = new HashSet<>(projectChain);
 					newProjectChain.add(aImport.getProjectName());
 					try {
-						importedBuildSpecs.addAll(aImport.getBuildSpec().getImportedBuildSpecs(newProjectChain));
-						importedBuildSpecs.add(aImport.getBuildSpec());
+						BuildSpec importedBuildSpec = aImport.getBuildSpec();
+						RevCommit commit = aImport.getProject().getRevCommit(aImport.getTag(), true);
+						JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(aImport.getProject(), commit, null));
+						try {
+							importedBuildSpecs.addAll(importedBuildSpec.getImportedBuildSpecs(newProjectChain));
+						} finally {
+							JobSecretAuthorizationContext.pop();
+						}
+						importedBuildSpecs.add(importedBuildSpec);
 					} catch (Exception e) {
 						// Ignore here as we rely on this method to show viewer/editor 
 						// Errors relating to this will be shown when validated

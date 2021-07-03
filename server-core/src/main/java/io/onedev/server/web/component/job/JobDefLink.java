@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.job;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -10,6 +12,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider;
@@ -42,6 +45,11 @@ public abstract class JobDefLink extends BookmarkablePageLink<Void> {
 
 	protected abstract Project getProject();
 	
+	@Nullable
+	protected PullRequest getPullRequest() {
+		return null;
+	}
+	
 	@Override
 	public PageParameters getPageParameters() {
 		ProjectBlobPage.State state = new ProjectBlobPage.State();
@@ -49,6 +57,7 @@ public abstract class JobDefLink extends BookmarkablePageLink<Void> {
 		if (getProject().getBlob(state.blobIdent, false) == null)
 			state.blobIdent = new BlobIdent(commitId.name(), ".onedev-buildspec", FileMode.REGULAR_FILE.getBits());
 		state.position = BuildSpecRendererProvider.getPosition(Job.SELECTION_PREFIX + jobName);
+		state.requestId = PullRequest.idOf(getPullRequest());
 		return ProjectBlobPage.paramsOf(getProject(), state);
 	}
 

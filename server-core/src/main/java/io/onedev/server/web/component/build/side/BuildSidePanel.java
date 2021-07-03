@@ -127,6 +127,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		CommitDetailPage.State commitState = new CommitDetailPage.State();
 		commitState.revision = getBuild().getCommitHash();
+		commitState.requestId = PullRequest.idOf(getBuild().getRequest());
 		params = CommitDetailPage.paramsOf(getProject(), commitState);
 		
 		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commit", CommitDetailPage.class, params) {
@@ -148,6 +149,11 @@ public abstract class BuildSidePanel extends Panel {
 			@Override
 			protected Project getProject() {
 				return BuildSidePanel.this.getProject();
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return getBuild().getRequest();
 			}
 
 			@Override
@@ -180,7 +186,9 @@ public abstract class BuildSidePanel extends Panel {
 			if (request != null
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
-					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), BuildSpec.BLOB_PATH)) { 
+					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), BuildSpec.BLOB_PATH)
+					&& getBuild().getSpec() != null 
+					&& getBuild().getSpec().getJobs().stream().anyMatch(it->it.getName().equals(getBuild().getJobName()))) { 
 				BlobIdent blobIdent = new BlobIdent(request.getSourceBranch(), BuildSpec.BLOB_PATH, 
 						FileMode.REGULAR_FILE.getBits());
 				state = new ProjectBlobPage.State(blobIdent);
