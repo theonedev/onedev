@@ -357,7 +357,7 @@ public class RepositoryResource {
 			example="46c001b04cba0ca41588841f1ca32f50b582ee9b")
 	@Path("/{projectId}/files/{branchAndFile:.*}")
 	@POST
-	public String editFile(
+	public FileEditResponse editFile(
 			@PathParam("projectId") Long projectId, 
 			@PathParam("branchAndFile") @NotEmpty @Api(example="test-branch/path/to/file") String branchAndFile, 
 			@NotNull FileEditRequest request) {
@@ -407,7 +407,19 @@ public class RepositoryResource {
 				request.getCommitMessage()
 			);
 		
-		return newCommitId.name();
+		FileEditResponse response = new FileEditResponse();
+		response.commitHash = newCommitId.name();
+		return response;
+	}
+
+	// Wrap string inside an object to make return value a valid json for some third party 
+	// applications to consume
+	public static class FileEditResponse implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		String commitHash;
+		
 	}
 
 	public static class RefResponse implements Serializable {
