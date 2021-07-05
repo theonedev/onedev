@@ -14,6 +14,10 @@
 .project-setting .branch-protections .bean-list td.property-jobNames {
 	width: 30%;
 }
+.project-setting .branch-protection>.card-header .badge, 
+.project-setting .tag-protection>.card-header .badge {
+	font-size: 0.9rem;
+}
 .project-setting .project-authorizations .bean-list td.property-userName {
 	width: 50%;
 }

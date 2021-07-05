@@ -39,6 +39,7 @@ import javax.persistence.Table;
 import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -1545,6 +1546,10 @@ public class Project extends AbstractEntity implements NameAware {
 		} else {
 			return file.getName();
 		}
+	}
+	
+	public boolean isPermittedByLoginUser(Permission permission) {
+		return getDefaultRole() != null && getDefaultRole().implies(permission);
 	}
 	
 	public LinkedHashMap<String, ContributedProjectSetting> getContributedSettings() {

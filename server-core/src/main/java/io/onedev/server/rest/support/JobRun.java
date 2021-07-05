@@ -15,13 +15,16 @@ public abstract class JobRun implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	@Api(order=250) String jobName;
+	@Api(order=250) 
+	private String jobName;
 	
 	@Api(order=260, description="A map of param name to value list. Normally the value list "
 			+ "contains only one param value. However in case the job param is defined as "
-			+ "multi-valued in build spec, you can add multiple param values") Map<String, List<String>> params = new HashMap<>();
+			+ "multi-valued in build spec, you can add multiple param values") 
+	private Map<String, List<String>> params = new HashMap<>();
 
-	@Api(order=1000) String reason;
+	@Api(order=1000) 
+	private String reason;
 
 	@NotEmpty
 	public String getJobName() {

@@ -51,6 +51,8 @@ import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.JobSecretAuthorizationContext;
+import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -89,7 +91,7 @@ import io.onedev.server.web.util.CursorSupport;
 
 @SuppressWarnings("serial")
 public abstract class BuildDetailPage extends ProjectPage 
-		implements InputContext, ScriptIdentityAware, BuildAware {
+		implements InputContext, ScriptIdentityAware, BuildAware, JobSecretAuthorizationContextAware {
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -363,6 +365,11 @@ public abstract class BuildDetailPage extends ProjectPage
 			protected Project getProject() {
 				return getBuild().getProject();
 			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return getBuild().getRequest();
+			}
 			
 		});
 		
@@ -601,6 +608,11 @@ public abstract class BuildDetailPage extends ProjectPage
 			return getBuild().getVersion() + " - Build #" +  getBuild().getNumber() + " - " + getProject().getName();
 		else
 			return "Build #" +  getBuild().getNumber() + " - " + getProject().getName();
+	}
+
+	@Override
+	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
+		return new JobSecretAuthorizationContext(getProject(), getBuild().getCommitId(), getBuild().getRequest());
 	}
 	
 }

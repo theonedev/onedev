@@ -5,9 +5,8 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
-import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.model.support.TagProtection;
@@ -72,6 +71,16 @@ abstract class TagProtectionPanel extends Panel {
 			
 		});
 		
+		add(new WebMarkupContainer("disabled") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!protection.isEnabled());
+			}
+			
+		});
+		
 		add(new AjaxCheckBox("enable", Model.of(protection.isEnabled())) {
 			
 			@Override
@@ -82,15 +91,6 @@ abstract class TagProtectionPanel extends Panel {
 			}
 			
 		});
-		
-		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return !protection.isEnabled()? "disabled": "";
-			}
-			
-		}));
 		
 		add(BeanContext.view("protection", protection).setOutputMarkupId(true));
 		

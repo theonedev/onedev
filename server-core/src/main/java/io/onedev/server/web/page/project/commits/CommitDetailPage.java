@@ -57,6 +57,7 @@ import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -70,6 +71,8 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.JobSecretAuthorizationContext;
+import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
@@ -92,7 +95,7 @@ import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.RevisionDiff;
 
 @SuppressWarnings("serial")
-public class CommitDetailPage extends ProjectPage implements RevisionDiff.AnnotationSupport {
+public class CommitDetailPage extends ProjectPage implements RevisionDiff.AnnotationSupport, JobSecretAuthorizationContextAware {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
 	
@@ -103,6 +106,8 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	private static final String PARAM_COMPARE_WITH = "compare-with";
 	
 	private static final String PARAM_BLAME_FILE = "blame-file";
+	
+	private static final String PARAM_PULL_REQUEST = "request";
 	
 	private static final String PARAM_WHITESPACE_OPTION = "whitespace-option";
 	
@@ -159,6 +164,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
 		state.commentId = params.get(PARAM_COMMENT).toOptionalLong();
 		state.mark = Mark.fromString(params.get(PARAM_MARK).toString());
+		state.requestId = params.get(PARAM_PULL_REQUEST).toOptionalLong();
 		
 		resolvedRevision = getProject().getRevCommit(state.revision, true).copy();
 		if (state.compareWith != null)
@@ -190,6 +196,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 
 		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
+		browseState.requestId = state.requestId;
 		PageParameters params = ProjectBlobPage.paramsOf(projectModel.getObject(), browseState);
 		add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 		
@@ -580,6 +587,14 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 				return projectModel.getObject();
 			}
 
+			@Override
+			protected PullRequest getPullRequest() {
+				if (state.requestId != null)
+					return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+				else
+					return null;
+			}
+
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
@@ -633,6 +648,8 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			params.set(PARAM_COMMENT, state.commentId);
 		if (state.mark != null)
 			params.set(PARAM_MARK, state.mark.toString());
+		if (state.requestId != null)
+			params.set(PARAM_PULL_REQUEST, state.requestId);
 		return params;
 	}
 	
@@ -678,6 +695,8 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		@Nullable
 		public Mark mark;
 		
+		@Nullable
+		public Long requestId;
 	}
 
 	@Override
@@ -851,6 +870,19 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		return getCommit().getShortMessage() 
 				+ " - Commit " +  GitUtils.abbreviateSHA(getCommit().getName()) 
 				+ " - " + getProject().getName();
+	}
+	
+	@Nullable
+	private PullRequest getPullRequest() {
+		if (state.requestId != null)
+			return OneDev.getInstance(PullRequestManager.class).load(state.requestId);
+		else
+			return null;
+	}
+
+	@Override
+	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
+		return new JobSecretAuthorizationContext(getProject(), getCommit(), getPullRequest());
 	}
 	
 }

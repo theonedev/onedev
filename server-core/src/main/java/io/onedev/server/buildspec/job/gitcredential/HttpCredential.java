@@ -46,7 +46,7 @@ public class HttpCredential implements GitCredential, Validatable {
 	@Override
 	public CloneInfo newCloneInfo(Build build, String jobToken) {
 		return new HttpCloneInfo(OneDev.getInstance(UrlManager.class).cloneUrlFor(build.getProject(), false), 
-				build.getSecretValue(accessTokenSecret));
+				build.getJobSecretAuthorizationContext().getSecretValue(accessTokenSecret));
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.joblist.JobListPanel;
@@ -45,6 +46,8 @@ public abstract class CommitStatusPanel extends Panel {
 		@Override
 		protected List<Job> load() {
 			List<Job> jobs = new ArrayList<>();
+			JobSecretAuthorizationContext.push(
+					new JobSecretAuthorizationContext(getProject(), commitId, getPullRequest()));
 			try {
 				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
 				if (buildSpec != null)
@@ -52,6 +55,8 @@ public abstract class CommitStatusPanel extends Panel {
 			} catch (Exception e) {
 				logger.error("Error retrieving build spec (project: {}, commit: {})", 
 						getProject().getName(), commitId.name(), e);
+			} finally {
+				JobSecretAuthorizationContext.pop();
 			}
 			return jobs;
 		}

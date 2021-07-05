@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -11,25 +12,35 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 
+import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.base.Preconditions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -42,6 +53,8 @@ public class Import implements Serializable, Validatable {
 	private String projectName;
 	
 	private String tag;
+	
+	private String accessTokenSecret;
 	
 	private transient BuildSpec buildSpec;
 	
@@ -93,7 +106,7 @@ public class Import implements Serializable, Validatable {
 	}
 	
 	@Editable(order=200, description="Specify tag in above project to import build spec from")
-	@Interpolative(variableSuggester="suggestTags", literalSuggester="suggestTags")
+	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestTags")
 	@NotEmpty
 	public String getTag() {
 		return tag;
@@ -104,6 +117,11 @@ public class Import implements Serializable, Validatable {
 	}
 
 	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return BuildSpec.suggestVariables(matchWith, false, false);
+	}
+	
+	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestTags(String matchWith) {
 		Project project = getInputProject();
 		if (project != null)
@@ -112,36 +130,74 @@ public class Import implements Serializable, Validatable {
 			return new ArrayList<>();
 	}
 
-	private boolean canReadCode(Project project) {
-		return project.getDefaultRole() != null && project.getDefaultRole().implies(new ReadCode());
+	@Editable(order=500, description="Specify a secret to be used as access token to import build spec "
+			+ "from above project. If not specified, OneDev will try to import build spec anonymously")
+	@ChoiceProvider("getAccessTokenSecretChoices")
+	@Nullable
+	@NameOfEmptyValue("Access Anonymously")
+	public String getAccessTokenSecret() {
+		return accessTokenSecret;
+	}
+
+	public void setAccessTokenSecret(String accessTokenSecret) {
+		this.accessTokenSecret = accessTokenSecret;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getAccessTokenSecretChoices() {
+		return Project.get().getBuildSetting().getJobSecrets()
+				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
 	public BuildSpec getBuildSpec() {
 		if (buildSpec == null) {
 			Project project = getProject();
-			
-			if (canReadCode(project)) {
-				RevCommit commit = project.getRevCommit(tag, false);
-				if (commit == null) {
-					String errorMessage = String.format("Unable to find tag to import build spec (project: %s, tag: %s)", 
-							projectName, tag);
-					throw new ExplicitException(errorMessage);
+
+			Subject subject;
+			if (getAccessTokenSecret() != null) {
+				JobSecretAuthorizationContext context = Preconditions.checkNotNull(JobSecretAuthorizationContext.get());
+				String accessToken;
+				
+				if (WicketUtils.getPage() instanceof ProjectBlobPage) {
+					ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+					if (context.getProject().equals(page.getProject()) 
+							&& (page.getMode() == Mode.ADD || page.getMode() == Mode.EDIT)) {
+						accessToken = context.getSecretValue(page.getBlobIdent().revision, accessTokenSecret);
+					} else {
+						accessToken = context.getSecretValue(accessTokenSecret);
+					}
+				} else {
+					accessToken = context.getSecretValue(accessTokenSecret);
 				}
-				try {
-					buildSpec = project.getBuildSpec(commit);
-				} catch (BuildSpecParseException e) {
-					String errorMessage = String.format("Malformed build spec (project: %s, tag: %s)", 
-							projectName, tag);
-					throw new ExplicitException(errorMessage);
+				User user = OneDev.getInstance(UserManager.class).findByAccessToken(accessToken);
+				if (user == null) {
+					throw new ExplicitException(String.format(
+							"Unable to import build spec as access token is invalid (import project: %s, access token: %s)", 
+							projectName, accessToken));
 				}
-				if (buildSpec == null) {
-					String errorMessage = String.format("Build spec not defined (project: %s, tag: %s)", 
-							projectName, tag);
-					throw new ExplicitException(errorMessage);
-				}
+				subject = user.asSubject();
 			} else {
-				String errorMessage = String.format("Unable to read build spec. Make sure default role of the project "
-						+ "has permission to read code (project: %s, tag: %s)", projectName, tag);
+				subject = SecurityUtils.asSubject(0L);
+			}
+			if (!subject.isPermitted(new ProjectPermission(project, new ReadCode())) 
+					&& !project.isPermittedByLoginUser(new ReadCode())) {
+				String errorMessage = String.format(
+						"Code read permission is required to import build spec (import project: %s)", 
+						projectName);
+				throw new ExplicitException(errorMessage);
+			}
+			
+			RevCommit commit = getCommit();
+			try {
+				buildSpec = project.getBuildSpec(commit);
+			} catch (BuildSpecParseException e) {
+				String errorMessage = String.format("Malformed build spec (import project: %s, tag: %s)", 
+						projectName, tag);
+				throw new ExplicitException(errorMessage);
+			}
+			if (buildSpec == null) {
+				String errorMessage = String.format("Build spec not defined (import project: %s, tag: %s)", 
+						projectName, tag);
 				throw new ExplicitException(errorMessage);
 			}
 			
@@ -162,18 +218,24 @@ public class Import implements Serializable, Validatable {
 			importChain.get().push(projectName);
 			try {
 				Validator validator = OneDev.getInstance(Validator.class);
-				for (int i=0; i<getBuildSpec().getImports().size(); i++) {
-					Import aImport = getBuildSpec().getImports().get(i);
-					for (ConstraintViolation<Import> violation: validator.validate(aImport)) {
-						String location = "imports[" + i + "]";
-						if (violation.getPropertyPath().toString().length() != 0)
-							location += "." + violation.getPropertyPath();
-			    		String message = String.format("Error validating imported build spec (project: %s, location: %s, message: %s)", 
-			    				projectName, location, violation.getMessage());
-			    		throw new ValidationException(message);
+				BuildSpec buildSpec = getBuildSpec();
+				JobSecretAuthorizationContext.push(new JobSecretAuthorizationContext(getProject(), getCommit(), null));
+				try {
+					for (int i=0; i<buildSpec.getImports().size(); i++) {
+						Import aImport = buildSpec.getImports().get(i);
+						for (ConstraintViolation<Import> violation: validator.validate(aImport)) {
+							String location = "imports[" + i + "]";
+							if (violation.getPropertyPath().toString().length() != 0)
+								location += "." + violation.getPropertyPath();
+				    		String message = String.format("Error validating imported build spec (import project: %s, location: %s, message: %s)", 
+				    				projectName, location, violation.getMessage());
+				    		throw new ValidationException(message);
+						}
 					}
+					return true;
+				} finally {
+					JobSecretAuthorizationContext.pop();
 				}
-				return true;
 			} catch (Exception e) {
 				context.disableDefaultConstraintViolation();
 				context.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
@@ -187,9 +249,19 @@ public class Import implements Serializable, Validatable {
 	public Project getProject() {
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		if (project == null) 
-			throw new ExplicitException("Unable to find project to import build spec (" + projectName + ")");
+			throw new ExplicitException("Unable to find project to import build spec: " + projectName);
 		else 
 			return project;
+	}
+	
+	public RevCommit getCommit() {
+		RevCommit commit = getProject().getRevCommit(tag, false);
+		if (commit == null) {
+			String errorMessage = String.format("Unable to find tag to import build spec (import project: %s, tag: %s)", 
+					projectName, tag);
+			throw new ExplicitException(errorMessage);
+		}
+		return commit;
 	}
 	
 }

@@ -26,6 +26,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -205,6 +206,11 @@ public class IssueImportPage<T extends Serializable, S extends Serializable> ext
 		return importOption;
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.getUser() != null;
+	}
+	
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "Import Issues frmo " + importer.getName());

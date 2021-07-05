@@ -105,7 +105,7 @@ public class ProjectDependency implements Serializable {
 	}
 	
 	@Editable(order=500, description="Specify a secret to be used as access token to retrieve artifacts "
-			+ "from specified project. If not specified, project artifacts will be accessed anonymously")
+			+ "from above project. If not specified, project artifacts will be accessed anonymously")
 	@ChoiceProvider("getAccessTokenSecretChoices")
 	@Nullable
 	@NameOfEmptyValue("Access Anonymously")

@@ -86,6 +86,8 @@ import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.FilenameUtils;
+import io.onedev.server.util.JobSecretAuthorizationContext;
+import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
@@ -118,7 +120,8 @@ import io.onedev.server.web.util.EditParamsAware;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, ScriptIdentityAware, EditParamsAware {
+public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, 
+		ScriptIdentityAware, EditParamsAware, JobSecretAuthorizationContextAware {
 
 	private static final String PARAM_REVISION = "revision";
 	
@@ -1539,6 +1542,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "Files");
+	}
+
+	@Override
+	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
+		return new JobSecretAuthorizationContext(getProject(), getCommit(), getPullRequest());
 	}
 
 }

@@ -13,6 +13,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
@@ -64,6 +65,11 @@ public class NewProjectPage extends LayoutPage {
 		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
 		
 		add(form);
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.getUser() != null;
 	}
 
 	@Override

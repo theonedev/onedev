@@ -57,7 +57,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -86,11 +85,11 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;
@@ -353,6 +352,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private transient Map<Build.Status, Build> streamPreviousCache = new HashMap<>();
 	
 	private transient Map<Integer, Collection<Long>> streamPreviousNumbersCache = new HashMap<>();
+	
+	private transient JobSecretAuthorizationContext jobSecretAuthorizationContext;
 	
 	public Project getNumberScope() {
 		return numberScope;
@@ -720,10 +721,16 @@ public class Build extends AbstractEntity implements Referenceable {
 		return new BuildFacade(getId(), getProject().getId(), getCommitHash());
 	}
 	
+	public JobSecretAuthorizationContext getJobSecretAuthorizationContext() {
+		if (jobSecretAuthorizationContext == null)
+			jobSecretAuthorizationContext = new JobSecretAuthorizationContext(project, getCommitId(), request);
+		return jobSecretAuthorizationContext;
+	}
+	
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
 		for (JobSecret secret: getProject().getBuildSetting().getJobSecrets()) {
-			if (isOnBranches(secret.getAuthorizedBranches()))
+			if (getJobSecretAuthorizationContext().isOnBranches(secret.getAuthorizedBranches()))
 				secretValuesToMask.add(secret.getValue());
 		}
 		
@@ -741,22 +748,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		return secretValuesToMask;
 	}
 	
-	public String getSecretValue(String secretName) {
-		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
-			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
-		} else {
-			for (JobSecret secret: getProject().getBuildSetting().getJobSecrets()) {
-				if (secret.getName().equals(secretName)) {
-					if (isOnBranches(secret.getAuthorizedBranches()))				
-						return secret.getValue();
-					else
-						throw new ExplicitException("Job secret not authorized: " + secretName);
-				}
-			}
-			throw new ExplicitException("No job secret found: " + secretName);
-		}
-	}
-	
 	@Nullable
 	public BuildSpec getSpec() {
 		if (spec == null) 
@@ -766,7 +757,12 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	@Nullable
 	public Job getJob() {
-		return getSpec()!=null? getSpec().getJobMap().get(getJobName()): null;
+		JobSecretAuthorizationContext.push(getJobSecretAuthorizationContext());
+		try {
+			return getSpec()!=null? getSpec().getJobMap().get(getJobName()): null;
+		} finally {
+			JobSecretAuthorizationContext.pop();
+		}
 	}
 
 	public Serializable getParamBean() {
@@ -892,7 +888,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public boolean canCreateTag(String tagName) {
 		for (ActionAuthorization authorization: getProject().getBuildSetting().getActionAuthorizations()) {
-			if (isOnBranches(authorization.getAuthorizedBranches())) {
+			if (getJobSecretAuthorizationContext().isOnBranches(authorization.getAuthorizedBranches())) {
 				if (authorization instanceof CreateTagAuthorization) {
 					CreateTagAuthorization createTagAuthorization = (CreateTagAuthorization) authorization;
 					String tagNames = createTagAuthorization.getTagNames();
@@ -906,7 +902,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public boolean canCloseMilestone(String milestoneName) {
 		for (ActionAuthorization authorization: getProject().getBuildSetting().getActionAuthorizations()) {
-			if (isOnBranches(authorization.getAuthorizedBranches())) {
+			if (getJobSecretAuthorizationContext().isOnBranches(authorization.getAuthorizedBranches())) {
 				if (authorization instanceof CloseMilestoneAuthorization) {
 					CloseMilestoneAuthorization closeMilestoneAuthorization = (CloseMilestoneAuthorization) authorization;
 					String milestoneNames = closeMilestoneAuthorization.getMilestoneNames();
@@ -938,23 +934,6 @@ public class Build extends AbstractEntity implements Referenceable {
 					return buildAware.getBuild();
 			}
 			return null;
-		}
-	}
-
-	public boolean isOnBranches(@Nullable String branches) {
-		if (branches == null)
-			branches = "**";
-		if (project.isCommitOnBranches(getCommitId(), branches)) {
-			return true;
-		} else if (getRequest() != null) {
-			PatternSet patternSet = PatternSet.parse(branches);
-			PathMatcher matcher = new PathMatcher();
-			return project.equals(getRequest().getSourceProject()) 
-					&& patternSet.matches(matcher, getRequest().getTargetBranch())
-					&& getRequest().getSourceBranch() != null 
-					&& patternSet.matches(matcher, getRequest().getSourceBranch());
-		} else {
-			return false;
 		}
 	}
 	

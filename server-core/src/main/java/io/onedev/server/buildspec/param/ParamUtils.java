@@ -217,7 +217,7 @@ public class ParamUtils {
 				for (List<String> value: param.getValuesProvider().getValues(build, paramCombination)) {
 					List<String> resolvedValue = new ArrayList<>();
 					for (String each: value) 
-						resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getSecretValue(each));
+						resolvedValue.add(SecretInput.LITERAL_VALUE_PREFIX + build.getJobSecretAuthorizationContext().getSecretValue(each));
 					resolvedValues.add(resolvedValue);
 				}
 				paramMatrix.put(param.getName(), resolvedValues);
