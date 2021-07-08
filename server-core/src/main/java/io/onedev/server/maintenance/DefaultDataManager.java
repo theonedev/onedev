@@ -325,8 +325,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 				+ "Error detail:\n"
 				+ "%s",
 				url, Throwables.getStackTraceAsString(e));
-		mailManager.sendMail(Lists.newArrayList(root.getEmail()), 
-				"OneDev database auto-backup failed", htmlBody, textBody);
+		mailManager.sendMail(Lists.newArrayList(root.getEmail()), Lists.newArrayList(),
+				"OneDev database auto-backup failed", htmlBody, textBody, 
+				null, null);
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

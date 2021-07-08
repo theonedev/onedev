@@ -117,7 +117,7 @@ public abstract class IssueOperationsPanel extends Panel {
 					public void onClick(AjaxRequestTarget target) {
 						activeTransitionLinkRef.set(this);
 						Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueOperationsPanel.this);
-						Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getIssue().getProject());
+						Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
 						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 
 						Form<?> form = new Form<Void>("form") {

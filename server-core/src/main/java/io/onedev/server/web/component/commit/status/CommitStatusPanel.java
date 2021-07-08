@@ -2,6 +2,7 @@ package io.onedev.server.web.component.commit.status;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -145,8 +146,11 @@ public abstract class CommitStatusPanel extends Panel {
 		add(statusLink);
 	}
 	
-	private Collection<String> getWebSocketObservables() {
-		return Sets.newHashSet("commit-status:" + getProject().getId() + ":" + commitId.name());
+	protected Collection<String> getWebSocketObservables() {
+		if (!jobsModel.getObject().isEmpty())
+			return Sets.newHashSet("commit-status:" + getProject().getId() + ":" + commitId.name());
+		else
+			return new HashSet<>();
 	}
 
 	@Override

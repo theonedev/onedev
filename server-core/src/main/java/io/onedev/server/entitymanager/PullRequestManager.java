@@ -33,10 +33,13 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     PullRequest find(Project targetProject, long number);
     
     @Nullable
-    PullRequest find(String pullRequestFQN);
+    PullRequest findByFQN(String fqn);
     
     @Nullable
-    PullRequest find(ProjectScopedNumber pullRequestFQN);
+    PullRequest findByUUID(String uuid);
+    
+    @Nullable
+    PullRequest find(ProjectScopedNumber fqn);
     
 	@Nullable
 	PullRequest findLatest(Project targetProject);

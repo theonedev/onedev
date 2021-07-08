@@ -1,5 +1,7 @@
 package io.onedev.server.event.issue;
 
+import java.util.Collection;
+
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.IssueComment;
 
@@ -7,9 +9,12 @@ public class IssueCommented extends IssueEvent implements MarkdownAware {
 
 	private final IssueComment comment;
 	
-	public IssueCommented(IssueComment comment) {
+	private final Collection<String> notifiedEmailAddresses;
+	
+	public IssueCommented(IssueComment comment, Collection<String> notifiedEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getIssue());
 		this.comment = comment;
+		this.notifiedEmailAddresses = notifiedEmailAddresses;
 	}
 
 	public IssueComment getComment() {
@@ -24,6 +29,10 @@ public class IssueCommented extends IssueEvent implements MarkdownAware {
 	@Override
 	public boolean affectsBoards() {
 		return false;
+	}
+
+	public Collection<String> getNotifiedEmailAddresses() {
+		return notifiedEmailAddresses;
 	}
 
 	@Override

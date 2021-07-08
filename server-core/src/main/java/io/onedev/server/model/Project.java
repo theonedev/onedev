@@ -1507,7 +1507,7 @@ public class Project extends AbstractEntity implements NameAware {
 	
 	public String saveAttachment(String attachmentGroup, String suggestedAttachmentName, InputStream attachmentStream) {
 		String attachmentName = suggestedAttachmentName;
-		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getAttachmentGroupDir(this, attachmentGroup);
+		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getGroupDir(this, attachmentGroup);
 
 		FileUtils.createDir(attachmentDir);
 		int index = 2;

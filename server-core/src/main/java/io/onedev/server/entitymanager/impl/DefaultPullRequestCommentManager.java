@@ -1,11 +1,15 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
-import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
+import io.onedev.server.event.pullrequest.PullRequestCommented;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -27,15 +31,7 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 	@Transactional
 	@Override
 	public void save(PullRequestComment comment) {
-		boolean isNew = comment.isNew();
-		dao.persist(comment);
-		if (isNew) {
-			PullRequestCommentCreated event = new PullRequestCommentCreated(comment);
-			listenerRegistry.post(event);
-			
-			PullRequest request = comment.getRequest();
-			request.setCommentCount(request.getCommentCount()+1);
-		}
+		save(comment, Lists.newArrayList());
 	}
 
 	@Transactional
@@ -44,6 +40,19 @@ public class DefaultPullRequestCommentManager extends BaseEntityManager<PullRequ
 		super.delete(comment);
 		PullRequest request = comment.getRequest();
 		request.setCommentCount(request.getCommentCount()-1);
+	}
+
+	@Override
+	public void save(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
+		boolean isNew = comment.isNew();
+		dao.persist(comment);
+		if (isNew) {
+			PullRequestCommented event = new PullRequestCommented(comment, notifiedEmailAddresses);
+			listenerRegistry.post(event);
+			
+			PullRequest request = comment.getRequest();
+			request.setCommentCount(request.getCommentCount()+1);
+		}
 	}
 
 }

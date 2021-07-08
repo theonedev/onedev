@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import com.vladsch.flexmark.Extension;
 import com.vladsch.flexmark.ast.Node;
@@ -27,17 +28,23 @@ import com.vladsch.flexmark.util.options.MutableDataHolder;
 import com.vladsch.flexmark.util.options.MutableDataSet;
 
 import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.resource.AttachmentResource;
 
 @Singleton
 public class DefaultMarkdownManager implements MarkdownManager {
+	
+	private final SettingManager settingManager;
 	
 	private final Set<Extension> contributedExtensions;
 	
 	private final Set<MarkdownProcessor> htmlTransformers;
 	
 	@Inject
-	public DefaultMarkdownManager(Set<Extension> contributedExtensions, Set<MarkdownProcessor> htmlTransformers) {
+	public DefaultMarkdownManager(SettingManager settingManager, Set<Extension> contributedExtensions, 
+			Set<MarkdownProcessor> htmlTransformers) {
+		this.settingManager = settingManager;
 		this.contributedExtensions = contributedExtensions;
 		this.htmlTransformers = htmlTransformers;
 	}
@@ -70,7 +77,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	public String render(String markdown) {
 		MutableDataHolder options = setupOptions();
 		Node node = parse(markdown);
-		return HtmlRenderer.builder(options).build().render(node);
+		return HtmlRenderer.builder(options).softBreak("<br>").build().render(node);
 	}
 
 	@Override
@@ -81,16 +88,35 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 
 	@Override
-	public Document process(Document document, @Nullable Project project, @Nullable Object context) {
+	public Document process(Document document, @Nullable Project project, @Nullable Object context, boolean forExternal) {
 		document = HtmlUtils.sanitize(document);
 		for (MarkdownProcessor htmlTransformer: htmlTransformers)
 			htmlTransformer.process(document, project, context);
+		
+		if (forExternal) {
+			for (Element element: document.body().getElementsByTag("img")) {
+				String src = element.attr("src");
+				if (src.startsWith("/")) {
+					src = settingManager.getSystemSetting().getServerUrl() + src;
+					element.attr("src", AttachmentResource.authorizeGroup(src));
+				}
+				element.attr("width", "100%");
+			}
+			for (Element element: document.body().getElementsByTag("a")) {
+				String href = element.attr("href");
+				if (href.startsWith("/")) {
+					href = settingManager.getSystemSetting().getServerUrl() + href;
+					element.attr("href", AttachmentResource.authorizeGroup(href));
+				}
+			}
+		}
+		
 		return document;
 	}
-
+	
 	@Override
-	public String process(String html, Project project, Object context) {
-		return process(HtmlUtils.parse(html), project, context).body().html();
+	public String process(String html, Project project, Object context, boolean forExternal) {
+		return process(HtmlUtils.parse(html), project, context, forExternal).body().html();
 	}
 
 	@Override

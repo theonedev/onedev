@@ -12,6 +12,8 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
@@ -24,6 +26,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.util.markdown.MarkdownManager;
 
 @Singleton
 public class BuildNotificationManager extends AbstractNotificationManager {
@@ -40,7 +43,9 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	@Inject
 	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
-			UserManager userManager, SettingManager settingManager) {
+			UserManager userManager, SettingManager settingManager, 
+			MarkdownManager markdownManager) {
+		super(markdownManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.userManager = userManager;
@@ -69,7 +74,9 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 					build.getNumber(), build.getStatus().getDisplayName().toLowerCase());
 		}
 		String url = urlManager.urlFor(build);
-		mailManager.sendMailAsync(emails, subject, getHtmlBody(null, url), getTextBody(null, url));
+		String threadingReferences = build.getProject().getName() + "-build" + build.getNumber() + "@onedev";
+		mailManager.sendMailAsync(Lists.newArrayList(), emails, subject, getHtmlBody(null, url), 
+				getTextBody(null, url), null, threadingReferences);
 	}
 	
 	@Sessional

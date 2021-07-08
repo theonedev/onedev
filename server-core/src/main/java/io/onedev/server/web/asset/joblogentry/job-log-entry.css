@@ -1,0 +1,114 @@
+.log-entry>.font-weight-bold {
+    font-weight: 600 !important;
+}
+
+.log-entry>.fg-fg-default {
+	color: var(--dark);
+}
+.log-entry>.fg-bg-default {
+	color: white;
+}
+.log-entry>.fg-30 {
+	color: black;
+}
+.log-entry>.fg-31 {
+	color: red;
+}
+.log-entry>.fg-32 {
+	color: green;
+}
+.log-entry>.fg-33 {
+	color: orange;
+}
+.log-entry>.fg-34 {
+	color: blue;
+}
+.log-entry>.fg-35 {
+	color: darkmagenta;
+}
+.log-entry>.fg-36 {
+	color: darkturquoise;
+}
+.log-entry>.fg-37 {
+	color: white;
+}
+.log-entry>.fg-90 {
+	color: black;
+}
+.log-entry>.fg-91 {
+	color: red;
+}
+.log-entry>.fg-92 {
+	color: green;
+}
+.log-entry>.fg-93 {
+	color: orange;
+}
+.log-entry>.fg-94 {
+	color: blue;
+}
+.log-entry>.fg-95 {
+	color: darkmagenta;
+}
+.log-entry>.fg-96 {
+	color: darkturquoise;
+}
+.log-entry>.fg-97 {
+	color: white;
+}
+
+.log-entry>.bg-fg-default {
+	background-color: var(--dark);
+}
+.log-entry>.bg-bg-default {
+	background-color: white;
+}
+.log-entry>.bg-40 {
+	background-color: black;
+}
+.log-entry>.bg-41 {
+	background-color: red;
+}
+.log-entry>.bg-42 {
+	background-color: green;
+}
+.log-entry>.bg-43 {
+	background-color: orange;
+}
+.log-entry>.bg-44 {
+	background-color: blue;
+}
+.log-entry>.bg-45 {
+	background-color: darkmagenta;
+}
+.log-entry>.bg-46 {
+	background-color: darkturquoise;
+}
+.log-entry>.bg-47 {
+	background-color: white;
+}
+.log-entry>.bg-100 {
+	background-color: black;
+}
+.log-entry>.bg-101 {
+	background-color: red;
+}
+.log-entry>.bg-102 {
+	background-color: green;
+}
+.log-entry>.bg-103 {
+	background-color: orange;
+}
+.log-entry>.bg-104 {
+	background-color: blue;
+}
+.log-entry>.bg-105 {
+	background-color: darkmagenta;
+}
+.log-entry>.bg-106 {
+	background-color: darkturquoise;
+}
+.log-entry>.bg-107 {
+	background-color: white;
+}
+

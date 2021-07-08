@@ -83,7 +83,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 			if (getPage() instanceof ProjectPage)
 				project = ((ProjectPage) getPage()).getProject(); 
 			MarkdownManager manager = AppLoader.getInstance(MarkdownManager.class);
-			return manager.process(manager.render(markdown), project, getRenderContext());
+			return manager.process(manager.render(markdown), project, getRenderContext(), false);
 		} else {
 			return null;
 		}
@@ -165,7 +165,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				String referenceId = params.getParameterValue(REFERENCE_ID).toString();
 				switch (referenceType) {
 				case "issue":
-					Issue issue = OneDev.getInstance(IssueManager.class).find(referenceId);
+					Issue issue = OneDev.getInstance(IssueManager.class).findByFQN(referenceId);
 					// check permission here as issue project may not be the same as current project
 					if (issue != null && SecurityUtils.canAccess(issue.getProject())) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
@@ -176,7 +176,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					}
 					break;
 				case "pull request":
-					PullRequest request = OneDev.getInstance(PullRequestManager.class).find(referenceId);
+					PullRequest request = OneDev.getInstance(PullRequestManager.class).findByFQN(referenceId);
 					// check permission here as target project may not be the same as current project
 					if (request != null && SecurityUtils.canReadCode(request.getTargetProject())) {
 						String statusCss;

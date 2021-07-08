@@ -30,7 +30,7 @@ public class UrlProcessor implements MarkdownProcessor {
 
 	@Override
 	public void process(Document rendered, Project project, Object context) {
-		if (context instanceof BlobRenderContext && project != null) {
+		if (RequestCycle.get() != null && context instanceof BlobRenderContext && project != null) {
 			BlobRenderContext blobRenderContext = (BlobRenderContext) context;
 			Repository repository = project.getRepository();
 			RevCommit commit;

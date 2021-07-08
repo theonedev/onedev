@@ -166,7 +166,17 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			protected void onUpdate(AjaxRequestTarget target) {
 				onPropertyUpdating(target);
 				target.add(typeSelectorContainer.get("typeDescription"));
-				target.add(get(BEAN_EDITOR_ID));
+				
+				Component beanEditor = get(BEAN_EDITOR_ID);
+				target.add(beanEditor);
+				
+				if (beanEditor instanceof BeanEditor) {
+					target.appendJavaScript(String.format("$('#%s').addClass('property-defined');", 
+							PolymorphicPropertyEditor.this.getMarkupId()));
+				} else {
+					target.appendJavaScript(String.format("$('#%s').removeClass('property-defined');", 
+							PolymorphicPropertyEditor.this.getMarkupId()));
+				}
 			}
 			
 		});
@@ -207,6 +217,18 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 		}.setOutputMarkupPlaceholderTag(true).setEscapeModelStrings(false));
 		
 		add(newBeanEditor(getModelObject()));
+		
+		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (get(BEAN_EDITOR_ID) instanceof BeanEditor)
+					return "property-polymorphic property-defined";
+				else
+					return "property-polymorphic";					
+			}
+			
+		}));
 	}
 	
 	@Override

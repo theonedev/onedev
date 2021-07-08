@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 
 @SuppressWarnings("serial")
@@ -115,7 +116,7 @@ abstract class TaskFeedbackPanel extends Panel {
 
 			private String getData() {
 				Map<String, Object> data = new HashMap<>();
-				data.put("messages", getMessages());
+				data.put("logEntries", getLogEntries());
 				data.put("finished", getResult() != null);
 				
 				try {
@@ -145,7 +146,7 @@ abstract class TaskFeedbackPanel extends Panel {
 
 	protected abstract void onClose(AjaxRequestTarget target);
 	
-	protected abstract List<String> getMessages();
+	protected abstract List<JobLogEntryEx> getLogEntries();
 	
 	@Nullable
 	protected abstract String getResult();

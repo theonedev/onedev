@@ -23,9 +23,9 @@ public interface MarkdownManager {
 	
 	Node parse(String markdown);
 	
-	Document process(Document document, @Nullable Project project, @Nullable Object context);
+	Document process(Document document, @Nullable Project project, @Nullable Object context, boolean forExternal);
 
-	String process(String html, @Nullable Project project, @Nullable Object context);
+	String process(String html, @Nullable Project project, @Nullable Object context, boolean forExternal);
 	
 	/**
 	 * Escape html characters in specified markdown so that the markdown plain text 

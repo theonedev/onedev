@@ -1,25 +1,22 @@
 onedev.server.taskFeedback = {
 	processData: function(containerId, callback, data) {
-		const maxMessages = 2000;
+		const maxLogEntries = 2000;
 		
-		var $messages = $("#" + containerId).find(".messages");
-		for (const message of data.messages) {
-			var $message = $("<div class='message'></div>");
-			$message.text(message);
-			$messages.append($message);
-		}
+		var $logEntries = $("#" + containerId).find(".task-log");
+		for (const logEntry of data.logEntries)
+			$logEntries.append(onedev.server.jobLogEntry.render(logEntry, false));
 		
-		const $children = $messages.children();
-		const numOfMessagesToRemove = $children.length - maxMessages;
-		if (numOfMessagesToRemove > 0) 
-			$children.filter(":lt(" + numOfMessagesToRemove + ")").remove();			
+		const $children = $logEntries.children();
+		const numOfLogEntriesToRemove = $children.length - maxLogEntries;
+		if (numOfLogEntriesToRemove > 0) 
+			$children.filter(":lt(" + numOfLogEntriesToRemove + ")").remove();			
 		
-		if (data.messages.length != 0) 
-			$messages.scrollTop($messages[0].scrollHeight);			
+		if (data.logEntries.length != 0) 
+			$logEntries.scrollTop($logEntries[0].scrollHeight);			
 			
 		if (!data.finished) {
 			setTimeout(function() {
-				callback(data.lastMessageIndex);
+				callback();
 			}, 1000);
 		}
 	}

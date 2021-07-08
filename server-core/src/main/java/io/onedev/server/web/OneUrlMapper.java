@@ -161,13 +161,21 @@ public class OneUrlMapper extends CompoundRequestMapper {
 
 	private void addResources() {
 		add(new BaseResourceMapper("downloads/server-log", new ServerLogResourceReference()));
-		add(new BaseResourceMapper("downloads/projects/${project}/builds/${build}/log", new BuildLogResourceReference()));
-		add(new BaseResourceMapper("projects/${project}/archive/${revision}", new ArchiveResourceReference()));
-		add(new DynamicPathResourceMapper("projects/${project}/raw/${revision}/${path}", new RawBlobResourceReference()));
-		add(new BaseResourceMapper("projects/${project}/attachment/${uuid}/${attachment}", new AttachmentResourceReference()));
+		add(new BaseResourceMapper("downloads/projects/${project}/builds/${build}/log", 
+				new BuildLogResourceReference()));
+		add(new BaseResourceMapper("projects/${project}/archive/${revision}", 
+				new ArchiveResourceReference()));
+		add(new DynamicPathResourceMapper("projects/${project}/raw/${revision}/${path}", 
+				new RawBlobResourceReference()));
+		
+		// Change AttachmentResource.authorizeGroup accordingly if change attachment url here
+		add(new BaseResourceMapper("projects/${project}/attachment/${group}/${attachment}", 
+				new AttachmentResourceReference()));
+		
 		add(new DynamicPathResourceMapper("downloads/projects/${project}/builds/${build}/artifacts/${path}", 
 				new ArtifactResourceReference()));
-		add(new BaseResourceMapper(SvgSpriteResourceReference.DEFAULT_MOUNT_PATH, new SvgSpriteResourceReference(IconScope.class)));
+		add(new BaseResourceMapper(SvgSpriteResourceReference.DEFAULT_MOUNT_PATH, 
+				new SvgSpriteResourceReference(IconScope.class)));
 	}
 	
 	private void addErrorPages() {

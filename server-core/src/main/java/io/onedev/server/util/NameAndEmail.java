@@ -2,6 +2,8 @@ package io.onedev.server.util;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -14,7 +16,7 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 	
 	private final String emailAddress;
 	
-	public NameAndEmail(String name, String emailAddress) {
+	public NameAndEmail(@Nullable String name, String emailAddress) {
 		this.name = name;
 		this.emailAddress = emailAddress;
 	}
@@ -27,10 +29,12 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 		return new PersonIdent(name, emailAddress);
 	}
 	
+	@Nullable
 	public String getName() {
 		return name;
 	}
 
+	@Nullable
 	public String getEmailAddress() {
 		return emailAddress;
 	}
@@ -55,7 +59,10 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 
 	@Override
 	public int compareTo(NameAndEmail nameAndEmail) {
-		return name.compareTo(nameAndEmail.name);
+		if (name != null && nameAndEmail.name != null)
+			return name.compareTo(nameAndEmail.name);
+		else 
+			return emailAddress.compareTo(nameAndEmail.emailAddress);
 	}
 	
 }

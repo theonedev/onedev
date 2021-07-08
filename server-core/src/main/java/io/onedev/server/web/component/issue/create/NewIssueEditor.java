@@ -79,7 +79,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		super.onInitialize();
 
 		Issue issue = newIssue();
-		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getProject());
+		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 
 		Collection<String> fieldNames = getIssueSetting().getPromptFieldsUponIssueOpen(); 

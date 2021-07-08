@@ -147,16 +147,24 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return find(criteria);
 	}
 	
-	@Sessional
 	@Override
-	public Issue find(String issueFQN) {
-		return find(ProjectScopedNumber.from(issueFQN));
+	public Issue findByUUID(String uuid) {
+		EntityCriteria<Issue> criteria = newCriteria();
+		criteria.add(Restrictions.eq(Issue.PROP_UUID, uuid));
+		criteria.setCacheable(true);
+		return find(criteria);
 	}
 	
 	@Sessional
 	@Override
-	public Issue find(ProjectScopedNumber issueFQN) {
-		return find(issueFQN.getProject(), issueFQN.getNumber());
+	public Issue findByFQN(String fqn) {
+		return find(ProjectScopedNumber.from(fqn));
+	}
+	
+	@Sessional
+	@Override
+	public Issue find(ProjectScopedNumber fqn) {
+		return find(fqn.getProject(), fqn.getNumber());
 	}
 	
 	@Transactional

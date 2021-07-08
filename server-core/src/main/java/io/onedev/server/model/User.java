@@ -36,6 +36,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -519,6 +520,14 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 
 	public void setMemberships(Collection<Membership> memberships) {
 		this.memberships = memberships;
+	}
+	
+	public Collection<String> getEmails() {
+		Collection<String> emails = Sets.newHashSet(email);
+		if (gitEmail != null)
+			emails.add(gitEmail);
+		emails.addAll(alternateEmails);
+		return emails;
 	}
 
 	@Override

@@ -7,10 +7,12 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.util.Path;
@@ -76,7 +78,10 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 				@Override
 				protected void onUpdate(AjaxRequestTarget target) {
 					onPropertyUpdating(target);
-					target.add(BeanPropertyEditor.this.get(BEAN_EDITOR_ID));
+					Component beanEditor = BeanPropertyEditor.this.get(BEAN_EDITOR_ID);
+					target.add(beanEditor);
+					target.appendJavaScript(String.format("$('#%s').toggleClass('property-defined');", 
+							BeanPropertyEditor.this.getMarkupId()));
 				}
 				
 			}));
@@ -88,7 +93,20 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 		if (getDescriptor().isPropertyRequired() && propertyValue == null) {
 			propertyValue = newProperty();
 		}
+		
 		add(newBeanEditor(propertyValue));
+
+		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				if (get(BEAN_EDITOR_ID).isVisible())
+					return "property-bean property-defined";
+				else
+					return "property-bean";
+			}
+			
+		}));
 	}
 	
 	@Override

@@ -193,6 +193,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         	for (GroovyScript groovyScript: settingManager.getGroovyScripts())
         		groovyScript.onRenameProject(oldName, project.getName());
         	jobManager.schedule(project);
+        	if (settingManager.getMailSetting() != null)
+        		settingManager.getMailSetting().onRenameProject(oldName, project.getName());
     	}
     }
     
@@ -218,9 +220,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		usage.add(jobExecutor.onDeleteProject(project.getName(), index).prefix("administration"));
     		index++;
     	}
+    	index = 0;
     	for (GroovyScript groovyScript: settingManager.getGroovyScripts()) {
     		usage.add(groovyScript.onDeleteProject(project.getName(), index).prefix("administration"));
     		index++;
+    	}
+    	if (settingManager.getMailSetting() != null) {
+    		usage.add(settingManager.getMailSetting().onDeleteProject(project.getName()))
+    				.prefix("mail setting").prefix("administration");
     	}
     	
     	usage.checkInUse("Project '" + project.getName() + "'");

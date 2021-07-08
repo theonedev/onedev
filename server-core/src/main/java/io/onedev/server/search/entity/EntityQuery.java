@@ -120,7 +120,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			else if (!value.contains("#"))
 				value = project.getName() + "#" + value;
 		}
-		Issue issue = OneDev.getInstance(IssueManager.class).find(value);
+		Issue issue = OneDev.getInstance(IssueManager.class).findByFQN(value);
 		if (issue != null)
 			return issue;
 		else
@@ -134,7 +134,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			else if (!value.contains("#"))
 				value = project.getName() + "#" + value;
 		}
-		PullRequest pullRequest = OneDev.getInstance(PullRequestManager.class).find(value);
+		PullRequest pullRequest = OneDev.getInstance(PullRequestManager.class).findByFQN(value);
 		if (pullRequest != null)
 			return pullRequest;
 		else

@@ -237,7 +237,7 @@ abstract class InsertUrlPanel extends Panel {
 					String referenceUrl = urlFor(ProjectBlobPage.class, 
 							ProjectBlobPage.paramsOf(context.getProject(), blobIdent)).toString();
 					String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
-					markdownEditor.insertUrl(target, isImage, relativized, UrlUtils.describe(blobIdent.getName()), null);
+					markdownEditor.insertUrl(target, isImage, relativized, blobIdent.getName(), null);
 					onClose(target);
 				}
 
@@ -292,8 +292,7 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								String displayName = UrlUtils.describe(attachmentName);
-								markdownEditor.insertUrl(target, true, attachmentUrl, displayName, null);
+								markdownEditor.insertUrl(target, true, attachmentUrl, attachmentName, null);
 								onClose(target);
 							}
 
@@ -346,8 +345,7 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								String displayName = UrlUtils.describe(attachmentName);
-								markdownEditor.insertUrl(target, false, attachmentUrl, displayName, null);
+								markdownEditor.insertUrl(target, false, attachmentUrl, attachmentName, null);
 								onClose(target);
 							}
 
@@ -409,7 +407,7 @@ abstract class InsertUrlPanel extends Panel {
 						throw new RuntimeException(e);
 					}
 					markdownEditor.insertUrl(target, isImage, 
-							attachmentSupport.getAttachmentUrlPath(attachmentName), UrlUtils.describe(attachmentName), null);
+							attachmentSupport.getAttachmentUrlPath(attachmentName), attachmentName, null);
 					onClose(target);
 				}
 
@@ -554,7 +552,7 @@ abstract class InsertUrlPanel extends Panel {
 							url = directory + "/" + UrlUtils.encodePath(fileName);
 						else 
 							url = UrlUtils.encodePath(fileName);
-						markdownEditor.insertUrl(target, isImage, url, UrlUtils.describe(fileName), null);
+						markdownEditor.insertUrl(target, isImage, url, fileName, null);
 						onClose(target);
 					} catch (GitException e) {
 						form.error(e.getMessage());

@@ -3,6 +3,8 @@ package io.onedev.server.migration;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -2544,6 +2546,35 @@ public class DataMigrator {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					element.addElement("contributedSettings");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
+	private void migrate59(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							valueElement.element("sendAsHtml").detach();
+							Element senderAddressElement = valueElement.element("senderAddress");
+							if (senderAddressElement != null) {
+								senderAddressElement.setName("emailAddress");
+							} else {
+								String hostName;
+								try {
+									hostName = InetAddress.getLocalHost().getHostName();
+								} catch (UnknownHostException e) {
+									hostName = "localhost";
+								}
+								valueElement.addElement("emailAddress").setText("onedev@" + hostName);
+							}
+						}
+					}
 				}
 				dom.writeToFile(file, false);
 			}

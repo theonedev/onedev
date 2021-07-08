@@ -1,19 +1,28 @@
 package io.onedev.server.event.pullrequest;
 
+import java.util.Collection;
+
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.PullRequestComment;
 
-public class PullRequestCommentCreated extends PullRequestEvent implements MarkdownAware {
+public class PullRequestCommented extends PullRequestEvent implements MarkdownAware {
 
 	private final PullRequestComment comment;
 	
-	public PullRequestCommentCreated(PullRequestComment comment) {
+	private final Collection<String> notifiedEmailAddresses;
+	
+	public PullRequestCommented(PullRequestComment comment, Collection<String> notifiedEmailAddresses) {
 		super(comment.getUser(), comment.getDate(), comment.getRequest());
 		this.comment = comment;
+		this.notifiedEmailAddresses = notifiedEmailAddresses;
 	}
 
 	public PullRequestComment getComment() {
 		return comment;
+	}
+
+	public Collection<String> getNotifiedEmailAddresses() {
+		return notifiedEmailAddresses;
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 
-import io.onedev.server.web.asset.moment.MomentResourceReference;
+import io.onedev.server.web.asset.joblogentry.JobLogEntryResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -21,7 +21,7 @@ public class BuildLogResourceReference extends BaseDependentResourceReference {
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new MomentResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JobLogEntryResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
 				BuildLogResourceReference.class, "build-log.css")));
 		return dependencies;

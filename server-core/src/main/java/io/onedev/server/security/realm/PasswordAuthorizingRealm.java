@@ -108,6 +108,8 @@ public class PasswordAuthorizingRealm extends AbstractAuthorizingRealm {
 				try {
 					String userName = (String) token.getPrincipal();
 					User user = userManager.findByName(userName);
+					if (user == null)
+						user = userManager.findByEmail(userName);
 			    	if (user == null) {
 				    	Authenticator authenticator = settingManager.getAuthenticator();
 		    			if (authenticator != null) {

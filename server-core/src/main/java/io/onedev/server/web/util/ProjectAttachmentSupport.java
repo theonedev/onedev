@@ -60,7 +60,7 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	}
 
 	private File getAttachmentDir() {
-		return OneDev.getInstance(AttachmentStorageManager.class).getAttachmentGroupDir(getProject(), attachmentGroup);
+		return OneDev.getInstance(AttachmentStorageManager.class).getGroupDir(getProject(), attachmentGroup);
 	}
 	
 	@Override

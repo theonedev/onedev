@@ -13,6 +13,6 @@ public interface AttachmentStorageManager {
 	 * 			directory to store attachment of specified project and group. The directory may not exist 
 	 * 			if there is no any attachment saved
 	 */
-    File getAttachmentGroupDir(Project project, String attachmentGroup);
+    File getGroupDir(Project project, String group);
 
 }

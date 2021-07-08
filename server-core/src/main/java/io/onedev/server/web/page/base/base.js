@@ -88,7 +88,7 @@ onedev.server = {
 				}
 				onedev.server.form.dirtyChanged($form);
 			}
-			$form.submit(function() {
+			$form.submit(function(e) {
 				$form.removeClass("dirty");				
 				setTimeout(function() {
 					$form.removeClass("dirty");				

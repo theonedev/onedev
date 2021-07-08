@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.model.support.issue.field.spec.SecretField;
@@ -90,7 +89,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private Serializable getDefaultFieldBean() {
 		if (defaultFieldBean == null) {
-			Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(Project.get());
+			Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
 			try {
 				defaultFieldBean = (Serializable) fieldBeanClass.newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {

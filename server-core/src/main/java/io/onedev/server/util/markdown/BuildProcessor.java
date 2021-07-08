@@ -26,13 +26,17 @@ public class BuildProcessor extends ReferenceParser implements MarkdownProcessor
 
 	@Override
 	protected String toHtml(ProjectScopedNumber referenceable, String referenceText) {
-		CharSequence url = RequestCycle.get().urlFor(
-				BuildDashboardPage.class, BuildDashboardPage.paramsOf(referenceable)); 
-		Build build = OneDev.getInstance(BuildManager.class).find(referenceable);
-		if (build != null && build.getVersion() != null)
-			referenceText += " (" + HtmlEscape.escapeHtml5(build.getVersion()) + ")";
-		return String.format("<a href='%s' class='build reference' data-reference='%s'>%s</a>", 
-				url, referenceable.toString(), referenceText);
+		if (RequestCycle.get() != null) {
+			CharSequence url = RequestCycle.get().urlFor(
+					BuildDashboardPage.class, BuildDashboardPage.paramsOf(referenceable)); 
+			Build build = OneDev.getInstance(BuildManager.class).find(referenceable);
+			if (build != null && build.getVersion() != null)
+				referenceText += " (" + HtmlEscape.escapeHtml5(build.getVersion()) + ")";
+			return String.format("<a href='%s' class='build reference' data-reference='%s'>%s</a>", 
+					url, referenceable.toString(), referenceText);
+		} else {
+			return super.toHtml(referenceable, referenceText);
+		}
 	}
 	
 }

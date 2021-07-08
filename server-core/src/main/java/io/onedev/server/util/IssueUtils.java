@@ -17,7 +17,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -45,7 +44,7 @@ public class IssueUtils {
     	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
     }
     
-	private static final String FIELD_BEAN_PREFIX = "IssueFieldBean";
+	private static final String FIELD_BEAN_CLASS = "IssueFieldBean";
 	
 	public static void clearFields(Serializable fieldBean) {
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBean.getClass()).getProperties().values()) {
@@ -55,21 +54,18 @@ public class IssueUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Class<? extends Serializable> defineFieldBeanClass(Project project) {
-		String className = FIELD_BEAN_PREFIX + project.getId();
+	public static Class<? extends Serializable> defineFieldBeanClass() {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		return (Class<? extends Serializable>) FieldSpec.defineClass(className, "Issue Fields", issueSetting.getFieldSpecs());
+		return (Class<? extends Serializable>) FieldSpec.defineClass(FIELD_BEAN_CLASS, 
+				"Issue Fields", issueSetting.getFieldSpecs());
 	}
 	
 	@Nullable
 	public static Class<? extends Serializable> loadFieldBeanClass(String className) {
-		if (className.startsWith(FIELD_BEAN_PREFIX)) {
-			Long projectId = Long.parseLong(className.substring(FIELD_BEAN_PREFIX.length()));
-			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-			return defineFieldBeanClass(project);
-		} else {
+		if (className.equals(FIELD_BEAN_CLASS)) 
+			return defineFieldBeanClass();
+		else 
 			return null;
-		}
 	}
 	
 	public static Collection<String> getPropertyNames(Project project, Class<?> fieldBeanClass, Collection<String> fieldNames) {

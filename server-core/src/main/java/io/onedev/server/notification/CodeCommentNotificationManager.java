@@ -3,6 +3,7 @@ package io.onedev.server.notification;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -22,8 +23,6 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 	
 	private final MailManager mailManager;
 	
-	private final MarkdownManager markdownManager;
-	
 	private final UrlManager urlManager;
 	
 	private final UserManager userManager;
@@ -31,8 +30,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 	@Inject
 	public CodeCommentNotificationManager(MailManager mailManager, MarkdownManager markdownManager, 
 			UrlManager urlManager, UserManager userManager) {
+		super(markdownManager);
 		this.mailManager = mailManager;
-		this.markdownManager = markdownManager;
 		this.urlManager = urlManager;
 		this.userManager = userManager;
 	}
@@ -59,8 +58,10 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 					if (url != null) {
 						String subject = String.format("You are mentioned in a code comment on file '%s'", 
 								event.getComment().getMark().getPath());
-						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), subject, 
-								getHtmlBody(event, url), getTextBody(event, url));
+						String threadingReferences = event.getComment().getProject().getName() 
+								+ "-codecomment" + event.getComment().getId() + "@onedev";
+						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), Lists.newArrayList(), subject, 
+								getHtmlBody(event, url), getTextBody(event, url), null, threadingReferences);
 					}
 				}
 			}

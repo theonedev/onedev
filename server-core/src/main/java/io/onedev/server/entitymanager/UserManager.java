@@ -100,4 +100,5 @@ public interface UserManager extends EntityManager<User> {
 	void onRenameSsoConnector(String oldName, String newName);
 	 
 	void onDeleteSsoConnector(String name);
+	
 }

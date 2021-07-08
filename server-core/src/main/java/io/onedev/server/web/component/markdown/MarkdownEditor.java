@@ -149,7 +149,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			project = null;
 		
 		MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
-		return manager.process(manager.render(markdown), project, blobRenderContext);
+		return manager.process(manager.render(markdown), project, blobRenderContext, false);
 	}
 	
 	@Override

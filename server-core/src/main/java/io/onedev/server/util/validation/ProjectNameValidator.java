@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.server.notification.MailManager;
 import io.onedev.server.util.validation.annotation.ProjectName;
 
 public class ProjectNameValidator implements ConstraintValidator<ProjectName, String> {
@@ -32,7 +33,7 @@ public class ProjectNameValidator implements ConstraintValidator<ProjectName, St
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (value.equals("new") || value.equals("import")) {
+		} else if (value.equals("new") || value.equals("import") || value.equals(MailManager.TEST_SUB_ADDRESSING)) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)

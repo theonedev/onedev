@@ -25,10 +25,13 @@ public interface IssueManager extends EntityManager<Issue> {
     Issue find(Project project, long number);
     
     @Nullable
-    Issue find(ProjectScopedNumber issueFQN);
+    Issue find(ProjectScopedNumber fqn);
     
     @Nullable
-    Issue find(String issueFQN);
+    Issue findByFQN(String fqn);
+
+    @Nullable
+    Issue findByUUID(String uuid);
     
 	void open(Issue issue);
 	

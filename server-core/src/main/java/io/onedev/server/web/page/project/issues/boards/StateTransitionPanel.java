@@ -34,7 +34,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getIssue().getProject());
+		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
 		Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 
 		Form<?> form = new Form<Void>("form");

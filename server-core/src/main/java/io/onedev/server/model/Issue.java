@@ -4,6 +4,7 @@ import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.PROP_NO_SPACE_TITLE;
 import static io.onedev.server.model.Issue.PROP_NUMBER;
 import static io.onedev.server.model.Issue.PROP_STATE;
+import static io.onedev.server.model.Issue.PROP_UUID;
 import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.PROP_TITLE;
 import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
@@ -75,6 +76,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 @Table(
 		indexes={
 				@Index(columnList="o_project_id"), @Index(columnList=PROP_STATE), 
+				@Index(columnList=PROP_UUID),
 				@Index(columnList=PROP_TITLE), @Index(columnList=PROP_NO_SPACE_TITLE),  
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_SUBMIT_DATE), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=PROP_VOTE_COUNT), 
@@ -144,6 +146,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public static final String PROP_FIELDS = "fields";
 		
+	public static final String PROP_UUID = "uuid";
+	
 	public static final String PROP_ID = "id";
 	
 	public static final String PROP_NO_SPACE_TITLE = "noSpaceTitle";
@@ -202,6 +206,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private String uuid = UUID.randomUUID().toString();
 
 	private long number;
+	
+	private String threadingReference;
 	
 	@Embedded
 	private LastUpdate lastUpdate;
@@ -284,6 +290,15 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.uuid = uuid;
 	}
 
+	@Nullable
+	public String getThreadingReference() {
+		return threadingReference;
+	}
+
+	public void setThreadingReference(String threadingReference) {
+		this.threadingReference = threadingReference;
+	}
+	
 	@Override
 	public long getNumber() {
 		return number;
@@ -680,13 +695,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 
 	@Override
-	public String getAttachmentGroup() {
+	public String getGroup() {
 		return uuid;
-	}
-
-	@Override
-	public Project getAttachmentProject() {
-		return getProject();
 	}
 
 	public ProjectScopedNumber getFQN() {

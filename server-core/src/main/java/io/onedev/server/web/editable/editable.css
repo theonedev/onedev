@@ -112,3 +112,8 @@
 .property-editor .select2-container {
 	width: 100%;
 }
+
+.property-editor.property-bean.property-defined + div + .form-text,
+.property-editor.property-polymorphic.property-defined + div + .form-text {
+	display: none;
+} 

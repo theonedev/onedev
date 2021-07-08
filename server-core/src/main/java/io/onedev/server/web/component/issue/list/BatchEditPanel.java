@@ -178,7 +178,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		});
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
-		Class<? extends Serializable> fieldBeanClass = IssueUtils.defineFieldBeanClass(getProject());
+		Class<? extends Serializable> fieldBeanClass = IssueUtils.defineFieldBeanClass();
 		Issue issue = new Issue();
 		issue.setProject(getProject());
 		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {

@@ -227,8 +227,7 @@ public abstract class BasePage extends WebPage {
 
 			@Override
 			public void component(Component object, IVisit<Void> visit) {
-				if (object.isVisibleInHierarchy())
-					observers.addAll(object.getBehaviors(WebSocketObserver.class));
+				observers.addAll(object.getBehaviors(WebSocketObserver.class));
 			}
 
 		});

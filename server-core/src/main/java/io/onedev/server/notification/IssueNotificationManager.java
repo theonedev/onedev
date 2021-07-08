@@ -1,5 +1,6 @@
 package io.onedev.server.notification;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -47,8 +49,6 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	
 	private final UrlManager urlManager;
 	
-	private final MarkdownManager markdownManager;
-	
 	private final IssueWatchManager issueWatchManager;
 	
 	private final UserManager userManager;
@@ -61,9 +61,9 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager,
 			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager,
 			UserManager userManager, SettingManager settingManager) {
+		super(markdownManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
-		this.markdownManager = markdownManager;
 		this.issueWatchManager = issueWatchManager;
 		this.userInfoManager = userInfoManager;
 		this.userManager = userManager;
@@ -146,6 +146,10 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
+		String replyAddress = mailManager.getReplyAddressForIssue(issue);
+		String threadingReferences = issue.getThreadingReference();
+		if (threadingReferences == null)
+			threadingReferences = issue.getUUID() + "@onedev";
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
 			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.getNumberAndTitle());
 			Set<String> emails = entry.getValue().getMembers()
@@ -153,7 +157,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, subject, getHtmlBody(event, url), getTextBody(event, url));
+			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, getHtmlBody(event, url), getTextBody(event, url), 
+					replyAddress, threadingReferences);
 			
 			for (User member: entry.getValue().getMembers())
 				issueWatchManager.watch(issue, member, true);
@@ -167,13 +172,15 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, subject, getHtmlBody(event, url), getTextBody(event, url));
+			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, getHtmlBody(event, url), getTextBody(event, url), 
+					replyAddress, threadingReferences);
 			
 			for (User each: entry.getValue())
 				issueWatchManager.watch(issue, each, true);
 			notifiedUsers.addAll(entry.getValue());
 		}
 		
+		Collection<User> mentionedUsers = new HashSet<>();
 		if (event instanceof MarkdownAware) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
@@ -182,13 +189,9 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				
 				for (String userName: new MentionParser().parseMentions(rendered)) {
 					User mentionedUser = userManager.findByName(userName);
-					if (mentionedUser != null) {
-						String subject = String.format("You are mentioned in issue %s", issue.getNumberAndTitle());
-						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()),
-								subject, getHtmlBody(event, url), getTextBody(event, url));
-						
+					if (mentionedUser != null && notifiedUsers.add(mentionedUser)) {
 						issueWatchManager.watch(issue, mentionedUser, true);
-						notifiedUsers.add(mentionedUser);
+						mentionedUsers.add(mentionedUser);
 					}
 				}
 			}
@@ -207,27 +210,35 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			notifyWatchers = true;
 		}
 		
-		if (notifyWatchers) {
-			Collection<User> usersToNotify = new HashSet<>();
+		if (!mentionedUsers.isEmpty() || notifyWatchers) {
+			Collection<User> ccUsers = new HashSet<>();
 			
+			Collection<String> notifiedEmailAddresses;
+			if (event instanceof IssueCommented)
+				notifiedEmailAddresses = ((IssueCommented) event).getNotifiedEmailAddresses();
+			else
+				notifiedEmailAddresses = new ArrayList<>();
 			for (IssueWatch watch: issue.getWatches()) {
 				Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
 				if (watch.isWatching()
 						&& (visitDate == null || visitDate.before(event.getDate()))
-						&& !notifiedUsers.contains(watch.getUser())) {
-					usersToNotify.add(watch.getUser());
+						&& !notifiedUsers.contains(watch.getUser())
+						&& !notifiedEmailAddresses.stream().anyMatch(watch.getUser().getEmails()::contains)) {
+					ccUsers.add(watch.getUser());
 				}
 			}
 
-			if (!usersToNotify.isEmpty()) {
+			if (!mentionedUsers.isEmpty() || !ccUsers.isEmpty()) {
 				String subject;
 				if (user != null)
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
 				else
 					subject = event.getActivity(true);
 
-				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()),
-						subject, getHtmlBody(event, url), getTextBody(event, url));
+				mailManager.sendMailAsync(
+						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
+						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()),
+						subject, getHtmlBody(event, url), getTextBody(event, url), replyAddress, threadingReferences);
 			}
 		}
 	}

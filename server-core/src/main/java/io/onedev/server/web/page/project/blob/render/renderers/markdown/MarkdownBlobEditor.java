@@ -67,7 +67,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			@Override
 			protected String renderMarkdown(String markdown) {
 				MarkdownManager manager = OneDev.getInstance(MarkdownManager.class);
-				return manager.process(manager.render(markdown), context.getProject(), context);
+				return manager.process(manager.render(markdown), context.getProject(), context, false);
 			}
 
 			@Override

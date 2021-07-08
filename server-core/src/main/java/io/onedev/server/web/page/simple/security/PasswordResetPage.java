@@ -13,6 +13,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -90,8 +92,8 @@ public class PasswordResetPage extends SimplePage {
 								+ "%s",
 								user.getDisplayName(), user.getName(), serverUrl, password);
 						
-						mailManager.sendMail(settingManager.getMailSetting(), Arrays.asList(user.getEmail()), 
-								"Your OneDev password has been reset", htmlBody, textBody);
+						mailManager.sendMail(settingManager.getMailSetting(), Arrays.asList(user.getEmail()),
+								Lists.newArrayList(), "Your OneDev password has been reset", htmlBody, textBody, null, null);
 						return "Please check your email " + user.getEmail() + " for the reset password";
 					} else {
 						throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");

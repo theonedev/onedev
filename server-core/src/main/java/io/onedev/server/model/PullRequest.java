@@ -966,7 +966,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	
 	@Override
-	public String getAttachmentGroup() {
+	public String getGroup() {
 		return uuid;
 	}
 	
@@ -1041,11 +1041,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return comparisonBase;
 	}
 
-	@Override
-	public Project getAttachmentProject() {
-		return getTargetProject();
-	}
-	
 	@Override
 	public Project getProject() {
 		return getTargetProject();

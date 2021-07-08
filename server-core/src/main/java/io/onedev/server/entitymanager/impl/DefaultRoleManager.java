@@ -57,8 +57,11 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	@Transactional
 	@Override
 	public void save(Role role, String oldName) {
-		if (oldName != null && !oldName.equals(role.getName())) 
+		if (oldName != null && !oldName.equals(role.getName())) { 
 			settingManager.getIssueSetting().onRenameRole(oldName, role.getName());
+			if (settingManager.getMailSetting() != null)
+				settingManager.getMailSetting().onRenameRole(oldName, role.getName());
+		}
 		dao.persist(role);
 	}
 
@@ -68,6 +71,10 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
     	Usage usage = new Usage();
 
 		usage.add(settingManager.getIssueSetting().onDeleteRole(role.getName()).prefix("administration"));
+		if (settingManager.getMailSetting() != null) {
+			usage.add(settingManager.getMailSetting().onDeleteRole(role.getName())
+					.prefix("mail setting").prefix("administration"));
+		}
 
 		usage.checkInUse("Role '" + role.getName() + "'");
 		

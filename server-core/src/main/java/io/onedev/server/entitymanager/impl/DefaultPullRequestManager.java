@@ -978,8 +978,16 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	}
 	
 	@Sessional
+	public PullRequest findByUUID(String uuid) {
+		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(Restrictions.eq(PullRequest.PROP_UUID, uuid));
+		criteria.setCacheable(true);
+		return find(criteria);
+	}
+	
+	@Sessional
 	@Override
-	public PullRequest find(String pullRequestFQN) {
+	public PullRequest findByFQN(String pullRequestFQN) {
 		return find(ProjectScopedNumber.from(pullRequestFQN));
 	}
 	

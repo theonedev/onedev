@@ -1,7 +1,11 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.Collection;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.IssueCommentManager;
@@ -26,13 +30,7 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
 	@Transactional
 	@Override
 	public void save(IssueComment comment) {
-		boolean isNew = comment.isNew();
-		dao.persist(comment);
-		if (isNew) {
-			IssueCommented event = new IssueCommented(comment);
-			listenerRegistry.post(event);
-			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
-		}		
+		save(comment, Lists.newArrayList());
 	}
 
 	@Transactional
@@ -40,6 +38,17 @@ public class DefaultIssueCommentManager extends BaseEntityManager<IssueComment>
 	public void delete(IssueComment comment) {
 		super.delete(comment);
 		comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()-1);
+	}
+
+	@Override
+	public void save(IssueComment comment, Collection<String> notifiedEmailAddresses) {
+		boolean isNew = comment.isNew();
+		dao.persist(comment);
+		if (isNew) {
+			IssueCommented event = new IssueCommented(comment, notifiedEmailAddresses);
+			listenerRegistry.post(event);
+			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
+		}		
 	}
 
 }

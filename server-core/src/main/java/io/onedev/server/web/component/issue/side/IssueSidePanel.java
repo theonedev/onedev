@@ -230,7 +230,7 @@ public abstract class IssueSidePanel extends Panel {
 				Fragment fragment = new Fragment("fields", "fieldsEditFrag", IssueSidePanel.this);
 				Form<?> form = new Form<Void>("form");
 
-				Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getProject());
+				Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass();
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
 
 				Collection<String> propertyNames = IssueUtils.getPropertyNames(getIssue().getProject(), 

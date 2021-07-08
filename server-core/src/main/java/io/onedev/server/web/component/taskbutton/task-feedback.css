@@ -1,10 +1,7 @@
-.task-feedback .messages {
-	background: white;
-	border: none;
+.task-feedback .task-log {
 	padding: 0;
 	max-height: 480px;
 	overflow: auto;
-	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 0.9rem;
 }
 .task-feedback .alert {

@@ -33,6 +33,8 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.log.JobLogEntry;
+import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -80,8 +82,8 @@ public abstract class TaskButton extends AjaxButton {
 		String title = getTitle().toLowerCase();
 		
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
-		List<String> messages = new ArrayList<>();
-		messages.add("Please wait...");
+		List<JobLogEntryEx> messages = new ArrayList<>();
+		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), "Please wait...")));
 		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<String>() {
 
 			@Override
@@ -95,7 +97,7 @@ public abstract class TaskButton extends AjaxButton {
 							@Override
 							public void log(String message, StyleBuilder styleBuilder) {
 								synchronized (messages) {
-									messages.add(message);
+									messages.add(JobLogEntryEx.parse(message, styleBuilder));
 								}
 							}
 							
@@ -153,10 +155,10 @@ public abstract class TaskButton extends AjaxButton {
 					}
 
 					@Override
-					protected List<String> getMessages() {
+					protected List<JobLogEntryEx> getLogEntries() {
 						TaskFuture future = getTaskFutures().get(path);
 						if (future != null) 
-							return future.getMessages();
+							return future.getLogEntries();
 						else
 							return new ArrayList<>();
 					}
@@ -242,13 +244,13 @@ public abstract class TaskButton extends AjaxButton {
 
 		private final Future<String> wrapped;
 		
-		private final List<String> messages;
+		private final List<JobLogEntryEx> logEntries;
 		
 		private volatile Date lastActive = new Date();
 		
-		public TaskFuture(Future<String> wrapped, List<String> messages) {
+		public TaskFuture(Future<String> wrapped, List<JobLogEntryEx> logEntries) {
 			this.wrapped = wrapped;
-			this.messages = messages;
+			this.logEntries = logEntries;
 		}
 		
 		@Override
@@ -281,11 +283,11 @@ public abstract class TaskButton extends AjaxButton {
 			return get(timeout, unit);
 		}
 		
-		public List<String> getMessages() {
+		public List<JobLogEntryEx> getLogEntries() {
 			lastActive = new Date();
-			synchronized (messages) {
-				List<String> copy = new ArrayList<>(messages);
-				messages.clear();
+			synchronized (logEntries) {
+				List<JobLogEntryEx> copy = new ArrayList<>(logEntries);
+				logEntries.clear();
 				return copy;
 			}
 		}

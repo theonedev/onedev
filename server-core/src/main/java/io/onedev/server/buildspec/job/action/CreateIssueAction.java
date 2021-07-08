@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import javax.validation.Valid;
 import javax.validation.ValidationException;
@@ -91,7 +90,6 @@ public class CreateIssueAction extends PostBuildAction {
 			@Override
 			public void run() {
 				Issue issue = new Issue();
-				issue.setUUID(UUID.randomUUID().toString());
 				issue.setProject(build.getProject());
 				issue.setTitle(getIssueTitle());
 				issue.setSubmitter(SecurityUtils.getUser());
