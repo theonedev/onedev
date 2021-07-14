@@ -19,6 +19,8 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -71,6 +73,63 @@ public abstract class TaskButton extends AjaxButton {
 		return WordUtils.uncamel(getId());
 	}
 	
+	@Override
+	protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+		super.updateAjaxAttributes(attributes);
+		attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
+			
+			@Override
+			public CharSequence getSuccessHandler(Component component) {
+				return null;
+			}
+			
+			@Override
+			public CharSequence getPrecondition(Component component) {
+				return String.format("onedev.server.taskButtonFormDirty = $('#%s').closest('form').hasClass('dirty');",
+						getMarkupId());
+			}
+			
+			@Override
+			public CharSequence getInitHandler(Component component) {
+				return null;
+			}
+			
+			@Override
+			public CharSequence getFailureHandler(Component component) {
+				return null;
+			}
+			
+			@Override
+			public CharSequence getDoneHandler(Component component) {
+				return null;
+			}
+			
+			@Override
+			public CharSequence getCompleteHandler(Component component) {
+				return String.format(""
+						+ "if (onedev.server.taskButtonFormDirty) "
+						+ "  onedev.server.form.markDirty($('#%s').closest('form'));",
+						getMarkupId());
+			}
+			
+			@Override
+			public CharSequence getBeforeSendHandler(Component component) {
+				return null;
+			}
+			
+			@Override
+			public CharSequence getBeforeHandler(Component component) {
+				return null;
+			}
+			
+			@Override
+			public CharSequence getAfterHandler(Component component) {
+				return null;
+			}
+			
+		});
+	}
+
 	protected void onCompleted(AjaxRequestTarget target) {
 	}
 	
