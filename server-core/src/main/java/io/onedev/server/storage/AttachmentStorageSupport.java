@@ -4,8 +4,8 @@ import io.onedev.server.model.Project;
 
 public interface AttachmentStorageSupport {
 	
-	Project getProject();
+	Project getAttachmentProject();
 	
-	String getGroup();
+	String getAttachmentGroup();
 	
 }

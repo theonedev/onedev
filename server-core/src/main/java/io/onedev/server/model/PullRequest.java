@@ -964,9 +964,13 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 				.containsAll(requiredJobs);
 	}
 	
+	@Override
+	public Project getAttachmentProject() {
+		return targetProject;
+	}
 	
 	@Override
-	public String getGroup() {
+	public String getAttachmentGroup() {
 		return uuid;
 	}
 	

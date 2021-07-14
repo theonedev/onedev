@@ -1028,4 +1028,11 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		return requests;
 	}
 
+	@Transactional
+	@Override
+	public void delete(Collection<PullRequest> requests) {
+		for (PullRequest request: requests)
+			delete(request);
+	}
+
 }

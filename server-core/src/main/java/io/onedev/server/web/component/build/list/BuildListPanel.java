@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -71,17 +72,21 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
@@ -114,6 +119,10 @@ public abstract class BuildListPanel extends Panel {
 	};
 	
 	private DataTable<Build, Void> buildsTable;
+	
+	private SelectionColumn<Build, Void> selectionColumn;
+	
+	private SortableDataProvider<Build, Void> dataProvider;	
 	
 	private TextField<String> queryInput;
 	
@@ -246,6 +255,121 @@ public abstract class BuildListPanel extends Panel {
 			}		
 			
 		}.setOutputMarkupPlaceholderTag(true));
+		
+		add(new MenuLink("delete") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "All Queried Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete all queried builds?"));
+							}
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								Collection<Build> builds = new ArrayList<>();
+								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) {
+									builds.add(it.next());
+								}
+								OneDev.getInstance(BuildManager.class).delete(builds);
+								target.add(body);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(buildsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No builds to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Selected Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected builds?"));
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								Collection<Build> builds = new ArrayList<>();
+								for (IModel<Build> each: selectionColumn.getSelections())
+									builds.add(each.getObject());
+								OneDev.getInstance(BuildManager.class).delete(builds);
+								target.add(body);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select builds to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				return menuItems;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getProject() != null && SecurityUtils.canManageBuilds(getProject()));
+			}
+			
+		});
 		
 		add(new ModalLink("listParams") {
 
@@ -432,7 +556,7 @@ public abstract class BuildListPanel extends Panel {
 		});
 		add(queryForm);
 		
-		SortableDataProvider<Build, Void> dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
@@ -482,6 +606,9 @@ public abstract class BuildListPanel extends Panel {
 		body.add(new FencedFeedbackPanel("feedback", this));
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
+		
+		if (getProject() != null && SecurityUtils.canManageBuilds(getProject())) 
+			columns.add(selectionColumn = new SelectionColumn<Build, Void>());
 		
 		columns.add(new AbstractColumn<Build, Void>(Model.of("Build")) {
 

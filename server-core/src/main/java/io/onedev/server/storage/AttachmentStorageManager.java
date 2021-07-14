@@ -15,4 +15,6 @@ public interface AttachmentStorageManager {
 	 */
     File getGroupDir(Project project, String group);
 
+    void moveGroupDir(Project fromProject, Project toProject, String group);
+    
 }

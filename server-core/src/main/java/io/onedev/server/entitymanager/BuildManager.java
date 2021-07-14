@@ -76,4 +76,6 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	void populateBuilds(Collection<PullRequest> requests);
 
+	void delete(Collection<Build> builds);
+	
 }

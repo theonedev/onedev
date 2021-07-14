@@ -695,7 +695,12 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 
 	@Override
-	public String getGroup() {
+	public Project getAttachmentProject() {
+		return project;
+	}
+	
+	@Override
+	public String getAttachmentGroup() {
 		return uuid;
 	}
 

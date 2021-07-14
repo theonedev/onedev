@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -67,12 +68,16 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
@@ -106,6 +111,10 @@ public abstract class PullRequestListPanel extends Panel {
 	};
 	
 	private DataTable<PullRequest, Void> requestsTable;
+	
+	private SelectionColumn<PullRequest, Void> selectionColumn;
+	
+	private SortableDataProvider<PullRequest, Void> dataProvider;	
 	
 	private TextField<String> queryInput;
 	
@@ -230,6 +239,121 @@ public abstract class PullRequestListPanel extends Panel {
 			}		
 			
 		}.setOutputMarkupPlaceholderTag(true));
+		
+		add(new MenuLink("delete") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "All Queried Pull Requests";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete all queried pull requests?"));
+							}
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								Collection<PullRequest> requests = new ArrayList<>();
+								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
+									requests.add(it.next());
+								}
+								OneDev.getInstance(PullRequestManager.class).delete(requests);
+								target.add(body);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(requestsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No pull requests to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Selected Pull Requests";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected pull requests?"));
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								Collection<PullRequest> requests = new ArrayList<>();
+								for (IModel<PullRequest> each: selectionColumn.getSelections())
+									requests.add(each.getObject());
+								OneDev.getInstance(PullRequestManager.class).delete(requests);
+								target.add(body);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select pull requests to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				return menuItems;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getProject() != null && SecurityUtils.canManagePullRequests(getProject()));
+			}
+			
+		});
 		
 		add(new DropdownLink("orderBy") {
 
@@ -375,6 +499,9 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
+		if (getProject() != null && SecurityUtils.canManagePullRequests(getProject())) 
+			columns.add(selectionColumn = new SelectionColumn<PullRequest, Void>());
+		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("")) {
 
 			@Override
@@ -497,7 +624,7 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
-		SortableDataProvider<PullRequest, Void> dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {

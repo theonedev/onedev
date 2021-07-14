@@ -66,6 +66,23 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 			return new File(baseDir, TEMP + "/" + group); 
 	}
 
+	@Override
+	public void moveGroupDir(Project fromProject, Project toProject, String group) {
+		File fromBaseDir = storageManager.getProjectAttachmentDir(fromProject.getId());
+		File fromGroupDir = getPermanentGroupDir(fromBaseDir, group);
+		
+		File toBaseDir = storageManager.getProjectAttachmentDir(toProject.getId());
+		File toGroupDir = getPermanentGroupDir(toBaseDir, group);
+		
+		FileUtils.createDir(toGroupDir.getParentFile());
+		
+		try {
+			FileUtils.moveDirectory(fromGroupDir, toGroupDir);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	private File getPermanentGroupDir(File base, String group) {
 		String prefix = group.substring(0, 2);
 		return new File(base, PERMANENT + "/" + prefix + "/" + group);
@@ -128,8 +145,8 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 	public void on(EntityPersisted event) {
 		if (event.isNew() && event.getEntity() instanceof AttachmentStorageSupport) {
 			AttachmentStorageSupport storageSupport = (AttachmentStorageSupport) event.getEntity();
-			File base = storageManager.getProjectAttachmentDir(storageSupport.getProject().getId());
-			String group = storageSupport.getGroup();
+			File base = storageManager.getProjectAttachmentDir(storageSupport.getAttachmentProject().getId());
+			String group = storageSupport.getAttachmentGroup();
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override
@@ -147,7 +164,7 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 		if (event.getEntity() instanceof AttachmentStorageSupport) {
 			AttachmentStorageSupport storageSupport = (AttachmentStorageSupport) event.getEntity();
 			File attachmentStorage = getPermanentGroupDir(
-					storageManager.getProjectAttachmentDir(storageSupport.getProject().getId()), storageSupport.getGroup());
+					storageManager.getProjectAttachmentDir(storageSupport.getAttachmentProject().getId()), storageSupport.getAttachmentGroup());
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override

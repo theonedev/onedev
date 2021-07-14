@@ -789,7 +789,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				
 				WebMarkupContainer actions = new WebMarkupContainer("actions");
 				fragment.add(actions);
-				if (SecurityUtils.canManage(getPullRequest().getTargetProject())) {
+				if (SecurityUtils.canManagePullRequests(getPullRequest().getTargetProject())) {
 					actions.add(new Link<Void>("synchronize") {
 	
 						@Override

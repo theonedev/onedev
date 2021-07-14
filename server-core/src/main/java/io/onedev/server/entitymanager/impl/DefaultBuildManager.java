@@ -1003,5 +1003,12 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		for (Build build: getSession().createQuery(query).getResultList())
 			build.getRequest().getBuilds().add(build);
 	}
+
+	@Transactional
+	@Override
+	public void delete(Collection<Build> builds) {
+		for (Build build: builds)
+			delete(build);
+	}
 	
 }

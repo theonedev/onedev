@@ -62,5 +62,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Collection<Long> getIssueNumbers(Long projectId);
 	
+	void move(Project targetProject, Collection<Issue> issues);
+	
+	void delete(Collection<Issue> issues);
+	
 	Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones);
 }

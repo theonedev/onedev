@@ -35,6 +35,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
@@ -48,6 +49,7 @@ import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
@@ -75,7 +77,9 @@ import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.MilestoneAndState;
+import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -93,6 +97,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	private final ListenerRegistry listenerRegistry;
 	
 	private final IssueQuerySettingManager issueQuerySettingManager;
+	
+	private final AttachmentStorageManager attachmentStorageManager;
+	
+	private final IssueCommentManager issueCommentManager;
 	
 	private final SettingManager settingManager;
 	
@@ -112,7 +120,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, 
 			TransactionManager transactionManager, IssueQuerySettingManager issueQuerySettingManager, 
 			SettingManager settingManager, ListenerRegistry listenerRegistry, 
-			ProjectManager projectManager, UserManager userManager, RoleManager roleManager) {
+			ProjectManager projectManager, UserManager userManager, 
+			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
+			IssueCommentManager issueCommentManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
@@ -122,6 +132,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.transactionManager = transactionManager;
 		this.userManager = userManager;
 		this.roleManager = roleManager;
+		this.attachmentStorageManager = attachmentStorageManager;
+		this.issueCommentManager = issueCommentManager;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -739,4 +751,46 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
 
+	@Transactional
+	@Override
+	public void move(Project targetProject, Collection<Issue> issues) {
+		List<Pair<Project, String>> attachmentInfos = new ArrayList<>();
+		for (Issue issue: issues) {
+			attachmentInfos.add(new Pair<>(issue.getAttachmentProject(), issue.getAttachmentGroup()));
+			if (issue.getDescription() != null) {
+				issue.setDescription(issue.getDescription().replace(
+						issue.getAttachmentProject().getName() + "/attachment/" + issue.getAttachmentGroup(), 
+						targetProject.getName() + "/attachment/" + issue.getAttachmentGroup()));
+			}
+			for (IssueComment comment: issue.getComments()) {
+				comment.setContent(comment.getContent().replace(
+						issue.getAttachmentProject().getName() + "/attachment/" + issue.getAttachmentGroup(), 
+						targetProject.getName() + "/attachment/" + issue.getAttachmentGroup()));
+				issueCommentManager.save(comment);
+			}
+			issue.setProject(targetProject);
+			issue.setMilestone(null);
+			issue.setNumberScope(targetProject.getForkRoot());
+			issue.setNumber(getNextNumber(issue.getNumberScope()));
+			save(issue);
+		}
+		
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				for (Pair<Project, String> attachmentInfo: attachmentInfos)
+					attachmentStorageManager.moveGroupDir(attachmentInfo.getFirst(), targetProject, attachmentInfo.getSecond());
+			}
+			
+		});
+	}
+
+	@Transactional
+	@Override
+	public void delete(Collection<Issue> issues) {
+		for (Issue issue: issues)
+			delete(issue);
+	}
+	
 }

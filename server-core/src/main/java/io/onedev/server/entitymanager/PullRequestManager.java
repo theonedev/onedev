@@ -70,5 +70,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	int count(@Nullable Project targetProject, EntityCriteria<PullRequest> requestCriteria);
 	
 	List<PullRequest> query(Project targetProject, String term, int count);
+
+	void delete(Collection<PullRequest> requests);
 	
 }
