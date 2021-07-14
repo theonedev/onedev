@@ -23,6 +23,13 @@ onedev.server.modal = {
 					onedev.server.modal.close($modal, true);
 				}
 			}
+
+		});
+		
+		$modal.on("hide.bs.modal", function() {
+			$("body>.floating").each(function() {
+				onedev.server.floating.close($(this).attr("id"));
+			});
 		});
 		
 		// Use keydown as keypress does not work in chrome/safari
