@@ -6,3 +6,7 @@
 .group-authorizations .bean-list td.property-projectName {
 	width: 50%;
 }
+
+.job-executor>.card-header .badge {
+	font-size: 0.9rem;
+}

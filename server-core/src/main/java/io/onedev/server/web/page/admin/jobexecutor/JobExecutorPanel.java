@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -92,6 +93,16 @@ abstract class JobExecutorPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onDelete(target);
+			}
+			
+		});
+		
+		add(new WebMarkupContainer("disabled") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getExecutor().isEnabled());
 			}
 			
 		});
