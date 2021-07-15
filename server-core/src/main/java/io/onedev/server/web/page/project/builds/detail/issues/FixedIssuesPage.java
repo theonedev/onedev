@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -40,73 +41,80 @@ public class FixedIssuesPage extends BuildDetailPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(issueList = new IssueListPanel("issues", new IModel<String>() {
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public String getObject() {
-				return query;
-			}
-
-			@Override
-			public void setObject(String object) {
-				query = object;
-				PageParameters params = getPageParameters();
-				params.set(PARAM_QUERY, query);
-				params.remove(PARAM_PAGE);
-				CharSequence url = RequestCycle.get().urlFor(FixedIssuesPage.class, params);
-				pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
-			}
+		if (getBuild().getStreamPrevious(null) != null) {
+			Fragment fragment = new Fragment("content", "hasPreviousBuildFrag", this);
 			
-		}) {
+			fragment.add(issueList = new IssueListPanel("issues", new IModel<String>() {
 
-			@Override
-			protected IssueQuery getBaseQuery() {
-				return new IssueQuery(new FixedInBuildCriteria(getBuild()), new ArrayList<>());
-			}
-			
-			@Override
-			protected PagingHistorySupport getPagingHistorySupport() {
-				return new PagingHistorySupport() {
-					
-					@Override
-					public PageParameters newPageParameters(int currentPage) {
-						PageParameters params = paramsOf(getBuild(), query);
-						params.add(PARAM_PAGE, currentPage+1);
-						return params;
-					}
-					
-					@Override
-					public int getCurrentPage() {
-						return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
-					}
-					
-				};
-			}
+				@Override
+				public void detach() {
+				}
 
-			@Override
-			protected Project getProject() {
-				return FixedIssuesPage.this.getProject();
-			}
-			
-		});
-		
-		add(new WebMarkupContainer("buildStreamHelpUrl") {
+				@Override
+				public String getObject() {
+					return query;
+				}
 
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				tag.put("href", OneDev.getInstance().getDocRoot() + "/pages/concepts.md#build-stream");
-			}
+				@Override
+				public void setObject(String object) {
+					query = object;
+					PageParameters params = getPageParameters();
+					params.set(PARAM_QUERY, query);
+					params.remove(PARAM_PAGE);
+					CharSequence url = RequestCycle.get().urlFor(FixedIssuesPage.class, params);
+					pushState(RequestCycle.get().find(AjaxRequestTarget.class), url.toString(), query);
+				}
+				
+			}) {
+
+				@Override
+				protected IssueQuery getBaseQuery() {
+					return new IssueQuery(new FixedInBuildCriteria(getBuild()), new ArrayList<>());
+				}
+				
+				@Override
+				protected PagingHistorySupport getPagingHistorySupport() {
+					return new PagingHistorySupport() {
+						
+						@Override
+						public PageParameters newPageParameters(int currentPage) {
+							PageParameters params = paramsOf(getBuild(), query);
+							params.add(PARAM_PAGE, currentPage+1);
+							return params;
+						}
+						
+						@Override
+						public int getCurrentPage() {
+							return getPageParameters().get(PARAM_PAGE).toInt(1)-1;
+						}
+						
+					};
+				}
+
+				@Override
+				protected Project getProject() {
+					return FixedIssuesPage.this.getProject();
+				}
+				
+			});
 			
-		});
-		
+			fragment.add(new WebMarkupContainer("buildStreamHelpUrl") {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.put("href", OneDev.getInstance().getDocRoot() + "/pages/concepts.md#build-stream");
+				}
+				
+			});
+			
+			add(fragment);
+		} else {
+			add(new Fragment("content", "noPreviousBuildFrag", this));
+		}
 	}
-	
+
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		query = (String) data;
