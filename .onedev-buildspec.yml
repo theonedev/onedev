@@ -1,4 +1,4 @@
-version: 7
+version: 9
 jobs:
 - name: CI
   steps:
@@ -16,6 +16,7 @@ jobs:
       dependencies)..."
     - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version
       -q -DforceStdout) > buildVersion
+    useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
     name: set build version
@@ -26,6 +27,7 @@ jobs:
     image: 1dev/build-environment:1.3
     commands:
     - mvn test
+    useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !PullRequestUpdateTrigger {}
@@ -55,6 +57,7 @@ jobs:
       dependencies)..."
     - echo $(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version
       -q -DforceStdout) > buildVersion
+    useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !SetBuildVersionStep
     name: set build version
@@ -137,6 +140,7 @@ jobs:
     - '  curl -u robinshine:@secrets:github-token@ -X PATCH -H "$acceptHeader" -d
       "$releaseJson" https://api.github.com/repos/theonedev/onedev/releases/$releaseId'
     - fi
+    useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
@@ -177,6 +181,7 @@ jobs:
     - git config --global --unset http.extraHeader
     - git push -f https://robinshine:@secrets:github-token@@@github.com/theonedev/server
       HEAD:main
+    useTTY: false
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !BranchUpdateTrigger
