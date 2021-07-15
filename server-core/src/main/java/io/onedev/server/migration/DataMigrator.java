@@ -2581,4 +2581,24 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate60(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement: valueElement.elements()) {
+								if (executorElement.getName().equals("io.onedev.server.plugin.docker.DockerExecutor"))
+									executorElement.setName("io.onedev.server.plugin.executor.docker.DockerExecutor");
+							}
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

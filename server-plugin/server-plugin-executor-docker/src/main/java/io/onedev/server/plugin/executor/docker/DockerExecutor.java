@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.docker;
+package io.onedev.server.plugin.executor.docker;
 
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.getCacheInstances;
@@ -70,7 +70,7 @@ import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.plugin.docker.DockerExecutor.TestData;
+import io.onedev.server.plugin.executor.docker.DockerExecutor.TestData;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
@@ -593,6 +593,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 											}
 										}
 
+										if (commandExecutable.isUseTTY())
+											docker.addArgs("-t");
 										docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
 										
 										docker.addArgs(commandExecutable.getImage());

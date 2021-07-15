@@ -26,6 +26,8 @@ public class CommandStep extends Step {
 	
 	private List<String> commands = new ArrayList<>();
 	
+	private boolean useTTY;
+	
 	@Editable(order=100, description="Specify docker image to execute commands inside")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
@@ -50,6 +52,18 @@ public class CommandStep extends Step {
 		this.commands = commands;
 	}
 	
+	@Editable(order=120, name="Enable TTY Mode", description="Many commands print outputs with ANSI colors in "
+			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
+			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
+			+ "to the command")
+	public boolean isUseTTY() {
+		return useTTY;
+	}
+
+	public void setUseTTY(boolean useTTY) {
+		this.useTTY = useTTY;
+	}
+
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false);
@@ -62,7 +76,7 @@ public class CommandStep extends Step {
 	
 	@Override
 	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return new CommandExecutable(getImage(), getCommands());
+		return new CommandExecutable(getImage(), getCommands(), isUseTTY());
 	}
 	
 }

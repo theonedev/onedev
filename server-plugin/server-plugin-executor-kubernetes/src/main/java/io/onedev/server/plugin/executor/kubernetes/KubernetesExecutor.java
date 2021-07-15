@@ -823,7 +823,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				} else {
 					List<Action> actions = new ArrayList<>();
 					CommandExecutable executable = new CommandExecutable((String) executionContext, 
-							Lists.newArrayList("this does not matter"));
+							Lists.newArrayList("this does not matter"), false);
 					actions.add(new Action("test", executable, ExecuteCondition.ALWAYS));
 					entryExecutable = new CompositeExecutable(actions);
 				}
@@ -853,16 +853,19 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					public Void visit(LeafExecutable executable, List<Integer> position) {
 						String containerName = getContainerName(position);
 						containerNames.add(containerName);
-						String image;
-						if (executable instanceof CommandExecutable)
-							image = ((CommandExecutable)executable).getImage();
-						else 
-							image = "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion;
+						Map<Object, Object> stepContainerSpec;
+						if (executable instanceof CommandExecutable) {
+							stepContainerSpec = CollectionUtils.newHashMap(
+									"name", containerName, 
+									"image", ((CommandExecutable)executable).getImage());
+							if (((CommandExecutable) executable).isUseTTY())
+								stepContainerSpec.put("tty", true);
+						} else { 
+							stepContainerSpec = CollectionUtils.newHashMap(
+									"name", containerName, 
+									"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion);
+						}
 						
-						Map<Object, Object> stepContainerSpec = CollectionUtils.newHashMap(
-								"name", containerName, 
-								"image", image);
-
 						String positionStr = stringifyPosition(position);
 						if (baselineOsInfo.isLinux()) {
 							stepContainerSpec.put("command", Lists.newArrayList("sh"));

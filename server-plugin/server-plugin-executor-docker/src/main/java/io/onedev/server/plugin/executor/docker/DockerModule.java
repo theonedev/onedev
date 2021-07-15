@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.docker;
+package io.onedev.server.plugin.executor.docker;
 
 import java.util.Collection;
 

@@ -5,9 +5,9 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>4.8.0</version>
+		<version>4.8.1</version>
 	</parent>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.docker.DockerModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.executor.docker.DockerModule</moduleClass>
 	</properties>
 </project>
