@@ -27,7 +27,7 @@ jobs:
     image: 1dev/build-environment:1.3
     commands:
     - mvn test
-    useTTY: false
+    useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !PullRequestUpdateTrigger {}
