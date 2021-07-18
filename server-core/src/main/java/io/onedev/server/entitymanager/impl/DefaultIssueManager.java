@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.IssueCommentManager;
@@ -81,6 +82,7 @@ import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.MilestoneAndState;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -755,7 +757,10 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Override
 	public void move(Project targetProject, Collection<Issue> issues) {
 		List<Pair<Project, String>> attachmentInfos = new ArrayList<>();
-		for (Issue issue: issues) {
+		Map<Long, Long> numberMapping = new HashMap<>();
+		List<Issue> issueList = new ArrayList<>(issues);
+		Collections.sort(issueList);
+		for (Issue issue: issueList) {
 			attachmentInfos.add(new Pair<>(issue.getAttachmentProject(), issue.getAttachmentGroup()));
 			if (issue.getDescription() != null) {
 				issue.setDescription(issue.getDescription().replace(
@@ -766,12 +771,27 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 				comment.setContent(comment.getContent().replace(
 						issue.getAttachmentProject().getName() + "/attachment/" + issue.getAttachmentGroup(), 
 						targetProject.getName() + "/attachment/" + issue.getAttachmentGroup()));
-				issueCommentManager.save(comment);
 			}
+			
 			issue.setProject(targetProject);
 			issue.setMilestone(null);
 			issue.setNumberScope(targetProject.getForkRoot());
+			Long oldNumber = issue.getNumber();
 			issue.setNumber(getNextNumber(issue.getNumberScope()));
+			numberMapping.put(oldNumber, issue.getNumber());
+		}
+		
+		for (Issue issue: issueList) {
+			if (issue.getDescription() != null) {
+				issue.setDescription(new ReferenceMigrator(Issue.class, numberMapping)
+						.migratePrefixed(issue.getDescription(), "#"));
+			}
+			
+			for (IssueComment comment: issue.getComments()) {
+				comment.setContent(new ReferenceMigrator(Issue.class, numberMapping)
+						.migratePrefixed(comment.getContent(), "#"));
+				issueCommentManager.save(comment);
+			}
 			save(issue);
 		}
 		
