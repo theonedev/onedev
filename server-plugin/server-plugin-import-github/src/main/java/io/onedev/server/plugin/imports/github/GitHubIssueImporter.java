@@ -24,11 +24,7 @@ public class GitHubIssueImporter extends IssueImporter<GitHubIssueImportSource, 
 	
 	@Override
 	public GitHubIssueImportOption getImportOption(GitHubIssueImportSource importSource, SimpleLogger logger) {
-		GitHubIssueImportOption importOption;
-		if (importSource.isPrepopulateImportOptions()) 
-			importOption = buildImportOption(importSource, importSource.getRepository(), logger);
-		else 
-			importOption = new GitHubIssueImportOption();
+		GitHubIssueImportOption importOption = buildImportOption(importSource, importSource.getRepository(), logger);
 		return importOption;
 	}
 

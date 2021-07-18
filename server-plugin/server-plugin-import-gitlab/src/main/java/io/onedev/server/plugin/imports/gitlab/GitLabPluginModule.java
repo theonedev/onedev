@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -15,7 +15,7 @@ import io.onedev.server.web.page.project.issues.imports.IssueImporterContributio
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
  */
-public class GitHubPluginModule extends AbstractPluginModule {
+public class GitLabPluginModule extends AbstractPluginModule {
 
 	@Override
 	protected void configure() {
@@ -25,12 +25,12 @@ public class GitHubPluginModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<ProjectImporter<? extends Serializable, ? extends Serializable>> getImporters() {
-				return Lists.newArrayList(new GitHubProjectImporter());
+				return Lists.newArrayList(new GitLabProjectImporter());
 			}
 
 			@Override
 			public int getOrder() {
-				return 100;
+				return 200;
 			}
 			
 		});
@@ -39,12 +39,12 @@ public class GitHubPluginModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<IssueImporter<? extends Serializable, ? extends Serializable>> getImporters() {
-				return Lists.newArrayList(new GitHubIssueImporter());
+				return Lists.newArrayList(new GitLabIssueImporter());
 			}
 
 			@Override
 			public int getOrder() {
-				return 100;
+				return 200;
 			}
 			
 		});

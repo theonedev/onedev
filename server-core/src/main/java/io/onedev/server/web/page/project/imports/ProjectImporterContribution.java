@@ -10,4 +10,6 @@ public interface ProjectImporterContribution {
 
 	Collection<ProjectImporter<? extends Serializable, ? extends Serializable>> getImporters();
 	
+	int getOrder();
+	
 }

@@ -18,7 +18,8 @@ public class YouTrackIssueImportOption implements Serializable {
 	private List<IssueTagMapping> issueTagMappings = new ArrayList<>();
 	
 	@Editable(order=200, description="Specify how to map YouTrack issue state to OneDev issue state. "
-			+ "Unmapped states will use the initial state in OneDev")
+			+ "Unmapped states will use the initial state in OneDev.<br>"
+			+ "<b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here")
 	public List<IssueStateMapping> getIssueStateMappings() {
 		return issueStateMappings;
 	}
@@ -27,10 +28,14 @@ public class YouTrackIssueImportOption implements Serializable {
 		this.issueStateMappings = issueStateMappings;
 	}
 
-	@Editable(order=300, description="Specify how to map YouTrack issue custom fields to OneDev issue "
-			+ "custom fields. Unmapped fields will be reflected in issue description.<br>"
-			+ "<b>Note: </b>Enum field needs to be mapped in form of <tt>&lt;Field Name&gt;::&lt;Field Value&gt;</tt>, "
-			+ "for instance <tt>Priority::Critical</tt>")
+	@Editable(order=300, description="Specify how to map YouTrack issue fields to OneDev. Unmapped fields will "
+			+ "be reflected in issue description.<br>"
+			+ "<b>Note: </b>"
+			+ "<ul>"
+			+ "<li>Enum field needs to be mapped in form of <tt>&lt;Field Name&gt;::&lt;Field Value&gt;</tt>, "
+			+ "for instance <tt>Priority::Critical</tt>"
+			+ "<li>You may customize OneDev issue fields in case there is no appropriate option here"
+			+ "</ul>")
 	public List<IssueFieldMapping> getIssueFieldMappings() {
 		return issueFieldMappings;
 	}
@@ -40,8 +45,8 @@ public class YouTrackIssueImportOption implements Serializable {
 	}
 
 	@Editable(order=300, description="Specify how to map YouTrack issue tags to OneDev issue custom "
-			+ "fields. Only multi-valued enum field can be used here. Unmapped tags will be "
-			+ "reflected in issue description")
+			+ "fields. Unmapped tags will be reflected in issue description.<br>"
+			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
 	public List<IssueTagMapping> getIssueTagMappings() {
 		return issueTagMappings;
 	}

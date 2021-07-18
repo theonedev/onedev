@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.youtrack;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,22 +15,22 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class IssueTagMapping implements Serializable {
+public class IssueLabelMapping implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String youTrackIssueTag;
+	private String gitLabIssueLabel;
 	
 	private String oneDevIssueField;
 
-	@Editable(order=100, name="YouTrack Issue Tag")
+	@Editable(order=100, name="GitLab Issue Label")
 	@NotEmpty
-	public String getYouTrackIssueTag() {
-		return youTrackIssueTag;
+	public String getGitLabIssueLabel() {
+		return gitLabIssueLabel;
 	}
 
-	public void setYouTrackIssueTag(String youTrackIssueTag) {
-		this.youTrackIssueTag = youTrackIssueTag;
+	public void setGitLabIssueLabel(String gitLabIssueLabel) {
+		this.gitLabIssueLabel = gitLabIssueLabel;
 	}
 
 	@Editable(order=200, name="OneDev Issue Field", description="Specify a multi-value enum custom field")

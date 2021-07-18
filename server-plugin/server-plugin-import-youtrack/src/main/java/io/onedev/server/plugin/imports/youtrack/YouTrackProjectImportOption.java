@@ -37,7 +37,7 @@ public class YouTrackProjectImportOption extends YouTrackIssueImportOption imple
 		for (int i=0; i<projecMappings.size(); i++) {
 			if (projectManager.find(projecMappings.get(i).getOneDevProject()) != null) {
 				context.buildConstraintViolationWithTemplate("Project name already used")
-						.addPropertyNode("imports")
+						.addPropertyNode("projectMappings")
 						.addPropertyNode(ProjectMapping.PROP_ONEDEV_PROJECT)
 						.inIterable().atIndex(i).addConstraintViolation();
 				isValid = false;
@@ -45,7 +45,7 @@ public class YouTrackProjectImportOption extends YouTrackIssueImportOption imple
 				for (int j=0; j<projecMappings.size(); j++) {
 					if (j != i && projecMappings.get(j).getOneDevProject().equals(projecMappings.get(i).getOneDevProject())) {
 						context.buildConstraintViolationWithTemplate("Duplicate project name")
-								.addPropertyNode("imports")
+								.addPropertyNode("projectMappings")
 								.addPropertyNode(ProjectMapping.PROP_ONEDEV_PROJECT)
 								.inIterable().atIndex(i).addConstraintViolation();
 						isValid = false;

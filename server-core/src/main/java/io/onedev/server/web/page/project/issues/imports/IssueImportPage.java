@@ -122,16 +122,18 @@ public class IssueImportPage<T extends Serializable, S extends Serializable> ext
 		form.add(new TaskButton("import") {
 
 			@Override
-			protected void onCompleted(AjaxRequestTarget target) {
-				super.onCompleted(target);
+			protected void onCompleted(AjaxRequestTarget target, boolean successful) {
+				super.onCompleted(target, successful);
 				
-				EntitySort sort = new EntitySort();
-				sort.setField(Issue.NAME_NUMBER);
-				sort.setDirection(Direction.DESCENDING);
-				IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
-				
-				PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
-				throw new RestartResponseException(ProjectIssueListPage.class, params);
+				if (successful) {
+					EntitySort sort = new EntitySort();
+					sort.setField(Issue.NAME_NUMBER);
+					sort.setDirection(Direction.DESCENDING);
+					IssueQuery query = new IssueQuery(null, Lists.newArrayList(sort));
+					
+					PageParameters params = ProjectIssueListPage.paramsOf(getProject(), query.toString(), 0);
+					throw new RestartResponseException(ProjectIssueListPage.class, params);
+				}
 			}
 
 			@Override
@@ -213,7 +215,7 @@ public class IssueImportPage<T extends Serializable, S extends Serializable> ext
 	
 	@Override
 	protected Component newProjectTitle(String componentId) {
-		return new Label(componentId, "Import Issues frmo " + importer.getName());
+		return new Label(componentId, "Import Issues from " + importer.getName());
 	}
 	
 }

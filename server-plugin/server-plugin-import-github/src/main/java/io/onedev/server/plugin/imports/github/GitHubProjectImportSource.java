@@ -33,8 +33,6 @@ public class GitHubProjectImportSource implements Serializable, Validatable {
 	
 	private String accessToken;
 
-	private boolean prepopulateImportOptions = true;
-	
 	@Editable(order=10, name="GitHub API URL", description="Specify GitHub API url, for instance <tt>https://api.github.com</tt>")
 	@NotEmpty
 	public String getApiUrl() {
@@ -57,16 +55,6 @@ public class GitHubProjectImportSource implements Serializable, Validatable {
 		this.accessToken = accessToken;
 	}
 	
-	@Editable(order=1000, description="If checked, import options will be pre-populated based on all accessible "
-			+ "repositories and its settings")
-	public boolean isPrepopulateImportOptions() {
-		return prepopulateImportOptions;
-	}
-
-	public void setPrepopulateImportOptions(boolean prepopulateImportOptions) {
-		this.prepopulateImportOptions = prepopulateImportOptions;
-	}
-
 	public static String getApiEndpoint(String apiUrl, String apiPath) {
 		return StringUtils.stripEnd(apiUrl, "/") + "/" + StringUtils.stripStart(apiPath, "/");
 	}
@@ -84,7 +72,12 @@ public class GitHubProjectImportSource implements Serializable, Validatable {
 			WebTarget target = client.target(apiEndpoint);
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
-				if (response.getStatus() == 401) {
+				if (!response.getMediaType().toString().startsWith("application/json")) {
+					context.disableDefaultConstraintViolation();
+					context.buildConstraintViolationWithTemplate("This does not seem like a GitHub api url")
+							.addPropertyNode(PROP_API_URL).addConstraintViolation();
+					return false;
+				} else if (response.getStatus() == 401) {
 					context.disableDefaultConstraintViolation();
 					String errorMessage = "Authentication failed";
 					context.buildConstraintViolationWithTemplate(errorMessage)

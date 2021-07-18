@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import io.onedev.server.web.editable.annotation.RoleChoice;
 
 @Editable
 @ClassValidating
-public class GitHubProjectImportOption extends GitHubIssueImportOption implements Validatable {
+public class GitLabProjectImportOption extends GitLabIssueImportOption implements Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,8 +26,8 @@ public class GitHubProjectImportOption extends GitHubIssueImportOption implement
 	
 	private String publicRoleName;
 	
-	@Editable(order=200, name="Public Role", description="If specified, all public repositories imported from GitHub "
-			+ "will use this as default role. Private repositories are not affected")
+	@Editable(order=200, name="Public Role", description="If specified, all public and internal projects imported from GitLab "
+			+ "will use this as default role. Private projects are not affected")
 	@RoleChoice
 	@Nullable
 	public String getPublicRoleName() {
@@ -46,8 +46,8 @@ public class GitHubProjectImportOption extends GitHubIssueImportOption implement
 			return null;
 	}
 
-	@Editable(order=100, name="Repositories to Import")
-	@Size(min=1, max=10000, message="No repositories to import")
+	@Editable(order=100, name="Projects to Import")
+	@Size(min=1, max=10000, message="No projects to import")
 	public List<ProjectMapping> getProjectMappings() {
 		return projectMappings;
 	}

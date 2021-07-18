@@ -10,4 +10,6 @@ public interface IssueImporterContribution {
 
 	Collection<IssueImporter<? extends Serializable, ? extends Serializable>> getImporters();
 	
+	int getOrder();
+	
 }

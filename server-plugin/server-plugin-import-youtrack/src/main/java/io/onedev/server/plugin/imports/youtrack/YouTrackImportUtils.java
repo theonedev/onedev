@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -755,6 +756,17 @@ public class YouTrackImportUtils {
 						}
 						
 						issue.setCommentCount(issue.getComments().size());
+						
+						Set<String> fieldAndValues = new HashSet<>();
+						for (IssueField field: issue.getFields()) {
+							String fieldAndValue = field.getName() + "::" + field.getValue();
+							if (!fieldAndValues.add(fieldAndValue)) {
+								String errorMessage = String.format(
+										"Duplicate issue field mapping (issue: #%d, field: %s)", 
+										readableId, fieldAndValue);
+								throw new ExplicitException(errorMessage);
+							}
+						}
 						
 						if (!extraIssueInfo.isEmpty()) {
 							StringBuilder builder = new StringBuilder("|");

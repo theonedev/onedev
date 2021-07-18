@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class GitHubIssueImportOption implements Serializable {
+public class GitLabIssueImportOption implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,9 +24,15 @@ public class GitHubIssueImportOption implements Serializable {
 	
 	private String assigneesIssueField;
 	
+	private String dueDateIssueField;
+	
+	private String estimatedTimeIssueField;
+	
+	private String spentTimeIssueField;
+	
 	private List<IssueLabelMapping> issueLabelMappings = new ArrayList<>();
 	
-	@Editable(order=300, description="Specify which issue state to use for closed GitHub issues.<br>"
+	@Editable(order=300, description="Specify which issue state to use for closed GitLab issues.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue states in case there is no appropriate option here")
 	@ChoiceProvider("getCloseStateChoices")
 	@NotEmpty
@@ -50,7 +56,7 @@ public class GitHubIssueImportOption implements Serializable {
 		return choices;
 	}
 	
-	@Editable(order=350, description="Specify a multi-value user field to hold assignees information."
+	@Editable(order=350, description="Specify a multi-value user field to hold assignees information.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
 	@ChoiceProvider("getAssigneesIssueFieldChoices")
 	@NotEmpty
@@ -72,7 +78,60 @@ public class GitHubIssueImportOption implements Serializable {
 		return choices;
 	}
 
-	@Editable(order=400, description="Specify how to map GitHub issue labels to OneDev custom "
+	@Editable(order=360, description="Optionally specify a date field to hold due date information.<br>"
+			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+	@ChoiceProvider("getDueDateIssueFieldChoices")
+	public String getDueDateIssueField() {
+		return dueDateIssueField;
+	}
+
+	public void setDueDateIssueField(String dueDateIssueField) {
+		this.dueDateIssueField = dueDateIssueField;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getDueDateIssueFieldChoices() {
+		List<String> choices = new ArrayList<>();
+		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
+			if (field.getType().equals(InputSpec.DATE))
+				choices.add(field.getName());
+		}
+		return choices;
+	}
+	
+	@Editable(order=370, description="Optionally specify a working period field to hold estimated time infomration.<br>"
+			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+	@ChoiceProvider("getWorkingPeriodIssueFieldChoices")
+	public String getEstimatedTimeIssueField() {
+		return estimatedTimeIssueField;
+	}
+
+	public void setEstimatedTimeIssueField(String estimatedTimeIssueField) {
+		this.estimatedTimeIssueField = estimatedTimeIssueField;
+	}
+
+	@Editable(order=380, description="Optionally specify a working period field to hold spent time infomration.<br>"
+			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
+	@ChoiceProvider("getWorkingPeriodIssueFieldChoices")
+	public String getSpentTimeIssueField() {
+		return spentTimeIssueField;
+	}
+
+	public void setSpentTimeIssueField(String spentTimeIssueField) {
+		this.spentTimeIssueField = spentTimeIssueField;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getWorkingPeriodIssueFieldChoices() {
+		List<String> choices = new ArrayList<>();
+		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
+			if (field.getType().equals(InputSpec.WORKING_PERIOD))
+				choices.add(field.getName());
+		}
+		return choices;
+	}
+	
+	@Editable(order=400, description="Specify how to map GitLab issue labels to OneDev custom "
 			+ "fields. Unmapped labels will be reflected in issue description.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
 	public List<IssueLabelMapping> getIssueLabelMappings() {

@@ -313,7 +313,19 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				Collection<IssueImporter<? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
-				for (IssueImporterContribution contribution: OneDev.getExtensions(IssueImporterContribution.class))
+				
+				List<IssueImporterContribution> contributions = 
+						new ArrayList<>(OneDev.getExtensions(IssueImporterContribution.class));
+				Collections.sort(contributions, new Comparator<IssueImporterContribution>() {
+
+					@Override
+					public int compare(IssueImporterContribution o1, IssueImporterContribution o2) {
+						return o1.getOrder() - o2.getOrder();
+					}
+					
+				});
+				
+				for (IssueImporterContribution contribution: contributions)
 					importers.addAll(contribution.getImporters());
 				
 				List<MenuItem> menuItems = new ArrayList<>();

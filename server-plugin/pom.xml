@@ -30,5 +30,6 @@
 	    <module>server-plugin-report-checkstyle</module>
 	    <module>server-plugin-import-github</module>
     <module>server-plugin-import-youtrack</module>
+    <module>server-plugin-import-gitlab</module>
   </modules>
 </project>

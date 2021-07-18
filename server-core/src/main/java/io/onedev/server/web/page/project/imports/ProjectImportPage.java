@@ -118,15 +118,17 @@ public class ProjectImportPage<T extends Serializable, S extends Serializable> e
 		form.add(new TaskButton("import") {
 
 			@Override
-			protected void onCompleted(AjaxRequestTarget target) {
-				super.onCompleted(target);
+			protected void onCompleted(AjaxRequestTarget target, boolean successful) {
+				super.onCompleted(target, successful);
 
-				EntitySort sort = new EntitySort();
-				sort.setField(Project.NAME_UPDATE_DATE);
-				sort.setDirection(Direction.DESCENDING);
-				ProjectQuery query = new ProjectQuery(null, Lists.newArrayList(sort));
-				PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);
-				throw new RestartResponseException(ProjectListPage.class, params); 
+				if (successful) {
+					EntitySort sort = new EntitySort();
+					sort.setField(Project.NAME_UPDATE_DATE);
+					sort.setDirection(Direction.DESCENDING);
+					ProjectQuery query = new ProjectQuery(null, Lists.newArrayList(sort));
+					PageParameters params = ProjectListPage.paramsOf(query.toString(), 0, 0);
+					throw new RestartResponseException(ProjectListPage.class, params); 
+				}
 			}
 
 			@Override

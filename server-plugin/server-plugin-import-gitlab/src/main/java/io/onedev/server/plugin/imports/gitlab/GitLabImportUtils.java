@@ -1,5 +1,7 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitlab;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -12,6 +14,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
@@ -23,7 +27,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.joda.time.format.ISODateTimeFormat;
 import org.unbescape.html.HtmlEscape;
 
@@ -45,43 +49,45 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.AttachmentTooLargeException;
+import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.SimpleLogger;
 
-public class GitHubImportUtils {
-
-	static final String NAME = "GitHub";
+public class GitLabImportUtils {
+	
+	static final String NAME = "GitLab";
 
 	static final int PER_PAGE = 100;
 	
-	static GitHubIssueImportOption buildImportOption(GitHubProjectImportSource importSource, 
-			@Nullable String gitHubRepo, SimpleLogger logger) {
-		GitHubIssueImportOption importOption = new GitHubIssueImportOption();
+	private static final Pattern PATTERN_ATTACHMENT = Pattern.compile("\\[(.+?)\\]\\s*\\((/uploads/.+?)\\)");
+	
+	static GitLabIssueImportOption buildImportOption(GitLabProjectImportSource importSource, 
+			@Nullable String gitLabProject, SimpleLogger logger) {
+		GitLabIssueImportOption importOption = new GitLabIssueImportOption();
 		Client client = newClient(importSource);
 		try {
-			List<String> gitHubRepos = new ArrayList<>();
-			if (gitHubRepo == null) {
-				String apiEndpoint = importSource.getApiEndpoint("/user/repos");
-				for (JsonNode repoNode: list(client, apiEndpoint, logger)) {
-					String repoName = repoNode.get("name").asText();
-					String ownerName = repoNode.get("owner").get("login").asText();
-					gitHubRepos.add(ownerName + "/" + repoName);
-				}
+			List<String> gitLabProjects = new ArrayList<>();
+			if (gitLabProject == null) {
+				String apiEndpoint = importSource.getApiEndpoint("/projects?membership=true");
+				for (JsonNode projectNode: list(client, apiEndpoint, logger)) 
+					gitLabProjects.add(projectNode.get("path_with_namespace").asText());
 			} else {
-				gitHubRepos.add(gitHubRepo);
+				gitLabProjects.add(gitLabProject);
 			}
 
 			Set<String> labels = new LinkedHashSet<>();
-			for (String each: gitHubRepos) {
-				String apiEndpoint = importSource.getApiEndpoint("/repos/" + each + "/labels"); 
+			for (String each: gitLabProjects) {
+				String apiEndpoint = importSource.getApiEndpoint("/projects/" + each.replace("/", "%2F") + "/labels"); 
 				for (JsonNode labelNode: list(client, apiEndpoint, logger)) 
 					labels.add(labelNode.get("name").asText());
 			}
 			
 			for (String label: labels) {
 				IssueLabelMapping mapping = new IssueLabelMapping();
-				mapping.setGitHubIssueLabel(label);
+				mapping.setGitLabIssueLabel(label);
 				importOption.getIssueLabelMappings().add(mapping);
 			}
 		} finally {
@@ -91,29 +97,36 @@ public class GitHubImportUtils {
 	}
 	
 	@Nullable
-	static User getUser(Client client, GitHubProjectImportSource importSource, 
-			Map<String, Optional<User>> users, String login, SimpleLogger logger) {
-		Optional<User> userOpt = users.get(login);
+	static User getUser(Client client, GitLabProjectImportSource importSource, Map<String, Optional<User>> users, 
+			String userId, SimpleLogger logger) {
+		Optional<User> userOpt = users.get(userId);
 		if (userOpt == null) {
-			String apiEndpoint = importSource.getApiEndpoint("/users/" + login);
-			String email = get(client, apiEndpoint, logger).get("email").asText(null);
-			if (email != null) 
+			String apiEndpoint = importSource.getApiEndpoint("/users/" + userId);
+			JsonNode userNode = get(client, apiEndpoint, logger);
+			String email = null;
+			if (userNode.hasNonNull("email"))
+				email = userNode.get("email").asText(null);
+			if (email == null && userNode.hasNonNull("public_email"))
+				email = userNode.get("public_email").asText(null);
+			if (email != null)
 				userOpt = Optional.ofNullable(OneDev.getInstance(UserManager.class).findByEmail(email));
-			else 
+			else
 				userOpt = Optional.empty();
-			users.put(login, userOpt);
+			users.put(userId, userOpt);
 		}
 		return userOpt.orElse(null);
 	}
 	
-	static GitHubImportResult importIssues(GitHubProjectImportSource importSource, String gitHubRepo, Project oneDevProject,
-			boolean useExistingIssueNumbers, GitHubIssueImportOption importOption, Map<String, Optional<User>> users, 
+	static GitLabImportResult importIssues(GitLabProjectImportSource importSource, String gitLabProject, Project oneDevProject,
+			boolean useExistingIssueNumbers, GitLabIssueImportOption importOption, Map<String, Optional<User>> users, 
 			boolean dryRun, SimpleLogger logger) {
 		Client client = newClient(importSource);
 		try {
 			Set<String> nonExistentMilestones = new HashSet<>();
 			Set<String> nonExistentLogins = new HashSet<>();
 			Set<String> unmappedIssueLabels = new HashSet<>();
+			Set<String> tooLargeAttachments = new LinkedHashSet<>();
+			Set<String> errorAttachments = new HashSet<>();
 			
 			Map<String, Pair<FieldSpec, String>> labelMappings = new HashMap<>();
 			Map<String, Milestone> milestoneMappings = new HashMap<>();
@@ -124,7 +137,7 @@ public class GitHubImportUtils {
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(oneDevFieldName);
 				if (fieldSpec == null)
 					throw new ExplicitException("No field spec found: " + oneDevFieldName);
-				labelMappings.put(mapping.getGitHubIssueLabel(), new Pair<>(fieldSpec, oneDevFieldValue));
+				labelMappings.put(mapping.getGitLabIssueLabel(), new Pair<>(fieldSpec, oneDevFieldValue));
 			}
 			
 			for (Milestone milestone: oneDevProject.getMilestones())
@@ -139,6 +152,40 @@ public class GitHubImportUtils {
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
 
+				@Nullable
+				private String processAttachments(String issueUUID, String issueFQN, String markdown, 
+						String attachmentRootUrl, Set<String> tooLargeAttachments) {
+				    StringBuffer buffer = new StringBuffer();  
+				    Matcher matcher = PATTERN_ATTACHMENT.matcher(markdown);  
+				    while (matcher.find()) {  
+				    	String attachmentUrl = attachmentRootUrl + matcher.group(2);
+				    	String attachmentName = StringUtils.substringAfterLast(attachmentUrl, "/");
+						WebTarget target = client.target(attachmentUrl);
+						Invocation.Builder builder =  target.request();
+						try (Response response = builder.get()) {
+							String errorMessage = JerseyUtils.checkStatus(attachmentUrl, response);
+							if (errorMessage != null) { 
+								logger.error("Error downloading attachment: " + errorMessage); 
+								errorAttachments.add(attachmentUrl);
+							} else {
+								try (InputStream is = response.readEntity(InputStream.class)) {
+									String oneDevAttachmentName = oneDevProject.saveAttachment(issueUUID, attachmentName, is);
+									String oneDevAttachmentUrl = oneDevProject.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
+							    	matcher.appendReplacement(buffer, "[" + matcher.group(1) + "](" + oneDevAttachmentUrl + ")");  
+								} catch (AttachmentTooLargeException ex) {
+									tooLargeAttachments.add(issueFQN + ":" + matcher.group(2));
+								} catch (IOException e) {
+									logger.error("Error downloading attachment", e); 
+									errorAttachments.add(attachmentUrl);
+								} 
+							}
+						}
+				    }  
+				    matcher.appendTail(buffer);  
+				    
+				    return buffer.toString();
+				}
+				
 				private String joinAsMultilineHtml(List<String> values) {
 					List<String> escapedValues = new ArrayList<>();
 					for (String value: values)
@@ -157,10 +204,11 @@ public class GitHubImportUtils {
 						Issue issue = new Issue();
 						issue.setProject(oneDevProject);
 						issue.setTitle(issueNode.get("title").asText());
-						issue.setDescription(issueNode.get("body").asText(null));
+						issue.setDescription(issueNode.get("description").asText(null));
+						
 						issue.setNumberScope(oneDevProject);
 
-						Long oldNumber = issueNode.get("number").asLong();
+						Long oldNumber = issueNode.get("iid").asLong();
 						Long newNumber;
 						if (dryRun || useExistingIssueNumbers)
 							newNumber = oldNumber;
@@ -168,6 +216,8 @@ public class GitHubImportUtils {
 							newNumber = OneDev.getInstance(IssueManager.class).getNextNumber(oneDevProject);
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
+						
+						String issueFQN = gitLabProject + "#" + oldNumber;
 						
 						if (issueNode.get("state").asText().equals("closed"))
 							issue.setState(importOption.getClosedIssueState());
@@ -185,16 +235,16 @@ public class GitHubImportUtils {
 							}
 						}
 						
-						String login = issueNode.get("user").get("login").asText(null);
-						User user = getUser(client, importSource, users, login, logger);
+						JsonNode authorNode = issueNode.get("author");
+						User user = getUser(client, importSource, users, authorNode.get("id").asText(), logger);
 						if (user != null) {
 							issue.setSubmitter(user);
 						} else {
-							issue.setSubmitterName(login);
-							nonExistentLogins.add(login);
+							issue.setSubmitterName(authorNode.get("name").asText());
+							nonExistentLogins.add(authorNode.get("username").asText());
 						}
 						
-						issue.setSubmitDate(ISODateTimeFormat.dateTimeNoMillis()
+						issue.setSubmitDate(ISODateTimeFormat.dateTime()
 								.parseDateTime(issueNode.get("created_at").asText())
 								.toDate());
 						
@@ -205,52 +255,70 @@ public class GitHubImportUtils {
 						lastUpdate.setUserName(issue.getSubmitterName());
 						issue.setLastUpdate(lastUpdate);
 
-						for (JsonNode assigneeNode: issueNode.get("assignees")) {
+						List<JsonNode> assigneeNodes = new ArrayList<>();
+						if (issueNode.hasNonNull("assignees")) {
+							for (JsonNode assigneeNode: issueNode.get("assignees")) 
+								assigneeNodes.add(assigneeNode);
+						} else {
+							assigneeNodes.add(issueNode.get("assignee"));
+						}
+						
+						for (JsonNode assigneeNode: assigneeNodes) {
 							IssueField assigneeField = new IssueField();
 							assigneeField.setIssue(issue);
 							assigneeField.setName(importOption.getAssigneesIssueField());
 							assigneeField.setType(InputSpec.USER);
 							
-							login = assigneeNode.get("login").asText();
-							user = getUser(client, importSource, users, login, logger);
+							user = getUser(client, importSource, users, assigneeNode.get("id").asText(), logger);
 							if (user != null) { 
 								assigneeField.setValue(user.getName());
 							} else {
-								assigneeField.setValue(login);
-								nonExistentLogins.add(login);
+								String assigneeLogin = assigneeNode.get("username").asText();
+								assigneeField.setValue(assigneeLogin);
+								nonExistentLogins.add(assigneeLogin);
 							}
 							issue.getFields().add(assigneeField);
 						}
 
-						String apiEndpoint = importSource.getApiEndpoint("/repos/" + gitHubRepo 
-								+ "/issues/" + oldNumber + "/comments");
-						for (JsonNode commentNode: list(client, apiEndpoint, logger)) {
-							IssueComment comment = new IssueComment();
-							comment.setIssue(issue);
-							comment.setContent(commentNode.get("body").asText(null));
-							comment.setDate(ISODateTimeFormat.dateTimeNoMillis()
-									.parseDateTime(commentNode.get("created_at").asText())
-									.toDate());
-							
-							login = commentNode.get("user").get("login").asText();
-							user = getUser(client, importSource, users, login, logger);
-							if (user != null) {
-								comment.setUser(user);
-							} else {
-								comment.setUserName(login);
-								nonExistentLogins.add(login);
+						if (importOption.getDueDateIssueField() != null) {
+							String dueDate = issueNode.get("due_date").asText(null);
+							if (dueDate != null) {
+								IssueField issueField = new IssueField();
+								issueField.setIssue(issue);
+								issueField.setName(importOption.getDueDateIssueField());
+								issueField.setType(InputSpec.DATE);
+								issueField.setValue(dueDate);
+								issue.getFields().add(issueField);
 							}
-
-							issue.getComments().add(comment);
 						}
 						
-						issue.setCommentCount(issue.getComments().size());
+						JsonNode timeStatsNode = issueNode.get("time_stats");
+						if (importOption.getEstimatedTimeIssueField() != null) {
+							int value = timeStatsNode.get("time_estimate").asInt();
+							if (value != 0) {
+								IssueField issueField = new IssueField();
+								issueField.setIssue(issue);
+								issueField.setName(importOption.getEstimatedTimeIssueField());
+								issueField.setType(InputSpec.WORKING_PERIOD);
+								issueField.setValue(DateUtils.formatWorkingPeriod(value/60));
+								issue.getFields().add(issueField);
+							}
+						}
+						if (importOption.getSpentTimeIssueField() != null) {
+							int value = timeStatsNode.get("total_time_spent").asInt();
+							if (value != 0) {
+								IssueField issueField = new IssueField();
+								issueField.setIssue(issue);
+								issueField.setName(importOption.getSpentTimeIssueField());
+								issueField.setType(InputSpec.WORKING_PERIOD);
+								issueField.setValue(DateUtils.formatWorkingPeriod(value/60));
+								issue.getFields().add(issueField);
+							}
+						}
 						
-						apiEndpoint = importSource.getApiEndpoint("/repos/" + gitHubRepo 
-								+ "/issues/" + oldNumber + "/labels");
 						List<String> currentUnmappedLabels = new ArrayList<>();
-						for (JsonNode labelNode: list(client, apiEndpoint, logger)) {
-							String labelName = labelNode.get("name").asText();
+						for (JsonNode labelNode: issueNode.get("labels")) {
+							String labelName = labelNode.asText();
 							Pair<FieldSpec, String> mapped = labelMappings.get(labelName);
 							if (mapped != null) {
 								IssueField tagField = new IssueField();
@@ -269,13 +337,53 @@ public class GitHubImportUtils {
 						if (!currentUnmappedLabels.isEmpty()) 
 							extraIssueInfo.put("Labels", joinAsMultilineHtml(currentUnmappedLabels));
 						
+						String webUrl = issueNode.get("web_url").asText();
+						String attachmentRootUrl = StringUtils.substringBeforeLast(webUrl, "/-");
+						if (!dryRun && issue.getDescription() != null) {
+							issue.setDescription(processAttachments(issue.getUUID(), issueFQN, 
+									issue.getDescription(), attachmentRootUrl, tooLargeAttachments));
+						}
+						
+						String apiEndpoint = importSource.getApiEndpoint("/projects/" + gitLabProject.replace("/", "%2F") 
+								+ "/issues/" + oldNumber + "/notes?sort=asc");
+						for (JsonNode noteNode: list(client, apiEndpoint, logger)) {
+							if (!noteNode.get("system").asBoolean()) {
+								String commentContent = noteNode.get("body").asText(null); 
+								if (commentContent != null) {
+									if (!dryRun) {
+										commentContent = processAttachments(issue.getUUID(), issueFQN, 
+												commentContent, attachmentRootUrl, tooLargeAttachments);
+									}
+									
+									IssueComment comment = new IssueComment();
+									comment.setIssue(issue);
+									comment.setContent(commentContent);
+									comment.setDate(ISODateTimeFormat.dateTime()
+											.parseDateTime(noteNode.get("created_at").asText())
+											.toDate());
+									
+									authorNode = noteNode.get("author");
+									user = getUser(client, importSource, users, authorNode.get("id").asText(), logger);
+									if (user != null) {
+										comment.setUser(user);
+									} else {
+										comment.setUserName(authorNode.get("name").asText());
+										nonExistentLogins.add(authorNode.get("username").asText());
+									}
+									issue.getComments().add(comment);
+								}
+							}
+						}
+						
+						issue.setCommentCount(issue.getComments().size());
+
 						Set<String> fieldAndValues = new HashSet<>();
 						for (IssueField field: issue.getFields()) {
 							String fieldAndValue = field.getName() + "::" + field.getValue();
 							if (!fieldAndValues.add(fieldAndValue)) {
 								String errorMessage = String.format(
 										"Duplicate issue field mapping (issue: #%d, field: %s)", 
-										gitHubRepo + "#" + oldNumber, fieldAndValue);
+										issueFQN, fieldAndValue);
 								throw new ExplicitException(errorMessage);
 							}
 						}
@@ -302,7 +410,7 @@ public class GitHubImportUtils {
 				
 			};
 
-			String apiEndpoint = importSource.getApiEndpoint("/repos/" + gitHubRepo + "/issues?state=all");
+			String apiEndpoint = importSource.getApiEndpoint("/projects/" + gitLabProject.replace("/", "%2F") + "/issues?sort=asc");
 			list(client, apiEndpoint, pageDataConsumer, logger);
 
 			if (!dryRun) {
@@ -321,13 +429,12 @@ public class GitHubImportUtils {
 				}
 			}
 			
-			GitHubImportResult result = new GitHubImportResult();
+			GitLabImportResult result = new GitLabImportResult();
 			result.nonExistentLogins.addAll(nonExistentLogins);
 			result.nonExistentMilestones.addAll(nonExistentMilestones);
 			result.unmappedIssueLabels.addAll(unmappedIssueLabels);
-			
-			if (numOfImportedIssues.get() != 0)
-				result.issuesImported = true;
+			result.tooLargeAttachments.addAll(tooLargeAttachments);
+			result.errorAttachments.addAll(errorAttachments);
 			
 			return result;
 		} finally {
@@ -389,19 +496,8 @@ public class GitHubImportUtils {
 				if (status != 200) {
 					String errorMessage = response.readEntity(String.class);
 					if (StringUtils.isNotBlank(errorMessage)) {
-						if (errorMessage.contains("rate limit exceeded")) {
-							long resetTime = Long.parseLong(response.getHeaderString("x-ratelimit-reset"))*1000L;
-							logger.log("Rate limit exceeded, wait until reset...");
-							try {
-								Thread.sleep(resetTime + 60*1000L - System.currentTimeMillis());
-								continue;
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
-							}
-						} else {
-							throw new ExplicitException(String.format("Http request failed (url: %s, status code: %d, error message: %s)", 
-									apiEndpoint, status, errorMessage));
-						}
+						throw new ExplicitException(String.format("Http request failed (url: %s, status code: %d, error message: %s)", 
+								apiEndpoint, status, errorMessage));
 					} else {
 						throw new ExplicitException(String.format("Http request failed (status: %s)", status));
 					}
@@ -411,10 +507,10 @@ public class GitHubImportUtils {
 		}
 	}
 	
-	static Client newClient(GitHubProjectImportSource importSource) {
+	static Client newClient(GitLabProjectImportSource importSource) {
 		Client client = ClientBuilder.newClient();
 		client.property(ClientProperties.FOLLOW_REDIRECTS, true);
-		client.register(HttpAuthenticationFeature.basic("git", importSource.getAccessToken()));
+		client.register(OAuth2ClientSupport.feature(importSource.getAccessToken()));
 		return client;
 	}
 

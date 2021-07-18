@@ -6,8 +6,6 @@ import java.util.Collection;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
-import io.onedev.server.web.page.project.imports.ProjectImporter;
-import io.onedev.server.web.page.project.imports.ProjectImporterContribution;
 import io.onedev.server.web.page.project.issues.imports.IssueImporter;
 import io.onedev.server.web.page.project.issues.imports.IssueImporterContribution;
 
@@ -21,21 +19,17 @@ public class YouTrackPluginModule extends AbstractPluginModule {
 	protected void configure() {
 		super.configure();
 		
-		// put your guice bindings here
-		contribute(ProjectImporterContribution.class, new ProjectImporterContribution() {
-
-			@Override
-			public Collection<ProjectImporter<? extends Serializable, ? extends Serializable>> getImporters() {
-				return Lists.newArrayList(new YouTrackProjectImporter());
-			}
-			
-		});
-		
+		// put your guice bindings here		
 		contribute(IssueImporterContribution.class, new IssueImporterContribution() {
 
 			@Override
 			public Collection<IssueImporter<? extends Serializable, ? extends Serializable>> getImporters() {
 				return Lists.newArrayList(new YouTrackIssueImporter());
+			}
+
+			@Override
+			public int getOrder() {
+				return 300;
 			}
 			
 		});

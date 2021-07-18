@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.Serializable;
 
@@ -14,21 +14,21 @@ public class ProjectMapping implements Serializable {
 	
 	public static final String PROP_ONEDEV_PROJECT = "oneDevProject";
 	
-	private String gitHubRepo;
+	private String gitLabProejct;
 	
 	private String oneDevProject;
 	
 	private boolean importIssues = true;
 	
-	@Editable(order=100, name="GitHub Repository", description="Specify GitHub repository in form of "
-			+ "<tt>organization/repository</tt>")
+	@Editable(order=100, name="GitLab Project", description="Specify GitLab project in form of "
+			+ "<tt>group/subgroup/project</tt>")
 	@NotEmpty
-	public String getGitHubRepo() {
-		return gitHubRepo;
+	public String getGitLabProject() {
+		return gitLabProejct;
 	}
 
-	public void setGitHubRepo(String gitHubRepo) {
-		this.gitHubRepo = gitHubRepo;
+	public void setGitLabProject(String gitLabProject) {
+		this.gitLabProejct = gitLabProject;
 	}
 
 	@Editable(order=200, name="OneDev Project", description="Specify OneDev project to be created as "

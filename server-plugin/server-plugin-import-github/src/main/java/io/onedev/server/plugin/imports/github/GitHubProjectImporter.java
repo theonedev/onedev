@@ -10,10 +10,10 @@ import static io.onedev.server.plugin.imports.github.GitHubImportUtils.newClient
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
 
 import org.apache.http.client.utils.URIBuilder;
@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -44,43 +43,25 @@ public class GitHubProjectImporter extends ProjectImporter<GitHubProjectImportSo
 	@Override
 	public GitHubProjectImportOption getImportOption(GitHubProjectImportSource importSource, SimpleLogger logger) {
 		GitHubProjectImportOption importOption = new GitHubProjectImportOption();
-		if (importSource.isPrepopulateImportOptions()) {
-			Client client = newClient(importSource);
-			try {
-				String apiEndpoint = importSource.getApiEndpoint("/user/repos");
-				for (JsonNode repoNode: list(client, apiEndpoint, logger)) {
-					String repoName = repoNode.get("name").asText();
-					String ownerName = repoNode.get("owner").get("login").asText();
-					ProjectMapping projectMapping = new ProjectMapping();
-					projectMapping.setGitHubRepo(ownerName + "/" + repoName);
-					projectMapping.setOneDevProject(ownerName + "-" + repoName);
-					importOption.getProjectMappings().add(projectMapping);
-				}					
-				GitHubIssueImportOption issueImportOption = buildImportOption(importSource, null, logger);
-				importOption.setAssigneesIssueField(issueImportOption.getAssigneesIssueField());
-				importOption.setClosedIssueState(issueImportOption.getClosedIssueState());
-				importOption.setIssueLabelMappings(issueImportOption.getIssueLabelMappings());
-			} finally {
-				client.close();
-			}
+		Client client = newClient(importSource);
+		try {
+			String apiEndpoint = importSource.getApiEndpoint("/user/repos");
+			for (JsonNode repoNode: list(client, apiEndpoint, logger)) {
+				String repoName = repoNode.get("name").asText();
+				String ownerName = repoNode.get("owner").get("login").asText();
+				ProjectMapping projectMapping = new ProjectMapping();
+				projectMapping.setGitHubRepo(ownerName + "/" + repoName);
+				projectMapping.setOneDevProject(ownerName + "-" + repoName);
+				importOption.getProjectMappings().add(projectMapping);
+			}					
+			GitHubIssueImportOption issueImportOption = buildImportOption(importSource, null, logger);
+			importOption.setAssigneesIssueField(issueImportOption.getAssigneesIssueField());
+			importOption.setClosedIssueState(issueImportOption.getClosedIssueState());
+			importOption.setIssueLabelMappings(issueImportOption.getIssueLabelMappings());
+		} finally {
+			client.close();
 		}
 		return importOption;
-	}
-	
-	@Nullable
-	private User getUser(Client client, GitHubProjectImportSource importSource, 
-			Map<String, Optional<User>> users, String login, SimpleLogger logger) {
-		Optional<User> userOpt = users.get(login);
-		if (userOpt == null) {
-			String apiEndpoint = importSource.getApiEndpoint("/users/" + login);
-			String email = get(client, apiEndpoint, logger).get("email").asText(null);
-			if (email != null) 
-				userOpt = Optional.ofNullable(OneDev.getInstance(UserManager.class).findByEmail(email));
-			else 
-				userOpt = Optional.empty();
-			users.put(login, userOpt);
-		}
-		return userOpt.orElse(null);
 	}
 	
 	@Override
@@ -115,7 +96,7 @@ public class GitHubProjectImporter extends ProjectImporter<GitHubProjectImportSo
 				}
 
 				if (projectMapping.isImportIssues()) {
-					Map<Long, Milestone> milestones = new HashMap<>();
+					List<Milestone> milestones = new ArrayList<>();
 					logger.log("Importing milestones from repository " + projectMapping.getGitHubRepo() + "...");
 					apiEndpoint = importSource.getApiEndpoint("/repos/" + projectMapping.getGitHubRepo() + "/milestones?state=all");
 					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) {
@@ -129,7 +110,7 @@ public class GitHubProjectImporter extends ProjectImporter<GitHubProjectImportSo
 						if (milestoneNode.get("state").asText().equals("closed"))
 							milestone.setClosed(true);
 						
-						milestones.put(milestoneNode.get("number").asLong(), milestone);
+						milestones.add(milestone);
 						project.getMilestones().add(milestone);
 						
 						if (!dryRun)

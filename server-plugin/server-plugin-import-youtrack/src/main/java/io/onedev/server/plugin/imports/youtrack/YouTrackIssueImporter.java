@@ -1,6 +1,10 @@
 package io.onedev.server.plugin.imports.youtrack;
 
-import static io.onedev.server.plugin.imports.youtrack.YouTrackImportUtils.*;
+import static io.onedev.server.plugin.imports.youtrack.YouTrackImportUtils.NAME;
+import static io.onedev.server.plugin.imports.youtrack.YouTrackImportUtils.buildImportOption;
+import static io.onedev.server.plugin.imports.youtrack.YouTrackImportUtils.importIssues;
+import static io.onedev.server.plugin.imports.youtrack.YouTrackImportUtils.list;
+import static io.onedev.server.plugin.imports.youtrack.YouTrackImportUtils.newClient;
 
 import javax.ws.rs.client.Client;
 
@@ -37,12 +41,8 @@ public class YouTrackIssueImporter extends IssueImporter<YouTrackIssueImportSour
 	
 	@Override
 	public YouTrackIssueImportOption getImportOption(YouTrackIssueImportSource importSource, SimpleLogger logger) {
-		if (importSource.isPrepopulateImportOptions()) {
-			String youTrackProjectId = getYouTrackProjectId(importSource, importSource.getProject(), logger);
-			return buildImportOption(importSource, youTrackProjectId, logger);
-		} else {
-			return new YouTrackIssueImportOption();
-		}
+		String youTrackProjectId = getYouTrackProjectId(importSource, importSource.getProject(), logger);
+		return buildImportOption(importSource, youTrackProjectId, logger);
 	}
 	
 	@Override

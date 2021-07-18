@@ -86,7 +86,7 @@ abstract class TaskFeedbackPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getResult();
+				return getResult().getFeedback();
 			}
 			
 		}) {
@@ -149,6 +149,6 @@ abstract class TaskFeedbackPanel extends Panel {
 	protected abstract List<JobLogEntryEx> getLogEntries();
 	
 	@Nullable
-	protected abstract String getResult();
+	protected abstract TaskResult getResult();
 	
 }

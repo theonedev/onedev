@@ -130,7 +130,7 @@ public abstract class TaskButton extends AjaxButton {
 		});
 	}
 
-	protected void onCompleted(AjaxRequestTarget target) {
+	protected void onCompleted(AjaxRequestTarget target, boolean successful) {
 	}
 	
 	protected void onCancelled(AjaxRequestTarget target) {
@@ -143,13 +143,12 @@ public abstract class TaskButton extends AjaxButton {
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
 		List<JobLogEntryEx> messages = new ArrayList<>();
 		messages.add(new JobLogEntryEx(new JobLogEntry(new Date(), "Please wait...")));
-		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<String>() {
+		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<TaskResult>() {
 
 			@Override
-			public String call() throws Exception {
-				String result;
+			public TaskResult call() throws Exception {
 				try {
-					result = String.format(
+					String feedback = String.format(
 						"<div class='task-result text-break alert alert-light-info'>%s</div>", 
 						runTask(new SimpleLogger() {
 
@@ -160,22 +159,24 @@ public abstract class TaskButton extends AjaxButton {
 								}
 							}
 							
-						}));					
+						}));
+					return new TaskResult(true, feedback);
 				} catch (Exception e) {	
 					logger.error("Error " + title, e);
 					String suggestedSolution = ExceptionUtils.suggestSolution(e);
 					if (suggestedSolution != null)
 						logger.warn("!!! " + suggestedSolution);
+					String feedback;
 					if (e.getMessage() != null)
-						result = e.getMessage();
+						feedback = e.getMessage();
 					else
-						result = "Error " + title;
-					result = String.format(
+						feedback = "Error " + title;
+					feedback = String.format(
 							"<div class='task-result text-break alert alert-light-danger'>%s</div>", 
-							HtmlEscape.escapeHtml5(result));					
-					result = StringUtils.replace(result, "\n", "<br>");
+							HtmlEscape.escapeHtml5(feedback));					
+					feedback = StringUtils.replace(feedback, "\n", "<br>");
+					return new TaskResult(false, feedback);
 				} 
-				return result;
 			}
 			
 		}), messages));
@@ -188,14 +189,18 @@ public abstract class TaskButton extends AjaxButton {
 			@Override
 			protected void onClosed() {
 				super.onClosed();
-				Future<?> future = getTaskFutures().remove(path);
+				TaskFuture future = getTaskFutures().remove(path);
 				
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				if (future != null && !future.isDone()) {
 					future.cancel(true);
 					onCancelled(target);
 				} else {
-					onCompleted(target);
+					try {
+						onCompleted(target, future != null && future.get().successful);
+					} catch (InterruptedException | ExecutionException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 
@@ -223,7 +228,7 @@ public abstract class TaskButton extends AjaxButton {
 					}
 
 					@Override
-					protected String getResult() {
+					protected TaskResult getResult() {
 						TaskFuture future = getTaskFutures().get(path);
 						if (future != null && future.isDone() && !future.isCancelled()) { 
 							try {
@@ -299,15 +304,15 @@ public abstract class TaskButton extends AjaxButton {
 		
 	}
 	
-	private static class TaskFuture implements Future<String> {
+	private static class TaskFuture implements Future<TaskResult> {
 
-		private final Future<String> wrapped;
+		private final Future<TaskResult> wrapped;
 		
 		private final List<JobLogEntryEx> logEntries;
 		
 		private volatile Date lastActive = new Date();
 		
-		public TaskFuture(Future<String> wrapped, List<JobLogEntryEx> logEntries) {
+		public TaskFuture(Future<TaskResult> wrapped, List<JobLogEntryEx> logEntries) {
 			this.wrapped = wrapped;
 			this.logEntries = logEntries;
 		}
@@ -332,12 +337,12 @@ public abstract class TaskButton extends AjaxButton {
 		}
 
 		@Override
-		public String get() throws InterruptedException, ExecutionException {
+		public TaskResult get() throws InterruptedException, ExecutionException {
 			return wrapped.get();
 		}
 
 		@Override
-		public String get(long timeout, TimeUnit unit)
+		public TaskResult get(long timeout, TimeUnit unit)
 				throws InterruptedException, ExecutionException, TimeoutException {
 			return get(timeout, unit);
 		}
@@ -352,4 +357,5 @@ public abstract class TaskButton extends AjaxButton {
 		}
 		
 	}
+	
 }

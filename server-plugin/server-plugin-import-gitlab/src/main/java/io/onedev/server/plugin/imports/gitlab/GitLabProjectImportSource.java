@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.youtrack;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.io.Serializable;
 
@@ -9,10 +9,8 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
 import org.hibernate.validator.constraints.NotEmpty;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.JerseyUtils;
@@ -23,23 +21,19 @@ import io.onedev.server.web.editable.annotation.Password;
 
 @Editable
 @ClassValidating
-public class YouTrackProjectImportSource implements Serializable, Validatable {
+public class GitLabProjectImportSource implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-	protected static final String PROP_API_URL = "apiUrl";
+	static final String PROP_API_URL = "apiUrl";
 	
-	protected static final String PROP_USER_NAME = "userName";
-	
-	protected static final String PROP_PASSWORD = "password";
+	static final String PROP_ACCESS_TOKEN = "accessToken";
 	
 	private String apiUrl;
 	
-	private String userName;
-	
-	private String password;
-	
-	@Editable(order=10, name="YouTrack API URL", description="Specify url of YouTrack API. For instance <tt>http://localhost:8080/api</tt>")
+	private String accessToken;
+
+	@Editable(order=10, name="GitLab API URL", description="Specify GitLab API url, for instance <tt>https://gitlab.example.com/api/v4</tt>")
 	@NotEmpty
 	public String getApiUrl() {
 		return apiUrl;
@@ -48,65 +42,53 @@ public class YouTrackProjectImportSource implements Serializable, Validatable {
 	public void setApiUrl(String apiUrl) {
 		this.apiUrl = apiUrl;
 	}
-	
-	@Editable(order=200, name="YouTrack User Name", description="Specify YouTrack user name. This account should have permission to:"
-			+ "<ul>"
-			+ "<li>Read full information and issues of the projects you want to import"
-			+ "<li>Read issue tags"
-			+ "<li>Read user basic information"
-			+ "</ul>")
-	@NotEmpty
-	public String getUserName() {
-		return userName;
-	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	@Editable(order=300, name="YouTrack Password or Access Token", description="Specify YouTrack password or access token for above user")
+	@Editable(order=100, name="GitLab Personal Access Token", description="GitLab personal access token should be generated with "
+			+ "scope <b>read_api</b>, <b>read_user</b> and <b>read_repository</b>")
 	@Password
 	@NotEmpty
-	public String getPassword() {
-		return password;
+	public String getAccessToken() {
+		return accessToken;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
-
-	static String getApiEndpoint(String apiUrl, String apiPath) {
+	
+	public static String getApiEndpoint(String apiUrl, String apiPath) {
 		return StringUtils.stripEnd(apiUrl, "/") + "/" + StringUtils.stripStart(apiPath, "/");
 	}
-
+	
 	public String getApiEndpoint(String apiPath) {
 		return getApiEndpoint(apiUrl, apiPath);
 	}
-	
+
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		Client client = ClientBuilder.newClient();
+		client.register(OAuth2ClientSupport.feature(accessToken));
 		try {
-			client.register(HttpAuthenticationFeature.basic(getUserName(), getPassword()));
-			String apiEndpoint = getApiEndpoint("/users/me?fields=guest");
+			String apiEndpoint = getApiEndpoint("/user");
 			WebTarget target = client.target(apiEndpoint);
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
-				String errorMessage = JerseyUtils.checkStatus(apiEndpoint, response);
-				if (errorMessage != null) {
+				if (!response.getMediaType().toString().startsWith("application/json")) {
 					context.disableDefaultConstraintViolation();
-					context.buildConstraintViolationWithTemplate(errorMessage)
+					context.buildConstraintViolationWithTemplate("This does not seem like a GitLab api url")
 							.addPropertyNode(PROP_API_URL).addConstraintViolation();
 					return false;
+				} else if (response.getStatus() == 401) {
+					context.disableDefaultConstraintViolation();
+					String errorMessage = "Authentication failed";
+					context.buildConstraintViolationWithTemplate(errorMessage)
+							.addPropertyNode(PROP_ACCESS_TOKEN).addConstraintViolation();
+					return false;
 				} else {
-					JsonNode userNode = response.readEntity(JsonNode.class);
-					if (userNode.get("guest").asBoolean()) {
+					String errorMessage = JerseyUtils.checkStatus(apiEndpoint, response);
+					if (errorMessage != null) {
 						context.disableDefaultConstraintViolation();
-						errorMessage = "Authentication failed";
 						context.buildConstraintViolationWithTemplate(errorMessage)
-								.addPropertyNode(PROP_USER_NAME).addConstraintViolation();
-						context.buildConstraintViolationWithTemplate(errorMessage)
-								.addPropertyNode(PROP_PASSWORD).addConstraintViolation();
+								.addPropertyNode(PROP_API_URL).addConstraintViolation();
 						return false;
 					}
 				}

@@ -49,7 +49,7 @@ public class IssueLabelMapping implements Serializable {
 		List<String> choices = new ArrayList<>();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		for (FieldSpec field: issueSetting.getFieldSpecs()) {
-			if (field.getType().equals(InputSpec.ENUMERATION) && field.isAllowMultiple()) {
+			if (field.getType().equals(InputSpec.ENUMERATION)) {
 				for (String value: field.getPossibleValues()) 
 					choices.add(field.getName() + "::" + value);
 			}

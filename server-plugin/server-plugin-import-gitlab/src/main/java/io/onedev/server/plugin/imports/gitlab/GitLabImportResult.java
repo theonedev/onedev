@@ -1,14 +1,15 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitlab;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.unbescape.html.HtmlEscape;
 
-public class GitHubImportResult {
+public class GitLabImportResult {
 
 	private static final int MAX_DISPLAY_ENTRIES = 100;
 	
@@ -18,8 +19,10 @@ public class GitHubImportResult {
 	
 	Set<String> nonExistentMilestones = new HashSet<>();
 	
-	boolean issuesImported = false;
+	Set<String> tooLargeAttachments = new LinkedHashSet<>();
 	
+	Set<String> errorAttachments = new LinkedHashSet<>();
+
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {
 			List<String> entriesToDisplay = new ArrayList<>(entries).subList(0, MAX_DISPLAY_ENTRIES);
@@ -35,7 +38,7 @@ public class GitHubImportResult {
 		boolean hasNotice = false;
 		
 		if (!nonExistentMilestones.isEmpty() || !unmappedIssueLabels.isEmpty() 
-				|| !nonExistentLogins.isEmpty() || issuesImported) {
+				|| !nonExistentLogins.isEmpty() || !tooLargeAttachments.isEmpty()) { 
 			hasNotice = true;
 		}
 		
@@ -43,18 +46,17 @@ public class GitHubImportResult {
 			feedback.append("<br><br><b>NOTE:</b><ul>");
 		
 		if (!nonExistentMilestones.isEmpty()) 
-			feedback.append(getEntryFeedback("Non existent milestones", nonExistentMilestones));
-		if (!unmappedIssueLabels.isEmpty()) { 
-			feedback.append(getEntryFeedback("GitHub issue labels not mapped to OneDev custom field",  
-					unmappedIssueLabels));
-		}
+			feedback.append(getEntryFeedback("Non existent milestones", nonExistentLogins));
+		if (!unmappedIssueLabels.isEmpty()) 
+			feedback.append(getEntryFeedback("GitLab issue labels not mapped to OneDev custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("GitHub logins without public email or public email can not be mapped to OneDev account", 
+			feedback.append(getEntryFeedback("GitLab logins without email or email can not be mapped to OneDev account", 
 					nonExistentLogins));
 		}
-		
-		if (issuesImported)
-			feedback.append("<li> Attachments in issue description and comments are not imported due to GitHub limitation");
+		if (!tooLargeAttachments.isEmpty()) 
+			feedback.append(getEntryFeedback("Too large attachments", tooLargeAttachments));
+		if (!errorAttachments.isEmpty()) 
+			feedback.append(getEntryFeedback("Failed to download attachments", errorAttachments));
 		
 		if (hasNotice)
 			feedback.append("</ul>");

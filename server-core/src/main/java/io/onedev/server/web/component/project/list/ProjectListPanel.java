@@ -3,6 +3,8 @@ package io.onedev.server.web.component.project.list;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -245,7 +247,18 @@ public class ProjectListPanel extends Panel {
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				Collection<ProjectImporter<? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
-				for (ProjectImporterContribution contribution: OneDev.getExtensions(ProjectImporterContribution.class))
+				List<ProjectImporterContribution> contributions = 
+						new ArrayList<>(OneDev.getExtensions(ProjectImporterContribution.class));
+				Collections.sort(contributions, new Comparator<ProjectImporterContribution>() {
+
+					@Override
+					public int compare(ProjectImporterContribution o1, ProjectImporterContribution o2) {
+						return o1.getOrder() - o2.getOrder();
+					}
+					
+				});
+				
+				for (ProjectImporterContribution contribution: contributions)
 					importers.addAll(contribution.getImporters());
 				
 				List<MenuItem> menuItems = new ArrayList<>();
