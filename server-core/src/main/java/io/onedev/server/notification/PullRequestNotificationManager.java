@@ -194,6 +194,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			else if (changeData instanceof PullRequestDiscardData) 
 				subject = String.format(user.getDisplayName() + " discarded pull request %s", request.getNumberAndTitle());
 			if (subject != null) { 
+				subject = "[" + getState(request) + "] " + subject;
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
 						Lists.newArrayList(), subject, getHtmlBody(event, url), getTextBody(event, url), 
 						replyAddress, threadingReferences);
@@ -260,6 +261,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				else
 					subject = event.getActivity(true);
 				
+				subject = "[" + getState(request) + "] " + subject;
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
@@ -272,6 +274,15 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		return request.getUUID() + "@onedev";
 	}
 	
+	private String getState(PullRequest request) {
+		if (request.isMerged())
+			return "Merged";
+		else if (request.isDiscarded())
+			return "Discarded";
+		else
+			return "Open";
+	}
+	
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
@@ -282,7 +293,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (review.getResult() == null && !review.getUser().equals(SecurityUtils.getUser())) {
 					pullRequestWatchManager.watch(request, review.getUser(), true);
 					String url = urlManager.urlFor(request);
-					String subject = String.format("You are invited to review pull request %s", request.getNumberAndTitle());
+					String subject = String.format("[%s] You are invited to review pull request %s", 
+							getState(request), request.getNumberAndTitle());
 					String replyAddress = mailManager.getReplyAddressForPullRequest(request);
 					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), Lists.newArrayList(),
 							subject, getHtmlBody(event, url), getTextBody(event, url), replyAddress, 
@@ -294,8 +306,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (!assignment.getUser().equals(SecurityUtils.getUser())) {
 					pullRequestWatchManager.watch(request, assignment.getUser(), true);
 					String url = urlManager.urlFor(request);
-					String subject = String.format("You are assigned and expected to merge pull request %s", 
-							request.getNumberAndTitle());
+					String subject = String.format("[%s] You are assigned and expected to merge pull request %s", 
+							getState(request), request.getNumberAndTitle());
 					String replyAddress = mailManager.getReplyAddressForPullRequest(request);
 					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), Lists.newArrayList(),
 							subject, getHtmlBody(event, url), getTextBody(event, url), replyAddress, 

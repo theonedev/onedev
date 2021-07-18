@@ -151,7 +151,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		if (threadingReferences == null)
 			threadingReferences = issue.getUUID() + "@onedev";
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
-			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.getNumberAndTitle());
+			String subject = String.format("[%s] You are now \"%s\" of issue %s", 
+					issue.getState(), entry.getKey(), issue.getNumberAndTitle());
 			Set<String> emails = entry.getValue().getMembers()
 					.stream()
 					.filter(it->!it.equals(user))
@@ -166,7 +167,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
-			String subject = String.format("You are now \"%s\" of issue %s", entry.getKey(), issue.getNumberAndTitle());
+			String subject = String.format("[%s] You are now \"%s\" of issue %s", 
+					issue.getState(), entry.getKey(), issue.getNumberAndTitle());
 			Set<String> emails = entry.getValue()
 					.stream()
 					.filter(it->!it.equals(user))
@@ -234,7 +236,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
 				else
 					subject = event.getActivity(true);
-
+				subject = "[" + issue.getState() + "] " + subject;
+				
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()),
