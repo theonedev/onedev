@@ -743,7 +743,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "All Queried Issues";
+						return "Move All Queried Issues To...";
 					}
 					
 					@Override
@@ -786,12 +786,12 @@ public abstract class IssueListPanel extends Panel {
 											
 											@Override
 											protected String getConfirmMessage() {
-												return "Do you really want to move all queried issues to project '" + getTargetProject().getName() + "'?";
+												return "Type <code>yes</code> below to move all queried issues to project '" + getTargetProject().getName() + "'";
 											}
 											
 											@Override
 											protected String getConfirmInput() {
-												return null;
+												return "yes";
 											}
 											
 										};
@@ -825,7 +825,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Selected Issues";
+						return "Move Selected Issues To...";
 					}
 
 					@Override
@@ -922,29 +922,41 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "All Queried Issues";
+						return "Delete All Queried Issues";
 					}
 					
 					@Override
 					public WebMarkupContainer newLink(String id) {
 						return new AjaxLink<Void>(id) {
 
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete all queried issues?"));
-							}
-
 							@SuppressWarnings("unchecked")
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Issue> issues = new ArrayList<>();
-								for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
-									issues.add(it.next());
-								}
-								OneDev.getInstance(IssueManager.class).delete(issues);
-								target.add(body);
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Issue> issues = new ArrayList<>();
+										for (Iterator<Issue> it = (Iterator<Issue>) dataProvider.iterator(0, issuesTable.getItemCount()); it.hasNext();) {
+											issues.add(it.next());
+										}
+										OneDev.getInstance(IssueManager.class).delete(issues);
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete all queried issues";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
 							}
 							
 							@Override
@@ -972,7 +984,7 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Selected Issues";
+						return "Delete Selected Issues";
 					}
 					
 					@Override

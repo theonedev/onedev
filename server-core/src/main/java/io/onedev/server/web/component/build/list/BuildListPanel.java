@@ -89,6 +89,7 @@ import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -266,29 +267,42 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "All Queried Builds";
+						return "Delete All Queried Builds";
 					}
 					
 					@Override
 					public WebMarkupContainer newLink(String id) {
 						return new AjaxLink<Void>(id) {
 
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete all queried builds?"));
-							}
-
 							@SuppressWarnings("unchecked")
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Build> builds = new ArrayList<>();
-								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) {
-									builds.add(it.next());
-								}
-								OneDev.getInstance(BuildManager.class).delete(builds);
-								target.add(body);
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Build> builds = new ArrayList<>();
+										for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) {
+											builds.add(it.next());
+										}
+										OneDev.getInstance(BuildManager.class).delete(builds);
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete all queried builds";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
 							}
 							
 							@Override
@@ -316,7 +330,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Selected Builds";
+						return "Delete Selected Builds";
 					}
 					
 					@Override

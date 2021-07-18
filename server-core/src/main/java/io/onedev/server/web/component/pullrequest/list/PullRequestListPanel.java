@@ -78,6 +78,7 @@ import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
@@ -250,29 +251,42 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "All Queried Pull Requests";
+						return "Delete All Queried Pull Requests";
 					}
 					
 					@Override
 					public WebMarkupContainer newLink(String id) {
 						return new AjaxLink<Void>(id) {
 
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete all queried pull requests?"));
-							}
-
 							@SuppressWarnings("unchecked")
 							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<PullRequest> requests = new ArrayList<>();
-								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
-									requests.add(it.next());
-								}
-								OneDev.getInstance(PullRequestManager.class).delete(requests);
-								target.add(body);
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<PullRequest> requests = new ArrayList<>();
+										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
+											requests.add(it.next());
+										}
+										OneDev.getInstance(PullRequestManager.class).delete(requests);
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete all queried pull requests";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
 							}
 							
 							@Override
@@ -300,7 +314,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
-						return "Selected Pull Requests";
+						return "Delete Selected Pull Requests";
 					}
 					
 					@Override
