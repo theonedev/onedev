@@ -18,8 +18,6 @@ public class ProjectMapping implements Serializable {
 	
 	private String oneDevProject;
 	
-	private boolean importIssues = true;
-	
 	@Editable(order=100, name="GitHub Repository", description="Specify GitHub repository in form of "
 			+ "<tt>organization/repository</tt>")
 	@NotEmpty
@@ -41,15 +39,6 @@ public class ProjectMapping implements Serializable {
 
 	public void setOneDevProject(String oneDevProject) {
 		this.oneDevProject = oneDevProject;
-	}
-
-	@Editable(order=400)
-	public boolean isImportIssues() {
-		return importIssues;
-	}
-
-	public void setImportIssues(boolean importIssues) {
-		this.importIssues = importIssues;
 	}
 
 }

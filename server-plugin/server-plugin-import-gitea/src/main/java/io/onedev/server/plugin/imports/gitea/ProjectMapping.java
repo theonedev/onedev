@@ -1,14 +1,11 @@
-package io.onedev.server.plugin.imports.youtrack;
+package io.onedev.server.plugin.imports.gitea;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.validation.annotation.ProjectName;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class ProjectMapping implements Serializable {
@@ -17,20 +14,19 @@ public class ProjectMapping implements Serializable {
 	
 	public static final String PROP_ONEDEV_PROJECT = "oneDevProject";
 	
-	private String youTrackProject;
+	private String giteaRepo;
 	
 	private String oneDevProject;
 	
-	@Editable(order=100, name="YouTrack Project", description="Issues will be imported from specified "
-			+ "YouTrack project")
-	@ChoiceProvider("getProjectChoices")
+	@Editable(order=100, name="Gitea Repository", description="Specify Gitea repository in form of "
+			+ "<tt>organization/repository</tt>")
 	@NotEmpty
-	public String getYouTrackProject() {
-		return youTrackProject;
+	public String getGiteaRepo() {
+		return giteaRepo;
 	}
 
-	public void setYouTrackProject(String youTrackProject) {
-		this.youTrackProject = youTrackProject;
+	public void setGiteaRepo(String giteaRepo) {
+		this.giteaRepo = giteaRepo;
 	}
 
 	@Editable(order=200, name="OneDev Project", description="Specify OneDev project to be created as "
@@ -45,9 +41,4 @@ public class ProjectMapping implements Serializable {
 		this.oneDevProject = oneDevProject;
 	}
 
-	@SuppressWarnings("unused")
-	private static List<String> getProjectChoices() {
-		return WicketUtils.getPage().getMetaData(ImportServer.META_DATA_KEY).getProjectChoices();
-	}
-	
 }

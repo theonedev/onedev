@@ -57,8 +57,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.imports.IssueImporter2;
-import io.onedev.server.imports.IssueImporterContribution2;
+import io.onedev.server.imports.IssueImporter;
+import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -312,24 +312,24 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				Collection<IssueImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+				Collection<IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
 				
-				List<IssueImporterContribution2> contributions = 
-						new ArrayList<>(OneDev.getExtensions(IssueImporterContribution2.class));
-				Collections.sort(contributions, new Comparator<IssueImporterContribution2>() {
+				List<IssueImporterContribution> contributions = 
+						new ArrayList<>(OneDev.getExtensions(IssueImporterContribution.class));
+				Collections.sort(contributions, new Comparator<IssueImporterContribution>() {
 
 					@Override
-					public int compare(IssueImporterContribution2 o1, IssueImporterContribution2 o2) {
+					public int compare(IssueImporterContribution o1, IssueImporterContribution o2) {
 						return o1.getOrder() - o2.getOrder();
 					}
 					
 				});
 				
-				for (IssueImporterContribution2 contribution: contributions)
+				for (IssueImporterContribution contribution: contributions)
 					importers.addAll(contribution.getImporters());
 				
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (IssueImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
+				for (IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
 					menuItems.add(new MenuItem() {
 
 						@Override

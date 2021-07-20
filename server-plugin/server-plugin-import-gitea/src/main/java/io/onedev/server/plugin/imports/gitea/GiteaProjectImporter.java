@@ -1,9 +1,4 @@
-package io.onedev.server.plugin.imports.github;
-
-import static io.onedev.server.plugin.imports.github.ImportUtils.NAME;
-import static io.onedev.server.plugin.imports.github.ImportUtils.get;
-import static io.onedev.server.plugin.imports.github.ImportUtils.importIssues;
-import static io.onedev.server.plugin.imports.github.ImportUtils.list;
+package io.onedev.server.plugin.imports.gitea;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,15 +25,43 @@ import io.onedev.server.model.User;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.SimpleLogger;
 
-public class GitHubProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ProjectImportOption> {
+public class GiteaProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ProjectImportOption> {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	@Override
 	public String getName() {
-		return NAME;
+		return ImportUtils.NAME;
 	}
-	
+
+	@Override
+	public ProjectImportSource getWhat(ImportServer where, SimpleLogger logger) {
+		ProjectImportSource importSource = new ProjectImportSource();
+		Client client = where.newClient();
+		try {
+			String apiEndpoint = where.getApiEndpoint("/user/repos");
+			for (JsonNode repoNode: ImportUtils.list(client, apiEndpoint, logger)) {
+				String repoName = repoNode.get("name").asText();
+				String ownerName = repoNode.get("owner").get("login").asText();
+				ProjectMapping projectMapping = new ProjectMapping();
+				projectMapping.setGiteaRepo(ownerName + "/" + repoName);
+				projectMapping.setOneDevProject(ownerName + "-" + repoName);
+				importSource.getProjectMappings().add(projectMapping);
+			}					
+		} finally {
+			client.close();
+		}
+		return importSource;
+	}
+
+	@Override
+	public ProjectImportOption getHow(ImportServer where, ProjectImportSource what, SimpleLogger logger) {
+		ProjectImportOption importOption = new ProjectImportOption();
+		List<String> repos = what.getProjectMappings().stream().map(it->it.getGiteaRepo()).collect(Collectors.toList());
+		importOption.setIssueImportOption(ImportUtils.buildIssueImportOption(where, repos, logger));
+		return importOption;
+	}
+
 	@Override
 	public String doImport(ImportServer where, ProjectImportSource what, ProjectImportOption how, 
 			boolean dryRun, SimpleLogger logger) {
@@ -48,10 +71,10 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 			Map<String, Optional<User>> users = new HashMap<>();
 			ImportResult result = new ImportResult();
 			for (ProjectMapping projectMapping: what.getProjectMappings()) {
-				logger.log("Cloning code from repository " + projectMapping.getGitHubRepo() + "...");
+				logger.log("Cloning code from repository " + projectMapping.getGiteaRepo() + "...");
 				
-				String apiEndpoint = where.getApiEndpoint("/repos/" + projectMapping.getGitHubRepo());
-				JsonNode repoNode = get(client, apiEndpoint, logger);
+				String apiEndpoint = where.getApiEndpoint("/repos/" + projectMapping.getGiteaRepo());
+				JsonNode repoNode = ImportUtils.get(client, apiEndpoint, logger);
 				Project project = new Project();
 				project.setName(projectMapping.getOneDevProject());
 				project.setDescription(repoNode.get("description").asText(null));
@@ -72,9 +95,9 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 
 				if (how.getIssueImportOption() != null) {
 					List<Milestone> milestones = new ArrayList<>();
-					logger.log("Importing milestones from repository " + projectMapping.getGitHubRepo() + "...");
-					apiEndpoint = where.getApiEndpoint("/repos/" + projectMapping.getGitHubRepo() + "/milestones?state=all");
-					for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) {
+					logger.log("Importing milestones from repository " + projectMapping.getGiteaRepo() + "...");
+					apiEndpoint = where.getApiEndpoint("/repos/" + projectMapping.getGiteaRepo() + "/milestones?state=all");
+					for (JsonNode milestoneNode: ImportUtils.list(client, apiEndpoint, logger)) {
 						Milestone milestone = new Milestone();
 						milestone.setName(milestoneNode.get("title").asText());
 						milestone.setDescription(milestoneNode.get("description").asText(null));
@@ -92,13 +115,12 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 							OneDev.getInstance(MilestoneManager.class).save(milestone);
 					}
 					
-					logger.log("Importing issues from repository " + projectMapping.getGitHubRepo() + "...");
-					ImportResult currentResult = importIssues(where, projectMapping.getGitHubRepo(), 
+					logger.log("Importing issues from repository " + projectMapping.getGiteaRepo() + "...");
+					ImportResult currentResult = ImportUtils.importIssues(where, projectMapping.getGiteaRepo(), 
 							project, true, how.getIssueImportOption(), users, dryRun, logger);
 					result.nonExistentLogins.addAll(currentResult.nonExistentLogins);
 					result.nonExistentMilestones.addAll(currentResult.nonExistentMilestones);
 					result.unmappedIssueLabels.addAll(currentResult.unmappedIssueLabels);
-
 					result.issuesImported |= currentResult.issuesImported;
 				}
 			}
@@ -110,36 +132,7 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 			throw new RuntimeException(e);
 		} finally {
 			client.close();
-		}
+		}		
 	}
 
-	@Override
-	public ProjectImportSource getWhat(ImportServer where, SimpleLogger logger) {
-		ProjectImportSource importSource = new ProjectImportSource();
-		Client client = where.newClient();
-		try {
-			String apiEndpoint = where.getApiEndpoint("/user/repos");
-			for (JsonNode repoNode: list(client, apiEndpoint, logger)) {
-				String repoName = repoNode.get("name").asText();
-				String ownerName = repoNode.get("owner").get("login").asText();
-				ProjectMapping projectMapping = new ProjectMapping();
-				projectMapping.setGitHubRepo(ownerName + "/" + repoName);
-				projectMapping.setOneDevProject(ownerName + "-" + repoName);
-				importSource.getProjectMappings().add(projectMapping);
-			}					
-		} finally {
-			client.close();
-		}
-		return importSource;
-	}
-
-	@Override
-	public ProjectImportOption getHow(ImportServer where, ProjectImportSource what, SimpleLogger logger) {
-		ProjectImportOption importOption = new ProjectImportOption();
-		List<String> gitHubRepos = what.getProjectMappings().stream()
-				.map(it->it.getGitHubRepo()).collect(Collectors.toList());
-		importOption.setIssueImportOption(ImportUtils.buildImportOption(where, gitHubRepos, logger));
-		return importOption;
-	}
-		
 }

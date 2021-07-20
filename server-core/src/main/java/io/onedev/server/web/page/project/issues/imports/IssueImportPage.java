@@ -12,8 +12,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.Importer;
-import io.onedev.server.imports.IssueImporter2;
-import io.onedev.server.imports.IssueImporterContribution2;
+import io.onedev.server.imports.IssueImporter;
+import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntitySort;
@@ -30,17 +30,17 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 	private static final String PARAM_IMPORTER = "importer";
 	
-	private IssueImporter2<Where, What, How> importer;
+	private IssueImporter<Where, What, How> importer;
 	
 	@SuppressWarnings("unchecked")
 	public IssueImportPage(PageParameters params) {
 		super(params);
 		
 		String importerName = params.get(PARAM_IMPORTER).toString();
-		for (IssueImporterContribution2 contribution: OneDev.getExtensions(IssueImporterContribution2.class)) {
-			for (IssueImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: contribution.getImporters()) {
+		for (IssueImporterContribution contribution: OneDev.getExtensions(IssueImporterContribution.class)) {
+			for (IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: contribution.getImporters()) {
 				if (importer.getName().equals(importerName)) {
-					this.importer = (IssueImporter2<Where, What, How>) importer;
+					this.importer = (IssueImporter<Where, What, How>) importer;
 					break;
 				}
 			}

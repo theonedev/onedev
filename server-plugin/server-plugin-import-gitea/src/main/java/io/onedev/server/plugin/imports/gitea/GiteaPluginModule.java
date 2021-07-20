@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package io.onedev.server.plugin.imports.gitea;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -15,22 +15,23 @@ import io.onedev.server.imports.ProjectImporterContribution;
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
  */
-public class GitHubPluginModule extends AbstractPluginModule {
+public class GiteaPluginModule extends AbstractPluginModule {
 
 	@Override
 	protected void configure() {
 		super.configure();
 		
+		// put your guice bindings here
 		contribute(ProjectImporterContribution.class, new ProjectImporterContribution() {
 
 			@Override
 			public Collection<ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> getImporters() {
-				return Lists.newArrayList(new GitHubProjectImporter());
+				return Lists.newArrayList(new GiteaProjectImporter());
 			}
 
 			@Override
 			public int getOrder() {
-				return 100;
+				return 300;
 			}
 			
 		});
@@ -39,15 +40,16 @@ public class GitHubPluginModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<IssueImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> getImporters() {
-				return Lists.newArrayList(new GitHubIssueImporter());
+				return Lists.newArrayList(new GiteaIssueImporter());
 			}
 
 			@Override
 			public int getOrder() {
-				return 100;
+				return 300;
 			}
 			
 		});
+		
 	}
-	
+
 }

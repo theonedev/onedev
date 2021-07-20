@@ -12,8 +12,8 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.Importer;
-import io.onedev.server.imports.ProjectImporter2;
-import io.onedev.server.imports.ProjectImporterContribution2;
+import io.onedev.server.imports.ProjectImporter;
+import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -29,17 +29,17 @@ public class ProjectImportPage<Where extends Serializable, What extends Serializ
 
 	private static final String PARAM_IMPORTER = "importer";
 	
-	private ProjectImporter2<Where, What, How> importer;
+	private ProjectImporter<Where, What, How> importer;
 	
 	@SuppressWarnings("unchecked")
 	public ProjectImportPage(PageParameters params) {
 		super(params);
 		
 		String importerName = params.get(PARAM_IMPORTER).toString();
-		for (ProjectImporterContribution2 contribution: OneDev.getExtensions(ProjectImporterContribution2.class)) {
-			for (ProjectImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: contribution.getImporters()) {
+		for (ProjectImporterContribution contribution: OneDev.getExtensions(ProjectImporterContribution.class)) {
+			for (ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: contribution.getImporters()) {
 				if (importer.getName().equals(importerName)) {
-					this.importer = (ProjectImporter2<Where, What, How>) importer;
+					this.importer = (ProjectImporter<Where, What, How>) importer;
 					break;
 				}
 			}

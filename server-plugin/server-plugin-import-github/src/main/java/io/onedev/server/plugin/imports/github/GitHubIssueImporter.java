@@ -1,19 +1,22 @@
 package io.onedev.server.plugin.imports.github;
 
-import static io.onedev.server.plugin.imports.github.GitHubImportUtils.NAME;
-import static io.onedev.server.plugin.imports.github.GitHubImportUtils.buildImportOption;
-import static io.onedev.server.plugin.imports.github.GitHubImportUtils.importIssues;
+import static io.onedev.server.plugin.imports.github.ImportUtils.NAME;
+import static io.onedev.server.plugin.imports.github.ImportUtils.buildImportOption;
+import static io.onedev.server.plugin.imports.github.ImportUtils.importIssues;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
+
+import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SimpleLogger;
-import io.onedev.server.web.page.project.issues.imports.IssueImporter;
+import io.onedev.server.web.util.WicketUtils;
 
-public class GitHubIssueImporter extends IssueImporter<GitHubIssueImportSource, GitHubIssueImportOption> {
+public class GitHubIssueImporter extends IssueImporter<ImportServer, IssueImportSource, IssueImportOption> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,18 +26,23 @@ public class GitHubIssueImporter extends IssueImporter<GitHubIssueImportSource, 
 	}
 	
 	@Override
-	public GitHubIssueImportOption getImportOption(GitHubIssueImportSource importSource, SimpleLogger logger) {
-		GitHubIssueImportOption importOption = buildImportOption(importSource, importSource.getRepository(), logger);
-		return importOption;
+	public String doImport(ImportServer where, IssueImportSource what, IssueImportOption how, Project project,
+			boolean dryRun, SimpleLogger logger) {
+		logger.log("Importing issues from repository " + what.getRepository() + "...");
+		Map<String, Optional<User>> users = new HashMap<>();
+		return importIssues(where, what.getRepository(), project, false, how, users, dryRun, logger)
+				.toHtml("Issues imported successfully");
 	}
 
 	@Override
-	public String doImport(Project project, GitHubIssueImportSource importSource, GitHubIssueImportOption importOption,
-			boolean dryRun, SimpleLogger logger) {
-		logger.log("Importing issues from repository " + importSource.getRepository() + "...");
-		Map<String, Optional<User>> users = new HashMap<>();
-		return importIssues(importSource, importSource.getRepository(), project, false, importOption, users, dryRun, logger)
-				.toHtml("Issues imported successfully");
+	public IssueImportSource getWhat(ImportServer where, SimpleLogger logger) {
+		WicketUtils.getPage().setMetaData(ImportServer.META_DATA_KEY, where);
+		return new IssueImportSource();
+	}
+
+	@Override
+	public IssueImportOption getHow(ImportServer where, IssueImportSource what, SimpleLogger logger) {
+		return buildImportOption(where, Lists.newArrayList(what.getRepository()), logger);
 	}
 	
 }
