@@ -44,6 +44,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.imports.ProjectImporter2;
+import io.onedev.server.imports.ProjectImporterContribution2;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
@@ -68,8 +70,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
-import io.onedev.server.web.page.project.imports.ProjectImporter;
-import io.onedev.server.web.page.project.imports.ProjectImporterContribution;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -246,23 +246,23 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				Collection<ProjectImporter<? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
-				List<ProjectImporterContribution> contributions = 
-						new ArrayList<>(OneDev.getExtensions(ProjectImporterContribution.class));
-				Collections.sort(contributions, new Comparator<ProjectImporterContribution>() {
+				Collection<ProjectImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+				List<ProjectImporterContribution2> contributions = 
+						new ArrayList<>(OneDev.getExtensions(ProjectImporterContribution2.class));
+				Collections.sort(contributions, new Comparator<ProjectImporterContribution2>() {
 
 					@Override
-					public int compare(ProjectImporterContribution o1, ProjectImporterContribution o2) {
+					public int compare(ProjectImporterContribution2 o1, ProjectImporterContribution2 o2) {
 						return o1.getOrder() - o2.getOrder();
 					}
 					
 				});
 				
-				for (ProjectImporterContribution contribution: contributions)
+				for (ProjectImporterContribution2 contribution: contributions)
 					importers.addAll(contribution.getImporters());
 				
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (ProjectImporter<? extends Serializable, ? extends Serializable> importer: importers) {
+				for (ProjectImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
 					menuItems.add(new MenuItem() {
 
 						@Override

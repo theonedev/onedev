@@ -1,15 +1,14 @@
-package io.onedev.server.plugin.imports.gitlab;
+package server.plugin.imports.gitea;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.unbescape.html.HtmlEscape;
 
-public class GitLabImportResult {
+public class ImportResult {
 
 	private static final int MAX_DISPLAY_ENTRIES = 100;
 	
@@ -18,11 +17,9 @@ public class GitLabImportResult {
 	Set<String> unmappedIssueLabels = new HashSet<>();
 	
 	Set<String> nonExistentMilestones = new HashSet<>();
-	
-	Set<String> tooLargeAttachments = new LinkedHashSet<>();
-	
-	Set<String> errorAttachments = new LinkedHashSet<>();
 
+	boolean issuesImported = false;
+	
 	private String getEntryFeedback(String entryDescription, Collection<String> entries) {
 		if (entries.size() > MAX_DISPLAY_ENTRIES) {
 			List<String> entriesToDisplay = new ArrayList<>(entries).subList(0, MAX_DISPLAY_ENTRIES);
@@ -38,8 +35,7 @@ public class GitLabImportResult {
 		boolean hasNotice = false;
 		
 		if (!nonExistentMilestones.isEmpty() || !unmappedIssueLabels.isEmpty() 
-				|| !nonExistentLogins.isEmpty() || !tooLargeAttachments.isEmpty()
-				|| !errorAttachments.isEmpty()) { 
+				|| !nonExistentLogins.isEmpty() || issuesImported) { 
 			hasNotice = true;
 		}
 		
@@ -49,15 +45,18 @@ public class GitLabImportResult {
 		if (!nonExistentMilestones.isEmpty()) 
 			feedback.append(getEntryFeedback("Non existent milestones", nonExistentLogins));
 		if (!unmappedIssueLabels.isEmpty()) 
-			feedback.append(getEntryFeedback("GitLab issue labels not mapped to OneDev custom field", unmappedIssueLabels));
+			feedback.append(getEntryFeedback("Gitea issue labels not mapped to OneDev custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {
-			feedback.append(getEntryFeedback("GitLab logins without email or email can not be mapped to OneDev account", 
+			feedback.append(getEntryFeedback("Gitea logins without email or email can not be mapped to OneDev account", 
 					nonExistentLogins));
 		}
-		if (!tooLargeAttachments.isEmpty()) 
-			feedback.append(getEntryFeedback("Too large attachments", tooLargeAttachments));
-		if (!errorAttachments.isEmpty()) 
-			feedback.append(getEntryFeedback("Failed to download attachments", errorAttachments));
+		
+		if (issuesImported) {
+			feedback.append("<li> Attachments in issue description and comments are not imported as Gitea does not "
+					+ "provide attachment api currently");
+			feedback.append("<li> Issue dependencies are not imported as Gitea does not "
+					+ "provide public api to access this information");
+		}
 		
 		if (hasNotice)
 			feedback.append("</ul>");

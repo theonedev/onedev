@@ -57,6 +57,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.imports.IssueImporter2;
+import io.onedev.server.imports.IssueImporterContribution2;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -104,8 +106,6 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.imports.IssueImportPage;
-import io.onedev.server.web.page.project.issues.imports.IssueImporter;
-import io.onedev.server.web.page.project.issues.imports.IssueImporterContribution;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.Cursor;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
@@ -312,24 +312,24 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				Collection<IssueImporter<? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+				Collection<IssueImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
 				
-				List<IssueImporterContribution> contributions = 
-						new ArrayList<>(OneDev.getExtensions(IssueImporterContribution.class));
-				Collections.sort(contributions, new Comparator<IssueImporterContribution>() {
+				List<IssueImporterContribution2> contributions = 
+						new ArrayList<>(OneDev.getExtensions(IssueImporterContribution2.class));
+				Collections.sort(contributions, new Comparator<IssueImporterContribution2>() {
 
 					@Override
-					public int compare(IssueImporterContribution o1, IssueImporterContribution o2) {
+					public int compare(IssueImporterContribution2 o1, IssueImporterContribution2 o2) {
 						return o1.getOrder() - o2.getOrder();
 					}
 					
 				});
 				
-				for (IssueImporterContribution contribution: contributions)
+				for (IssueImporterContribution2 contribution: contributions)
 					importers.addAll(contribution.getImporters());
 				
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (IssueImporter<? extends Serializable, ? extends Serializable> importer: importers) {
+				for (IssueImporter2<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -339,9 +339,8 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						public WebMarkupContainer newLink(String id) {
-							String url = urlFor(getPage().getClass(), getPage().getPageParameters()).toString();
 							return new BookmarkablePageLink<Void>(id, IssueImportPage.class, 
-									IssueImportPage.paramsOf(getProject(), importer.getName(), url));
+									IssueImportPage.paramsOf(getProject(), importer.getName()));
 						}
 						
 					});

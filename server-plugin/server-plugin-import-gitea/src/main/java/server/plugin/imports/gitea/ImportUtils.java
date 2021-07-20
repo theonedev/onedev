@@ -1,10 +1,12 @@
-package io.onedev.server.plugin.imports.gitlab;
+package server.plugin.imports.gitea;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -14,8 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.client.Client;
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.oauth2.OAuth2ClientSupport;
-import org.joda.time.format.ISODateTimeFormat;
 import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,45 +48,38 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.SimpleLogger;
 
-public class GitLabImportUtils {
-	
-	static final String NAME = "GitLab";
+public class ImportUtils {
 
-	static final int PER_PAGE = 100;
+	public static final String NAME = "Gitea";
 	
-	private static final Pattern PATTERN_ATTACHMENT = Pattern.compile("\\[(.+?)\\]\\s*\\((/uploads/.+?)\\)");
+	static final int PER_PAGE = 50;
 	
-	static GitLabIssueImportOption buildImportOption(GitLabProjectImportSource importSource, 
-			@Nullable String gitLabProject, SimpleLogger logger) {
-		GitLabIssueImportOption importOption = new GitLabIssueImportOption();
-		Client client = newClient(importSource);
+	static IssueImportOption buildIssueImportOption(ImportServer server, Collection<String> repositories, SimpleLogger logger) {
+		IssueImportOption importOption = new IssueImportOption();
+		Client client = newClient(server);
 		try {
-			List<String> gitLabProjects = new ArrayList<>();
-			if (gitLabProject == null) {
-				String apiEndpoint = importSource.getApiEndpoint("/projects?membership=true");
-				for (JsonNode projectNode: list(client, apiEndpoint, logger)) 
-					gitLabProjects.add(projectNode.get("path_with_namespace").asText());
-			} else {
-				gitLabProjects.add(gitLabProject);
-			}
-
 			Set<String> labels = new LinkedHashSet<>();
-			for (String each: gitLabProjects) {
-				String apiEndpoint = importSource.getApiEndpoint("/projects/" + each.replace("/", "%2F") + "/labels"); 
+			for (String repo: repositories) {
+				String apiEndpoint = server.getApiEndpoint("/repos/" + repo + "/labels"); 
 				for (JsonNode labelNode: list(client, apiEndpoint, logger)) 
 					labels.add(labelNode.get("name").asText());
+				try {
+					apiEndpoint = server.getApiEndpoint("/orgs/" + StringUtils.substringBefore(repo, "/") + "/labels");
+					for (JsonNode labelNode: list(client, apiEndpoint, logger)) 
+						labels.add(labelNode.get("name").asText());
+				} catch (Exception e) {
+					// ignore as exception might be thrown if repo belongs to a user account
+				}
 			}
 			
 			for (String label: labels) {
 				IssueLabelMapping mapping = new IssueLabelMapping();
-				mapping.setGitLabIssueLabel(label);
+				mapping.setGiteaIssueLabel(label);
 				importOption.getIssueLabelMappings().add(mapping);
 			}
 		} finally {
@@ -97,36 +89,30 @@ public class GitLabImportUtils {
 	}
 	
 	@Nullable
-	static User getUser(Client client, GitLabProjectImportSource importSource, Map<String, Optional<User>> users, 
-			String userId, SimpleLogger logger) {
-		Optional<User> userOpt = users.get(userId);
+	static User getUser(Map<String, Optional<User>> users, JsonNode userNode, SimpleLogger logger) {
+		String login = userNode.get("login").asText();
+		Optional<User> userOpt = users.get(login);
 		if (userOpt == null) {
-			String apiEndpoint = importSource.getApiEndpoint("/users/" + userId);
-			JsonNode userNode = get(client, apiEndpoint, logger);
 			String email = null;
 			if (userNode.hasNonNull("email"))
 				email = userNode.get("email").asText(null);
-			if (email == null && userNode.hasNonNull("public_email"))
-				email = userNode.get("public_email").asText(null);
 			if (email != null)
 				userOpt = Optional.ofNullable(OneDev.getInstance(UserManager.class).findByEmail(email));
 			else
 				userOpt = Optional.empty();
-			users.put(userId, userOpt);
+			users.put(login, userOpt);
 		}
 		return userOpt.orElse(null);
 	}
 	
-	static GitLabImportResult importIssues(GitLabProjectImportSource importSource, String gitLabProject, Project oneDevProject,
-			boolean useExistingIssueNumbers, GitLabIssueImportOption importOption, Map<String, Optional<User>> users, 
+	static ImportResult importIssues(ImportServer server, String giteaRepo, Project oneDevProject,
+			boolean useExistingIssueNumbers, IssueImportOption importOption, Map<String, Optional<User>> users, 
 			boolean dryRun, SimpleLogger logger) {
-		Client client = newClient(importSource);
+		Client client = newClient(server);
 		try {
 			Set<String> nonExistentMilestones = new HashSet<>();
 			Set<String> nonExistentLogins = new HashSet<>();
 			Set<String> unmappedIssueLabels = new HashSet<>();
-			Set<String> tooLargeAttachments = new LinkedHashSet<>();
-			Set<String> errorAttachments = new HashSet<>();
 			
 			Map<String, Pair<FieldSpec, String>> labelMappings = new HashMap<>();
 			Map<String, Milestone> milestoneMappings = new HashMap<>();
@@ -137,7 +123,7 @@ public class GitLabImportUtils {
 				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(oneDevFieldName);
 				if (fieldSpec == null)
 					throw new ExplicitException("No field spec found: " + oneDevFieldName);
-				labelMappings.put(mapping.getGitLabIssueLabel(), new Pair<>(fieldSpec, oneDevFieldValue));
+				labelMappings.put(mapping.getGiteaIssueLabel(), new Pair<>(fieldSpec, oneDevFieldValue));
 			}
 			
 			for (Milestone milestone: oneDevProject.getMilestones())
@@ -152,40 +138,6 @@ public class GitLabImportUtils {
 			AtomicInteger numOfImportedIssues = new AtomicInteger(0);
 			PageDataConsumer pageDataConsumer = new PageDataConsumer() {
 
-				@Nullable
-				private String processAttachments(String issueUUID, String issueFQN, String markdown, 
-						String attachmentRootUrl, Set<String> tooLargeAttachments) {
-				    StringBuffer buffer = new StringBuffer();  
-				    Matcher matcher = PATTERN_ATTACHMENT.matcher(markdown);  
-				    while (matcher.find()) {  
-				    	String attachmentUrl = attachmentRootUrl + matcher.group(2);
-				    	String attachmentName = StringUtils.substringAfterLast(attachmentUrl, "/");
-						WebTarget target = client.target(attachmentUrl);
-						Invocation.Builder builder =  target.request();
-						try (Response response = builder.get()) {
-							String errorMessage = JerseyUtils.checkStatus(attachmentUrl, response);
-							if (errorMessage != null) { 
-								logger.error("Error downloading attachment: " + errorMessage); 
-								errorAttachments.add(attachmentUrl);
-							} else {
-								try (InputStream is = response.readEntity(InputStream.class)) {
-									String oneDevAttachmentName = oneDevProject.saveAttachment(issueUUID, attachmentName, is);
-									String oneDevAttachmentUrl = oneDevProject.getAttachmentUrlPath(issueUUID, oneDevAttachmentName);
-							    	matcher.appendReplacement(buffer, "[" + matcher.group(1) + "](" + oneDevAttachmentUrl + ")");  
-								} catch (AttachmentTooLargeException ex) {
-									tooLargeAttachments.add(issueFQN + ":" + matcher.group(2));
-								} catch (IOException e) {
-									logger.error("Error downloading attachment", e); 
-									errorAttachments.add(attachmentUrl);
-								} 
-							}
-						}
-				    }  
-				    matcher.appendTail(buffer);  
-				    
-				    return buffer.toString();
-				}
-				
 				private String joinAsMultilineHtml(List<String> values) {
 					List<String> escapedValues = new ArrayList<>();
 					for (String value: values)
@@ -204,11 +156,11 @@ public class GitLabImportUtils {
 						Issue issue = new Issue();
 						issue.setProject(oneDevProject);
 						issue.setTitle(issueNode.get("title").asText());
-						issue.setDescription(issueNode.get("description").asText(null));
+						issue.setDescription(issueNode.get("body").asText(null));
 						
 						issue.setNumberScope(oneDevProject.getForkRoot());
 
-						Long oldNumber = issueNode.get("iid").asLong();
+						Long oldNumber = issueNode.get("number").asLong();
 						Long newNumber;
 						if (dryRun || useExistingIssueNumbers)
 							newNumber = oldNumber;
@@ -217,7 +169,7 @@ public class GitLabImportUtils {
 						issue.setNumber(newNumber);
 						issueNumberMappings.put(oldNumber, newNumber);
 						
-						String issueFQN = gitLabProject + "#" + oldNumber;
+						String issueFQN = giteaRepo + "#" + oldNumber;
 						
 						if (issueNode.get("state").asText().equals("closed"))
 							issue.setState(importOption.getClosedIssueState());
@@ -235,18 +187,21 @@ public class GitLabImportUtils {
 							}
 						}
 						
-						JsonNode authorNode = issueNode.get("author");
-						User user = getUser(client, importSource, users, authorNode.get("id").asText(), logger);
+						JsonNode userNode = issueNode.get("user");
+						User user = getUser(users, userNode, logger);
 						if (user != null) {
 							issue.setSubmitter(user);
 						} else {
-							issue.setSubmitterName(authorNode.get("name").asText());
-							nonExistentLogins.add(authorNode.get("username").asText());
+							String submitterName = userNode.get("full_name").asText();
+							if (StringUtils.isBlank(submitterName))
+								submitterName = userNode.get("login").asText();
+							issue.setSubmitterName(submitterName);
+							nonExistentLogins.add(userNode.get("login").asText());
 						}
 						
-						issue.setSubmitDate(ISODateTimeFormat.dateTime()
-								.parseDateTime(issueNode.get("created_at").asText())
-								.toDate());
+						String created_at = issueNode.get("created_at").asText();
+						issue.setSubmitDate(Date.from(Instant.from(
+								DateTimeFormatter.ISO_DATE_TIME.parse(created_at))));
 						
 						LastUpdate lastUpdate = new LastUpdate();
 						lastUpdate.setActivity("Opened");
@@ -254,12 +209,12 @@ public class GitLabImportUtils {
 						lastUpdate.setUser(issue.getSubmitter());
 						lastUpdate.setUserName(issue.getSubmitterName());
 						issue.setLastUpdate(lastUpdate);
-
+						
 						List<JsonNode> assigneeNodes = new ArrayList<>();
 						if (issueNode.hasNonNull("assignees")) {
 							for (JsonNode assigneeNode: issueNode.get("assignees")) 
 								assigneeNodes.add(assigneeNode);
-						} else {
+						} else if (issueNode.hasNonNull("assignee")) {
 							assigneeNodes.add(issueNode.get("assignee"));
 						}
 						
@@ -269,12 +224,12 @@ public class GitLabImportUtils {
 							assigneeField.setName(importOption.getAssigneesIssueField());
 							assigneeField.setType(InputSpec.USER);
 							
-							user = getUser(client, importSource, users, assigneeNode.get("id").asText(), logger);
+							user = getUser(users, assigneeNode, logger);
 							if (user != null) { 
 								assigneeField.setValue(user.getName());
 								issue.getFields().add(assigneeField);
 							} else {
-								nonExistentLogins.add(assigneeNode.get("username").asText());
+								nonExistentLogins.add(assigneeNode.get("login").asText());
 							}
 						}
 
@@ -285,38 +240,15 @@ public class GitLabImportUtils {
 								issueField.setIssue(issue);
 								issueField.setName(importOption.getDueDateIssueField());
 								issueField.setType(InputSpec.DATE);
-								issueField.setValue(dueDate);
-								issue.getFields().add(issueField);
-							}
-						}
-						
-						JsonNode timeStatsNode = issueNode.get("time_stats");
-						if (importOption.getEstimatedTimeIssueField() != null) {
-							int value = timeStatsNode.get("time_estimate").asInt();
-							if (value != 0) {
-								IssueField issueField = new IssueField();
-								issueField.setIssue(issue);
-								issueField.setName(importOption.getEstimatedTimeIssueField());
-								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(DateUtils.formatWorkingPeriod(value/60));
-								issue.getFields().add(issueField);
-							}
-						}
-						if (importOption.getSpentTimeIssueField() != null) {
-							int value = timeStatsNode.get("total_time_spent").asInt();
-							if (value != 0) {
-								IssueField issueField = new IssueField();
-								issueField.setIssue(issue);
-								issueField.setName(importOption.getSpentTimeIssueField());
-								issueField.setType(InputSpec.WORKING_PERIOD);
-								issueField.setValue(DateUtils.formatWorkingPeriod(value/60));
+								issueField.setValue(DateUtils.formatDate(Date.from(
+										Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(dueDate)))));
 								issue.getFields().add(issueField);
 							}
 						}
 						
 						List<String> currentUnmappedLabels = new ArrayList<>();
 						for (JsonNode labelNode: issueNode.get("labels")) {
-							String labelName = labelNode.asText();
+							String labelName = labelNode.get("name").asText();
 							Pair<FieldSpec, String> mapped = labelMappings.get(labelName);
 							if (mapped != null) {
 								IssueField labelField = new IssueField();
@@ -335,41 +267,31 @@ public class GitLabImportUtils {
 						if (!currentUnmappedLabels.isEmpty()) 
 							extraIssueInfo.put("Labels", joinAsMultilineHtml(currentUnmappedLabels));
 						
-						String webUrl = issueNode.get("web_url").asText();
-						String attachmentRootUrl = StringUtils.substringBeforeLast(webUrl, "/-");
-						if (!dryRun && issue.getDescription() != null) {
-							issue.setDescription(processAttachments(issue.getUUID(), issueFQN, 
-									issue.getDescription(), attachmentRootUrl, tooLargeAttachments));
-						}
-						
-						String apiEndpoint = importSource.getApiEndpoint("/projects/" + gitLabProject.replace("/", "%2F") 
-								+ "/issues/" + oldNumber + "/notes?sort=asc");
-						for (JsonNode noteNode: list(client, apiEndpoint, logger)) {
-							if (!noteNode.get("system").asBoolean()) {
-								String commentContent = noteNode.get("body").asText(null); 
-								if (commentContent != null) {
-									if (!dryRun) {
-										commentContent = processAttachments(issue.getUUID(), issueFQN, 
-												commentContent, attachmentRootUrl, tooLargeAttachments);
-									}
-									
-									IssueComment comment = new IssueComment();
-									comment.setIssue(issue);
-									comment.setContent(commentContent);
-									comment.setDate(ISODateTimeFormat.dateTime()
-											.parseDateTime(noteNode.get("created_at").asText())
-											.toDate());
-									
-									authorNode = noteNode.get("author");
-									user = getUser(client, importSource, users, authorNode.get("id").asText(), logger);
-									if (user != null) {
-										comment.setUser(user);
-									} else {
-										comment.setUserName(authorNode.get("name").asText());
-										nonExistentLogins.add(authorNode.get("username").asText());
-									}
-									issue.getComments().add(comment);
+						String apiEndpoint = server.getApiEndpoint("/repos/" + giteaRepo  
+								+ "/issues/" + oldNumber + "/comments");
+						for (JsonNode commentNode: list(client, apiEndpoint, logger)) {
+							String commentContent = commentNode.get("body").asText(null); 
+							if (commentContent != null) {
+								IssueComment comment = new IssueComment();
+								comment.setIssue(issue);
+								comment.setContent(commentContent);
+								
+								created_at = commentNode.get("created_at").asText();
+								comment.setDate(Date.from(Instant.from(
+										DateTimeFormatter.ISO_DATE_TIME.parse(created_at))));
+								
+								userNode = commentNode.get("user");
+								user = getUser(users, userNode, logger);
+								if (user != null) {
+									comment.setUser(user);
+								} else {
+									String fullName = userNode.get("full_name").asText();
+									if (StringUtils.isBlank(fullName))
+										fullName = userNode.get("login").asText();
+									comment.setUserName(fullName);
+									nonExistentLogins.add(userNode.get("username").asText());
 								}
+								issue.getComments().add(comment);
 							}
 						}
 						
@@ -408,7 +330,7 @@ public class GitLabImportUtils {
 				
 			};
 
-			String apiEndpoint = importSource.getApiEndpoint("/projects/" + gitLabProject.replace("/", "%2F") + "/issues?sort=asc");
+			String apiEndpoint = server.getApiEndpoint("/repos/" + giteaRepo + "/issues?state=all");
 			list(client, apiEndpoint, pageDataConsumer, logger);
 
 			if (!dryRun) {
@@ -427,12 +349,13 @@ public class GitLabImportUtils {
 				}
 			}
 			
-			GitLabImportResult result = new GitLabImportResult();
+			ImportResult result = new ImportResult();
 			result.nonExistentLogins.addAll(nonExistentLogins);
 			result.nonExistentMilestones.addAll(nonExistentMilestones);
 			result.unmappedIssueLabels.addAll(unmappedIssueLabels);
-			result.tooLargeAttachments.addAll(tooLargeAttachments);
-			result.errorAttachments.addAll(errorAttachments);
+			
+			if (numOfImportedIssues.get() != 0)
+				result.issuesImported = true;
 			
 			return result;
 		} finally {
@@ -462,7 +385,7 @@ public class GitLabImportUtils {
 		URI uri;
 		try {
 			uri = new URIBuilder(apiEndpoint)
-					.addParameter("per_page", String.valueOf(PER_PAGE)).build();
+					.addParameter("limit", String.valueOf(PER_PAGE)).build();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
@@ -505,10 +428,10 @@ public class GitLabImportUtils {
 		}
 	}
 	
-	static Client newClient(GitLabProjectImportSource importSource) {
+	static Client newClient(ImportServer importServer) {
 		Client client = ClientBuilder.newClient();
 		client.property(ClientProperties.FOLLOW_REDIRECTS, true);
-		client.register(OAuth2ClientSupport.feature(importSource.getAccessToken()));
+		client.register(OAuth2ClientSupport.feature(importServer.getAccessToken()));
 		return client;
 	}
 

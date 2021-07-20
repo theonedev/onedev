@@ -292,7 +292,7 @@ public class YouTrackImportUtils {
 						issue.setDescription(issueNode.get("description").asText(null));
 						issue.setSubmitDate(new Date(issueNode.get("created").asLong(System.currentTimeMillis())));
 						issue.setProject(oneDevProject);
-						issue.setNumberScope(oneDevProject);
+						issue.setNumberScope(oneDevProject.getForkRoot());
 						
 						if (!dryRun) {
 							List<JsonNode> attachmentNodes = new ArrayList<>();
@@ -469,20 +469,22 @@ public class YouTrackImportUtils {
 											if (user != null) {
 												fieldValue = user.getName();
 											} else {
-												fieldValue = fullName;
+												fieldValue = null;
 												nonExistentLogins.add(login);
 											}
 										} else {
-											fieldValue = fullName;
+											fieldValue = null;
 											nonExistentLogins.add(login);
 										}
 										
-										IssueField issueField = new IssueField();
-										issueField.setIssue(issue);
-										issueField.setName(mapped.getFirst().getName());
-										issueField.setType(InputSpec.USER);
-										issueField.setValue(fieldValue);
-										issue.getFields().add(issueField);
+										if (fieldValue != null) {
+											IssueField issueField = new IssueField();
+											issueField.setIssue(issue);
+											issueField.setName(mapped.getFirst().getName());
+											issueField.setType(InputSpec.USER);
+											issueField.setValue(fieldValue);
+											issue.getFields().add(issueField);
+										}
 									}
 								}
 								break;
@@ -501,7 +503,6 @@ public class YouTrackImportUtils {
 									} else {
 										for (JsonNode valueNode: customFieldNode.get("value")) {
 											String login = valueNode.get("login").asText();
-											String fullName = valueNode.get("name").asText();
 											String email = getEmail(valueNode);
 											
 											if (email != null) {
@@ -509,20 +510,22 @@ public class YouTrackImportUtils {
 												if (user != null) {
 													fieldValue = user.getName();
 												} else {
-													fieldValue = fullName;
+													fieldValue = null;
 													nonExistentLogins.add(login);
 												}
 											} else {
-												fieldValue = fullName;
+												fieldValue = null;
 												nonExistentLogins.add(login);
 											}
-											
-											IssueField issueField = new IssueField();
-											issueField.setIssue(issue);
-											issueField.setName(mapped.getFirst().getName());
-											issueField.setType(InputSpec.USER);
-											issueField.setValue(fieldValue);
-											issue.getFields().add(issueField);
+
+											if (fieldValue != null) {
+												IssueField issueField = new IssueField();
+												issueField.setIssue(issue);
+												issueField.setName(mapped.getFirst().getName());
+												issueField.setType(InputSpec.USER);
+												issueField.setValue(fieldValue);
+												issue.getFields().add(issueField);
+											}
 										}
 									}
 								}
@@ -762,7 +765,7 @@ public class YouTrackImportUtils {
 							String fieldAndValue = field.getName() + "::" + field.getValue();
 							if (!fieldAndValues.add(fieldAndValue)) {
 								String errorMessage = String.format(
-										"Duplicate issue field mapping (issue: #%d, field: %s)", 
+										"Duplicate issue field mapping (issue: %s, field: %s)", 
 										readableId, fieldAndValue);
 								throw new ExplicitException(errorMessage);
 							}

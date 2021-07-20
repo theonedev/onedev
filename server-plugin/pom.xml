@@ -31,5 +31,6 @@
 	    <module>server-plugin-import-github</module>
     <module>server-plugin-import-youtrack</module>
     <module>server-plugin-import-gitlab</module>
+    <module>server-plugin-import-gitea</module>
   </modules>
 </project>

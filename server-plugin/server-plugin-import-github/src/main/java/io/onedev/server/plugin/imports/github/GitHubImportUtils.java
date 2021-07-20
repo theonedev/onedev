@@ -158,7 +158,7 @@ public class GitHubImportUtils {
 						issue.setProject(oneDevProject);
 						issue.setTitle(issueNode.get("title").asText());
 						issue.setDescription(issueNode.get("body").asText(null));
-						issue.setNumberScope(oneDevProject);
+						issue.setNumberScope(oneDevProject.getForkRoot());
 
 						Long oldNumber = issueNode.get("number").asLong();
 						Long newNumber;
@@ -215,11 +215,10 @@ public class GitHubImportUtils {
 							user = getUser(client, importSource, users, login, logger);
 							if (user != null) { 
 								assigneeField.setValue(user.getName());
+								issue.getFields().add(assigneeField);
 							} else {
-								assigneeField.setValue(login);
 								nonExistentLogins.add(login);
 							}
-							issue.getFields().add(assigneeField);
 						}
 
 						String apiEndpoint = importSource.getApiEndpoint("/repos/" + gitHubRepo 
@@ -274,7 +273,7 @@ public class GitHubImportUtils {
 							String fieldAndValue = field.getName() + "::" + field.getValue();
 							if (!fieldAndValues.add(fieldAndValue)) {
 								String errorMessage = String.format(
-										"Duplicate issue field mapping (issue: #%d, field: %s)", 
+										"Duplicate issue field mapping (issue: %s, field: %s)", 
 										gitHubRepo + "#" + oldNumber, fieldAndValue);
 								throw new ExplicitException(errorMessage);
 							}

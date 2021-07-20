@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.imports.github;
+package server.plugin.imports.gitea;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,18 +19,18 @@ public class IssueLabelMapping implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String gitHubIssueLabel;
+	private String giteaIssueLabel;
 	
 	private String oneDevIssueField;
 
-	@Editable(order=100, name="GitHub Issue Label")
+	@Editable(order=100, name="Gitea Issue Label")
 	@NotEmpty
-	public String getGitHubIssueLabel() {
-		return gitHubIssueLabel;
+	public String getGiteaIssueLabel() {
+		return giteaIssueLabel;
 	}
 
-	public void setGitHubIssueLabel(String gitHubIssueLabel) {
-		this.gitHubIssueLabel = gitHubIssueLabel;
+	public void setGiteaIssueLabel(String giteaIssueLabel) {
+		this.giteaIssueLabel = giteaIssueLabel;
 	}
 
 	@Editable(order=200, name="OneDev Issue Field", description="Specify a custom field of Enum type")
