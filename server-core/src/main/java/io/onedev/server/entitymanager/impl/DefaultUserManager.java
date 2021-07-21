@@ -156,6 +156,12 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     	return load(User.SYSTEM_ID);
     }
     
+    @Sessional
+    @Override
+    public User getUnknown() {
+    	return load(User.UNKNOWN_ID);
+    }
+    
     @Transactional
     @Override
 	public void delete(User user) {
@@ -181,82 +187,74 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 		
 		usage.checkInUse("User '" + user.getName() + "'");
     	
-    	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
-    			+ "where submitter=:submitter");
+    	Query<?> query = getSession().createQuery("update PullRequest set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
-    	query.setParameter("submitterName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Build set submitter=null, submitterName=:submitterName "
-    			+ "where submitter=:submitter");
+    	query = getSession().createQuery("update Build set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
-    	query.setParameter("submitterName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Build set canceller=null, cancellerName=:cancellerName "
-    			+ "where canceller=:canceller");
+    	query = getSession().createQuery("update Build set canceller=:unknown where canceller=:canceller");
     	query.setParameter("canceller", user);
-    	query.setParameter("cancellerName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set closeInfo.user=null, "
-    			+ "closeInfo.userName=:userName where closeInfo.user=:user");
+    	query = getSession().createQuery("update PullRequest set closeInfo.user=:unknown where closeInfo.user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set lastUpdate.user=null, "
-    			+ "lastUpdate.userName=:userName where lastUpdate.user=:user");
+    	query = getSession().createQuery("update PullRequest set lastUpdate.user=:unknown where lastUpdate.user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequestChange set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update PullRequestChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequestComment set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update PullRequestComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeComment set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update CodeComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeComment set lastUpdate.user=null, lastUpdate.userName=:userName "
-    			+ "where lastUpdate.user=:user");
+    	query = getSession().createQuery("update CodeComment set lastUpdate.user=:unknown where lastUpdate.user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update CodeCommentReply set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update CodeCommentReply set user=:unknown where user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set submitter=null, submitterName=:submitterName "
-    			+ "where submitter=:submitter");
+    	query = getSession().createQuery("update Issue set submitter=:unknown where submitter=:submitter");
     	query.setParameter("submitter", user);
-    	query.setParameter("submitterName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set lastUpdate.user=null, lastUpdate.userName=:userName "
-    			+ "where lastUpdate.user=:user");
+    	query = getSession().createQuery("update Issue set lastUpdate.user=:unknown where lastUpdate.user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update IssueComment set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update IssueComment set user=:unknown where user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update IssueChange set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update IssueChange set user=:unknown where user=:user");
     	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
+    	query.setParameter("unknown", getUnknown());
     	query.executeUpdate();
     	
 		dao.remove(user);
@@ -307,7 +305,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 	@Override
 	public List<User> query() {
 		EntityCriteria<User> criteria = newCriteria();
-		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
+		criteria.add(Restrictions.gt("id", 0L));
 		criteria.setCacheable(true);
 		return query(criteria);
 	}

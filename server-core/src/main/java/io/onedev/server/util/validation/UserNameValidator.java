@@ -8,6 +8,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.util.validation.annotation.UserName;
 
@@ -36,7 +37,7 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (value.equals("new") || value.equals(OneDev.NAME)) {
+		} else if (value.equals("new") || value.equals(User.SYSTEM_NAME) || value.equals(User.UNKNOWN_NAME)) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)
@@ -61,7 +62,8 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 					if (suffix > 1)
 						suggestedUserName += suffix;
 					if (!suggestedUserName.equals("new") 
-							&& !suggestedUserName.equals(OneDev.NAME) 
+							&& !suggestedUserName.equals(User.SYSTEM_NAME)
+							&& !suggestedUserName.equals(User.UNKNOWN_NAME)
 							&& userManager.findByName(suggestedUserName) == null) {
 						return suggestedUserName;
 					}

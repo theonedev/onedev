@@ -45,7 +45,6 @@ import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
@@ -401,9 +400,8 @@ public abstract class CodeCommentListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "lastUpdateFrag", CodeCommentListPanel.this);
 				
 				LastUpdate lastUpdate = comment.getLastUpdate();
-				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
-					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
-					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
+				if (lastUpdate.getUser() != null) {
+					fragment.add(new UserIdentPanel("user", lastUpdate.getUser(), Mode.NAME));
 				} else {
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
 				}

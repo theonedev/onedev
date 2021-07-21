@@ -30,10 +30,8 @@ public class PullRequestComment extends AbstractEntity {
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
+	@JoinColumn(nullable=false)
 	private User user;
-	
-	private String userName;
 	
 	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
@@ -49,22 +47,12 @@ public class PullRequestComment extends AbstractEntity {
 		this.request = request;
 	}
 
-	@Nullable
 	public User getUser() {
 		return user;
 	}
 
 	public void setUser(@Nullable User user) {
 		this.user = user;
-	}
-
-	@Nullable
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	public String getContent() {

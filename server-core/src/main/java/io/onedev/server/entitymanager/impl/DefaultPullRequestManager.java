@@ -58,7 +58,6 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestAssignmentManager;
@@ -318,7 +317,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	    		mergeCommit = targetHeadCommit;
 	    		for (RevCommit commit: commits) {
 	    			PersonIdent committer = commit.getCommitterIdent();
-	    			if (committer.getName().equals(OneDev.NAME) && committer.getEmailAddress().length() == 0
+	    			if (committer.getName().equals(User.SYSTEM_NAME) && committer.getEmailAddress().length() == 0
 	    					|| !commit.getParent(0).equals(mergeCommit)) {
 				        CommitBuilder commitBuilder = new CommitBuilder();
 				        commitBuilder.setAuthor(commit.getAuthorIdent());

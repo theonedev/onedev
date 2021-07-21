@@ -48,7 +48,7 @@ public class IssueOpenedActivity implements IssueActivity {
 
 	@Override
 	public User getUser() {
-		return User.from(getIssue().getSubmitter(), getIssue().getSubmitterName());
+		return getIssue().getSubmitter();
 	}
 	
 }

@@ -57,7 +57,7 @@ public class PullRequestCommentedActivity implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return User.from(getComment().getUser(), getComment().getUserName());
+		return getComment().getUser();
 	}
 
 }

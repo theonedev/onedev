@@ -3,6 +3,7 @@ package io.onedev.server.model.support;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.FetchType;
@@ -33,10 +34,6 @@ public class LastUpdate implements Serializable {
 	@OptimisticLock(excluded=true)
 	private User user;
 	
-	@Column(name=COLUMN_USER_NAME)
-	@OptimisticLock(excluded=true)
-	private String userName;
-
 	@Column(name=COLUMN_DATE, nullable=false)
 	@OptimisticLock(excluded=true)
 	private Date date;
@@ -45,20 +42,13 @@ public class LastUpdate implements Serializable {
 	@OptimisticLock(excluded=true)
 	private String activity;
 
+	@Nullable
 	public User getUser() {
 		return user;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	public Date getDate() {

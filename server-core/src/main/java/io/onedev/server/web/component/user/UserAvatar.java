@@ -1,7 +1,5 @@
 package io.onedev.server.web.component.user;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebComponent;
@@ -18,14 +16,10 @@ public class UserAvatar extends WebComponent {
 	
 	private boolean system;
 	
-	public UserAvatar(String id, @Nullable Long userId, String displayName) {
-		super(id);
-		url = getAvatarManager().getAvatarUrl(userId, displayName);
-		system = (userId != null && userId == -1);
-	}
-	
 	public UserAvatar(String id, User user) {
-		this(id, user.getId(), user.getDisplayName());
+		super(id);
+		url = getAvatarManager().getAvatarUrl(user);
+		system = user.isSystem();
 	}
 	
 	public UserAvatar(String id, PersonIdent personIdent) {

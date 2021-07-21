@@ -99,9 +99,8 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		User user = User.from(getComment().getUser(), getComment().getUserName());
-		commentContainer.add(new UserIdentPanel("userAvatar", user, Mode.AVATAR));
-		commentContainer.add(new Label("userName", user.getDisplayName()));
+		commentContainer.add(new UserIdentPanel("userAvatar", getComment().getUser(), Mode.AVATAR));
+		commentContainer.add(new Label("userName", getComment().getUser().getDisplayName()));
 		commentContainer.add(new Label("action", "commented"));
 		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
@@ -248,9 +247,8 @@ public abstract class CodeCommentPanel extends Panel {
 		replyContainer.setMarkupId(reply.getAnchor());
 		replyContainer.add(AttributeAppender.append("name", reply.getAnchor()));
 		
-		User user = User.from(reply.getUser(), reply.getUserName());
-		replyContainer.add(new UserIdentPanel("userAvatar", user, Mode.AVATAR));
-		replyContainer.add(new Label("userName", user.getDisplayName()));
+		replyContainer.add(new UserIdentPanel("userAvatar", reply.getUser(), Mode.AVATAR));
+		replyContainer.add(new Label("userName", reply.getUser().getDisplayName()));
 		
 		replyContainer.add(new Label("action", "replied"));
 		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate()))

@@ -175,7 +175,7 @@ public class ImportUtils {
 						if (user != null) {
 							issue.setSubmitter(user);
 						} else {
-							issue.setSubmitterName(login);
+							issue.setSubmitter(OneDev.getInstance(UserManager.class).getUnknown());
 							nonExistentLogins.add(login);
 						}
 						
@@ -187,7 +187,6 @@ public class ImportUtils {
 						lastUpdate.setActivity("Opened");
 						lastUpdate.setDate(issue.getSubmitDate());
 						lastUpdate.setUser(issue.getSubmitter());
-						lastUpdate.setUserName(issue.getSubmitterName());
 						issue.setLastUpdate(lastUpdate);
 
 						for (JsonNode assigneeNode: issueNode.get("assignees")) {
@@ -221,7 +220,7 @@ public class ImportUtils {
 							if (user != null) {
 								comment.setUser(user);
 							} else {
-								comment.setUserName(login);
+								comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
 								nonExistentLogins.add(login);
 							}
 

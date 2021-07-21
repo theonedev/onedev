@@ -34,7 +34,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 		super.onInitialize();
 		
 		Issue issue = getIssue();
-		add(new Label("user", User.from(issue.getSubmitter(), issue.getSubmitterName()).getDisplayName()));
+		add(new Label("user", issue.getSubmitter().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(issue.getSubmitDate()))));
 		

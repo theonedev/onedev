@@ -822,7 +822,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				build.setSubmitter(SecurityUtils.getUser());
 				build.setSubmitReason(reason);
 				build.setCanceller(null);
-				build.setCancellerName(null);
 				
 				buildParamManager.deleteParams(build);
 				for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {

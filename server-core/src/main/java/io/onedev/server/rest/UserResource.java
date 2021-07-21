@@ -272,7 +272,7 @@ public class UserResource {
     		throw new InvalidParamException("Count should not be greater than " + RestConstants.MAX_PAGE_SIZE);
 
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
-		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
+		criteria.add(Restrictions.gt("id", 0L));
 		if (name != null) 
 			criteria.add(Restrictions.ilike("name", name.replace('*', '%'), MatchMode.EXACT));
 		if (fullName != null) 		

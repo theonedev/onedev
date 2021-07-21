@@ -25,10 +25,7 @@ public class PullRequestChange extends AbstractEntity {
 	private PullRequest request;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
 	private User user;
-	
-	private String userName;
 	
 	@Column(nullable=false)
 	private Date date;
@@ -60,15 +57,6 @@ public class PullRequestChange extends AbstractEntity {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	@Nullable
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	public Date getDate() {

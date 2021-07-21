@@ -48,10 +48,7 @@ public class IssueChangeActivity implements IssueActivity {
 
 	@Override
 	public User getUser() {
-		if (getChange().getUser() != null || getChange().getUserName() != null)
-			return User.from(getChange().getUser(), getChange().getUserName());
-		else
-			return null;
+		return getChange().getUser();
 	}
 
 }

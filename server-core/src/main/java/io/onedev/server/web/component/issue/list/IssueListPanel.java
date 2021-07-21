@@ -61,7 +61,6 @@ import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.ChoiceField;
@@ -1195,12 +1194,10 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(fieldsView);
 				
 				LastUpdate lastUpdate = issue.getLastUpdate();
-				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
-					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
-					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
-				} else {
+				if (lastUpdate.getUser() != null) 
+					fragment.add(new UserIdentPanel("user", lastUpdate.getUser(), Mode.NAME));
+				else 
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
-				}
 				fragment.add(new Label("activity", lastUpdate.getActivity()));
 				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));

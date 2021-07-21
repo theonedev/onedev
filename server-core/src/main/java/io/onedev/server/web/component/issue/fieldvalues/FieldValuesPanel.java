@@ -75,8 +75,11 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				protected void populateItem(ListItem<String> item) {
 					String value = item.getModelObject();
 					if (getField().getType().equals(FieldSpec.USER)) {
-						User user = User.from(OneDev.getInstance(UserManager.class).findByName(value), value);
-						item.add(new UserIdentPanel("value", user, userFieldDisplayMode));
+						User user = OneDev.getInstance(UserManager.class).findByName(value);
+						if (user != null)
+							item.add(new UserIdentPanel("value", user, userFieldDisplayMode));
+						else 
+							item.add(new Label("value", value));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));

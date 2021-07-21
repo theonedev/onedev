@@ -249,7 +249,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		if (user != null) {
 			head.add(new WebMarkupContainer("title").setVisible(false));
-			head.add(new UserIdentPanel("userIdent", User.from(user, user.getDisplayName()), Mode.AVATAR_AND_NAME));
+			head.add(new UserIdentPanel("userIdent", user, Mode.AVATAR_AND_NAME));
 		} else {
 			head.add(new Label("title", title).setEscapeModelStrings(false));
 			head.add(new WebMarkupContainer("userIdent").setVisible(false));

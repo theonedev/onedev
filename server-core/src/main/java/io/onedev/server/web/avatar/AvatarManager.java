@@ -12,8 +12,6 @@ import io.onedev.server.util.facade.UserFacade;
 
 public interface AvatarManager {
 	
-	String getAvatarUrl(@Nullable Long userId, String displayName);
-	
 	String getAvatarUrl(User user);
 	
 	String getAvatarUrl(PersonIdent personIdent);

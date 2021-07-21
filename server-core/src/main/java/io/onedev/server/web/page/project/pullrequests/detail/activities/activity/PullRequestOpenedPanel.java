@@ -34,7 +34,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 		super.onInitialize();
 		
 		PullRequest request = getPullRequest();
-		add(new Label("user", User.from(request.getSubmitter(), request.getSubmitterName()).getDisplayName()));
+		add(new Label("user", request.getSubmitter().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(request.getSubmitDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(request.getSubmitDate()))));
 		

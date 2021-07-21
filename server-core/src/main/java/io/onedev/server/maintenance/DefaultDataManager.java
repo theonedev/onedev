@@ -106,10 +106,19 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (system == null) {
 			system = new User();
 			system.setId(User.SYSTEM_ID);
-			system.setName(OneDev.NAME);
-			system.setEmail("no email");
+			system.setName(User.SYSTEM_NAME);
+			system.setEmail("system email");
 			system.setPassword("no password");
     		userManager.replicate(system);
+		}
+		User unknown = userManager.get(User.UNKNOWN_ID);
+		if (unknown == null) {
+			unknown = new User();
+			unknown.setId(User.UNKNOWN_ID);
+			unknown.setName(User.UNKNOWN_NAME);
+			unknown.setEmail("unknown email");
+			unknown.setPassword("no password");
+    		userManager.replicate(unknown);
 		}
 		User administrator = userManager.get(User.ROOT_ID);		
 		if (administrator == null) {

@@ -86,7 +86,7 @@ import io.onedev.server.web.util.WicketUtils;
 				@Index(columnList=LastUpdate.COLUMN_DATE), @Index(columnList="o_sourceProject_id"), 
 				@Index(columnList="o_submitter_id"), @Index(columnList=MergePreview.COLUMN_HEAD_COMMIT_HASH), 
 				@Index(columnList=CloseInfo.COLUMN_DATE), @Index(columnList=CloseInfo.COLUMN_STATUS), 
-				@Index(columnList=CloseInfo.COLUMN_USER), @Index(columnList=CloseInfo.COLUMN_USER_NAME), 
+				@Index(columnList=CloseInfo.COLUMN_USER), 
 				@Index(columnList="o_numberScope_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_numberScope_id", PROP_NUMBER})})
 //use dynamic update in order not to overwrite other edits while background threads change update date
@@ -221,12 +221,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
+	@JoinColumn(nullable=false)
 	@OptimisticLock(excluded=true)
 	private User submitter;
-	
-	@OptimisticLock(excluded=true)
-	private String submitterName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -363,18 +360,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	 * @return
 	 * 			the user submitting the pull request
 	 */
-	@Nullable
 	public User getSubmitter() {
 		return submitter;
 	}
 
 	public void setSubmitter(User submitter) {
 		this.submitter = submitter;
-	}
-
-	@Nullable
-	public String getSubmitterName() {
-		return submitterName;
 	}
 
 	public Project getNumberScope() {

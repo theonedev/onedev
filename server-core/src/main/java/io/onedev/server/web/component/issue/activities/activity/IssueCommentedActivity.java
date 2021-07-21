@@ -60,7 +60,7 @@ public class IssueCommentedActivity implements IssueActivity {
 
 	@Override
 	public User getUser() {
-		return User.from(getComment().getUser(), getComment().getUserName());
+		return getComment().getUser();
 	}
 	
 }

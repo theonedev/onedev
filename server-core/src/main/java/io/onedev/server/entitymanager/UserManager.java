@@ -48,6 +48,14 @@ public interface UserManager extends EntityManager<User> {
 	User getSystem();
 	
 	/**
+	 * Find unknown user in the system. 
+	 * 
+	 * @return
+	 * 			unknown user. Never be <tt>null</tt>
+	 */
+	User getUnknown();
+	
+	/**
 	 * Find user of specified name.
 	 * <p>
 	 * @param userName

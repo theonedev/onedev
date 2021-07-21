@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import static io.onedev.server.model.Build.PROP_CANCELLER_NAME;
 import static io.onedev.server.model.Build.PROP_COMMIT;
 import static io.onedev.server.model.Build.PROP_FINISH_DATE;
 import static io.onedev.server.model.Build.PROP_FINISH_DAY;
@@ -10,7 +9,6 @@ import static io.onedev.server.model.Build.PROP_PENDING_DATE;
 import static io.onedev.server.model.Build.PROP_REF_NAME;
 import static io.onedev.server.model.Build.PROP_RUNNING_DATE;
 import static io.onedev.server.model.Build.PROP_STATUS;
-import static io.onedev.server.model.Build.PROP_SUBMITTER_NAME;
 import static io.onedev.server.model.Build.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Build.PROP_VERSION;
 
@@ -102,8 +100,8 @@ import io.onedev.server.web.util.WicketUtils;
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
-				@Index(columnList="o_request_id"), @Index(columnList=PROP_SUBMITTER_NAME), 
-				@Index(columnList=PROP_CANCELLER_NAME), @Index(columnList=PROP_COMMIT), 
+				@Index(columnList="o_request_id"),  
+				@Index(columnList=PROP_COMMIT), 
 				@Index(columnList=PROP_NUMBER), @Index(columnList=PROP_JOB), 
 				@Index(columnList=PROP_STATUS), @Index(columnList=PROP_REF_NAME),  
 				@Index(columnList=PROP_SUBMIT_DATE), @Index(columnList=PROP_PENDING_DATE), 
@@ -271,14 +269,11 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Project project; 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private User submitter;
-	
-	private String submitterName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private User canceller;
-	
-	private String cancellerName;
 	
 	@Column(nullable=false)
 	private String jobName;
@@ -377,31 +372,12 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.project = project;
 	}
 
-	@Nullable
 	public User getSubmitter() {
 		return submitter;
 	}
 
 	public void setSubmitter(User submitter) {
 		this.submitter = submitter;
-	}
-
-	@Nullable
-	public String getSubmitterName() {
-		return submitterName;
-	}
-
-	public void setSubmitterName(String submitterName) {
-		this.submitterName = submitterName;
-	}
-
-	@Nullable
-	public String getCancellerName() {
-		return cancellerName;
-	}
-
-	public void setCancellerName(String cancellerName) {
-		this.cancellerName = cancellerName;
 	}
 
 	@Nullable

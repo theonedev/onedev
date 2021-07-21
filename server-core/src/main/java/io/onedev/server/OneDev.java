@@ -53,8 +53,6 @@ import io.onedev.server.util.schedule.TaskScheduler;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
-	public static final String NAME = "OneDev";
-
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
 	
 	private final Provider<JettyLauncher> jettyLauncherProvider;

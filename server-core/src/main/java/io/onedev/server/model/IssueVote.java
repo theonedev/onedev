@@ -25,7 +25,7 @@ public class IssueVote extends AbstractEntity {
 	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
+	@JoinColumn(nullable=false)
 	private User user;
 	
 	@Column(nullable=false)

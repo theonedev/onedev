@@ -4,9 +4,9 @@ import static io.onedev.server.model.Issue.PROP_COMMENT_COUNT;
 import static io.onedev.server.model.Issue.PROP_NO_SPACE_TITLE;
 import static io.onedev.server.model.Issue.PROP_NUMBER;
 import static io.onedev.server.model.Issue.PROP_STATE;
-import static io.onedev.server.model.Issue.PROP_UUID;
 import static io.onedev.server.model.Issue.PROP_SUBMIT_DATE;
 import static io.onedev.server.model.Issue.PROP_TITLE;
+import static io.onedev.server.model.Issue.PROP_UUID;
 import static io.onedev.server.model.Issue.PROP_VOTE_COUNT;
 
 import java.io.Serializable;
@@ -191,9 +191,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private Milestone milestone;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
 	private User submitter;
-	
-	private String submitterName;
 	
 	@Column(nullable=false)
 	private Date submitDate = new Date();
@@ -327,15 +326,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setSubmitter(User submitter) {
 		this.submitter = submitter;
-	}
-
-	@Nullable
-	public String getSubmitterName() {
-		return submitterName;
-	}
-	
-	public void setSubmitterName(String submitterName) {
-		this.submitterName = submitterName;
 	}
 
 	public Date getSubmitDate() {

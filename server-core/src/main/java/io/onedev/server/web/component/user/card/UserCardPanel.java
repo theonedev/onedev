@@ -1,12 +1,11 @@
 package io.onedev.server.web.component.user.card;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
@@ -15,18 +14,26 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.component.user.UserAvatar;
 
 @SuppressWarnings("serial")
-public class UserCardPanel extends Panel {
+public class UserCardPanel extends GenericPanel<User> {
 
-	private final Long userId;
-	
-	private final String displayName;
-	
-	public UserCardPanel(String id, @Nullable Long userId, String displayName) {
+	public UserCardPanel(String id, User user) {
 		super(id);
-		this.userId = userId;
-		this.displayName = displayName;
+		
+		Long userId = user.getId();
+		setModel(new LoadableDetachableModel<User>() {
+
+			@Override
+			protected User load() {
+				return OneDev.getInstance(UserManager.class).load(userId);
+			}
+			
+		});
 	}
 
+	private User getUser() {
+		return getModelObject();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -34,19 +41,17 @@ public class UserCardPanel extends Panel {
 		WebMarkupContainer container = new WebMarkupContainer("container");
 		add(container);
 
-		container.add(new UserAvatar("avatar", userId, displayName));
+		container.add(new UserAvatar("avatar", getUser()));
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + "</div>");
+		builder.append("<div>" + HtmlEscape.escapeHtml5(getUser().getDisplayName()) + "</div>");
 		
-		if (userId == null) {
-			builder.append("<i>No OneDev account</i>");
-		} else if (User.SYSTEM_ID.equals(userId)) {
+		if (getUser().isUnknown()) 
+			builder.append("<i>Unknown Account</i>");
+		else if (getUser().isSystem()) 
 			builder.append("<i>System Account</i>");
-		} else {
-			User user = OneDev.getInstance(UserManager.class).load(userId);
-			builder.append("<i>@" + HtmlEscape.escapeHtml5(user.getName()) + "</i>");
-		}
+		else 
+			builder.append("<i>@" + HtmlEscape.escapeHtml5(getUser().getDisplayName()) + "</i>");
 		container.add(new Label("info", builder.toString()).setEscapeModelStrings(false));
 	}
 

@@ -295,18 +295,17 @@ public class ImportUtils {
 						if (issueNode.hasNonNull("reporter")) {
 							JsonNode reporterNode = issueNode.get("reporter");
 							String email = getEmail(reporterNode);
-							String fullName = reporterNode.get("name").asText();
 							String login = reporterNode.get("login").asText();
 							if (email != null) {
 								User user = OneDev.getInstance(UserManager.class).findByEmail(email);
 								if (user != null) {
 									issue.setSubmitter(user);
 								} else {
-									issue.setSubmitterName(fullName);
+									issue.setSubmitter(OneDev.getInstance(UserManager.class).getUnknown());
 									nonExistentLogins.add(login);
 								}
 							} else {
-								issue.setSubmitterName(fullName);
+								issue.setSubmitter(OneDev.getInstance(UserManager.class).getUnknown());
 								nonExistentLogins.add(login);
 							}
 						} else {
@@ -317,7 +316,6 @@ public class ImportUtils {
 						lastUpdate.setActivity("Opened");
 						lastUpdate.setDate(issue.getSubmitDate());
 						lastUpdate.setUser(issue.getSubmitter());
-						lastUpdate.setUserName(issue.getSubmitterName());
 						issue.setLastUpdate(lastUpdate);
 						
 						StateSpec initialState = getIssueSetting().getInitialStateSpec();
@@ -723,18 +721,17 @@ public class ImportUtils {
 								if (commentNode.hasNonNull("author")) {
 									JsonNode authorNode = commentNode.get("author");
 									String email = getEmail(authorNode);
-									String fullName = authorNode.get("name").asText();
 									String login = authorNode.get("login").asText();
 									if (email != null) {
 										User user = OneDev.getInstance(UserManager.class).findByEmail(email);
 										if (user != null) {
 											comment.setUser(user);
 										} else {
-											comment.setUserName(fullName);
+											comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
 											nonExistentLogins.add(login);
 										}
 									} else {
-										comment.setUserName(fullName);
+										comment.setUser(OneDev.getInstance(UserManager.class).getUnknown());
 										nonExistentLogins.add(login);
 									}
 								} else {

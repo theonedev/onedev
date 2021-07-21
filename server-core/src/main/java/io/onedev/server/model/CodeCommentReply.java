@@ -28,11 +28,9 @@ public class CodeCommentReply extends AbstractEntity {
 	private CodeComment comment;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
+	@JoinColumn(nullable=false)
 	private User user;
 	
-	private String userName;
-
 	@Column(nullable=false)
 	private Date date;
 	
@@ -54,15 +52,6 @@ public class CodeCommentReply extends AbstractEntity {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	@Nullable
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	public Date getDate() {

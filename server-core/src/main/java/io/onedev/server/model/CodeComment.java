@@ -93,11 +93,9 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	private Project project;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
+	@JoinColumn(nullable=false)
 	private User user;
 	
-	private String userName;
-
 	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
 	
@@ -143,22 +141,12 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 		this.request = request;
 	}
 
-	@Nullable
 	public User getUser() {
 		return user;
 	}
 
 	public void setUser(@Nullable User user) {
 		this.user = user;
-	}
-
-	@Nullable
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	public String getContent() {

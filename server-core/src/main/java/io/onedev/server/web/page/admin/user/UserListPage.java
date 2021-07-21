@@ -75,7 +75,7 @@ public class UserListPage extends AdministrationPage {
 	
 	private EntityCriteria<User> getCriteria() {
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
-		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
+		criteria.add(Restrictions.gt("id", 0L));
 		if (query != null) {
 			criteria.add(Restrictions.or(
 					Restrictions.ilike("name", query, MatchMode.ANYWHERE), 

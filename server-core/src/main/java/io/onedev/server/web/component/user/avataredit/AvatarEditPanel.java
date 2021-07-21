@@ -39,7 +39,7 @@ public class AvatarEditPanel extends GenericPanel<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new UserAvatar("avatar", getUser().getId(), getUser().getDisplayName()));
+		add(new UserAvatar("avatar", getUser()));
 		
 		add(new Link<Void>("useDefault") {
 

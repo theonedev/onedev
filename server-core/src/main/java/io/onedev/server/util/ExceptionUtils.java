@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.model.User;
 import io.onedev.server.web.ExpectedExceptionContribution;
 
 public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
@@ -47,7 +48,7 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 	
 	private static void requireAuthentication(HttpServletResponse response) {
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	    String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + OneDev.NAME + "\"";
+	    String authcHeader = HttpServletRequest.BASIC_AUTH + " realm=\"" + User.SYSTEM_NAME + "\"";
 	    response.setHeader(HttpHeaders.WWW_AUTHENTICATE, authcHeader);
 	}
 

@@ -11,6 +11,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.UserAvatar;
 
@@ -47,7 +48,7 @@ public class PersonCardPanel extends Panel {
 		builder.append("<div>" + HtmlEscape.escapeHtml5(displayName) + " <i>(" + gitRole + ")</i></div>");
 		
 		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
-			if (personIdent.getName().equals(OneDev.NAME))
+			if (personIdent.getName().equals(User.SYSTEM_NAME))
 				builder.append("<i>System Account</i>");
 			else
 				builder.append("<i>No OneDev Account</i>");

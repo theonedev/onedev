@@ -36,8 +36,7 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		User user = User.from(getComment().getUser(), getComment().getUserName());
-		add(new Label("user", user.getDisplayName()));
+		add(new Label("user", getComment().getUser().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
 		

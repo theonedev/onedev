@@ -6,8 +6,11 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -15,27 +18,35 @@ import io.onedev.server.web.component.user.UserAvatar;
 import io.onedev.server.web.component.user.card.UserCardPanel;
 
 @SuppressWarnings("serial")
-public class UserIdentPanel extends Panel {
+public class UserIdentPanel extends GenericPanel<User> {
 
-	private final Long userId;
-	
-	private final String displayName;
-	
 	private final Mode mode;
 	
 	public UserIdentPanel(String id, User user, Mode mode) {
 		super(id);
-		userId = user.getId();
-		displayName = user.getDisplayName();
 		this.mode = mode;
+		
+		Long userId = user.getId();
+		setModel(new LoadableDetachableModel<User>() {
+
+			@Override
+			protected User load() {
+				return OneDev.getInstance(UserManager.class).load(userId);
+			}
+			
+		});
+	}
+	
+	private User getUser() {
+		return getModelObject();
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserAvatar("avatar", userId, displayName).setVisible(mode != Mode.NAME));
-		add(new Label("name", displayName).setVisible(mode != Mode.AVATAR));
+		add(new UserAvatar("avatar", getUser()).setVisible(mode != Mode.NAME));
+		add(new Label("name", getUser().getDisplayName()).setVisible(mode != Mode.AVATAR));
 		
 		add(AttributeAppender.append("class", "user"));
 		
@@ -43,7 +54,7 @@ public class UserIdentPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new UserCardPanel(id, userId, displayName);
+				return new UserCardPanel(id, getUser());
 			}
 			
 		});

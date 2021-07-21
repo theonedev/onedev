@@ -72,9 +72,15 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	
 	public static final int ACCESS_TOKEN_LEN = 40;
 	
+	public static final Long UNKNOWN_ID = -2L;
+	
 	public static final Long SYSTEM_ID = -1L;
 	
 	public static final Long ROOT_ID = 1L;
+	
+	public static final String SYSTEM_NAME = "OneDev";
+	
+	public static final String UNKNOWN_NAME = "Unknown";
 	
 	public static final String EXTERNAL_MANAGED = "external_managed";
 	
@@ -561,6 +567,10 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 		return SYSTEM_ID.equals(getId());
 	}
 	
+	public boolean isUnknown() {
+		return UNKNOWN_ID.equals(getId());
+	}
+	
 	public Collection<UserAuthorization> getAuthorizations() {
 		return authorizations;
 	}
@@ -589,17 +599,6 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 		if (groups == null)  
 			groups = getMemberships().stream().map(it->it.getGroup()).collect(Collectors.toList());
 		return groups;
-	}
-	
-	public static User from(@Nullable User user, @Nullable String displayName) {
-		if (user == null) {
-			user = new User();
-			if (displayName != null)
-				user.setName(displayName);
-			else
-				user.setName("Unknown");
-		}
-		return user;
 	}
 	
 	public static void push(User user) {

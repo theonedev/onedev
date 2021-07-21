@@ -197,7 +197,7 @@ public class SuggestionUtils {
 				Restrictions.ilike(User.PROP_NAME, "%" + matchWith + "%"), 
 				Restrictions.ilike(User.PROP_EMAIL, "%" + matchWith + "%"),
 				Restrictions.ilike(User.PROP_FULL_NAME, "%" + matchWith + "%")));
-		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
+		criteria.add(Restrictions.gt("id", 0L));
 		
 		for (User user: OneDev.getInstance(UserManager.class).query(criteria)) {
 			LinearRange match = LinearRange.match(user.getName(), matchWith);

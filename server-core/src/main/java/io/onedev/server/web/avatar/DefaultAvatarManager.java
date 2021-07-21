@@ -20,7 +20,6 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -49,18 +48,11 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Sessional
 	@Override
 	public String getAvatarUrl(User user) {
-		return getAvatarUrl(user.getId(), user.getDisplayName());
-	}
-	
-	@Sessional
-	@Override
-	public String getAvatarUrl(Long userId, String displayName) {
-		if (userId == null) {
+		if (user.isUnknown()) {
 			return AVATARS_BASE_URL + "user.png";
-		} else if (userId.equals(User.SYSTEM_ID)) {
+		} else if (user.isSystem()) {
 			return AVATARS_BASE_URL + "onedev.png";
 		} else {
-			User user = OneDev.getInstance(UserManager.class).load(userId);
 			File uploadedFile = getUploaded(new UserFacade(user));
 			if (uploadedFile.exists())
 				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
@@ -75,7 +67,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Override
 	public String getAvatarUrl(PersonIdent personIdent) {
 		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
-			if (personIdent.getName().equals(OneDev.NAME)) 
+			if (personIdent.getName().equals(User.SYSTEM_NAME)) 
 				return AVATARS_BASE_URL + "onedev.png";
 			else  
 				return AVATARS_BASE_URL + "user.png";

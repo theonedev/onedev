@@ -32,6 +32,7 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.model.User;
 import io.onedev.server.util.Pair;
 
 @Singleton
@@ -2595,6 +2596,104 @@ public class DataMigrator {
 							}
 						}
 					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
+	private void useUnknownUser(Element element, String field) {
+		Element userNameElement = element.element(field + "Name");
+		if (userNameElement != null) {
+			userNameElement.detach();
+			if (element.element(field) == null)
+				element.addElement(field).setText("-2");
+		}
+	}
+	
+	private void migrate61(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					useUnknownUser(element.element("lastUpdate"), "user");
+					useUnknownUser(element, "submitter");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					useUnknownUser(element, "submitter");
+					useUnknownUser(element, "canceller");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					useUnknownUser(element.element("lastUpdate"), "user");
+					useUnknownUser(element, "user");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					useUnknownUser(element, "user");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					useUnknownUser(element.element("lastUpdate"), "user");
+					useUnknownUser(element, "submitter");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					useUnknownUser(element, "user");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					useUnknownUser(element, "user");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					useUnknownUser(element, "user");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					useUnknownUser(element, "user");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					if (element.elementTextTrim("id").equals("-1"))
+						element.element("email").setText("system email");
+				}
+				if (file.getName().equals("Users.xml")) {
+					Element element = dom.getRootElement().addElement("io.onedev.server.model.User");
+					element.addAttribute("revision", "0.0");
+					element.addElement("id").setText("-2");
+					element.addElement("name").setText("Unknown");
+					element.addElement("password").setText("no password");
+					element.addElement("ssoInfo").addElement("subject").setText(UUID.randomUUID().toString());
+					element.addElement("email").setText("unknown email");
+					element.addElement("alternateEmails");
+					element.addElement("accessToken").setText(RandomStringUtils.randomAlphanumeric(User.ACCESS_TOKEN_LEN));
+					element.addElement("userProjectQueries");
+					element.addElement("userIssueQueries");
+					element.addElement("userIssueQueryWatches");
+					element.addElement("issueQueryWatches");
+					
+					element.addElement("userPullRequestQueries");
+					element.addElement("userPullRequestQueryWatches");
+					element.addElement("pullRequestQueryWatches");
+					element.addElement("userBuildQueries");
+					
+					element.addElement("userBuildQuerySubscriptions");
+					element.addElement("buildQuerySubscriptions");
 				}
 				dom.writeToFile(file, false);
 			}

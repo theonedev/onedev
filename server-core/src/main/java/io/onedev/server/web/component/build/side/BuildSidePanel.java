@@ -31,7 +31,6 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
@@ -67,13 +66,11 @@ public abstract class BuildSidePanel extends Panel {
 
 			@Override
 			protected void onBeforeRender() {
-				User submitter = User.from(getBuild().getSubmitter(), getBuild().getSubmitterName());
-				addOrReplace(new UserIdentPanel("submitter", submitter, Mode.NAME));
-				User canceller = User.from(getBuild().getCanceller(), getBuild().getCancellerName());
-				UserIdentPanel cancellerIdentPanel = new UserIdentPanel("canceller", canceller, Mode.NAME);				
-				cancellerIdentPanel.setVisible(getBuild().getStatus() == Build.Status.CANCELLED 
-						&& (getBuild().getCanceller() != null || getBuild().getCancellerName() != null));
-				addOrReplace(cancellerIdentPanel);
+				addOrReplace(new UserIdentPanel("submitter", getBuild().getSubmitter(), Mode.NAME));
+				if (getBuild().getStatus() == Build.Status.CANCELLED && getBuild().getCanceller() != null) 
+					addOrReplace(new UserIdentPanel("canceller", getBuild().getCanceller(), Mode.NAME));
+				else
+					addOrReplace(new WebMarkupContainer("canceller").setVisible(false));
 				super.onBeforeRender();
 			}
 			

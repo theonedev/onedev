@@ -39,7 +39,7 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new Label("user", User.from(getComment().getUser(), getComment().getUserName()).getDisplayName()));
+		add(new Label("user", getComment().getUser().getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getDate()))));
 		

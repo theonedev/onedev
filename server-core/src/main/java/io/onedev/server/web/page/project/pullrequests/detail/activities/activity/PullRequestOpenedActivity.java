@@ -49,7 +49,7 @@ public class PullRequestOpenedActivity implements PullRequestActivity {
 
 	@Override
 	public User getUser() {
-		return User.from(getRequest().getSubmitter(), getRequest().getSubmitterName());
+		return getRequest().getSubmitter();
 	}
 
 }

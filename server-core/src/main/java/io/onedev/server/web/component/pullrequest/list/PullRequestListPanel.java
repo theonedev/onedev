@@ -55,7 +55,6 @@ import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
@@ -618,12 +617,10 @@ public abstract class PullRequestListPanel extends Panel {
 				}
 				
 				LastUpdate lastUpdate = request.getLastUpdate();
-				if (lastUpdate.getUser() != null || lastUpdate.getUserName() != null) {
-					User user = User.from(lastUpdate.getUser(), lastUpdate.getUserName());
-					fragment.add(new UserIdentPanel("user", user, Mode.NAME));
-				} else {
+				if (lastUpdate.getUser() != null) 
+					fragment.add(new UserIdentPanel("user", lastUpdate.getUser(), Mode.NAME));
+				else 
 					fragment.add(new WebMarkupContainer("user").setVisible(false));
-				}
 				fragment.add(new Label("activity", lastUpdate.getActivity()));
 				fragment.add(new Label("date", DateUtils.formatAge(lastUpdate.getDate()))
 					.add(new AttributeAppender("title", DateUtils.formatDateTime(lastUpdate.getDate()))));

@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,10 +26,7 @@ public class IssueChange extends AbstractEntity {
 	private Issue issue;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn
 	private User user;
-	
-	private String userName;
 	
 	@Column(nullable=false)
 	private Date date;
@@ -45,20 +43,13 @@ public class IssueChange extends AbstractEntity {
 		this.issue = issue;
 	}
 
+	@Nullable
 	public User getUser() {
 		return user;
 	}
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
 	}
 
 	public Date getDate() {

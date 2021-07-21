@@ -23,8 +23,6 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 		IssueChange change = getModelObject();
 		if (change.getUser() != null) 
 			add(new Label("user", change.getUser().getDisplayName()));
-		else if (change.getUserName() != null) 
-			add(new Label("user", change.getUserName()));
 		else
 			add(new WebMarkupContainer("user").setVisible(false));
 
