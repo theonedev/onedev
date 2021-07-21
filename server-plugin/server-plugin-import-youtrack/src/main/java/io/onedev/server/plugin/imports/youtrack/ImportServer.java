@@ -65,7 +65,7 @@ public class ImportServer implements Serializable, Validatable {
 		this.apiUrl = apiUrl;
 	}
 	
-	@Editable(order=200, name="YouTrack User Name", description="Specify YouTrack user name. This account should have permission to:"
+	@Editable(order=200, name="YouTrack Login Name", description="Specify YouTrack login name. This account should have permission to:"
 			+ "<ul>"
 			+ "<li>Read full information and issues of the projects you want to import"
 			+ "<li>Read issue tags"
