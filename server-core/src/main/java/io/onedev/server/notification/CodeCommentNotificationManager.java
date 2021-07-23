@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.MarkdownAware;
@@ -29,8 +30,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 	
 	@Inject
 	public CodeCommentNotificationManager(MailManager mailManager, MarkdownManager markdownManager, 
-			UrlManager urlManager, UserManager userManager) {
-		super(markdownManager);
+			UrlManager urlManager, UserManager userManager, SettingManager settingManager) {
+		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.userManager = userManager;
@@ -61,11 +62,11 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 						String threadingReferences = event.getComment().getProject().getName() 
 								+ "-codecomment" + event.getComment().getId() + "@onedev";
 						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), Lists.newArrayList(), subject, 
-								getHtmlBody(event, url), getTextBody(event, url), null, threadingReferences);
+								getHtmlBody(event, url, null), getTextBody(event, url, null), null, threadingReferences);
 					}
 				}
 			}
 		}
 	}
-	
+
 }

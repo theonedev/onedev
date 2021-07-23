@@ -1,4 +1,4 @@
-package io.onedev.server.security;
+package io.onedev.server.util;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -15,7 +15,7 @@ import org.apache.sshd.common.digest.Digest;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 
-public class CipherUtils {
+public class CryptoUtils {
 
     public static final Digest DIGEST_FORMAT = new BaseDigest("MD5", 512);
 	

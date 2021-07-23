@@ -3,6 +3,7 @@ package io.onedev.server.buildspec.job.action;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -30,7 +31,7 @@ public class SendNotificationAction extends PostBuildAction {
 	public void execute(Build build) {
 		io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver parsedReceiver = 
 				io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver.parse(getReceivers(), build);
-		OneDev.getInstance(BuildNotificationManager.class).notify(build, parsedReceiver.getEmails());
+		OneDev.getInstance(BuildNotificationManager.class).notify(new BuildFinished(build), parsedReceiver.getEmails());
 	}
 
 	@Override

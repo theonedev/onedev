@@ -436,7 +436,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.groovy</groupId>
-				<artifactId>groovy</artifactId>
+				<artifactId>groovy-templates</artifactId>
 				<version>${groovy.version}</version>
 			</dependency>
 			<dependency>

@@ -154,7 +154,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy</artifactId>
+			<artifactId>groovy-templates</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.albfernandez</groupId>

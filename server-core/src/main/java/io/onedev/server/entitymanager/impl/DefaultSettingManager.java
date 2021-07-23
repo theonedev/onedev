@@ -30,6 +30,7 @@ import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -56,6 +57,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	private volatile Long authenticatorId;
 	
 	private volatile Long jobExecutorsId;
+	
+	private volatile Long notificationTemplateSettingId;
 	
 	private volatile Long jobScriptsId;
 	
@@ -268,6 +271,32 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 			setting.setKey(Key.JOB_EXECUTORS);
 		}
 		setting.setValue((Serializable) jobExecutors);
+		dao.persist(setting);
+	}
+
+	@Sessional
+	@Override
+	public NotificationTemplateSetting getNotificationTemplateSetting() {
+        Setting setting;
+        if (notificationTemplateSettingId == null) {
+    		setting = getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
+    		Preconditions.checkNotNull(setting);
+    		notificationTemplateSettingId = setting.getId();
+        } else {
+            setting = load(notificationTemplateSettingId);
+        }
+        return (NotificationTemplateSetting) setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting) {
+		Setting setting = getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.NOTIFICATION_TEMPLATE_SETTING);
+		}
+		setting.setValue((Serializable) notificationTemplateSetting);
 		dao.persist(setting);
 	}
 

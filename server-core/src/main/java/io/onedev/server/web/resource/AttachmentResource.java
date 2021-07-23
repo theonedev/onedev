@@ -22,9 +22,9 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.CipherUtils;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
+import io.onedev.server.util.CryptoUtils;
 
 public class AttachmentResource extends AbstractResource {
 
@@ -57,7 +57,7 @@ public class AttachmentResource extends AbstractResource {
 		
 		String authorization = params.get(PARAM_AUTHORIZATION).toOptionalString();
 		if (authorization == null 
-				|| !new String(CipherUtils.decrypt(Base64.decodeBase64(authorization)), StandardCharsets.UTF_8).equals(group)) {
+				|| !new String(CryptoUtils.decrypt(Base64.decodeBase64(authorization)), StandardCharsets.UTF_8).equals(group)) {
 			PullRequest request = OneDev.getInstance(PullRequestManager.class).findByUUID(group);
 			if (request != null && !SecurityUtils.canReadCode(project))
 				throw new UnauthorizedException();
@@ -118,7 +118,7 @@ public class AttachmentResource extends AbstractResource {
 			URIBuilder builder = new URIBuilder(attachmentUrl);
 			if (builder.getPathSegments().size() >= 4) {
 				String group = builder.getPathSegments().get(3);
-				byte[] encrypted = CipherUtils.encrypt(group.getBytes(StandardCharsets.UTF_8));
+				byte[] encrypted = CryptoUtils.encrypt(group.getBytes(StandardCharsets.UTF_8));
 				String base64 = Base64.encodeBase64URLSafeString(encrypted);
 				builder.addParameter(PARAM_AUTHORIZATION, base64);
 			}

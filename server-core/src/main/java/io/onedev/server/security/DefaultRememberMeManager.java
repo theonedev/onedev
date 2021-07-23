@@ -7,6 +7,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.web.mgt.CookieRememberMeManager;
 
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.util.CryptoUtils;
 
 @Singleton
 public class DefaultRememberMeManager extends CookieRememberMeManager {
@@ -20,12 +21,12 @@ public class DefaultRememberMeManager extends CookieRememberMeManager {
 
 	@Override
 	public byte[] getEncryptionCipherKey() {
-		return CipherUtils.getCipherKey();
+		return CryptoUtils.getCipherKey();
 	}
 
 	@Override
 	public byte[] getDecryptionCipherKey() {
-		return CipherUtils.getCipherKey();
+		return CryptoUtils.getCipherKey();
 	}
 
 	@Override

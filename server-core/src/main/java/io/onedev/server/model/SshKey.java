@@ -22,8 +22,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.security.CipherUtils;
 import io.onedev.server.ssh.SshKeyUtils;
+import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -104,7 +104,7 @@ public class SshKey extends AbstractEntity implements Validatable {
     public void digest() {
         try {
             PublicKey pubEntry = SshKeyUtils.decodeSshPublicKey(content);
-            digest = KeyUtils.getFingerPrint(CipherUtils.DIGEST_FORMAT, pubEntry);
+            digest = KeyUtils.getFingerPrint(CryptoUtils.DIGEST_FORMAT, pubEntry);
         } catch (IOException | GeneralSecurityException e) {
             throw new RuntimeException(e);
         }

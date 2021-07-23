@@ -64,19 +64,16 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 	
 	private final UserManager userManager;
 	
-	private final SettingManager settingManager;
-	
 	@Inject
 	public PullRequestNotificationManager(MailManager mailManager, UrlManager urlManager, 
 			MarkdownManager markdownManager, PullRequestWatchManager pullRequestWatchManager, 
 			UserInfoManager userInfoManager, UserManager userManager, SettingManager settingManager) {
-		super(markdownManager);
+		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
 		this.userInfoManager = userInfoManager;
 		this.userManager = userManager;
-		this.settingManager = settingManager;
 	}
 	
 	@Transactional
@@ -179,7 +176,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 		}
 		
-		String replyAddress = mailManager.getReplyAddressForPullRequest(request);
+		String replyAddress = mailManager.getReplyAddress(request);
 		String threadingReferences = getThreadingReferences(request);
 		if (event instanceof PullRequestChangeEvent 
 				&& request.getSubmitter() != null 
@@ -196,8 +193,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			if (subject != null) { 
 				subject = "[" + getState(request) + "] " + subject;
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
-						Lists.newArrayList(), subject, getHtmlBody(event, url), getTextBody(event, url), 
-						replyAddress, threadingReferences);
+						Lists.newArrayList(), subject, getHtmlBody(event, url, null), 
+						getTextBody(event, url, null), replyAddress, threadingReferences);
 				notifiedUsers.add(request.getSubmitter());
 			}
 		}
@@ -261,11 +258,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				else
 					subject = event.getActivity(true);
 				
+				String unsubscribeAddress = mailManager.getUnsubscribeAddress(request);
 				subject = "[" + getState(request) + "] " + subject;
+				String htmlBody = getHtmlBody(event, url, new Unsubscribable(unsubscribeAddress));
+				String textBody = getTextBody(event, url, new Unsubscribable(unsubscribeAddress));
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
-						subject, getHtmlBody(event, url), getTextBody(event, url), replyAddress, threadingReferences);
+						subject, htmlBody, textBody, replyAddress, threadingReferences);
 			}
 		}				
 	}
@@ -295,9 +295,9 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					String url = urlManager.urlFor(request);
 					String subject = String.format("[%s] You are invited to review pull request %s", 
 							getState(request), request.getNumberAndTitle());
-					String replyAddress = mailManager.getReplyAddressForPullRequest(request);
+					String replyAddress = mailManager.getReplyAddress(request);
 					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), Lists.newArrayList(),
-							subject, getHtmlBody(event, url), getTextBody(event, url), replyAddress, 
+							subject, getHtmlBody(event, url, null), getTextBody(event, url, null), replyAddress, 
 							getThreadingReferences(request));
 				}
 			} else if (event.getEntity() instanceof PullRequestAssignment) {
@@ -308,9 +308,9 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 					String url = urlManager.urlFor(request);
 					String subject = String.format("[%s] You are assigned and expected to merge pull request %s", 
 							getState(request), request.getNumberAndTitle());
-					String replyAddress = mailManager.getReplyAddressForPullRequest(request);
+					String replyAddress = mailManager.getReplyAddress(request);
 					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), Lists.newArrayList(),
-							subject, getHtmlBody(event, url), getTextBody(event, url), replyAddress, 
+							subject, getHtmlBody(event, url, null), getTextBody(event, url, null), replyAddress, 
 							getThreadingReferences(request));
 				}
 			}

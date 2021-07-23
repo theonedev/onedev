@@ -23,10 +23,16 @@ public interface MailManager {
 			String htmlBody, String textBody, @Nullable String replyAddress, @Nullable String references);
 	
 	@Nullable
-	String getReplyAddressForIssue(Issue issue);
+	String getReplyAddress(Issue issue);
 	
 	@Nullable
-	String getReplyAddressForPullRequest(PullRequest request);
+	String getReplyAddress(PullRequest request);
+
+	@Nullable
+	String getUnsubscribeAddress(Issue issue);
+
+	@Nullable
+	public String getUnsubscribeAddress(PullRequest request);
 	
 	InboxMonitor monitorInbox(MailSetting mailSetting, MessageListener listener);
 	

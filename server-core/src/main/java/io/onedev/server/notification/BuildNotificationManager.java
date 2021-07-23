@@ -39,17 +39,14 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	private final UserManager userManager;
 	
-	private final SettingManager settingManager;
-	
 	@Inject
 	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
 			UserManager userManager, SettingManager settingManager, 
 			MarkdownManager markdownManager) {
-		super(markdownManager);
+		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.userManager = userManager;
-		this.settingManager = settingManager;
 	}
 
 	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 
@@ -64,8 +61,9 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		}
 	}
 	
-	public void notify(Build build, Collection<String> emails) {
+	public void notify(BuildEvent event, Collection<String> emails) {
 		String subject;
+		Build build = event.getBuild();
 		if (build.getVersion() != null) {
 			subject = String.format("Build %s/%s/#%s (%s) is %s", build.getProject().getName(), build.getJobName(), 
 					build.getNumber(), build.getVersion(), build.getStatus().getDisplayName().toLowerCase());
@@ -75,8 +73,10 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		}
 		String url = urlManager.urlFor(build);
 		String threadingReferences = build.getProject().getName() + "-build" + build.getNumber() + "@onedev";
-		mailManager.sendMailAsync(Lists.newArrayList(), emails, subject, getHtmlBody(null, url), 
-				getTextBody(null, url), null, threadingReferences);
+		String htmlBody = getHtmlBody(event, url, null);
+		String textBody = getTextBody(event, url, null);
+		mailManager.sendMailAsync(Lists.newArrayList(), emails, subject, htmlBody, 
+				textBody, null, threadingReferences);
 	}
 	
 	@Sessional
@@ -147,7 +147,7 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 			}
 		}
 		
-		notify(build, notifyEmails);
+		notify(event, notifyEmails);
 	}
-	
+
 }

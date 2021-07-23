@@ -58,6 +58,8 @@ import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
+import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
@@ -150,6 +152,16 @@ public abstract class LayoutPage extends BasePage {
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Setting", 
 							MailSettingPage.class, new PageParameters()));
+					
+					List<SidebarMenuItem> notificationTemplateSettingMenuItems = new ArrayList<>();
+					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Issue", 
+							IssueNotificationTemplatePage.class, new PageParameters()));
+					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Pull Request", 
+							PullRequestNotificationTemplatePage.class, new PageParameters()));
+					
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates", 
+							notificationTemplateSettingMenuItems));
+					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
 							JobExecutorsPage.class, new PageParameters()));
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 

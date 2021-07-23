@@ -51,6 +51,7 @@ import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
+import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -221,6 +222,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.PROJECT);
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
+		}
+		setting = settingManager.getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
+		if (setting == null) {
+			settingManager.saveNotificationTemplateSetting(new NotificationTemplateSetting());
 		}
 		
 		setting = settingManager.getSetting(Key.CONTRIBUTED_SETTINGS);

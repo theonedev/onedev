@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
@@ -25,7 +26,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
-
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.util.markdown.MarkdownManager;
 
@@ -39,8 +39,9 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 	private final UrlManager urlManager;
 	
 	@Inject
-	public CommitNotificationManager(MarkdownManager markdownManager, MailManager mailManager, UrlManager urlManager) {
-		super(markdownManager);
+	public CommitNotificationManager(MarkdownManager markdownManager, MailManager mailManager, UrlManager urlManager, 
+			SettingManager settingManager) {
+		super(markdownManager, settingManager);
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 	}
@@ -101,22 +102,22 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 
 				String branchName = GitUtils.ref2branch(event.getRefName());
 				if (branchName != null) {
-					subject = String.format("[Branch %s] Commit %s: %s", 
+					subject = String.format("[branch %s] Commit %s: %s", 
 							branchName, GitUtils.abbreviateSHA(commit.name()), commit.getShortMessage());
 				} else {
 					String tagName = GitUtils.ref2tag(event.getRefName());
 					if (tagName != null) {
-						subject = String.format("[Tag %s] Commit %s: %s", 
+						subject = String.format("[tag %s] Commit %s: %s", 
 								tagName, GitUtils.abbreviateSHA(commit.name()), commit.getShortMessage());
 					} else {
-						subject = String.format("[Ref %s] Commit %s: %s", 
+						subject = String.format("[ref %s] Commit %s: %s", 
 								event.getRefName(), GitUtils.abbreviateSHA(commit.name()), commit.getShortMessage());
 					}
 				}
 					
 				String url = urlManager.urlFor(project, commit);
 				mailManager.sendMailAsync(Lists.newArrayList(), notifyEmails, subject, 
-						getHtmlBody(event, url), getTextBody(event, url), null, null);
+						getHtmlBody(event, url, null), getTextBody(event, url, null), null, null);
 			}
 		}
 	}

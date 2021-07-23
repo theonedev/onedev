@@ -38,7 +38,7 @@ public interface UrlManager {
 	String urlFor(CodeComment comment, @Nullable PullRequest request);
 
 	String urlFor(CodeCommentReply reply, @Nullable PullRequest request);
-
+	
     String cloneUrlFor(Project project, boolean ssh);
     
 }

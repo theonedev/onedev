@@ -1,0 +1,26 @@
+<% 
+	if (eventBody != null) {
+		print eventBody
+		print "<br>" 
+	}
+%>
+<div>Visit <a href='${eventUrl}'>${eventUrl}</a> for details</div>
+<%
+	if (unsubscribable != null) {
+		print """
+			<div style='border-top:1px solid #EEE; margin-top:1em; padding-top:1em; color:#666; font-size:0.9em;'>You received this as you
+			are participating or participated previously in this topic.
+		"""
+		if (unsubscribable.getEmailAddress() != null) {
+			print """
+				Mail to <a href='mailto:${unsubscribable.emailAddress}?subject=Unsubscribe&body=I would like not to get any notifications from this topic'>this address</a> to unsubscribe
+				</div>
+			"""
+		} else {
+			print """
+				To stop receiving notifications of this topic, please visit detail link above and unwatch it
+				</div>
+			"""
+		}
+	}
+%>
