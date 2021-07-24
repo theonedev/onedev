@@ -4,10 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
@@ -15,6 +18,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
+import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -55,14 +59,34 @@ public class PullRequestNotificationTemplatePage extends AdministrationPage {
 			
 		};
 		
-		Link<?> useDefaultLink;
-		add(useDefaultLink = new Link<Void>("useDefault") {
+		AjaxLink<?> useDefaultLink;
+		add(useDefaultLink = new AjaxLink<Void>("useDefault") {
 
 			@Override
-			public void onClick() {
-				setting.setIssueNotificationTemplate(NotificationTemplateSetting.DEFAULT_TEMPLATE);
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to use default template?"));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				setting.setPullRequestNotificationTemplate(NotificationTemplateSetting.DEFAULT_TEMPLATE);
 				getSettingManager().saveNotificationTemplateSetting(setting);
 				setResponsePage(PullRequestNotificationTemplatePage.class);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled())
+					tag.put("disabled", "disabled");
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(!setting.getPullRequestNotificationTemplate().equals(NotificationTemplateSetting.DEFAULT_TEMPLATE));
 			}
 
 		});

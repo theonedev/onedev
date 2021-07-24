@@ -1,6 +1,10 @@
 .folder-view>table>tbody>tr>td {
 	padding: 0.6rem 1.2rem; 
 	border-top: 1px solid var(--light); 
+	min-width: 120px;
+}
+.folder-view>table>tbody>tr>td.path {
+	min-width: 200px;
 }
 
 .folder-view>table>tbody>tr:first-child>td {
