@@ -62,7 +62,8 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 						String threadingReferences = event.getComment().getProject().getName() 
 								+ "-codecomment" + event.getComment().getId() + "@onedev";
 						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), Lists.newArrayList(), subject, 
-								getHtmlBody(event, url, null), getTextBody(event, url, null), null, threadingReferences);
+								getHtmlBody(event, url, false, null), getTextBody(event, url, false, null), null, 
+								threadingReferences);
 					}
 				}
 			}

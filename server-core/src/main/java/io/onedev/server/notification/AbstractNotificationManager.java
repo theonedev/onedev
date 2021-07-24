@@ -35,7 +35,7 @@ public abstract class AbstractNotificationManager {
 		this.settingManager = settingManager;
 	}
 	
-	protected String getHtmlBody(Event event, String url, @Nullable Unsubscribable unsubscribable) {
+	protected String getHtmlBody(Event event, String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
 		String eventBody = null;
 		if (event instanceof MarkdownAware) {
 			eventBody = ((MarkdownAware) event).getMarkdown();
@@ -54,7 +54,8 @@ public abstract class AbstractNotificationManager {
 		bindings.put("event", event);
 		bindings.put("eventBody", eventBody);
 		bindings.put("unsubscribable", unsubscribable);
-		bindings.put("eventUrl", url);
+		bindings.put("replyable", replyable);
+		bindings.put("eventUrl", eventUrl);
 		
 		if (event instanceof IssueEvent) { 
 			template = StringUtils.join(settingManager.getNotificationTemplateSetting().getIssueNotificationTemplate(), "\n");
@@ -83,20 +84,21 @@ public abstract class AbstractNotificationManager {
 		}
 	}
 	
-	protected String getTextBody(Event event, String url, @Nullable Unsubscribable unsubscribable) {
+	protected String getTextBody(Event event, String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
 		String textBody = null;
-		if (event instanceof MarkdownAware) {
-			String markdown = ((MarkdownAware) event).getMarkdown();
-			if (markdown != null) {
-				textBody = String.format(""
-						+ "%s"
-						+ "\n"
-						+ "Visit %s for details",
-						markdown, url);
-			}
-		}
-		if (textBody == null)
-			textBody = String.format("Visit %s for details", url);
+		if (event instanceof MarkdownAware) 
+			textBody = ((MarkdownAware) event).getMarkdown();
+		
+		if (textBody != null)
+			textBody += "\n";
+		else 
+			textBody = "";
+		
+		if (replyable)
+			textBody += "Reply this email to post comment, or visit " + eventUrl + " for details";
+		else
+			textBody += "Visit " + eventUrl + " for details";
+		
 		if (unsubscribable != null) {
 			textBody += "\n\n---------------------------------------------\nYou received this as you "
 					+ "are participating or participated previously in this topic. ";

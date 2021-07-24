@@ -727,7 +727,7 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public String getReplyAddress(Issue issue) {
 		MailSetting mailSetting = settingManager.getMailSetting();
-		if (mailSetting != null) {
+		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
 			return systemAddress.getPrefix() + "+" + issue.getProject().getName() + "~issue" + issue.getNumber()
 					+ "@" + systemAddress.getDomain(); 
@@ -739,7 +739,7 @@ public class DefaultMailManager implements MailManager {
 	@Override
 	public String getReplyAddress(PullRequest request) {
 		MailSetting mailSetting = settingManager.getMailSetting();
-		if (mailSetting != null) {
+		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
 			return systemAddress.getPrefix() + "+" + request.getProject().getName() + "~pullrequest" + request.getNumber()
 					+ "@" + systemAddress.getDomain(); 

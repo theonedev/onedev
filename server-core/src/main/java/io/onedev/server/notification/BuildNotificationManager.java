@@ -73,8 +73,8 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		}
 		String url = urlManager.urlFor(build);
 		String threadingReferences = build.getProject().getName() + "-build" + build.getNumber() + "@onedev";
-		String htmlBody = getHtmlBody(event, url, null);
-		String textBody = getTextBody(event, url, null);
+		String htmlBody = getHtmlBody(event, url, false, null);
+		String textBody = getTextBody(event, url, false, null);
 		mailManager.sendMailAsync(Lists.newArrayList(), emails, subject, htmlBody, 
 				textBody, null, threadingReferences);
 	}

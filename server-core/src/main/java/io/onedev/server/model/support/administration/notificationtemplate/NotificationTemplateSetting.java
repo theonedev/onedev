@@ -33,6 +33,7 @@ public class NotificationTemplateSetting implements Serializable {
 			+ "<li><code>event:</code> <a href='https://code.onedev.io/projects/onedev-server/blob/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification"
 			+ "<li><code>eventBody:</code> string type representing body of the event, for instance, comment made by user"
 			+ "<li><code>eventUrl:</code> string type representing event detail url"
+			+ "<li><code>replyable:</code> boolean type indiciating whether or not topic comment can be created directly by replying the email"
 			+ "<li><code>unsubscribable:</code> a non-null value indicates that the notification can be unsuscribed. Check <a href='https://code.onedev.io/projects/onedev-server/blob/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>document</a> for details";
 	
 	static {

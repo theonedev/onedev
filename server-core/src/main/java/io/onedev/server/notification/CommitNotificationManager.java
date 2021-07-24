@@ -117,7 +117,8 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 					
 				String url = urlManager.urlFor(project, commit);
 				mailManager.sendMailAsync(Lists.newArrayList(), notifyEmails, subject, 
-						getHtmlBody(event, url, null), getTextBody(event, url, null), null, null);
+						getHtmlBody(event, url, false, null), getTextBody(event, url, false, null), 
+						null, null);
 			}
 		}
 	}

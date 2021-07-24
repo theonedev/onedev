@@ -177,6 +177,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		}
 		
 		String replyAddress = mailManager.getReplyAddress(request);
+		boolean replyable = replyAddress != null;
 		String threadingReferences = getThreadingReferences(request);
 		if (event instanceof PullRequestChangeEvent 
 				&& request.getSubmitter() != null 
@@ -193,8 +194,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			if (subject != null) { 
 				subject = "[" + getState(request) + "] " + subject;
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
-						Lists.newArrayList(), subject, getHtmlBody(event, url, null), 
-						getTextBody(event, url, null), replyAddress, threadingReferences);
+						Lists.newArrayList(), subject, getHtmlBody(event, url, replyable, null), 
+						getTextBody(event, url, replyable, null), replyAddress, threadingReferences);
 				notifiedUsers.add(request.getSubmitter());
 			}
 		}
@@ -260,8 +261,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				
 				String unsubscribeAddress = mailManager.getUnsubscribeAddress(request);
 				subject = "[" + getState(request) + "] " + subject;
-				String htmlBody = getHtmlBody(event, url, new Unsubscribable(unsubscribeAddress));
-				String textBody = getTextBody(event, url, new Unsubscribable(unsubscribeAddress));
+				String htmlBody = getHtmlBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
+				String textBody = getTextBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
@@ -297,7 +298,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 							getState(request), request.getNumberAndTitle());
 					String replyAddress = mailManager.getReplyAddress(request);
 					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), Lists.newArrayList(),
-							subject, getHtmlBody(event, url, null), getTextBody(event, url, null), replyAddress, 
+							subject, getHtmlBody(event, url, replyAddress != null, null), 
+							getTextBody(event, url, replyAddress != null, null), replyAddress, 
 							getThreadingReferences(request));
 				}
 			} else if (event.getEntity() instanceof PullRequestAssignment) {
@@ -310,8 +312,9 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 							getState(request), request.getNumberAndTitle());
 					String replyAddress = mailManager.getReplyAddress(request);
 					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), Lists.newArrayList(),
-							subject, getHtmlBody(event, url, null), getTextBody(event, url, null), replyAddress, 
-							getThreadingReferences(request));
+							subject, getHtmlBody(event, url, replyAddress != null, null), 
+							getTextBody(event, url, replyAddress != null, null), 
+							replyAddress, getThreadingReferences(request));
 				}
 			}
 		}

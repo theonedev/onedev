@@ -144,6 +144,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
 		String replyAddress = mailManager.getReplyAddress(issue);
+		boolean replyable = replyAddress != null;
 		String threadingReferences = issue.getThreadingReference();
 		if (threadingReferences == null)
 			threadingReferences = issue.getUUID() + "@onedev";
@@ -156,7 +157,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, 
-					getHtmlBody(event, url, null), getTextBody(event, url, null), 
+					getHtmlBody(event, url, replyable, null), getTextBody(event, url, replyable, null), 
 					replyAddress, threadingReferences);
 			
 			for (User member: entry.getValue().getMembers())
@@ -173,7 +174,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, 
-					getHtmlBody(event, url, null), getTextBody(event, url, null), 
+					getHtmlBody(event, url, replyable, null), getTextBody(event, url, replyable, null), 
 					replyAddress, threadingReferences);
 			
 			for (User each: entry.getValue())
@@ -238,8 +239,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 				subject = "[" + issue.getState() + "] " + subject;
 				
 				String unsubscribeAddress = mailManager.getUnsubscribeAddress(issue);
-				String htmlBody = getHtmlBody(event, url, new Unsubscribable(unsubscribeAddress));
-				String textBody = getTextBody(event, url, new Unsubscribable(unsubscribeAddress));
+				String htmlBody = getHtmlBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
+				String textBody = getTextBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()),
