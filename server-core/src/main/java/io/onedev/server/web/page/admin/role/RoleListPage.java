@@ -177,7 +177,7 @@ public class RoleListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Role, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<Role, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Role>> cellItem, String componentId, IModel<Role> rowModel) {

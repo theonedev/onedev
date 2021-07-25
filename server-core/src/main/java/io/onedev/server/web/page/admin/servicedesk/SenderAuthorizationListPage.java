@@ -148,7 +148,7 @@ public class SenderAuthorizationListPage extends AdministrationPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<SenderAuthorization, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<SenderAuthorization, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SenderAuthorization>> cellItem, String componentId, IModel<SenderAuthorization> rowModel) {

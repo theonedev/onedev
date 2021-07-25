@@ -36,7 +36,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public class GroovyScriptListPage extends AdministrationPage {
@@ -119,16 +118,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("Can be Used by Build Jobs")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				cellItem.add(new Label(componentId, TextUtils.describe(rowModel.getObject().isCanBeUsedByBuildJobs())));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {

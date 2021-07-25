@@ -149,7 +149,7 @@ public class IssueStateListPage extends IssueSettingPage {
 
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {

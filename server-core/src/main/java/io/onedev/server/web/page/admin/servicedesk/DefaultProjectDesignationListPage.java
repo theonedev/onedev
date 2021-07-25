@@ -134,7 +134,7 @@ public class DefaultProjectDesignationListPage extends AdministrationPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<DefaultProjectDesignation, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<DefaultProjectDesignation, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<DefaultProjectDesignation>> cellItem, String componentId, IModel<DefaultProjectDesignation> rowModel) {

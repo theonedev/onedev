@@ -278,7 +278,7 @@ public class MilestoneListPage extends ProjectPage {
 		});
 		
 		if (SecurityUtils.canManageIssues(getProject())) {
-			columns.add(new AbstractColumn<Milestone, Void>(Model.of("Actions")) {
+			columns.add(new AbstractColumn<Milestone, Void>(Model.of("")) {
 
 				@Override
 				public String getCssClass() {

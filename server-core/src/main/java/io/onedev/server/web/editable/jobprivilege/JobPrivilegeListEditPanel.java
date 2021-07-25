@@ -130,7 +130,7 @@ class JobPrivilegeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<JobPrivilege, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobPrivilege>> cellItem, String componentId, IModel<JobPrivilege> rowModel) {

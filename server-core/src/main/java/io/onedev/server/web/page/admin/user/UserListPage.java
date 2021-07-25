@@ -232,7 +232,7 @@ public class UserListPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<User, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {

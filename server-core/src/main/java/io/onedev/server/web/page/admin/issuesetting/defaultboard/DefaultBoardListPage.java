@@ -133,7 +133,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<BoardSpec, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {

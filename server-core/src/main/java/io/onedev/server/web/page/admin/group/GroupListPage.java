@@ -188,7 +188,7 @@ public class GroupListPage extends AdministrationPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<Group, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {

@@ -139,25 +139,7 @@ public class StateTransitionListPage extends IssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("Applicable Issues")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				TransitionSpec transition = rowModel.getObject();
-				if (transition.getTrigger().getIssueQuery() != null)
-					cellItem.add(new Label(componentId, transition.getTrigger().getIssueQuery()));
-				else
-					cellItem.add(new Label(componentId, "<i>All</i>").setEscapeModelStrings(false));
-			}
-			
-			@Override
-			public String getCssClass() {
-				return "d-none d-lg-table-cell";
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {

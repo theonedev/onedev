@@ -43,7 +43,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
-import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public class IssueFieldListPage extends IssueSettingPage {
@@ -127,22 +126,7 @@ public class IssueFieldListPage extends IssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Display in Issue List")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				FieldSpec field = rowModel.getObject();
-				cellItem.add(new Label(componentId, TextUtils.describe(getSetting().getListFields().contains(field.getName()))));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "d-none d-lg-table-cell";
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {

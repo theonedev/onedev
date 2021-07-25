@@ -125,7 +125,7 @@ public class IssueTemplateListPage extends IssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<IssueTemplate, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<IssueTemplate, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueTemplate>> cellItem, String componentId, IModel<IssueTemplate> rowModel) {

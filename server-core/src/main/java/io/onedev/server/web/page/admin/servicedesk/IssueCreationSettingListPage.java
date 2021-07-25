@@ -138,16 +138,7 @@ public class IssueCreationSettingListPage extends AdministrationPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("Issue Fields")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {
-				cellItem.add(new Label(componentId, "<i>Edit to show</i>").setEscapeModelStrings(false));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<IssueCreationSetting, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<IssueCreationSetting>> cellItem, String componentId, IModel<IssueCreationSetting> rowModel) {

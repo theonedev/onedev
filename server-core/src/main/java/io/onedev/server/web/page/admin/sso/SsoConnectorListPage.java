@@ -129,7 +129,7 @@ public class SsoConnectorListPage extends AdministrationPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<SsoConnector, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<SsoConnector, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<SsoConnector>> cellItem, String componentId, IModel<SsoConnector> rowModel) {
