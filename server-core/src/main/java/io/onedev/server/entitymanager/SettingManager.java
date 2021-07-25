@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -21,6 +23,10 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 public interface SettingManager extends EntityManager<Setting> {
@@ -118,6 +124,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting);
 	
+	ServiceDeskSetting getServiceDeskSetting();
+	
+	void saveServiceDeskSetting(ServiceDeskSetting serviceDeskSetting);
+	
 	List<GroovyScript> getGroovyScripts();
 	
 	void saveGroovyScripts(List<GroovyScript> jobScripts);
@@ -152,4 +162,28 @@ public interface SettingManager extends EntityManager<Setting> {
     void saveContributedSetting(Class<? extends ContributedAdministrationSetting> settingClass, 
     		@Nullable ContributedAdministrationSetting setting);
     
+	Collection<String> getUndefinedIssueFields();
+
+	Collection<UndefinedFieldValue> getUndefinedIssueFieldValues();
+	
+	Collection<String> fixUndefinedIssueFields(Map<String, UndefinedFieldResolution> resolutions);
+	
+	Collection<String> fixUndefinedIssueFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions);
+
+	void onRenameRole(String oldName, String newName);
+	
+	Usage onDeleteRole(String roleName);
+
+	void onRenameProject(String oldName, String newName);
+	
+	Usage onDeleteProject(String projectName);
+
+	void onRenameGroup(String oldName, String newName);
+
+	Usage onDeleteGroup(String groupName);
+
+	void onRenameUser(String oldName, String newName);
+
+	Usage onDeleteUser(String userName);
+	
 }

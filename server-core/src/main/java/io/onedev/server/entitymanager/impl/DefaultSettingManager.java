@@ -1,6 +1,8 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -37,6 +40,10 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.util.usage.Usage;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
 
 @Singleton
@@ -59,6 +66,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	private volatile Long jobExecutorsId;
 	
 	private volatile Long notificationTemplateSettingId;
+	
+	private volatile Long serviceDeskSettingId;
 	
 	private volatile Long jobScriptsId;
 	
@@ -506,6 +515,151 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		Map<String, ContributedAdministrationSetting> contributedSettings = getContributedSettings();
 		contributedSettings.put(settingClass.getName(), setting);
 		saveContributedSettings(contributedSettings);
+	}
+
+	@Sessional
+	@Override
+	public ServiceDeskSetting getServiceDeskSetting() {
+        Setting setting;
+        if (serviceDeskSettingId == null) {
+    		setting = getSetting(Key.SERVICE_DESK_SETTING);
+    		Preconditions.checkNotNull(setting);
+    		serviceDeskSettingId = setting.getId();
+        } else {
+            setting = load(serviceDeskSettingId);
+        }
+        return (ServiceDeskSetting) setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveServiceDeskSetting(ServiceDeskSetting serviceDeskSetting) {
+		Setting setting = getSetting(Key.SERVICE_DESK_SETTING);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.SERVICE_DESK_SETTING);
+		}
+		setting.setValue((Serializable) serviceDeskSetting);
+		dao.persist(setting);
+	}
+
+	@Override
+	public Collection<String> getUndefinedIssueFields() {
+		Collection<String> undefinedFields = new HashSet<>();
+		undefinedFields.addAll(getIssueSetting().getUndefinedFields());
+		undefinedFields.addAll(getServiceDeskSetting().getUndefinedIssueFields());
+		return undefinedFields;
+	}
+
+	@Override
+	public Collection<UndefinedFieldValue> getUndefinedIssueFieldValues() {
+		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
+		undefinedFieldValues.addAll(getIssueSetting().getUndefinedFieldValues());
+		undefinedFieldValues.addAll(getServiceDeskSetting().getUndefinedIssueFieldValues());
+		return undefinedFieldValues;
+	}
+
+	@Override
+	public Collection<String> fixUndefinedIssueFields(Map<String, UndefinedFieldResolution> resolutions) {
+		Collection<String> deletedFields = new HashSet<>();
+		deletedFields.addAll(getIssueSetting().fixUndefinedFields(resolutions));
+		getServiceDeskSetting().fixUndefinedIssueFields(resolutions);
+		return deletedFields;
+	}
+	
+	@Override
+	public Collection<String> fixUndefinedIssueFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		Collection<String> deletedFields = new HashSet<>();
+		deletedFields.addAll(getIssueSetting().fixUndefinedFieldValues(resolutions));
+		getServiceDeskSetting().fixUndefinedIssueFieldValues(resolutions);
+		return deletedFields;
+	}
+
+	@Override
+	public void onRenameRole(String oldName, String newName) {
+		getIssueSetting().onRenameRole(oldName, newName);
+		getServiceDeskSetting().onRenameRole(oldName, newName);
+	}
+
+	@Override
+	public Usage onDeleteRole(String roleName) {
+		Usage usage = new Usage();
+		
+		usage.add(getIssueSetting().onDeleteRole(roleName));
+		usage.add(getServiceDeskSetting().onDeleteRole(roleName));
+		
+		return usage.prefix("administration");
+	}
+
+	@Override
+	public void onRenameProject(String oldName, String newName) {
+    	for (JobExecutor jobExecutor: getJobExecutors())
+    		jobExecutor.onRenameProject(oldName, newName);
+    	for (GroovyScript groovyScript: getGroovyScripts())
+    		groovyScript.onRenameProject(oldName, newName);
+    	getServiceDeskSetting().onRenameProject(oldName, newName);
+	}
+
+	@Override
+	public Usage onDeleteProject(String projectName) {
+    	Usage usage = new Usage();
+    	int index = 0;
+    	for (JobExecutor jobExecutor: getJobExecutors()) {
+    		usage.add(jobExecutor.onDeleteProject(projectName).prefix("job executor #" + index));
+    		index++;
+    	}
+    	
+    	index = 0;
+    	for (GroovyScript groovyScript: getGroovyScripts()) {
+    		usage.add(groovyScript.onDeleteProject(projectName).prefix("groovy script #" + index));
+    		index++;
+    	}
+		usage.add(getServiceDeskSetting().onDeleteProject(projectName));
+		
+		return usage.prefix("administration");
+	}
+
+	@Override
+	public void onRenameGroup(String oldName, String newName) {
+		Authenticator authenticator = getAuthenticator();
+		if (authenticator != null) 
+			authenticator.onRenameGroup(oldName, newName);
+		getIssueSetting().onRenameGroup(oldName, newName);
+	}
+
+	@Override
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
+		
+		usage.add(getIssueSetting().onDeleteGroup(groupName));
+
+		Authenticator authenticator = getAuthenticator();
+		if (authenticator != null)
+			usage.add(authenticator.onDeleteGroup(groupName));
+		
+		return usage.prefix("administration");
+	}
+
+	@Override
+	public void onRenameUser(String oldName, String newName) {
+    	for (JobExecutor jobExecutor: getJobExecutors())
+    		jobExecutor.onRenameUser(oldName, newName);
+		getIssueSetting().onRenameUser(oldName, newName);
+	}
+
+	@Override
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
+		
+    	int index = 0;
+    	for (JobExecutor jobExecutor: getJobExecutors()) {
+    		usage.add(jobExecutor.onDeleteUser(userName).prefix("job executor #" + index));
+    		index++;
+    	}
+
+		usage.add(getIssueSetting().onDeleteUser(userName));
+		
+		return usage.prefix("administration");
 	}
 	
 }

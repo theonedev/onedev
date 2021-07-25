@@ -34,6 +34,8 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -74,14 +76,20 @@ import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.administration.DefaultProjectDesignation;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueCreationSetting;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.ReceiveMailSetting;
 import io.onedev.server.model.support.administration.SenderAuthorization;
+import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.EmailAddress;
 import io.onedev.server.util.validation.UserNameValidator;
 
@@ -248,6 +256,16 @@ public class DefaultMailManager implements MailManager {
 			}
 		}
 	}
+
+	private void checkPermission(InternetAddress sender, Project project, Permission privilege, 
+			@Nullable User user, @Nullable SenderAuthorization authorization) {
+		if ((user == null || !user.asSubject().isPermitted(new ProjectPermission(project, privilege))) 
+				&& (authorization == null || !authorization.isPermitted(project, privilege))) {
+			String errorMessage = String.format("Permission denied (project: %s, sender: %s, permission: %s)", 
+					project.getName(), sender.getAddress(), privilege.getClass().getName());
+			throw new UnauthorizedException(errorMessage);
+		}
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
@@ -261,12 +279,13 @@ public class DefaultMailManager implements MailManager {
 					throw new ExplicitException("Invalid email message: no from address found");
 				
 				InternetAddress from = InternetAddress.parse(fromHeader[0], true)[0];
+
+				User user = userManager.findByEmail(from.getAddress());
+
+				ServiceDeskSetting serviceDeskSetting = settingManager.getServiceDeskSetting();
 				
-				SenderAuthorization authorization = mailSetting.getReceiveMailSetting()
-						.getSenderAuthorization(from.getAddress());
-				if (authorization == null) 
-					throw new ExplicitException("Unauthorized sender: " + from.getAddress());
-				
+				SenderAuthorization authorization = serviceDeskSetting.getSenderAuthorization(from.getAddress());
+				DefaultProjectDesignation designation = serviceDeskSetting.getDefaultProjectDesignation(from.getAddress());
 				EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
 				
 				Collection<Issue> issues = new ArrayList<>();
@@ -281,18 +300,22 @@ public class DefaultMailManager implements MailManager {
 				
 				List<String> receiverEmailAddresses = 
 						receivers.stream().map(it->it.getAddress()).collect(Collectors.toList());
+				
 				for (InternetAddress receiver: receivers) {
 					EmailAddress receiverAddress = EmailAddress.parse(receiver.getAddress());
 					if (receiverAddress.toString().equals(systemAddress.toString())) {
-						String projectName = authorization.getDefaultProject();
+						if (designation == null)
+							throw new ExplicitException("No default project for sender: " + from.getAddress());
+						String projectName = designation.getDefaultProject();
 						Project project = projectManager.find(projectName);
 						if (project == null) {
 							String errorMessage = String.format(
-									"Default project not found (sender: %s, project: %s)", 
+									"Default project does not exist (sender: %s, project: %s)", 
 									from.getAddress(), projectName);
 							throw new ExplicitException(errorMessage);
 						}
-						issues.add(openIssue(message, project, from, authorization));
+						checkPermission(from, project, new AccessProject(), user, authorization);
+						issues.add(openIssue(message, project, from, user, authorization));
 					} else if (receiverAddress.getDomain().equals(systemAddress.getDomain()) 
 							&& receiverAddress.getPrefix().startsWith(systemAddress.getPrefix() + "+")) {
 						String subAddress = receiverAddress.getPrefix().substring(systemAddress.getPrefix().length()+1);
@@ -301,25 +324,24 @@ public class DefaultMailManager implements MailManager {
 							continue;
 						Project project = projectManager.find(projectName);
 						if (project == null) 
-							throw new ExplicitException("Non-existent project in to address: " +  receiverAddress);
-						if (!authorization.isProjectAuthorized(project)) 
-							throw new ExplicitException("Unauthorized project in to address: " + receiverAddress);
+							throw new ExplicitException("Non-existent project specified in receipient address: " +  receiverAddress);
+						
 						String remaining = StringUtils.substringAfter(subAddress, "~");
 						if (remaining.length() == 0) {
-							openIssue(message, project, from, authorization);
+							checkPermission(from, project, new AccessProject(), user, authorization);
+							issues.add(openIssue(message, project, from, user, authorization));
 						} else if (remaining.startsWith("issue")) {
 							remaining = remaining.substring("issue".length());
 							Long issueNumber;
 							try {
 								issueNumber = Long.valueOf(StringUtils.substringBefore(remaining, "~"));
 							} catch (NumberFormatException e) { 
-								throw new ExplicitException("Invalid issue number in to address: " + receiverAddress);
+								throw new ExplicitException("Invalid issue number specified in receipient address: " + receiverAddress);
 							}
 							Issue issue = issueManager.find(project, issueNumber);
 							if (issue == null)
-								throw new ExplicitException("Non-existent issue in to address: " + receiverAddress);
+								throw new ExplicitException("Non-existent issue specified in receipient address: " + receiverAddress);
 							if (remaining.contains("~")) {
-								User user = userManager.findByEmail(from.getAddress());
 								if (user != null) {
 									IssueWatch watch = issueWatchManager.find(issue, user);
 									if (watch != null) {
@@ -334,7 +356,8 @@ public class DefaultMailManager implements MailManager {
 									}
 								}
 							} else {
-								addComment(issue, message, from, receiverEmailAddresses, authorization.getAuthorizedRole());
+								checkPermission(from, project, new AccessProject(), user, authorization);
+								addComment(issue, message, from, receiverEmailAddresses, user, authorization);
 								issues.add(issue);
 							}
 						} else if (remaining.startsWith("pullrequest")) {
@@ -343,14 +366,13 @@ public class DefaultMailManager implements MailManager {
 							try {
 								pullRequestNumber = Long.valueOf(StringUtils.substringBefore(remaining, "~"));
 							} catch (NumberFormatException e) { 
-								throw new ExplicitException("Invalid pull request number in to address: " + receiverAddress);
+								throw new ExplicitException("Invalid pull request number specified in receipient address: " + receiverAddress);
 							}
 							PullRequest pullRequest = pullRequestManager.find(project, pullRequestNumber);
 							if (pullRequest == null)
-								throw new ExplicitException("Non-existent issue in to address: " + receiverAddress);
+								throw new ExplicitException("Non-existent pull request specified in receipient address: " + receiverAddress);
 							
 							if (remaining.contains("~")) {
-								User user = userManager.findByEmail(from.getAddress());
 								if (user != null) {
 									PullRequestWatch watch = pullRequestWatchManager.find(pullRequest, user);
 									if (watch != null) {
@@ -365,11 +387,12 @@ public class DefaultMailManager implements MailManager {
 									}
 								}
 							} else {
-								addComment(pullRequest, message, from, receiverEmailAddresses, authorization.getAuthorizedRole());
+								checkPermission(from, project, new ReadCode(), user, authorization);
+								addComment(pullRequest, message, from, receiverEmailAddresses, user, authorization);
 								pullRequests.add(pullRequest);
 							}
 						} else {
-							throw new ExplicitException("Unknown sub addressing: " + receiverAddress);
+							throw new ExplicitException("Invalid receipient address: " + receiverAddress);
 						}							
 					} else {
 						involved.add(receiver);
@@ -391,10 +414,12 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	private void addComment(Issue issue, Message message, InternetAddress author, 
-			Collection<String> receiverEmailAddresses, Role role) throws IOException, MessagingException {
+			Collection<String> receiverEmailAddresses, @Nullable User user, 
+			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
 		IssueComment comment = new IssueComment();
 		comment.setIssue(issue);
-		User user = createUserIfNotExist(author, issue.getProject(), role);
+		if (user == null)
+			user = createUserIfNotExist(author, issue.getProject(), authorization.getAuthorizedRole());
 		comment.setUser(user);
 		String content = readText(issue.getProject(), issue.getUUID(), message);
 		if (StringUtils.isNotBlank(content)) {
@@ -404,10 +429,12 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	private void addComment(PullRequest pullRequest, Message message, InternetAddress author, 
-			Collection<String> receiverEmailAddresses, Role role) throws IOException, MessagingException {
+			Collection<String> receiverEmailAddresses, @Nullable User user, 
+			@Nullable SenderAuthorization authorization) throws IOException, MessagingException {
 		PullRequestComment comment = new PullRequestComment();
 		comment.setRequest(pullRequest);
-		User user = createUserIfNotExist(author, pullRequest.getProject(), role);
+		if (user == null)
+			user = createUserIfNotExist(author, pullRequest.getProject(), authorization.getAuthorizedRole());
 		comment.setUser(user);
 		String content = readText(pullRequest.getProject(), pullRequest.getUUID(), message);
 		if (StringUtils.isNotBlank(content)) {
@@ -426,7 +453,7 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	private Issue openIssue(Message message, Project project, InternetAddress submitter, 
-			SenderAuthorization authorization) throws MessagingException, IOException {
+			@Nullable User user, @Nullable SenderAuthorization authorization) throws MessagingException, IOException {
 		Issue issue = new Issue();
 		issue.setProject(project);
 		if (StringUtils.isNotBlank(message.getSubject()))
@@ -441,17 +468,22 @@ public class DefaultMailManager implements MailManager {
 		String description = readText(project, issue.getUUID(), message);
 		if (StringUtils.isNotBlank(description))
 			issue.setDescription(description);
-		
-		User user = createUserIfNotExist(submitter, project, authorization.getAuthorizedRole());
+
+		if (user == null)
+			user = createUserIfNotExist(submitter, project, authorization.getAuthorizedRole());
 		issue.setSubmitter(user);
 		
 		GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 		issue.setState(issueSetting.getInitialStateSpec().getName());
-		for (FieldSupply supply: authorization.getIssueFields()) {
+		
+		IssueCreationSetting issueCreationSetting = settingManager.getServiceDeskSetting()
+				.getIssueCreationSetting(submitter.getAddress(), project);
+		for (FieldSupply supply: issueCreationSetting.getIssueFields()) {
 			Object fieldValue = issueSetting.getFieldSpec(supply.getName())
 					.convertToObject(supply.getValueProvider().getValue());
 			issue.setFieldValue(supply.getName(), fieldValue);
 		}
+		
 		issueManager.open(issue);
 		return issue;
 	}

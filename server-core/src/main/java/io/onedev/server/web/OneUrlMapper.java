@@ -35,6 +35,9 @@ import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
+import io.onedev.server.web.page.admin.servicedesk.DefaultProjectDesignationListPage;
+import io.onedev.server.web.page.admin.servicedesk.IssueCreationSettingListPage;
+import io.onedev.server.web.page.admin.servicedesk.SenderAuthorizationListPage;
 import io.onedev.server.web.page.admin.ssh.SshSettingPage;
 import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.sso.SsoProcessPage;
@@ -216,6 +219,12 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		
 		add(new DynamicPathPageMapper("administration/settings/system", SystemSettingPage.class));
 		add(new DynamicPathPageMapper("administration/settings/mail", MailSettingPage.class));
+		add(new DynamicPathPageMapper("administration/settings/sender-authorizations", 
+				SenderAuthorizationListPage.class));
+		add(new DynamicPathPageMapper("administration/settings/default-projects", 
+				DefaultProjectDesignationListPage.class));
+		add(new DynamicPathPageMapper("administration/settings/issue-creation-settings", 
+				IssueCreationSettingListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-notification-template", 
 				IssueNotificationTemplatePage.class));
 		add(new DynamicPathPageMapper("administration/settings/pull-request-notification-template", 

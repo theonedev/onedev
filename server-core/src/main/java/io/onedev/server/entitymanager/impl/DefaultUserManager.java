@@ -32,7 +32,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -117,11 +116,9 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
     			project.getIssueSetting().onRenameUser(oldName, user.getName());
     		}
     		
-        	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
-        		jobExecutor.onRenameUser(oldName, user.getName());
+    		settingManager.onRenameUser(oldName, user.getName());
     		
     		issueFieldManager.onRenameUser(oldName, user.getName());
-    		settingManager.getIssueSetting().onRenameUser(oldName, user.getName());
     	}
     	
     	transactionManager.runAfterCommit(new Runnable() {
@@ -176,14 +173,8 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			usedInProject.prefix("project '" + project.getName() + "': setting");
 			usage.add(usedInProject);
 		}
-		
-    	int index = 0;
-    	for (JobExecutor jobExecutor: settingManager.getJobExecutors()) {
-    		usage.add(jobExecutor.onDeleteUser(user.getName(), index).prefix("administration"));
-    		index++;
-    	}
 
-		usage.add(settingManager.getIssueSetting().onDeleteUser(user.getName()).prefix("administration"));
+		usage.add(settingManager.onDeleteUser(user.getName()));
 		
 		usage.checkInUse("User '" + user.getName() + "'");
     	

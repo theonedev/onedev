@@ -127,7 +127,7 @@ public class MailSettingPage extends AdministrationPage {
 					logger.log("Sending test mail to " + subAddressed + "...");
 					mailManager.sendMail(mailSetting, 
 							Sets.newHashSet(subAddressed), Lists.newArrayList(), uuid, 
-							"A test mail", "A test mail", null, null);
+							"This is a test email from OneDev", "This is a test email from OneDev", null, null);
 
 					logger.log("Waiting for test mail to come back...");
 

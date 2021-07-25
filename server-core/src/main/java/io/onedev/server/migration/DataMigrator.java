@@ -2696,6 +2696,67 @@ public class DataMigrator {
 					element.addElement("buildQuerySubscriptions");
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				List<Element> oldSenderAuthorizationElements = null;
+				
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				long maxId = 1L;
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element receiveMailSetting = valueElement.element("receiveMailSetting");
+							if (receiveMailSetting != null) {
+								Element senderAuthorizationsElement = receiveMailSetting.element("senderAuthorizations");
+								oldSenderAuthorizationElements = senderAuthorizationsElement.elements();
+								senderAuthorizationsElement.detach();
+							}
+						}
+					}
+					long id = Long.valueOf(element.elementTextTrim("id"));
+					if (id > maxId)
+						maxId = id;
+				}
+				Element serviceDeskSettingElement = dom.getRootElement().addElement("io.onedev.server.model.Setting");
+				serviceDeskSettingElement.addAttribute("revision", "0.0");
+				serviceDeskSettingElement.addElement("id").setText(String.valueOf(maxId+1));
+				serviceDeskSettingElement.addElement("key").setText("SERVICE_DESK_SETTING");
+				Element valueElement = serviceDeskSettingElement.addElement("value");
+				valueElement.addAttribute("class", "io.onedev.server.model.support.administration.ServiceDeskSetting");
+				Element senderAuthorizationsElement = valueElement.addElement("senderAuthorizations");
+				Element defaultProjectDesignationsElement = valueElement.addElement("defaultProjectDesignations");
+				Element issueCreationSettingsElement = valueElement.addElement("issueCreationSettings");
+				for (Element oldSenderAuthorizationElement: oldSenderAuthorizationElements) {
+					Element senderAuthorizationElement = senderAuthorizationsElement
+							.addElement("io.onedev.server.model.support.administration.SenderAuthorization");
+					Element defaultProjectDesignationElement = defaultProjectDesignationsElement
+							.addElement("io.onedev.server.model.support.administration.DefaultProjectDesignation");
+					Element issueCreationSettingElement = issueCreationSettingsElement
+							.addElement("io.onedev.server.model.support.administration.IssueCreationSetting");
+					
+					Element senderEmailsElement = oldSenderAuthorizationElement.element("senderEmails");
+					if (senderEmailsElement != null) {
+						String senderEmails = senderEmailsElement.getText().trim();
+						senderAuthorizationElement.addElement("senderEmails").setText(senderEmails);
+						defaultProjectDesignationElement.addElement("senderEmails").setText(senderEmails);
+						issueCreationSettingElement.addElement("senderEmails").setText(senderEmails);
+					}
+					
+					Element authorizedProjectsElement = oldSenderAuthorizationElement.element("authorizedProjects");
+					if (authorizedProjectsElement != null) {
+						senderAuthorizationElement.addElement("authorizedProjects")
+								.setText(authorizedProjectsElement.getText().trim());
+					}
+					senderAuthorizationElement.addElement("authorizedRoleName")
+							.setText(oldSenderAuthorizationElement.elementText("authorizedRoleName").trim());
+					defaultProjectDesignationElement.addElement("defaultProject")
+							.setText(oldSenderAuthorizationElement.elementText("defaultProject").trim());
+					Element issueFieldsElement = oldSenderAuthorizationElement.element("issueFields");
+					issueFieldsElement.detach();
+					issueCreationSettingElement.add(issueFieldsElement);
+				}
+				
+				dom.writeToFile(file, false);
 			}
 		}
 	}

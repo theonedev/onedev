@@ -15,7 +15,6 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.BaseEntityManager;
@@ -52,14 +51,8 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 					protection.onRenameGroup(oldName, group.getName());
 			}
 			
-			Authenticator authenticator = settingManager.getAuthenticator();
-			if (authenticator != null) {
-				authenticator.onRenameGroup(oldName, group.getName());
-				settingManager.saveAuthenticator(authenticator);
-			}
-			
+			settingManager.onRenameGroup(oldName, group.getName());
 			issueFieldManager.onRenameGroup(oldName, group.getName());
-			settingManager.getIssueSetting().onRenameGroup(oldName, group.getName());
 		}
 		dao.persist(group);
 	}
@@ -78,11 +71,7 @@ public class DefaultGroupManager extends BaseEntityManager<Group> implements Gro
 			usage.add(usedInProject);
 		}
 
-		usage.add(settingManager.getIssueSetting().onDeleteGroup(group.getName()).prefix("administration"));
-
-		Authenticator authenticator = settingManager.getAuthenticator();
-		if (authenticator != null)
-			usage.add(authenticator.onDeleteGroup(group.getName()).prefix("administration"));
+		usage.add(settingManager.onDeleteGroup(group.getName()));
 		
 		usage.checkInUse("Group '" + group.getName() + "'");
 		

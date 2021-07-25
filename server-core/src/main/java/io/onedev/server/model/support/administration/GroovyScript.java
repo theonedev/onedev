@@ -123,14 +123,14 @@ public class GroovyScript implements Serializable {
 		}
 	}
 	
-	public Usage onDeleteProject(String projectName, int index) {
+	public Usage onDeleteProject(String projectName) {
 		Usage usage = new Usage();
 		if (getAllowedProjects() != null) {
 			PatternSet patternSet = PatternSet.parse(getAllowedProjects());
 			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
 				usage.add("allowed projects");
 		} 
-		return usage.prefix("groovy script #" + index);
+		return usage;
 	}
 	
 	public void onRenameProject(String oldName, String newName) {

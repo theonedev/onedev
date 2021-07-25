@@ -71,8 +71,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -188,13 +186,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     public void save(Project project, String oldName) {
     	dao.persist(project);
     	if (oldName != null && !oldName.equals(project.getName())) {
-        	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
-        		jobExecutor.onRenameProject(oldName, project.getName());
-        	for (GroovyScript groovyScript: settingManager.getGroovyScripts())
-        		groovyScript.onRenameProject(oldName, project.getName());
+    		settingManager.onRenameProject(oldName, project.getName());
         	jobManager.schedule(project);
-        	if (settingManager.getMailSetting() != null)
-        		settingManager.getMailSetting().onRenameProject(oldName, project.getName());
     	}
     }
     
@@ -215,20 +208,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Override
     public void delete(Project project) {
     	Usage usage = new Usage();
-    	int index = 0;
-    	for (JobExecutor jobExecutor: settingManager.getJobExecutors()) {
-    		usage.add(jobExecutor.onDeleteProject(project.getName(), index).prefix("administration"));
-    		index++;
-    	}
-    	index = 0;
-    	for (GroovyScript groovyScript: settingManager.getGroovyScripts()) {
-    		usage.add(groovyScript.onDeleteProject(project.getName(), index).prefix("administration"));
-    		index++;
-    	}
-    	if (settingManager.getMailSetting() != null) {
-    		usage.add(settingManager.getMailSetting().onDeleteProject(project.getName()))
-    				.prefix("mail setting").prefix("administration");
-    	}
+    	usage.add(settingManager.onDeleteProject(project.getName()));
     	
     	usage.checkInUse("Project '" + project.getName() + "'");
 

@@ -66,6 +66,9 @@ import io.onedev.server.web.page.admin.role.RoleDetailPage;
 import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
+import io.onedev.server.web.page.admin.servicedesk.DefaultProjectDesignationListPage;
+import io.onedev.server.web.page.admin.servicedesk.IssueCreationSettingListPage;
+import io.onedev.server.web.page.admin.servicedesk.SenderAuthorizationListPage;
 import io.onedev.server.web.page.admin.ssh.SshSettingPage;
 import io.onedev.server.web.page.admin.sso.SsoConnectorListPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
@@ -152,6 +155,17 @@ public abstract class LayoutPage extends BasePage {
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Setting", 
 							MailSettingPage.class, new PageParameters()));
+					
+					List<SidebarMenuItem> serviceDeskSettingMenuItems = new ArrayList<>();
+					serviceDeskSettingMenuItems.add(new SidebarMenuItem.Page(null, "Sender Authorizations", 
+							SenderAuthorizationListPage.class, new PageParameters()));
+					serviceDeskSettingMenuItems.add(new SidebarMenuItem.Page(null, "Default Projects", 
+							DefaultProjectDesignationListPage.class, new PageParameters()));
+					serviceDeskSettingMenuItems.add(new SidebarMenuItem.Page(null, "Issue Creation Settings", 
+							IssueCreationSettingListPage.class, new PageParameters()));
+					
+					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Service Desk Settings", 
+							serviceDeskSettingMenuItems));
 					
 					List<SidebarMenuItem> notificationTemplateSettingMenuItems = new ArrayList<>();
 					notificationTemplateSettingMenuItems.add(new SidebarMenuItem.Page(null, "Issue", 

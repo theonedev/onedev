@@ -1,0 +1,58 @@
+package io.onedev.server.model.support.administration;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
+import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Patterns;
+
+@Editable
+public class DefaultProjectDesignation implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	private String senderEmails;
+	
+	private String defaultProject;
+
+	@Editable(order=100, name="Applicable Senders", description="Specify space-separated sender "
+			+ "email addresses applicable for this entry. Use '*' or '?' for wildcard match. "
+			+ "Prefix with '-' to exclude. Leave empty to match all senders")
+	@Patterns
+	@NameOfEmptyValue("Any sender")
+	public String getSenderEmails() {
+		return senderEmails;
+	}
+
+	public void setSenderEmails(String senderEmails) {
+		this.senderEmails = senderEmails;
+	}
+	
+	@Editable(order=200)
+	@ChoiceProvider("getProjectChoices")
+	@NotEmpty
+	public String getDefaultProject() {
+		return defaultProject;
+	}
+
+	public void setDefaultProject(String defaultProject) {
+		this.defaultProject = defaultProject;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getProjectChoices() {
+		List<String> projectNames = OneDev.getInstance(ProjectManager.class)
+				.query().stream().map(it->it.getName()).collect(Collectors.toList());
+		Collections.sort(projectNames);
+		return projectNames;
+	}
+		
+}

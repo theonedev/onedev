@@ -1,6 +1,10 @@
 package io.onedev.server.model.support.issue.field.supply;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -9,6 +13,15 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.web.component.issue.workflowreconcile.ReconcileUtils;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -51,6 +64,66 @@ public class FieldSupply implements Serializable {
 	public void setSecret(boolean secret) {
 		this.secret = secret;
 	}
+	
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
+	public Set<String> getUndefinedFields() {
+		Set<String> undefinedFields = new HashSet<>();
+		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getName());
+		if (fieldSpec == null)
+			undefinedFields.add(getName());
+		return undefinedFields;
+	}
+
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
+		if (getValueProvider() instanceof SpecifiedValue) {
+			SpecifiedValue specifiedValue = (SpecifiedValue) getValueProvider();
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getIssueSetting().getFieldSpec(getName()));
+			if (specifiedChoices != null) {
+				for (String value: specifiedValue.getValue()) {
+					if (!specifiedChoices.getChoiceValues().contains(value)) 
+						undefinedFieldValues.add(new UndefinedFieldValue(getName(), value));
+				}
+			}
+		}
+		
+		return undefinedFieldValues;
+	}
+	
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
+		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+			UndefinedFieldResolution resolution = entry.getValue();
+			if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
+				if (getName().equals(entry.getKey()))
+					setName(resolution.getNewField());
+			} else {
+				if (getName().equals(entry.getKey())) 
+					return false;
+			} 
+		}				
+		return true;
+	}
+	
+	public boolean fixUndefinedFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
+		if (getValueProvider() instanceof SpecifiedValue) {
+			SpecifiedValue specifiedValue = (SpecifiedValue) getValueProvider();
+			for (Map.Entry<String, UndefinedFieldValuesResolution> entry: resolutions.entrySet()) {
+				if (entry.getKey().equals(getName())) {
+					specifiedValue.getValue().removeAll(entry.getValue().getDeletions());
+					for (Map.Entry<String, String> renameEntry: entry.getValue().getRenames().entrySet()) {
+						ReconcileUtils.renameItem(specifiedValue.getValue(), 
+								renameEntry.getKey(), renameEntry.getValue());
+					}
+					if (specifiedValue.getValue().isEmpty())
+						return false;
+				}
+			}
+		}
+		return true;
+	}		
 
 	@Override
 	public boolean equals(Object other) {
@@ -71,6 +144,6 @@ public class FieldSupply implements Serializable {
 			.append(name)
 			.append(valueProvider)
 			.toHashCode();
-	}		
-	
+	}
+
 }

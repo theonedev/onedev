@@ -14,7 +14,7 @@ public class ProjectPermission implements Permission {
 		this.project = project;
 		this.privilege = privilege;
 	}
-	
+
 	@Override
 	public boolean implies(Permission p) {
 		if (p instanceof ProjectPermission) {

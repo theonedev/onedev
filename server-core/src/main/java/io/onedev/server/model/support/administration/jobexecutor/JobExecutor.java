@@ -89,10 +89,10 @@ public abstract class JobExecutor implements Serializable {
 		return isEnabled() && io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).matches(build);
 	}
 	
-	public Usage onDeleteProject(String projectName, int executorIndex) {
+	public Usage onDeleteProject(String projectName) {
 		Usage usage = new Usage();
 		if (io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).isUsingProject(projectName))
-			usage.add("job executor #" + executorIndex + ": job match" );
+			usage.add("job match" );
 		return usage;
 	}
 	
@@ -103,10 +103,10 @@ public abstract class JobExecutor implements Serializable {
 		jobMatch = parsedJobMatch.toString();
 	}
 
-	public Usage onDeleteUser(String userName, int executorIndex) {
+	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		if (io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).isUsingUser(userName))
-			usage.add("job executor #" + executorIndex + ": job match" );
+			usage.add("job match" );
 		return usage;
 	}
 	

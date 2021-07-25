@@ -368,7 +368,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public Collection<String> getUndefinedFields() {
-		Collection<String> undefinedFields = getIssueSetting().getUndefinedFields();
+		Collection<String> undefinedFields = new HashSet<>();
+		undefinedFields.addAll(settingManager.getUndefinedIssueFields());
 		undefinedFields.addAll(roleManager.getUndefinedIssueFields());
 		
 		Query<String> query = getSession().createQuery("select distinct name from IssueField");
@@ -406,7 +407,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	@Sessional
 	@Override
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		Collection<UndefinedFieldValue> undefinedFieldValues = getIssueSetting().getUndefinedFieldValues();
+		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
+		
+		undefinedFieldValues.addAll(settingManager.getUndefinedIssueFieldValues());
 		
 		Query query = getSession().createQuery("select distinct name, value from IssueField where type=:choice");
 		query.setParameter("choice", FieldSpec.ENUMERATION);
@@ -539,7 +542,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			fixUndefinedFields(resolutions, null, user.getIssueQuerySetting().getUserQueries());
 		
 		Map<String, UndefinedFieldResolution> derivedDeletions = 
-				getFieldResolutions(getIssueSetting().fixUndefinedFields(resolutions));
+				getFieldResolutions(settingManager.fixUndefinedIssueFields(resolutions));
 		if (!derivedDeletions.isEmpty())
 			fixUndefinedFields(derivedDeletions);
 	}
@@ -591,7 +594,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			fixUndefinedFieldValues(resolutions, null, user.getIssueQuerySetting().getUserQueries());
 		
 		Map<String, UndefinedFieldResolution> derivedDeletions = 
-				getFieldResolutions(getIssueSetting().fixUndefinedFieldValues(resolutions));
+				getFieldResolutions(settingManager.fixUndefinedIssueFieldValues(resolutions));
 		if (!derivedDeletions.isEmpty())
 			fixUndefinedFields(derivedDeletions);
 	}

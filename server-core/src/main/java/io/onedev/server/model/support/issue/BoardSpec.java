@@ -376,15 +376,8 @@ public class BoardSpec implements Serializable {
 		for (Map.Entry<String, UndefinedFieldValuesResolution> resolutionEntry: resolutions.entrySet()) {
 			if (resolutionEntry.getKey().equals(getIdentifyField())) {
 				getColumns().removeAll(resolutionEntry.getValue().getDeletions());
-				for (Map.Entry<String, String> renameEntry: resolutionEntry.getValue().getRenames().entrySet()) {
-					int index = getColumns().indexOf(renameEntry.getKey());
-					if (index != -1) {
-						if (getColumns().contains(renameEntry.getValue()))
-							getColumns().remove(index);
-						else
-							getColumns().set(index, renameEntry.getValue());
-					}
-				}
+				for (Map.Entry<String, String> renameEntry: resolutionEntry.getValue().getRenames().entrySet()) 
+					ReconcileUtils.renameItem(getColumns(), renameEntry.getKey(), renameEntry.getValue());
 			}
 		}
 		return getColumns().size() >= 2;

@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.usage.Usage;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -83,9 +81,8 @@ public class MailSetting implements Serializable {
 		this.emailAddress = emailAddress;
 	}
 
-	@Editable(order=450, name="Check Incoming Email", description="Enable this to check inbox of "
-			+ "system email address to take various actions, such as creating issue, "
-			+ "post issue/pull request comments etc.<br>"
+	@Editable(order=450, name="Check Incoming Email", description="Enable this to use the service desk feature (creating issue, "
+			+ "posting issue or pull request comments from email) <br>"
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
 			+ "needs to be enabled for your mail server, as OneDev needs to use this to track context of sent email and received email")
 	public ReceiveMailSetting getReceiveMailSetting() {
@@ -114,67 +111,6 @@ public class MailSetting implements Serializable {
 
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
-	}
-	
-	public void onRenameRole(String oldName, String newName) {
-		if (receiveMailSetting != null) {
-			for (SenderAuthorization authorization: receiveMailSetting.getSenderAuthorizations()) {
-				if (authorization.getAuthorizedRoleName().equals(oldName))
-					authorization.setAuthorizedRoleName(newName);
-			}
-		}
-	}
-	
-	public Usage onDeleteRole(String roleName) {
-		Usage usage = new Usage();
-		if (getReceiveMailSetting() != null) {
-			int index = 0;
-			for (SenderAuthorization authorization: getReceiveMailSetting().getSenderAuthorizations()) {
-				if (authorization.getAuthorizedRoleName().equals(roleName))
-					usage.add("authorized role");
-				usage.prefix("sender authorization #" + index);
-				index++;
-			}
-			usage.prefix("check incoming email");
-		} 
-		return usage;
-	}
-	
-	public void onRenameProject(String oldName, String newName) {
-		if (receiveMailSetting != null) {
-			for (SenderAuthorization authorization: receiveMailSetting.getSenderAuthorizations()) {
-				if (authorization.getDefaultProject().equals(oldName))
-					authorization.setDefaultProject(newName);
-				PatternSet patternSet = PatternSet.parse(authorization.getAuthorizedProjects());
-				if (patternSet.getIncludes().remove(oldName))
-					patternSet.getIncludes().add(newName);
-				if (patternSet.getExcludes().remove(oldName))
-					patternSet.getExcludes().add(newName);
-				authorization.setAuthorizedProjects(patternSet.toString());
-				if (authorization.getAuthorizedProjects().length() == 0)
-					authorization.setAuthorizedProjects(null);
-			}
-		}
-	}
-	
-	public Usage onDeleteProject(String projectName) {
-		Usage usage = new Usage();
-		if (getReceiveMailSetting() != null) {
-			int index = 0;
-			for (SenderAuthorization authorization: getReceiveMailSetting().getSenderAuthorizations()) {
-				if (authorization.getDefaultProject().equals(projectName))
-					usage.add("default project");
-				if (authorization.getAuthorizedProjects() != null) {
-					PatternSet patternSet = PatternSet.parse(authorization.getAuthorizedProjects());
-					if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
-						usage.add("authorized projects");
-				} 
-				usage.prefix("sender authorization #" + index);
-				index++;
-			}
-			usage.prefix("check incoming email");
-		} 
-		return usage;
 	}
 	
 }

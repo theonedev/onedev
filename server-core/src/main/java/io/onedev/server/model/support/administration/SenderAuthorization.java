@@ -1,33 +1,22 @@
 package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
+import org.apache.shiro.authz.Permission;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
-import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.FieldNamesProvider;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.RoleChoice;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -43,10 +32,6 @@ public class SenderAuthorization implements Serializable {
 	
 	private String authorizedRoleName;
 	
-	private String defaultProject;
-
-	private List<FieldSupply> issueFields = new ArrayList<>();
-
 	@Editable(order=100, name="Applicable Senders", description="Specify space-separated sender "
 			+ "email addresses applicable for this entry. Use '*' or '?' for wildcard match. "
 			+ "Prefix with '-' to exclude. Leave empty to match all senders")
@@ -96,50 +81,13 @@ public class SenderAuthorization implements Serializable {
 		return role;
 	}
 	
-	@Editable(order=200, description="Upon receiving new email (aka, not replying to notification emails), OneDev "
-			+ "will check subaddress of the email to determine which project to create issue in. If subadddress "
-			+ "is not specified, this property will be used to determine project based on sender address")
-	@ChoiceProvider("getProjectChoices")
-	@NotEmpty
-	public String getDefaultProject() {
-		return defaultProject;
-	}
-
-	public void setDefaultProject(String defaultProject) {
-		this.defaultProject = defaultProject;
-	}
-
-	@SuppressWarnings("unused")
-	private static List<String> getProjectChoices() {
-		List<String> projectNames = OneDev.getInstance(ProjectManager.class)
-				.query().stream().map(it->it.getName()).collect(Collectors.toList());
-		Collections.sort(projectNames);
-		return projectNames;
-	}
-	
-	@Editable(order=300)
-	@FieldNamesProvider("getFieldNames")
-	@OmitName
-	@Valid
-	public List<FieldSupply> getIssueFields() {
-		return issueFields;
-	}
-
-	public void setIssueFields(List<FieldSupply> issueFields) {
-		this.issueFields = issueFields;
-	}
-	
-	@SuppressWarnings("unused")
-	private static Collection<String> getFieldNames() {
-		return OneDev.getInstance(SettingManager.class).getIssueSetting().getPromptFieldsUponIssueOpen();
-	}
-	
-	public boolean isProjectAuthorized(Project project) {
+	public boolean isPermitted(Project project, Permission privilege) {
 		String authorizedProjects = this.authorizedProjects;
 		if (authorizedProjects == null)
 			authorizedProjects = "*";
 		Matcher matcher = new StringMatcher();
-		return PatternSet.parse(authorizedProjects).matches(matcher, project.getName());
+		return PatternSet.parse(authorizedProjects).matches(matcher, project.getName()) 
+				&& getAuthorizedRole().implies(privilege);
 	}
 	
 }
