@@ -4,13 +4,12 @@
 			<div class="alert alert-light alert-notice mb-5">The service desk feature enables user to create issues, post 
 			issue or pull request comments via email directly. When sender email address can not be mapped to an existing 
 			user, OneDev will use sender authorizations defined here to determine if the sender has permission to execute 
-			relevant actions</div>
-			<a wicket:id="addNew" class="btn btn-icon btn-primary mb-4" title="Add sender authorization"><wicket:svg href="plus" class="icon"></wicket:svg></a>	
-			<table wicket:id="authorizations" class="table table-hover"></table>
+			relevant actions. For a particular sender, the first matching entry will take effect</div>
+			
+			<form wicket:id="form" class="sender-authorizations leave-confirm">
+				<div wicket:id="editor"></div>
+				<input type="submit" class="btn btn-primary dirty-aware mt-4" value="Save">
+			</form>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="actionColumnFrag">
-		<a wicket:id="edit" class="btn btn-xs btn-icon btn-light btn-hover-primary mr-1" title="Edit"><wicket:svg href="edit" class="icon"></wicket:svg></a>
-		<a wicket:id="delete" class="btn btn-xs btn-icon btn-light btn-hover-danger" title="Delete"><wicket:svg href="trash" class="icon"></wicket:svg></a>
- 	</wicket:fragment>
 </wicket:extend>

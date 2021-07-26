@@ -20,11 +20,16 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldReso
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
 public class ServiceDeskSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String PROP_SENDER_AUTHORIZATIONS = "senderAuthorizations";
+	
+	public static final String PROP_DEFAULT_PROJECT_DESIGNATIONS = "defaultProjectDesignations";
 
 	private List<SenderAuthorization> senderAuthorizations = new ArrayList<>(); 
 	
@@ -32,6 +37,8 @@ public class ServiceDeskSetting implements Serializable {
 	
 	private List<IssueCreationSetting> issueCreationSettings = new ArrayList<>();
 
+	@Editable
+	@OmitName
 	public List<SenderAuthorization> getSenderAuthorizations() {
 		return senderAuthorizations;
 	}
@@ -40,6 +47,8 @@ public class ServiceDeskSetting implements Serializable {
 		this.senderAuthorizations = senderAuthorizations;
 	}
 
+	@Editable
+	@OmitName
 	public List<DefaultProjectDesignation> getDefaultProjectDesignations() {
 		return defaultProjectDesignations;
 	}
