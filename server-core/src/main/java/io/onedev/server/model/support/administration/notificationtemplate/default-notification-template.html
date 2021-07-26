@@ -1,8 +1,12 @@
 <% 
+	print "<b>${eventSummary}</b>"
+	print "<br><br>" 
+	
 	if (eventBody != null) {
 		print eventBody
 		print "<br>" 
 	}
+	
 	if (replyable)
 		print """
 			<div>Reply this email to post comment, or click <a href='${eventUrl}'>this link</a> for details</div>

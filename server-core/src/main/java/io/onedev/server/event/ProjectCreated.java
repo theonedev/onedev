@@ -10,11 +10,8 @@ public class ProjectCreated extends ProjectEvent {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = "created";
-		if (withEntity)
-			activity += " project " + getProject().getName();
-		return activity;
+	public String getActivity() {
+		return "created";
 	}
 
 }

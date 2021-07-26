@@ -76,6 +76,17 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		this.userManager = userManager;
 	}
 	
+	private String getSubject(PullRequest request) {
+		String state;
+		if (request.isMerged())
+			state = "Merged";
+		else if (request.isDiscarded())
+			state = "Discarded";
+		else
+			state = "Open";
+		return String.format("[%s] %s", state, request.getTitle());
+	}
+	
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
@@ -184,18 +195,20 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				&& !notifiedUsers.contains(request.getSubmitter())) {
 			PullRequestChangeEvent changeEvent = (PullRequestChangeEvent) event;
 			PullRequestChangeData changeData = changeEvent.getChange().getData();
-			String subject = null;
+			String summary = null;
 			if (changeData instanceof PullRequestApproveData) 
-				subject = String.format(user.getDisplayName() + " approved pull request %s", request.getNumberAndTitle());
+				summary = user.getDisplayName() + " approved";
 			else if (changeData instanceof PullRequestRequestedForChangesData) 
-				subject = String.format(user.getDisplayName() + " requested changes for pull request %s", request.getNumberAndTitle());
+				summary = user.getDisplayName() + " requested changes";
 			else if (changeData instanceof PullRequestDiscardData) 
-				subject = String.format(user.getDisplayName() + " discarded pull request %s", request.getNumberAndTitle());
-			if (subject != null) { 
-				subject = "[" + getState(request) + "] " + subject;
+				summary = user.getDisplayName() + " discarded";
+			if (summary != null) { 
+				summary = "Pull request " + request.getFQN() + ": " + summary;
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
-						Lists.newArrayList(), subject, getHtmlBody(event, url, replyable, null), 
-						getTextBody(event, url, replyable, null), replyAddress, threadingReferences);
+						Lists.newArrayList(), getSubject(request), 
+						getHtmlBody(event, summary, null, url, replyable, null), 
+						getTextBody(event, summary, null, url, replyable, null), 
+						replyAddress, threadingReferences);
 				notifiedUsers.add(request.getSubmitter());
 			}
 		}
@@ -251,37 +264,27 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 
 			if (!mentionedUsers.isEmpty() || !ccUsers.isEmpty()) {
-				String subject;
+				String summary;
 				if (user != null) 
-					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
+					summary = String.format("Pull request %s: %s %s", request.getFQN(), user.getDisplayName(), event.getActivity());
 				else if (committer != null) 
-					subject = String.format("%s added commits to pull request %s", committer.getDisplayName(), request.getNumberAndTitle());
+					summary = String.format("Pull request %s: %s added commits", request.getFQN(), committer.getDisplayName());
 				else
-					subject = event.getActivity(true);
+					summary = "Pull request " + request.getFQN() + ": " + event.getActivity();
 				
-				String unsubscribeAddress = mailManager.getUnsubscribeAddress(request);
-				subject = "[" + getState(request) + "] " + subject;
-				String htmlBody = getHtmlBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
-				String textBody = getTextBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
+				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
+				String htmlBody = getHtmlBody(event, summary, null, url, replyable, unsubscribable);
+				String textBody = getTextBody(event, summary, null, url, replyable, unsubscribable);
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
-						subject, htmlBody, textBody, replyAddress, threadingReferences);
+						getSubject(request), htmlBody, textBody, replyAddress, threadingReferences);
 			}
 		}				
 	}
 	
 	private String getThreadingReferences(PullRequest request) {
-		return request.getUUID() + "@onedev";
-	}
-	
-	private String getState(PullRequest request) {
-		if (request.isMerged())
-			return "Merged";
-		else if (request.isDiscarded())
-			return "Discarded";
-		else
-			return "Open";
+		return "<" + request.getUUID() + "@onedev>";
 	}
 	
 	@Transactional
@@ -294,13 +297,13 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (review.getResult() == null && !review.getUser().equals(SecurityUtils.getUser())) {
 					pullRequestWatchManager.watch(request, review.getUser(), true);
 					String url = urlManager.urlFor(request);
-					String subject = String.format("[%s] You are invited to review pull request %s", 
-							getState(request), request.getNumberAndTitle());
+					String summary = "Pull request " + request.getFQN() + ": You are invited to review";
 					String replyAddress = mailManager.getReplyAddress(request);
-					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), Lists.newArrayList(),
-							subject, getHtmlBody(event, url, replyAddress != null, null), 
-							getTextBody(event, url, replyAddress != null, null), replyAddress, 
-							getThreadingReferences(request));
+					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), 
+							Lists.newArrayList(), getSubject(request), 
+							getHtmlBody(event, summary, null, url, replyAddress != null, null), 
+							getTextBody(event, summary, null, url, replyAddress != null, null), 
+							replyAddress, getThreadingReferences(request));
 				}
 			} else if (event.getEntity() instanceof PullRequestAssignment) {
 				PullRequestAssignment assignment = (PullRequestAssignment) event.getEntity();
@@ -308,12 +311,12 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (!assignment.getUser().equals(SecurityUtils.getUser())) {
 					pullRequestWatchManager.watch(request, assignment.getUser(), true);
 					String url = urlManager.urlFor(request);
-					String subject = String.format("[%s] You are assigned and expected to merge pull request %s", 
-							getState(request), request.getNumberAndTitle());
+					String summary = "Pull request " + request.getFQN() + ": You are assigned and expected to merge";
 					String replyAddress = mailManager.getReplyAddress(request);
-					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), Lists.newArrayList(),
-							subject, getHtmlBody(event, url, replyAddress != null, null), 
-							getTextBody(event, url, replyAddress != null, null), 
+					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), 
+							Lists.newArrayList(), getSubject(request), 
+							getHtmlBody(event, summary, null, url, replyAddress != null, null), 
+							getTextBody(event, summary, null, url, replyAddress != null, null), 
 							replyAddress, getThreadingReferences(request));
 				}
 			}

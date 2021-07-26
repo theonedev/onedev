@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -36,11 +35,8 @@ public class IssueReferencedFromPullRequestData implements IssueChangeData {
 	}
 	
 	@Override
-	public String getActivity(Issue withIssue) {
-		if (withIssue != null)
-			return "A pull request referenced issue " + withIssue.getNumberAndTitle();
-		else
-			return "Referenced from pull request";
+	public String getActivity() {
+		return "Referenced from pull request";
 	}
 
 	@Override

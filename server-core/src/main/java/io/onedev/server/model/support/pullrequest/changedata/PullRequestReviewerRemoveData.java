@@ -2,7 +2,6 @@ package io.onedev.server.model.support.pullrequest.changedata;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentAware;
 
@@ -17,11 +16,8 @@ public class PullRequestReviewerRemoveData implements PullRequestChangeData {
 	}
 	
 	@Override
-	public String getActivity(PullRequest withRequest) {
-		String activity = "removed reviewer \"" + reviewer + "\"";
-		if (withRequest != null)
-			activity += " in pull request " + withRequest.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "removed reviewer \"" + reviewer + "\"";
 	}
 
 	@Override

@@ -11,11 +11,8 @@ public class ScheduledTimeReaches extends ProjectEvent {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = "Scheduled time reaches ";
-		if (withEntity)
-			activity += " in project " + getProject().getName();
-		return activity;
+	public String getActivity() {
+		return "Scheduled time reaches ";
 	}
 	
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentAware;
@@ -39,11 +38,8 @@ public class IssueDescriptionChangeData implements IssueChangeData {
 	}
 	
 	@Override
-	public String getActivity(Issue withIssue) {
-		String activity = "changed description";
-		if (withIssue != null)
-			activity += " of issue " + withIssue.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "changed description";
 	}
 
 	@Override

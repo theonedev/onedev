@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.unbescape.html.HtmlEscape;
 
 import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.StringUtils;
@@ -35,9 +36,9 @@ public abstract class AbstractNotificationManager {
 		this.settingManager = settingManager;
 	}
 	
-	protected String getHtmlBody(Event event, String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
-		String eventBody = null;
-		if (event instanceof MarkdownAware) {
+	protected String getHtmlBody(Event event, String eventSummary, @Nullable String eventBody, 
+			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
+		if (eventBody == null && event instanceof MarkdownAware) {
 			eventBody = ((MarkdownAware) event).getMarkdown();
 			if (eventBody != null) {
 				Project project = null;
@@ -51,11 +52,15 @@ public abstract class AbstractNotificationManager {
 		
 		Map<String, Object> bindings = new HashMap<>();
 		
+		eventSummary = HtmlEscape.escapeHtml5(eventSummary);
+		eventUrl = HtmlEscape.escapeHtml5(eventUrl);
+		
 		bindings.put("event", event);
+		bindings.put("eventSummary", eventSummary);
 		bindings.put("eventBody", eventBody);
-		bindings.put("unsubscribable", unsubscribable);
-		bindings.put("replyable", replyable);
 		bindings.put("eventUrl", eventUrl);
+		bindings.put("replyable", replyable);
+		bindings.put("unsubscribable", unsubscribable);
 		
 		if (event instanceof IssueEvent) { 
 			template = StringUtils.join(settingManager.getNotificationTemplateSetting().getIssueNotificationTemplate(), "\n");
@@ -77,39 +82,38 @@ public abstract class AbstractNotificationManager {
 			template = StringUtils.join(NotificationTemplateSetting.DEFAULT_TEMPLATE, "\n");
 			
 		try {
-			String htmlBody = new SimpleTemplateEngine().createTemplate(template).make(bindings).toString();
-			return htmlBody;
+			return new SimpleTemplateEngine().createTemplate(template).make(bindings).toString();
 		} catch (CompilationFailedException | ClassNotFoundException | IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	protected String getTextBody(Event event, String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
-		String textBody = null;
-		if (event instanceof MarkdownAware) 
-			textBody = ((MarkdownAware) event).getMarkdown();
+	protected String getTextBody(Event event, String eventSummary, @Nullable String eventBody, 
+			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
+		StringBuilder textBody = new StringBuilder(eventSummary).append("\n\n");
 		
-		if (textBody != null)
-			textBody += "\n";
-		else 
-			textBody = "";
+		if (eventBody == null && event instanceof MarkdownAware)
+			eventBody = ((MarkdownAware) event).getMarkdown();
+		
+		if (eventBody != null) 
+			textBody.append(eventBody).append("\n\n");
 		
 		if (replyable)
-			textBody += "Reply this email to post comment, or visit " + eventUrl + " for details";
+			textBody.append("Reply this email to post comment, or visit " + eventUrl + " for details");
 		else
-			textBody += "Visit " + eventUrl + " for details";
+			textBody.append("Visit " + eventUrl + " for details");
 		
 		if (unsubscribable != null) {
-			textBody += "\n\n---------------------------------------------\nYou received this as you "
-					+ "are participating or participated previously in this topic. ";
+			textBody.append("\n\n---------------------------------------------\nYou received this as you "
+					+ "are participating or participated previously in this topic. ");
 			if (unsubscribable.getEmailAddress() != null) {
-				textBody += String.format("Mail to %s with any content to unsubscribe", 
-						unsubscribable.getEmailAddress());
+				textBody.append(String.format("Mail to %s with any content to unsubscribe", 
+						unsubscribable.getEmailAddress()));
 			} else {
-				textBody += "To stop receiving notifications of this topic, please visit detail link above and unwatch it";
+				textBody.append("To stop receiving notifications of this topic, please visit detail link above and unwatch it");
 			}
 		}
-		return textBody;
+		return textBody.toString();
 	}
 	
 }

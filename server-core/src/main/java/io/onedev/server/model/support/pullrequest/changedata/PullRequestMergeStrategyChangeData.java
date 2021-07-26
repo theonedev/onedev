@@ -2,7 +2,6 @@ package io.onedev.server.model.support.pullrequest.changedata;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.util.CollectionUtils;
@@ -23,11 +22,8 @@ public class PullRequestMergeStrategyChangeData implements PullRequestChangeData
 	}
 	
 	@Override
-	public String getActivity(PullRequest withRequest) {
-		String activity = "changed merge strategy";
-		if (withRequest != null)
-			activity += " of pull request" + withRequest.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "changed merge strategy";
 	}
 
 	@Override

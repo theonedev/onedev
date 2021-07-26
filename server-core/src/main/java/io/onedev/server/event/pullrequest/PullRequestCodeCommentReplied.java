@@ -22,11 +22,8 @@ public class PullRequestCodeCommentReplied extends PullRequestCodeCommentEvent {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = "replied code comment"; 
-		if (withEntity)
-			activity += " in pull request " + getRequest().getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "replied code comment"; 
 	}
 
 }

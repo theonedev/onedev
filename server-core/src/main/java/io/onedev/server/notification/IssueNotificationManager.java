@@ -73,6 +73,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		Issue issue = event.getIssue();
 		User user = event.getUser();
 
+		String subject = String.format("[%s] %s", issue.getState(), issue.getTitle());
+		
 		String url;
 		if (event instanceof IssueCommented)
 			url = urlManager.urlFor(((IssueCommented)event).getComment());
@@ -147,17 +149,17 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		boolean replyable = replyAddress != null;
 		String threadingReferences = issue.getThreadingReference();
 		if (threadingReferences == null)
-			threadingReferences = issue.getUUID() + "@onedev";
+			threadingReferences = "<" + issue.getUUID() + "@onedev>";
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
-			String subject = String.format("[%s] You are now \"%s\" of issue %s", 
-					issue.getState(), entry.getKey(), issue.getNumberAndTitle());
+			String summary = String.format("Issue %s: %s: You", issue.getFQN(), entry.getKey());
 			Set<String> emails = entry.getValue().getMembers()
 					.stream()
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, 
-					getHtmlBody(event, url, replyable, null), getTextBody(event, url, replyable, null), 
+					getHtmlBody(event, summary, null, url, replyable, null), 
+					getTextBody(event, summary, null, url, replyable, null), 
 					replyAddress, threadingReferences);
 			
 			for (User member: entry.getValue().getMembers())
@@ -166,15 +168,15 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
-			String subject = String.format("[%s] You are now \"%s\" of issue %s", 
-					issue.getState(), entry.getKey(), issue.getNumberAndTitle());
+			String summary = String.format("Issue %s: %s: You", issue.getFQN(), entry.getKey());
 			Set<String> emails = entry.getValue()
 					.stream()
 					.filter(it->!it.equals(user))
 					.map(it->it.getEmail())
 					.collect(Collectors.toSet());
 			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, 
-					getHtmlBody(event, url, replyable, null), getTextBody(event, url, replyable, null), 
+					getHtmlBody(event, summary, null, url, replyable, null), 
+					getTextBody(event, summary, null, url, replyable, null), 
 					replyAddress, threadingReferences);
 			
 			for (User each: entry.getValue())
@@ -231,16 +233,16 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 
 			if (!mentionedUsers.isEmpty() || !ccUsers.isEmpty()) {
-				String subject;
+				String summary;
 				if (user != null)
-					subject = String.format("%s %s", user.getDisplayName(), event.getActivity(true));
+					summary = String.format("Issue %s: %s %s", issue.getFQN(), user.getDisplayName(), event.getActivity());
 				else
-					subject = event.getActivity(true);
-				subject = "[" + issue.getState() + "] " + subject;
+					summary = "Issue " + issue.getFQN() + ": " + event.getActivity();
 				
-				String unsubscribeAddress = mailManager.getUnsubscribeAddress(issue);
-				String htmlBody = getHtmlBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
-				String textBody = getTextBody(event, url, replyable, new Unsubscribable(unsubscribeAddress));
+				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
+				String htmlBody = getHtmlBody(event, summary, null, url, replyable, unsubscribable);
+				String textBody = getTextBody(event, summary, null, url, replyable, unsubscribable);
+				
 				mailManager.sendMailAsync(
 						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()),

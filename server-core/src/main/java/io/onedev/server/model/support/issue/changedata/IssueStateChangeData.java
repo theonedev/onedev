@@ -9,7 +9,6 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
@@ -94,11 +93,8 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	}
 
 	@Override
-	public String getActivity(Issue withIssue) {
-		String activity = "changed state to '" + newState + "'";
-		if (withIssue != null)
-			activity += " for issue " + withIssue.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "changed state to '" + newState + "'";
 	}
 	
 }

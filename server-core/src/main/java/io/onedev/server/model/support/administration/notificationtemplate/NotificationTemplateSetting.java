@@ -31,10 +31,12 @@ public class NotificationTemplateSetting implements Serializable {
 			+ "When evaluating this template, below variables will be available:"
 			+ "<ul class='mb-0'>"
 			+ "<li><code>event:</code> <a href='https://code.onedev.io/projects/onedev-server/blob/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification"
-			+ "<li><code>eventBody:</code> string type representing body of the event, for instance, comment made by user"
-			+ "<li><code>eventUrl:</code> string type representing event detail url"
-			+ "<li><code>replyable:</code> boolean type indiciating whether or not topic comment can be created directly by replying the email"
-			+ "<li><code>unsubscribable:</code> a non-null value indicates that the notification can be unsuscribed. Check <a href='https://code.onedev.io/projects/onedev-server/blob/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>document</a> for details";
+			+ "<li><code>eventSummary:</code> a string representing summary of the event"
+			+ "<li><code>eventBody:</code> a string representing body of the event. May be <code>null</code>"
+			+ "<li><code>eventUrl:</code> a string representing event detail url"
+			+ "<li><code>replyable:</code> a boolean indiciating whether or not topic comment can be created directly by replying the email"
+			+ "<li><code>unsubscribable:</code> an <a href='https://code.onedev.io/projects/onedev-server/blob/main/server-core/src/main/java/io/onedev/server/notification/Unsubscribable.java' target='_blank'>object</a> holding unsubscribe information. "
+			+ "		A <code>null</code> value means that the notification can not be unsubscribed";
 	
 	static {
 		URL url = Resources.getResource(NotificationTemplateSetting.class, "default-notification-template.html");

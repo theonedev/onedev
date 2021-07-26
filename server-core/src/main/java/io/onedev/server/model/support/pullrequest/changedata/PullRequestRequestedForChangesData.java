@@ -6,7 +6,6 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentAware;
 
@@ -21,11 +20,8 @@ public class PullRequestRequestedForChangesData implements PullRequestChangeData
 	}
 	
 	@Override
-	public String getActivity(PullRequest withRequest) {
-		String activity = "requested for changes";
-		if (withRequest != null)
-			activity += " in pull request " + withRequest.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "requested for changes";
 	}
 
 	@Override

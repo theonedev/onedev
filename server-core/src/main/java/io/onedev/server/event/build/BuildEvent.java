@@ -33,16 +33,8 @@ public class BuildEvent extends ProjectEvent implements CommitAware {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = build.getStatus().getDisplayName();
-		if (withEntity) {
-			activity = " is " + activity;
-			if (build.getVersion() != null)
-				activity = "build #" + build.getNumber() + " (" + build.getVersion() + ")" + activity;
-			else
-				activity = "build #" + build.getNumber() + activity;
-		} 
-		return activity;
+	public String getActivity() {
+		return build.getStatus().getDisplayName();
 	}
 
 }

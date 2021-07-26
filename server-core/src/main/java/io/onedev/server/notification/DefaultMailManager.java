@@ -1,6 +1,8 @@
 package io.onedev.server.notification;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,6 +13,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
 import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.shiro.authz.Permission;
@@ -171,6 +176,21 @@ public class DefaultMailManager implements MailManager {
 			
 		});
 	}
+	
+	private String getThreadIndex(String references) {
+		byte[] threadIndexBytes = new byte[22];
+		FileTime ft = FileTime.fromMillis(System.currentTimeMillis());
+		long value = ft.to(TimeUnit.MICROSECONDS);
+		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+		buffer.mark();
+		buffer.putLong(value);
+		buffer.reset();
+		buffer.get(threadIndexBytes, 0, 6);
+
+		byte[] md5Bytes = DigestUtils.md5(references.toString());
+		System.arraycopy(md5Bytes, 0, threadIndexBytes, 6, md5Bytes.length);
+		return Base64.encodeBase64String(threadIndexBytes);
+	}
 
 	@Override
 	public void sendMail(MailSetting mailSetting, Collection<String> toList, Collection<String> ccList, 
@@ -198,8 +218,11 @@ public class DefaultMailManager implements MailManager {
 	        email.setStartTLSEnabled(mailSetting.isEnableStartTLS());
 	        email.setSSLOnConnect(false);
 	        email.setSSLCheckServerIdentity(false);
-	        if (references != null)
+	        if (references != null) {
 	        	email.addHeader("References", references);
+	        	email.addHeader("In-Reply-To", references);
+	        	email.addHeader("Thread-Index", getThreadIndex(references));
+	        }
 			
 			try {
 				if (replyAddress != null)
@@ -400,12 +423,32 @@ public class DefaultMailManager implements MailManager {
 				}
 				
 				for (Issue issue: issues) {
-					for (InternetAddress each: involved) 
-						createUserIfNotExist(each, issue, authorization.getAuthorizedRole());
+					for (InternetAddress each: involved) {
+						user = userManager.findByEmail(each.getAddress());
+						authorization = serviceDeskSetting.getSenderAuthorization(each.getAddress());
+						try {
+							checkPermission(each, issue.getProject(), new AccessProject(), user, authorization);
+							if (user == null) 
+								user = createUserIfNotExist(each, issue.getProject(), authorization.getAuthorizedRole());
+							watch(user, issue);
+						} catch (UnauthorizedException e) {
+							logger.error("Error adding receipient to watch list", e);
+						}
+					}
 				}
 				for (PullRequest pullRequest: pullRequests) {
-					for (InternetAddress each: involved) 
-						createUserIfNotExist(each, pullRequest, authorization.getAuthorizedRole());
+					for (InternetAddress each: involved) { 
+						user = userManager.findByEmail(each.getAddress());
+						authorization = serviceDeskSetting.getSenderAuthorization(each.getAddress());
+						try {
+							checkPermission(each, pullRequest.getProject(), new ReadCode(), user, authorization);
+							if (user == null) 
+								user = createUserIfNotExist(each, pullRequest.getProject(), authorization.getAuthorizedRole());
+							watch(user, pullRequest);
+						} catch (UnauthorizedException e) {
+							logger.error("Error adding receipient to watch list", e);
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -516,9 +559,7 @@ public class DefaultMailManager implements MailManager {
 		return user;
 	}
 	
-	@Transactional
-	private User createUserIfNotExist(InternetAddress address, Issue issue, Role role) {
-		User user = createUserIfNotExist(address, issue.getProject(), role);
+	private void watch(User user, Issue issue) {
 		boolean found = false;
 		for (IssueWatch watch: user.getIssueWatches()) {
 			if (watch.getIssue().equals(issue)) {
@@ -533,26 +574,23 @@ public class DefaultMailManager implements MailManager {
 			watch.setWatching(true);
 			issueWatchManager.save(watch);
 		}
-		return user;
 	}
 	
-	private User createUserIfNotExist(InternetAddress address, PullRequest pullRequest, Role role) {
-		User user = createUserIfNotExist(address, pullRequest.getProject(), role);
+	private void watch(User user, PullRequest request) {
 		boolean found = false;
 		for (PullRequestWatch watch: user.getPullRequestWatches()) {
-			if (watch.getRequest().equals(pullRequest)) {
+			if (watch.getRequest().equals(request)) {
 				found = true;
 				break;
 			}
 		}
 		if (!found) {
 			PullRequestWatch watch = new PullRequestWatch();
-			watch.setRequest(pullRequest);
+			watch.setRequest(request);
 			watch.setUser(user);
 			watch.setWatching(true);
 			pullRequestWatchManager.save(watch);
 		}
-		return user;
 	}
 	
 	@Listen

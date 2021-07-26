@@ -19,12 +19,12 @@ public abstract class ProjectEvent extends Event {
 		return project;
 	}
 	
-	public abstract String getActivity(boolean withEntity);
+	public abstract String getActivity();
 	
 	public LastUpdate getLastUpdate() {
 		LastUpdate lastUpdate = new LastUpdate();
 		lastUpdate.setUser(getUser());
-		lastUpdate.setActivity(getActivity(false));
+		lastUpdate.setActivity(getActivity());
 		lastUpdate.setDate(getDate());
 		return lastUpdate;
 	}

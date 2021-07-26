@@ -31,11 +31,8 @@ public class PullRequestCommented extends PullRequestEvent implements MarkdownAw
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = "commented";
-		if (withEntity)
-			activity += " on pull request " + getRequest().getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "commented";
 	}
 
 }

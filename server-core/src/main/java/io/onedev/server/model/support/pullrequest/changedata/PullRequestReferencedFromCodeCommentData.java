@@ -3,7 +3,6 @@ package io.onedev.server.model.support.pullrequest.changedata;
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
@@ -30,11 +29,8 @@ public class PullRequestReferencedFromCodeCommentData implements PullRequestChan
 	}
 	
 	@Override
-	public String getActivity(PullRequest withRequest) {
-		if (withRequest != null)
-			return "A code comment referenced pull request " + withRequest.getNumberAndTitle();
-		else
-			return "Referenced from code comment";
+	public String getActivity() {
+		return "Referenced from code comment";
 	}
 
 	@Override

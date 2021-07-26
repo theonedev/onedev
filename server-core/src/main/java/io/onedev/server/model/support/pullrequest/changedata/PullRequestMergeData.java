@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentAware;
 
@@ -19,15 +18,11 @@ public class PullRequestMergeData implements PullRequestChangeData {
 	}
 	
 	@Override
-	public String getActivity(PullRequest withRequest) {
-		if (reason != null) {
+	public String getActivity() {
+		if (reason != null) 
 			return reason;
-		} else {
-			String activity = "merged";
-			if (withRequest != null)
-				activity += " pull request " + withRequest.getNumberAndTitle();
-			return activity;
-		}
+		else 
+			return "merged";
 	}
 
 	@Override

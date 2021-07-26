@@ -36,11 +36,8 @@ public class IssueCommented extends IssueEvent implements MarkdownAware {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = "commented";
-		if (withEntity)
-			activity += " on issue " + comment.getIssue().getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "commented";
 	}
 
 }

@@ -13,6 +13,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
@@ -102,22 +103,28 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 
 				String branchName = GitUtils.ref2branch(event.getRefName());
 				if (branchName != null) {
-					subject = String.format("[branch %s] Commit %s: %s", 
-							branchName, GitUtils.abbreviateSHA(commit.name()), commit.getShortMessage());
+					subject = String.format("[%s] %s", branchName, commit.getShortMessage());
 				} else {
 					String tagName = GitUtils.ref2tag(event.getRefName());
 					if (tagName != null) {
-						subject = String.format("[tag %s] Commit %s: %s", 
-								tagName, GitUtils.abbreviateSHA(commit.name()), commit.getShortMessage());
+						subject = String.format("[%s] %s", tagName, commit.getShortMessage());
 					} else {
-						subject = String.format("[ref %s] Commit %s: %s", 
-								event.getRefName(), GitUtils.abbreviateSHA(commit.name()), commit.getShortMessage());
+						subject = String.format("[%s] %s", event.getRefName(), commit.getShortMessage());
 					}
 				}
 					
 				String url = urlManager.urlFor(project, commit);
+				String summary = String.format("Commit %s:%s - Authored by %s", project.getName(), 
+						GitUtils.abbreviateSHA(commit.name()), commit.getAuthorIdent().getName());
+
+				String textMessage = GitUtils.getDetailMessage(commit);
+				String htmlMessage = null;
+				if (textMessage != null) 
+					htmlMessage = "<pre>" + HtmlEscape.escapeHtml5(textMessage) + "</pre>";
+				
 				mailManager.sendMailAsync(Lists.newArrayList(), notifyEmails, subject, 
-						getHtmlBody(event, url, false, null), getTextBody(event, url, false, null), 
+						getHtmlBody(event, summary, htmlMessage, url, false, null), 
+						getTextBody(event, summary, textMessage, url, false, null), 
 						null, null);
 			}
 		}

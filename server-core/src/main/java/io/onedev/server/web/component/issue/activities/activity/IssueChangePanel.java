@@ -26,7 +26,7 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 		else
 			add(new WebMarkupContainer("user").setVisible(false));
 
-		add(new Label("description", change.getData().getActivity(null)));
+		add(new Label("description", change.getData().getActivity()));
 		add(new Label("age", DateUtils.formatAge(change.getDate()))
 			.add(new AttributeAppender("title", DateUtils.formatDateTime(change.getDate()))));
 		

@@ -9,7 +9,6 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.util.CommentAware;
@@ -113,11 +112,8 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	}
 
 	@Override
-	public String getActivity(Issue withIssue) {
-		String activity = "batch edited";
-		if (withIssue != null)
-			activity += " issue " + withIssue.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "batch edited";
 	}
 	
 }

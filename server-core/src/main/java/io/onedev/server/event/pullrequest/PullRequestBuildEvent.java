@@ -18,15 +18,13 @@ public class PullRequestBuildEvent extends PullRequestEvent {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
+	public String getActivity() {
 		String activity = build.getJobName() + " ";
 		if (build.getVersion() != null)
 			activity = "build #" + build.getNumber() + " (" + build.getVersion() + ")";
 		else
 			activity = "build #" + build.getNumber();
 		activity += " is " + build.getStatus().getDisplayName();
-		if (withEntity)
-			activity += " for pull request " + build.getRequest().getNumberAndTitle();
 		return activity;
 	}
 

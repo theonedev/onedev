@@ -2,7 +2,6 @@ package io.onedev.server.model.support.pullrequest.changedata;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentAware;
 
@@ -28,11 +27,8 @@ public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 	}
 
 	@Override
-	public String getActivity(PullRequest withRequest) {
-		String activity = "changed description";
-		if (withRequest != null)
-			activity += " of pull request " + withRequest.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "changed description";
 	}
 
 	@Override

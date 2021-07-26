@@ -16,7 +16,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
@@ -70,11 +69,8 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public String getActivity(Issue withIssue) {
-		String activity = "changed fields";
-		if (withIssue != null)
-			activity += " of issue " + withIssue.getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "changed fields";
 	}
 
 	public List<String> getLines(Map<String, Input> fields) {

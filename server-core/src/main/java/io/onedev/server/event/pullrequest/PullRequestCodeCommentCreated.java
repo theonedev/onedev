@@ -16,11 +16,8 @@ public class PullRequestCodeCommentCreated extends PullRequestCodeCommentEvent i
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		String activity = "created code comment"; 
-		if (withEntity)
-			activity += " in pull request " + getRequest().getNumberAndTitle();
-		return activity;
+	public String getActivity() {
+		return "created code comment"; 
 	}
 
 }

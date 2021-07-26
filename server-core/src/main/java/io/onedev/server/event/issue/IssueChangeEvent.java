@@ -45,8 +45,8 @@ public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 	}
 
 	@Override
-	public String getActivity(boolean withEntity) {
-		return getChange().getData().getActivity(withEntity?getChange().getIssue():null);
+	public String getActivity() {
+		return getChange().getData().getActivity();
 	}
 
 }
