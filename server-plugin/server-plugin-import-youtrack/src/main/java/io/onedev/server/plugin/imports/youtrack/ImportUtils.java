@@ -55,6 +55,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
+import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.SimpleLogger;
@@ -124,7 +125,7 @@ public class ImportUtils {
 		Client client = server.newClient();
 		try {
 			String apiEndpoint = server.getApiEndpoint("/admin/projects/" + youTrackProjectId + "?fields=shortName");
-			String youTrackProjectShortName = get(client, apiEndpoint, logger).get("shortName").asText();
+			String youTrackProjectShortName = JerseyUtils.get(client, apiEndpoint, logger).get("shortName").asText();
 			
 			Map<String, String> stateMappings = new HashMap<>();
 			Map<String, Pair<FieldSpec, String>> fieldMappings = new HashMap<>(); 
@@ -841,7 +842,7 @@ public class ImportUtils {
 				URIBuilder builder = new URIBuilder(uri);
 				builder.addParameter("$skip", String.valueOf(page*PER_PAGE));
 				List<JsonNode> pageData = new ArrayList<>();
-				for (JsonNode each: get(client, builder.build().toString(), logger)) 
+				for (JsonNode each: JerseyUtils.get(client, builder.build().toString(), logger)) 
 					pageData.add(each);
 				pageDataConsumer.consume(pageData);
 				if (pageData.size() < PER_PAGE)
@@ -852,23 +853,5 @@ public class ImportUtils {
 			}
 		}
 	}
-	
-	static JsonNode get(Client client, String apiEndpoint, SimpleLogger logger) {
-		WebTarget target = client.target(apiEndpoint);
-		Invocation.Builder builder =  target.request();
-		try (Response response = builder.get()) {
-			String errorMessage = JerseyUtils.checkStatus(apiEndpoint, response);
-			if (errorMessage != null)
-				throw new ExplicitException(errorMessage);
-			else
-				return response.readEntity(JsonNode.class);
-		}
-	}
-	
-	private static interface PageDataConsumer {
-		
-		void consume(List<JsonNode> pageData) throws InterruptedException;
-		
-	}	
 	
 }

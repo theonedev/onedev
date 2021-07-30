@@ -45,7 +45,7 @@ public class ImportOption implements Serializable {
 	}
 
 	@Editable(order=300, description="Specify how to map YouTrack issue tags to OneDev issue custom "
-			+ "fields. Unmapped tags will be reflected in issue description.<br>"
+			+ "fields.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
 	public List<IssueTagMapping> getIssueTagMappings() {
 		return issueTagMappings;

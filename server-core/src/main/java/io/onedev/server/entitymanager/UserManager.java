@@ -65,6 +65,9 @@ public interface UserManager extends EntityManager<User> {
 	 */
 	@Nullable 
 	User findByName(String userName);
+	
+	@Nullable
+	User findByFullName(String fullName);
 
 	@Nullable 
 	User findBySsoInfo(SsoInfo ssoInfo);

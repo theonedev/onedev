@@ -45,10 +45,6 @@ public class ImportServer implements Serializable, Validatable {
 	
 	protected static final String PROP_API_URL = "apiUrl";
 	
-	protected static final String PROP_USER_NAME = "userName";
-	
-	protected static final String PROP_PASSWORD = "password";
-	
 	private String apiUrl;
 	
 	private String userName;
@@ -104,7 +100,8 @@ public class ImportServer implements Serializable, Validatable {
 			WebTarget target = client.target(apiEndpoint);
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
-				if (!response.getMediaType().toString().startsWith("application/json")) {
+				if (!response.getMediaType().toString().startsWith("application/json") 
+						|| response.getStatus() == 404) {
 					context.disableDefaultConstraintViolation();
 					context.buildConstraintViolationWithTemplate("This does not seem like a YouTrack api url")
 							.addPropertyNode(PROP_API_URL).addConstraintViolation();
@@ -121,10 +118,7 @@ public class ImportServer implements Serializable, Validatable {
 					if (userNode.get("guest").asBoolean()) {
 						context.disableDefaultConstraintViolation();
 						errorMessage = "Authentication failed";
-						context.buildConstraintViolationWithTemplate(errorMessage)
-								.addPropertyNode(PROP_USER_NAME).addConstraintViolation();
-						context.buildConstraintViolationWithTemplate(errorMessage)
-								.addPropertyNode(PROP_PASSWORD).addConstraintViolation();
+						context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
 						return false;
 					}
 				}

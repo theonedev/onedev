@@ -6,16 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.util.JerseyUtils;
+import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.SimpleLogger;
 
 public class ImportUtils {
@@ -50,7 +47,7 @@ public class ImportUtils {
 		while (true) {
 			try {
 				List<JsonNode> pageData = new ArrayList<>();
-				JsonNode resultNode = get(client, uri.toString(), logger);
+				JsonNode resultNode = JerseyUtils.get(client, uri.toString(), logger);
 				if (resultNode.hasNonNull("values")) {
 					for (JsonNode each: resultNode.get("values"))
 						pageData.add(each);
@@ -64,32 +61,6 @@ public class ImportUtils {
 				throw new RuntimeException(e);
 			}
 		}
-	}
-	
-	static JsonNode get(Client client, String apiEndpoint, SimpleLogger logger) {
-		WebTarget target = client.target(apiEndpoint);
-		Invocation.Builder builder =  target.request();
-		while (true) {
-			try (Response response = builder.get()) {
-				int status = response.getStatus();
-				if (status != 200) {
-					String errorMessage = response.readEntity(String.class);
-					if (StringUtils.isNotBlank(errorMessage)) {
-						throw new ExplicitException(String.format("Http request failed (url: %s, status code: %d, error message: %s)", 
-								apiEndpoint, status, errorMessage));
-					} else {
-						throw new ExplicitException(String.format("Http request failed (status: %s)", status));
-					}
-				} 
-				return response.readEntity(JsonNode.class);
-			}
-		}
-	}
-	
-	static interface PageDataConsumer {
-		
-		void consume(List<JsonNode> pageData) throws InterruptedException;
-		
 	}
 	
 }

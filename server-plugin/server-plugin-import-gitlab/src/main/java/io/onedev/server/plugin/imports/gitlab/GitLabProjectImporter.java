@@ -1,7 +1,6 @@
 package io.onedev.server.plugin.imports.gitlab;
 
 import static io.onedev.server.plugin.imports.gitlab.ImportUtils.NAME;
-import static io.onedev.server.plugin.imports.gitlab.ImportUtils.get;
 import static io.onedev.server.plugin.imports.gitlab.ImportUtils.list;
 
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.SimpleLogger;
 
 public class GitLabProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ProjectImportOption> {
@@ -46,7 +46,7 @@ public class GitLabProjectImporter extends ProjectImporter<ImportServer, Project
 			for (JsonNode milestoneNode: list(client, apiEndpoint, logger)) 
 				milestones.add(getMilestone(milestoneNode));
 			apiEndpoint = server.getApiEndpoint("/groups/" + groupId);
-			JsonNode groupNode = get(client, apiEndpoint, logger);
+			JsonNode groupNode = JerseyUtils.get(client, apiEndpoint, logger);
 			JsonNode parentIdNode = groupNode.get("parent_id");
 			if (parentIdNode != null && parentIdNode.asText(null) != null) 
 				milestones.addAll(getMilestones(server, parentIdNode.asText(), logger));
@@ -80,7 +80,7 @@ public class GitLabProjectImporter extends ProjectImporter<ImportServer, Project
 				logger.log("Cloning code from project " + projectMapping.getGitLabProject() + "...");
 				
 				String apiEndpoint = where.getApiEndpoint("/projects/" + projectMapping.getGitLabProject().replace("/", "%2F"));
-				JsonNode projectNode = get(client, apiEndpoint, logger);
+				JsonNode projectNode = JerseyUtils.get(client, apiEndpoint, logger);
 				Project project = new Project();
 				project.setName(projectMapping.getOneDevProject());
 				project.setDescription(projectNode.get("description").asText(null));

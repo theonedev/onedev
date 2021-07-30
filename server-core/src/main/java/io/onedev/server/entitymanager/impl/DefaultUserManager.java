@@ -276,6 +276,15 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 
 	@Sessional
     @Override
+    public User findByFullName(String fullName) {
+		EntityCriteria<User> criteria = newCriteria();
+		criteria.add(Restrictions.ilike(User.PROP_FULL_NAME, fullName));
+		criteria.setCacheable(true);
+		return find(criteria);
+    }
+	
+	@Sessional
+    @Override
     public User findByAccessToken(String accessToken) {
 		EntityCriteria<User> criteria = newCriteria();
 		criteria.add(Restrictions.eq(User.PROP_ACCESS_TOKEN, accessToken));

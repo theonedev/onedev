@@ -43,7 +43,7 @@ public class ImportResult {
 			feedback.append("<br><br><b>NOTE:</b><ul>");
 		
 		if (!nonExistentMilestones.isEmpty()) 
-			feedback.append(getEntryFeedback("Non existent milestones", nonExistentLogins));
+			feedback.append(getEntryFeedback("Non existent milestones", nonExistentMilestones));
 		if (!unmappedIssueLabels.isEmpty()) 
 			feedback.append(getEntryFeedback("Gitea issue labels not mapped to OneDev custom field", unmappedIssueLabels));
 		if (!nonExistentLogins.isEmpty()) {
@@ -62,6 +62,6 @@ public class ImportResult {
 			feedback.append("</ul>");
 		
 		return feedback.toString();
-		
 	}
+	
 }

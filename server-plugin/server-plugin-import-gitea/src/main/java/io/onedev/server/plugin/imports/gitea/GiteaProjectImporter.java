@@ -23,6 +23,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.SimpleLogger;
 
 public class GiteaProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ProjectImportOption> {
@@ -74,7 +75,7 @@ public class GiteaProjectImporter extends ProjectImporter<ImportServer, ProjectI
 				logger.log("Cloning code from repository " + projectMapping.getGiteaRepo() + "...");
 				
 				String apiEndpoint = where.getApiEndpoint("/repos/" + projectMapping.getGiteaRepo());
-				JsonNode repoNode = ImportUtils.get(client, apiEndpoint, logger);
+				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
 				Project project = new Project();
 				project.setName(projectMapping.getOneDevProject());
 				project.setDescription(repoNode.get("description").asText(null));

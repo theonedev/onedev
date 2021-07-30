@@ -33,8 +33,6 @@ public class ImportServer implements Serializable, Validatable {
 		
 	};
 	
-	static final String PROP_APP_PASSWORD = "appPassword";
-	
 	private String userName;
 	
 	private String appPassword;
@@ -77,8 +75,7 @@ public class ImportServer implements Serializable, Validatable {
 				if (response.getStatus() == 401) {
 					context.disableDefaultConstraintViolation();
 					String errorMessage = "Authentication failed";
-					context.buildConstraintViolationWithTemplate(errorMessage)
-							.addPropertyNode(PROP_APP_PASSWORD).addConstraintViolation();
+					context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
 					return false;
 				} else {
 					String errorMessage = JerseyUtils.checkStatus(apiEndpoint, response);

@@ -33,5 +33,6 @@
     <module>server-plugin-import-gitlab</module>
     <module>server-plugin-import-gitea</module>
     <module>server-plugin-import-bitbucketcloud</module>
+    <module>server-plugin-import-jiracloud</module>
   </modules>
 </project>

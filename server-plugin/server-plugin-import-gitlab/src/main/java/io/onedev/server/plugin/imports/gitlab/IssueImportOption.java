@@ -132,7 +132,7 @@ public class IssueImportOption implements Serializable {
 	}
 	
 	@Editable(order=400, description="Specify how to map GitLab issue labels to OneDev custom "
-			+ "fields. Unmapped labels will be reflected in issue description.<br>"
+			+ "fields.<br>"
 			+ "<b>NOTE: </b> You may customize OneDev issue fields in case there is no appropriate option here")
 	public List<IssueLabelMapping> getIssueLabelMappings() {
 		return issueLabelMappings;

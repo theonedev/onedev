@@ -43,6 +43,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.SimpleLogger;
@@ -244,7 +245,7 @@ public class ImportUtils {
 								tagField.setOrdinal(mapped.getFirst().getOrdinal(mapped.getSecond()));
 								issue.getFields().add(tagField);
 							} else {
-								currentUnmappedLabels.add(HtmlEscape.escapeHtml5(labelName));
+								currentUnmappedLabels.add(labelName);
 								unmappedIssueLabels.add(HtmlEscape.escapeHtml5(labelName));
 							}
 						}
@@ -392,12 +393,6 @@ public class ImportUtils {
 				return response.readEntity(JsonNode.class);
 			}
 		}
-	}
-	
-	static interface PageDataConsumer {
-		
-		void consume(List<JsonNode> pageData) throws InterruptedException;
-		
 	}
 	
 }

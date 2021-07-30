@@ -27,8 +27,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.joda.time.DateTime;
 import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -48,8 +46,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 @SuppressWarnings("serial")
 public abstract class TaskButton extends AjaxButton {
 
-	private static final Logger logger = LoggerFactory.getLogger(TaskButton.class);
-	
 	public TaskButton(String id) {
 		super(id);
 	}
@@ -147,25 +143,26 @@ public abstract class TaskButton extends AjaxButton {
 
 			@Override
 			public TaskResult call() throws Exception {
+				SimpleLogger logger = new SimpleLogger() {
+
+					@Override
+					public void log(String message, StyleBuilder styleBuilder) {
+						synchronized (messages) {
+							messages.add(JobLogEntryEx.parse(message, styleBuilder));
+						}
+					}
+					
+				};				
 				try {
 					String feedback = String.format(
 						"<div class='task-result text-break alert alert-light-info'>%s</div>", 
-						runTask(new SimpleLogger() {
-
-							@Override
-							public void log(String message, StyleBuilder styleBuilder) {
-								synchronized (messages) {
-									messages.add(JobLogEntryEx.parse(message, styleBuilder));
-								}
-							}
-							
-						}));
+						runTask(logger));
 					return new TaskResult(true, feedback);
 				} catch (Exception e) {	
 					logger.error("Error " + title, e);
 					String suggestedSolution = ExceptionUtils.suggestSolution(e);
 					if (suggestedSolution != null)
-						logger.warn("!!! " + suggestedSolution);
+						logger.error("!!! " + suggestedSolution);
 					String feedback;
 					if (e.getMessage() != null)
 						feedback = e.getMessage();

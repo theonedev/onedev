@@ -50,6 +50,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
+import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.SimpleLogger;
@@ -90,7 +91,7 @@ public class ImportUtils {
 		Optional<User> userOpt = users.get(userId);
 		if (userOpt == null) {
 			String apiEndpoint = importSource.getApiEndpoint("/users/" + userId);
-			JsonNode userNode = get(client, apiEndpoint, logger);
+			JsonNode userNode = JerseyUtils.get(client, apiEndpoint, logger);
 			String email = null;
 			if (userNode.hasNonNull("email"))
 				email = userNode.get("email").asText(null);
@@ -314,7 +315,7 @@ public class ImportUtils {
 								labelField.setOrdinal(mapped.getFirst().getOrdinal(mapped.getSecond()));
 								issue.getFields().add(labelField);
 							} else {
-								currentUnmappedLabels.add(HtmlEscape.escapeHtml5(labelName));
+								currentUnmappedLabels.add(labelName);
 								unmappedIssueLabels.add(HtmlEscape.escapeHtml5(labelName));
 							}
 						}
@@ -478,7 +479,7 @@ public class ImportUtils {
 				URIBuilder builder = new URIBuilder(uri);
 				builder.addParameter("page", String.valueOf(page));
 				List<JsonNode> pageData = new ArrayList<>();
-				for (JsonNode each: get(client, builder.build().toString(), logger)) 
+				for (JsonNode each: JerseyUtils.get(client, builder.build().toString(), logger)) 
 					pageData.add(each);
 				pageDataConsumer.consume(pageData);
 				if (pageData.size() < PER_PAGE)
@@ -488,32 +489,6 @@ public class ImportUtils {
 				throw new RuntimeException(e);
 			}
 		}
-	}
-	
-	static JsonNode get(Client client, String apiEndpoint, SimpleLogger logger) {
-		WebTarget target = client.target(apiEndpoint);
-		Invocation.Builder builder =  target.request();
-		while (true) {
-			try (Response response = builder.get()) {
-				int status = response.getStatus();
-				if (status != 200) {
-					String errorMessage = response.readEntity(String.class);
-					if (StringUtils.isNotBlank(errorMessage)) {
-						throw new ExplicitException(String.format("Http request failed (url: %s, status code: %d, error message: %s)", 
-								apiEndpoint, status, errorMessage));
-					} else {
-						throw new ExplicitException(String.format("Http request failed (status: %s)", status));
-					}
-				} 
-				return response.readEntity(JsonNode.class);
-			}
-		}
-	}
-	
-	static interface PageDataConsumer {
-		
-		void consume(List<JsonNode> pageData) throws InterruptedException;
-		
 	}
 	
 }

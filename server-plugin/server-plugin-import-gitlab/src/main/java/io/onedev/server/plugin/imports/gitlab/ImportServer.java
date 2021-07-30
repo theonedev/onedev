@@ -77,7 +77,8 @@ public class ImportServer implements Serializable, Validatable {
 			WebTarget target = client.target(apiEndpoint);
 			Invocation.Builder builder =  target.request();
 			try (Response response = builder.get()) {
-				if (!response.getMediaType().toString().startsWith("application/json")) {
+				if (!response.getMediaType().toString().startsWith("application/json") 
+						|| response.getStatus() == 404) {
 					context.disableDefaultConstraintViolation();
 					context.buildConstraintViolationWithTemplate("This does not seem like a GitLab api url")
 							.addPropertyNode(PROP_API_URL).addConstraintViolation();

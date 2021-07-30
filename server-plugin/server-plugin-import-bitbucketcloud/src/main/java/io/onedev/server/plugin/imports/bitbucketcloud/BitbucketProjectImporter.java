@@ -15,6 +15,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.SimpleLogger;
 
 public class BitbucketProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ProjectImportOption> {
@@ -36,7 +37,7 @@ public class BitbucketProjectImporter extends ProjectImporter<ImportServer, Proj
 				logger.log("Cloning code from repository " + projectMapping.getBitbucketRepo() + "...");
 				
 				String apiEndpoint = where.getApiEndpoint("/repositories/" + projectMapping.getBitbucketRepo());
-				JsonNode repoNode = ImportUtils.get(client, apiEndpoint, logger);
+				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
 				Project project = new Project();
 				project.setName(projectMapping.getOneDevProject());
 				project.setDescription(repoNode.get("description").asText(null));
