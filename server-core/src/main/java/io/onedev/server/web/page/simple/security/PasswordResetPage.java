@@ -92,8 +92,12 @@ public class PasswordResetPage extends SimplePage {
 								+ "%s",
 								user.getDisplayName(), user.getName(), serverUrl, password);
 						
-						mailManager.sendMail(settingManager.getMailSetting(), Arrays.asList(user.getEmail()),
-								Lists.newArrayList(), "Your OneDev password has been reset", htmlBody, textBody, null, null);
+						mailManager.sendMail(
+								settingManager.getMailSetting(), 
+								Arrays.asList(user.getEmail()),
+								Lists.newArrayList(), Lists.newArrayList(), 
+								"[Password Reset] Your OneDev Password Has Been Reset", 
+								htmlBody, textBody, null, null);
 						return "Please check your email " + user.getEmail() + " for the reset password";
 					} else {
 						throw new ExplicitException("Unable to send password reset email as smtp setting is not defined");

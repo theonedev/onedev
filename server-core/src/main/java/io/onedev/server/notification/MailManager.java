@@ -12,15 +12,17 @@ public interface MailManager {
 	
 	public static final String TEST_SUB_ADDRESSING = "test-sub-addressing";
 	
-	void sendMail(Collection<String> toList, Collection<String> ccList, String subject, 
-			String htmlBody, String textBody, @Nullable String replyAddress, @Nullable String references);
+	void sendMail(Collection<String> toList, Collection<String> ccList, 
+			Collection<String> bccList, String subject, String htmlBody, 
+			String textBody, @Nullable String replyAddress, @Nullable String references);
 	
 	void sendMail(MailSetting mailSetting, Collection<String> toList, Collection<String> ccList, 
+			Collection<String> bccList, String subject, String htmlBody, String textBody, 
+			@Nullable String replyAddress, @Nullable String references);
+	
+	void sendMailAsync(Collection<String> toList, Collection<String> ccList, Collection<String> bccList, 
 			String subject, String htmlBody, String textBody, @Nullable String replyAddress, 
 			@Nullable String references);
-	
-	void sendMailAsync(Collection<String> toList, Collection<String> ccList, String subject, 
-			String htmlBody, String textBody, @Nullable String replyAddress, @Nullable String references);
 	
 	@Nullable
 	String getReplyAddress(Issue issue);

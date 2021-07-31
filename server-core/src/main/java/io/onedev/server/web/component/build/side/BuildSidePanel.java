@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -34,7 +35,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;

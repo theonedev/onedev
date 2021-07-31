@@ -17,8 +17,6 @@ public interface IssueChangeManager extends EntityManager<IssueChange> {
 
 	void changeTitle(Issue issue, String title);
 	
-	void changeDescription(Issue issue, @Nullable String description);
-	
 	void changeMilestone(Issue issue, Milestone milestone);
 	
 	void changeFields(Issue issue, Map<String, Object> fieldValues);

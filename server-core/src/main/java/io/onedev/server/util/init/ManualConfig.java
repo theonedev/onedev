@@ -17,12 +17,20 @@ public abstract class ManualConfig implements Serializable {
 	
 	private final Collection<String> excludedProperties;
 	
+	private final boolean forceOrdinaryStyle;
+	
 	public ManualConfig(String title, @Nullable String description, Serializable setting, 
-			Collection<String> excludedProperties) {
+			Collection<String> excludedProperties, boolean forceOrdinaryStyle) {
 		this.title = title;
 		this.description = description;
 		this.setting = setting;
 		this.excludedProperties = excludedProperties;
+		this.forceOrdinaryStyle = forceOrdinaryStyle;
+	}
+	
+	public ManualConfig(String title, @Nullable String description, Serializable setting, 
+			Collection<String> excludedProperties) {
+		this(title, description, setting, excludedProperties, false);
 	}
 	
 	public ManualConfig(String title, @Nullable String description, Serializable setting) {
@@ -39,6 +47,10 @@ public abstract class ManualConfig implements Serializable {
 
 	public Serializable getSetting() {
 		return setting;
+	}
+
+	public boolean isForceOrdinaryStyle() {
+		return forceOrdinaryStyle;
 	}
 
 	public Collection<String> getExcludeProperties() {

@@ -6,17 +6,13 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.Component;
-
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
-public class IssueMilestoneChangeData implements IssueChangeData {
+public class IssueMilestoneChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,14 +23,6 @@ public class IssueMilestoneChangeData implements IssueChangeData {
 	public IssueMilestoneChangeData(@Nullable Milestone oldMilestone, @Nullable Milestone newMilestone) {
 		this.oldMilestone = oldMilestone!=null?oldMilestone.getName():null;
 		this.newMilestone = newMilestone!=null?newMilestone.getName():null;
-	}
-	
-	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new PropertyChangePanel(componentId, 
-				CollectionUtils.newHashMap("Milestone", oldMilestone), 
-				CollectionUtils.newHashMap("Milestone", newMilestone), 
-				true);
 	}
 	
 	public String getOldMilestone() {
@@ -68,6 +56,15 @@ public class IssueMilestoneChangeData implements IssueChangeData {
 	@Override
 	public boolean affectsBoards() {
 		return true;
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		Map<String, String> oldFieldValues = new HashMap<>();
+		oldFieldValues.put("Milestone", oldMilestone);
+		Map<String, String> newFieldValues = new HashMap<>();
+		oldFieldValues.put("Milestone", newMilestone);
+		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	
 }

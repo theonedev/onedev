@@ -22,6 +22,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.wicket.util.lang.Objects;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -44,6 +45,9 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.entityreference.ReferenceMigrator;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueEvent;
@@ -61,9 +65,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.changedata.IssueChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -82,7 +83,6 @@ import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.MilestoneAndState;
 import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -112,6 +112,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final TransactionManager transactionManager;
 	
+	private final EntityReferenceManager entityReferenceManager;
+	
 	private final RoleManager roleManager;
 	
 	private final Map<Long, IssueFacade> cache = new HashMap<>();
@@ -124,7 +126,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			SettingManager settingManager, ListenerRegistry listenerRegistry, 
 			ProjectManager projectManager, UserManager userManager, 
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
-			IssueCommentManager issueCommentManager) {
+			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
@@ -136,6 +138,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		this.roleManager = roleManager;
 		this.attachmentStorageManager = attachmentStorageManager;
 		this.issueCommentManager = issueCommentManager;
+		this.entityReferenceManager = entityReferenceManager;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -303,11 +306,8 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		boolean minorChange = false;
 		if (event instanceof IssueChangeEvent) {
 			IssueChangeData changeData = ((IssueChangeEvent)event).getChange().getData();
-			if (changeData instanceof IssueReferencedFromCodeCommentData
-					|| changeData instanceof IssueReferencedFromIssueData
-					|| changeData instanceof IssueReferencedFromPullRequestData) {
+			if (changeData instanceof ReferencedFromAware) 
 				minorChange = true;
-			}
 		}
 
 		if (!(event instanceof IssueOpened || minorChange))
@@ -808,7 +808,18 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			
 		});
 	}
-
+	
+	@Transactional
+	@Override
+	public void saveDescription(Issue issue, @Nullable String description) {
+		String prevDescription = issue.getDescription();
+		if (!Objects.equal(description, prevDescription)) {
+			issue.setDescription(description);
+			entityReferenceManager.addReferenceChange(issue, description);
+			save(issue);
+		}
+	}
+	
 	@Transactional
 	@Override
 	public void delete(Collection<Issue> issues) {

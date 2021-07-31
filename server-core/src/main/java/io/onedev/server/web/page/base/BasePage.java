@@ -30,6 +30,7 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.protocol.ws.api.WebSocketBehavior;
 import org.apache.wicket.protocol.ws.api.WebSocketRequestHandler;
 import org.apache.wicket.protocol.ws.api.message.TextMessage;
@@ -51,8 +52,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CryptoUtils;
 import io.onedev.server.web.asset.icon.IconScope;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.svg.SpriteImage;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.simple.SimplePage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
 import io.onedev.server.web.websocket.WebSocketManager;
@@ -141,15 +145,34 @@ public abstract class BasePage extends WebPage {
 			
 		});
 
-		StringBuilder builder = new StringBuilder();
-		Class<?> clazz = getClass();
-		while (clazz != BasePage.class) {
-			builder.append(clazz.getSimpleName()).append(" ");
-			clazz = clazz.getSuperclass();
-		}
-		
-		String script = String.format("$('html').addClass('%s');", builder.toString());
-		add(new Label("script", script).setEscapeModelStrings(false));
+		add(new Label("script", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				StringBuilder builder = new StringBuilder();
+				Class<?> clazz = getPage().getClass();
+				while (clazz != BasePage.class) {
+					builder.append(clazz.getSimpleName()).append(" ");
+					clazz = clazz.getSuperclass();
+				}
+
+				IVisitor<BeanEditor, BeanEditor> visitor = new IVisitor<BeanEditor, BeanEditor>() {
+	
+					@Override
+					public void component(BeanEditor object, IVisit<BeanEditor> visit) {
+						if (!object.getBehaviors(ForceOrdinaryStyleBehavior.class).isEmpty())
+							visit.stop(object);
+					}
+
+				};
+				
+				if (getPage() instanceof SimplePage && getPage().visitChildren(BeanEditor.class, visitor) != null) 
+					builder.append("force-ordinary-style ");
+				
+				return String.format("$('html').addClass('%s');", builder.toString());
+			}
+			
+		}).setEscapeModelStrings(false));
 		
 		sessionFeedback = new SessionFeedbackPanel("sessionFeedback");
 		add(sessionFeedback);			

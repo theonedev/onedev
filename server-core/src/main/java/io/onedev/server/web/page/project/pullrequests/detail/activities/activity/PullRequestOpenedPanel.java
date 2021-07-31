@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -47,7 +47,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
+				OneDev.getInstance(PullRequestManager.class).saveDescription(getPullRequest(), comment);
 			}
 
 			@Override

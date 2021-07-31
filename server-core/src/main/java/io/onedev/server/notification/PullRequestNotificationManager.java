@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.text.WordUtils;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -18,7 +20,6 @@ import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
@@ -30,6 +31,8 @@ import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
@@ -48,8 +51,6 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.util.markdown.MentionParser;
 
 @Singleton
 public class PullRequestNotificationManager extends AbstractNotificationManager {
@@ -76,23 +77,12 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		this.userManager = userManager;
 	}
 	
-	private String getSubject(PullRequest request) {
-		String state;
-		if (request.isMerged())
-			state = "Merged";
-		else if (request.isDiscarded())
-			state = "Discarded";
-		else
-			state = "Open";
-		return String.format("[%s] %s", state, request.getTitle());
-	}
-	
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
 		PullRequest request = event.getRequest();
 		User user = event.getUser();
-		
+
 		String url;
 		if (event instanceof PullRequestCommented)
 			url = urlManager.urlFor(((PullRequestCommented)event).getComment());
@@ -178,6 +168,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 		}
 		
+		String summary = "[" + request.getStatusName() + "] "; 
+		if (user != null)
+			summary = summary + user.getDisplayName() + " " + event.getActivity();
+		else if (committer != null)
+			summary = summary + committer.getDisplayName() + " " + event.getActivity();
+		else
+			summary = summary + event.getActivity();
+		
 		if (event instanceof PullRequestOpened) {
 			for (PullRequestReview review: request.getReviews()) {
 				if (review.getResult() == null) {
@@ -189,43 +187,49 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		
 		String replyAddress = mailManager.getReplyAddress(request);
 		boolean replyable = replyAddress != null;
-		String threadingReferences = getThreadingReferences(request);
 		if (event instanceof PullRequestChangeEvent 
 				&& request.getSubmitter() != null 
 				&& !notifiedUsers.contains(request.getSubmitter())) {
 			PullRequestChangeEvent changeEvent = (PullRequestChangeEvent) event;
 			PullRequestChangeData changeData = changeEvent.getChange().getData();
-			String summary = null;
-			if (changeData instanceof PullRequestApproveData) 
-				summary = user.getDisplayName() + " approved";
-			else if (changeData instanceof PullRequestRequestedForChangesData) 
-				summary = user.getDisplayName() + " requested changes";
-			else if (changeData instanceof PullRequestDiscardData) 
-				summary = user.getDisplayName() + " discarded";
-			if (summary != null) { 
-				summary = "Pull request " + request.getFQN() + ": " + summary;
+			if (changeData instanceof PullRequestApproveData
+					|| changeData instanceof PullRequestRequestedForChangesData
+					|| changeData instanceof PullRequestDiscardData) { 
+				String subject = String.format("[Pull Request %s] (%s) %s", request.getFQN(), 
+						WordUtils.capitalize(changeData.getActivity()), request.getTitle());
+				String threadingReferences = String.format("<%s-%s@onedev>", 
+						changeData.getActivity().replace(' ', '-'), request.getUUID());
 				mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), 
-						Lists.newArrayList(), getSubject(request), 
-						getHtmlBody(event, summary, null, url, replyable, null), 
-						getTextBody(event, summary, null, url, replyable, null), 
+						Lists.newArrayList(), Lists.newArrayList(), subject, 
+						getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+						getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
 						replyAddress, threadingReferences);
 				notifiedUsers.add(request.getSubmitter());
 			}
 		}
 		
-		Collection<User> mentionedUsers = new HashSet<>();
-		if (event instanceof MarkdownAware) {
-			MarkdownAware markdownAware = (MarkdownAware) event;
-			String markdown = markdownAware.getMarkdown();
-			if (markdown != null) {
-				String rendered = markdownManager.render(markdown);
-				
-				for (String userName: new MentionParser().parseMentions(rendered)) {
-					User mentionedUser = userManager.findByName(userName);
-					if (mentionedUser != null && notifiedUsers.add(mentionedUser)) { 
-						pullRequestWatchManager.watch(request, mentionedUser, true);
-						mentionedUsers.add(mentionedUser);
-					}
+		Collection<String> notifiedEmailAddresses;
+		if (event instanceof PullRequestCommented)
+			notifiedEmailAddresses = ((PullRequestCommented) event).getNotifiedEmailAddresses();
+		else
+			notifiedEmailAddresses = new ArrayList<>();
+		
+		if (event.getRenderedMarkdown() != null) {
+			for (String userName: new MentionParser().parseMentions(event.getRenderedMarkdown())) {
+				User mentionedUser = userManager.findByName(userName);
+				if (mentionedUser != null) { 
+					pullRequestWatchManager.watch(request, mentionedUser, true);
+					if (!notifiedEmailAddresses.stream().anyMatch(mentionedUser.getEmails()::contains)) {
+						String subject = String.format("[Pull Request %s] (Mentioned You) %s", request.getFQN(), request.getTitle());
+						String threadingReferences = String.format("<mentioned-%s@onedev>", request.getUUID());
+						
+						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), 
+								Sets.newHashSet(), Sets.newHashSet(), subject, 
+								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+								getTextBody(event, summary, event.getTextBody(), url, replyable, null),
+								replyAddress, threadingReferences);
+						notifiedUsers.add(mentionedUser);
+					}					
 				}
 			}
 		} 
@@ -244,14 +248,9 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			notifyWatchers = true;
 		}
 		
-		if (!mentionedUsers.isEmpty() || notifyWatchers) {
-			Collection<User> ccUsers = new HashSet<>();
+		if (notifyWatchers) {
+			Collection<User> bccUsers = new HashSet<>();
 			
-			Collection<String> notifiedEmailAddresses;
-			if (event instanceof PullRequestCommented)
-				notifiedEmailAddresses = ((PullRequestCommented) event).getNotifiedEmailAddresses();
-			else
-				notifiedEmailAddresses = new ArrayList<>();
 			for (PullRequestWatch watch: request.getWatches()) {
 				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
 				if (watch.isWatching() 
@@ -259,32 +258,22 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 						&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
 						&& !notifiedUsers.contains(watch.getUser())
 						&& !notifiedEmailAddresses.stream().anyMatch(watch.getUser().getEmails()::contains)) {
-					ccUsers.add(watch.getUser());
+					bccUsers.add(watch.getUser());
 				}
 			}
 
-			if (!mentionedUsers.isEmpty() || !ccUsers.isEmpty()) {
-				String summary;
-				if (user != null) 
-					summary = String.format("Pull request %s: %s %s", request.getFQN(), user.getDisplayName(), event.getActivity());
-				else if (committer != null) 
-					summary = String.format("Pull request %s: %s added commits", request.getFQN(), committer.getDisplayName());
-				else
-					summary = "Pull request " + request.getFQN() + ": " + event.getActivity();
-				
+			if (!bccUsers.isEmpty()) {
+				String subject = String.format("[Pull Request %s] (Updated) %s", request.getFQN(), request.getTitle());
+				String threadingReferences = "<" + request.getUUID() + "@onedev>";
 				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(request));
-				String htmlBody = getHtmlBody(event, summary, null, url, replyable, unsubscribable);
-				String textBody = getTextBody(event, summary, null, url, replyable, unsubscribable);
+				String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
+				String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
 				mailManager.sendMailAsync(
-						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
-						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
-						getSubject(request), htmlBody, textBody, replyAddress, threadingReferences);
+						Lists.newArrayList(), Lists.newArrayList(),
+						bccUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
+						subject, htmlBody, textBody, replyAddress, threadingReferences);
 			}
 		}				
-	}
-	
-	private String getThreadingReferences(PullRequest request) {
-		return "<" + request.getUUID() + "@onedev>";
 	}
 	
 	@Transactional
@@ -297,13 +286,15 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (review.getResult() == null && !review.getUser().equals(SecurityUtils.getUser())) {
 					pullRequestWatchManager.watch(request, review.getUser(), true);
 					String url = urlManager.urlFor(request);
-					String summary = "Pull request " + request.getFQN() + ": You are invited to review";
+					String subject = String.format("[Pull Request %s] (Review Invitation) %s", 
+							request.getFQN(), request.getTitle());
+					String threadingReferences = "<review-invitation-" + request.getUUID() + "@onedev>";
 					String replyAddress = mailManager.getReplyAddress(request);
 					mailManager.sendMailAsync(Lists.newArrayList(review.getUser().getEmail()), 
-							Lists.newArrayList(), getSubject(request), 
-							getHtmlBody(event, summary, null, url, replyAddress != null, null), 
-							getTextBody(event, summary, null, url, replyAddress != null, null), 
-							replyAddress, getThreadingReferences(request));
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, null, null, url, replyAddress != null, null), 
+							getTextBody(event, null, null, url, replyAddress != null, null), 
+							replyAddress, threadingReferences);
 				}
 			} else if (event.getEntity() instanceof PullRequestAssignment) {
 				PullRequestAssignment assignment = (PullRequestAssignment) event.getEntity();
@@ -311,13 +302,14 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 				if (!assignment.getUser().equals(SecurityUtils.getUser())) {
 					pullRequestWatchManager.watch(request, assignment.getUser(), true);
 					String url = urlManager.urlFor(request);
-					String summary = "Pull request " + request.getFQN() + ": You are assigned and expected to merge";
+					String subject = String.format("[Pull Request %s] (Assigned) %s", request.getFQN(), request.getTitle());
+					String threadingReferences = "<assigned-" + request.getUUID() + "@onedev>";
 					String replyAddress = mailManager.getReplyAddress(request);
 					mailManager.sendMailAsync(Lists.newArrayList(assignment.getUser().getEmail()), 
-							Lists.newArrayList(), getSubject(request), 
-							getHtmlBody(event, summary, null, url, replyAddress != null, null), 
-							getTextBody(event, summary, null, url, replyAddress != null, null), 
-							replyAddress, getThreadingReferences(request));
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, null, null, url, replyAddress != null, null), 
+							getTextBody(event, null, null, url, replyAddress != null, null), 
+							replyAddress, threadingReferences);
 				}
 			}
 		}

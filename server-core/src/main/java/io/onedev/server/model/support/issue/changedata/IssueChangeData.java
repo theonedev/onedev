@@ -6,26 +6,29 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.Component;
-
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
 
-public interface IssueChangeData extends Serializable {
+public abstract class IssueChangeData implements Serializable {
 	
-	Component render(String componentId, IssueChange change);
-	
-	String getActivity();
+	private static final long serialVersionUID = 1L;
+
+	public abstract String getActivity();
 
 	@Nullable
-	CommentAware getCommentAware();
+	public abstract CommentAware getCommentAware();
 	
-	Map<String, Collection<User>> getNewUsers();
+	public abstract Map<String, Collection<User>> getNewUsers();
 	
-	Map<String, Group> getNewGroups();
+	public abstract Map<String, Group> getNewGroups();
 	
-	boolean affectsBoards();
+	public abstract boolean affectsBoards();
+
+	@Nullable
+	public ActivityDetail getActivityDetail() {
+		return null;
+	}
 	
 }

@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -47,7 +47,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), comment);
+				OneDev.getInstance(IssueManager.class).saveDescription(getIssue(), comment);
 			}
 
 			@Override

@@ -56,6 +56,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
@@ -73,7 +74,6 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.Referenceable;
 import io.onedev.server.web.util.PullRequestAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -1174,6 +1174,15 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		if (getSource().getObjectName(false) != null)
 			return "Source branch already exists";
 		return null;
+	}
+
+	public String getStatusName() {
+		if (isMerged())
+			return "Merged";
+		else if (isDiscarded())
+			return "Discarded";
+		else
+			return "Open";
 	}
 	
 }

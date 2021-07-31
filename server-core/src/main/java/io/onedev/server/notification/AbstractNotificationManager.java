@@ -13,17 +13,14 @@ import groovy.text.SimpleTemplateEngine;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.Event;
-import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
+import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
-import io.onedev.server.util.markdown.MarkdownManager;
 
 public abstract class AbstractNotificationManager {
 
@@ -36,23 +33,14 @@ public abstract class AbstractNotificationManager {
 		this.settingManager = settingManager;
 	}
 	
-	protected String getHtmlBody(Event event, String eventSummary, @Nullable String eventBody, 
+	protected String getHtmlBody(Event event, @Nullable String eventSummary, @Nullable String eventBody, 
 			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
-		if (eventBody == null && event instanceof MarkdownAware) {
-			eventBody = ((MarkdownAware) event).getMarkdown();
-			if (eventBody != null) {
-				Project project = null;
-				if (event instanceof ProjectEvent)
-					project = ((ProjectEvent) event).getProject();
-				eventBody = markdownManager.process(markdownManager.render(eventBody), project, null, true);
-			}
-		}
-		
 		String template = null;
 		
 		Map<String, Object> bindings = new HashMap<>();
 		
-		eventSummary = HtmlEscape.escapeHtml5(eventSummary);
+		if (eventSummary != null)
+			eventSummary = HtmlEscape.escapeHtml5(eventSummary);
 		eventUrl = HtmlEscape.escapeHtml5(eventUrl);
 		
 		bindings.put("event", event);
@@ -88,13 +76,11 @@ public abstract class AbstractNotificationManager {
 		}
 	}
 	
-	protected String getTextBody(Event event, String eventSummary, @Nullable String eventBody, 
+	protected String getTextBody(Event event, @Nullable String eventSummary, @Nullable String eventBody, 
 			String eventUrl, boolean replyable, @Nullable Unsubscribable unsubscribable) {
-		StringBuilder textBody = new StringBuilder(eventSummary).append("\n\n");
-		
-		if (eventBody == null && event instanceof MarkdownAware)
-			eventBody = ((MarkdownAware) event).getMarkdown();
-		
+		StringBuilder textBody = new StringBuilder();
+		if (eventSummary != null)
+			textBody.append(eventSummary).append("\n\n");
 		if (eventBody != null) 
 			textBody.append(eventBody).append("\n\n");
 		
@@ -104,8 +90,8 @@ public abstract class AbstractNotificationManager {
 			textBody.append("Visit " + eventUrl + " for details");
 		
 		if (unsubscribable != null) {
-			textBody.append("\n\n---------------------------------------------\nYou received this as you "
-					+ "are participating or participated previously in this topic. ");
+			textBody.append("\n\n---------------------------------------------\nYou received this notification as you "
+					+ "are participating in this topic. ");
 			if (unsubscribable.getEmailAddress() != null) {
 				textBody.append(String.format("Mail to %s with any content to unsubscribe", 
 						unsubscribable.getEmailAddress()));

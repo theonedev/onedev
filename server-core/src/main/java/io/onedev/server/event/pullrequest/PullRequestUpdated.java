@@ -25,7 +25,7 @@ public class PullRequestUpdated extends PullRequestEvent {
 
 	@Override
 	public String getActivity() {
-		return "Commits added";
+		return "added commits";
 	}
 
 	public Collection<User> getCommitters() {

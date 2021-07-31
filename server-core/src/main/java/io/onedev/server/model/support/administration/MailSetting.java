@@ -71,7 +71,8 @@ public class MailSetting implements Serializable {
 	}
 
 	@Editable(order=410, name="System Email Address", description="This email address will be used as sender "
-			+ "address for various notifications")
+			+ "address for various notifications. Its inbox will also be checked if <tt>Check Incoming Email</tt>"
+			+ "option is enabled below")
 	@NotEmpty
 	public String getEmailAddress() {
 		return emailAddress;
@@ -81,10 +82,9 @@ public class MailSetting implements Serializable {
 		this.emailAddress = emailAddress;
 	}
 
-	@Editable(order=450, name="Check Incoming Email", description="Enable this to use the service desk feature (creating issue, "
-			+ "posting issue or pull request comments from email) <br>"
+	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email<br>"
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
-			+ "needs to be enabled for your mail server, as OneDev needs to use this to track context of sent email and received email")
+			+ "needs to be enabled for system email address, as OneDev uses it to track issue and pull request contexts")
 	public ReceiveMailSetting getReceiveMailSetting() {
 		return receiveMailSetting;
 	}

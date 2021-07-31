@@ -3,7 +3,7 @@ package io.onedev.server.web.editable.string;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 
-import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyViewer;

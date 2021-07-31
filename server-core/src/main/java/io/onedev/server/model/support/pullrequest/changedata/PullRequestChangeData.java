@@ -4,18 +4,21 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.Component;
-
-import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
 
-public interface PullRequestChangeData extends Serializable {
+public abstract class PullRequestChangeData implements Serializable {
 
-	Component render(String componentId, PullRequestChange change);
-	
-	String getActivity();
+	private static final long serialVersionUID = 1L;
+
+	public abstract String getActivity();
 	
 	@Nullable
-	CommentAware getCommentAware();
+	public abstract CommentAware getCommentAware();
 
+	@Nullable
+	public ActivityDetail getActivityDetail() {
+		return null;
+	}
+	
 }

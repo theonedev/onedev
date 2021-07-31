@@ -1,6 +1,8 @@
 <% 
-	print "<b>${eventSummary}</b>"
-	print "<br><br>" 
+	if (eventSummary != null) {
+		print "<b>${eventSummary}</b>"
+		print "<br><br>" 
+	}
 	
 	if (eventBody != null) {
 		print eventBody
@@ -21,7 +23,7 @@
 	if (unsubscribable != null) {
 		print """
 			<div style='border-top:1px solid #EEE; margin-top:1em; padding-top:1em; color:#666; font-size:0.9em;'>You received this as you
-			are participating or participated previously in this topic.
+			are participating in this topic.
 		"""
 		if (unsubscribable.getEmailAddress() != null) 
 			print """

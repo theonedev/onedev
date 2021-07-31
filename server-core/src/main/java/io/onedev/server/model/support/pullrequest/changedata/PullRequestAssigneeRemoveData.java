@@ -1,11 +1,8 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import org.apache.wicket.Component;
-
-import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentAware;
 
-public class PullRequestAssigneeRemoveData implements PullRequestChangeData {
+public class PullRequestAssigneeRemoveData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,11 +19,6 @@ public class PullRequestAssigneeRemoveData implements PullRequestChangeData {
 
 	@Override
 	public CommentAware getCommentAware() {
-		return null;
-	}
-
-	@Override
-	public Component render(String componentId, PullRequestChange change) {
 		return null;
 	}
 

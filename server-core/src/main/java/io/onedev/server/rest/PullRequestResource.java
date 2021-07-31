@@ -289,7 +289,7 @@ public class PullRequestResource {
 		PullRequest request = pullRequestManager.load(requestId);
     	if (!SecurityUtils.canModify(request))
 			throw new UnauthorizedException();
-		pullRequestChangeManager.changeDescription(request, description);
+		pullRequestManager.saveDescription(request, description);
 		return Response.ok().build();
     }
 	

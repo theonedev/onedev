@@ -50,7 +50,7 @@ public class SshServerLauncher {
         server.setPublickeyAuthenticator(new CachingPublicKeyAuthenticator(authenticator));
         server.setKeyboardInteractiveAuthenticator(null);
         
-        server.setCommandFactory(command -> {
+        server.setCommandFactory((channel, command) -> {
         	for (SshCommandCreator creator: commandCreators) {
         		Command sshCommand = creator.createCommand(command);
         		if (sshCommand != null)

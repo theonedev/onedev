@@ -4,16 +4,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.wicket.Component;
-
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
-public class IssueTitleChangeData implements IssueChangeData {
+public class IssueTitleChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,14 +20,6 @@ public class IssueTitleChangeData implements IssueChangeData {
 	public IssueTitleChangeData(String oldTitle, String newTitle) {
 		this.oldTitle = oldTitle;
 		this.newTitle = newTitle;
-	}
-	
-	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new PropertyChangePanel(componentId, 
-				CollectionUtils.newHashMap("Title", oldTitle), 
-				CollectionUtils.newHashMap("Title", newTitle), 
-				true);
 	}
 	
 	@Override
@@ -57,6 +45,15 @@ public class IssueTitleChangeData implements IssueChangeData {
 	@Override
 	public boolean affectsBoards() {
 		return false;
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		Map<String, String> oldFieldValues = new HashMap<>();
+		oldFieldValues.put("Title", oldTitle);
+		Map<String, String> newFieldValues = new HashMap<>();
+		oldFieldValues.put("Title", newTitle);
+		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	
 }

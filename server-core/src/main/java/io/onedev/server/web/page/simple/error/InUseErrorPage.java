@@ -6,7 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.usage.InUseException;
 import io.onedev.server.web.page.simple.SimplePage;
 

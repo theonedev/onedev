@@ -31,7 +31,7 @@ public class NotificationTemplateSetting implements Serializable {
 			+ "When evaluating this template, below variables will be available:"
 			+ "<ul class='mb-0'>"
 			+ "<li><code>event:</code> <a href='https://code.onedev.io/projects/onedev-server/blob/main/server-core/src/main/java/io/onedev/server/event/Event.java' target='_blank'>event object</a> triggering the notification"
-			+ "<li><code>eventSummary:</code> a string representing summary of the event"
+			+ "<li><code>eventSummary:</code> a string representing summary of the event. May be <code>null</code>"
 			+ "<li><code>eventBody:</code> a string representing body of the event. May be <code>null</code>"
 			+ "<li><code>eventUrl:</code> a string representing event detail url"
 			+ "<li><code>replyable:</code> a boolean indiciating whether or not topic comment can be created directly by replying the email"

@@ -2,10 +2,9 @@ package io.onedev.server.event.issue;
 
 import java.util.Collection;
 
-import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.IssueComment;
 
-public class IssueCommented extends IssueEvent implements MarkdownAware {
+public class IssueCommented extends IssueEvent {
 
 	private final IssueComment comment;
 	

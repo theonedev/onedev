@@ -2,7 +2,6 @@ package io.onedev.server.event.pullrequest;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
@@ -10,7 +9,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeDat
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.ProjectScopedCommit;
 
-public class PullRequestChangeEvent extends PullRequestEvent implements MarkdownAware, CommitAware {
+public class PullRequestChangeEvent extends PullRequestEvent implements CommitAware {
 
 	private final PullRequestChange change;
 	

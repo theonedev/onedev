@@ -33,7 +33,10 @@ public class BuildMultiChoiceEditor extends PropertyEditor<List<Long>> {
 	}
 
 	private Project getProject() {
-		return ((ProjectPage)getPage()).getProject();		
+		if (getPage() instanceof ProjectPage)
+			return ((ProjectPage)getPage()).getProject();		
+		else
+			return null;
 	}
 	
 	@Override

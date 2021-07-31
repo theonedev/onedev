@@ -8,8 +8,10 @@
 }
 .SimplePage .main {
 	padding: 1.75rem;
-	width: 450px;
 	margin: auto;
+}
+.SimplePage:not(.force-ordinary-style) .main {
+	width: 450px;
 }
 .SimplePage.GeneralErrorPage .main {
 	width: 900px;
@@ -18,6 +20,9 @@
 	width: auto;
 }
 
+.force-ordinary-style .bean-editor {
+	text-align: left !important;
+}
 .SimplePage .main .logo.icon {
 	color: var(--primary);
 	margin-bottom: 3rem;
@@ -25,7 +30,7 @@
 .SimplePage .main .title {
 	margin-bottom: 5rem;
 }
-.SimplePage .main .btn:not(.btn-block) {
+.SimplePage:not(.force-ordinary-style) .main .btn:not(.btn-block) {
 	padding: 1rem 2.25rem;
 	margin: 0.75rem 1rem;
 }
@@ -43,18 +48,18 @@
 	text-align: left;
 	margin-bottom: 1.5rem;
 }
-.SimplePage .main .form-group {
+.SimplePage:not(.force-ordinary-style) .main .form-group {
 	margin-bottom: 1.5rem;
 	text-align: left;
 }
-.SimplePage .main .form-control {
+.SimplePage:not(.force-ordinary-style) .main .form-control {
 	padding: 1rem 2rem;
 	background-color: var(--light);
     border-color: var(--light);
     color: var(--gray-dark);
 	height: auto;
 }
-.SimplePage .main .form-control:focus {
+.SimplePage:not(.force-ordinary-style) .main .form-control:focus {
     background-color: var(--light-gray);
     border-color: var(--light-gray);
 }

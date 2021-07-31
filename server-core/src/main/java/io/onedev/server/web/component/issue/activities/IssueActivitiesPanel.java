@@ -33,22 +33,14 @@ import org.apache.wicket.request.http.WebResponse;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
-import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.CodeComment;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -122,22 +114,8 @@ public abstract class IssueActivitiesPanel extends Panel {
 		
 		if (showChangeHistory) {
 			for (IssueChange change: getIssue().getChanges()) {
-				if (change.getData() instanceof IssueReferencedFromIssueData) {
-					IssueReferencedFromIssueData referencedFromIssueData = (IssueReferencedFromIssueData) change.getData();
-					Issue issue = OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId());
-					if (issue != null)
-						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssueReferencedFromPullRequestData) {
-					IssueReferencedFromPullRequestData referencedFromPullRequestData = (IssueReferencedFromPullRequestData) change.getData();
-					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId());
-					if (request != null)
-						otherActivities.add(new IssueChangeActivity(change));
-				} else if (change.getData() instanceof IssueReferencedFromCodeCommentData) {
-					IssueReferencedFromCodeCommentData referencedFromCodeCommentData = (IssueReferencedFromCodeCommentData) change.getData();
-					CodeComment comment = OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId());
-					if (comment != null)
-						otherActivities.add(new IssueChangeActivity(change));
-				} else if (!(change.getData() instanceof IssueDescriptionChangeData)) {
+				if (!(change.getData() instanceof ReferencedFromAware) 
+						|| ((ReferencedFromAware<?>)change.getData()).getReferencedFrom() != null) {
 					otherActivities.add(new IssueChangeActivity(change));
 				}
 			}

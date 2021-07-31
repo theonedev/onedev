@@ -7,38 +7,49 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable
-public class ServiceDeskSetting implements Serializable {
+@ClassValidating
+public class ServiceDeskSetting implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String PROP_SENDER_AUTHORIZATIONS = "senderAuthorizations";
-	
-	public static final String PROP_DEFAULT_PROJECT_DESIGNATIONS = "defaultProjectDesignations";
+	private static final String PROP_PROJECT_DESIGNATIONS = "projectDesignations";
 
+	private static final String PROP_ISSUE_CREATION_SETTINGS = "issueCreationSettings";
+	
 	private List<SenderAuthorization> senderAuthorizations = new ArrayList<>(); 
 	
-	private List<DefaultProjectDesignation> defaultProjectDesignations = new ArrayList<>();
+	private List<ProjectDesignation> projectDesignations = new ArrayList<>();
 	
 	private List<IssueCreationSetting> issueCreationSettings = new ArrayList<>();
-
-	@Editable
-	@OmitName
+	
+	@Editable(order=100, description="When sender email address can not be mapped to an existing user, "
+			+ "OneDev will use entries defined here to determine if the sender has permission to "
+			+ "create issues. For a particular sender, the first matching entry will take "
+			+ "effect")
 	public List<SenderAuthorization> getSenderAuthorizations() {
 		return senderAuthorizations;
 	}
@@ -47,16 +58,29 @@ public class ServiceDeskSetting implements Serializable {
 		this.senderAuthorizations = senderAuthorizations;
 	}
 
-	@Editable
-	@OmitName
-	public List<DefaultProjectDesignation> getDefaultProjectDesignations() {
-		return defaultProjectDesignations;
+	@Editable(order=200, description="When email is sent to system email address without specifying "
+			+ "project information, OneDev will use entries defined here to decide in which "
+			+ "project to create issues. For a particular sender, the first matching entry will "
+			+ "take effect")
+	public List<ProjectDesignation> getProjectDesignations() {
+		return projectDesignations;
 	}
 
-	public void setDefaultProjectDesignations(List<DefaultProjectDesignation> defaultProjectDesignations) {
-		this.defaultProjectDesignations = defaultProjectDesignations;
+	public void setProjectDesignations(List<ProjectDesignation> projectDesignations) {
+		this.projectDesignations = projectDesignations;
 	}
 
+	@SuppressWarnings("unused")
+	private static List<String> getProjectChoices() {
+		List<String> projectNames = OneDev.getInstance(ProjectManager.class)
+				.query().stream().map(it->it.getName()).collect(Collectors.toList());
+		Collections.sort(projectNames);
+		return projectNames;
+	}
+	
+	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, "
+			+ "the first matching entry will take effect. If no entry matches, default issue creation "
+			+ "settings defined below will be used")
 	public List<IssueCreationSetting> getIssueCreationSettings() {
 		return issueCreationSettings;
 	}
@@ -65,6 +89,11 @@ public class ServiceDeskSetting implements Serializable {
 		this.issueCreationSettings = issueCreationSettings;
 	}
 	
+	@SuppressWarnings("unused")
+	private static Collection<String> getIssueFieldNames() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getPromptFieldsUponIssueOpen();
+	}
+
 	@Nullable
 	public SenderAuthorization getSenderAuthorization(String senderAddress) {
 		Matcher matcher = new StringMatcher();
@@ -79,21 +108,20 @@ public class ServiceDeskSetting implements Serializable {
 		return null;
 	}
 	
-	@Nullable
-	public DefaultProjectDesignation getDefaultProjectDesignation(String senderAddress) {
+	public String getDesignatedProject(String senderAddress) {
 		Matcher matcher = new StringMatcher();
-		for (DefaultProjectDesignation designation: defaultProjectDesignations) {
+		for (ProjectDesignation designation: projectDesignations) {
 			String patterns = designation.getSenderEmails();
 			if (patterns == null)
 				patterns = "*";
 			PatternSet patternSet = PatternSet.parse(patterns);
 			if (patternSet.matches(matcher, senderAddress))
-				return designation;
+				return designation.getProject();
 		}
-		return null;
+		throw new ExplicitException("No project designated for sender: " + senderAddress);
 	}
 	
-	public IssueCreationSetting getIssueCreationSetting(String senderAddress, Project project) {
+	public List<FieldSupply> getIssueCreationSetting(String senderAddress, Project project) {
 		Matcher matcher = new StringMatcher();
 		for (IssueCreationSetting setting: issueCreationSettings) {
 			String senderPatterns = setting.getSenderEmails();
@@ -107,9 +135,9 @@ public class ServiceDeskSetting implements Serializable {
 			PatternSet projectPatternSet = PatternSet.parse(projectPatterns);
 			
 			if (senderPatternSet.matches(matcher, senderAddress) && projectPatternSet.matches(matcher, project.getName()))
-				return setting;
+				return setting.getIssueFields();
 		}
-		String errorMessage = String.format("No issue creation setting found (sender: %s, project: %s)", 
+		String errorMessage = String.format("No issue creation setting (sender: %s, project: %s)", 
 				senderAddress, project.getName());
 		throw new ExplicitException(errorMessage);
 	}
@@ -143,9 +171,9 @@ public class ServiceDeskSetting implements Serializable {
 			if (authorization.getAuthorizedProjects().length() == 0)
 				authorization.setAuthorizedProjects(null);
 		}
-		for (DefaultProjectDesignation designation: getDefaultProjectDesignations()) {
-			if (designation.getDefaultProject().equals(oldName))
-				designation.setDefaultProject(newName);
+		for (ProjectDesignation designation: getProjectDesignations()) {
+			if (designation.getProject().equals(oldName))
+				designation.setProject(newName);
 		}
 		for (IssueCreationSetting setting: getIssueCreationSettings()) {
 			PatternSet patternSet = PatternSet.parse(setting.getApplicableProjects());
@@ -171,9 +199,9 @@ public class ServiceDeskSetting implements Serializable {
 		}
 		
 		index = 0;
-		for (DefaultProjectDesignation designation: getDefaultProjectDesignations()) {
-			if (designation.getDefaultProject().equals(projectName))
-				usage.add("default project designation #" + index + ": default project");
+		for (ProjectDesignation senderProject: getProjectDesignations()) {
+			if (senderProject.getProject().equals(projectName))
+				usage.add("sender project #" + index + ": project");
 			index++;
 		}
 		
@@ -209,6 +237,48 @@ public class ServiceDeskSetting implements Serializable {
 	public void fixUndefinedIssueFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
 		for (IssueCreationSetting setting: getIssueCreationSettings()) 
 			setting.fixUndefinedFieldValues(resolutions);
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		boolean isValid = true;
+		
+		boolean foundDefault = false;
+		for (ProjectDesignation designation: getProjectDesignations()) {
+			if (designation.getSenderEmails() == null) {
+				foundDefault = true;
+				break;
+			}
+		}
+		if (!foundDefault) {
+			String errorMessage = "An entry with any sender should be defined to be used as "
+					+ "default project designation"; 
+			context.buildConstraintViolationWithTemplate(errorMessage)
+					.addPropertyNode(PROP_PROJECT_DESIGNATIONS)
+					.addConstraintViolation();
+			isValid = false;
+		}
+		
+		foundDefault = false;
+		for (IssueCreationSetting setting: getIssueCreationSettings()) {
+			if (setting.getSenderEmails() == null && setting.getApplicableProjects() == null) {
+				foundDefault = true;
+				break;
+			}
+		}
+		if (!foundDefault) {
+			String errorMessage = "An entry with any sender and any project should be defined "
+					+ "to be use as default issue creation setting"; 
+			context.buildConstraintViolationWithTemplate(errorMessage)
+					.addPropertyNode(PROP_ISSUE_CREATION_SETTINGS)
+					.addConstraintViolation();
+			isValid = false;
+		}
+		
+		if (!isValid)
+			context.disableDefaultConstraintViolation();
+		
+		return isValid;
 	}
 	
 }

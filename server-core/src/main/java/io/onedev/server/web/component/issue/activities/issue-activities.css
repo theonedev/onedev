@@ -34,7 +34,16 @@
 .issue-activities>table>tbody>tr>td.content>.body {
     margin-top: 1rem;
 }
+.issue-activities>table>tbody>tr>td.content>.body>.detail+.comment {
+    margin-top: 1rem;
+}
 
-.issue-activities .field-change>.comment {
-	margin-top: 0.8rem;
+.issue-activities table.field-compare {
+	border: 1px dashed var(--secondary) !important;
+}
+.issue-activities table.field-compare th, .issue-activities table.field-compare td {
+	border-bottom: 1px dashed var(--secondary) !important;
+}
+.issue-activities table.field-compare th {
+	font-weight: 600 !important;
 }

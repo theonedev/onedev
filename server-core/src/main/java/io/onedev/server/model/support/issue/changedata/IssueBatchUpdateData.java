@@ -5,15 +5,9 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.Component;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
-import io.onedev.server.web.component.issue.activities.activity.IssueFieldChangePanel;
 
 public class IssueBatchUpdateData extends IssueFieldChangeData {
 
@@ -91,21 +85,6 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 			@Override
 			public void setComment(String comment) {
 				IssueBatchUpdateData.this.comment = comment;
-			}
-
-		};
-	}
-
-	@Override
-	public Component render(String componentId, IssueChange change) {
-		Long changeId = change.getId();
-		return new IssueFieldChangePanel(componentId, true) {
-			
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected IssueChange getChange() {
-				return OneDev.getInstance(IssueChangeManager.class).load(changeId);
 			}
 
 		};

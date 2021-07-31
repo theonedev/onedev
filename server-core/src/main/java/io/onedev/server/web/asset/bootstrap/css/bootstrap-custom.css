@@ -2836,3 +2836,7 @@ a.badge.badge-light-dark:hover, a.badge.badge-light-dark:focus {
 .form-text {
 	margin-top: 0.3rem;
 }
+
+.form-group {
+	margin-bottom: 1.2rem;
+}

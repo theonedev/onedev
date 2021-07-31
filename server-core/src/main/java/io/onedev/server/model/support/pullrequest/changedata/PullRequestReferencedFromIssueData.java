@@ -1,14 +1,15 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import org.apache.wicket.Component;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 
-public class PullRequestReferencedFromIssueData implements PullRequestChangeData {
+public class PullRequestReferencedFromIssueData 
+		extends PullRequestChangeData implements ReferencedFromAware<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,11 +25,6 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 	}
 
 	@Override
-	public Component render(String componentId, PullRequestChange change) {
-		return new ReferencedFromIssuePanel(componentId, issueId);
-	}
-	
-	@Override
 	public String getActivity() {
 		return "Referenced from issue";
 	}
@@ -38,4 +34,14 @@ public class PullRequestReferencedFromIssueData implements PullRequestChangeData
 		return null;
 	}
 
+	@Override
+	public Issue getReferencedFrom() {
+		return OneDev.getInstance(IssueManager.class).get(issueId);
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return ActivityDetail.referencedFrom(getReferencedFrom());
+	}
+	
 }

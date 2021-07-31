@@ -20,6 +20,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.build.BuildUpdated;
+import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildQuerySetting;
 import io.onedev.server.model.Project;
@@ -27,7 +28,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.util.markdown.MarkdownManager;
 
 @Singleton
 public class BuildNotificationManager extends AbstractNotificationManager {
@@ -64,22 +64,17 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 	
 	public void notify(BuildEvent event, Collection<String> emails) {
 		Build build = event.getBuild();
-		String subject = String.format("[%s] %s - %s", build.getStatus().getDisplayName(), 
-					build.getProject().getName(), build.getJobName());
+		String subject = String.format("[Build %s] %s", build.getFQN(), build.getJobName());
 
-		String summary;
-		if (build.getVersion() != null) 
-			summary = String.format("Build %s (%s)", build.getFQN(), build.getVersion());
-		else 
-			summary = String.format("Build %s", build.getFQN());
-		
-		summary += " is " + build.getStatus().getDisplayName().toLowerCase();
-		
+		String summary = build.getStatus().getDisplayName();
+		if (build.getVersion() != null)
+			summary = build.getVersion() + " " + summary;
+			
 		String url = urlManager.urlFor(build);
-		String threadingReferences = build.getProject().getName() + "-build" + build.getNumber() + "@onedev";
+		String threadingReferences = "<" + build.getProject().getName() + "-build-" + build.getNumber() + "@onedev>";
 		String htmlBody = getHtmlBody(event, summary, null, url, false, null);
 		String textBody = getTextBody(event, summary, null, url, false, null);
-		mailManager.sendMailAsync(Lists.newArrayList(), emails, subject, htmlBody, 
+		mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), emails, subject, htmlBody, 
 				textBody, null, threadingReferences);
 	}
 	

@@ -1,14 +1,15 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import org.apache.wicket.Component;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestChange;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
 
-public class PullRequestReferencedFromPullRequestData implements PullRequestChangeData {
+public class PullRequestReferencedFromPullRequestData 
+		extends PullRequestChangeData implements ReferencedFromAware<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,11 +25,6 @@ public class PullRequestReferencedFromPullRequestData implements PullRequestChan
 	}
 
 	@Override
-	public Component render(String componentId, PullRequestChange change) {
-		return new ReferencedFromPullRequestPanel(componentId, requestId);
-	}
-	
-	@Override
 	public String getActivity() {
 		return "Referenced from other pull request";
 	}
@@ -38,4 +34,14 @@ public class PullRequestReferencedFromPullRequestData implements PullRequestChan
 		return null;
 	}
 
+	@Override
+	public PullRequest getReferencedFrom() {
+		return OneDev.getInstance(PullRequestManager.class).get(requestId);
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return ActivityDetail.referencedFrom(getReferencedFrom());
+	}
+	
 }

@@ -22,13 +22,13 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.CommitQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.commit.CommitQuery;
-import io.onedev.server.util.markdown.MarkdownManager;
 
 @Singleton
 public class CommitNotificationManager extends AbstractNotificationManager {
@@ -99,33 +99,30 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 			
 			RevCommit commit = project.getRevCommit(event.getNewCommitId(), false);
 			if (commit != null) {
-				String subject;
-
-				String branchName = GitUtils.ref2branch(event.getRefName());
-				if (branchName != null) {
-					subject = String.format("[%s] %s", branchName, commit.getShortMessage());
-				} else {
-					String tagName = GitUtils.ref2tag(event.getRefName());
-					if (tagName != null) {
-						subject = String.format("[%s] %s", tagName, commit.getShortMessage());
-					} else {
-						subject = String.format("[%s] %s", event.getRefName(), commit.getShortMessage());
-					}
+				String target = GitUtils.ref2branch(event.getRefName());
+				if (target == null) {
+					target = GitUtils.ref2tag(event.getRefName());
+					if (target == null) 
+						target = event.getRefName();
 				}
-					
+				
+				String subject = String.format("[Commit %s:%s] (%s) %s", 
+						project.getName(), GitUtils.abbreviateSHA(commit.name()), target, commit.getShortMessage());
+
 				String url = urlManager.urlFor(project, commit);
-				String summary = String.format("Commit %s:%s - Authored by %s", project.getName(), 
-						GitUtils.abbreviateSHA(commit.name()), commit.getAuthorIdent().getName());
+				String summary = String.format("Authored by %s", commit.getAuthorIdent().getName());
 
 				String textMessage = GitUtils.getDetailMessage(commit);
 				String htmlMessage = null;
 				if (textMessage != null) 
 					htmlMessage = "<pre>" + HtmlEscape.escapeHtml5(textMessage) + "</pre>";
 				
-				mailManager.sendMailAsync(Lists.newArrayList(), notifyEmails, subject, 
+				String threadingReferences = "<commit-" + commit.name() + "@onedev>";
+				
+				mailManager.sendMailAsync(Lists.newArrayList(), Lists.newArrayList(), notifyEmails, subject, 
 						getHtmlBody(event, summary, htmlMessage, url, false, null), 
 						getTextBody(event, summary, textMessage, url, false, null), 
-						null, null);
+						null, threadingReferences);
 			}
 		}
 	}

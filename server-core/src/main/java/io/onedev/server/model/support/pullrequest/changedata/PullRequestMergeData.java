@@ -2,12 +2,9 @@ package io.onedev.server.model.support.pullrequest.changedata;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.Component;
-
-import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentAware;
 
-public class PullRequestMergeData implements PullRequestChangeData {
+public class PullRequestMergeData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,11 +20,6 @@ public class PullRequestMergeData implements PullRequestChangeData {
 			return reason;
 		else 
 			return "merged";
-	}
-
-	@Override
-	public Component render(String componentId, PullRequestChange change) {
-		return null;
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.model.Issue;
 
 public class ReferenceMigratorTest {

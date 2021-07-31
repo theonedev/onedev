@@ -53,6 +53,7 @@ import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
@@ -66,7 +67,6 @@ import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -296,6 +296,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	public void setThreadingReference(String threadingReference) {
 		this.threadingReference = threadingReference;
+	}
+	
+	public String getEffectiveThreadingReference() {
+		String threadingReference = getThreadingReference();
+		if (threadingReference == null)
+			threadingReference = "<" + getUUID() + "@onedev>";
+		return threadingReference;
 	}
 	
 	@Override

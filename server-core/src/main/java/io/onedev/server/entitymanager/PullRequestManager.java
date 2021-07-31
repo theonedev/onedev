@@ -73,4 +73,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 
 	void delete(Collection<PullRequest> requests);
 	
+	void saveDescription(PullRequest request, @Nullable String description);
+	
 }

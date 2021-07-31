@@ -3,12 +3,12 @@ package io.onedev.server.event.issue;
 import java.util.Collection;
 import java.util.Map;
 
-import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.notification.ActivityDetail;
 
-public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
+public class IssueChangeEvent extends IssueEvent {
 
 	private final IssueChange change;
 	
@@ -47,6 +47,11 @@ public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 	@Override
 	public String getActivity() {
 		return getChange().getData().getActivity();
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return getChange().getData().getActivityDetail();
 	}
 
 }

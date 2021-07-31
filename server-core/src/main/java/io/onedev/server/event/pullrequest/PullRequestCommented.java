@@ -2,10 +2,9 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Collection;
 
-import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.PullRequestComment;
 
-public class PullRequestCommented extends PullRequestEvent implements MarkdownAware {
+public class PullRequestCommented extends PullRequestEvent {
 
 	private final PullRequestComment comment;
 	

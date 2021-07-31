@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,28 +18,23 @@ import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.MarkdownAware;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.markdown.MarkdownManager;
+import io.onedev.server.markdown.MentionParser;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.issue.changedata.IssueChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
-import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.util.markdown.MentionParser;
 
 @Singleton
 public class IssueNotificationManager extends AbstractNotificationManager {
@@ -73,8 +67,6 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		Issue issue = event.getIssue();
 		User user = event.getUser();
 
-		String subject = String.format("[%s] %s", issue.getState(), issue.getTitle());
-		
 		String url;
 		if (event instanceof IssueCommented)
 			url = urlManager.urlFor(((IssueCommented)event).getComment());
@@ -82,7 +74,13 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			url = urlManager.urlFor(((IssueChangeEvent)event).getChange());
 		else
 			url = urlManager.urlFor(issue);
-		
+
+		String summary = "[" + issue.getState() + "] "; 
+		if (user != null)
+			summary = summary + user.getDisplayName() + " " + event.getActivity();
+		else
+			summary = summary + event.getActivity();
+
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
 
 			@Override
@@ -141,113 +139,102 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			if (!user.isSystem())
 				issueWatchManager.watch(issue, user, true);
 		}
-		
+
 		Map<String, Group> newGroups = event.getNewGroups();
 		Map<String, Collection<User>> newUsers = event.getNewUsers();
 		
 		String replyAddress = mailManager.getReplyAddress(issue);
 		boolean replyable = replyAddress != null;
-		String threadingReferences = issue.getThreadingReference();
-		if (threadingReferences == null)
-			threadingReferences = "<" + issue.getUUID() + "@onedev>";
 		for (Map.Entry<String, Group> entry: newGroups.entrySet()) {
-			String summary = String.format("Issue %s: %s: You", issue.getFQN(), entry.getKey());
-			Set<String> emails = entry.getValue().getMembers()
-					.stream()
-					.filter(it->!it.equals(user))
-					.map(it->it.getEmail())
-					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, 
-					getHtmlBody(event, summary, null, url, replyable, null), 
-					getTextBody(event, summary, null, url, replyable, null), 
-					replyAddress, threadingReferences);
+			String subject = String.format("[Issue %s] (%s: You) %s", issue.getFQN(), entry.getKey(), issue.getTitle());
+			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
+			for (User member: entry.getValue().getMembers()) {
+				if (!member.equals(user)) {
+					mailManager.sendMailAsync(Sets.newHashSet(member.getEmail()), 
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+							getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+							replyAddress, threadingReferences);
+				}
+			}
 			
 			for (User member: entry.getValue().getMembers())
 				issueWatchManager.watch(issue, member, true);
 			
 			notifiedUsers.addAll(entry.getValue().getMembers());
 		}
+		
 		for (Map.Entry<String, Collection<User>> entry: newUsers.entrySet()) {
-			String summary = String.format("Issue %s: %s: You", issue.getFQN(), entry.getKey());
-			Set<String> emails = entry.getValue()
-					.stream()
-					.filter(it->!it.equals(user))
-					.map(it->it.getEmail())
-					.collect(Collectors.toSet());
-			mailManager.sendMailAsync(emails, Lists.newArrayList(), subject, 
-					getHtmlBody(event, summary, null, url, replyable, null), 
-					getTextBody(event, summary, null, url, replyable, null), 
-					replyAddress, threadingReferences);
+			String subject = String.format("[Issue %s] (%s: You) %s", issue.getFQN(), entry.getKey(), issue.getTitle());
+			String threadingReferences = String.format("<you-in-field-%s-%s@onedev>", entry.getKey(), issue.getUUID());
+			for (User member: entry.getValue()) {
+				if (!member.equals(user)) {
+					mailManager.sendMailAsync(Sets.newHashSet(member.getEmail()), 
+							Lists.newArrayList(), Lists.newArrayList(), subject, 
+							getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+							getTextBody(event, summary, event.getTextBody(), url, replyable, null), 
+							replyAddress, threadingReferences);
+				}
+			}
 			
 			for (User each: entry.getValue())
 				issueWatchManager.watch(issue, each, true);
 			notifiedUsers.addAll(entry.getValue());
 		}
 		
-		Collection<User> mentionedUsers = new HashSet<>();
-		if (event instanceof MarkdownAware) {
-			MarkdownAware markdownAware = (MarkdownAware) event;
-			String markdown = markdownAware.getMarkdown();
-			if (markdown != null) {
-				String rendered = markdownManager.render(markdown);
-				
-				for (String userName: new MentionParser().parseMentions(rendered)) {
-					User mentionedUser = userManager.findByName(userName);
-					if (mentionedUser != null && notifiedUsers.add(mentionedUser)) {
-						issueWatchManager.watch(issue, mentionedUser, true);
-						mentionedUsers.add(mentionedUser);
+		Collection<String> notifiedEmailAddresses;
+		if (event instanceof IssueCommented)
+			notifiedEmailAddresses = ((IssueCommented) event).getNotifiedEmailAddresses();
+		else
+			notifiedEmailAddresses = new ArrayList<>();
+		
+		if (event.getRenderedMarkdown() != null) {
+			for (String userName: new MentionParser().parseMentions(event.getRenderedMarkdown())) {
+				User mentionedUser = userManager.findByName(userName);
+				if (mentionedUser != null) {
+					issueWatchManager.watch(issue, mentionedUser, true);
+					if (!notifiedEmailAddresses.stream().anyMatch(mentionedUser.getEmails()::contains)) {
+						String subject = String.format("[Issue %s] (Mentioned You) %s", issue.getFQN(), issue.getTitle());
+						String threadingReferences = String.format("<mentioned-%s@onedev>", issue.getUUID());
+						
+						mailManager.sendMailAsync(Sets.newHashSet(mentionedUser.getEmail()), 
+								Sets.newHashSet(), Sets.newHashSet(), subject, 
+								getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, null), 
+								getTextBody(event, summary, event.getTextBody(), url, replyable, null),
+								replyAddress, threadingReferences);
+						notifiedUsers.add(mentionedUser);
 					}
 				}
 			}
 		}
-		
-		boolean notifyWatchers = false;
-		if (event instanceof IssueChangeEvent) {
-			IssueChangeData changeData = ((IssueChangeEvent) event).getChange().getData();
-			if (!(changeData instanceof IssueReferencedFromCodeCommentData
-					|| changeData instanceof IssueReferencedFromIssueData
-					|| changeData instanceof IssueReferencedFromPullRequestData
-					|| changeData instanceof IssueDescriptionChangeData)) {
-				notifyWatchers = true;
-			}
-		} else {
-			notifyWatchers = true;
-		}
-		
-		if (!mentionedUsers.isEmpty() || notifyWatchers) {
-			Collection<User> ccUsers = new HashSet<>();
+
+		if (!(event instanceof IssueChangeEvent) 
+				|| !(((IssueChangeEvent) event).getChange().getData() instanceof ReferencedFromAware)) {
+			Collection<User> bccUsers = new HashSet<>();
 			
-			Collection<String> notifiedEmailAddresses;
-			if (event instanceof IssueCommented)
-				notifiedEmailAddresses = ((IssueCommented) event).getNotifiedEmailAddresses();
-			else
-				notifiedEmailAddresses = new ArrayList<>();
 			for (IssueWatch watch: issue.getWatches()) {
 				Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
 				if (watch.isWatching()
 						&& (visitDate == null || visitDate.before(event.getDate()))
 						&& !notifiedUsers.contains(watch.getUser())
 						&& !notifiedEmailAddresses.stream().anyMatch(watch.getUser().getEmails()::contains)) {
-					ccUsers.add(watch.getUser());
+					bccUsers.add(watch.getUser());
 				}
 			}
-
-			if (!mentionedUsers.isEmpty() || !ccUsers.isEmpty()) {
-				String summary;
-				if (user != null)
-					summary = String.format("Issue %s: %s %s", issue.getFQN(), user.getDisplayName(), event.getActivity());
-				else
-					summary = "Issue " + issue.getFQN() + ": " + event.getActivity();
-				
+	
+			if (!bccUsers.isEmpty()) {
+				String subject = String.format("[Issue %s] (Updated) %s", issue.getFQN(), issue.getTitle()); 
+	
 				Unsubscribable unsubscribable = new Unsubscribable(mailManager.getUnsubscribeAddress(issue));
-				String htmlBody = getHtmlBody(event, summary, null, url, replyable, unsubscribable);
-				String textBody = getTextBody(event, summary, null, url, replyable, unsubscribable);
-				
-				mailManager.sendMailAsync(
-						mentionedUsers.stream().map(User::getEmail).collect(Collectors.toList()),
-						ccUsers.stream().map(User::getEmail).collect(Collectors.toList()),
+				String htmlBody = getHtmlBody(event, summary, event.getHtmlBody(), url, replyable, unsubscribable);
+				String textBody = getTextBody(event, summary, event.getTextBody(), url, replyable, unsubscribable);
+	
+				String threadingReferences = issue.getEffectiveThreadingReference();
+				mailManager.sendMailAsync(Sets.newHashSet(), Sets.newHashSet(), 
+						bccUsers.stream().map(User::getEmail).collect(Collectors.toList()),
 						subject, htmlBody, textBody, replyAddress, threadingReferences);
 			}
 		}
 	}
+
 }

@@ -31,6 +31,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
@@ -65,6 +66,8 @@ import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.entityreference.EntityReferenceManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -77,6 +80,7 @@ import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
@@ -99,9 +103,6 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeDa
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
@@ -123,7 +124,6 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
@@ -159,6 +159,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 	
 	private final ExecutorService executorService;
 	
+	private final EntityReferenceManager entityReferenceManager;
+	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
 			PullRequestReviewManager pullRequestReviewManager, MarkdownManager markdownManager, 
@@ -166,7 +168,8 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			SessionManager sessionManager, PullRequestChangeManager pullRequestChangeManager, 
 			ExecutorService executorService, BuildManager buildManager, 
 			TransactionManager transactionManager, ProjectManager projectManager, 
-			CommitInfoManager commitInfoManager, PullRequestAssignmentManager pullRequestAssignmentManager) {
+			CommitInfoManager commitInfoManager, PullRequestAssignmentManager pullRequestAssignmentManager, 
+			EntityReferenceManager entityReferenceManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -181,6 +184,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		this.projectManager = projectManager;
 		this.commitInfoManager = commitInfoManager;
 		this.pullRequestAssignmentManager = pullRequestAssignmentManager;
+		this.entityReferenceManager = entityReferenceManager;
 	}
 	
 	@Transactional
@@ -660,9 +664,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 						|| changeData instanceof PullRequestAssigneeRemoveData
 						|| changeData instanceof PullRequestSourceBranchDeleteData
 						|| changeData instanceof PullRequestSourceBranchRestoreData
-						|| changeData instanceof PullRequestReferencedFromCodeCommentData
-						|| changeData instanceof PullRequestReferencedFromIssueData
-						|| changeData instanceof PullRequestReferencedFromPullRequestData) {
+						|| changeData instanceof ReferencedFromAware) {
 					minorChange = true;
 				}
 			}
@@ -1034,4 +1036,15 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			delete(request);
 	}
 
+	@Transactional
+	@Override
+	public void saveDescription(PullRequest request, @Nullable String description) {
+		String prevDescription = request.getDescription();
+		if (!Objects.equal(description, prevDescription)) {
+			request.setDescription(description);
+			entityReferenceManager.addReferenceChange(request, description);
+			save(request);
+		}
+	}
+	
 }

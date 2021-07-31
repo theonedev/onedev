@@ -5,6 +5,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -225,8 +226,23 @@ public class DefaultDataManager implements DataManager, Serializable {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
 		setting = settingManager.getSetting(Key.SERVICE_DESK_SETTING);
-		if (setting == null) {
-			settingManager.saveServiceDeskSetting(new ServiceDeskSetting());
+		if (setting == null) { 
+			settingManager.saveServiceDeskSetting(null);
+		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
+			manualConfigs.add(new ManualConfig("Specify Service Desk Setting", null, 
+					setting.getValue(), new HashSet<>(), true) {
+	
+				@Override
+				public Skippable getSkippable() {
+					return null;
+				}
+	
+				@Override
+				public void complete() {
+					settingManager.saveServiceDeskSetting((ServiceDeskSetting) getSetting());
+				}
+				
+			});
 		}
 		setting = settingManager.getSetting(Key.NOTIFICATION_TEMPLATE_SETTING);
 		if (setting == null) {
@@ -345,8 +361,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 				+ "%s",
 				url, Throwables.getStackTraceAsString(e));
 		mailManager.sendMail(Lists.newArrayList(root.getEmail()), Lists.newArrayList(),
-				"OneDev database auto-backup failed", htmlBody, textBody, 
-				null, null);
+				Lists.newArrayList(), "[Backup] OneDev Database Auto-backup Failed", 
+				htmlBody, textBody, null, null);
 	}
 	
 	public Object writeReplace() throws ObjectStreamException {

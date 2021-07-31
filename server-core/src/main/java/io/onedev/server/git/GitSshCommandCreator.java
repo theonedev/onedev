@@ -17,9 +17,10 @@ import org.apache.shiro.util.ThreadContext;
 import org.apache.sshd.common.channel.ChannelOutputStream;
 import org.apache.sshd.server.Environment;
 import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.session.ServerSession;
+import org.apache.sshd.server.session.ServerSessionAware;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,7 +118,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 		}
 	}
 
-	private abstract class GitSshCommand implements Command, SessionAware {
+	private abstract class GitSshCommand implements Command, ServerSessionAware {
 		
 		private static final int PRIORITY = 2;
 
@@ -156,7 +157,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 	    }
 	    
 		@Override
-		public void start(Environment env) throws IOException {
+		public void start(ChannelSession channel, Environment env) throws IOException {
 			ThreadContext.bind(SecurityUtils.asSubject(authenticator.getPublicKeyOwnerId(session)));
 			
             File gitDir;
@@ -206,7 +207,7 @@ public class GitSshCommandCreator implements SshCommandCreator {
 		protected abstract ExecutionResult execute(File gitDir, Map<String, String> gitEnvs);
 
 		@Override
-		public void destroy() throws Exception {
+		public void destroy(ChannelSession channel) throws Exception {
 			if (commandFuture != null)
 				commandFuture.cancel(true);
 		}

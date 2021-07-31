@@ -7,7 +7,9 @@ import javax.annotation.Nullable;
 import org.apache.wicket.markup.html.form.FormComponent;
 
 import io.onedev.server.util.init.ManualConfig;
+import io.onedev.server.web.behavior.ForceOrdinaryStyleBehavior;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {
@@ -20,7 +22,11 @@ public class ManualConfigStep implements WizardStep {
 	
 	@Override
 	public FormComponent<Serializable> render(String componentId) {
-		return BeanContext.edit(componentId, config.getSetting(), config.getExcludeProperties(), true);
+		BeanEditor editor = BeanContext.edit(componentId, config.getSetting(), 
+				config.getExcludeProperties(), true);
+		if (config.isForceOrdinaryStyle())
+			editor.add(new ForceOrdinaryStyleBehavior());
+		return editor;
 	}
 
 	@Override

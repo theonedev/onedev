@@ -57,7 +57,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
-import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
@@ -161,22 +160,6 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 		}
 	}
 
-	@Transactional
-	@Override
-	public void changeDescription(Issue issue, @Nullable String description) {
-		String prevDescription = issue.getDescription();
-		if (!Objects.equal(description, prevDescription)) {
-			issue.setDescription(description);
-			
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueDescriptionChangeData(prevDescription, issue.getDescription()));
-			save(change);
-		}
-	}
-	
 	@Transactional
 	@Override
 	public void changeMilestone(Issue issue, @Nullable Milestone milestone) {

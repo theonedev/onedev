@@ -1,6 +1,6 @@
 package io.onedev.server.web.component.entity.reference;
 
-import io.onedev.server.util.Referenceable;
+import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 
 import org.apache.wicket.markup.ComponentTag;

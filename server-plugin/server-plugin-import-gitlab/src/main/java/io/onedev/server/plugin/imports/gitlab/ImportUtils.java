@@ -36,6 +36,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entityreference.ReferenceMigrator;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
@@ -52,7 +53,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
-import io.onedev.server.util.ReferenceMigrator;
 import io.onedev.server.util.SimpleLogger;
 
 public class ImportUtils {

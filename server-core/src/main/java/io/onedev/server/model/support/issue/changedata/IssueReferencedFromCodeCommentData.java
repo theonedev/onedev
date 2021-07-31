@@ -4,17 +4,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.wicket.Component;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
 
-public class IssueReferencedFromCodeCommentData implements IssueChangeData {
+public class IssueReferencedFromCodeCommentData extends IssueChangeData implements ReferencedFromAware<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,11 +35,6 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 	}
 
 	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new ReferencedFromCodeCommentPanel(componentId, commentId);
-	}
-
-	@Override
 	public CommentAware getCommentAware() {
 		return null;
 	}
@@ -57,6 +52,16 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 	@Override
 	public boolean affectsBoards() {
 		return false;
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return ActivityDetail.referencedFrom(getReferencedFrom());
+	}
+
+	@Override
+	public CodeComment getReferencedFrom() {
+		return OneDev.getInstance(CodeCommentManager.class).get(commentId);
 	}
 
 }

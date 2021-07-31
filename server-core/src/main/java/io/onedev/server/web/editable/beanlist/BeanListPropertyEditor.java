@@ -25,7 +25,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.PathNode.Indexed;

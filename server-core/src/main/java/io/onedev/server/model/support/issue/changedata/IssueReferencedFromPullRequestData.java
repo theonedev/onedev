@@ -4,17 +4,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.wicket.Component;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
 
-public class IssueReferencedFromPullRequestData implements IssueChangeData {
+public class IssueReferencedFromPullRequestData extends IssueChangeData implements ReferencedFromAware<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,11 +29,6 @@ public class IssueReferencedFromPullRequestData implements IssueChangeData {
 		return requestId;
 	}
 
-	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new ReferencedFromPullRequestPanel(componentId, requestId);
-	}
-	
 	@Override
 	public String getActivity() {
 		return "Referenced from pull request";
@@ -58,5 +53,15 @@ public class IssueReferencedFromPullRequestData implements IssueChangeData {
 	public boolean affectsBoards() {
 		return false;
 	}
-	 
+
+	@Override
+	public PullRequest getReferencedFrom() {
+		return OneDev.getInstance(PullRequestManager.class).get(requestId);
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return ActivityDetail.referencedFrom(getReferencedFrom());
+	}
+	
 }

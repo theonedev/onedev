@@ -126,8 +126,8 @@ public class MailSettingPage extends AdministrationPage {
 							+ MailManager.TEST_SUB_ADDRESSING + "@" + emailAddress.getDomain();
 					logger.log("Sending test mail to " + subAddressed + "...");
 					mailManager.sendMail(mailSetting, 
-							Sets.newHashSet(subAddressed), Lists.newArrayList(), uuid, 
-							"This is a test email from OneDev", "This is a test email from OneDev", null, null);
+							Sets.newHashSet(subAddressed), Lists.newArrayList(), Lists.newArrayList(), uuid, 
+							"[Test] Test Email From OneDev", "This is a test email from OneDev", null, null);
 
 					logger.log("Waiting for test mail to come back...");
 
@@ -142,8 +142,8 @@ public class MailSettingPage extends AdministrationPage {
 					return "Great, your mail setting is working";
 				} else {
 					String body = "Great, your mail setting is working!";
-					mailManager.sendMail(mailSettingHolder.getMailSetting(), 
-							Sets.newHashSet(user.getEmail()), Lists.newArrayList(), "Test email from OneDev", 
+					mailManager.sendMail(mailSettingHolder.getMailSetting(), Sets.newHashSet(user.getEmail()), 
+							Lists.newArrayList(), Lists.newArrayList(), "[Test] Test Email From OneDev", 
 							body, body, null, null);
 					return "Test mail has been sent to " + user.getEmail() + ", please check your mail box";
 				}

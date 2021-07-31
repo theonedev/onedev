@@ -1,13 +1,12 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import org.apache.wicket.Component;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
-public class PullRequestTitleChangeData implements PullRequestChangeData {
+public class PullRequestTitleChangeData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,16 +25,18 @@ public class PullRequestTitleChangeData implements PullRequestChangeData {
 	}
 
 	@Override
-	public Component render(String componentId, PullRequestChange change) {
-		return new PropertyChangePanel(componentId, 
-				CollectionUtils.newHashMap("Title", oldTitle), 
-				CollectionUtils.newHashMap("Title", newTitle), 
-				true);
-	}
-	
-	@Override
 	public CommentAware getCommentAware() {
 		return null;
 	}
 
+	@Override
+	public ActivityDetail getActivityDetail() {
+		Map<String, String> oldProperties = new HashMap<>();
+		oldProperties.put("Title", oldTitle);
+		Map<String, String> newProperties = new HashMap<>();
+		oldProperties.put("Title", newTitle);
+		
+		return ActivityDetail.compare(oldProperties, newProperties, true);
+	}
+	
 }

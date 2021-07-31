@@ -4,17 +4,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.wicket.Component;
-
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entityreference.ReferencedFromAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.rest.annotation.EntityId;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 
-public class IssueReferencedFromIssueData implements IssueChangeData {
+public class IssueReferencedFromIssueData extends IssueChangeData implements ReferencedFromAware<Issue> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,11 +29,6 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 		return issueId;
 	}
 
-	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new ReferencedFromIssuePanel(componentId, issueId);
-	}
-	
 	@Override
 	public String getActivity() {
 		return "Referenced from other issue";
@@ -58,5 +53,15 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	public boolean affectsBoards() {
 		return false;
 	}
-	
+
+	@Override
+	public Issue getReferencedFrom() {
+		return OneDev.getInstance(IssueManager.class).get(issueId);
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return ActivityDetail.referencedFrom(getReferencedFrom());
+	}
+
 }

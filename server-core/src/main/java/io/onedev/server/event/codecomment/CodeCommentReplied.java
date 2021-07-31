@@ -1,9 +1,8 @@
 package io.onedev.server.event.codecomment;
 
-import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.CodeCommentReply;
 
-public class CodeCommentReplied extends CodeCommentEvent implements MarkdownAware {
+public class CodeCommentReplied extends CodeCommentEvent {
 
 	private final CodeCommentReply reply;
 	

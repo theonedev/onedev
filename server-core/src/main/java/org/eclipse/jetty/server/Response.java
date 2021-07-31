@@ -553,14 +553,14 @@ public class Response implements HttpServletResponse
             if (location.startsWith("/"))
             {
                 // absolute in context
-                location = URIUtil.canonicalEncodedPath(location);
+                location = URIUtil.canonicalURI(location);
             }
             else
             {
                 // relative to request
                 String path = _channel.getRequest().getRequestURI();
                 String parent = (path.endsWith("/")) ? path : URIUtil.parentPath(path);
-                location = URIUtil.canonicalEncodedPath(URIUtil.addEncodedPaths(parent, location));
+                location = URIUtil.canonicalURI(URIUtil.addEncodedPaths(parent, location));
                 if (location != null && !location.startsWith("/"))
                     buf.append('/');
             }

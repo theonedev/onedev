@@ -9,21 +9,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.wicket.Component;
-
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
 import io.onedev.server.util.Input;
-import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
-public class IssueFieldChangeData implements IssueChangeData {
+public class IssueFieldChangeData extends IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -64,11 +61,6 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 	
 	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new PropertyChangePanel(componentId, getOldFieldValues(), getNewFieldValues(), false);
-	}
-
-	@Override
 	public String getActivity() {
 		return "changed fields";
 	}
@@ -80,11 +72,6 @@ public class IssueFieldChangeData implements IssueChangeData {
 		return lines;
 	}
 	
-	@Override
-	public CommentAware getCommentAware() {
-		return null;
-	}
-
 	@Override
 	public Map<String, Collection<User>> getNewUsers() {
 		UserManager userManager = OneDev.getInstance(UserManager.class);
@@ -149,6 +136,16 @@ public class IssueFieldChangeData implements IssueChangeData {
 	@Override
 	public boolean affectsBoards() {
 		return true;
+	}
+
+	@Override
+	public CommentAware getCommentAware() {
+		return null;
+	}
+
+	@Override
+	public ActivityDetail getActivityDetail() {
+		return ActivityDetail.compare(getOldFieldValues(), getNewFieldValues(), false);
 	}
 
 }

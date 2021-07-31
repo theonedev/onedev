@@ -1,14 +1,13 @@
 package io.onedev.server.model.support.pullrequest.changedata;
 
-import org.apache.wicket.Component;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.util.CollectionUtils;
+import io.onedev.server.notification.ActivityDetail;
 import io.onedev.server.util.CommentAware;
-import io.onedev.server.web.component.propertychangepanel.PropertyChangePanel;
 
-public class PullRequestMergeStrategyChangeData implements PullRequestChangeData {
+public class PullRequestMergeStrategyChangeData extends PullRequestChangeData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,16 +26,18 @@ public class PullRequestMergeStrategyChangeData implements PullRequestChangeData
 	}
 
 	@Override
-	public Component render(String componentId, PullRequestChange change) {
-		return new PropertyChangePanel(componentId, 
-				CollectionUtils.newHashMap("Merge Strategy", oldStrategy.toString()), 
-				CollectionUtils.newHashMap("Merge Strategy", newStrategy.toString()), 
-				true);
-	}
-	
-	@Override
 	public CommentAware getCommentAware() {
 		return null;
 	}
 
+	@Override
+	public ActivityDetail getActivityDetail() {
+		Map<String, String> oldProperties = new HashMap<>();
+		oldProperties.put("Merge Strategy", oldStrategy.name());
+		Map<String, String> newProperties = new HashMap<>();
+		oldProperties.put("Merge Strategy", newStrategy.name());
+		
+		return ActivityDetail.compare(oldProperties, newProperties, true);
+	}
+	
 }

@@ -124,6 +124,7 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting);
 	
+	@Nullable
 	ServiceDeskSetting getServiceDeskSetting();
 	
 	void saveServiceDeskSetting(ServiceDeskSetting serviceDeskSetting);

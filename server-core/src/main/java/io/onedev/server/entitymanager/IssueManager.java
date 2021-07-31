@@ -58,6 +58,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void fixFieldValueOrders();
 	
+	void saveDescription(Issue issue, @Nullable String description);
+	
+	@Override
 	void delete(Issue issue);
 	
 	Collection<Long> getIssueNumbers(Long projectId);
