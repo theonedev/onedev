@@ -1,6 +1,4 @@
-### ![#f03c15](https://via.placeholder.com/15/f03c15/000000?text=+) NOTE: We develop OneDev at https://code.onedev.io/projects/onedev-server for sake of dogfooding. All issues and pull requests should be created there
-
-<hr/>
+<div class="alert alert-notice alert-light-warning"><b>NOTE:</b> We develop OneDev at <a href="https://code.onedev.io/projects/onedev-server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there</div>
 
 # Super Easy All-In-One DevOps Platform 
 
