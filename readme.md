@@ -1,4 +1,6 @@
-<div class="alert alert-notice alert-light-warning mb-4"><b>NOTE:</b> We develop OneDev at <a href="https://code.onedev.io/projects/onedev-server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there</div>
+> :warning: **NOTE:** We develop OneDev at <a href="https://code.onedev.io/projects/onedev-server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there
+
+<br>
 
 # Super Easy All-In-One DevOps Platform 
 
