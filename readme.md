@@ -1,7 +1,5 @@
 > :warning: **NOTE:** We develop OneDev at <a href="https://code.onedev.io/projects/onedev-server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there
 
-<br>
-
 # Super Easy All-In-One DevOps Platform 
 
 With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Powerful.
@@ -20,15 +18,11 @@ Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. N
 
 ![Job Executor](doc/images/job-executor.png)
 
-<br>
-
 ### Set up CI/CD  in a Breeze
 
 CI/CD configuration is defined in a yaml file together with your code, and OneDev provides a GUI to generate the file without any learning curve.
 
 ![Cispec](doc/images/build-spec.gif)
-
-<br>
 
 ### Flexible Build Workflow and Pipeline
 
@@ -36,15 +30,11 @@ Conditional build parameters. Create matrix builds by combining different parame
 
 ![Build Workflow](doc/images/build-workflow.gif)
 
-<br>
-
 ### Custom Issue States and Fields
 
 Add custom issue states and fields. Configure field dependencies. Transit issue state automatically upon certain events, or manually by authorized users 
 
 ![Custom Issue](doc/images/custom-issue.gif)
-
-<br>
 
 ### Auto-Refreshing Issue Boards
 
@@ -52,15 +42,11 @@ Define issue boards to show issues in columns based on values of specified field
 
 ![Issue Boards](doc/images/issue-boards.gif)
 
-<br>
-
 ### Code Intelligence
 
 Symbol search and navigation in source code and diff. Outline display and search. Works for every commit. Currently supports Java, JavaScript, C, C++, CSharp, Go, PHP, Python, CSS, SCSS, LESS and R. 
 
 ![Symbol Search](doc/images/symbol-search.gif)
-
-<br>
 
 ### Code Discussions and Comprehensions
 
@@ -68,15 +54,11 @@ Instant and lightweight code discussions on code and diff blocks without creatin
 
 ![Code Comments](doc/images/code-comments.gif)
 
-<br>
-
 ### Flexible Pull Request Review Policies
 
 Enforce pull request review with branch protections. Specify required reviewers and builds for desired file patterns. 
 
 ![Branch Protection](doc/images/branch-protection.gif)
-
-<br>
 
 ### Painless Pull Request Review
 
@@ -84,15 +66,11 @@ Review pull request commits as a whole or one by one. Organize code discussions 
 
 ![Increment Review](doc/images/increment-review.gif)
 
-<br>
-
 ### Powerful Query Language
 
 Perform sophisticated queries against projects, commits, builds, issues, pull requests or code comments with a powerful query language. Save query for quick access. Subscribe to saved query to get notified of interesting events.
 
 ![Powerful Query](doc/images/powerful-query.gif)
-
-<br>
 
 ### Deep Integration of Code, Issue, Pull Request and Build
 
@@ -100,15 +78,11 @@ Configure issues to transit to desired state upon commit, build or pull request 
 
 ![Issue Query](doc/images/issue-code-build-integration.gif)
 
-<br>
-
 ### Service Desk to Work with Issues over Email
 
 The ability to submit and discuss issues over email make OneDev a perfect customer support system, with the ability to create tickets of different priorities for different customers, and assign to different support representatives. 
 
 ![service-desk-setting.png](doc/images/service-desk-setting.png)
-
-<br>
 
 ### Fine Grained Permission Control
 

@@ -2840,3 +2840,7 @@ a.badge.badge-light-dark:hover, a.badge.badge-light-dark:focus {
 .form-group {
 	margin-bottom: 1.2rem;
 }
+
+p {
+	margin-bottom: 1.2rem;
+}
