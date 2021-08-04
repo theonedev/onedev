@@ -25,10 +25,12 @@ import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
 import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
@@ -118,6 +120,24 @@ public class SettingResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	return settingManager.getMailSetting();
+    }
+	
+	@Api(order=850)
+	@Path("/service-desk")
+    @GET
+    public ServiceDeskSetting getServiceDeskSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getServiceDeskSetting();
+    }
+	
+	@Api(order=900)
+	@Path("/notification-template")
+    @GET
+    public NotificationTemplateSetting getNotificiationTemplateSetting() {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	return settingManager.getNotificationTemplateSetting();
     }
 	
 	@Api(order=1000)
@@ -251,6 +271,26 @@ public class SettingResource {
     	if (!SecurityUtils.isAdministrator()) 
 			throw new UnauthorizedException();
     	settingManager.saveMailSetting(mailSetting);
+    	return Response.ok().build();
+    }
+	
+	@Api(order=2210)
+	@Path("/service-desk")
+	@POST
+    public Response setServiceDeskSetting(ServiceDeskSetting serviceDeskSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveServiceDeskSetting(serviceDeskSetting);
+    	return Response.ok().build();
+    }
+	
+	@Api(order=2220)
+	@Path("/notification-template")
+	@POST
+    public Response setNotificationTemplateSetting(NotificationTemplateSetting notificationTemplateSetting) {
+    	if (!SecurityUtils.isAdministrator()) 
+			throw new UnauthorizedException();
+    	settingManager.saveNotificationTemplateSetting(notificationTemplateSetting);
     	return Response.ok().build();
     }
 	
