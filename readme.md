@@ -80,7 +80,7 @@ Configure issues to transit to desired state upon commit, build or pull request 
 
 ### Service Desk to Work with Issues over Email
 
-The ability to submit and discuss issues over email make OneDev a perfect customer support system, with the ability to create tickets of different priorities for different customers, and assign to different support representatives. 
+The ability to submit and discuss issues over email makes OneDev a perfect customer supporting system, with the ability to create tickets of different priorities for different customers, and assign to different support representatives. 
 
 ![service-desk-setting.png](doc/images/service-desk-setting.png)
 
