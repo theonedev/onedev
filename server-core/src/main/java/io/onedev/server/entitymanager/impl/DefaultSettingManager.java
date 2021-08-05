@@ -547,7 +547,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Collection<String> getUndefinedIssueFields() {
 		Collection<String> undefinedFields = new HashSet<>();
 		undefinedFields.addAll(getIssueSetting().getUndefinedFields());
-		undefinedFields.addAll(getServiceDeskSetting().getUndefinedIssueFields());
+		if (getServiceDeskSetting() != null)
+			undefinedFields.addAll(getServiceDeskSetting().getUndefinedIssueFields());
 		return undefinedFields;
 	}
 
@@ -555,7 +556,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Collection<UndefinedFieldValue> getUndefinedIssueFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		undefinedFieldValues.addAll(getIssueSetting().getUndefinedFieldValues());
-		undefinedFieldValues.addAll(getServiceDeskSetting().getUndefinedIssueFieldValues());
+		if (getServiceDeskSetting() != null)
+			undefinedFieldValues.addAll(getServiceDeskSetting().getUndefinedIssueFieldValues());
 		return undefinedFieldValues;
 	}
 
@@ -563,7 +565,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Collection<String> fixUndefinedIssueFields(Map<String, UndefinedFieldResolution> resolutions) {
 		Collection<String> deletedFields = new HashSet<>();
 		deletedFields.addAll(getIssueSetting().fixUndefinedFields(resolutions));
-		getServiceDeskSetting().fixUndefinedIssueFields(resolutions);
+		if (getServiceDeskSetting() != null)
+			getServiceDeskSetting().fixUndefinedIssueFields(resolutions);
 		return deletedFields;
 	}
 	
@@ -571,14 +574,16 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Collection<String> fixUndefinedIssueFieldValues(Map<String, UndefinedFieldValuesResolution> resolutions) {
 		Collection<String> deletedFields = new HashSet<>();
 		deletedFields.addAll(getIssueSetting().fixUndefinedFieldValues(resolutions));
-		getServiceDeskSetting().fixUndefinedIssueFieldValues(resolutions);
+		if (getServiceDeskSetting() != null)
+			getServiceDeskSetting().fixUndefinedIssueFieldValues(resolutions);
 		return deletedFields;
 	}
 
 	@Override
 	public void onRenameRole(String oldName, String newName) {
 		getIssueSetting().onRenameRole(oldName, newName);
-		getServiceDeskSetting().onRenameRole(oldName, newName);
+		if (getServiceDeskSetting() != null)
+			getServiceDeskSetting().onRenameRole(oldName, newName);
 	}
 
 	@Override
@@ -586,7 +591,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		Usage usage = new Usage();
 		
 		usage.add(getIssueSetting().onDeleteRole(roleName));
-		usage.add(getServiceDeskSetting().onDeleteRole(roleName));
+		if (getServiceDeskSetting() != null)
+			usage.add(getServiceDeskSetting().onDeleteRole(roleName));
 		
 		return usage.prefix("administration");
 	}
@@ -597,7 +603,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     		jobExecutor.onRenameProject(oldName, newName);
     	for (GroovyScript groovyScript: getGroovyScripts())
     		groovyScript.onRenameProject(oldName, newName);
-    	getServiceDeskSetting().onRenameProject(oldName, newName);
+    	if (getServiceDeskSetting() != null)
+    		getServiceDeskSetting().onRenameProject(oldName, newName);
 	}
 
 	@Override
@@ -614,7 +621,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     		usage.add(groovyScript.onDeleteProject(projectName).prefix("groovy script #" + index));
     		index++;
     	}
-		usage.add(getServiceDeskSetting().onDeleteProject(projectName));
+    	if (getServiceDeskSetting() != null)
+    		usage.add(getServiceDeskSetting().onDeleteProject(projectName));
 		
 		return usage.prefix("administration");
 	}
