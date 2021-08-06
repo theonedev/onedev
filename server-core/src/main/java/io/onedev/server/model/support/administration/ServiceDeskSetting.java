@@ -79,8 +79,7 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 	}
 	
 	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, "
-			+ "the first matching entry will take effect. If no entry matches, default issue creation "
-			+ "settings defined below will be used")
+			+ "the first matching entry will take effect")
 	public List<IssueCreationSetting> getIssueCreationSettings() {
 		return issueCreationSettings;
 	}
