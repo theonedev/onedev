@@ -6,6 +6,7 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SO
 
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -32,6 +33,7 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		String commitMessageBody = null;
 		PullRequest request = getPullRequest();
 		if (request.getMergeStrategy() == MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS) {
 			StringBuilder builder = new StringBuilder();
@@ -47,26 +49,35 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 				}
 			}
 
-			bean.setBody(builder.toString().trim());
+			commitMessageBody = builder.toString().trim();
 		}
 
+		String commitMessageSummary = null;
 		String description = null;
 		MergeStrategy mergeStrategy = getPullRequest().getMergeStrategy();
 		MergePreview mergePreview = getPullRequest().getMergePreview();
 		if (mergeStrategy == CREATE_MERGE_COMMIT) 
-			bean.setSummary("Merge pull request " + request.getNumberAndTitle());
+			commitMessageSummary = "Merge pull request " + request.getNumberAndTitle();
 		else if (mergeStrategy == SQUASH_SOURCE_BRANCH_COMMITS) 
-			bean.setSummary("Pull request " + request.getNumberAndTitle());
+			commitMessageSummary = "Pull request " + request.getNumberAndTitle();
 		else if (mergeStrategy == REBASE_SOURCE_BRANCH_COMMITS) 
 			description = "Source branch commits will be rebased onto target branch";
 		else if (mergePreview.getMergeCommitHash().equals(mergePreview.getHeadCommitHash())) 
 			description = "Source branch commits will be fast-forwarded to target branch";
 		else 
-			bean.setSummary("Merge pull request " + request.getNumberAndTitle());
+			commitMessageSummary = "Merge pull request " + request.getNumberAndTitle();
 		
 		getForm().add(new Label("description", description).setVisible(description != null));
-		
-		getForm().add(BeanContext.edit("commitMessage", bean).setVisible(description == null));
+
+		if (commitMessageSummary != null) {
+			String commitMessage = commitMessageSummary;
+			if (commitMessageBody != null)
+				commitMessage += "\n\n" + commitMessageBody;
+			bean.setCommitMessage(commitMessage);
+			getForm().add(BeanContext.edit("commitMessage", bean));
+		} else {
+			getForm().add(new WebMarkupContainer("commitMessage").setVisible(false));
+		}
 	}
 
 	private PullRequest getPullRequest() {
@@ -74,16 +85,7 @@ public abstract class MergeConfirmPanel extends OperationConfirmPanel {
 	}
 	
 	public String getCommitMessage() {
-		if (bean.getSummary() != null) {
-			StringBuilder builder = new StringBuilder(bean.getSummary());
-			if (bean.getBody() != null) {
-				builder.append("\n\n");
-				builder.append(bean.getBody());
-			}
-			return builder.toString();
-		} else {
-			return null;
-		}
+		return bean.getCommitMessage();
 	}
 
 	@Override

@@ -271,11 +271,13 @@ import io.onedev.server.util.xstream.MapConverter;
 import io.onedev.server.util.xstream.ReflectionConverter;
 import io.onedev.server.util.xstream.StringConverter;
 import io.onedev.server.util.xstream.VersionedDocumentConverter;
+import io.onedev.server.web.DefaultUploadItemManager;
 import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
 import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.ResourcePackScopeContribution;
+import io.onedev.server.web.UploadItemManager;
 import io.onedev.server.web.WebApplication;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -660,6 +662,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
+		bind(UploadItemManager.class).to(DefaultUploadItemManager.class);
 		
 		bind(TaskButton.TaskFutureManager.class);
 		

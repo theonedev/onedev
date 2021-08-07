@@ -166,7 +166,7 @@ public class CommitOptionPanel extends Panel {
 
 		form.add(new FencedFeedbackPanel("feedback", form));
 		newChangesOfOthersContainer(null);
-		commitMessageBean.setSummary(getDefaultCommitMessage());
+		commitMessageBean.setCommitMessage(getDefaultCommitMessage());
 		form.add(BeanContext.edit("commitMessage", commitMessageBean));
 
 		AjaxButton saveButton = new AjaxButton("save") {
@@ -247,9 +247,7 @@ public class CommitOptionPanel extends Panel {
 			target.add(form);
 			return false;
 		} else {
-			String commitMessage = commitMessageBean.getSummary();
-			if (StringUtils.isNotBlank(commitMessageBean.getBody()))
-				commitMessage += "\n\n" + commitMessageBean.getBody();
+			String commitMessage = commitMessageBean.getCommitMessage();
 			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 			String revision = context.getBlobIdent().revision;

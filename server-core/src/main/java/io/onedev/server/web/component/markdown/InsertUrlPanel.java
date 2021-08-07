@@ -28,7 +28,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.image.ExternalImage;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -67,6 +66,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.util.FileUpload;
 
 @SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {
@@ -89,15 +89,13 @@ abstract class InsertUrlPanel extends Panel {
 	
 	private static final String CONTENT_ID = "content";
 	
-	private Collection<FileUpload> uploads;
+	private Collection<FileUpload> uploads = new ArrayList<>();
 	
 	private String url;
 	
 	private String text;
 	
-	private String summaryCommitMessage;
-	
-	private String detailCommitMessage;
+	private String commitMessage;
 	
 	private final MarkdownEditor markdownEditor;
 	
@@ -402,7 +400,8 @@ abstract class InsertUrlPanel extends Panel {
 					FileUpload upload = uploads.iterator().next();
 					try (InputStream is = upload.getInputStream()) {
 						attachmentName = attachmentSupport.saveAttachment(
-								FilenameUtils.sanitizeFilename(upload.getClientFileName()), is);
+								FilenameUtils.sanitizeFilename(upload.getFileName()), is);
+						upload.release();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -514,19 +513,8 @@ abstract class InsertUrlPanel extends Panel {
 				}
 				
 			};
-			form.add(new TextField<String>("summaryCommitMessage", 
-					new PropertyModel<String>(this, "summaryCommitMessage")).add(behavior));
-			
-			behavior = new ReferenceInputBehavior(true) {
-				
-				@Override
-				protected Project getProject() {
-					return markdownEditor.getBlobRenderContext().getProject();
-				}
-				
-			};
-			form.add(new TextArea<String>("detailCommitMessage", 
-					new PropertyModel<String>(this, "detailCommitMessage")).add(behavior));
+			form.add(new TextArea<String>("commitMessage", 
+					new PropertyModel<String>(this, "commitMessage")).add(behavior));
 			
 			form.add(new AjaxButton("insert") {
 
@@ -535,24 +523,22 @@ abstract class InsertUrlPanel extends Panel {
 					super.onSubmit(target, form);
 
 					BlobRenderContext context = Preconditions.checkNotNull(markdownEditor.getBlobRenderContext());
-					String commitMessage = summaryCommitMessage;
+					String commitMessage = InsertUrlPanel.this.commitMessage;
 					if (StringUtils.isBlank(commitMessage))
 						commitMessage = "Add files via upload";
 					
-					if (StringUtils.isNotBlank(detailCommitMessage))
-						commitMessage += "\n\n" + detailCommitMessage;
-
 					try {
 						String directory = WebSession.get().getMetaData(UPLOAD_DIRECTORY);
 						context.onCommitted(null, context.uploadFiles(uploads, directory, commitMessage));
-						
-						String fileName = uploads.iterator().next().getClientFileName();
+						String fileName = uploads.iterator().next().getFileName();
 						String url;
 						if (directory != null) 
-							url = directory + "/" + UrlUtils.encodePath(fileName);
+							url = StringUtils.stripEnd(directory, "/") + "/" + UrlUtils.encodePath(fileName);
 						else 
 							url = UrlUtils.encodePath(fileName);
 						markdownEditor.insertUrl(target, isImage, url, fileName, null);
+						for (FileUpload upload: uploads) 
+							upload.release();
 						onClose(target);
 					} catch (GitException e) {
 						form.error(e.getMessage());
@@ -646,6 +632,8 @@ abstract class InsertUrlPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				for (FileUpload upload: uploads)
+					upload.release();
 				onClose(target);
 			}
 			

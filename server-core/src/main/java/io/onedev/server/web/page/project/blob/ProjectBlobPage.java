@@ -31,7 +31,6 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -117,6 +116,7 @@ import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.resource.RawBlobResourceReference;
 import io.onedev.server.web.util.EditParamsAware;
+import io.onedev.server.web.util.FileUpload;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -1464,7 +1464,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		BlobIdent blobIdent = getBlobIdent();
 		
 		for (FileUpload upload: uploads) {
-			String blobPath = FilenameUtils.sanitizeFilename(upload.getClientFileName());
+			String blobPath = FilenameUtils.sanitizeFilename(upload.getFileName());
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			

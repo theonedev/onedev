@@ -7,7 +7,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.PlanarRange;
@@ -17,6 +16,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.web.util.FileUpload;
 
 public interface BlobRenderContext extends Serializable {
 

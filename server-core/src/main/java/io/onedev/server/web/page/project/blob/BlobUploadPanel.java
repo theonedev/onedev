@@ -11,7 +11,6 @@ import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -22,6 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.web.util.FileUpload;
 
 @SuppressWarnings("serial")
 public abstract class BlobUploadPanel extends Panel {
@@ -30,9 +30,7 @@ public abstract class BlobUploadPanel extends Panel {
 	
 	private String directory;
 	
-	private String summaryCommitMessage;
-	
-	private String detailCommitMessage;
+	private String commitMessage;
 	
 	private final Collection<FileUpload> uploads = new ArrayList<>();
 	
@@ -72,14 +70,14 @@ public abstract class BlobUploadPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				String commitMessage = summaryCommitMessage;
+				String commitMessage = BlobUploadPanel.this.commitMessage;
 				if (StringUtils.isBlank(commitMessage))
 					commitMessage = "Add files via upload";
 				
-				if (StringUtils.isNotBlank(detailCommitMessage))
-					commitMessage += "\n\n" + detailCommitMessage;
-
 				RefUpdated refUpdated = context.uploadFiles(uploads, directory, commitMessage);
+				for (FileUpload upload: uploads)
+					upload.release();
+				
 				onCommitted(target, refUpdated);
 			}
 
@@ -101,24 +99,15 @@ public abstract class BlobUploadPanel extends Panel {
 			}
 			
 		};
-		form.add(new TextField<String>("summaryCommitMessage", 
-				new PropertyModel<String>(this, "summaryCommitMessage")).add(behavior));
-		
-		behavior = new ReferenceInputBehavior(true) {
-			
-			@Override
-			protected Project getProject() {
-				return context.getProject();
-			}
-			
-		};
-		form.add(new TextArea<String>("detailCommitMessage", 
-				new PropertyModel<String>(this, "detailCommitMessage")).add(behavior));
+		form.add(new TextArea<String>("commitMessage", 
+				new PropertyModel<String>(this, "commitMessage")).add(behavior));
 		
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
+				for (FileUpload upload: uploads)
+					upload.release();
 				onCancel(target);
 			}
 			

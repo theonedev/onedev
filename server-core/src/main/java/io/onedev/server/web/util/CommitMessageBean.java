@@ -14,32 +14,19 @@ public class CommitMessageBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String summary;
+	private String commitMessage;
 	
-	private String body;
-
-	@Editable(order=100, name="Commit Message Summary")
-	@NotEmpty
-	@OmitName
-	@ReferenceAware
-	public String getSummary() {
-		return summary;
-	}
-
-	public void setSummary(String summary) {
-		this.summary = summary;
-	}
-
-	@Editable(order=200, name="Commit Message Body")
+	@Editable(order=100, name="Commit Message")
 	@Multiline
 	@OmitName
 	@ReferenceAware
-	public String getBody() {
-		return body;
+	@NotEmpty
+	public String getCommitMessage() {
+		return commitMessage;
 	}
 
-	public void setBody(String body) {
-		this.body = body;
+	public void setCommitMessage(String commitMessage) {
+		this.commitMessage = commitMessage;
 	}
 	
 }
