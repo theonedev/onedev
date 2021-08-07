@@ -12,11 +12,6 @@ With Git Management, Issue Tracking, and CI/CD. Simple yet Powerful.
 | <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
 </div>
 
-<p style="margin-bottom: 10px;">
-
-<a href="https://twitter.com/robintics">![twitter](https://img.shields.io/twitter/url?label=%40robintics&url=https%3A%2F%2Ftwitter.com%2Frobintics)
-</a>
-
 <p style="margin-bottom: 20px;">
 </div>
 
