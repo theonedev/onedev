@@ -1,8 +1,9 @@
 > :warning: **NOTE:** We develop OneDev at <a href="https://code.onedev.io/projects/onedev-server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there
 
-# Super Easy All-In-One DevOps Platform 
+<div align="center">
+<h1>All-In-One DevOps Platform</h1>
 
-With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Powerful.
+With Git Management, Issue Tracking, and CI/CD. Simple yet Powerful.
 
 <div style="font-size: 18px;">
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/quickstart.md">5-minute Quickstart</a> 
@@ -10,7 +11,9 @@ With Issue Tracking, Git Management, Pull Request, and Build Farm. Simple yet Po
 | <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/tutorials.md">Tutorials</a>
 | <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
 </div>
+
 <p style="margin-bottom: 20px;">
+</div>
 
 ### Docker First Kubernetes Native Build Farm
 
