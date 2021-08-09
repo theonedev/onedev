@@ -22,7 +22,7 @@ import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.build.BuildUpdated;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.BuildQuerySetting;
+import io.onedev.server.model.BuildQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -84,14 +84,18 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 		if (!(event instanceof BuildUpdated)) {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
-			for (BuildQuerySetting setting: project.getUserBuildQuerySettings()) {
-				for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
-							NamedQuery.find(project.getBuildSetting().getNamedQueries(true), name));
-				}
-				for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) { 
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
-							NamedQuery.find(setting.getUserQueries(), name));
+			for (BuildQueryPersonalization personalization: project.getBuildQueryPersonalizations()) {
+				for (String name: personalization.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+					String globalName = NamedQuery.getGlobalName(name);
+					if (globalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+								NamedQuery.find(project.getBuildSetting().getNamedQueries(true), globalName));
+					}
+					String personalName = NamedQuery.getPersonalName(name);
+					if (personalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, personalization.getUser(), 
+								NamedQuery.find(personalization.getQueries(), personalName));
+					}
 				}
 			}
 
@@ -118,13 +122,17 @@ public class BuildNotificationManager extends AbstractNotificationManager {
 			
 			subscribedQueryStrings.clear();
 			for (User user: userManager.query()) {
-				for (String name: user.getBuildQuerySetting().getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-							NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), name));
-				}
-				for (String name: user.getBuildQuerySetting().getQuerySubscriptionSupport().getUserQuerySubscriptions()) { 
-					fillSubscribedQueryStrings(subscribedQueryStrings, user, 
-							NamedQuery.find(user.getBuildQuerySetting().getUserQueries(), name));
+				for (String name: user.getBuildQueryPersonalization().getQuerySubscriptionSupport().getQuerySubscriptions()) {
+					String globalName = NamedQuery.getGlobalName(name);
+					if (globalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+								NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), globalName));
+					}
+					String personalName = NamedQuery.getPersonalName(name);
+					if (personalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+								NamedQuery.find(user.getBuildQueryPersonalization().getQueries(), personalName));
+					}
 				}
 			}
 

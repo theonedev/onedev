@@ -17,10 +17,10 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.jobmatch.JobMatch;
-import io.onedev.server.util.jobmatch.JobMatchLexer;
-import io.onedev.server.util.jobmatch.JobMatchParser;
+import io.onedev.server.job.match.JobMatchLexer;
+import io.onedev.server.job.match.JobMatchParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 

@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Setting;
+import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -145,6 +146,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveProjectSetting(GlobalProjectSetting projectSetting);
 
+	AgentSetting getAgentSetting();
+	
+	void saveAgentSetting(AgentSetting agentSetting);
+	
     SshSetting getSshSetting();
 
     void saveSshSetting(SshSetting sshSetting);

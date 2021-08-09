@@ -38,9 +38,9 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 	
 	private final TransactionManager transactionManager;
 	
-	private final Map<Long, Collection<String>> buildParams = new HashMap<>();
+	private final Map<Long, Collection<String>> paramNames = new HashMap<>();
 	
-	private final ReadWriteLock buildParamsLock = new ReentrantReadWriteLock();
+	private final ReadWriteLock paramNamesLock = new ReentrantReadWriteLock();
 	
 	@Inject
 	public DefaultBuildParamManager(Dao dao, TransactionManager transactionManager) {
@@ -73,7 +73,7 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long projectId = projectIds.get(fields[0]);
 			if (projectId != null)
-				addBuildParam(projectId, (String) fields[1]);
+				addParam(projectId, (String) fields[1]);
 		}
 	}
 
@@ -90,11 +90,11 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 
 				@Override
 				public void run() {
-					buildParamsLock.writeLock().lock();
+					paramNamesLock.writeLock().lock();
 					try {
-						addBuildParam(projectId, paramName);
+						addParam(projectId, paramName);
 					} finally {
-						buildParamsLock.writeLock().unlock();
+						paramNamesLock.writeLock().unlock();
 					}
 				}
 				
@@ -102,27 +102,27 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 		}
 	}
 
-	private void addBuildParam(Long projectId, String paramName) {
-		Collection<String> paramsOfProject = buildParams.get(projectId);
+	private void addParam(Long projectId, String paramName) {
+		Collection<String> paramsOfProject = paramNames.get(projectId);
 		if (paramsOfProject == null) {
 			paramsOfProject = new HashSet<>();
-			buildParams.put(projectId, paramsOfProject);
+			paramNames.put(projectId, paramsOfProject);
 		}
 		paramsOfProject.add(paramName);
 	}
 	
 	@Override
-	public Collection<String> getBuildParamNames(@Nullable Project project) {
-		buildParamsLock.readLock().lock();
+	public Collection<String> getParamNames(@Nullable Project project) {
+		paramNamesLock.readLock().lock();
 		try {
-			Collection<String> buildParams = new HashSet<>();
-			for (Map.Entry<Long, Collection<String>> entry: this.buildParams.entrySet()) {
+			Collection<String> paramNames = new HashSet<>();
+			for (Map.Entry<Long, Collection<String>> entry: this.paramNames.entrySet()) {
 				if (project == null || project.getId().equals(entry.getKey()))
-					buildParams.addAll(entry.getValue());
+					paramNames.addAll(entry.getValue());
 			}
-			return buildParams;
+			return paramNames;
 		} finally {
-			buildParamsLock.readLock().unlock();
+			paramNamesLock.readLock().unlock();
 		}
 	}
 	
@@ -135,14 +135,14 @@ public class DefaultBuildParamManager extends BaseEntityManager<BuildParam> impl
 
 				@Override
 				public void run() {
-					buildParamsLock.writeLock().lock();
+					paramNamesLock.writeLock().lock();
 					try {
-						for (Iterator<Map.Entry<Long, Collection<String>>> it = buildParams.entrySet().iterator(); it.hasNext();) {
+						for (Iterator<Map.Entry<Long, Collection<String>>> it = paramNames.entrySet().iterator(); it.hasNext();) {
 							if (it.next().getKey().equals(projectId))
 								it.remove();
 						}
 					} finally {
-						buildParamsLock.writeLock().unlock();
+						paramNamesLock.writeLock().unlock();
 					}
 				}
 			});

@@ -1,0 +1,73 @@
+<wicket:extend>
+	<div class="mb-4">
+		<a wicket:id="pauseOrResume" class="btn btn-light-primary mr-2"><span wicket:id="label"></span></a>
+		<a wicket:id="restart" class="btn btn-light-primary mr-2">Restart</a>
+		<a wicket:id="remove" class="btn btn-light-danger mr-2">Remove</a>
+	</div>
+	<table class="table mb-5">
+		<thead>
+			<th>Name</th>
+			<th>IP Address</th>
+			<th class="d-none d-lg-table-cell">OS Version</th>
+			<th class="d-none d-lg-table-cell">OS Arch</th>
+			<th class="d-none d-lg-table-cell">CPU</th>
+			<th class="d-none d-lg-table-cell">Memory</th>
+			<th>Status</th>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					<div class="d-flex align-items-center">
+						<svg wicket:id="icon" class="icon icon-lg mr-2"></svg>
+						<span wicket:id="name"></span>			
+					</div>	
+				</td>
+				<td>
+					<span wicket:id="ipAddress"></span>
+				</td>
+				<td class="d-none d-lg-table-cell">
+					<span wicket:id="osVersion"></span>
+				</td>
+				<td class="d-none d-lg-table-cell">
+					<span wicket:id="osArch"></span>
+				</td>
+				<td class="d-none d-lg-table-cell">
+					<span wicket:id="cpu"></span>
+				</td>
+				<td class="d-none d-lg-table-cell">
+					<span wicket:id="memory"></span>
+				</td>
+				<td>
+					<span wicket:id="status"></span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div wicket:id="attributes"></div>
+	<wicket:fragment wicket:id="onlineAttributesFrag">
+		<form wicket:id="form" class="leave-confirm">
+			<div wicket:id="attributes"></div>
+			<input type="submit" value="Update" class="btn btn-primary dirty-aware">
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="offlineHasAttributesFrag">
+		<div class="mb-3 font-weight-bold">Attributes (can only be edited when agent is online)</div>
+		<div class="border rounded">
+		<table class="table mb-0">
+			<thead>
+				<th>Name</th>
+				<th>Value</th>
+			</thead>
+			<tbody>
+				<tr wicket:id="attributes">
+					<td><span wicket:id="name"></span></td>
+					<td><span wicket:id="value"></span></td>
+				</tr>
+			</tbody>
+		</table>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="offlineNoAttributesFrag">
+		<div class="alert alert-notice alert-light-warning">No attributes defined (can only be edited when agent is online)</div>
+	</wicket:fragment>
+</wicket:extend>

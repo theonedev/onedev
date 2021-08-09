@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -77,5 +78,7 @@ public interface BuildManager extends EntityManager<Build> {
 	void populateBuilds(Collection<PullRequest> requests);
 
 	void delete(Collection<Build> builds);
+	
+	Collection<Build> query(Agent agent, @Nullable Build.Status status);
 	
 }

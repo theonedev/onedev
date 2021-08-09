@@ -18,7 +18,9 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
@@ -44,6 +46,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pullrequest.RequestStatusBadge;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -71,6 +74,32 @@ public abstract class BuildSidePanel extends Panel {
 					addOrReplace(new UserIdentPanel("canceller", getBuild().getCanceller(), Mode.NAME));
 				else
 					addOrReplace(new WebMarkupContainer("canceller").setVisible(false));
+				
+				if (getBuild().getAgent() != null) {
+					if (SecurityUtils.isAdministrator()) {
+						addOrReplace(new BookmarkablePageLink<Void>("agent", AgentOverviewPage.class, 
+								AgentOverviewPage.paramsOf(getBuild().getAgent())) {
+
+							@Override
+							public IModel<?> getBody() {
+								return Model.of(getBuild().getAgent().getName());
+							}
+							
+						});
+					} else {
+						addOrReplace(new Label("agent", getBuild().getAgent().getName()) {
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								tag.setName("span");
+							}
+							
+						});
+					}
+				} else {
+					addOrReplace(new WebMarkupContainer("agent").setVisible(false));
+				}
 				super.onBeforeRender();
 			}
 			

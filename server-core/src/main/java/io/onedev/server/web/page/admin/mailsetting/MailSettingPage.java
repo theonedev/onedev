@@ -18,6 +18,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
@@ -28,7 +29,6 @@ import io.onedev.server.notification.MailManager;
 import io.onedev.server.notification.MessageListener;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EmailAddress;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -98,7 +98,7 @@ public class MailSettingPage extends AdministrationPage {
 			}
 
 			@Override
-			protected String runTask(SimpleLogger logger) {
+			protected String runTask(TaskLogger logger) {
 				User user = SecurityUtils.getUser();
 				
 				MailManager mailManager = OneDev.getInstance(MailManager.class);

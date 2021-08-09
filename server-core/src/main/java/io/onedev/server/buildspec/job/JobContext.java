@@ -3,16 +3,20 @@ package io.onedev.server.buildspec.job;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.server.buildspec.Service;
-import io.onedev.server.util.SimpleLogger;
+import io.onedev.server.job.resource.ResourceHolder;
 
 public abstract class JobContext {
 	
@@ -24,9 +28,9 @@ public abstract class JobContext {
 	
 	private final List<Action> actions;
 	
-	private final String cpuRequirement;
+	private final int cpuRequirement;
 	
-	private final String memoryRequirement;
+	private final int memoryRequirement;
 	
 	private final ObjectId commitId;
 	
@@ -38,7 +42,7 @@ public abstract class JobContext {
 	
 	private final int retried;
 	
-	private final SimpleLogger logger;	
+	private final TaskLogger logger;	
 	
 	private final Collection<String> allocatedCaches = new HashSet<>();
 	
@@ -47,9 +51,9 @@ public abstract class JobContext {
 	protected final Collection<Thread> serverStepThreads = new ArrayList<>();
 	
 	public JobContext(String projectName, Long buildNumber, File projectGitDir, 
-			List<Action> actions, String cpuRequirement, String memoryRequirement, 
-			ObjectId commitId, Collection<CacheSpec> caches, int cacheTTL, 
-			int retried, List<Service> services, SimpleLogger logger) {
+			List<Action> actions, int cpuRequirement, int memoryRequirement, ObjectId commitId, 
+			Collection<CacheSpec> caches, int cacheTTL, int retried, List<Service> services, 
+			TaskLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
@@ -84,11 +88,11 @@ public abstract class JobContext {
 		return commitId;
 	}
 
-	public String getCpuRequirement() {
+	public int getCpuRequirement() {
 		return cpuRequirement;
 	}
 
-	public String getMemoryRequirement() {
+	public int getMemoryRequirement() {
 		return memoryRequirement;
 	}
 
@@ -96,7 +100,7 @@ public abstract class JobContext {
 		return cacheSpecs;
 	}
 
-	public SimpleLogger getLogger() {
+	public TaskLogger getLogger() {
 		return logger;
 	}
 	
@@ -120,12 +124,12 @@ public abstract class JobContext {
 		return cacheCounts;
 	}
 	
-	public abstract void notifyJobRunning();
+	public abstract void notifyJobRunning(@Nullable Long agentId);
 	
 	public abstract void reportJobWorkspace(String jobWorkspace);
 	
 	public Map<String, byte[]> runServerStep(List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger) {
+			File filesDir, Map<String, String> placeholderValues, TaskLogger logger) {
 		Thread thread = Thread.currentThread();
 		synchronized (serverStepThreads) {
 			serverStepThreads.add(thread);
@@ -140,7 +144,7 @@ public abstract class JobContext {
 	}
 	
 	protected abstract Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger);
+			File filesDir, Map<String, String> placeholderValues, TaskLogger logger);
 	
 	public abstract void copyDependencies(File targetDir);
 	
@@ -149,6 +153,21 @@ public abstract class JobContext {
 			for (Thread thread: serverStepThreads)
 				thread.interrupt();
 		}
+	}
+	
+	public Map<String, Integer> getResourceRequirements() {
+		int cpu = getCpuRequirement();
+		int memory = getMemoryRequirement();
+		for (Service service: getServices()) {
+			cpu += service.getCpuRequirement();
+			memory += service.getMemoryRequirement();
+		}
+		
+		Map<String, Integer> resourceRequirements = new HashMap<>();
+		resourceRequirements.put(ResourceHolder.CPU, cpu);
+		resourceRequirements.put(ResourceHolder.MEMORY, memory);
+		
+		return resourceRequirements;
 	}
 	
 }

@@ -19,10 +19,10 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import com.google.common.base.Joiner;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
@@ -136,7 +136,7 @@ public class AuthenticatorPage extends AdministrationPage {
 			}
 
 			@Override
-			protected String runTask(SimpleLogger logger) {
+			protected String runTask(TaskLogger logger) {
 				Authenticated authenticated = bean.getAuthenticator().authenticate(
 						new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 				StringBuilder retrievedInfoBuilder = new StringBuilder();

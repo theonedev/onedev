@@ -32,7 +32,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.svg.SpriteImage;
 
 @SuppressWarnings("serial")
-public class JobSecretsPage extends BuildSettingPage {
+public class JobSecretsPage extends ProjectBuildSettingPage {
 
 	private DataTable<JobSecret, Void> secretsTable;
 	

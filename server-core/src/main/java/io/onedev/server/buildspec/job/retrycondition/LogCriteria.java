@@ -3,8 +3,8 @@ package io.onedev.server.buildspec.job.retrycondition;
 import java.util.regex.Pattern;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.tasklog.LogManager;
 import io.onedev.server.util.criteria.Criteria;
 
 public class LogCriteria extends Criteria<Build> {

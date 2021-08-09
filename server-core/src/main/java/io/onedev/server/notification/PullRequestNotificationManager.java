@@ -39,7 +39,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
@@ -103,8 +103,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 
 			@Override
-			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
-				return request.getTargetProject().getUserPullRequestQuerySettings();
+			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+				return request.getTargetProject().getPullRequestQueryPersonalizations();
 			}
 
 			@Override
@@ -129,8 +129,8 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 
 			@Override
-			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
-				return userManager.query().stream().map(it->it.getPullRequestQuerySetting()).collect(Collectors.toList());
+			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+				return userManager.query().stream().map(it->it.getPullRequestQueryPersonalization()).collect(Collectors.toList());
 			}
 
 			@Override

@@ -13,6 +13,9 @@ import javax.annotation.Nullable;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import io.onedev.server.tasklog.Style;
+import io.onedev.server.tasklog.StyleBuilder;
+
 public class JobLogEntryEx implements Serializable {
 
 	private static final long serialVersionUID = 1L;

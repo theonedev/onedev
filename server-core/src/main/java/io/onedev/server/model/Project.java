@@ -80,12 +80,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildQuerySettingManager;
-import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
-import io.onedev.server.entitymanager.CommitQuerySettingManager;
-import io.onedev.server.entitymanager.IssueQuerySettingManager;
+import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
+import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
+import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
+import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
+import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
@@ -262,19 +262,19 @@ public class Project extends AbstractEntity implements NameAware {
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<IssueQuerySetting> userIssueQuerySettings = new ArrayList<>();
+	private Collection<IssueQueryPersonalization> issueQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<CommitQuerySetting> userCommitQuerySettings = new ArrayList<>();
+	private Collection<CommitQueryPersonalization> commitQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestQuerySetting> userPullRequestQuerySettings = new ArrayList<>();
+	private Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentQuerySetting> userCodeCommentQuerySettings = new ArrayList<>();
+	private Collection<CodeCommentQueryPersonalization> codeCommentQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<BuildQuerySetting> userBuildQuerySettings = new ArrayList<>();
+	private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
@@ -327,15 +327,15 @@ public class Project extends AbstractEntity implements NameAware {
     
     private transient Optional<String> defaultBranchOptional;
     
-    private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUserHolder;
+    private transient Optional<IssueQueryPersonalization> issueQueryPersonalizationOfCurrentUserHolder;
     
-    private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
+    private transient Optional<PullRequestQueryPersonalization> pullRequestQueryPersonalizationOfCurrentUserHolder;
     
-    private transient Optional<CodeCommentQuerySetting> codeCommentQuerySettingOfCurrentUserHolder;
+    private transient Optional<CodeCommentQueryPersonalization> codeCommentQueryPersonalizationOfCurrentUserHolder;
     
-    private transient Optional<BuildQuerySetting> buildQuerySettingOfCurrentUserHolder;
+    private transient Optional<BuildQueryPersonalization> buildQueryPersonalizationOfCurrentUserHolder;
     
-    private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
+    private transient Optional<CommitQueryPersonalization> commitQueryPersonalizationOfCurrentUserHolder;
     
     private transient Optional<RevCommit> lastCommitHolder;
     
@@ -1113,44 +1113,44 @@ public class Project extends AbstractEntity implements NameAware {
 		this.namedCodeCommentQueries = namedCodeCommentQueries;
 	}
 	
-	public Collection<IssueQuerySetting> getUserIssueQuerySettings() {
-		return userIssueQuerySettings;
+	public Collection<IssueQueryPersonalization> getIssueQueryPersonalizations() {
+		return issueQueryPersonalizations;
 	}
 
-	public void setUserIssueQuerySettings(Collection<IssueQuerySetting> userIssueQuerySettings) {
-		this.userIssueQuerySettings = userIssueQuerySettings;
+	public void setIssueQueryPersonalizations(Collection<IssueQueryPersonalization> issueQueryPersonalizations) {
+		this.issueQueryPersonalizations = issueQueryPersonalizations;
 	}
 
-	public Collection<CommitQuerySetting> getUserCommitQuerySettings() {
-		return userCommitQuerySettings;
+	public Collection<CommitQueryPersonalization> getCommitQueryPersonalizations() {
+		return commitQueryPersonalizations;
 	}
 
-	public void setUserCommitQuerySettings(Collection<CommitQuerySetting> userCommitQuerySettings) {
-		this.userCommitQuerySettings = userCommitQuerySettings;
+	public void setCommitQueryPersonalizations(Collection<CommitQueryPersonalization> commitQueryPersonalizations) {
+		this.commitQueryPersonalizations = commitQueryPersonalizations;
 	}
 
-	public Collection<PullRequestQuerySetting> getUserPullRequestQuerySettings() {
-		return userPullRequestQuerySettings;
+	public Collection<PullRequestQueryPersonalization> getPullRequestQueryPersonalizations() {
+		return pullRequestQueryPersonalizations;
 	}
 
-	public void setUserPullRequestQuerySettings(Collection<PullRequestQuerySetting> userPullRequestQuerySettings) {
-		this.userPullRequestQuerySettings = userPullRequestQuerySettings;
+	public void setPullRequestQueryPersonalizations(Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations) {
+		this.pullRequestQueryPersonalizations = pullRequestQueryPersonalizations;
 	}
 
-	public Collection<CodeCommentQuerySetting> getUserCodeCommentQuerySettings() {
-		return userCodeCommentQuerySettings;
+	public Collection<CodeCommentQueryPersonalization> getCodeCommentQueryPersonalizations() {
+		return codeCommentQueryPersonalizations;
 	}
 
-	public void setUserCodeCommentQuerySettings(Collection<CodeCommentQuerySetting> userCodeCommentQuerySettings) {
-		this.userCodeCommentQuerySettings = userCodeCommentQuerySettings;
+	public void setCodeCommentQueryPersonalizations(Collection<CodeCommentQueryPersonalization> codeCommentQueryPersonalizations) {
+		this.codeCommentQueryPersonalizations = codeCommentQueryPersonalizations;
 	}
 	
-	public Collection<BuildQuerySetting> getUserBuildQuerySettings() {
-		return userBuildQuerySettings;
+	public Collection<BuildQueryPersonalization> getBuildQueryPersonalizations() {
+		return buildQueryPersonalizations;
 	}
 
-	public void setUserBuildQuerySettings(Collection<BuildQuerySetting> userBuildQuerySettings) {
-		this.userBuildQuerySettings = userBuildQuerySettings;
+	public void setBuildQueryPersonalizations(Collection<BuildQueryPersonalization> buildQueryPersonalizations) {
+		this.buildQueryPersonalizations = buildQueryPersonalizations;
 	}
 
 	public Collection<Build> getBuilds() {
@@ -1321,97 +1321,102 @@ public class Project extends AbstractEntity implements NameAware {
 		return authors;
 	}
 	
-	public IssueQuerySetting getIssueQuerySettingOfCurrentUser() {
-		if (issueQuerySettingOfCurrentUserHolder == null) {
+	public IssueQueryPersonalization getIssueQueryPersonalizationOfCurrentUser() {
+		if (issueQueryPersonalizationOfCurrentUserHolder == null) {
 			User user = SecurityUtils.getUser();
 			if (user != null) {
-				IssueQuerySetting setting = OneDev.getInstance(IssueQuerySettingManager.class).find(this, user);
-				if (setting == null) {
-					setting = new IssueQuerySetting();
-					setting.setProject(this);
-					setting.setUser(user);
+				IssueQueryPersonalization personalization = 
+						OneDev.getInstance(IssueQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new IssueQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
 				}
-				issueQuerySettingOfCurrentUserHolder = Optional.of(setting);
+				issueQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
 			} else {
-				issueQuerySettingOfCurrentUserHolder = Optional.absent();
+				issueQueryPersonalizationOfCurrentUserHolder = Optional.absent();
 			}
 		}
-		return issueQuerySettingOfCurrentUserHolder.orNull();
+		return issueQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
-	public CommitQuerySetting getCommitQuerySettingOfCurrentUser() {
-		if (commitQuerySettingOfCurrentUserHolder == null) {
+	public CommitQueryPersonalization getCommitQueryPersonalizationOfCurrentUser() {
+		if (commitQueryPersonalizationOfCurrentUserHolder == null) {
 			User user = SecurityUtils.getUser();
 			if (user != null) {
-				CommitQuerySetting setting = OneDev.getInstance(CommitQuerySettingManager.class).find(this, user);
-				if (setting == null) {
-					setting = new CommitQuerySetting();
-					setting.setProject(this);
-					setting.setUser(user);
+				CommitQueryPersonalization personalization = 
+						OneDev.getInstance(CommitQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new CommitQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
 				}
-				commitQuerySettingOfCurrentUserHolder = Optional.of(setting);
+				commitQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
 			} else {
-				commitQuerySettingOfCurrentUserHolder = Optional.absent();
+				commitQueryPersonalizationOfCurrentUserHolder = Optional.absent();
 			}
 		}
-		return commitQuerySettingOfCurrentUserHolder.orNull();
-	}
-	
-	@Nullable
-	public PullRequestQuerySetting getPullRequestQuerySettingOfCurrentUser() {
-		if (pullRequestQuerySettingOfCurrentUserHolder == null) {
-			User user = SecurityUtils.getUser();
-			if (user != null) {
-				PullRequestQuerySetting setting = OneDev.getInstance(PullRequestQuerySettingManager.class).find(this, user);
-				if (setting == null) {
-					setting = new PullRequestQuerySetting();
-					setting.setProject(this);
-					setting.setUser(user);
-				}
-				pullRequestQuerySettingOfCurrentUserHolder = Optional.of(setting);
-			} else {
-				pullRequestQuerySettingOfCurrentUserHolder = Optional.absent();
-			}
-		}
-		return pullRequestQuerySettingOfCurrentUserHolder.orNull();
+		return commitQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable
-	public CodeCommentQuerySetting getCodeCommentQuerySettingOfCurrentUser() {
-		if (codeCommentQuerySettingOfCurrentUserHolder == null) {
+	public PullRequestQueryPersonalization getPullRequestQueryPersonalizationOfCurrentUser() {
+		if (pullRequestQueryPersonalizationOfCurrentUserHolder == null) {
 			User user = SecurityUtils.getUser();
 			if (user != null) {
-				CodeCommentQuerySetting setting = OneDev.getInstance(CodeCommentQuerySettingManager.class).find(this, user);
-				if (setting == null) {
-					setting = new CodeCommentQuerySetting();
-					setting.setProject(this);
-					setting.setUser(user);
+				PullRequestQueryPersonalization personalization = 
+						OneDev.getInstance(PullRequestQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new PullRequestQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
 				}
-				codeCommentQuerySettingOfCurrentUserHolder = Optional.of(setting);
+				pullRequestQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
 			} else {
-				codeCommentQuerySettingOfCurrentUserHolder = Optional.absent();
+				pullRequestQueryPersonalizationOfCurrentUserHolder = Optional.absent();
 			}
 		}
-		return codeCommentQuerySettingOfCurrentUserHolder.orNull();
+		return pullRequestQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable
-	public BuildQuerySetting getBuildQuerySettingOfCurrentUser() {
-		if (buildQuerySettingOfCurrentUserHolder == null) {
+	public CodeCommentQueryPersonalization getCodeCommentQueryPersonalizationOfCurrentUser() {
+		if (codeCommentQueryPersonalizationOfCurrentUserHolder == null) {
 			User user = SecurityUtils.getUser();
 			if (user != null) {
-				BuildQuerySetting setting = OneDev.getInstance(BuildQuerySettingManager.class).find(this, user);
-				if (setting == null) {
-					setting = new BuildQuerySetting();
-					setting.setProject(this);
-					setting.setUser(user);
+				CodeCommentQueryPersonalization personalization = 
+						OneDev.getInstance(CodeCommentQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new CodeCommentQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
 				}
-				buildQuerySettingOfCurrentUserHolder = Optional.of(setting);
+				codeCommentQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
 			} else {
-				buildQuerySettingOfCurrentUserHolder = Optional.absent();
+				codeCommentQueryPersonalizationOfCurrentUserHolder = Optional.absent();
 			}
 		}
-		return buildQuerySettingOfCurrentUserHolder.orNull();
+		return codeCommentQueryPersonalizationOfCurrentUserHolder.orNull();
+	}
+	
+	@Nullable
+	public BuildQueryPersonalization getBuildQueryPersonalizationOfCurrentUser() {
+		if (buildQueryPersonalizationOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				BuildQueryPersonalization personalization = 
+						OneDev.getInstance(BuildQueryPersonalizationManager.class).find(this, user);
+				if (personalization == null) {
+					personalization = new BuildQueryPersonalization();
+					personalization.setProject(this);
+					personalization.setUser(user);
+				}
+				buildQueryPersonalizationOfCurrentUserHolder = Optional.of(personalization);
+			} else {
+				buildQueryPersonalizationOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return buildQueryPersonalizationOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable

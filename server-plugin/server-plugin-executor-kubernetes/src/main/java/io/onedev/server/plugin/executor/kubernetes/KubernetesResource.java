@@ -37,16 +37,15 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TarUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
+import io.onedev.k8shelper.JobData;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
-import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.rest.annotation.Api;
-import io.onedev.server.util.SimpleLogger;
 
 @Api(internal=true)
 @Path("/k8s")
@@ -66,18 +65,15 @@ public class KubernetesResource {
     	this.jobManager = jobManager;
 	}
     
-	@Path("/job-context")
+	@Path("/job-data")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
     @POST
-    public byte[] getJobContext(@Nullable String jobWorkspace) {
+    public byte[] getJobData(@Nullable String jobWorkspace) {
 		JobContext context = jobManager.getJobContext(getJobToken(), true);
 		if (StringUtils.isNotBlank(jobWorkspace))
-			context.reportJobWorkspace(jobWorkspace);		
-		Map<String, Object> contextMap = new HashMap<>();
-		contextMap.put("actions", context.getActions());
-		contextMap.put("projectName", context.getProjectName());
-		contextMap.put("commitHash", context.getCommitId().name());
-		return SerializationUtils.serialize((Serializable) contextMap);
+			context.reportJobWorkspace(jobWorkspace);	
+		JobData jobData = new JobData(context.getCommitId().name(), context.getActions());
+		return SerializationUtils.serialize(jobData);
     }
 	
 	@Path("/allocate-job-caches")
@@ -120,13 +116,13 @@ public class KubernetesResource {
 					for (int i=0; i<length; i++) 
 						placeholderValues.put(readString(is), readString(is));
 					
-					TarUtils.untar(is, filesDir);
+					FileUtils.untar(is, filesDir, false);
 					
 					Map<String, byte[]> outputFiles = jobManager.runServerStep(getJobToken(), stepPosition, 
-							filesDir, placeholderValues, new SimpleLogger() {
+							filesDir, placeholderValues, new TaskLogger() {
 
 						@Override
-						public void log(String message, StyleBuilder styleBuilder) {
+						public void log(String message, String taskId) {
 							// While testing, ngrok.io buffers response and build can not get log entries 
 							// timely. This won't happen on pagekite however
 							KubernetesHelper.writeInt(output, 1);
@@ -166,7 +162,7 @@ public class KubernetesResource {
 				File tempDir = FileUtils.createTempDir();
 				try {
 					context.copyDependencies(tempDir);
-					TarUtils.tar(tempDir, Lists.newArrayList("**"), new ArrayList<>(), output);
+					FileUtils.tar(tempDir, Lists.newArrayList("**"), new ArrayList<>(), output, false);
 					output.flush();
 				} finally {
 					FileUtils.deleteDir(tempDir);

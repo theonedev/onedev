@@ -20,13 +20,14 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -84,26 +85,18 @@ public class IssueListPage extends LayoutPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedIssueQuery> getQuerySetting() {
-				if (getLoginUser() != null)
-					return getLoginUser().getIssueQuerySetting();
-				else
-					return null;
+			protected QueryPersonalization<NamedIssueQuery> getQueryPersonalization() {
+				return getLoginUser().getIssueQueryPersonalization();
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedIssueQuery> querySetting) {
-				OneDev.getInstance(UserManager.class).save(getLoginUser());
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedIssueQuery> queries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedIssueQuery> queries) {
 				getIssueSetting().setNamedQueries(queries);
 				OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
 			}
 
 			@Override
-			protected ArrayList<NamedIssueQuery> getQueries() {
+			protected ArrayList<NamedIssueQuery> getGlobalQueries() {
 				return (ArrayList<NamedIssueQuery>) getIssueSetting().getNamedQueries();
 			}
 			
@@ -161,15 +154,15 @@ public class IssueListPage extends LayoutPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										QuerySetting<NamedIssueQuery> querySetting = getLoginUser().getIssueQuerySetting();
-										NamedIssueQuery namedQuery = NamedQuery.find(querySetting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										QueryPersonalization<NamedIssueQuery> queryPersonalization = getLoginUser().getIssueQueryPersonalization();
+										NamedIssueQuery namedQuery = NamedQuery.find(queryPersonalization.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
-											querySetting.getUserQueries().add(namedQuery);
+											queryPersonalization.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -177,9 +170,11 @@ public class IssueListPage extends LayoutPage {
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalIssueSetting issueSetting = getIssueSetting();
 										NamedIssueQuery namedQuery = issueSetting.getNamedQuery(name);
 										if (namedQuery == null) {
@@ -240,8 +235,8 @@ public class IssueListPage extends LayoutPage {
 	public static PageParameters paramsOf(int page) {
 		String query = null;
 		User user = SecurityUtils.getUser();
-		if (user != null && !user.getIssueQuerySetting().getUserQueries().isEmpty()) 
-			query = user.getIssueQuerySetting().getUserQueries().iterator().next().getQuery();
+		if (user != null && !user.getIssueQueryPersonalization().getQueries().isEmpty()) 
+			query = user.getIssueQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getIssueSetting().getNamedQueries().isEmpty())
 			query = getIssueSetting().getNamedQueries().iterator().next().getQuery();
 		

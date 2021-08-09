@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -130,7 +131,9 @@ public class ExampleValuePanel extends Panel {
 		StringBuilder builder = new StringBuilder();
 		if (isScalarValue()) {
 			builder.append(toJson(getValue()));
-		} else if (getField() != null && getField().getAnnotation(ManyToOne.class) != null) { 
+		} else if (getField() != null 
+				&& (getField().getAnnotation(ManyToOne.class) != null 
+					|| getField().getAnnotation(JoinColumn.class) != null)) { 
 			builder.append(toJson(((AbstractEntity)getValue()).getId()));
 		} else if (getValue() instanceof Collection) {
 			List<String> elements = new ArrayList<>();
@@ -200,16 +203,19 @@ public class ExampleValuePanel extends Panel {
 	
 	@Override
 	protected void onBeforeRender() {
-		if (isScalarValue()) 
+		if (isScalarValue()) {
 			addOrReplace(newScalarFragment(getValue()));
-		else if (getField() != null && getField().getAnnotation(ManyToOne.class) != null) 
+		} else if (getField() != null 
+				&& (getField().getAnnotation(ManyToOne.class) != null 
+					|| getField().getAnnotation(JoinColumn.class) != null)) { 
 			addOrReplace(newScalarFragment(((AbstractEntity)getValue()).getId()));
-		else if (getValue() instanceof Collection) 
+		} else if (getValue() instanceof Collection) { 
 			addOrReplace(newArrayFragment());
-		else if (getValue() instanceof Map) 
+		} else if (getValue() instanceof Map) { 
 			addOrReplace(newMapFragment());
-		else 
+		} else { 
 			addOrReplace(newObjectFragment());
+		}
 		
 		if (newValueHint("psuedoId") != null) {
 			addOrReplace(new DropdownLink("hint") {
@@ -247,7 +253,9 @@ public class ExampleValuePanel extends Panel {
 			fragment.add(typeHintFrag);
 			hasHint = true;
 		} else if (getField() != null) {
-			if (getField().getAnnotation(ManyToOne.class) != null || getField().getAnnotation(EntityId.class) != null) {
+			if (getField().getAnnotation(ManyToOne.class) != null 
+					|| getField().getAnnotation(JoinColumn.class) != null 
+					|| getField().getAnnotation(EntityId.class) != null) {
 				Class<?> entityClass;
 				if (getValue() instanceof AbstractEntity)
 					entityClass = getValue().getClass();
@@ -553,7 +561,7 @@ public class ExampleValuePanel extends Panel {
 					}
 					
 				};
-				if (field.getAnnotation(ManyToOne.class) != null)
+				if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null)
 					item.add(new ExampleValuePanel("name", Model.of(field.getName() + "Id"), valueInfoModel, requestBodyClass));
 				else
 					item.add(new ExampleValuePanel("name", Model.of(field.getName()), valueInfoModel, requestBodyClass));

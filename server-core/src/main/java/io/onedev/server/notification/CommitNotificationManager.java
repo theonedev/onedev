@@ -23,7 +23,7 @@ import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.markdown.MarkdownManager;
-import io.onedev.server.model.CommitQuerySetting;
+import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -65,14 +65,18 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
-			for (CommitQuerySetting setting: project.getUserCommitQuerySettings()) {
+			for (CommitQueryPersonalization setting: project.getCommitQueryPersonalizations()) {
 				for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions()) {
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
-							NamedQuery.find(project.getNamedCommitQueries(), name));
-				}
-				for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) { 
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
-							NamedQuery.find(setting.getUserQueries(), name));
+					String globalName = NamedQuery.getGlobalName(name);
+					if (globalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
+								NamedQuery.find(project.getNamedCommitQueries(), globalName));
+					}
+					String personalName = NamedQuery.getPersonalName(name);
+					if (personalName != null) {
+						fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
+								NamedQuery.find(setting.getQueries(), personalName));
+					}
 				}
 			}
 			

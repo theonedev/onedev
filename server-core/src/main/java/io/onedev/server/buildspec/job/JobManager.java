@@ -10,10 +10,10 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SimpleLogger;
 
 public interface JobManager {
 	
@@ -35,6 +35,6 @@ public interface JobManager {
 	
 	@Nullable
 	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger);
+			File filesDir, Map<String, String> placeholderValues, TaskLogger logger);
 	
 }

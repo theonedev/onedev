@@ -3,8 +3,8 @@ package io.onedev.server.imports;
 import java.io.Serializable;
 import java.util.List;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.util.ReflectionUtils;
-import io.onedev.server.util.SimpleLogger;
 
 public abstract class Importer<Where extends Serializable,  What extends Serializable, How extends Serializable> implements Serializable {
 
@@ -38,8 +38,8 @@ public abstract class Importer<Where extends Serializable,  What extends Seriali
 	
 	public abstract String getName();
 
-	public abstract What getWhat(Where where, SimpleLogger logger);
+	public abstract What getWhat(Where where, TaskLogger logger);
 	
-	public abstract How getHow(Where where, What what, SimpleLogger logger);
+	public abstract How getHow(Where where, What what, TaskLogger logger);
 	
 }

@@ -15,7 +15,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 
 
 public abstract class QueryWatchBuilder<T extends AbstractEntity> {
@@ -27,20 +27,19 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 	private final Map<User, Boolean> watches = new HashMap<>();
 
 	public QueryWatchBuilder() {
-		for (QuerySetting<?> querySetting: getQuerySettings()) {
-			boolean watched = false;
-			for (Map.Entry<String, Boolean> entry: querySetting.getQueryWatchSupport().getUserQueryWatches().entrySet()) {
-				if (matches(NamedQuery.find(querySetting.getUserQueries(), entry.getKey()), querySetting.getUser())) {
-					watches.putIfAbsent(querySetting.getUser(), entry.getValue());
-					watched = true;
-					break;
+		for (QueryPersonalization<?> personalization: getQueryPersonalizations()) {
+			for (Map.Entry<String, Boolean> entry: personalization.getQueryWatchSupport().getQueryWatches().entrySet()) {
+				String globalName = NamedQuery.getGlobalName(entry.getKey());
+				if (globalName != null) {
+					if (matches(NamedQuery.find(getNamedQueries(), globalName), personalization.getUser())) {
+						watches.putIfAbsent(personalization.getUser(), entry.getValue());
+						break;
+					}
 				}
-			}
-			if (!watched) {
-				for (Map.Entry<String, Boolean> entry: querySetting.getQueryWatchSupport().getQueryWatches().entrySet()) {
-					if (matches(NamedQuery.find(getNamedQueries(), entry.getKey()), querySetting.getUser())) {
-						watches.putIfAbsent(querySetting.getUser(), entry.getValue());
-						watched = true;
+				String personalName = NamedQuery.getPersonalName(entry.getKey());
+				if (personalName != null) {
+					if (matches(NamedQuery.find(personalization.getQueries(), personalName), personalization.getUser())) {
+						watches.putIfAbsent(personalization.getUser(), entry.getValue());
 						break;
 					}
 				}
@@ -85,7 +84,7 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 	
 	protected abstract T getEntity();
 	
-	protected abstract Collection<? extends QuerySetting<?>> getQuerySettings();
+	protected abstract Collection<? extends QueryPersonalization<?>> getQueryPersonalizations();
 	
 	protected abstract EntityQuery<T> parse(String queryString);
 	

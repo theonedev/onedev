@@ -78,7 +78,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							if (getProject() != null)
 								fields.remove(Build.NAME_PROJECT);
 							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
-							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames(project));
+							List<String> paramNames = new ArrayList<>(buildParamManager.getParamNames(project));
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);
@@ -100,6 +100,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								else if (operator == BuildQueryLexer.FixedIssue)
 									return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+								else if (operator == BuildQueryLexer.RanOn)
+									return SuggestionUtils.suggestAgents(matchWith);
 								else 
 									return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							} else {

@@ -29,6 +29,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.GroupManager;
@@ -134,6 +135,15 @@ public class SuggestionUtils {
 				.sorted()
 				.collect(Collectors.toList());
 		return suggest(projectNames, matchWith);
+	}
+	
+	public static List<InputSuggestion> suggestAgents(String matchWith) {
+		List<String> agentNames = OneDev.getInstance(AgentManager.class).query()
+				.stream()
+				.map(it->it.getName())
+				.sorted()
+				.collect(Collectors.toList());
+		return suggest(agentNames, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestVariables(Project project, BuildSpec buildSpec, 

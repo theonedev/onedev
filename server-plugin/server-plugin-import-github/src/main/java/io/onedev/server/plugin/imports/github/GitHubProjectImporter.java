@@ -20,6 +20,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -28,7 +29,6 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.SimpleLogger;
 
 public class GitHubProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ProjectImportOption> {
 
@@ -41,7 +41,7 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 	
 	@Override
 	public String doImport(ImportServer where, ProjectImportSource what, ProjectImportOption how, 
-			boolean dryRun, SimpleLogger logger) {
+			boolean dryRun, TaskLogger logger) {
 		Collection<Long> projectIds = new ArrayList<>();
 		Client client = where.newClient();
 		try {
@@ -114,7 +114,7 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 	}
 
 	@Override
-	public ProjectImportSource getWhat(ImportServer where, SimpleLogger logger) {
+	public ProjectImportSource getWhat(ImportServer where, TaskLogger logger) {
 		ProjectImportSource importSource = new ProjectImportSource();
 		Client client = where.newClient();
 		try {
@@ -134,7 +134,7 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 	}
 
 	@Override
-	public ProjectImportOption getHow(ImportServer where, ProjectImportSource what, SimpleLogger logger) {
+	public ProjectImportOption getHow(ImportServer where, ProjectImportSource what, TaskLogger logger) {
 		ProjectImportOption importOption = new ProjectImportOption();
 		List<String> gitHubRepos = what.getProjectMappings().stream()
 				.map(it->it.getGitHubRepo()).collect(Collectors.toList());

@@ -16,12 +16,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.tasklog.LogManager;
 
 public class BuildLogResource extends AbstractResource {
 

@@ -20,12 +20,13 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -74,26 +75,18 @@ public class PullRequestListPage extends LayoutPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedPullRequestQuery> getQuerySetting() {
-				if (getLoginUser() != null)
-					return getLoginUser().getPullRequestQuerySetting();
-				else
-					return null;
+			protected QueryPersonalization<NamedPullRequestQuery> getQueryPersonalization() {
+				return getLoginUser().getPullRequestQueryPersonalization();
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
-				OneDev.getInstance(UserManager.class).save(getLoginUser());
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedPullRequestQuery> queries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedPullRequestQuery> queries) {
 				getPullRequestSetting().setNamedQueries(queries);
 				OneDev.getInstance(SettingManager.class).savePullRequestSetting(getPullRequestSetting());
 			}
 
 			@Override
-			protected ArrayList<NamedPullRequestQuery> getQueries() {
+			protected ArrayList<NamedPullRequestQuery> getGlobalQueries() {
 				return (ArrayList<NamedPullRequestQuery>) getPullRequestSetting().getNamedQueries();
 			}
 
@@ -151,15 +144,15 @@ public class PullRequestListPage extends LayoutPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										QuerySetting<NamedPullRequestQuery> querySetting = getLoginUser().getPullRequestQuerySetting();
-										NamedPullRequestQuery namedQuery = NamedQuery.find(querySetting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										QueryPersonalization<NamedPullRequestQuery> queryPersonalization = getLoginUser().getPullRequestQueryPersonalization();
+										NamedPullRequestQuery namedQuery = NamedQuery.find(queryPersonalization.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);
-											querySetting.getUserQueries().add(namedQuery);
+											queryPersonalization.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -167,9 +160,11 @@ public class PullRequestListPage extends LayoutPage {
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalPullRequestSetting pullRequestSetting = getPullRequestSetting();
 										NamedPullRequestQuery namedQuery = pullRequestSetting.getNamedQuery(name);
 										if (namedQuery == null) {
@@ -187,7 +182,7 @@ public class PullRequestListPage extends LayoutPage {
 									protected void onCancel(AjaxRequestTarget target) {
 										close();
 									}
-									
+
 								};
 							}
 							
@@ -235,8 +230,8 @@ public class PullRequestListPage extends LayoutPage {
 	public static PageParameters paramsOf(int page) {
 		String query = null;
 		User user = SecurityUtils.getUser();
-		if (user != null && !user.getPullRequestQuerySetting().getUserQueries().isEmpty())
-			query = user.getPullRequestQuerySetting().getUserQueries().iterator().next().getQuery();
+		if (user != null && !user.getPullRequestQueryPersonalization().getQueries().isEmpty())
+			query = user.getPullRequestQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getPullRequestSetting().getNamedQueries().isEmpty())
 			query = getPullRequestSetting().getNamedQueries().iterator().next().getQuery();
 		return paramsOf(query, page);

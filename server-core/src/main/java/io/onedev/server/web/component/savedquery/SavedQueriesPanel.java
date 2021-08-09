@@ -34,7 +34,7 @@ import org.apache.wicket.request.http.WebResponse;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
@@ -64,42 +64,18 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		return COOKIE_PREFIX + getPage().getClass().getSimpleName();
 	}
 	
-	private ArrayList<T> getUserQueries() {
-		QuerySetting<T> querySetting = getQuerySetting();
-		if (querySetting != null)
-			return querySetting.getUserQueries();
-		else
-			return new ArrayList<>();
-	}	
-	
-	private WatchStatus getWatchStatus(T namedQuery) {
-		QuerySetting<T> querySetting = getQuerySetting();
-		if (querySetting != null)
-			return querySetting.getQueryWatchSupport().getWatchStatus(namedQuery);
+	private WatchStatus getWatchStatus(String queryName) {
+		QueryPersonalization<T> personalization = getQueryPersonalization();
+		if (personalization != null)
+			return personalization.getQueryWatchSupport().getWatchStatus(queryName);
 		else
 			return WatchStatus.DEFAULT;
 	}
 	
-	private WatchStatus getUserWatchStatus(T namedQuery) {
-		QuerySetting<T> querySetting = getQuerySetting();
-		if (querySetting != null)
-			return querySetting.getQueryWatchSupport().getUserWatchStatus(namedQuery);
-		else
-			return WatchStatus.DEFAULT;
-	}
-	
-	private boolean getSubscriptionStatus(T namedQuery) {
-		QuerySetting<T> querySetting = getQuerySetting();
-		if (querySetting != null)
-			return querySetting.getQuerySubscriptionSupport().getQuerySubscriptions().contains(namedQuery.getName());
-		else
-			return false;
-	}
-	
-	private boolean getUserSubscriptionStatus(T namedQuery) {
-		QuerySetting<T> querySetting = getQuerySetting();
-		if (querySetting != null)
-			return querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().contains(namedQuery.getName());
+	private boolean getSubscriptionStatus(String queryName) {
+		QueryPersonalization<T> personalization = getQueryPersonalization();
+		if (personalization != null)
+			return personalization.getQuerySubscriptionSupport().getQuerySubscriptions().contains(queryName);
 		else
 			return false;
 	}
@@ -137,6 +113,10 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		handler.add(this);
 	}
 	
+	private boolean canEditGlobalQueries() {
+		return SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManage(Project.get());
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -163,7 +143,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.getUser() != null);
+				setVisible(SecurityUtils.getUser() != null && (getQueryPersonalization() != null || canEditGlobalQueries()));
 			}
 
 			@Override
@@ -171,17 +151,18 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				return "modal-lg";
 			}
 
-			private Component newUserQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> userQueries) {
-				return new NamedQueriesEditor(componentId, userQueries, null) {
+			private Component newPersonalQueriesEditor(String componentId, ModalPanel modal) {
+				ArrayList<T> personalQueries = getQueryPersonalization().getQueries();
+				return new NamedQueriesEditor(componentId, personalQueries, null) {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, ArrayList<T> queries) {
 						target.add(SavedQueriesPanel.this);
 						modal.close();
 						
-						QuerySetting<T> querySetting = getQuerySetting();
-						querySetting.setUserQueries(queries);
-						onSaveQuerySetting(querySetting);
+						QueryPersonalization<T> personalization = getQueryPersonalization();
+						personalization.setQueries(queries);
+						personalization.onUpdated();
 					}
 					
 					@Override
@@ -192,15 +173,34 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				};
 			}
 			
-			private Component newQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> queries, 
-					@Nullable UseDefaultListener useDefaultListener) {
+			private Component newGlobalQueriesEditor(String componentId, ModalPanel modal) {
+				ArrayList<T> queries = getGlobalQueries();
+				UseDefaultListener useDefaultListener;
+				if (queries == null) {
+					queries = new ArrayList<>(getDefaultQueries());
+					useDefaultListener = null;
+				} else if (getDefaultQueries() != null) {
+					useDefaultListener = new UseDefaultListener() {
+						
+						@Override
+						public void onUseDefault(AjaxRequestTarget target) {
+							target.add(SavedQueriesPanel.this);
+							modal.close();
+							onSaveGlobalQueries(null);
+						}
+						
+					};
+				} else {
+					useDefaultListener = null;
+				}
+				
 				return new NamedQueriesEditor(componentId, queries, useDefaultListener) {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, ArrayList<T> queries) {
 						target.add(SavedQueriesPanel.this);
 						modal.close();
-						onSaveQueries(queries);
+						onSaveGlobalQueries(queries);
 					}
 					
 					@Override
@@ -213,30 +213,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "editSavedQueriesFrag", SavedQueriesPanel.this);
-				List<Tab> tabs = new ArrayList<>();
+				Fragment fragment;
+				if (getQueryPersonalization() != null) {
+					fragment = new Fragment(id, "editPersonalAwareSavedQueriesFrag", SavedQueriesPanel.this);
+					List<Tab> tabs = new ArrayList<>();
 
-				ArrayList<T> userQueries = getUserQueries();
-				tabs.add(new AjaxActionTab(Model.of("Mine")) {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-					}
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-						Component editor = newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries);
-						fragment.replace(editor);
-						target.add(editor);
-					}
-					
-				});
-				fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
-				
-				if (SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManage(Project.get())) {
-					tabs.add(new AjaxActionTab(Model.of("All Users")) {
+					tabs.add(new AjaxActionTab(Model.of("Mine")) {
 
 						@Override
 						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -246,34 +228,38 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							ArrayList<T> queries = getQueries();
-							UseDefaultListener useDefaultListener;
-							if (queries == null) {
-								queries = new ArrayList<>(getDefaultQueries());
-								useDefaultListener = null;
-							} else if (getDefaultQueries() != null) {
-								useDefaultListener = new UseDefaultListener() {
-									
-									@Override
-									public void onUseDefault(AjaxRequestTarget target) {
-										target.add(SavedQueriesPanel.this);
-										modal.close();
-										onSaveQueries(null);
-									}
-									
-								};
-							} else {
-								useDefaultListener = null;
-							}
-							Component editor = newQueriesEditor(TAB_PANEL_ID, modal, queries, useDefaultListener);
+							Component editor = newPersonalQueriesEditor(TAB_PANEL_ID, modal);
 							fragment.replace(editor);
 							target.add(editor);
 						}
 						
 					});
+					fragment.add(newPersonalQueriesEditor(TAB_PANEL_ID, modal));
+					
+					if (canEditGlobalQueries()) {
+						tabs.add(new AjaxActionTab(Model.of("All Users")) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+							}
+
+							@Override
+							protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+								Component editor = newGlobalQueriesEditor(TAB_PANEL_ID, modal);
+								fragment.replace(editor);
+								target.add(editor);
+							}
+							
+						});
+					}
+					
+					fragment.add(new Tabbable("tab", tabs));
+				} else {
+					fragment = new Fragment(id, "editSavedQueriesFrag", SavedQueriesPanel.this);
+					fragment.add(newGlobalQueriesEditor("content", modal));
 				}
-				
-				fragment.add(new Tabbable("tab", tabs));
 				
 				fragment.add(new AjaxLink<Void>("close") {
 
@@ -294,11 +280,11 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			
 		});
 		
-		add(new ListView<T>("userQueries", new LoadableDetachableModel<List<T>>() {
+		add(new ListView<T>("personalQueries", new LoadableDetachableModel<List<T>>() {
 
 			@Override
 			protected List<T> load() {
-				return getUserQueries();
+				return getQueryPersonalization().getQueries();
 			}
 			
 		}) {
@@ -310,25 +296,27 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				link.add(new Label("label", namedQuery.getName()));
 				item.add(link);
 				
+				String personalName = NamedQuery.PERSONAL_NAME_PREFIX + namedQuery.getName();
+				
 				item.add(new WatchStatusLink("watchStatus") {
 					
 					@Override
 					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
 						target.add(this);
-						QuerySetting<T> querySetting = getQuerySetting();
-						querySetting.getQueryWatchSupport().setUserWatchStatus(namedQuery, watchStatus);
-						onSaveQuerySetting(querySetting);
+						QueryPersonalization<T> personalization = getQueryPersonalization();
+						personalization.getQueryWatchSupport().setWatchStatus(personalName, watchStatus);
+						personalization.onUpdated();
 					}
 					
 					@Override
 					protected WatchStatus getWatchStatus() {
-						return getUserWatchStatus(namedQuery);
+						return SavedQueriesPanel.this.getWatchStatus(personalName);
 					}
 					
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getQuerySetting().getQueryWatchSupport() != null);
+						setVisible(getQueryPersonalization().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -338,23 +326,23 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onSubscriptionStatusChange(AjaxRequestTarget target, boolean subscriptionStatus) {
 						target.add(this);
-						QuerySetting<T> querySetting = getQuerySetting();
+						QueryPersonalization<T> personalization = getQueryPersonalization();
 						if (subscriptionStatus)
-							querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().add(namedQuery.getName());
+							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().add(personalName);
 						else
-							querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().remove(namedQuery.getName());
-						onSaveQuerySetting(querySetting);
+							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().remove(personalName);
+						personalization.onUpdated();
 					}
 					
 					@Override
 					protected boolean isSubscribed() {
-						return getUserSubscriptionStatus(namedQuery);
+						return getSubscriptionStatus(personalName);
 					}
 					
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(getQuerySetting().getQuerySubscriptionSupport() != null);
+						setVisible(getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}
 					
 				});
@@ -364,17 +352,17 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getModelObject().isEmpty());
+				setVisible(SecurityUtils.getUser() != null && getQueryPersonalization() != null);
 			}
 
 		});
 		
-		add(new ListView<T>("queries", new LoadableDetachableModel<List<T>>() {
+		add(new ListView<T>("globalQueries", new LoadableDetachableModel<List<T>>() {
 
 			@Override
 			protected List<T> load() {
 				List<T> namedQueries = new ArrayList<>();
-				for (T namedQuery: getQueries()!=null?getQueries():getDefaultQueries())
+				for (T namedQuery: getGlobalQueries()!=null?getGlobalQueries():getDefaultQueries())
 					namedQueries.add(namedQuery);
 				return namedQueries;
 			}
@@ -388,26 +376,30 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				link.add(new Label("label", namedQuery.getName()));
 				item.add(link);
 				
+				String globalName = NamedQuery.GLOBAL_NAME_PREFIX + namedQuery.getName();
+				
 				item.add(new WatchStatusLink("watchStatus") {
 					
 					@Override
 					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
 						target.add(this);
 
-						QuerySetting<T> querySetting = getQuerySetting();
-						querySetting.getQueryWatchSupport().setWatchStatus(namedQuery, watchStatus);
-						onSaveQuerySetting(querySetting);
+						QueryPersonalization<T> personalization = getQueryPersonalization();
+						personalization.getQueryWatchSupport().setWatchStatus(globalName, watchStatus);
+						personalization.onUpdated();
 					}
 					
 					@Override
 					protected WatchStatus getWatchStatus() {
-						return SavedQueriesPanel.this.getWatchStatus(namedQuery);
+						return SavedQueriesPanel.this.getWatchStatus(globalName);
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getUser() != null && getQuerySetting().getQueryWatchSupport() != null);
+						setVisible(SecurityUtils.getUser() != null 
+								&& getQueryPersonalization() != null 
+								&& getQueryPersonalization().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -418,23 +410,25 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onSubscriptionStatusChange(AjaxRequestTarget target, boolean subscriptionStatus) {
 						target.add(this);
 
-						QuerySetting<T> querySetting = getQuerySetting();
+						QueryPersonalization<T> personalization = getQueryPersonalization();
 						if (subscriptionStatus)
-							querySetting.getQuerySubscriptionSupport().getQuerySubscriptions().add(namedQuery.getName());
+							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().add(globalName);
 						else
-							querySetting.getQuerySubscriptionSupport().getQuerySubscriptions().remove(namedQuery.getName());
-						onSaveQuerySetting(querySetting);
+							personalization.getQuerySubscriptionSupport().getQuerySubscriptions().remove(globalName);
+						personalization.onUpdated();
 					}
 					
 					@Override
 					protected boolean isSubscribed() {
-						return getSubscriptionStatus(namedQuery);
+						return getSubscriptionStatus(globalName);
 					}
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getUser() != null && getQuerySetting().getQuerySubscriptionSupport() != null);
+						setVisible(SecurityUtils.getUser() != null 
+								&& getQueryPersonalization() != null
+								&& getQueryPersonalization().getQuerySubscriptionSupport() != null);
 					}
 					
 				});
@@ -523,6 +517,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			form.add(new AjaxLink<Void>("cancel") {
 
 				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				}
+				
+				@Override
 				public void onClick(AjaxRequestTarget target) {
 					onCancel(target);
 				}
@@ -543,14 +543,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	protected abstract Link<Void> newQueryLink(String componentId, T namedQuery);
 	
 	@Nullable
-	protected abstract QuerySetting<T> getQuerySetting();
+	protected abstract QueryPersonalization<T> getQueryPersonalization();
 	
 	@Nullable
-	protected abstract ArrayList<T> getQueries();
+	protected abstract ArrayList<T> getGlobalQueries();
 
-	protected abstract void onSaveQueries(ArrayList<T> queries);
-	
-	protected abstract void onSaveQuerySetting(QuerySetting<T> querySetting);
+	protected abstract void onSaveGlobalQueries(ArrayList<T> queries);
 	
 	@Nullable
 	protected ArrayList<T> getDefaultQueries() {

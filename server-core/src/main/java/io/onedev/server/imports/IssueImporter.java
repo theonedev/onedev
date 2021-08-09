@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SimpleLogger;
 
 public abstract class IssueImporter<Where extends Serializable,  What extends Serializable, How extends Serializable> 
 		extends Importer<Where, What, How> {
@@ -14,6 +14,6 @@ public abstract class IssueImporter<Where extends Serializable,  What extends Se
 	
 	@Nullable
 	public abstract String doImport(Where where, What what, How how, Project project, 
-			boolean dryRun, SimpleLogger logger);
+			boolean dryRun, TaskLogger logger);
 	
 }

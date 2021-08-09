@@ -30,7 +30,7 @@ import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
-public class ActionAuthorizationsPage extends BuildSettingPage {
+public class ActionAuthorizationsPage extends ProjectBuildSettingPage {
 
 	private DataTable<ActionAuthorization, Void> authorizationsTable;
 	

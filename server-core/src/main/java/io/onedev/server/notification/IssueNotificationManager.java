@@ -30,7 +30,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.QueryWatchBuilder;
@@ -89,8 +89,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 
 			@Override
-			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
-				return issue.getProject().getUserIssueQuerySettings();
+			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+				return issue.getProject().getIssueQueryPersonalizations();
 			}
 
 			@Override
@@ -115,8 +115,8 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 			}
 
 			@Override
-			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
-				return userManager.query().stream().map(it->it.getIssueQuerySetting()).collect(Collectors.toList());
+			protected Collection<? extends QueryPersonalization<?>> getQueryPersonalizations() {
+				return userManager.query().stream().map(it->it.getIssueQueryPersonalization()).collect(Collectors.toList());
 			}
 
 			@Override

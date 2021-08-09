@@ -150,6 +150,8 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new DependsOnCriteria(project, value);
 						else if (ctx.DependenciesOf() != null) 
 							return new DependenciesOfCriteria(project, value);
+						else if (ctx.RanOn() != null)
+							return new RanOnCriteria(value);
 						else 
 							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
 					}
@@ -274,7 +276,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames(null);
+		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getParamNames(null);
 		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {

@@ -21,9 +21,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.buildspec.job.log.StyleBuilder;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.util.JerseyUtils;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -142,10 +141,10 @@ public class ImportServer implements Serializable, Validatable {
 		
 		Client client = newClient();
 		try {
-			SimpleLogger logger = new SimpleLogger() {
+			TaskLogger logger = new TaskLogger() {
 
 				@Override
-				public void log(String message, StyleBuilder styleBuilder) {
+				public void log(String message, String taskId) {
 					ImportServer.logger.info(message);
 				}
 				

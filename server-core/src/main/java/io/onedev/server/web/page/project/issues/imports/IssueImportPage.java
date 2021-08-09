@@ -10,6 +10,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.imports.Importer;
 import io.onedev.server.imports.IssueImporter;
@@ -20,7 +21,6 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.component.imports.ImportPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
@@ -63,7 +63,7 @@ public class IssueImportPage<Where extends Serializable, What extends Serializab
 
 			@Override
 			protected String doImport(Where where, What what, How how, boolean dryRun,
-					SimpleLogger logger) {
+					TaskLogger logger) {
 				return importer.doImport(where, what, how, getProject(), dryRun, logger);
 			}
 

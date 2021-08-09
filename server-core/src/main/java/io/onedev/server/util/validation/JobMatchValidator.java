@@ -21,7 +21,7 @@ public class JobMatchValidator implements ConstraintValidator<JobMatch, String> 
 			return true;
 		} else {
 			try {
-				io.onedev.server.util.jobmatch.JobMatch.parse(value);
+				io.onedev.server.job.match.JobMatch.parse(value);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

@@ -2,7 +2,9 @@ package io.onedev.server.buildspec;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -30,9 +32,9 @@ public class Service implements NamedElement, Serializable {
 	
 	private String readinessCheckCommand;
 	
-	private String cpuRequirement = "500m";
+	private int cpuRequirement = 250;
 	
-	private String memoryRequirement = "128m";
+	private int memoryRequirement = 256;
 	
 	@Editable(order=100, description="Specify name of the service, which will be used as host name to access the service")
 	@SuggestionProvider("getNameSuggestions")
@@ -102,33 +104,45 @@ public class Service implements NamedElement, Serializable {
 		this.readinessCheckCommand = readinessCheckCommand;
 	}
 	
-	@Editable(order=10000, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getCpuRequirement() {
+	@Editable(order=10000, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the service in millis. "
+			+ "1000 millis means a single CPU core")
+	public int getCpuRequirement() {
 		return cpuRequirement;
 	}
 
-	public void setCpuRequirement(String cpuRequirement) {
+	public void setCpuRequirement(int cpuRequirement) {
 		this.cpuRequirement = cpuRequirement;
 	}
 
-	@Editable(order=10100, group="More Settings", description="Specify memory requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getMemoryRequirement() {
+	@Editable(order=10100, group="More Settings", description="Specify memory requirement of the service in mega bytes")
+	public int getMemoryRequirement() {
 		return memoryRequirement;
 	}
 
-	public void setMemoryRequirement(String memoryRequirement) {
+	public void setMemoryRequirement(int memoryRequirement) {
 		this.memoryRequirement = memoryRequirement;
 	}
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, false, false);
+	}
+	
+	public Map<String, Serializable> toMap() {
+		Map<String, Serializable> serviceMap = new HashMap<>();
+		
+		serviceMap.put("name", getName());
+		serviceMap.put("image", getImage());
+		serviceMap.put("readinessCheckCommand", getReadinessCheckCommand());
+		serviceMap.put("cpuRequirement", getCpuRequirement());
+		serviceMap.put("memoryRequirement", getMemoryRequirement());
+		serviceMap.put("arguments", getArguments());
+		Map<String, String> envVars = new HashMap<>();
+		for (EnvVar var: getEnvVars())
+			envVars.put(var.getName(), var.getValue());
+		serviceMap.put("envVars", (Serializable) envVars);
+		
+		return serviceMap;
 	}
 	
 }

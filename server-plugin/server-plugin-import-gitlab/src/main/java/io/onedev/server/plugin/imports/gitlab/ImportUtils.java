@@ -32,6 +32,7 @@ import org.unbescape.html.HtmlEscape;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -53,7 +54,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
-import io.onedev.server.util.SimpleLogger;
 
 public class ImportUtils {
 	
@@ -63,7 +63,7 @@ public class ImportUtils {
 	
 	private static final Pattern PATTERN_ATTACHMENT = Pattern.compile("\\[(.+?)\\]\\s*\\((/uploads/.+?)\\)");
 	
-	static IssueImportOption buildImportOption(ImportServer server, Collection<String> gitLabProjects, SimpleLogger logger) {
+	static IssueImportOption buildImportOption(ImportServer server, Collection<String> gitLabProjects, TaskLogger logger) {
 		IssueImportOption importOption = new IssueImportOption();
 		Client client = server.newClient();
 		try {
@@ -87,7 +87,7 @@ public class ImportUtils {
 	
 	@Nullable
 	static User getUser(Client client, ImportServer importSource, Map<String, Optional<User>> users, 
-			String userId, SimpleLogger logger) {
+			String userId, TaskLogger logger) {
 		Optional<User> userOpt = users.get(userId);
 		if (userOpt == null) {
 			String apiEndpoint = importSource.getApiEndpoint("/users/" + userId);
@@ -108,7 +108,7 @@ public class ImportUtils {
 	
 	static ImportResult importIssues(ImportServer server, String gitLabProject, Project oneDevProject,
 			boolean useExistingIssueNumbers, IssueImportOption importOption, Map<String, Optional<User>> users, 
-			boolean dryRun, SimpleLogger logger) {
+			boolean dryRun, TaskLogger logger) {
 		Client client = server.newClient();
 		try {
 			Set<String> nonExistentMilestones = new HashSet<>();
@@ -450,7 +450,7 @@ public class ImportUtils {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
-	static List<JsonNode> list(Client client, String apiEndpoint, SimpleLogger logger) {
+	static List<JsonNode> list(Client client, String apiEndpoint, TaskLogger logger) {
 		List<JsonNode> result = new ArrayList<>();
 		list(client, apiEndpoint, new PageDataConsumer() {
 
@@ -464,7 +464,7 @@ public class ImportUtils {
 	}
 	
 	static void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, 
-			SimpleLogger logger) {
+			TaskLogger logger) {
 		URI uri;
 		try {
 			uri = new URIBuilder(apiEndpoint)

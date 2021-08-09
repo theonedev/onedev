@@ -27,12 +27,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.bootstrap.BootstrapUtils;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -42,6 +42,7 @@ import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -225,6 +226,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
+		setting = settingManager.getSetting(Key.AGENT);
+		if (setting == null) {
+			settingManager.saveAgentSetting(new AgentSetting());
+		}
 		setting = settingManager.getSetting(Key.SERVICE_DESK_SETTING);
 		if (setting == null) { 
 			settingManager.saveServiceDeskSetting(null);
@@ -320,7 +325,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 						persistManager.exportData(tempDir);
 						File backupFile = new File(backupDir, 
 								DateTimeFormat.forPattern(Upgrade.BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
-						ZipUtils.zip(tempDir, backupFile);
+						BootstrapUtils.zip(tempDir, backupFile);
 					} catch (Exception e) {
 						notifyBackupError(e);
 						throw ExceptionUtils.unchecked(e);

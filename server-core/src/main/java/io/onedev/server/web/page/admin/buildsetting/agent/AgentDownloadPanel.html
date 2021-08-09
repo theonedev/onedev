@@ -1,0 +1,13 @@
+<wicket:panel>
+	<div class="p-5">
+		<h6 class="text-center mb-4">Download & Install Agent</h6>
+		<ol>
+			<li>Make sure <code>Server URL</code> in <a wicket:id="systemSetting" class="link-primary" target="_blank">system setting</a> is specified correctly</li>
+			<li>Make sure <a href="https://openjdk.java.net" target="_blank">JDK 1.8 or higher</a> is installed</li>
+			<li>Download agent package for <a wicket:id="zip" class="link-primary">Windows</a> or <a wicket:id="targz" class="link-primary">Linux/Mac</a>. A new agent token will be included in the package</li>
+			<li>Extract the package into a folder</li>
+			<li>From extracted folder, run <code>bin/agent.sh console</code> (Linux/Mac) or <code>bin\agent.bat console</code> (Windows)</li>
+			<li>Check <a wicket:id="installationGuide" class="link-primary" target="_blank">agent installation guide</a> for more details, such as running as docker container, running as service etc.</li> 
+		</ol>
+	</div>
+</wicket:panel>

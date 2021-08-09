@@ -124,6 +124,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_VERSION = "version";
 	
+	public static final String PROP_AGENT = "agent";
+	
 	public static final String NAME_PROJECT = "Project";
 	
 	public static final String PROP_PROJECT = "project";
@@ -178,11 +180,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_PARAMS = "params";
 	
-	public static final String NAME_DEPENDENCIES = "Dependencies";
-	
 	public static final String PROP_DEPENDENCIES = "dependencies";
-	
-	public static final String NAME_DEPENDENTS = "Dependents";
 	
 	public static final String PROP_DEPENDENTS = "dependents";
 	
@@ -199,8 +197,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
 			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE,
-			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, NAME_DEPENDENCIES, 
-			NAME_DEPENDENTS, NAME_ERROR_MESSAGE, NAME_LOG, BuildMetric.NAME_REPORT);
+			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, 
+			NAME_ERROR_MESSAGE, NAME_LOG, BuildMetric.NAME_REPORT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
@@ -267,6 +265,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project; 
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private Agent agent; 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -363,13 +364,22 @@ public class Build extends AbstractEntity implements Referenceable {
 		return project;
 	}
 	
+	public void setProject(Project project) {
+		this.project = project;
+	}
+
 	@Override
 	public String getType() {
 		return "build";
 	}
-	
-	public void setProject(Project project) {
-		this.project = project;
+
+	@Nullable
+	public Agent getAgent() {
+		return agent;
+	}
+
+	public void setAgent(Agent agent) {
+		this.agent = agent;
 	}
 
 	public User getSubmitter() {

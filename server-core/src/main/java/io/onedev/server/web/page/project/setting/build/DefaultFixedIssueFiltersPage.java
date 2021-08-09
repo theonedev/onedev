@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class DefaultFixedIssueFiltersPage extends BuildSettingPage {
+public class DefaultFixedIssueFiltersPage extends ProjectBuildSettingPage {
 
 	public DefaultFixedIssueFiltersPage(PageParameters params) {
 		super(params);

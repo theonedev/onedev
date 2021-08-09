@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -329,7 +330,7 @@ public class DefaultPersistManager implements PersistManager {
 	 */
 	private boolean hasForeignKeyDependency(Class<?> entityType1, Class<?> entityType2) {
 		for (Field field: BeanUtils.findFields(entityType1)) {
-			if (field.getAnnotation(ManyToOne.class) != null) {
+			if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) {
 				if (field.getType() == entityType2)
 					return true;
 				if (field.getType() != entityType1 && 

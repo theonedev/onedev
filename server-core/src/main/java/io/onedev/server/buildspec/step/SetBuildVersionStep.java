@@ -13,12 +13,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.event.build.BuildUpdated;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -46,7 +46,7 @@ public class SetBuildVersionStep extends ServerStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger jobLogger) {
+	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger jobLogger) {
 		return OneDev.getInstance(TransactionManager.class).call(new Callable<Map<String, byte[]>>() {
 
 			@Override

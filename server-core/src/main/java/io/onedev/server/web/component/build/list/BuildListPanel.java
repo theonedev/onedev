@@ -267,6 +267,54 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
+						return "Delete Selected Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected builds?"));
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								Collection<Build> builds = new ArrayList<>();
+								for (IModel<Build> each: selectionColumn.getSelections())
+									builds.add(each.getObject());
+								OneDev.getInstance(BuildManager.class).delete(builds);
+								target.add(body);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select builds to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
 						return "Delete All Queried Builds";
 					}
 					
@@ -326,54 +374,6 @@ public abstract class BuildListPanel extends Panel {
 					
 				});
 				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Delete Selected Builds";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected builds?"));
-							}
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								Collection<Build> builds = new ArrayList<>();
-								for (IModel<Build> each: selectionColumn.getSelections())
-									builds.add(each.getObject());
-								OneDev.getInstance(BuildManager.class).delete(builds);
-								target.add(body);
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select builds to delete");
-								}
-							}
-							
-						};
-					}
-					
-				});
-				
 				return menuItems;
 			}
 
@@ -415,7 +415,7 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					protected Map<String, String> load() {
 						Map<String, String> choices = new LinkedHashMap<>();
-						for (String fieldName: OneDev.getInstance(BuildParamManager.class).getBuildParamNames(null))
+						for (String fieldName: OneDev.getInstance(BuildParamManager.class).getParamNames(null))
 							choices.put(fieldName, fieldName);
 						return choices;
 					}

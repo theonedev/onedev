@@ -8,12 +8,12 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Executable;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.ServerExecutable;
 import io.onedev.server.buildspec.param.ParamCombination;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.EditableStringVisitor;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -32,7 +32,7 @@ public abstract class ServerStep extends Step {
 	}
 	
 	@Nullable
-	public abstract Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger);
+	public abstract Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger);
 	
 	public Collection<String> getPlaceholders() {
 		Collection<String> placeholders = new HashSet<>();

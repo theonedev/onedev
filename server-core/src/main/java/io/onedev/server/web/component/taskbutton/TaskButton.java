@@ -31,14 +31,14 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntry;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.util.SimpleLogger;
+import io.onedev.server.tasklog.StyleBuilder;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -143,12 +143,12 @@ public abstract class TaskButton extends AjaxButton {
 
 			@Override
 			public TaskResult call() throws Exception {
-				SimpleLogger logger = new SimpleLogger() {
+				TaskLogger logger = new TaskLogger() {
 
 					@Override
-					public void log(String message, StyleBuilder styleBuilder) {
+					public void log(String message, String taskId) {
 						synchronized (messages) {
-							messages.add(JobLogEntryEx.parse(message, styleBuilder));
+							messages.add(JobLogEntryEx.parse(message, new StyleBuilder()));
 						}
 					}
 					
@@ -256,7 +256,7 @@ public abstract class TaskButton extends AjaxButton {
 	 * @param logger
 	 * @return html display to user showing task execution result
 	 */
-	protected abstract String runTask(SimpleLogger logger);
+	protected abstract String runTask(TaskLogger logger);
 
 	@Singleton
 	public static class TaskFutureManager implements SchedulableTask {

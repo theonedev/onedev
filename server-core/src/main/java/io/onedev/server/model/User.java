@@ -40,8 +40,9 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedProjectQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.SsoInfo;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.sso.SsoConnector;
@@ -165,19 +166,19 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
     private Collection<IssueVote> issueVotes = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<IssueQuerySetting> projectIssueQuerySettings = new ArrayList<>();
+    private Collection<IssueQueryPersonalization> issueQueryPersonalizations = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<BuildQuerySetting> projectBuildQuerySettings = new ArrayList<>();
+    private Collection<BuildQueryPersonalization> buildQueryPersonalizations = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<PullRequestQuerySetting> projectPullRequestQuerySettings = new ArrayList<>();
+    private Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CommitQuerySetting> projectCommitQuerySettings = new ArrayList<>();
+    private Collection<CommitQueryPersonalization> commitQueryPersonalizations = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings = new ArrayList<>();
+    private Collection<CodeCommentQueryPersonalization> codeCommentQueryPersonalizations = new ArrayList<>();
     
     @OneToMany(mappedBy="owner", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -186,18 +187,23 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<NamedProjectQuery> userProjectQueries = new ArrayList<>();
+	private ArrayList<NamedProjectQuery> projectQueries = new ArrayList<>();
 	
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<NamedIssueQuery> userIssueQueries = new ArrayList<>();
+	private ArrayList<NamedIssueQuery> issueQueries = new ArrayList<>();
 
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
-	private LinkedHashMap<String, Boolean> userIssueQueryWatches = new LinkedHashMap<>();
-	
+	private ArrayList<NamedPullRequestQuery> pullRequestQueries = new ArrayList<>();
+
+    @JsonIgnore
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedBuildQuery> buildQueries = new ArrayList<>();
+
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -206,28 +212,8 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<NamedPullRequestQuery> userPullRequestQueries = new ArrayList<>();
-
-    @JsonIgnore
-	@Lob
-	@Column(nullable=false, length=65535)
-	private LinkedHashMap<String, Boolean> userPullRequestQueryWatches = new LinkedHashMap<>();
-
-    @JsonIgnore
-	@Lob
-	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> pullRequestQueryWatches = new LinkedHashMap<>();
 	
-    @JsonIgnore
-	@Lob
-	@Column(nullable=false, length=65535)
-	private ArrayList<NamedBuildQuery> userBuildQueries = new ArrayList<>();
-
-    @JsonIgnore
-	@Lob
-	@Column(nullable=false, length=65535)
-	private LinkedHashSet<String> userBuildQuerySubscriptions = new LinkedHashSet<>();
-
     @JsonIgnore
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -235,8 +221,8 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	
     private transient Collection<Group> groups;
     
-	public QuerySetting<NamedProjectQuery> getProjectQuerySetting() {
-		return new QuerySetting<NamedProjectQuery>() {
+	public QueryPersonalization<NamedProjectQuery> getProjectQueryPersonalization() {
+		return new QueryPersonalization<NamedProjectQuery>() {
 
 			@Override
 			public Project getProject() {
@@ -249,13 +235,13 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 			}
 
 			@Override
-			public ArrayList<NamedProjectQuery> getUserQueries() {
-				return userProjectQueries;
+			public ArrayList<NamedProjectQuery> getQueries() {
+				return projectQueries;
 			}
 
 			@Override
-			public void setUserQueries(ArrayList<NamedProjectQuery> userQueries) {
-				userProjectQueries = userQueries;
+			public void setQueries(ArrayList<NamedProjectQuery> userQueries) {
+				projectQueries = userQueries;
 			}
 
 			@Override
@@ -268,11 +254,16 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 				return null;
 			}
 			
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserManager.class).save(User.this);
+			}
+			
 		};
 	}
 	
-	public QuerySetting<NamedIssueQuery> getIssueQuerySetting() {
-		return new QuerySetting<NamedIssueQuery>() {
+	public QueryPersonalization<NamedIssueQuery> getIssueQueryPersonalization() {
+		return new QueryPersonalization<NamedIssueQuery>() {
 
 			@Override
 			public Project getProject() {
@@ -285,23 +276,18 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 			}
 
 			@Override
-			public ArrayList<NamedIssueQuery> getUserQueries() {
-				return userIssueQueries;
+			public ArrayList<NamedIssueQuery> getQueries() {
+				return issueQueries;
 			}
 
 			@Override
-			public void setUserQueries(ArrayList<NamedIssueQuery> userQueries) {
-				userIssueQueries = userQueries;
+			public void setQueries(ArrayList<NamedIssueQuery> userQueries) {
+				issueQueries = userQueries;
 			}
 
 			@Override
 			public QueryWatchSupport<NamedIssueQuery> getQueryWatchSupport() {
 				return new QueryWatchSupport<NamedIssueQuery>() {
-
-					@Override
-					public LinkedHashMap<String, Boolean> getUserQueryWatches() {
-						return userIssueQueryWatches;
-					}
 
 					@Override
 					public LinkedHashMap<String, Boolean> getQueryWatches() {
@@ -315,12 +301,17 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 			public QuerySubscriptionSupport<NamedIssueQuery> getQuerySubscriptionSupport() {
 				return null;
 			}
+
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserManager.class).save(User.this);
+			}
 			
 		};
 	}
 	
-	public QuerySetting<NamedPullRequestQuery> getPullRequestQuerySetting() {
-		return new QuerySetting<NamedPullRequestQuery>() {
+	public QueryPersonalization<NamedPullRequestQuery> getPullRequestQueryPersonalization() {
+		return new QueryPersonalization<NamedPullRequestQuery>() {
 
 			@Override
 			public Project getProject() {
@@ -333,23 +324,18 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 			}
 
 			@Override
-			public ArrayList<NamedPullRequestQuery> getUserQueries() {
-				return userPullRequestQueries;
+			public ArrayList<NamedPullRequestQuery> getQueries() {
+				return pullRequestQueries;
 			}
 
 			@Override
-			public void setUserQueries(ArrayList<NamedPullRequestQuery> userQueries) {
-				userPullRequestQueries = userQueries;
+			public void setQueries(ArrayList<NamedPullRequestQuery> userQueries) {
+				pullRequestQueries = userQueries;
 			}
 
 			@Override
 			public QueryWatchSupport<NamedPullRequestQuery> getQueryWatchSupport() {
 				return new QueryWatchSupport<NamedPullRequestQuery>() {
-
-					@Override
-					public LinkedHashMap<String, Boolean> getUserQueryWatches() {
-						return userPullRequestQueryWatches;
-					}
 
 					@Override
 					public LinkedHashMap<String, Boolean> getQueryWatches() {
@@ -363,12 +349,17 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 			public QuerySubscriptionSupport<NamedPullRequestQuery> getQuerySubscriptionSupport() {
 				return null;
 			}
+
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserManager.class).save(User.this);
+			}
 			
 		};
 	}
 	
-	public QuerySetting<NamedBuildQuery> getBuildQuerySetting() {
-		return new QuerySetting<NamedBuildQuery>() {
+	public QueryPersonalization<NamedBuildQuery> getBuildQueryPersonalization() {
+		return new QueryPersonalization<NamedBuildQuery>() {
 
 			@Override
 			public Project getProject() {
@@ -381,13 +372,13 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 			}
 
 			@Override
-			public ArrayList<NamedBuildQuery> getUserQueries() {
-				return userBuildQueries;
+			public ArrayList<NamedBuildQuery> getQueries() {
+				return buildQueries;
 			}
 
 			@Override
-			public void setUserQueries(ArrayList<NamedBuildQuery> userQueries) {
-				userBuildQueries = userQueries;
+			public void setQueries(ArrayList<NamedBuildQuery> userQueries) {
+				buildQueries = userQueries;
 			}
 
 			@Override
@@ -400,16 +391,16 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 				return new QuerySubscriptionSupport<NamedBuildQuery>() {
 
 					@Override
-					public LinkedHashSet<String> getUserQuerySubscriptions() {
-						return userBuildQuerySubscriptions;
-					}
-
-					@Override
 					public LinkedHashSet<String> getQuerySubscriptions() {
 						return buildQuerySubscriptions;
 					}
 					
 				};
+			}
+
+			@Override
+			public void onUpdated() {
+				OneDev.getInstance(UserManager.class).save(User.this);
 			}
 			
 		};
@@ -706,68 +697,60 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 		this.issueVotes = issueVotes;
 	}
 
-	public Collection<IssueQuerySetting> getProjectIssueQuerySettings() {
-		return projectIssueQuerySettings;
+	public Collection<IssueQueryPersonalization> getIssueQueryPersonalizations() {
+		return issueQueryPersonalizations;
 	}
 
-	public void setProjectIssueQuerySettings(Collection<IssueQuerySetting> projectIssueQuerySettings) {
-		this.projectIssueQuerySettings = projectIssueQuerySettings;
+	public void setIssueQueryPersonalizations(Collection<IssueQueryPersonalization> issueQueryPersonalizations) {
+		this.issueQueryPersonalizations = issueQueryPersonalizations;
 	}
 
-	public Collection<BuildQuerySetting> getProjectBuildQuerySettings() {
-		return projectBuildQuerySettings;
+	public Collection<BuildQueryPersonalization> getBuildQueryPersonalizations() {
+		return buildQueryPersonalizations;
 	}
 
-	public void setProjectBuildQuerySettings(Collection<BuildQuerySetting> projectBuildQuerySettings) {
-		this.projectBuildQuerySettings = projectBuildQuerySettings;
+	public void setBuildQueryPersonalizations(Collection<BuildQueryPersonalization> buildQueryPersonalizations) {
+		this.buildQueryPersonalizations = buildQueryPersonalizations;
 	}
 
-	public Collection<PullRequestQuerySetting> getProjectPullRequestQuerySettings() {
-		return projectPullRequestQuerySettings;
+	public Collection<PullRequestQueryPersonalization> getPullRequestQueryPersonalizations() {
+		return pullRequestQueryPersonalizations;
 	}
 
-	public void setProjectPullRequestQuerySettings(Collection<PullRequestQuerySetting> projectPullRequestQuerySettings) {
-		this.projectPullRequestQuerySettings = projectPullRequestQuerySettings;
+	public void setPullRequestQueryPersonalizations(Collection<PullRequestQueryPersonalization> pullRequestQueryPersonalizations) {
+		this.pullRequestQueryPersonalizations = pullRequestQueryPersonalizations;
 	}
 
-	public Collection<CommitQuerySetting> getProjectCommitQuerySettings() {
-		return projectCommitQuerySettings;
+	public Collection<CommitQueryPersonalization> getCommitQueryPersonalizations() {
+		return commitQueryPersonalizations;
 	}
 
-	public void setProjectCommitQuerySettings(Collection<CommitQuerySetting> projectCommitQuerySettings) {
-		this.projectCommitQuerySettings = projectCommitQuerySettings;
+	public void setCommitQueryPersonalizations(Collection<CommitQueryPersonalization> commitQueryPersonalizations) {
+		this.commitQueryPersonalizations = commitQueryPersonalizations;
 	}
 
-	public Collection<CodeCommentQuerySetting> getProjectCodeCommentQuerySettings() {
-		return projectCodeCommentQuerySettings;
+	public Collection<CodeCommentQueryPersonalization> getCodeCommentQueryPersonalizations() {
+		return codeCommentQueryPersonalizations;
 	}
 
-	public void setProjectCodeCommentQuerySettings(Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings) {
-		this.projectCodeCommentQuerySettings = projectCodeCommentQuerySettings;
+	public void setCodeCommentQueryPersonalizations(Collection<CodeCommentQueryPersonalization> codeCommentQueryPersonalizations) {
+		this.codeCommentQueryPersonalizations = codeCommentQueryPersonalizations;
 	}
 
 	public ArrayList<NamedProjectQuery> getUserProjectQueries() {
-		return userProjectQueries;
+		return projectQueries;
 	}
 
-	public void setUserProjectQueries(ArrayList<NamedProjectQuery> userProjectQueries) {
-		this.userProjectQueries = userProjectQueries;
+	public void setProjectQueries(ArrayList<NamedProjectQuery> userProjectQueries) {
+		this.projectQueries = userProjectQueries;
 	}
 
 	public ArrayList<NamedIssueQuery> getUserIssueQueries() {
-		return userIssueQueries;
+		return issueQueries;
 	}
 
-	public void setUserIssueQueries(ArrayList<NamedIssueQuery> userIssueQueries) {
-		this.userIssueQueries = userIssueQueries;
-	}
-
-	public LinkedHashMap<String, Boolean> getUserIssueQueryWatches() {
-		return userIssueQueryWatches;
-	}
-
-	public void setUserIssueQueryWatches(LinkedHashMap<String, Boolean> userIssueQueryWatches) {
-		this.userIssueQueryWatches = userIssueQueryWatches;
+	public void setIssueQueries(ArrayList<NamedIssueQuery> userIssueQueries) {
+		this.issueQueries = userIssueQueries;
 	}
 
 	public LinkedHashMap<String, Boolean> getIssueQueryWatches() {
@@ -779,19 +762,11 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	}
 
 	public ArrayList<NamedPullRequestQuery> getUserPullRequestQueries() {
-		return userPullRequestQueries;
+		return pullRequestQueries;
 	}
 
-	public void setUserPullRequestQueries(ArrayList<NamedPullRequestQuery> userPullRequestQueries) {
-		this.userPullRequestQueries = userPullRequestQueries;
-	}
-
-	public LinkedHashMap<String, Boolean> getUserPullRequestQueryWatches() {
-		return userPullRequestQueryWatches;
-	}
-
-	public void setUserPullRequestQueryWatches(LinkedHashMap<String, Boolean> userPullRequestQueryWatches) {
-		this.userPullRequestQueryWatches = userPullRequestQueryWatches;
+	public void setPullRequestQueries(ArrayList<NamedPullRequestQuery> userPullRequestQueries) {
+		this.pullRequestQueries = userPullRequestQueries;
 	}
 
 	public LinkedHashMap<String, Boolean> getPullRequestQueryWatches() {
@@ -803,19 +778,11 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	}
 
 	public ArrayList<NamedBuildQuery> getUserBuildQueries() {
-		return userBuildQueries;
+		return buildQueries;
 	}
 
-	public void setUserBuildQueries(ArrayList<NamedBuildQuery> userBuildQueries) {
-		this.userBuildQueries = userBuildQueries;
-	}
-
-	public LinkedHashSet<String> getUserBuildQuerySubscriptions() {
-		return userBuildQuerySubscriptions;
-	}
-	
-	public void setUserBuildQuerySubscriptions(LinkedHashSet<String> userBuildQuerySubscriptions) {
-		this.userBuildQuerySubscriptions = userBuildQuerySubscriptions;
+	public void setBuildQueries(ArrayList<NamedBuildQuery> buildQueries) {
+		this.buildQueries = buildQueries;
 	}
 
 	public LinkedHashSet<String> getBuildQuerySubscriptions() {

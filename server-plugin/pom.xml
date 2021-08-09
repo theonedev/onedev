@@ -18,7 +18,7 @@
 	<modules>
 		<module>server-plugin-archetype</module>
 		<module>server-plugin-executor-kubernetes</module>
-		<module>server-plugin-executor-docker</module>
+		<module>server-plugin-executor-serverdocker</module>
 		<module>server-plugin-buildspec-maven</module>
     	<module>server-plugin-buildspec-gradle</module>
     	<module>server-plugin-buildspec-node</module>
@@ -34,5 +34,6 @@
     <module>server-plugin-import-gitea</module>
     <module>server-plugin-import-bitbucketcloud</module>
     <module>server-plugin-import-jiracloud</module>
+    <module>server-plugin-executor-remotedocker</module>
   </modules>
 </project>

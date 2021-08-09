@@ -10,13 +10,13 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -58,7 +58,7 @@ public class CreateTagStep extends ServerStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
+	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
 		PersonIdent tagIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 		Project project = build.getProject();
 		String tagName = getTagName();

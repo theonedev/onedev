@@ -13,6 +13,7 @@ import javax.ws.rs.client.Client;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.ProjectImporter;
@@ -20,7 +21,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.JerseyUtils;
-import io.onedev.server.util.SimpleLogger;
 
 public class JiraProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ImportOption> {
 
@@ -32,7 +32,7 @@ public class JiraProjectImporter extends ProjectImporter<ImportServer, ProjectIm
 	}
 
 	@Override
-	public ProjectImportSource getWhat(ImportServer where, SimpleLogger logger) {
+	public ProjectImportSource getWhat(ImportServer where, TaskLogger logger) {
 		ProjectImportSource importSource = new ProjectImportSource();
 		for (String projectName: ImportUtils.getProjectNodes(where, logger).keySet()) {
 			ProjectMapping mapping = new ProjectMapping();
@@ -44,7 +44,7 @@ public class JiraProjectImporter extends ProjectImporter<ImportServer, ProjectIm
 	}
 
 	@Override
-	public ImportOption getHow(ImportServer where, ProjectImportSource what, SimpleLogger logger) {
+	public ImportOption getHow(ImportServer where, ProjectImportSource what, TaskLogger logger) {
 		List<String> jiraProjects = what.getProjectMappings().stream()
 				.map(it->it.getJiraProject()).collect(Collectors.toList());
 		return ImportUtils.buildImportOption(where, jiraProjects, logger);
@@ -52,7 +52,7 @@ public class JiraProjectImporter extends ProjectImporter<ImportServer, ProjectIm
 
 	@Override
 	public String doImport(ImportServer where, ProjectImportSource what, ImportOption how, 
-		boolean dryRun, SimpleLogger logger) {
+		boolean dryRun, TaskLogger logger) {
 		Collection<Long> projectIds = new ArrayList<>();
 		
 		Map<String, JsonNode> projectNodes = ImportUtils.getProjectNodes(where, logger);

@@ -250,6 +250,54 @@ public abstract class PullRequestListPanel extends Panel {
 
 					@Override
 					public String getLabel() {
+						return "Delete Selected Pull Requests";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected pull requests?"));
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								Collection<PullRequest> requests = new ArrayList<>();
+								for (IModel<PullRequest> each: selectionColumn.getSelections())
+									requests.add(each.getObject());
+								OneDev.getInstance(PullRequestManager.class).delete(requests);
+								target.add(body);
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select pull requests to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
 						return "Delete All Queried Pull Requests";
 					}
 					
@@ -301,54 +349,6 @@ public abstract class PullRequestListPanel extends Panel {
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
 									tag.put("title", "No pull requests to delete");
-								}
-							}
-							
-						};
-					}
-					
-				});
-				
-				menuItems.add(new MenuItem() {
-
-					@Override
-					public String getLabel() {
-						return "Delete Selected Pull Requests";
-					}
-					
-					@Override
-					public WebMarkupContainer newLink(String id) {
-						return new AjaxLink<Void>(id) {
-
-							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected pull requests?"));
-							}
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								dropdown.close();
-								Collection<PullRequest> requests = new ArrayList<>();
-								for (IModel<PullRequest> each: selectionColumn.getSelections())
-									requests.add(each.getObject());
-								OneDev.getInstance(PullRequestManager.class).delete(requests);
-								target.add(body);
-							}
-							
-							@Override
-							protected void onConfigure() {
-								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
-							}
-							
-							@Override
-							protected void onComponentTag(ComponentTag tag) {
-								super.onComponentTag(tag);
-								configure();
-								if (!isEnabled()) {
-									tag.put("disabled", "disabled");
-									tag.put("title", "Please select pull requests to delete");
 								}
 							}
 							

@@ -15,16 +15,17 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
+import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.CodeCommentQuerySetting;
+import io.onedev.server.model.CodeCommentQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -50,8 +51,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 		query = getPageParameters().get(PARAM_QUERY).toString();
 	}
 
-	private CodeCommentQuerySettingManager getCodeCommentQuerySettingManager() {
-		return OneDev.getInstance(CodeCommentQuerySettingManager.class);		
+	private CodeCommentQueryPersonalizationManager getCodeCommentQueryPersonalizationManager() {
+		return OneDev.getInstance(CodeCommentQueryPersonalizationManager.class);		
 	}
 	
 	@Override
@@ -79,22 +80,17 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedCodeCommentQuery> getQuerySetting() {
-				return getProject().getCodeCommentQuerySettingOfCurrentUser();
+			protected QueryPersonalization<NamedCodeCommentQuery> getQueryPersonalization() {
+				return getProject().getCodeCommentQueryPersonalizationOfCurrentUser();
 			}
 
 			@Override
-			protected ArrayList<NamedCodeCommentQuery> getQueries() {
+			protected ArrayList<NamedCodeCommentQuery> getGlobalQueries() {
 				return getProject().getNamedCodeCommentQueries();
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedCodeCommentQuery> querySetting) {
-				getCodeCommentQuerySettingManager().save((CodeCommentQuerySetting) querySetting);
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
 				getProject().setNamedCodeCommentQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
@@ -156,25 +152,27 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										CodeCommentQuerySetting setting = getProject().getCodeCommentQuerySettingOfCurrentUser();
-										NamedCodeCommentQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										CodeCommentQueryPersonalization setting = getProject().getCodeCommentQueryPersonalizationOfCurrentUser();
+										NamedCodeCommentQuery namedQuery = NamedQuery.find(setting.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCodeCommentQuery(name, query);
-											setting.getUserQueries().add(namedQuery);
+											setting.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getCodeCommentQuerySettingManager().save(setting);
+										getCodeCommentQueryPersonalizationManager().save(setting);
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										NamedCodeCommentQuery namedQuery = NamedQuery.find(getProject().getNamedCodeCommentQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCodeCommentQuery(name, query);
@@ -226,9 +224,9 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	
 	public static PageParameters paramsOf(Project project, int page) {
 		String query = null;
-		if (project.getCodeCommentQuerySettingOfCurrentUser() != null 
-				&& !project.getCodeCommentQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
-			query = project.getCodeCommentQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+		if (project.getCodeCommentQueryPersonalizationOfCurrentUser() != null 
+				&& !project.getCodeCommentQueryPersonalizationOfCurrentUser().getQueries().isEmpty()) {
+			query = project.getCodeCommentQueryPersonalizationOfCurrentUser().getQueries().iterator().next().getQuery();
 		} else if (!project.getNamedCodeCommentQueries().isEmpty()) {
 			query = project.getNamedCodeCommentQueries().iterator().next().getQuery();
 		}

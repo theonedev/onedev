@@ -10,7 +10,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.safety.Cleaner;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
@@ -35,10 +35,10 @@ public class HtmlUtils {
 
 	private static final String[] SAFE_ANCHOR_SCHEMES = new String[] { "http", "https", "mailto", };
 
-	private static final Whitelist whiteList;
+	private static final Safelist whiteList;
 	
 	static {
-		whiteList = new Whitelist() {
+		whiteList = new Safelist() {
 
 			@Override
 			protected boolean isSafeAttribute(String tagName, Element el, Attribute attr) {
@@ -88,7 +88,7 @@ public class HtmlUtils {
 		StringBuffer buffer = new StringBuffer();
 		matcher.appendReplacement(buffer, "");
 		if (buffer.length() != 0)
-			node.before(new TextNode(buffer.toString(), node.baseUri()));
+			node.before(new TextNode(buffer.toString()));
 		node.before(replacement);
 	}
 	
@@ -96,7 +96,7 @@ public class HtmlUtils {
 		StringBuffer buffer = new StringBuffer();
 		matcher.appendTail(buffer);
 		if (buffer.length() != 0)
-			node.before(new TextNode(buffer.toString(), node.baseUri()));
+			node.before(new TextNode(buffer.toString()));
 		node.remove();
 	}
 	

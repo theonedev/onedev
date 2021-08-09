@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -47,6 +48,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.commons.utils.command.LineConsumer;
@@ -62,7 +64,6 @@ import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.EnvVar;
 import io.onedev.server.buildspec.job.JobContext;
-import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -73,14 +74,13 @@ import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=100, description="This executor runs build jobs as pods in a kubernetes cluster. "
+@Editable(order=300, description="This executor runs build jobs as pods in a kubernetes cluster. "
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "setting as job pods need to access it to download source and artifacts")
 @Horizontal
@@ -198,7 +198,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Override
-	public void test(TestData testData, SimpleLogger jobLogger) {
+	public void test(TestData testData, TaskLogger jobLogger) {
 		execute(KubernetesResource.TEST_JOB_TOKEN, jobLogger, testData.getDockerImage());
 	}
 	
@@ -212,7 +212,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return cmdline;
 	}
 	
-	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, SimpleLogger jobLogger) {
+	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, TaskLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		File file = null;
 		try {
@@ -253,7 +253,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void deleteNamespace(String namespace, SimpleLogger jobLogger) {
+	private void deleteNamespace(String namespace, TaskLogger jobLogger) {
 		try {
 			Commandline cmd = newKubeCtl();
 			cmd.timeout(NAMESPACE_DELETION_TIMEOUT).addArgs("delete", "namespace", namespace);
@@ -280,7 +280,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void deleteClusterRoleBinding(String namespace, SimpleLogger jobLogger) {
+	private void deleteClusterRoleBinding(String namespace, TaskLogger jobLogger) {
 		Commandline cmd = newKubeCtl();
 		cmd.addArgs("delete", "clusterrolebinding", namespace);
 		cmd.execute(new LineConsumer() {
@@ -300,7 +300,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}).checkReturnCode();
 	}
 	
-	private String createNamespace(String namespace, @Nullable JobContext jobContext, SimpleLogger jobLogger) {
+	private String createNamespace(String namespace, @Nullable JobContext jobContext, TaskLogger jobLogger) {
 		AtomicBoolean namespaceExists = new AtomicBoolean(false);
 		Commandline cmd = newKubeCtl();
 		cmd.addArgs("get", "namespaces", "--field-selector", "metadata.name=" + namespace, 
@@ -393,7 +393,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			return null;
 	}
 	
-	private OsInfo getBaselineOsInfo(Collection<NodeSelectorEntry> nodeSelector, SimpleLogger jobLogger) {
+	private OsInfo getBaselineOsInfo(Collection<NodeSelectorEntry> nodeSelector, TaskLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem} {.status.nodeInfo.kernelVersion} {.spec.unschedulable}{'|'}{end}");
 		for (NodeSelectorEntry entry: nodeSelector) 
@@ -430,7 +430,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Nullable
-	private String createImagePullSecret(String namespace, SimpleLogger jobLogger) {
+	private String createImagePullSecret(String namespace, TaskLogger jobLogger) {
 		if (!getRegistryLogins().isEmpty()) {
 			Map<Object, Object> auths = new LinkedHashMap<>();
 			for (RegistryLogin login: getRegistryLogins()) {
@@ -466,7 +466,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void createClusterRoleBinding(String namespace, SimpleLogger jobLogger) {
+	private void createClusterRoleBinding(String namespace, TaskLogger jobLogger) {
 		AtomicBoolean clusterRoleBindingExists = new AtomicBoolean(false);
 		Commandline cmd = newKubeCtl();
 		cmd.addArgs("get", "clusterrolebindings", "--field-selector", "metadata.name=" + namespace, 
@@ -507,7 +507,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}	
 	
 	@Nullable
-	private String createTrustCertsConfigMap(String namespace, SimpleLogger jobLogger) {
+	private String createTrustCertsConfigMap(String namespace, TaskLogger jobLogger) {
 		Map<String, String> configMapData = new LinkedHashMap<>();
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
 		File keystoreFile = serverConfig.getKeystoreFile();
@@ -544,7 +544,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void startService(String namespace, JobContext jobContext, Service jobService, 
-			@Nullable String imagePullSecretName, SimpleLogger jobLogger) {
+			@Nullable String imagePullSecretName, TaskLogger jobLogger) {
 		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
 		
 		List<NodeSelectorEntry> nodeSelector = getNodeSelector();
@@ -560,8 +560,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				"name", "default", 
 				"image", jobService.getImage());
 		containerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
-				"cpu", jobService.getCpuRequirement(), 
-				"memory", jobService.getMemoryRequirement())));
+				"cpu", jobService.getCpuRequirement() + "m", 
+				"memory", jobService.getMemoryRequirement() + "m")));
 		List<Map<Object, Object>> envs = new ArrayList<>();
 		for (EnvVar envVar: jobService.getEnvVars()) {
 			envs.add(CollectionUtils.newLinkedHashMap(
@@ -706,7 +706,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void execute(String jobToken, SimpleLogger jobLogger, Object executionContext) {
+	private void execute(String jobToken, TaskLogger jobLogger, Object executionContext) {
 		jobLogger.log("Checking cluster access...");
 		JobContext jobContext;
 		if (executionContext instanceof JobContext)
@@ -768,21 +768,21 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String containerBuildHome;
 				String containerCommandHome;
 				String containerCacheHome;
-				String containerUserHome;
+				String containerAuthInfoHome;
 				String trustCertsHome;
 				String dockerSock;
 				if (baselineOsInfo.isLinux()) {
 					containerBuildHome = "/onedev-build";
 					containerCacheHome = containerBuildHome + "/cache";
 					containerCommandHome = containerBuildHome + "/command";
-					containerUserHome = "/root/onedev";
+					containerAuthInfoHome = "/root/auth-info";
 					trustCertsHome = containerBuildHome + "/trust-certs";
 					dockerSock = "/var/run/docker.sock";
 				} else {
 					containerBuildHome = "C:\\onedev-build";
 					containerCacheHome = containerBuildHome + "\\cache";
 					containerCommandHome = containerBuildHome + "\\command";
-					containerUserHome = "C:\\Users\\ContainerAdministrator\\onedev";
+					containerAuthInfoHome = "C:\\Users\\ContainerAdministrator\\auth-info";
 					trustCertsHome = containerBuildHome + "\\trust-certs";
 					dockerSock = null;
 				}
@@ -790,14 +790,14 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				Map<String, String> buildHomeMount = CollectionUtils.newLinkedHashMap(
 						"name", "build-home", 
 						"mountPath", containerBuildHome);
-				Map<String, String> userHomeMount = CollectionUtils.newLinkedHashMap(
-						"name", "user-home", 
-						"mountPath", containerUserHome);
+				Map<String, String> authInfoMount = CollectionUtils.newLinkedHashMap(
+						"name", "auth-info-home", 
+						"mountPath", containerAuthInfoHome);
 				
 				// Windows nanoserver default user is ContainerUser
-				Map<String, String> userHomeMount2 = CollectionUtils.newLinkedHashMap(
-						"name", "user-home", 
-						"mountPath", "C:\\Users\\ContainerUser\\onedev");
+				Map<String, String> authInfoMount2 = CollectionUtils.newLinkedHashMap(
+						"name", "auth-info-home", 
+						"mountPath", "C:\\Users\\ContainerUser\\auth-info");
 				
 				Map<String, String> cacheHomeMount = CollectionUtils.newLinkedHashMap(
 						"name", "cache-home", 
@@ -809,9 +809,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"name", "docker-sock", 
 						"mountPath", dockerSock);
 				
-				List<Object> volumeMounts = Lists.<Object>newArrayList(buildHomeMount, userHomeMount, cacheHomeMount);
+				List<Object> volumeMounts = Lists.<Object>newArrayList(buildHomeMount, authInfoMount, cacheHomeMount);
 				if (baselineOsInfo.isWindows())
-					volumeMounts.add(userHomeMount2);
+					volumeMounts.add(authInfoMount2);
 				if (trustCertsConfigMapName != null)
 					volumeMounts.add(trustCertsMount);
 				if (dockerSock != null)
@@ -920,8 +920,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				if (jobContext != null) {
 					sidecarContainerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
-							"cpu", jobContext.getCpuRequirement(), 
-							"memory", jobContext.getMemoryRequirement())));
+							"cpu", jobContext.getCpuRequirement() + "m", 
+							"memory", jobContext.getMemoryRequirement() + "m")));
 				}
 				
 				containerSpecs.add(sidecarContainerSpec);
@@ -945,7 +945,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"name", "build-home", 
 						"emptyDir", CollectionUtils.newLinkedHashMap());
 				Map<Object, Object> userHomeVolume = CollectionUtils.newLinkedHashMap(
-						"name", "user-home", 
+						"name", "auth-info-home", 
 						"emptyDir", CollectionUtils.newLinkedHashMap());
 				Map<Object, Object> cacheHomeVolume = CollectionUtils.newLinkedHashMap(
 						"name", "cache-home", 
@@ -999,7 +999,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}, jobLogger);
 				
 				if (jobContext != null)
-					jobContext.notifyJobRunning();
+					jobContext.notifyJobRunning(null);
 
 				String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
 				jobLogger.log("Running job on node " + nodeName + "...");
@@ -1166,7 +1166,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return stoppedContainers;
 	}
 	
-	private void updateCacheLabels(String nodeName, JobContext jobContext, SimpleLogger jobLogger) {
+	private void updateCacheLabels(String nodeName, JobContext jobContext, TaskLogger jobLogger) {
 		jobLogger.log("Updating cache labels on node...");
 		
 		Commandline kubectl = newKubeCtl();
@@ -1251,7 +1251,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void checkConditions(JsonNode statusNode, SimpleLogger jobLogger) {
+	private void checkConditions(JsonNode statusNode, TaskLogger jobLogger) {
 		JsonNode conditionsNode = statusNode.get("conditions");
 		if (conditionsNode != null) {
 			for (JsonNode conditionNode: conditionsNode) {
@@ -1264,7 +1264,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void watchPod(String namespace, String podName, AbortChecker abortChecker, SimpleLogger jobLogger) {
+	private void watchPod(String namespace, String podName, AbortChecker abortChecker, TaskLogger jobLogger) {
 		Commandline kubectl = newKubeCtl();
 		
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
@@ -1359,7 +1359,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	private void collectContainerLog(String namespace, String podName, String containerName, 
-			@Nullable String logEndMessage, SimpleLogger jobLogger) {
+			@Nullable String logEndMessage, TaskLogger jobLogger) {
 		Thread thread = Thread.currentThread();
 		AtomicReference<Boolean> abortError = new AtomicReference<>(false);
 		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);
@@ -1373,7 +1373,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			class Logger extends LineConsumer {
 
-				private final StyleBuilder styleBuilder = new StyleBuilder();
+				private final String taskId = UUID.randomUUID().toString();
 				
 				@Override
 				public void consume(String line) {
@@ -1397,12 +1397,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
 							if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
 								lastInstantRef.set(instant);
-							jobLogger.log(StringUtils.substringAfter(line, " "), styleBuilder);
+							jobLogger.log(StringUtils.substringAfter(line, " "), taskId);
 						} catch (DateTimeParseException e) {
-							jobLogger.log(line, styleBuilder);
+							jobLogger.log(line, taskId);
 						}
 					} else {
-						jobLogger.log(line, styleBuilder);
+						jobLogger.log(line, taskId);
 					}
 				}
 				

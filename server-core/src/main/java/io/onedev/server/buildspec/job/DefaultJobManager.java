@@ -54,6 +54,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.k8shelper.Action;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CompositeExecutable;
@@ -66,7 +67,6 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.Service;
 import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.buildspec.job.action.condition.ActionCondition;
-import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.projectdependency.ProjectDependency;
 import io.onedev.server.buildspec.job.retrycondition.RetryCondition;
 import io.onedev.server.buildspec.job.trigger.JobTrigger;
@@ -76,6 +76,7 @@ import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.param.spec.SecretParam;
 import io.onedev.server.buildspec.step.ServerStep;
 import io.onedev.server.buildspec.step.Step;
+import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -91,7 +92,6 @@ import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRetrying;
 import io.onedev.server.event.build.BuildRunning;
 import io.onedev.server.event.build.BuildSubmitted;
-import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
@@ -103,8 +103,6 @@ import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.Setting;
-import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.inputspec.SecretInput;
@@ -117,10 +115,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.tasklog.LogManager;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
@@ -165,11 +163,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final PullRequestManager pullRequestManager;
 	
+	private final AgentManager agentManager;
+	
 	private final TaskScheduler taskScheduler;
 	
 	private final Validator validator;
-	
-	private volatile List<JobExecutor> jobExecutors;
 	
 	private volatile Thread thread;
 	
@@ -178,7 +176,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
 			PullRequestManager pullRequestManager, ProjectManager projectManager, Validator validator, 
-			TaskScheduler taskScheduler) {
+			TaskScheduler taskScheduler, AgentManager agentManager) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -192,6 +190,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.pullRequestManager = pullRequestManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
+		this.agentManager = agentManager;
 	}
 
 	private void validateBuildSpec(Project project, ObjectId commitId, BuildSpec buildSpec) {
@@ -397,7 +396,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Nullable
 	private JobExecutor getJobExecutor(Build build) {
-		for (JobExecutor executor: jobExecutors) {
+		for (JobExecutor executor: settingManager.getJobExecutors()) {
 			if (executor.isApplicable(build))
 				return executor;
 		}
@@ -416,7 +415,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			
 			JobExecutor executor = getJobExecutor(build);
 			if (executor != null) {
-				SimpleLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
+				TaskLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
 				
 				ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 				Long buildId = build.getId();
@@ -484,7 +483,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 													services, jobLogger) {
 												
 												@Override
-												public void notifyJobRunning() {
+												public void notifyJobRunning(Long agentId) {
 													transactionManager.run(new Runnable() {
 
 														@Override
@@ -492,6 +491,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 															Build build = buildManager.load(buildId);
 															build.setStatus(Build.Status.RUNNING);
 															build.setRunningDate(new Date());
+															if (agentId != null)
+																build.setAgent(agentManager.load(agentId));
 															buildManager.save(build);
 															listenerRegistry.post(new BuildRunning(build));
 														}
@@ -515,7 +516,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 												@Override
 												public Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, File filesDir, 
-														Map<String, String> placeholderValues, SimpleLogger logger) {
+														Map<String, String> placeholderValues, TaskLogger logger) {
 													return sessionManager.call(new Callable<Map<String, byte[]>>() {
 
 														@Override
@@ -687,7 +688,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private void log(Throwable e, SimpleLogger logger) {
+	private void log(Throwable e, TaskLogger logger) {
 		if (e instanceof ExplicitException)
 			logger.error(e.getMessage());
 		else
@@ -899,20 +900,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		});
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Listen
-	public void on(EntityPersisted event) {
-		if (event.getEntity() instanceof Setting) {
-			Setting setting = (Setting) event.getEntity();
-			if (setting.getKey() == Key.JOB_EXECUTORS)
-				jobExecutors = (List<JobExecutor>) setting.getValue();
-		}
-	}
-	
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		jobExecutors = settingManager.getJobExecutors();
 		thread = new Thread(this);
 		thread.start();	
 		
@@ -1303,7 +1293,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, SimpleLogger logger) {
+			File filesDir, Map<String, String> placeholderValues, TaskLogger logger) {
 		return getJobContext(jobToken, true).runServerStep(stepPosition, filesDir, placeholderValues, logger);
 	}
 	

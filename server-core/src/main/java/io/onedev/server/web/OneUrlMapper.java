@@ -12,6 +12,12 @@ import io.onedev.server.web.mapper.BaseResourceMapper;
 import io.onedev.server.web.mapper.DynamicPathPageMapper;
 import io.onedev.server.web.mapper.DynamicPathResourceMapper;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
+import io.onedev.server.web.page.admin.buildsetting.agent.AgentBuildsPage;
+import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
+import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
+import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
+import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
+import io.onedev.server.web.page.admin.buildsetting.serverresource.ServerResourcesSettingPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
@@ -25,7 +31,6 @@ import io.onedev.server.web.page.admin.issuesetting.fieldspec.IssueFieldListPage
 import io.onedev.server.web.page.admin.issuesetting.issuetemplate.IssueTemplateListPage;
 import io.onedev.server.web.page.admin.issuesetting.statespec.IssueStateListPage;
 import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransitionListPage;
-import io.onedev.server.web.page.admin.jobexecutor.JobExecutorsPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
@@ -110,12 +115,16 @@ import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 import io.onedev.server.web.page.pullrequests.PullRequestListPage;
+import io.onedev.server.web.page.simple.error.MethodNotAllowedErrorPage;
 import io.onedev.server.web.page.simple.error.PageNotFoundErrorPage;
 import io.onedev.server.web.page.simple.security.LoginPage;
 import io.onedev.server.web.page.simple.security.LogoutPage;
 import io.onedev.server.web.page.simple.security.PasswordResetPage;
 import io.onedev.server.web.page.simple.security.SignUpPage;
 import io.onedev.server.web.page.simple.serverinit.ServerInitPage;
+import io.onedev.server.web.resource.AgentLibResourceReference;
+import io.onedev.server.web.resource.AgentLogResourceReference;
+import io.onedev.server.web.resource.AgentResourceReference;
 import io.onedev.server.web.resource.ArchiveResourceReference;
 import io.onedev.server.web.resource.ArtifactResourceReference;
 import io.onedev.server.web.resource.AttachmentResourceReference;
@@ -164,6 +173,10 @@ public class OneUrlMapper extends CompoundRequestMapper {
 
 	private void addResources() {
 		add(new BaseResourceMapper("downloads/server-log", new ServerLogResourceReference()));
+		add(new BaseResourceMapper("downloads/agent-log/${agent}", new AgentLogResourceReference()));
+		add(new BaseResourceMapper("downloads/agent.zip", new AgentResourceReference()));
+		add(new BaseResourceMapper("downloads/agent.tar.gz", new AgentResourceReference()));
+		add(new BaseResourceMapper("downloads/agent-lib", new AgentLibResourceReference()));
 		add(new BaseResourceMapper("downloads/projects/${project}/builds/${build}/log", 
 				new BuildLogResourceReference()));
 		add(new BaseResourceMapper("projects/${project}/archive/${revision}", 
@@ -183,6 +196,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 	
 	private void addErrorPages() {
 		add(new DynamicPathPageMapper("/errors/404", PageNotFoundErrorPage.class));
+		add(new DynamicPathPageMapper("/errors/405", MethodNotAllowedErrorPage.class));
 	}
 	
 	private void addSecurityPages() {
@@ -229,6 +243,10 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/settings/sso-connectors", SsoConnectorListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/ssh", SshSettingPage.class));
 
+		add(new DynamicPathPageMapper("administration/settings/agents", AgentListPage.class));
+		add(new DynamicPathPageMapper("administration/settings/agents/${agent}/overview", AgentOverviewPage.class));
+		add(new DynamicPathPageMapper("administration/settings/agents/${agent}/builds", AgentBuildsPage.class));
+		add(new DynamicPathPageMapper("administration/settings/agents/${agent}/log", AgentLogPage.class));
 		add(new DynamicPathPageMapper("administration/settings/job-executors", JobExecutorsPage.class));
 		add(new DynamicPathPageMapper("administration/settings/groovy-scripts", GroovyScriptListPage.class));
 		
@@ -237,6 +255,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/settings/state-transitions", StateTransitionListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-templates", IssueTemplateListPage.class));
+		add(new DynamicPathPageMapper("administration/settings/build", ServerResourcesSettingPage.class));
 		
 		add(new DynamicPathPageMapper("administration/settings/${setting}", ContributedAdministrationSettingPage.class));
 		

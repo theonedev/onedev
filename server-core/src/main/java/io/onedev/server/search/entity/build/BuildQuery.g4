@@ -9,7 +9,7 @@ query
 criteria
 	: operator=(Successful|Failed|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe) #OperatorCriteria
     | criteriaField=Quoted WS+ operator=IsEmpty #FieldOperatorCriteria
-	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|RanOn) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -71,6 +71,10 @@ DependsOn
 	
 DependenciesOf
 	: 'dependencies' WS+ 'of'
+	;
+	
+RanOn
+	: 'ran' WS+ 'on'
 	;
 			
 FixedIssue

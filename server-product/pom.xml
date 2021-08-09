@@ -47,7 +47,12 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-executor-docker</artifactId>
+			<artifactId>server-plugin-executor-serverdocker</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-executor-remotedocker</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

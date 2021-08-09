@@ -522,7 +522,7 @@ public class DefaultMailManager implements MailManager {
 		
 		AtomicReference<Node> lastContentNodeRef = new AtomicReference<>(null);
 		
-		new NodeTraversor(new NodeVisitor() {
+		NodeTraversor.traverse(new NodeVisitor() {
 			
 			@Override
 			public void tail(Node node, int depth) {
@@ -537,7 +537,7 @@ public class DefaultMailManager implements MailManager {
 				
 			}
 			
-		}).traverse(document);
+		}, document);
 
 		Node lastContentNode = lastContentNodeRef.get();
 		if (lastContentNode != null) {

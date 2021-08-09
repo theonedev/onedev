@@ -10,9 +10,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -49,7 +49,7 @@ public class PublishArtifactStep extends ServerStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger jobLogger) {
+	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger jobLogger) {
 		LockUtils.write(build.getArtifactsLockKey(), new Callable<Void>() {
 
 			@Override

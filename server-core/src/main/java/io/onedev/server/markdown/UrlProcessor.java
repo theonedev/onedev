@@ -44,7 +44,7 @@ public class UrlProcessor implements MarkdownProcessor {
 				commit = null;
 			}
 			
-			new NodeTraversor(new NodeVisitor() {
+			NodeTraversor.traverse(new NodeVisitor() {
 
 				@Override
 				public void head(Node node, int depth) {
@@ -109,7 +109,7 @@ public class UrlProcessor implements MarkdownProcessor {
 						}
 					}
 				}
-			}).traverse(rendered);
+			}, rendered);
 		}
 	}
 

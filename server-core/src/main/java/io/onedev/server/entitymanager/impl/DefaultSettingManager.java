@@ -20,6 +20,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.support.administration.AgentSetting;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -77,6 +78,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	
 	private volatile Long projectSettingId;
 
+	private volatile Long agentSettingId;
+	
     private volatile Long sshSettingId;
     
     private volatile Long ssoConnectorsId;
@@ -411,6 +414,32 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 			setting.setKey(Key.PROJECT);
 		}
 		setting.setValue(projectSetting);
+		dao.persist(setting);
+	}
+	
+	@Sessional
+	@Override
+	public AgentSetting getAgentSetting() {
+        Setting setting;
+        if (agentSettingId == null) {
+    		setting = getSetting(Key.AGENT);
+    		Preconditions.checkNotNull(setting);
+    		agentSettingId = setting.getId();
+        } else {
+            setting = load(agentSettingId);
+        }
+        return (AgentSetting)setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveAgentSetting(AgentSetting agentSetting) {
+		Setting setting = getSetting(Key.AGENT);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.AGENT);
+		}
+		setting.setValue(agentSetting);
 		dao.persist(setting);
 	}
 	

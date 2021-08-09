@@ -17,12 +17,12 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.MailManager;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.page.simple.SimplePage;
 
@@ -62,7 +62,7 @@ public class PasswordResetPage extends SimplePage {
 		form.add(new TaskButton("resettingPassword") {
 			
 			@Override
-			protected String runTask(SimpleLogger logger) {
+			protected String runTask(TaskLogger logger) {
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				User user = userManager.findByName(loginNameOrEmail);
 				if (user == null) 

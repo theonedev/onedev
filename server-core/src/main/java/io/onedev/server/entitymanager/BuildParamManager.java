@@ -13,6 +13,6 @@ public interface BuildParamManager extends EntityManager<BuildParam> {
 	
 	void deleteParams(Build build);
 	
-	Collection<String> getBuildParamNames(@Nullable Project project);
+	Collection<String> getParamNames(@Nullable Project project);
 	
 }

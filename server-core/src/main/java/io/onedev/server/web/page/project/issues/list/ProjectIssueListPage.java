@@ -15,16 +15,17 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.IssueQuerySettingManager;
+import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -51,8 +52,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 		query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 	}
 
-	private IssueQuerySettingManager getIssueQuerySettingManager() {
-		return OneDev.getInstance(IssueQuerySettingManager.class);		
+	private IssueQueryPersonalizationManager getIssueQueryPersonalizationManager() {
+		return OneDev.getInstance(IssueQueryPersonalizationManager.class);		
 	}
 	
 	@Override
@@ -73,22 +74,17 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedIssueQuery> getQuerySetting() {
-				return getProject().getIssueQuerySettingOfCurrentUser();
+			protected QueryPersonalization<NamedIssueQuery> getQueryPersonalization() {
+				return getProject().getIssueQueryPersonalizationOfCurrentUser();
 			}
 
 			@Override
-			protected ArrayList<NamedIssueQuery> getQueries() {
+			protected ArrayList<NamedIssueQuery> getGlobalQueries() {
 				return (ArrayList<NamedIssueQuery>) getProject().getIssueSetting().getNamedQueries(false);
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedIssueQuery> querySetting) {
-				getIssueQuerySettingManager().save((IssueQuerySetting) querySetting);
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedIssueQuery> namedQueries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedIssueQuery> namedQueries) {
 				getProject().getIssueSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
@@ -152,25 +148,27 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										IssueQuerySetting setting = getProject().getIssueQuerySettingOfCurrentUser();
-										NamedIssueQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										IssueQueryPersonalization setting = getProject().getIssueQueryPersonalizationOfCurrentUser();
+										NamedIssueQuery namedQuery = NamedQuery.find(setting.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
-											setting.getUserQueries().add(namedQuery);
+											setting.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getIssueQuerySettingManager().save(setting);
+										getIssueQueryPersonalizationManager().save(setting);
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										ProjectIssueSetting setting = getProject().getIssueSetting();
 										if (setting.getNamedQueries(false) == null) 
 											setting.setNamedQueries(new ArrayList<>(getIssueSetting().getNamedQueries()));
@@ -232,9 +230,9 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	
 	public static PageParameters paramsOf(Project project, int page) {
 		String query = null;
-		if (project.getIssueQuerySettingOfCurrentUser() != null 
-				&& !project.getIssueQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
-			query = project.getIssueQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+		if (project.getIssueQueryPersonalizationOfCurrentUser() != null 
+				&& !project.getIssueQueryPersonalizationOfCurrentUser().getQueries().isEmpty()) {
+			query = project.getIssueQueryPersonalizationOfCurrentUser().getQueries().iterator().next().getQuery();
 		} else if (!project.getIssueSetting().getNamedQueries(true).isEmpty()) {
 			query = project.getIssueSetting().getNamedQueries(true).iterator().next().getQuery();
 		}

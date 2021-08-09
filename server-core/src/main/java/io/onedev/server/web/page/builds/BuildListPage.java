@@ -20,12 +20,13 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -80,25 +81,17 @@ public class BuildListPage extends LayoutPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedBuildQuery> getQuerySetting() {
-				if (getLoginUser() != null)
-					return getLoginUser().getBuildQuerySetting();
-				else
-					return null;
+			protected QueryPersonalization<NamedBuildQuery> getQueryPersonalization() {
+				return getLoginUser().getBuildQueryPersonalization();
 			}
 
 			@Override
-			protected ArrayList<NamedBuildQuery> getQueries() {
+			protected ArrayList<NamedBuildQuery> getGlobalQueries() {
 				return (ArrayList<NamedBuildQuery>) getBuildSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedBuildQuery> querySetting) {
-				OneDev.getInstance(UserManager.class).save(getLoginUser());
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedBuildQuery> namedQueries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedBuildQuery> namedQueries) {
 				getBuildSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(SettingManager.class).saveBuildSetting(getBuildSetting());
 			}
@@ -155,15 +148,15 @@ public class BuildListPage extends LayoutPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										QuerySetting<NamedBuildQuery> querySetting = getLoginUser().getBuildQuerySetting();
-										NamedBuildQuery namedQuery = NamedQuery.find(querySetting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										QueryPersonalization<NamedBuildQuery> queryPersonalization = getLoginUser().getBuildQueryPersonalization();
+										NamedBuildQuery namedQuery = NamedQuery.find(queryPersonalization.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedBuildQuery(name, query);
-											querySetting.getUserQueries().add(namedQuery);
+											queryPersonalization.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -171,9 +164,11 @@ public class BuildListPage extends LayoutPage {
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalBuildSetting buildSetting = getBuildSetting();
 										NamedBuildQuery namedQuery = buildSetting.getNamedQuery(name);
 										if (namedQuery == null) {
@@ -236,8 +231,8 @@ public class BuildListPage extends LayoutPage {
 	public static PageParameters paramsOf(int page, int expectedCount) {
 		String query = null;
 		User user = SecurityUtils.getUser();
-		if (user != null && !user.getBuildQuerySetting().getUserQueries().isEmpty()) 
-			query = user.getBuildQuerySetting().getUserQueries().iterator().next().getQuery();
+		if (user != null && !user.getBuildQueryPersonalization().getQueries().isEmpty()) 
+			query = user.getBuildQueryPersonalization().getQueries().iterator().next().getQuery();
 		else if (!getBuildSetting().getNamedQueries().isEmpty())
 			query = getBuildSetting().getNamedQueries().iterator().next().getQuery();
 		

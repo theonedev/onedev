@@ -67,7 +67,7 @@ public class BuildMetricQueryBehavior extends ANTLRAssistBehavior {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(Build.METRIC_QUERY_FIELDS);
 							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
-							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames(project));
+							List<String> paramNames = new ArrayList<>(buildParamManager.getParamNames(project));
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);

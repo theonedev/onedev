@@ -171,7 +171,7 @@ public class BuildMetricQuery implements Serializable {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames(null);
+		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getParamNames(null);
 		if (!METRIC_QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName)) 
 			throw new ExplicitException("Field not found: " + fieldName);
 		switch (operator) {

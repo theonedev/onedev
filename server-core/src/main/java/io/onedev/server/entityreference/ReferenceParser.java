@@ -64,8 +64,7 @@ public class ReferenceParser {
 			}
 		};
 		
-		NodeTraversor tranversor = new NodeTraversor(visitor);
-		tranversor.traverse(document);
+		NodeTraversor.traverse(visitor, document);
 		
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = pattern.matcher(node.getWholeText());

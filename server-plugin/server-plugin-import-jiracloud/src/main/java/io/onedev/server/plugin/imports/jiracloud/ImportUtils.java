@@ -36,6 +36,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -55,7 +56,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
-import io.onedev.server.util.SimpleLogger;
 
 public class ImportUtils {
 
@@ -68,7 +68,7 @@ public class ImportUtils {
 	}
 	
 	@Nullable
-	static User getUser(Map<String, Optional<User>> users, JsonNode userNode, SimpleLogger logger) {
+	static User getUser(Map<String, Optional<User>> users, JsonNode userNode, TaskLogger logger) {
 		String accountId = userNode.get("accountId").asText();
 		Optional<User> userOpt = users.get(accountId);
 		if (userOpt == null) {
@@ -235,7 +235,7 @@ public class ImportUtils {
 	
 	static ImportResult importIssues(ImportServer server, JsonNode jiraProject, Project oneDevProject, 
 			boolean useExistingIssueNumbers, ImportOption importOption, 
-			Map<String, Optional<User>> users, boolean dryRun, SimpleLogger logger) {
+			Map<String, Optional<User>> users, boolean dryRun, TaskLogger logger) {
 		Client client = server.newClient();
 		try {
 			Set<String> unmappedIssueStatuses = new HashSet<>();
@@ -685,7 +685,7 @@ public class ImportUtils {
 		}
 	}
 	
-	static ImportOption buildImportOption(ImportServer server, Collection<String> projectNames, SimpleLogger logger) {
+	static ImportOption buildImportOption(ImportServer server, Collection<String> projectNames, TaskLogger logger) {
 		ImportOption importOption = new ImportOption();
 		
 		Map<String, JsonNode> projectNodes = getProjectNodes(server, logger);
@@ -739,7 +739,7 @@ public class ImportUtils {
 		return importOption;
 	}
 	
-	static Map<String, JsonNode> getProjectNodes(ImportServer where, SimpleLogger logger) {
+	static Map<String, JsonNode> getProjectNodes(ImportServer where, TaskLogger logger) {
 		Map<String, JsonNode> projectNodes = new LinkedHashMap<>();
 		
 		Client client = where.newClient();
@@ -752,7 +752,7 @@ public class ImportUtils {
 		return projectNodes;
 	}
 	
-	static List<JsonNode> list(Client client, String apiEndpoint, SimpleLogger logger) {
+	static List<JsonNode> list(Client client, String apiEndpoint, TaskLogger logger) {
 		List<JsonNode> result = new ArrayList<>();
 		list(client, apiEndpoint, new PageDataConsumer() {
 
@@ -766,7 +766,7 @@ public class ImportUtils {
 	}
 	
 	static void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, 
-			SimpleLogger logger) {
+			TaskLogger logger) {
 		URI uri;
 		try {
 			uri = new URIBuilder(apiEndpoint)

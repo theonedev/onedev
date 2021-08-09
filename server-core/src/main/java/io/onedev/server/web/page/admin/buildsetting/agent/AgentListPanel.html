@@ -1,0 +1,41 @@
+<wicket:panel>
+	<div class="agent-list card">
+		<div class="card-body">
+			<div class="d-flex mb-4">
+				<form wicket:id="query" class="clearable-wrapper flex-grow-1">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order agents here">
+						<span class="input-group-append">
+							<button wicket:id="submit" type="submit" class="btn btn-outline-secondary btn-icon" title="Query"><wicket:svg href="magnify" class="icon"></wicket:svg></button>
+						</span>
+					</div>
+				</form>
+				<a wicket:id="downloadAgent" class="btn btn-primary btn-icon flex-shrink-0 ml-3" title="Download agent"><wicket:svg href="download" class="icon"/></a>
+			</div>
+			<div class="operations mb-4">
+				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray mr-4">
+					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
+				</a>
+				<a wicket:id="saveQuery" class="save-query text-gray mr-4">
+					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
+				</a>
+				<a wicket:id="orderBy" class="order-by text-gray mr-4">
+					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
+				</a>
+				<a wicket:id="operations" class="text-gray mr-4 -b-2 d-inline-block text-nowrap">
+					<wicket:svg href="ellipsis-circle" class="icon rotate-180"></wicket:svg> Operations
+				</a>
+				<a wicket:id="tokens" class="text-gray mr-4 -b-2 d-inline-block text-nowrap">
+					<wicket:svg href="token" class="icon"></wicket:svg> Tokens
+				</a>
+			</div>
+			<div wicket:id="body">
+				<div wicket:id="feedback"></div>
+				<table wicket:id="agents" class="table"></table>
+			</div>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="agentLinkFrag">
+		<a wicket:id="link" class="d-flex align-items-center"><svg wicket:id="icon" class="icon icon-lg mr-1"></svg> <span wicket:id="label"></span></a> 
+	</wicket:fragment>
+</wicket:panel>

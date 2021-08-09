@@ -15,8 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import io.onedev.server.buildspec.job.log.StyleBuilder;
-import io.onedev.server.util.SimpleLogger;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.util.WicketUtils;
@@ -52,10 +51,10 @@ public class IssueImportSource implements Serializable {
 		Client client = server.newClient();
 		try {
 			String apiEndpoint = server.getApiEndpoint("/user/repos");
-			SimpleLogger logger = new SimpleLogger() {
+			TaskLogger logger = new TaskLogger() {
 
 				@Override
-				public void log(String message, StyleBuilder styleBuilder) {
+				public void log(String message, String taskId) {
 					IssueImportSource.logger.info(message);
 				}
 				

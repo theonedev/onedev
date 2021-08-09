@@ -12,9 +12,9 @@ import javax.ws.rs.client.Client;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.util.WicketUtils;
 
 public class YouTrackIssueImporter extends IssueImporter<ImportServer, IssueImportSource, ImportOption> {
@@ -28,7 +28,7 @@ public class YouTrackIssueImporter extends IssueImporter<ImportServer, IssueImpo
 
 	@Override
 	public String doImport(ImportServer where, IssueImportSource what, ImportOption how, Project project,
-			boolean dryRun, SimpleLogger logger) {
+			boolean dryRun, TaskLogger logger) {
 		logger.log("Importing issues from '" + what.getProject() + "'...");
 		Client client = where.newClient();
 		try {
@@ -47,13 +47,13 @@ public class YouTrackIssueImporter extends IssueImporter<ImportServer, IssueImpo
 	}
 
 	@Override
-	public IssueImportSource getWhat(ImportServer where, SimpleLogger logger) {
+	public IssueImportSource getWhat(ImportServer where, TaskLogger logger) {
 		WicketUtils.getPage().setMetaData(ImportServer.META_DATA_KEY, where);
 		return new IssueImportSource();
 	}
 
 	@Override
-	public ImportOption getHow(ImportServer where, IssueImportSource what, SimpleLogger logger) {
+	public ImportOption getHow(ImportServer where, IssueImportSource what, TaskLogger logger) {
 		Client client = where.newClient();
 		try {
 			String apiEndpoint = where.getApiEndpoint("/admin/projects?fields=id,name,customFields(field(name),bundle(values(name)))");

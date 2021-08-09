@@ -20,11 +20,12 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -79,25 +80,17 @@ public class ProjectListPage extends LayoutPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedProjectQuery> getQuerySetting() {
-				if (getLoginUser() != null)
-					return getLoginUser().getProjectQuerySetting();
-				else
-					return null;
+			protected QueryPersonalization<NamedProjectQuery> getQueryPersonalization() {
+				return getLoginUser().getProjectQueryPersonalization();
 			}
 
 			@Override
-			protected ArrayList<NamedProjectQuery> getQueries() {
+			protected ArrayList<NamedProjectQuery> getGlobalQueries() {
 				return (ArrayList<NamedProjectQuery>) getProjectSetting().getNamedQueries();
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedProjectQuery> querySetting) {
-				OneDev.getInstance(UserManager.class).save(getLoginUser());
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedProjectQuery> namedQueries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedProjectQuery> namedQueries) {
 				getProjectSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(SettingManager.class).saveProjectSetting(getProjectSetting());
 			}
@@ -156,15 +149,15 @@ public class ProjectListPage extends LayoutPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										QuerySetting<NamedProjectQuery> querySetting = getLoginUser().getProjectQuerySetting();
-										NamedProjectQuery namedQuery = NamedQuery.find(querySetting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										QueryPersonalization<NamedProjectQuery> queryPersonalization = getLoginUser().getProjectQueryPersonalization();
+										NamedProjectQuery namedQuery = NamedQuery.find(queryPersonalization.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedProjectQuery(name, query);
-											querySetting.getUserQueries().add(namedQuery);
+											queryPersonalization.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -172,9 +165,11 @@ public class ProjectListPage extends LayoutPage {
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										GlobalProjectSetting projectSetting = getProjectSetting();
 										NamedProjectQuery namedQuery = projectSetting.getNamedQuery(name);
 										if (namedQuery == null) {
@@ -233,8 +228,8 @@ public class ProjectListPage extends LayoutPage {
 		String query = null;
 		
 		User user = SecurityUtils.getUser();
-		if (user != null && !user.getProjectQuerySetting().getUserQueries().isEmpty()) {
-			query = user.getProjectQuerySetting().getUserQueries().iterator().next().getQuery();
+		if (user != null && !user.getProjectQueryPersonalization().getQueries().isEmpty()) {
+			query = user.getProjectQueryPersonalization().getQueries().iterator().next().getQuery();
 		} else {
 			if (!getProjectSetting().getNamedQueries().isEmpty())
 				query = getProjectSetting().getNamedQueries().iterator().next().getQuery();

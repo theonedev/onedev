@@ -39,8 +39,7 @@ public class MentionParser {
 			}
 		};
 		
-		NodeTraversor tranversor = new NodeTraversor(visitor);
-		tranversor.traverse(document);
+		NodeTraversor.traverse(visitor, document);
 		
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = PATTERN.matcher(node.getWholeText());

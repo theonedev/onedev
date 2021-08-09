@@ -15,16 +15,17 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.CommitQuerySettingManager;
+import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.CommitQuerySetting;
+import io.onedev.server.model.CommitQueryPersonalization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.NamedQuery;
-import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryPersonalization;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.PersonalQuerySupport;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
@@ -52,8 +53,8 @@ public class ProjectCommitsPage extends ProjectPage {
 		compare = params.get(PARAM_COMPARE).toString();
 	}
 
-	private CommitQuerySettingManager getCommitQuerySettingManager() {
-		return OneDev.getInstance(CommitQuerySettingManager.class);
+	private CommitQueryPersonalizationManager getCommitQueryPersonalizationManager() {
+		return OneDev.getInstance(CommitQueryPersonalizationManager.class);
 	}
 	
 	@Override
@@ -81,22 +82,17 @@ public class ProjectCommitsPage extends ProjectPage {
 			}
 
 			@Override
-			protected QuerySetting<NamedCommitQuery> getQuerySetting() {
-				return getProject().getCommitQuerySettingOfCurrentUser();
+			protected QueryPersonalization<NamedCommitQuery> getQueryPersonalization() {
+				return getProject().getCommitQueryPersonalizationOfCurrentUser();
 			}
 
 			@Override
-			protected ArrayList<NamedCommitQuery> getQueries() {
+			protected ArrayList<NamedCommitQuery> getGlobalQueries() {
 				return getProject().getNamedCommitQueries();
 			}
 
 			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedCommitQuery> querySetting) {
-				getCommitQuerySettingManager().save((CommitQuerySetting) querySetting);
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedCommitQuery> projectQueries) {
+			protected void onSaveGlobalQueries(ArrayList<NamedCommitQuery> projectQueries) {
 				getProject().setNamedCommitQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
@@ -135,25 +131,27 @@ public class ProjectCommitsPage extends ProjectPage {
 
 							@Override
 							protected Component newContent(String id) {
-								return new SaveQueryPanel(id) {
+								return new SaveQueryPanel(id, new PersonalQuerySupport() {
 
 									@Override
-									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										CommitQuerySetting setting = getProject().getCommitQuerySettingOfCurrentUser();
-										NamedCommitQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
+									public void onSave(AjaxRequestTarget target, String name) {
+										CommitQueryPersonalization setting = getProject().getCommitQueryPersonalizationOfCurrentUser();
+										NamedCommitQuery namedQuery = NamedQuery.find(setting.getQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCommitQuery(name, query);
-											setting.getUserQueries().add(namedQuery);
+											setting.getQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getCommitQuerySettingManager().save(setting);
+										getCommitQueryPersonalizationManager().save(setting);
 										target.add(savedQueries);
 										close();
 									}
+									
+								}) {
 
 									@Override
-									protected void onSaveForAll(AjaxRequestTarget target, String name) {
+									protected void onSave(AjaxRequestTarget target, String name) {
 										NamedCommitQuery namedQuery = NamedQuery.find(getProject().getNamedCommitQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCommitQuery(name, query);
@@ -170,7 +168,7 @@ public class ProjectCommitsPage extends ProjectPage {
 									protected void onCancel(AjaxRequestTarget target) {
 										close();
 									}
-									
+
 								};
 							}
 							
@@ -210,9 +208,9 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	public static PageParameters paramsOf(Project project, @Nullable String compareWith) {
 		String query = null;
-		if (project.getCommitQuerySettingOfCurrentUser() != null 
-				&& !project.getCommitQuerySettingOfCurrentUser().getUserQueries().isEmpty()) { 
-			query = project.getCommitQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+		if (project.getCommitQueryPersonalizationOfCurrentUser() != null 
+				&& !project.getCommitQueryPersonalizationOfCurrentUser().getQueries().isEmpty()) { 
+			query = project.getCommitQueryPersonalizationOfCurrentUser().getQueries().iterator().next().getQuery();
 		} else if (!project.getNamedCommitQueries().isEmpty()) {
 			query = project.getNamedCommitQueries().iterator().next().getQuery();
 		}

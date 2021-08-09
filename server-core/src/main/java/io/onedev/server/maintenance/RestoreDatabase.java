@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.bootstrap.BootstrapUtils;
 import io.onedev.commons.launcher.bootstrap.Command;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
@@ -65,7 +65,7 @@ public class RestoreDatabase extends DefaultPersistManager {
 		if (backupFile.isFile()) {
 			File dataDir = FileUtils.createTempDir("restore");
 			try {
-				ZipUtils.unzip(backupFile, dataDir);
+				BootstrapUtils.unzip(backupFile, dataDir);
 				doRestore(metadata, dataDir);
 			} finally {
 				FileUtils.deleteDir(dataDir);

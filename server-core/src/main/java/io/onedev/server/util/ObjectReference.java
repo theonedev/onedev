@@ -30,7 +30,7 @@ public abstract class ObjectReference<T> implements Closeable {
 	
 	public synchronized T get() {
 		if (object == null)
-			throw new RuntimeException("Objerct not initialized yet");
+			throw new RuntimeException("Object not initialized yet");
 		else
 			return object;
 	}

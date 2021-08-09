@@ -1,0 +1,15 @@
+<wicket:extend>
+	<div wicket:id="content"></div>
+	<wicket:fragment wicket:id="onlineFrag">
+	<div class="card server-log">
+		<div class="card-body">
+			<a wicket:id="download" class="btn btn-light btn-hover-primary btn-block mb-4" title="Download log"><wicket:svg href="download" class="icon mr-2"/> Download</a>
+			<div wicket:id="warning" class="alert alert-notice alert-light-warning mb-4"></div>
+			<pre wicket:id="logContent"></pre>
+		</div>
+	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="offlineFrag">
+		<div class="alert alert-notice alert-light-warning">Log not available for offline agent</div>
+	</wicket:fragment>
+</wicket:extend>

@@ -16,9 +16,9 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
-import io.onedev.server.buildspec.job.log.LogManager;
-import io.onedev.server.buildspec.job.log.LogSnippet;
 import io.onedev.server.model.Build;
+import io.onedev.server.tasklog.LogManager;
+import io.onedev.server.tasklog.LogSnippet;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")

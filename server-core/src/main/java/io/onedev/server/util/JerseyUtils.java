@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
 
 public class JerseyUtils {
 
@@ -31,7 +32,7 @@ public class JerseyUtils {
 		}
 	}
 	
-	public static JsonNode get(Client client, String apiEndpoint, SimpleLogger logger) {
+	public static JsonNode get(Client client, String apiEndpoint, TaskLogger logger) {
 		WebTarget target = client.target(apiEndpoint);
 		Invocation.Builder builder =  target.request();
 		try (Response response = builder.get()) {

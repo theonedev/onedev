@@ -15,11 +15,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.log.StyleBuilder;
 import io.onedev.server.imports.Importer;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.ajaxlistener.ShowGlobalAjaxIndicatorListener;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
@@ -89,10 +88,10 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 				super.onSubmit(target, form);
 				
 				if (what == null) {
-					what = getImporter().getWhat(where, new SimpleLogger() {
+					what = getImporter().getWhat(where, new TaskLogger() {
 
 						@Override
-						public void log(String message, StyleBuilder styleBuilder) {
+						public void log(String message, String taskId) {
 							logger.info(message);
 						}
 						
@@ -100,10 +99,10 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 					form.replace(BeanContext.edit("editor", what));
 					form.get("back").setVisible(true);
 				} else {
-					how = getImporter().getHow(where, what, new SimpleLogger() {
+					how = getImporter().getHow(where, what, new TaskLogger() {
 
 						@Override
-						public void log(String message, StyleBuilder styleBuilder) {
+						public void log(String message, String taskId) {
 							logger.info(message);
 						}
 						
@@ -136,7 +135,7 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 			}
 
 			@Override
-			protected String runTask(SimpleLogger logger) {
+			protected String runTask(TaskLogger logger) {
 				return OneDev.getInstance(TransactionManager.class).call(new Callable<String>() {
 
 					@Override
@@ -163,7 +162,7 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 		form.add(new TaskButton("dryRun") {
 
 			@Override
-			protected String runTask(SimpleLogger logger) {
+			protected String runTask(TaskLogger logger) {
 				return OneDev.getInstance(TransactionManager.class).call(new Callable<String>() {
 
 					@Override
@@ -195,7 +194,7 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 	
 	@Nullable 
 	protected abstract String doImport(Where where, What what, How how, 
-			boolean dryRun, SimpleLogger logger);
+			boolean dryRun, TaskLogger logger);
 	
 	protected abstract void onImportSuccessful(AjaxRequestTarget target);
 	

@@ -2,8 +2,10 @@ package io.onedev.server.util.jackson.hibernate;
 
 import java.lang.reflect.Field;
 
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.core.Version;
@@ -24,12 +26,13 @@ public class HibernateAnnotationIntrospector extends AnnotationIntrospector {
 
     @Override
     public boolean hasIgnoreMarker(AnnotatedMember m) {
-        return m.hasAnnotation(Transient.class) || m.hasAnnotation(OneToMany.class);
+        return m.hasAnnotation(Transient.class) || m.hasAnnotation(OneToMany.class) 
+        		|| m.hasAnnotation(OneToOne.class) && !m.hasAnnotation(JoinColumn.class);
     }
 
 	@Override
 	public PropertyName findNameForSerialization(Annotated annotation) {
-		if (annotation.hasAnnotation(ManyToOne.class)) 
+		if (annotation.hasAnnotation(ManyToOne.class) || annotation.hasAnnotation(JoinColumn.class)) 
 			return new PropertyName(((Field)annotation.getAnnotated()).getName() + "Id");
 		else
 			return super.findNameForSerialization(annotation);
@@ -37,7 +40,7 @@ public class HibernateAnnotationIntrospector extends AnnotationIntrospector {
 
 	@Override
 	public PropertyName findNameForDeserialization(Annotated annotation) {
-		if (annotation.hasAnnotation(ManyToOne.class)) 
+		if (annotation.hasAnnotation(ManyToOne.class) || annotation.hasAnnotation(JoinColumn.class)) 
 			return new PropertyName(((Field)annotation.getAnnotated()).getName() + "Id");
 		else
 			return super.findNameForDeserialization(annotation);
@@ -46,8 +49,8 @@ public class HibernateAnnotationIntrospector extends AnnotationIntrospector {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object findSerializer(Annotated annotation) {
-		if (annotation.hasAnnotation(ManyToOne.class)) {
-			return new ManyToOneSerializer((Class<AbstractEntity>) annotation.getRawType());
+		if (annotation.hasAnnotation(ManyToOne.class) || annotation.hasAnnotation(JoinColumn.class)) {
+			return new ForeignKeySerializer((Class<AbstractEntity>) annotation.getRawType());
 		} else {
 			return super.findSerializer(annotation);
 		}
@@ -55,8 +58,8 @@ public class HibernateAnnotationIntrospector extends AnnotationIntrospector {
 
 	@Override
 	public Object findDeserializer(Annotated am) {
-		if (am.hasAnnotation(ManyToOne.class)) {
-			return new ManyToOneDeserializer(am.getRawType());
+		if (am.hasAnnotation(ManyToOne.class) || am.hasAnnotation(JoinColumn.class)) {
+			return new ForeignKeyDeserializer(am.getRawType());
 		} else {
 			return super.findDeserializer(am);
 		}

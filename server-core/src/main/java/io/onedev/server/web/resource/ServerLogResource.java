@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.shiro.authz.UnauthorizedException;
@@ -14,8 +13,8 @@ import org.apache.wicket.request.resource.AbstractResource;
 
 import com.google.common.base.Joiner;
 
+import io.onedev.agent.job.LogRequest;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.security.SecurityUtils;
 
 public class ServerLogResource extends AbstractResource {
@@ -50,21 +49,7 @@ public class ServerLogResource extends AbstractResource {
 	}
 
 	public static List<String> readServerLog() {
-		File logFile = new File(Bootstrap.installDir, "logs/server.log");
-    	List<String> lines = new ArrayList<>();
-    	int index = logFile.getParentFile().list().length;
-    	try {
-			File logDir = logFile.getParentFile();
-			for (int i=index; i>=1; i--) {
-				File rollFile = new File(logDir, logFile.getName() + "." + i);
-				if (rollFile.exists())
-					lines.addAll((FileUtils.readLines(rollFile, StandardCharsets.UTF_8)));
-			}
-			lines.addAll((FileUtils.readLines(logFile, StandardCharsets.UTF_8)));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-    	return lines;
+		return LogRequest.readLog(new File(Bootstrap.installDir, "logs/server.log"));
 	}
 	
 }

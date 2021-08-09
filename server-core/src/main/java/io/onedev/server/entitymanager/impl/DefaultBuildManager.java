@@ -54,6 +54,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.model.Agent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -1009,6 +1010,16 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public void delete(Collection<Build> builds) {
 		for (Build build: builds)
 			delete(build);
+	}
+
+	@Sessional
+	@Override
+	public Collection<Build> query(Agent agent, Status status) {
+		EntityCriteria<Build> criteria = EntityCriteria.of(Build.class);
+		EntityCriteria<Build> agentCriteria = criteria.createCriteria(Build.PROP_AGENT, org.hibernate.sql.JoinType.INNER_JOIN);
+		if (status != null)
+			agentCriteria.add(Restrictions.eq(Build.PROP_STATUS, status));
+		return query(criteria);
 	}
 	
 }

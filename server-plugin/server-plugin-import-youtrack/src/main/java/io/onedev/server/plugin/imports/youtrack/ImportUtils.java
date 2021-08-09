@@ -29,6 +29,7 @@ import org.unbescape.html.HtmlEscape;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -58,7 +59,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
 import io.onedev.server.util.Pair;
-import io.onedev.server.util.SimpleLogger;
 
 public class ImportUtils {
 
@@ -66,7 +66,7 @@ public class ImportUtils {
 
 	static final int PER_PAGE = 50;
 	
-	static ImportOption buildImportOption(ImportServer server, Collection<JsonNode> projectNodes, SimpleLogger logger) {
+	static ImportOption buildImportOption(ImportServer server, Collection<JsonNode> projectNodes, TaskLogger logger) {
 		ImportOption importOption = new ImportOption();
 		Client client = server.newClient();
 		try {
@@ -121,7 +121,7 @@ public class ImportUtils {
 	
 	static ImportResult importIssues(ImportServer server, String youTrackProjectId, 
 			Project oneDevProject, boolean useExistingIssueNumbers, ImportOption importOption, 
-			boolean dryRun, SimpleLogger logger) {
+			boolean dryRun, TaskLogger logger) {
 		Client client = server.newClient();
 		try {
 			String apiEndpoint = server.getApiEndpoint("/admin/projects/" + youTrackProjectId + "?fields=shortName");
@@ -814,7 +814,7 @@ public class ImportUtils {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
-	static List<JsonNode> list(Client client, String apiEndpoint, SimpleLogger logger) {
+	static List<JsonNode> list(Client client, String apiEndpoint, TaskLogger logger) {
 		List<JsonNode> result = new ArrayList<>();
 		list(client, apiEndpoint, new PageDataConsumer() {
 
@@ -827,7 +827,7 @@ public class ImportUtils {
 		return result;
 	}
 	
-	static void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, SimpleLogger logger) {
+	static void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, TaskLogger logger) {
 		URI uri;
 		try {
 			uri = new URIBuilder(apiEndpoint)

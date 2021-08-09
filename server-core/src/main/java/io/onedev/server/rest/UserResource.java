@@ -35,15 +35,15 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.BuildQuerySetting;
-import io.onedev.server.model.CodeCommentQuerySetting;
-import io.onedev.server.model.CommitQuerySetting;
-import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.BuildQueryPersonalization;
+import io.onedev.server.model.CodeCommentQueryPersonalization;
+import io.onedev.server.model.CommitQueryPersonalization;
+import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.PullRequestAssignment;
-import io.onedev.server.model.PullRequestQuerySetting;
+import io.onedev.server.model.PullRequestQueryPersonalization;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.SshKey;
@@ -159,53 +159,53 @@ public class UserResource {
     }
 	
 	@Api(order=900)
-	@Path("/{userId}/project-build-query-settings")
+	@Path("/{userId}/project-build-query-personalizations")
     @GET
-    public Collection<BuildQuerySetting> getProjectBuildQuerySettings(@PathParam("userId") Long userId) {
+    public Collection<BuildQueryPersonalization> getProjectBuildQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-    	return user.getProjectBuildQuerySettings();
+    	return user.getBuildQueryPersonalizations();
     }
 	
 	@Api(order=1000)
-	@Path("/{userId}/project-code-comment-query-settings")
+	@Path("/{userId}/project-code-comment-query-personalizations")
     @GET
-    public Collection<CodeCommentQuerySetting> getProjectCodeCommentQuerySettings(@PathParam("userId") Long userId) {
+    public Collection<CodeCommentQueryPersonalization> getProjectCodeCommentQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-    	return user.getProjectCodeCommentQuerySettings();
+    	return user.getCodeCommentQueryPersonalizations();
     }
 	
 	@Api(order=1100)
-	@Path("/{userId}/project-commit-query-settings")
+	@Path("/{userId}/project-commit-query-personalizations")
     @GET
-    public Collection<CommitQuerySetting> getProjectCommitQuerySettings(@PathParam("userId") Long userId) {
+    public Collection<CommitQueryPersonalization> getProjectCommitQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-    	return user.getProjectCommitQuerySettings();
+    	return user.getCommitQueryPersonalizations();
     }
 	
 	@Api(order=1200)
-	@Path("/{userId}/project-issue-query-settings")
+	@Path("/{userId}/project-issue-query-personalizations")
     @GET
-    public Collection<IssueQuerySetting> getProjecIssueQuerySettings(@PathParam("userId") Long userId) {
+    public Collection<IssueQueryPersonalization> getProjecIssueQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-    	return user.getProjectIssueQuerySettings();
+    	return user.getIssueQueryPersonalizations();
     }
 	
 	@Api(order=1300)
-	@Path("/{userId}/project-pull-request-query-settings")
+	@Path("/{userId}/project-pull-request-query-personalizations")
     @GET
-    public Collection<PullRequestQuerySetting> getProjecPullRequestQuerySettings(@PathParam("userId") Long userId) {
+    public Collection<PullRequestQueryPersonalization> getProjecPullRequestQueryPersonalizations(@PathParam("userId") Long userId) {
     	User user = userManager.load(userId);
     	if (!SecurityUtils.isAdministrator() && !user.equals(SecurityUtils.getUser())) 
 			throw new UnauthorizedException();
-    	return user.getProjectPullRequestQuerySettings();
+    	return user.getPullRequestQueryPersonalizations();
     }
 	
 	@Api(order=1400)
@@ -249,13 +249,10 @@ public class UserResource {
 		queriesAndWatches.buildQuerySubscriptions = user.getBuildQuerySubscriptions();
 		queriesAndWatches.issueQueryWatches = user.getIssueQueryWatches();
 		queriesAndWatches.pullRequestQueryWatches = user.getPullRequestQueryWatches();
-		queriesAndWatches.userBuildQueries = user.getUserBuildQueries();
-		queriesAndWatches.userBuildQuerySubscriptions = user.getUserBuildQuerySubscriptions();
-		queriesAndWatches.userIssueQueries = user.getUserIssueQueries();
-		queriesAndWatches.userIssueQueryWatches = user.getUserIssueQueryWatches();
-		queriesAndWatches.userProjectQueries = user.getUserProjectQueries();
-		queriesAndWatches.userPullRequestQueries = user.getUserPullRequestQueries();
-		queriesAndWatches.userPullRequestQueryWatches = user.getUserPullRequestQueryWatches();
+		queriesAndWatches.buildQueries = user.getUserBuildQueries();
+		queriesAndWatches.issueQueries = user.getUserIssueQueries();
+		queriesAndWatches.projectQueries = user.getUserProjectQueries();
+		queriesAndWatches.pullRequestQueries = user.getUserPullRequestQueries();
 		return queriesAndWatches;
     }
 	
@@ -361,13 +358,11 @@ public class UserResource {
 		user.setBuildQuerySubscriptions(queriesAndWatches.buildQuerySubscriptions);
 		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
 		user.setPullRequestQueryWatches(queriesAndWatches.pullRequestQueryWatches);
-		user.setUserBuildQueries(queriesAndWatches.userBuildQueries);
-		user.setUserBuildQuerySubscriptions(queriesAndWatches.userBuildQuerySubscriptions);
-		user.setUserIssueQueries(queriesAndWatches.userIssueQueries);
-		user.setUserIssueQueryWatches(queriesAndWatches.userIssueQueryWatches);
-		user.setUserProjectQueries(queriesAndWatches.userProjectQueries);
-		user.setUserPullRequestQueries(queriesAndWatches.userPullRequestQueries);
-		user.setUserPullRequestQueryWatches(queriesAndWatches.userPullRequestQueryWatches);
+		user.setBuildQueries(queriesAndWatches.buildQueries);
+		user.setIssueQueries(queriesAndWatches.issueQueries);
+		user.setIssueQueryWatches(queriesAndWatches.issueQueryWatches);
+		user.setProjectQueries(queriesAndWatches.projectQueries);
+		user.setPullRequestQueries(queriesAndWatches.pullRequestQueries);
 		userManager.save(user);
 		return Response.ok().build();
     }
@@ -408,23 +403,17 @@ public class UserResource {
 		
 		private static final long serialVersionUID = 1L;
 		
-		ArrayList<NamedProjectQuery> userProjectQueries;
+		ArrayList<NamedProjectQuery> projectQueries;
 		
-		ArrayList<NamedIssueQuery> userIssueQueries;
+		ArrayList<NamedIssueQuery> issueQueries;
 
-		LinkedHashMap<String, Boolean> userIssueQueryWatches;
-		
 		LinkedHashMap<String, Boolean> issueQueryWatches;
 		
-		ArrayList<NamedPullRequestQuery> userPullRequestQueries;
-
-		LinkedHashMap<String, Boolean> userPullRequestQueryWatches;
+		ArrayList<NamedPullRequestQuery> pullRequestQueries;
 
 		LinkedHashMap<String, Boolean> pullRequestQueryWatches;
 		
-		ArrayList<NamedBuildQuery> userBuildQueries;
-
-		LinkedHashSet<String> userBuildQuerySubscriptions;
+		ArrayList<NamedBuildQuery> buildQueries;
 
 		LinkedHashSet<String> buildQuerySubscriptions;
 	}

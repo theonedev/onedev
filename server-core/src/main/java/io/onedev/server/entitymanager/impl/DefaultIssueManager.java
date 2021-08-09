@@ -40,7 +40,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueQuerySettingManager;
+import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -56,7 +56,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.IssueQuerySetting;
+import io.onedev.server.model.IssueQueryPersonalization;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -98,7 +98,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final IssueQuerySettingManager issueQuerySettingManager;
+	private final IssueQueryPersonalizationManager issueQueryPersonalizationManager;
 	
 	private final AttachmentStorageManager attachmentStorageManager;
 	
@@ -122,14 +122,14 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, 
-			TransactionManager transactionManager, IssueQuerySettingManager issueQuerySettingManager, 
+			TransactionManager transactionManager, IssueQueryPersonalizationManager issueQueryPersonalizationManager, 
 			SettingManager settingManager, ListenerRegistry listenerRegistry, 
 			ProjectManager projectManager, UserManager userManager, 
 			RoleManager roleManager, AttachmentStorageManager attachmentStorageManager, 
 			IssueCommentManager issueCommentManager, EntityReferenceManager entityReferenceManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
-		this.issueQuerySettingManager = issueQuerySettingManager;
+		this.issueQueryPersonalizationManager = issueQueryPersonalizationManager;
 		this.listenerRegistry = listenerRegistry;
 		this.settingManager = settingManager;
 		this.projectManager = projectManager;
@@ -345,11 +345,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			undefinedStates.addAll(project.getBuildSetting().getUndefinedStates(project));
 		}
 		
-		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
-			populateUndefinedStates(undefinedStates, setting.getProject(), setting.getUserQueries());
+		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+			populateUndefinedStates(undefinedStates, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			populateUndefinedStates(undefinedStates, null, user.getIssueQuerySetting().getUserQueries());
+			populateUndefinedStates(undefinedStates, null, user.getIssueQueryPersonalization().getQueries());
 
 		return undefinedStates;
 	}
@@ -384,11 +384,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			undefinedFields.addAll(project.getBuildSetting().getUndefinedFields(project));
 		}
 		
-		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
-			populateUndefinedFields(undefinedFields, setting.getProject(), setting.getUserQueries());
+		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+			populateUndefinedFields(undefinedFields, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			populateUndefinedFields(undefinedFields, null, user.getIssueQuerySetting().getUserQueries());
+			populateUndefinedFields(undefinedFields, null, user.getIssueQueryPersonalization().getQueries());
 		
 		return undefinedFields;
 	}
@@ -428,11 +428,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			undefinedFieldValues.addAll(project.getBuildSetting().getUndefinedFieldValues(project));
 		}
 		
-		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
-			populateUndefinedFieldValues(undefinedFieldValues, setting.getProject(), setting.getUserQueries());
+		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+			populateUndefinedFieldValues(undefinedFieldValues, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			populateUndefinedFieldValues(undefinedFieldValues, null, user.getIssueQuerySetting().getUserQueries());
+			populateUndefinedFieldValues(undefinedFieldValues, null, user.getIssueQueryPersonalization().getQueries());
 		
 		return undefinedFieldValues;
 	}
@@ -490,11 +490,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			project.getBuildSetting().fixUndefinedStates(project, resolutions);
 		}
 		
-		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
-			fixUndefinedStates(setting.getProject(), resolutions, setting.getUserQueries());
+		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+			fixUndefinedStates(setting.getProject(), resolutions, setting.getQueries());
 
 		for (User user: userManager.query())
-			fixUndefinedStates(null, resolutions, user.getIssueQuerySetting().getUserQueries());
+			fixUndefinedStates(null, resolutions, user.getIssueQueryPersonalization().getQueries());
 	}
 	
 	private void fixUndefinedStates(@Nullable Project project, Map<String, UndefinedStateResolution> resolutions, 
@@ -535,11 +535,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			project.getBuildSetting().fixUndefinedFields(project, resolutions);
 		}
 		
-		for (IssueQuerySetting setting: issueQuerySettingManager.query())
-			fixUndefinedFields(resolutions, setting.getProject(), setting.getUserQueries());
+		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query())
+			fixUndefinedFields(resolutions, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query()) 
-			fixUndefinedFields(resolutions, null, user.getIssueQuerySetting().getUserQueries());
+			fixUndefinedFields(resolutions, null, user.getIssueQueryPersonalization().getQueries());
 		
 		Map<String, UndefinedFieldResolution> derivedDeletions = 
 				getFieldResolutions(settingManager.fixUndefinedIssueFields(resolutions));
@@ -587,11 +587,11 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			project.getBuildSetting().fixUndefinedFieldValues(project, resolutions);
 		}
 		
-		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
-			fixUndefinedFieldValues(resolutions, setting.getProject(), setting.getUserQueries());
+		for (IssueQueryPersonalization setting: issueQueryPersonalizationManager.query()) 
+			fixUndefinedFieldValues(resolutions, setting.getProject(), setting.getQueries());
 		
 		for (User user: userManager.query())
-			fixUndefinedFieldValues(resolutions, null, user.getIssueQuerySetting().getUserQueries());
+			fixUndefinedFieldValues(resolutions, null, user.getIssueQueryPersonalization().getQueries());
 		
 		Map<String, UndefinedFieldResolution> derivedDeletions = 
 				getFieldResolutions(settingManager.fixUndefinedIssueFieldValues(resolutions));

@@ -11,9 +11,9 @@ import org.apache.http.client.utils.URIBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.util.JerseyUtils;
 import io.onedev.server.util.JerseyUtils.PageDataConsumer;
-import io.onedev.server.util.SimpleLogger;
 
 public class ImportUtils {
 
@@ -21,7 +21,7 @@ public class ImportUtils {
 
 	static final int PER_PAGE = 50;
 	
-	static List<JsonNode> list(Client client, String apiEndpoint, SimpleLogger logger) {
+	static List<JsonNode> list(Client client, String apiEndpoint, TaskLogger logger) {
 		List<JsonNode> result = new ArrayList<>();
 		list(client, apiEndpoint, new PageDataConsumer() {
 
@@ -35,7 +35,7 @@ public class ImportUtils {
 	}
 	
 	static void list(Client client, String apiEndpoint, PageDataConsumer pageDataConsumer, 
-			SimpleLogger logger) {
+			TaskLogger logger) {
 		URI uri;
 		try {
 			uri = new URIBuilder(apiEndpoint)

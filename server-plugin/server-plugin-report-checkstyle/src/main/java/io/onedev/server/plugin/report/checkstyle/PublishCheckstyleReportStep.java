@@ -19,6 +19,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.step.PublishReportStep;
@@ -26,7 +27,6 @@ import io.onedev.server.code.CodeProblem.Severity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CheckstyleMetric;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -63,7 +63,7 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, SimpleLogger logger) {
+	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
 		
 		CheckstyleReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CheckstyleReportData>() {

@@ -2,6 +2,7 @@ package io.onedev.server.util.xstream;
 
 import java.lang.reflect.Field;
 
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -26,7 +27,7 @@ public class ReflectionConverter extends com.thoughtworks.xstream.converters.ref
     
 	@Override
 	protected void marshallField(MarshallingContext context, Object newObj, Field field) {
-		if (field.getAnnotation(ManyToOne.class) != null) 
+		if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) 
 			super.marshallField(context, ((AbstractEntity) newObj).getId(), field);
 		else 
 			super.marshallField(context, newObj, field);
@@ -35,7 +36,7 @@ public class ReflectionConverter extends com.thoughtworks.xstream.converters.ref
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected Object unmarshallField(UnmarshallingContext context, Object result, Class type, Field field) {
-		if (field.getAnnotation(ManyToOne.class) != null) {
+		if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) {
 			Long entityId = (Long) context.convertAnother(context.currentObject(), Long.class);
 			return AppLoader.getInstance(Dao.class).load((Class<? extends AbstractEntity>) field.getType(), entityId);
 		} else {

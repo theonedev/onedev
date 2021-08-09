@@ -26,7 +26,7 @@ public class CodeProcessor implements MarkdownProcessor {
 	@Override
 	public void process(Document rendered, @Nullable Project project, Object context) {
 		Collection<Element> codeElements = new ArrayList<>();
-		new NodeTraversor(new NodeVisitor() {
+		NodeTraversor.traverse(new NodeVisitor() {
 
 			@Override
 			public void head(Node node, int depth) {
@@ -44,7 +44,7 @@ public class CodeProcessor implements MarkdownProcessor {
 				}
 			}
 			
-		}).traverse(rendered);
+		}, rendered);
 		
 		for (Element codeElement: codeElements) {
 			String code = HtmlEscape.unescapeHtml(codeElement.html());

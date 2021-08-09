@@ -52,7 +52,6 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.RetryCondition;
 import io.onedev.server.web.editable.annotation.SuggestionProvider;
 import io.onedev.server.web.util.WicketUtils;
@@ -93,9 +92,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 	
 	private List<CacheSpec> caches = new ArrayList<>();
 
-	private String cpuRequirement = "250m";
+	private int cpuRequirement = 500;
 	
-	private String memoryRequirement = "128m";
+	private int memoryRequirement = 256;
 	
 	private long timeout = 3600;
 	
@@ -242,27 +241,22 @@ public class Job implements NamedElement, Serializable, Validatable {
 		this.retryDelay = retryDelay;
 	}
 	
-	@Editable(order=10050, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getCpuRequirement() {
+	@Editable(order=10050, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the job in millis. "
+			+ "1000 millis means a single CPU core")
+	public int getCpuRequirement() {
 		return cpuRequirement;
 	}
 
-	public void setCpuRequirement(String cpuRequirement) {
+	public void setCpuRequirement(int cpuRequirement) {
 		this.cpuRequirement = cpuRequirement;
 	}
 
-	@Editable(order=10060, group="More Settings", description="Specify memory requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details")
-	@Interpolative(variableSuggester="suggestVariables")
-	@NotEmpty
-	public String getMemoryRequirement() {
+	@Editable(order=10060, group="More Settings", description="Specify memory requirement of the job in mega bytes")
+	public int getMemoryRequirement() {
 		return memoryRequirement;
 	}
 
-	public void setMemoryRequirement(String memoryRequirement) {
+	public void setMemoryRequirement(int memoryRequirement) {
 		this.memoryRequirement = memoryRequirement;
 	}
 

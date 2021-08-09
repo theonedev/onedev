@@ -37,8 +37,7 @@ public class CommitProcessor implements MarkdownProcessor {
 				}
 			};
 			
-			NodeTraversor tranversor = new NodeTraversor(visitor);
-			tranversor.traverse(rendered);
+			NodeTraversor.traverse(visitor, rendered);
 			
 			for (TextNode node : visitor.getMatchedNodes()) {
 				Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());

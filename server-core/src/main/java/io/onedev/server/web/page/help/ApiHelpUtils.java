@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.objenesis.ObjenesisStd;
@@ -115,7 +117,7 @@ public class ApiHelpUtils {
 						for (Field field: getJsonFields(instantiationClass)) {
 							Object fieldValue = new ExampleProvider(valueClass, field.getAnnotation(Api.class)).getExample();
 							if (fieldValue == null) {
-								if (field.getAnnotation(ManyToOne.class) != null) {
+								if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) {
 									fieldValue = field.getType().newInstance();
 									Field idField = AbstractEntity.class.getDeclaredField("id");
 									Object id = new ExampleProvider(idField.getType(), idField.getAnnotation(Api.class)).getExample();
@@ -177,6 +179,7 @@ public class ApiHelpUtils {
 			if (field.getAnnotation(JsonIgnore.class) != null 
 					|| field.getAnnotation(OneToMany.class) != null
 					|| field.getAnnotation(Transient.class) != null
+					|| field.getAnnotation(OneToOne.class) != null && field.getAnnotation(JoinColumn.class) == null
 					|| Modifier.isTransient(field.getModifiers()))
 				continue;
 			if (field.getAnnotation(JsonProperty.class) != null) {

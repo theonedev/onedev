@@ -86,33 +86,33 @@ public abstract class JobExecutor implements Serializable {
 	public abstract void execute(String jobToken, JobContext context);
 
 	public final boolean isApplicable(Build build) {
-		return isEnabled() && io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).matches(build);
+		return isEnabled() && io.onedev.server.job.match.JobMatch.parse(jobMatch).matches(build);
 	}
 	
 	public Usage onDeleteProject(String projectName) {
 		Usage usage = new Usage();
-		if (io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).isUsingProject(projectName))
+		if (io.onedev.server.job.match.JobMatch.parse(jobMatch).isUsingProject(projectName))
 			usage.add("job match" );
 		return usage;
 	}
 	
 	public void onRenameProject(String oldName, String newName) {
-		io.onedev.server.util.jobmatch.JobMatch parsedJobMatch = 
-				io.onedev.server.util.jobmatch.JobMatch.parse(this.jobMatch);
+		io.onedev.server.job.match.JobMatch parsedJobMatch = 
+				io.onedev.server.job.match.JobMatch.parse(this.jobMatch);
 		parsedJobMatch.onRenameProject(oldName, newName);
 		jobMatch = parsedJobMatch.toString();
 	}
 
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (io.onedev.server.util.jobmatch.JobMatch.parse(jobMatch).isUsingUser(userName))
+		if (io.onedev.server.job.match.JobMatch.parse(jobMatch).isUsingUser(userName))
 			usage.add("job match" );
 		return usage;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		io.onedev.server.util.jobmatch.JobMatch parsedJobMatch = 
-				io.onedev.server.util.jobmatch.JobMatch.parse(this.jobMatch);
+		io.onedev.server.job.match.JobMatch parsedJobMatch = 
+				io.onedev.server.job.match.JobMatch.parse(this.jobMatch);
 		parsedJobMatch.onRenameUser(oldName, newName);
 		jobMatch = parsedJobMatch.toString();
 	}

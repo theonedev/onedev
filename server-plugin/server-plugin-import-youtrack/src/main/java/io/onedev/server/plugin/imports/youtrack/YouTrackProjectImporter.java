@@ -16,12 +16,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.model.Project;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.SimpleLogger;
 import io.onedev.server.web.util.WicketUtils;
 
 public class YouTrackProjectImporter extends ProjectImporter<ImportServer, ProjectImportSource, ImportOption> {
@@ -35,7 +35,7 @@ public class YouTrackProjectImporter extends ProjectImporter<ImportServer, Proje
 
 	@Override
 	public String doImport(ImportServer where, ProjectImportSource what, ImportOption how, 
-			boolean dryRun, SimpleLogger logger) {
+			boolean dryRun, TaskLogger logger) {
 		Map<String, String> youTrackProjectIds = new HashMap<>();
 		Map<String, String> youTrackProjectDescriptions = new HashMap<>();
 		Collection<Long> projectIds = new ArrayList<>();
@@ -89,13 +89,13 @@ public class YouTrackProjectImporter extends ProjectImporter<ImportServer, Proje
 	}
 
 	@Override
-	public ProjectImportSource getWhat(ImportServer where, SimpleLogger logger) {
+	public ProjectImportSource getWhat(ImportServer where, TaskLogger logger) {
 		WicketUtils.getPage().setMetaData(ImportServer.META_DATA_KEY, where);
 		return new ProjectImportSource();
 	}
 
 	@Override
-	public ImportOption getHow(ImportServer where, ProjectImportSource what, SimpleLogger logger) {
+	public ImportOption getHow(ImportServer where, ProjectImportSource what, TaskLogger logger) {
 		Client client = where.newClient();
 		try {
 			List<JsonNode> projectNodes = new ArrayList<>();

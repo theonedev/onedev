@@ -25,7 +25,9 @@ import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.Configuration;
@@ -90,28 +92,29 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.DefaultJobManager;
 import io.onedev.server.buildspec.job.JobManager;
-import io.onedev.server.buildspec.job.log.DefaultLogManager;
-import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
 import io.onedev.server.code.LineCoverageContribution;
+import io.onedev.server.entitymanager.AgentAttributeManager;
+import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.entitymanager.AgentTokenManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
 import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.BuildQuerySettingManager;
+import io.onedev.server.entitymanager.BuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
-import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
+import io.onedev.server.entitymanager.CodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
-import io.onedev.server.entitymanager.CommitQuerySettingManager;
+import io.onedev.server.entitymanager.CommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.GroupAuthorizationManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.entitymanager.IssueQuerySettingManager;
+import io.onedev.server.entitymanager.IssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.IssueVoteManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.MembershipManager;
@@ -121,7 +124,7 @@ import io.onedev.server.entitymanager.PullRequestAssignmentManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
+import io.onedev.server.entitymanager.PullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
@@ -131,22 +134,25 @@ import io.onedev.server.entitymanager.SshKeyManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.entitymanager.impl.DefaultAgentAttributeManager;
+import io.onedev.server.entitymanager.impl.DefaultAgentManager;
+import io.onedev.server.entitymanager.impl.DefaultAgentTokenManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildDependenceManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildMetricManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildParamManager;
-import io.onedev.server.entitymanager.impl.DefaultBuildQuerySettingManager;
+import io.onedev.server.entitymanager.impl.DefaultBuildQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentManager;
-import io.onedev.server.entitymanager.impl.DefaultCodeCommentQuerySettingManager;
+import io.onedev.server.entitymanager.impl.DefaultCodeCommentQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentReplyManager;
-import io.onedev.server.entitymanager.impl.DefaultCommitQuerySettingManager;
+import io.onedev.server.entitymanager.impl.DefaultCommitQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultGroupManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueFieldManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueManager;
-import io.onedev.server.entitymanager.impl.DefaultIssueQuerySettingManager;
+import io.onedev.server.entitymanager.impl.DefaultIssueQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueVoteManager;
 import io.onedev.server.entitymanager.impl.DefaultIssueWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
@@ -156,7 +162,7 @@ import io.onedev.server.entitymanager.impl.DefaultPullRequestAssignmentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestManager;
-import io.onedev.server.entitymanager.impl.DefaultPullRequestQuerySettingManager;
+import io.onedev.server.entitymanager.impl.DefaultPullRequestQueryPersonalizationManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestReviewManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestUpdateManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestWatchManager;
@@ -178,6 +184,8 @@ import io.onedev.server.infomanager.DefaultPullRequestInfoManager;
 import io.onedev.server.infomanager.DefaultUserInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
+import io.onedev.server.job.resource.DefaultResourceManager;
+import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.maintenance.ApplyDatabaseConstraints;
 import io.onedev.server.maintenance.BackupDatabase;
 import io.onedev.server.maintenance.CheckDataVersion;
@@ -249,6 +257,8 @@ import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.DefaultAttachmentStorageManager;
 import io.onedev.server.storage.DefaultStorageManager;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.tasklog.DefaultLogManager;
+import io.onedev.server.tasklog.LogManager;
 import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
@@ -340,7 +350,7 @@ public class CoreModule extends AbstractPluginModule {
 
 		configurePersistence();
 		configureSecurity();
-		configureRestServices();
+		configureRestful();
 		configureWeb();
 		configureSsh();
 		configureGit();
@@ -399,11 +409,11 @@ public class CoreModule extends AbstractPluginModule {
 		bind(SessionFactory.class).toProvider(SessionFactoryProvider.class);
 		bind(EntityManagerFactory.class).toProvider(SessionFactoryProvider.class);
 		bind(IssueCommentManager.class).to(DefaultIssueCommentManager.class);
-		bind(IssueQuerySettingManager.class).to(DefaultIssueQuerySettingManager.class);
-		bind(PullRequestQuerySettingManager.class).to(DefaultPullRequestQuerySettingManager.class);
-		bind(CodeCommentQuerySettingManager.class).to(DefaultCodeCommentQuerySettingManager.class);
-		bind(CommitQuerySettingManager.class).to(DefaultCommitQuerySettingManager.class);
-		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
+		bind(IssueQueryPersonalizationManager.class).to(DefaultIssueQueryPersonalizationManager.class);
+		bind(PullRequestQueryPersonalizationManager.class).to(DefaultPullRequestQueryPersonalizationManager.class);
+		bind(CodeCommentQueryPersonalizationManager.class).to(DefaultCodeCommentQueryPersonalizationManager.class);
+		bind(CommitQueryPersonalizationManager.class).to(DefaultCommitQueryPersonalizationManager.class);
+		bind(BuildQueryPersonalizationManager.class).to(DefaultBuildQueryPersonalizationManager.class);
 		bind(PullRequestAssignmentManager.class).to(DefaultPullRequestAssignmentManager.class);
 		bind(SshKeyManager.class).to(DefaultSshKeyManager.class);
 		bind(BuildMetricManager.class).to(DefaultBuildMetricManager.class);
@@ -576,7 +586,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(SshCommandCreator.class, GitSshCommandCreator.class);
 	}
 	
-	private void configureRestServices() {
+	private void configureRestful() {
 		bind(ResourceConfig.class).toProvider(ResourceConfigProvider.class).in(Singleton.class);
 		bind(ServletContainer.class).to(DefaultServletContainer.class);
 		
@@ -670,6 +680,11 @@ public class CoreModule extends AbstractPluginModule {
 	}
 	
 	private void configureBuild() {
+		bind(ResourceManager.class).to(DefaultResourceManager.class);
+		bind(AgentManager.class).to(DefaultAgentManager.class);
+		bind(AgentTokenManager.class).to(DefaultAgentTokenManager.class);
+		bind(AgentAttributeManager.class).to(DefaultAgentAttributeManager.class);
+		
 		contribute(ScriptContribution.class, new ScriptContribution() {
 
 			@Override
@@ -776,10 +791,11 @@ public class CoreModule extends AbstractPluginModule {
 							public boolean shouldSerializeMember(Class definedIn, String fieldName) {
 								Field field = reflectionProvider.getField(definedIn, fieldName);
 								
-								return field.getAnnotation(XStreamOmitField.class) == null && 
-										field.getAnnotation(Transient.class) == null && 
-										field.getAnnotation(OneToMany.class) == null &&
-										field.getAnnotation(Version.class) == null;
+								return field.getAnnotation(XStreamOmitField.class) == null 
+										&& field.getAnnotation(Transient.class) == null 
+										&& field.getAnnotation(OneToMany.class) == null 
+										&& (field.getAnnotation(OneToOne.class) == null || field.getAnnotation(JoinColumn.class) != null)  
+										&& field.getAnnotation(Version.class) == null;
 							}
 							
 							@Override

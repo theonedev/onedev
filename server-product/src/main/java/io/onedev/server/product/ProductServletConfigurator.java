@@ -17,6 +17,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.server.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
 import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
@@ -47,10 +48,13 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
 	private final WebSocketManager webSocketManager;
 	
+	private final ServerSocketServlet serverServlet;
+	
 	@Inject
 	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, GitFilter gitFilter, 
 			GitPreReceiveCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet, 
-			WicketServlet wicketServlet, WebSocketManager webSocketManager, ServletContainer jerseyServlet) {
+			WicketServlet wicketServlet, WebSocketManager webSocketManager, ServletContainer jerseyServlet, 
+			ServerSocketServlet serverServlet) {
 		this.serverConfig = serverConfig;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
@@ -59,6 +63,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.wicketServlet = wicketServlet;
 		this.webSocketManager = webSocketManager;
 		this.jerseyServlet = jerseyServlet;
+		this.serverServlet = serverServlet;
 	}
 	
 	@Override
@@ -108,6 +113,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.addServlet(fileServletHolder, "/robots.txt");
 		
 		context.addServlet(new ServletHolder(jerseyServlet), "/api/*");	
+		context.addServlet(new ServletHolder(serverServlet), "/server");
 	}
 	
 }

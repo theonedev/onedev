@@ -1,8 +1,11 @@
 package io.onedev.server.web.component.savedquery;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -15,8 +18,11 @@ import io.onedev.server.web.page.project.ProjectPage;
 @SuppressWarnings("serial")
 public abstract class SaveQueryPanel extends Panel {
 
-	public SaveQueryPanel(String id) {
+	private final PersonalQuerySupport myQuerySupport;
+	
+	public SaveQueryPanel(String id, @Nullable PersonalQuerySupport myQuerySupport) {
 		super(id);
+		this.myQuerySupport = myQuerySupport;
 	}
 
 	@Override
@@ -35,21 +41,27 @@ public abstract class SaveQueryPanel extends Panel {
 		SaveQueryBean bean = new SaveQueryBean();
 		BeanEditor editor = BeanContext.edit("editor", bean); 
 		form.add(editor);
+		
+		if (myQuerySupport != null) {
+			form.add(new AjaxButton("saveForMine") {
+	
+				@Override
+				protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+					super.onSubmit(target, form);
+					myQuerySupport.onSave(target, bean.getName());
+				}
+				
+			});
+		} else {
+			form.add(new WebMarkupContainer("saveForMine").setVisible(false));
+		}
+		
 		form.add(new AjaxButton("save") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSaveForMine(target, bean.getName());
-			}
-			
-		});
-		form.add(new AjaxButton("saveForAll") {
-
-			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				onSaveForAll(target, bean.getName());
+				onSave(target, bean.getName());
 			}
 
 			@Override
@@ -83,9 +95,8 @@ public abstract class SaveQueryPanel extends Panel {
 		add(form);
 	}
 
-	protected abstract void onSaveForMine(AjaxRequestTarget target, String name);
-	
-	protected abstract void onSaveForAll(AjaxRequestTarget target, String name);
+	protected abstract void onSave(AjaxRequestTarget target, String name);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
+	
 }

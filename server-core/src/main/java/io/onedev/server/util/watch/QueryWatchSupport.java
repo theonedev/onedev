@@ -7,12 +7,10 @@ import io.onedev.server.model.support.NamedQuery;
 
 public abstract class QueryWatchSupport<T extends NamedQuery> {
 
-	public abstract LinkedHashMap<String, Boolean> getUserQueryWatches();
-
 	public abstract LinkedHashMap<String, Boolean> getQueryWatches();
 
-	private WatchStatus getWatchStatus(Map<String, Boolean> watches, String name) {
-		Boolean watching = watches.get(name);
+	private WatchStatus getWatchStatus(Map<String, Boolean> watches, String queryName) {
+		Boolean watching = watches.get(queryName);
 		if (Boolean.TRUE.equals(watching))
 			return WatchStatus.WATCH;
 		else if (Boolean.FALSE.equals(watching))
@@ -21,27 +19,19 @@ public abstract class QueryWatchSupport<T extends NamedQuery> {
 			return WatchStatus.DEFAULT;
 	}
 	
-	private void setWatchStatus(Map<String, Boolean> watches, String name, WatchStatus watchStatus) {
+	private void setWatchStatus(Map<String, Boolean> watches, String queryName, WatchStatus watchStatus) {
 		if (watchStatus != WatchStatus.DEFAULT) 
-			watches.put(name, watchStatus == WatchStatus.WATCH);
+			watches.put(queryName, watchStatus == WatchStatus.WATCH);
 		else
-			watches.remove(name);
+			watches.remove(queryName);
 	}
 	
-	public WatchStatus getWatchStatus(T namedQuery) {
-		return getWatchStatus(getQueryWatches(), namedQuery.getName());
+	public WatchStatus getWatchStatus(String queryName) {
+		return getWatchStatus(getQueryWatches(), queryName);
 	}
 	
-	public WatchStatus getUserWatchStatus(T namedQuery) {
-		return getWatchStatus(getUserQueryWatches(), namedQuery.getName());
-	}
-
-	public void setWatchStatus(T namedQuery, WatchStatus watchStatus) {
-		setWatchStatus(getQueryWatches(), namedQuery.getName(), watchStatus);
-	}
-	
-	public void setUserWatchStatus(T namedQuery, WatchStatus watchStatus) {
-		setWatchStatus(getUserQueryWatches(), namedQuery.getName(), watchStatus);
+	public void setWatchStatus(String queryName, WatchStatus watchStatus) {
+		setWatchStatus(getQueryWatches(), queryName, watchStatus);
 	}
 	
 }
