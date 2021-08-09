@@ -1,11 +1,11 @@
-package io.onedev.server.entityreference;
+package io.onedev.server.markdown;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.jsoup.nodes.Document;
 
-import io.onedev.server.markdown.MarkdownProcessor;
+import io.onedev.server.entityreference.ReferenceParser;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.ProjectScopedNumber;
