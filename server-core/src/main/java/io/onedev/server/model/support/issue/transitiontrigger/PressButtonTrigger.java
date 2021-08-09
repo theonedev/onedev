@@ -114,18 +114,22 @@ public class PressButtonTrigger extends TransitionTrigger {
 	}
 
 	public boolean isAuthorized(Project project) {
-		if (!getAuthorizedRoles().isEmpty()) {
-			if (SecurityUtils.canManageIssues(Project.get())) {
-				return true;
-			} else {
-				for (String roleName: getAuthorizedRoles()) {
-					if (SecurityUtils.isAuthorizedWithRole(project, roleName))
-						return true;
+		if (SecurityUtils.getUser() != null) {
+			if (!getAuthorizedRoles().isEmpty()) {
+				if (SecurityUtils.canManageIssues(Project.get())) {
+					return true;
+				} else {
+					for (String roleName: getAuthorizedRoles()) {
+						if (SecurityUtils.isAuthorizedWithRole(project, roleName))
+							return true;
+					}
+					return false;
 				}
-				return false;
+			} else {
+				return true;
 			}
 		} else {
-			return true;
+			return false;
 		}
 	}
 
