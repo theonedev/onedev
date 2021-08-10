@@ -17,7 +17,7 @@ With Git Management, Issue Tracking, and CI/CD. Simple yet Powerful.
 
 ### Docker First Kubernetes Native Build Farm
 
-Trivial to set up a build farm to run massive CI builds as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
+Out-of-box CI/CD capability with docker, and it is trivial to scale up to run massive jobs as pods in Kubernetes. No agents or runners required. Transparent support for Linux and Windows containers. 
 
 ![Job Executor](doc/images/job-executor.png)
 
