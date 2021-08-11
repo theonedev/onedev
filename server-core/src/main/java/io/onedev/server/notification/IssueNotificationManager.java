@@ -75,7 +75,7 @@ public class IssueNotificationManager extends AbstractNotificationManager {
 		else
 			url = urlManager.urlFor(issue);
 
-		String summary = "[" + issue.getState() + "] "; 
+		String summary = issue.getState() + " - "; 
 		if (user != null)
 			summary = summary + user.getDisplayName() + " " + event.getActivity();
 		else
