@@ -96,11 +96,6 @@ jobs:
     - cp server-product/target/k8s-resources.zip .
     - cp server-product/target/onedev-${buildVersion}.zip .
     - ''
-    - cat << EOF > run-as-docker.sh
-    - docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \$(pwd)/onedev:/opt/onedev
-      -p 6610:6610 -p 6611:6611 1dev/server:${buildVersion}
-    - EOF
-    - ''
     - echo "Creating release tag..."
     - git config --global user.name "Robin Shen"
     - git config --global user.email "robin@@onedev.io"
@@ -127,7 +122,6 @@ jobs:
       | jq '.id')
     - ''
     - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
-      Online Demo\n\nhttps://code.onedev.io/projects?query=owned+by+%22demo%22\n\n##
       Downloads\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/artifacts\n\n##
       Change Log\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
       Incompatibilities\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/markdown-reports/Incompatibilities/doc/incompatibilities.md\"}"
@@ -144,7 +138,7 @@ jobs:
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep
     name: publish artifact
-    artifacts: '*.zip *.sh'
+    artifacts: '*.zip'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishMarkdownReportStep
     name: publish markdown report

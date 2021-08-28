@@ -474,7 +474,7 @@ public class ExampleValuePanel extends Panel {
 
 			@Override
 			protected List<Field> load() {
-				return ApiHelpUtils.getJsonFields(getValue().getClass());
+				return ApiHelpUtils.getJsonFields(getValue().getClass(), getValueOrigin());
 			}
 			
 		};
@@ -524,7 +524,7 @@ public class ExampleValuePanel extends Panel {
 
 									@Override
 									public void onClick(AjaxRequestTarget target) {
-										Serializable newValue = ApiHelpUtils.getExampleValue(clazz);
+										Serializable newValue = ApiHelpUtils.getExampleValue(clazz, getValueOrigin());
 										valueModel.setObject(newValue);
 										target.add(ExampleValuePanel.this);
 										send(getPage(), Broadcast.BREADTH, new ExampleValueChanged(target));

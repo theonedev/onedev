@@ -116,7 +116,7 @@ public class MethodDetailPage extends ApiHelpPage {
 		if (param != null) { 
 			Serializable exampleValue = new ExampleProvider(resourceClass, param.getAnnotation(Api.class)).getExample(); 
 			if (exampleValue == null) 
-				exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType());
+				exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.REQUEST_BODY);
 			requestBodyClass = exampleValue.getClass();
 			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
@@ -200,7 +200,7 @@ public class MethodDetailPage extends ApiHelpPage {
 				
 				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample(); 
 				if (exampleValue == null)
-					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType());
+					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.PATH_PLACEHOLDER);
 				
 				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
@@ -251,7 +251,7 @@ public class MethodDetailPage extends ApiHelpPage {
 
 				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample();
 				if (exampleValue == null)
-					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType());
+					exampleValue = ApiHelpUtils.getExampleValue(param.getParameterizedType(), ValueInfo.Origin.QUERY_PARAM);
 				
 				IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
@@ -280,7 +280,7 @@ public class MethodDetailPage extends ApiHelpPage {
 			Fragment fragment = new Fragment("successResponseBody", "hasResponseBodyFrag", MethodDetailPage.this);
 			Serializable exampleValue = new ExampleProvider(resourceClass, method.getAnnotation(Api.class)).getExample();
 			if (exampleValue == null) 
-				exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType());
+				exampleValue = ApiHelpUtils.getExampleValue(method.getGenericReturnType(), ValueInfo.Origin.RESPONSE_BODY);
 			
 			IModel<ValueInfo> valueInfoModel = new LoadableDetachableModel<ValueInfo>() {
 
@@ -329,7 +329,7 @@ public class MethodDetailPage extends ApiHelpPage {
 				Api api = pathParam.getAnnotation(Api.class);
 				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample(); 
 				if (exampleValue == null)
-					exampleValue = ApiHelpUtils.getExampleValue(pathParam.getParameterizedType());
+					exampleValue = ApiHelpUtils.getExampleValue(pathParam.getParameterizedType(), ValueInfo.Origin.PATH_PLACEHOLDER);
 				endPoint = endPoint.replace("{" + pathParam.getAnnotation(PathParam.class).value() + "}", String.valueOf(exampleValue));
 			}
 		}
@@ -343,7 +343,7 @@ public class MethodDetailPage extends ApiHelpPage {
 				Api api = queryParam.getAnnotation(Api.class);
 				Serializable exampleValue = new ExampleProvider(getResourceMethod().getDeclaringClass(), api).getExample();
 				if (exampleValue == null)
-					exampleValue = ApiHelpUtils.getExampleValue(queryParam.getParameterizedType());
+					exampleValue = ApiHelpUtils.getExampleValue(queryParam.getParameterizedType(), ValueInfo.Origin.QUERY_PARAM);
 				
 				queryParams.put(paramName, String.valueOf(exampleValue));
 			}

@@ -9,7 +9,7 @@
 		<version>1.0.5</version>
 	</parent>
 	<artifactId>server</artifactId>
-	<version>4.9.3</version>
+	<version>4.9.4</version>
 	<packaging>pom</packaging>
 	<build>
 		<finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>
@@ -357,7 +357,7 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.62</version>
+				<version>1.67</version>
 			</dependency>
 			<dependency>
 				<groupId>org.unbescape</groupId>

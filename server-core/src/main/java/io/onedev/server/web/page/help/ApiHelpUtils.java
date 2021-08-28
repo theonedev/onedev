@@ -36,18 +36,19 @@ import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.page.layout.ContributedAdministrationSetting;
+import io.onedev.server.web.page.help.ValueInfo.Origin;
 import io.onedev.server.web.page.layout.AdministrationSettingContribution;
 import io.onedev.server.web.page.project.setting.ContributedProjectSetting;
 import io.onedev.server.web.page.project.setting.ProjectSettingContribution;
 
 public class ApiHelpUtils {
 
-	public static Serializable getExampleValue(Type valueType) {
-		return getExampleValue(valueType, Sets.newHashSet());
+	public static Serializable getExampleValue(Type valueType, ValueInfo.Origin origin) {
+		return getExampleValue(valueType, Sets.newHashSet(), origin);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Serializable getExampleValue(Type valueType, Set<Class<?>> parsedTypes) {
+	public static Serializable getExampleValue(Type valueType, Set<Class<?>> parsedTypes, ValueInfo.Origin origin) {
 		Class<?> valueClass = ReflectionUtils.getClass(valueType);
 		Object value = new ExampleProvider(valueClass, valueClass.getAnnotation(Api.class)).getExample();
 		if (value == null) {
@@ -79,7 +80,7 @@ public class ApiHelpUtils {
 						throw new RuntimeException(e);
 					}
 				}
-				collection.add(getExampleValue(collectionElementType, parsedTypes));
+				collection.add(getExampleValue(collectionElementType, parsedTypes, origin));
 				return (Serializable) collection;
 			} else if (Map.class.isAssignableFrom(valueClass)) {
 				Type mapKeyType = ReflectionUtils.getMapKeyType(valueType);
@@ -100,7 +101,8 @@ public class ApiHelpUtils {
 					}
 				}
 				
-				map.put(getExampleValue(mapKeyType, parsedTypes), getExampleValue(mapValueType, parsedTypes));
+				map.put(getExampleValue(mapKeyType, parsedTypes, origin), 
+						getExampleValue(mapValueType, parsedTypes, origin));
 				
 				return (Serializable) map;
 			} else {
@@ -114,7 +116,7 @@ public class ApiHelpUtils {
 							instantiationClass = valueClass;
 						}
 						value = new ObjenesisStd(true).getInstantiatorOf(instantiationClass).newInstance();
-						for (Field field: getJsonFields(instantiationClass)) {
+						for (Field field: getJsonFields(instantiationClass, origin)) {
 							Object fieldValue = new ExampleProvider(valueClass, field.getAnnotation(Api.class)).getExample();
 							if (fieldValue == null) {
 								if (field.getAnnotation(ManyToOne.class) != null || field.getAnnotation(JoinColumn.class) != null) {
@@ -122,11 +124,11 @@ public class ApiHelpUtils {
 									Field idField = AbstractEntity.class.getDeclaredField("id");
 									Object id = new ExampleProvider(idField.getType(), idField.getAnnotation(Api.class)).getExample();
 									if (id == null) 
-										id = getExampleValue(idField.getGenericType(), new HashSet<>(parsedTypes));
+										id = getExampleValue(idField.getGenericType(), new HashSet<>(parsedTypes), origin);
 									idField.setAccessible(true);
 									idField.set(fieldValue, id);
 								} else {
-									fieldValue = getExampleValue(field.getGenericType(), new HashSet<>(parsedTypes));
+									fieldValue = getExampleValue(field.getGenericType(), new HashSet<>(parsedTypes), origin);
 								}
 							}
 							field.setAccessible(true);
@@ -173,15 +175,19 @@ public class ApiHelpUtils {
 		return implementations;
 	}
 	
-	public static List<Field> getJsonFields(Class<?> beanClass) {
+	public static List<Field> getJsonFields(Class<?> beanClass, ValueInfo.Origin origin) {
 		List<Field> fields = new ArrayList<>();
 		for (Field field: BeanUtils.findFields(beanClass)) {
 			if (field.getAnnotation(JsonIgnore.class) != null 
 					|| field.getAnnotation(OneToMany.class) != null
 					|| field.getAnnotation(Transient.class) != null
 					|| field.getAnnotation(OneToOne.class) != null && field.getAnnotation(JoinColumn.class) == null
-					|| Modifier.isTransient(field.getModifiers()))
+					|| Modifier.isTransient(field.getModifiers())
+					|| origin == Origin.REQUEST_BODY 
+							&& field.getAnnotation(Api.class) != null 
+							&& field.getAnnotation(Api.class).readOnly()) {
 				continue;
+			}
 			if (field.getAnnotation(JsonProperty.class) != null) {
 				fields.add(field);
 			} else {

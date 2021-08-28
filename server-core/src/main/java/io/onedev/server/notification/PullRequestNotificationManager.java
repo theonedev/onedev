@@ -168,7 +168,7 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 			}
 		}
 		
-		String summary = "[" + request.getStatusName() + "] "; 
+		String summary = request.getStatusName() + " - "; 
 		if (user != null)
 			summary = summary + user.getDisplayName() + " " + event.getActivity();
 		else if (committer != null)

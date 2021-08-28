@@ -113,6 +113,7 @@ import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.rest.annotation.Api;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.StorageManager;
@@ -201,6 +202,8 @@ public class Project extends AbstractEntity implements NameAware {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
+	@Api(description="Represents the project from which this project is forked. Remove this property if "
+			+ "the project is not a fork when create/update the project")
 	private Project forkedFrom;
 	
 	@Column(nullable=false, unique=true)
@@ -228,9 +231,11 @@ public class Project extends AbstractEntity implements NameAware {
 	private LinkedHashMap<String, ContributedProjectSetting> contributedSettings = new LinkedHashMap<>();
 	
 	@Column(nullable=false)
+	@Api(readOnly=true)
 	private Date createDate = new Date();
 	
 	@Column(nullable=false)
+	@Api(readOnly=true)
 	private Date updateDate = new Date();
 
 	@OneToMany(mappedBy="targetProject", cascade=CascadeType.REMOVE)
@@ -248,6 +253,8 @@ public class Project extends AbstractEntity implements NameAware {
     
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
+	@Api(description="This represents default role of the project. Remove this property if the project should not "
+			+ "have a default role when create/update the project")
     private Role defaultRole;
     
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)

@@ -1,4 +1,4 @@
-package io.onedev.server.entityreference;
+package io.onedev.server.markdown;
 
 import javax.annotation.Nullable;
 
@@ -8,7 +8,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.markdown.MarkdownProcessor;
+import io.onedev.server.entityreference.ReferenceParser;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ProjectScopedNumber;
