@@ -48,7 +48,6 @@ import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentDetailPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
-import io.onedev.server.web.page.admin.buildsetting.serverresource.ServerResourcesSettingPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
@@ -154,16 +153,10 @@ public abstract class LayoutPage extends BasePage {
 
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Issue Setting", issueSettingMenuItems));
 					
-					List<SidebarMenuItem> buildSettingMenuItems = new ArrayList<>();
-					
-					buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Job Executors", 
 							JobExecutorsPage.class, new PageParameters()));
-					buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Server Resources", ServerResourcesSettingPage.class, 
-							new PageParameters()));
-					buildSettingMenuItems.add(new SidebarMenuItem.Page(null, "Agents", 
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Agents", 
 							AgentListPage.class, AgentListPage.paramsOf(0), Lists.newArrayList(AgentDetailPage.class)));
-					
-					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Build Setting", buildSettingMenuItems));
 					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Mail Setting", 
 							MailSettingPage.class, new PageParameters()));
