@@ -17,7 +17,6 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentListPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentLogPage;
 import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.admin.buildsetting.jobexecutor.JobExecutorsPage;
-import io.onedev.server.web.page.admin.buildsetting.serverresource.ServerResourcesSettingPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.generalsecuritysetting.GeneralSecuritySettingPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
@@ -255,7 +254,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/settings/state-transitions", StateTransitionListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/issue-templates", IssueTemplateListPage.class));
-		add(new DynamicPathPageMapper("administration/settings/build", ServerResourcesSettingPage.class));
 		
 		add(new DynamicPathPageMapper("administration/settings/${setting}", ContributedAdministrationSettingPage.class));
 		

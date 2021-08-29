@@ -12,6 +12,7 @@ import javax.inject.Singleton;
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.tika.mime.MimeTypes;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -91,6 +92,7 @@ public class DefaultJettyLauncher implements JettyLauncher, Provider<ServletCont
         GzipHandler gzipHandler = new GzipHandler();
 		gzipHandler.setHandler(servletContextHandler);
 		gzipHandler.setIncludedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name());
+		gzipHandler.setExcludedMimeTypes(MimeTypes.OCTET_STREAM);
 
         jettyServer.setHandler(gzipHandler);
         

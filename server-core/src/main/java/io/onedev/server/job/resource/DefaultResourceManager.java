@@ -28,7 +28,7 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;
 import io.onedev.server.model.Setting;
-import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
@@ -63,8 +63,8 @@ public class DefaultResourceManager implements ResourceManager {
 	@Listen
 	public synchronized void on(SystemStarted event) {
 		Map<String, Integer> resources = new HashMap<>();
-		resources.put(ResourceHolder.CPU, settingManager.getBuildSetting().getCpu());
-		resources.put(ResourceHolder.MEMORY, settingManager.getBuildSetting().getMemory());
+		resources.put(ResourceHolder.CPU, settingManager.getSystemSetting().getCpu());
+		resources.put(ResourceHolder.MEMORY, settingManager.getSystemSetting().getMemory());
 		serverResourceHolder = new ResourceHolder(resources);
 		
 		Query<?> query = dao.getSession().createQuery(String.format("select id, %s from Agent", Agent.PROP_PAUSED));
@@ -98,11 +98,11 @@ public class DefaultResourceManager implements ResourceManager {
 	public void on(EntityPersisted event) {
 		if (serverResourceHolder != null && event.getEntity() instanceof Setting) {
 			Setting setting = (Setting) event.getEntity();
-			if (setting.getKey() == Setting.Key.BUILD) {
-				GlobalBuildSetting buildSetting = (GlobalBuildSetting) setting.getValue();
+			if (setting.getKey() == Setting.Key.SYSTEM) {
+				SystemSetting systemSetting = (SystemSetting) setting.getValue();
 				synchronized (this) {
-					serverResourceHolder.updateTotalResource(ResourceHolder.CPU, buildSetting.getCpu());
-					serverResourceHolder.updateTotalResource(ResourceHolder.MEMORY, buildSetting.getMemory());
+					serverResourceHolder.updateTotalResource(ResourceHolder.CPU, systemSetting.getCpu());
+					serverResourceHolder.updateTotalResource(ResourceHolder.MEMORY, systemSetting.getMemory());
 					notifyAll();
 				}
 			}

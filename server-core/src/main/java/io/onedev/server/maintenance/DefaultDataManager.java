@@ -157,7 +157,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled");
+			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled", "cpu", "memory");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add("gitConfig");
 				excludedProps.add("curlConfig");
