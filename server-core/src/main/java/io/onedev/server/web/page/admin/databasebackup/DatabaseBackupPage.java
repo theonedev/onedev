@@ -11,7 +11,6 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import io.onedev.commons.launcher.bootstrap.BootstrapUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -61,7 +60,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 						try {
 							PersistManager persistManager = OneDev.getInstance(PersistManager.class);
 							persistManager.exportData(tempDir);
-							BootstrapUtils.zip(tempDir, attributes.getResponse().getOutputStream());
+							FileUtils.zip(tempDir, attributes.getResponse().getOutputStream());
 						} finally {
 							FileUtils.deleteDir(tempDir);
 						}

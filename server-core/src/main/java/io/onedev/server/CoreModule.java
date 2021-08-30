@@ -83,10 +83,10 @@ import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.AbstractPlugin;
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
-import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.loader.AbstractPlugin;
+import io.onedev.commons.loader.AbstractPluginModule;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -659,7 +659,7 @@ public class CoreModule extends AbstractPluginModule {
 			@Override
 			public Collection<Class<? extends Exception>> getExpectedExceptionClasses() {
 				return Sets.newHashSet(ConstraintViolationException.class, EntityNotFoundException.class, 
-						ObjectNotFoundException.class, io.onedev.server.git.exception.ObjectNotFoundException.class, 
+						ObjectNotFoundException.class, io.onedev.server.exception.ObjectNotFoundException.class, 
 						StaleStateException.class, UnauthorizedException.class, 
 						ExplicitException.class, ValidationException.class, PageExpiredException.class, 
 						StalePageException.class);

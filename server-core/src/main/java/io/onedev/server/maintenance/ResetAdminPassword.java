@@ -10,7 +10,7 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.DefaultPersistManager;

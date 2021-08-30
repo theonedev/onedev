@@ -1,18 +1,18 @@
 <wicket:panel>
 	<div class="p-5">
 		<h6 class="text-center mb-4">Download & Install Agent</h6>
-		<ol>
+		<ul>
 			<li>Make sure <code>Server URL</code> in <a wicket:id="systemSetting" class="link-primary" target="_blank">system setting</a> is specified correctly</li>
-			<li>On remote machine where you want to install agent:</li>
-			<ul>
+			<li>On remote machine (Windows/Mac/Linux/FreeBSD) where you want to install agent:</li>
+			<ol>
 				<li>Make sure <a href="https://openjdk.java.net" target="_blank">JDK 1.8 or higher</a> is installed</li>
 				<li>Make sure docker engine is installed and docker command line is available in system path</li>
 				<li>Make sure git version 2.11.1 or higher is installed and available in system path</li>
-				<li>Download agent package for <a wicket:id="zip" class="link-primary">Windows</a> or <a wicket:id="targz" class="link-primary">Linux/Mac</a>. A new agent token will be included in the package</li>
+				<li>Download <a wicket:id="agent" class="link-primary">agent package</a>. A new agent token will be included in the package</li>
 				<li>Extract the package into a folder</li>
-				<li>From extracted folder, run <code>bin/agent.sh console</code> (Linux/Mac) or <code>bin\agent.bat console</code> (Windows)</li>
-			</ul>
+				<li>From extracted folder, run <code>bin\agent.bat console</code> on Windows or <code>bin/agent.sh console</code> on other OS</li>
+			</ol>
 			<li>Check <a wicket:id="installationGuide" class="link-primary" target="_blank">agent installation guide</a> for more details, such as running as service etc.</li> 
-		</ol>
+		</ul>
 	</div>
 </wicket:panel>

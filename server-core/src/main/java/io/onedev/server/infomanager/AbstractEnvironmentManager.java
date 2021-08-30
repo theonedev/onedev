@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.system.SystemStopping;
 import jetbrains.exodus.ArrayByteIterable;

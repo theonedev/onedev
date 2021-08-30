@@ -15,7 +15,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.google.common.collect.Lists;
 
 import io.onedev.agent.Agent;
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;

@@ -9,7 +9,7 @@ import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.validation.ValidationConfig;
 import org.glassfish.jersey.server.validation.internal.InjectingConstraintValidatorFactory;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 
 @Provider
 public class ValidationConfigurationContextResolver implements ContextResolver<ValidationConfig> {

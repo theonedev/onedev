@@ -13,7 +13,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;

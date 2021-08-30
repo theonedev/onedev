@@ -26,10 +26,9 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.bootstrap.BootstrapUtils;
-import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -325,7 +324,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 						persistManager.exportData(tempDir);
 						File backupFile = new File(backupDir, 
 								DateTimeFormat.forPattern(Upgrade.BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
-						BootstrapUtils.zip(tempDir, backupFile);
+						FileUtils.zip(tempDir, backupFile, null);
 					} catch (Exception e) {
 						notifyBackupError(e);
 						throw ExceptionUtils.unchecked(e);

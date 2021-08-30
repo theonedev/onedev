@@ -18,8 +18,7 @@ class AgentDownloadPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ExternalLink("zip", "/downloads/agent.zip"));
-		add(new ExternalLink("targz", "/downloads/agent.tar.gz"));
+		add(new ExternalLink("agent", "/downloads/agent.zip"));
 		add(new BookmarkablePageLink<Void>("systemSetting", SystemSettingPage.class));
 		add(new ExternalLink("installationGuide", OneDev.getInstance().getDocRoot() + "/agent-installation-guide.md"));
 	}

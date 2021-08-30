@@ -8,8 +8,8 @@ import static org.hibernate.cfg.AvailableSettings.USER;
 
 import java.io.File;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
+import io.onedev.commons.loader.AbstractPluginModule;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.persistence.HibernateProperties;

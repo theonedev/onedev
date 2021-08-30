@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
-import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.loader.AbstractPluginModule;
+import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 
 /**

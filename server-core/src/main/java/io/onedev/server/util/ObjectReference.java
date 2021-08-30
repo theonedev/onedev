@@ -2,6 +2,8 @@ package io.onedev.server.util;
 
 import java.io.Closeable;
 
+import io.onedev.server.exception.NotReadyException;
+
 public abstract class ObjectReference<T> implements Closeable {
 	
 	private int count;
@@ -30,7 +32,7 @@ public abstract class ObjectReference<T> implements Closeable {
 	
 	public synchronized T get() {
 		if (object == null)
-			throw new RuntimeException("Object not initialized yet");
+			throw new NotReadyException();
 		else
 			return object;
 	}

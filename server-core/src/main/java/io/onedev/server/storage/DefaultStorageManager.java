@@ -9,8 +9,8 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;

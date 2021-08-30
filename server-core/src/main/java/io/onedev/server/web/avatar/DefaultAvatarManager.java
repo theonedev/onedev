@@ -16,7 +16,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;

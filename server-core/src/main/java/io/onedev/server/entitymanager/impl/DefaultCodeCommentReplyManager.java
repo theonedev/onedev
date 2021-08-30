@@ -3,7 +3,7 @@ package io.onedev.server.entitymanager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;

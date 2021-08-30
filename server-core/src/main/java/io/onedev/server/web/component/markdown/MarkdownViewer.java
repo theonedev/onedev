@@ -22,7 +22,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.StaleStateException;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;

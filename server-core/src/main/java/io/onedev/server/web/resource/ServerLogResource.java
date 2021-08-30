@@ -14,7 +14,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.google.common.base.Joiner;
 
 import io.onedev.agent.job.LogRequest;
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.security.SecurityUtils;
 
 public class ServerLogResource extends AbstractResource {

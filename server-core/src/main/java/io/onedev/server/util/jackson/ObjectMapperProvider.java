@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 
-import io.onedev.commons.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.loader.ImplementationRegistry;
 
 @Singleton
 public class ObjectMapperProvider implements Provider<ObjectMapper> {

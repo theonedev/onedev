@@ -15,7 +15,7 @@ import org.apache.commons.text.WordUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;

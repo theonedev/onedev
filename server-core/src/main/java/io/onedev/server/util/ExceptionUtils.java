@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.NotReadyException;
 import io.onedev.server.model.User;
 import io.onedev.server.web.ExpectedExceptionContribution;
 
@@ -38,8 +39,14 @@ public class ExceptionUtils extends io.onedev.commons.utils.ExceptionUtils {
 			} else if (find(exception, UnknownAccountException.class) != null) {
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unknown user name.");
 			} else {
-				logger.warn("Error serving request", exception);
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exception.getMessage());
+				NotReadyException notReadyException = ExceptionUtils.find(exception, NotReadyException.class);
+				if (notReadyException != null) {
+					logger.debug("Unable to serve request as system is not ready yet");
+					response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, notReadyException.getMessage());
+				} else {
+					logger.warn("Error serving request", exception);
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exception.getMessage());
+				}
 			} 
 		} catch (IOException e) {
 			throw new RuntimeException(e);

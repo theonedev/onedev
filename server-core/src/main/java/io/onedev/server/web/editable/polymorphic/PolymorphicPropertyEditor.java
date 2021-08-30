@@ -23,8 +23,8 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.Path;

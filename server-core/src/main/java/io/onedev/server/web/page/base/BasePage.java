@@ -45,7 +45,7 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;

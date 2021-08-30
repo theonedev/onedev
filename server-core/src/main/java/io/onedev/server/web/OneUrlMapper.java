@@ -174,7 +174,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new BaseResourceMapper("downloads/server-log", new ServerLogResourceReference()));
 		add(new BaseResourceMapper("downloads/agent-log/${agent}", new AgentLogResourceReference()));
 		add(new BaseResourceMapper("downloads/agent.zip", new AgentResourceReference()));
-		add(new BaseResourceMapper("downloads/agent.tar.gz", new AgentResourceReference()));
 		add(new BaseResourceMapper("downloads/agent-lib", new AgentLibResourceReference()));
 		add(new BaseResourceMapper("downloads/projects/${project}/builds/${build}/log", 
 				new BuildLogResourceReference()));

@@ -12,7 +12,7 @@ import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
 import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.shell.UnknownCommand;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.util.ServerConfig;

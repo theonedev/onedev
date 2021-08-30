@@ -5,7 +5,7 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.model.PullRequest;

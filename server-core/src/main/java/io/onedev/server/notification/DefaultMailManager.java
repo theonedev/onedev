@@ -58,8 +58,8 @@ import com.google.common.collect.Lists;
 import com.sun.mail.imap.IMAPFolder;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;

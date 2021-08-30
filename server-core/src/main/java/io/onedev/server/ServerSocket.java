@@ -25,6 +25,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.AgentManager;
+import io.onedev.server.exception.NotReadyException;
 
 @WebSocket
 public class ServerSocket {
@@ -37,17 +38,20 @@ public class ServerSocket {
 	
 	@OnWebSocketClose
     public void onClose(int statusCode, String reason) {
-		if (agentId != null) 
-			getAgentManager().agentDisconnected(agentId);
-		
-		StringBuilder builder = new StringBuilder("Websocket closed (");
-		if (session != null)
-			builder.append("remote address: " + session.getRemoteAddress().toString() + ", ");
-		builder.append("status code: " + statusCode);
-		if (reason != null)
-			builder.append(", reason: " + reason);
-		builder.append(")");
-		logger.trace(builder.toString());
+		try {
+			if (agentId != null) 
+				getAgentManager().agentDisconnected(agentId);
+			
+			StringBuilder builder = new StringBuilder("Websocket closed (");
+			if (session != null)
+				builder.append("remote address: " + session.getRemoteAddress().toString() + ", ");
+			builder.append("status code: " + statusCode);
+			if (reason != null)
+				builder.append(", reason: " + reason);
+			builder.append(")");
+			logger.debug(builder.toString());
+		} catch (NotReadyException e) {
+		}
     }
 
     @OnWebSocketError

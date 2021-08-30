@@ -52,10 +52,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
 import io.onedev.commons.utils.PathUtils;
+import io.onedev.server.exception.ObsoleteCommitException;
+import io.onedev.server.exception.RefUpdateException;
 import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.git.command.IsAncestorCommand;
-import io.onedev.server.git.exception.ObsoleteCommitException;
-import io.onedev.server.git.exception.RefUpdateException;
 
 public class GitUtils {
 	

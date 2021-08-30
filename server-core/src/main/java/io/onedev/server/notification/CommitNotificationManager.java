@@ -17,7 +17,7 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.RefUpdated;

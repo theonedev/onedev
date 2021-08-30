@@ -22,10 +22,10 @@ import org.junit.Test;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-import io.onedev.server.git.exception.NotTreeException;
-import io.onedev.server.git.exception.ObjectAlreadyExistsException;
-import io.onedev.server.git.exception.ObjectNotFoundException;
-import io.onedev.server.git.exception.ObsoleteCommitException;
+import io.onedev.server.exception.NotTreeException;
+import io.onedev.server.exception.ObjectAlreadyExistsException;
+import io.onedev.server.exception.ObjectNotFoundException;
+import io.onedev.server.exception.ObsoleteCommitException;
 
 public class BlobEditsTest extends AbstractGitTest {
 

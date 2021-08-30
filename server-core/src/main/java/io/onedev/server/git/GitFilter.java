@@ -36,11 +36,12 @@ import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.exception.GitException;
+import io.onedev.server.exception.NotReadyException;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.command.ReceivePackCommand;
 import io.onedev.server.git.command.UploadPackCommand;
-import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
@@ -307,15 +308,18 @@ public class GitFilter implements Filter {
 				if (oneDev.isReady())
 					processRefs(httpRequest, httpResponse);
 				else
-					throw new GitException("Server is not ready");
+					throw new NotReadyException();
 			} else if (GitSmartHttpTools.isReceivePack(httpRequest) || GitSmartHttpTools.isUploadPack(httpRequest)) {
 				if (oneDev.isReady())
 					processPacks(httpRequest, httpResponse);
 				else
-					throw new GitException("Server is not ready");
+					throw new NotReadyException();
 			} else {
 				chain.doFilter(request, response);
 			}
+		} catch (NotReadyException e) {
+			logger.debug("Unable to serve git request as system is not ready yet");
+			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_SERVICE_UNAVAILABLE, e.getMessage());
 		} catch (GitException|InterruptedException|ExecutionException e) {
 			logger.error("Error serving git request", e);
 			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

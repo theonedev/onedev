@@ -3,7 +3,7 @@ package io.onedev.server.imports;
 import java.io.Serializable;
 import java.util.Collection;
 
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
 public interface IssueImporterContribution {

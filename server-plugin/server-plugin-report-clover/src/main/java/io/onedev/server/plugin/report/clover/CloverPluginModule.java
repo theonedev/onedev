@@ -17,8 +17,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
-import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.loader.AbstractPluginModule;
+import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;

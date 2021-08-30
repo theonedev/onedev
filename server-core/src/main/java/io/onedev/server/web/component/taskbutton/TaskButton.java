@@ -29,7 +29,7 @@ import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.WordUtils;

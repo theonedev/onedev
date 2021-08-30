@@ -42,7 +42,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.base.Throwables;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;

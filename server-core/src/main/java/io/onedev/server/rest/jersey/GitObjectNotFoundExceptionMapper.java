@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.exception.ObjectNotFoundException;
 
 @Provider
 public class GitObjectNotFoundExceptionMapper implements ExceptionMapper<ObjectNotFoundException> {

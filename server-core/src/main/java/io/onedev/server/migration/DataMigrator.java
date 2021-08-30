@@ -28,8 +28,8 @@ import org.dom4j.Node;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.User;

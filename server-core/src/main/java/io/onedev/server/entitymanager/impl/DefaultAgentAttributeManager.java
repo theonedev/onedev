@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Agent;

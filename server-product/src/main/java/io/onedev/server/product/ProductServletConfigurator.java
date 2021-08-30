@@ -16,7 +16,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.glassfish.jersey.servlet.ServletContainer;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.hookcallback.GitPostReceiveCallback;

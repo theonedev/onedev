@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
 
-import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;

@@ -35,8 +35,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;

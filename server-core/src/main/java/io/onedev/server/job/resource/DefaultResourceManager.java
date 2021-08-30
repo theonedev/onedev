@@ -15,7 +15,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.hibernate.query.Query;
 
 import io.onedev.agent.AgentData;
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;

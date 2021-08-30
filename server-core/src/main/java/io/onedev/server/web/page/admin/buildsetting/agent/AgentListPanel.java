@@ -40,7 +40,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.AgentManager;
@@ -805,7 +805,7 @@ class AgentListPanel extends Panel {
 				Agent agent = rowModel.getObject();
 				Link<Void> link = new BookmarkablePageLink<Void>("link", 
 						AgentOverviewPage.class, AgentOverviewPage.paramsOf(agent));
-				link.add(new SpriteImage("icon", agent.getOs().name().toLowerCase()));
+				link.add(new SpriteImage("icon", agent.getOs().getIcon()));
 				link.add(new Label("label", agent.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);

@@ -48,8 +48,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;

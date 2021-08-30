@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;

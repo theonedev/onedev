@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueManager;

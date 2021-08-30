@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.util.QuotedString;
 
 import io.onedev.agent.Agent;
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.server.git.config.GitConfig;

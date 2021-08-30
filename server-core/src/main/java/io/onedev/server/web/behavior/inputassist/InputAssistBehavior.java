@@ -24,7 +24,7 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.RangeUtils;

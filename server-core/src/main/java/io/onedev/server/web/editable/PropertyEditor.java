@@ -17,7 +17,7 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.util.ComponentContext;
 
 @SuppressWarnings("serial")

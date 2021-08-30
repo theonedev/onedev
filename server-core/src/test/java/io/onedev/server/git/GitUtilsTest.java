@@ -21,7 +21,6 @@ import org.junit.Test;
 import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 
-import io.onedev.commons.launcher.bootstrap.BootstrapUtils;
 import io.onedev.commons.utils.FileUtils;
 
 public class GitUtilsTest extends AbstractGitTest {
@@ -328,7 +327,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(GitUtilsTest.class, "git-conflict-link-link.zip").openStream()) {
-			BootstrapUtils.unzip(is, tempDir);
+			FileUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
@@ -363,7 +362,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(GitUtilsTest.class, "git-conflict-link-file.zip").openStream()) {
-			BootstrapUtils.unzip(is, tempDir);
+			FileUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 
@@ -412,7 +411,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		
 		tempDir = FileUtils.createTempDir();
 		try (InputStream is = Resources.getResource(GitUtilsTest.class, "git-conflict-link-dir.zip").openStream()) {
-			BootstrapUtils.unzip(is, tempDir);
+			FileUtils.unzip(is, tempDir);
 			try (Git git = Git.open(tempDir)) {
 				ObjectId mergeCommitId;
 

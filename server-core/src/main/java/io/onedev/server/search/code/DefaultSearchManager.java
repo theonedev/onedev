@@ -43,7 +43,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStopping;

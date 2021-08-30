@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.entitymanager.BuildManager;

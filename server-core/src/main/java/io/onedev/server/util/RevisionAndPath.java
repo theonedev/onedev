@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 
 public class RevisionAndPath implements Serializable {

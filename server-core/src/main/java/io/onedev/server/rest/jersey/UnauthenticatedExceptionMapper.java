@@ -8,7 +8,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.shiro.authz.UnauthenticatedException;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 
 @Provider
 public class UnauthenticatedExceptionMapper implements ExceptionMapper<UnauthenticatedException> {

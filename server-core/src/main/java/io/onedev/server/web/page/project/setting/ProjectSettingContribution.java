@@ -2,7 +2,7 @@ package io.onedev.server.web.page.project.setting;
 
 import java.util.List;
 
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 
 @ExtensionPoint
 public interface ProjectSettingContribution {

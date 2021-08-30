@@ -12,7 +12,7 @@ import java.util.concurrent.Callable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;

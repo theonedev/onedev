@@ -13,7 +13,7 @@ import org.hibernate.proxy.HibernateProxyHelper;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.util.ComponentContext;
 
 @SuppressWarnings("serial")

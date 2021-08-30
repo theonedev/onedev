@@ -10,8 +10,8 @@ import org.apache.wicket.protocol.http.WebApplication;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
-import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.loader.AbstractPluginModule;
+import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.buildspec.step.PublishReportStep;
 import io.onedev.server.model.Build;

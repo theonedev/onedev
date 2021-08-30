@@ -3,7 +3,7 @@ package io.onedev.server.web.websocket;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;

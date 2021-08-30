@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.model.Build;
 
 @ExtensionPoint

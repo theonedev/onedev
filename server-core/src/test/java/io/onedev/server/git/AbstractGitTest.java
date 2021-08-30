@@ -19,8 +19,8 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.launcher.loader.AppLoaderMocker;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.loader.AppLoaderMocker;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.git.command.GitCommand;
 import io.onedev.server.git.config.GitConfig;

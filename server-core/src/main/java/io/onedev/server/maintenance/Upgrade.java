@@ -20,8 +20,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -82,8 +82,13 @@ public class Upgrade extends DefaultPersistManager {
 			bootstrapClass = "com.turbodev.launcher.bootstrap.Bootstrap";
 		} else if (version.startsWith("2.0.")) {
 			bootstrapClass = "io.onedev.launcher.bootstrap.Bootstrap";
-		} else {
+		} else if (version.startsWith("3.") || version.startsWith("4.0.") || version.startsWith("4.1.")
+				|| version.startsWith("4.2.") || version.startsWith("4.3.") || version.startsWith("4.4.")
+				|| version.startsWith("4.5.") || version.startsWith("4.6.") || version.startsWith("4.7.")
+				|| version.startsWith("4.8.") || version.startsWith("4.9.")) {
 			bootstrapClass = "io.onedev.commons.launcher.bootstrap.Bootstrap";
+		} else {
+			bootstrapClass = "io.onedev.commons.bootstrap.Bootstrap";
 		}
 		
 		if (version.startsWith("1.") ||  version.startsWith("2.")) {

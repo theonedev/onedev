@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>4.10.0</version>
+		<version>4.10.3</version>
 	</parent>
 	<build>
 		<plugins>
@@ -20,11 +20,15 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>commons-launcher-loader</artifactId>
+			<artifactId>commons-bootstrap</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>commons-launcher-loader</artifactId>
+			<artifactId>commons-loader</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>commons-loader</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

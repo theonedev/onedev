@@ -11,8 +11,7 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.bootstrap.BootstrapUtils;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.persistence.DefaultPersistManager;
@@ -67,7 +66,7 @@ public class BackupDatabase extends DefaultPersistManager {
 		File tempDir = FileUtils.createTempDir("backup");
 		try {
 			exportData(tempDir);
-			BootstrapUtils.zip(tempDir, backupFile);
+			FileUtils.zip(tempDir, backupFile, null);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		} finally {

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;

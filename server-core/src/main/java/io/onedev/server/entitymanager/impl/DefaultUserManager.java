@@ -21,7 +21,7 @@ import org.hibernate.ReplicationMode;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;

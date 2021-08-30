@@ -16,6 +16,7 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.exception.ScriptException;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.script.ScriptContribution;
 import io.onedev.server.util.script.identity.ScriptIdentity;

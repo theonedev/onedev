@@ -36,7 +36,7 @@ import org.yaml.snakeyaml.resolver.Resolver;
 import org.yaml.snakeyaml.serializer.Serializer;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;

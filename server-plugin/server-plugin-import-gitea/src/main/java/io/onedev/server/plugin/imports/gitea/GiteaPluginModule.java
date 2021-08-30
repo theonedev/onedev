@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
+import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.imports.IssueImporter;
 import io.onedev.server.imports.IssueImporterContribution;
 import io.onedev.server.imports.ProjectImporter;

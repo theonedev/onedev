@@ -83,7 +83,8 @@ public class AgentOverviewPage extends AgentDetailPage {
 			
 		});
 		
-		add(new SpriteImage("icon", getAgent().getOs().name().toLowerCase()));
+		add(new SpriteImage("icon", getAgent().getOs().getIcon()));
+		
 		add(new Label("name", getAgent().getName()));
 		add(new Label("ipAddress", getAgent().getIpAddress()));
 		add(new Label("osVersion", getAgent().getOsVersion()));

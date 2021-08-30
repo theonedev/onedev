@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Provider;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.AbstractPlugin;
-import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.loader.AbstractPlugin;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.entitymanager.SettingManager;

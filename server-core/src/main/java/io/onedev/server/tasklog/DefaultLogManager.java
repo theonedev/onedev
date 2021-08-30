@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;

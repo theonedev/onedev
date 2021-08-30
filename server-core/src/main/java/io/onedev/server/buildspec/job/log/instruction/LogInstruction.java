@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import io.onedev.commons.codeassist.FenceAware;
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.model.Build;

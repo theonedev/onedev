@@ -33,8 +33,8 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
 import io.onedev.agent.DockerUtils;
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.loader.AppLoader;
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.PathUtils;

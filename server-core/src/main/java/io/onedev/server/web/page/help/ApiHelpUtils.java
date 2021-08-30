@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.loader.ImplementationRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.rest.annotation.Api;

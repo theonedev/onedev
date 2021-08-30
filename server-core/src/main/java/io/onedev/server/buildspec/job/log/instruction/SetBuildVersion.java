@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.server.event.build.BuildUpdated;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Transactional;

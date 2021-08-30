@@ -1,4 +1,4 @@
-package io.onedev.server.git.exception;
+package io.onedev.server.exception;
 
 public class ObjectNotFoundException extends GitException {
 

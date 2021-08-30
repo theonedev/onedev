@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.server.model.Project;
 
 @ExtensionPoint

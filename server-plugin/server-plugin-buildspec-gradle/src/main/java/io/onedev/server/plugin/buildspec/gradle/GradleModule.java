@@ -2,7 +2,7 @@ package io.onedev.server.plugin.buildspec.gradle;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.launcher.loader.AbstractPluginModule;
+import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.script.ScriptContribution;

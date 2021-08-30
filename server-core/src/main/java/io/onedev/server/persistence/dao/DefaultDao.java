@@ -11,8 +11,8 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
-import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.loader.ListenerRegistry;
+import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.AbstractEntity;

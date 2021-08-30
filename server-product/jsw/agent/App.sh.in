@@ -36,22 +36,22 @@
 #       of code otherwise the service won't be displayed in the Service 
 #       Configuration GUI.
 ### BEGIN INIT INFO
-# Provides: @app.name@
+# Provides: onedevagent
 # Required-Start: $remote_fs $syslog
 # Should-Start: $network $time
 # Should-Stop: $network $time
 # Required-Stop: $remote_fs $syslog
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
-# Short-Description: @app.long.name@
-# Description: @app.description@
+# Short-Description: OneDev Agent
+# Description: OneDev Agent
 ### END INIT INFO
 
 # Application name and long name: If these variables are not set (or left to
 #  the default tokens), APP_NAME will default to the name of the script, then
 #  APP_LONG_NAME will default to the value of APP_NAME.
-APP_NAME="@app.name@"
-APP_LONG_NAME="@app.long.name@"
+APP_NAME="onedevagent"
+APP_LONG_NAME="OneDev Agent"
 
 # If uncommented (and set to false), APP_NAME and APP_LONG_NAME will no longer 
 #  be passed to the wrapper. See documentation for details.
@@ -188,7 +188,7 @@ MACOSX_KEEP_RUNNING="false"
 # The following two lines are used by the chkconfig command. Change as is
 #  appropriate for your application.  They should remain commented.
 # chkconfig: 2345 20 80
-# description: @app.long.name@
+# description: OneDev Agent
 
 # Set run level to use when installing the application to start and stop on
 #  system startup and shutdown.  It is important that the application always

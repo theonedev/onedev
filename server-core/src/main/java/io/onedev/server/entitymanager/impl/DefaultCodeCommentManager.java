@@ -36,8 +36,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.loader.Listen;
+import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
