@@ -16,7 +16,6 @@ import io.onedev.server.git.config.GitConfig;
 
 public abstract class GitCommand<V> {
 
-	// requires at least 2.11.1 to use allowAnySHA1InWant
 	private static final String MIN_VERSION = "2.11.1";
 	
 	protected final File gitDir;

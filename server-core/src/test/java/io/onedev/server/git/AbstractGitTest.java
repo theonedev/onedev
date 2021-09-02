@@ -86,7 +86,7 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 	@Override
 	protected void teardown() {
 		git.close();
-		deleteDir(gitDir, 3);
+		FileUtils.deleteDir(gitDir, 3);
 	}
 
 	protected void createDir(String path) {

@@ -17,7 +17,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.model.Build;
-import io.onedev.server.tasklog.LogManager;
+import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.tasklog.LogSnippet;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
@@ -65,8 +65,8 @@ public class BuildLogPanel extends GenericPanel<Build> {
 		setOutputMarkupId(true);
 	}
 
-	private LogManager getLogManager() {
-		return OneDev.getInstance(LogManager.class);
+	private JobLogManager getLogManager() {
+		return OneDev.getInstance(JobLogManager.class);
 	}
 	
 	private String asJSON(Object obj) {

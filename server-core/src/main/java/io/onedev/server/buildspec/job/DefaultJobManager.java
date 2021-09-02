@@ -115,7 +115,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.tasklog.LogManager;
+import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
@@ -151,7 +151,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final SessionManager sessionManager;
 	
-	private final LogManager logManager;
+	private final JobLogManager logManager;
 	
 	private final UserManager userManager;
 	
@@ -173,7 +173,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
-			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
+			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
 			PullRequestManager pullRequestManager, ProjectManager projectManager, Validator validator, 
 			TaskScheduler taskScheduler, AgentManager agentManager) {
@@ -415,7 +415,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			
 			JobExecutor executor = getJobExecutor(build);
 			if (executor != null) {
-				TaskLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
+				TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask); 
 				
 				ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 				Long buildId = build.getId();
@@ -600,7 +600,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								});
 								
 								jobContexts.put(jobToken, jobContext);
-								
+								logManager.registerLogger(jobToken, jobLogger);
 								try {
 									executor.execute(jobToken, jobContext);
 									break;
@@ -666,6 +666,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									}
 								} finally {
 									jobContexts.remove(jobToken);
+									logManager.deregisterLogger(jobToken);
 									jobContext.onJobFinished();
 								}
 							}

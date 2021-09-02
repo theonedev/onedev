@@ -91,7 +91,7 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 					what = getImporter().getWhat(where, new TaskLogger() {
 
 						@Override
-						public void log(String message, String taskId) {
+						public void log(String message, String sessionId) {
 							logger.info(message);
 						}
 						
@@ -102,7 +102,7 @@ public abstract class ImportPanel<Where extends Serializable, What extends Seria
 					how = getImporter().getHow(where, what, new TaskLogger() {
 
 						@Override
-						public void log(String message, String taskId) {
+						public void log(String message, String sessionId) {
 							logger.info(message);
 						}
 						

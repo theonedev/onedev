@@ -54,7 +54,7 @@ public class IssueImportSource implements Serializable {
 			TaskLogger logger = new TaskLogger() {
 
 				@Override
-				public void log(String message, String taskId) {
+				public void log(String message, String sessionId) {
 					IssueImportSource.logger.info(message);
 				}
 				

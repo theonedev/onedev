@@ -144,7 +144,7 @@ public class ImportServer implements Serializable, Validatable {
 			TaskLogger logger = new TaskLogger() {
 
 				@Override
-				public void log(String message, String taskId) {
+				public void log(String message, String sessionId) {
 					ImportServer.logger.info(message);
 				}
 				

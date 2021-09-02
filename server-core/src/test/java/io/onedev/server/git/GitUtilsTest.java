@@ -352,7 +352,7 @@ public class GitUtilsTest extends AbstractGitTest {
 				}
 			}
 		} finally {
-			deleteDir(tempDir, 3);
+			FileUtils.deleteDir(tempDir, 3);
 		}
 	}
 	
@@ -400,7 +400,7 @@ public class GitUtilsTest extends AbstractGitTest {
 				}
 			}
 		} finally {
-			deleteDir(tempDir, 3);
+			FileUtils.deleteDir(tempDir, 3);
 		}	
 		
 	}	

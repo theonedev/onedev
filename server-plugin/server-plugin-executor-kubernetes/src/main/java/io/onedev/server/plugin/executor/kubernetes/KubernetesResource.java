@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -53,8 +52,6 @@ import io.onedev.server.rest.annotation.Api;
 @Singleton
 public class KubernetesResource {
 
-	public static final String TEST_JOB_TOKEN = UUID.randomUUID().toString();
-	
 	private final JobManager jobManager;
 	
     @Context
@@ -122,7 +119,7 @@ public class KubernetesResource {
 							filesDir, placeholderValues, new TaskLogger() {
 
 						@Override
-						public void log(String message, String taskId) {
+						public void log(String message, String sessionId) {
 							// While testing, ngrok.io buffers response and build can not get log entries 
 							// timely. This won't happen on pagekite however
 							KubernetesHelper.writeInt(output, 1);
@@ -177,10 +174,10 @@ public class KubernetesResource {
 	@Path("/test")
 	public Response test() {
 		String jobToken = Job.getToken(request);
-		if (TEST_JOB_TOKEN.equals(jobToken))
+		if (jobToken != null) 
 			return Response.ok().build();
 		else 
-			return Response.status(400).entity("Invalid or missing job token").build();
+			return Response.status(400).entity("Missing job token").build();
 	}
 	
 	private String getJobToken() {

@@ -83,6 +83,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerDockerExecutor.class);
 
+	private static final Object cacheHomeCreationLock = new Object();
+	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private String runOptions;
@@ -129,17 +131,21 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	private File getCacheHome() {
-		return new File(Bootstrap.getSiteDir(), "cache"); 
+		File file = new File(Bootstrap.getSiteDir(), "cache");
+		if (!file.exists()) synchronized (cacheHomeCreationLock) {
+			FileUtils.createDir(file);
+		}
+		return file;
 	}
-
+	
 	private LineConsumer newInfoLogger(TaskLogger jobLogger) {
 		return new LineConsumer(StandardCharsets.UTF_8.name()) {
 
-			private final String taskId = UUID.randomUUID().toString();
+			private final String sessionId = UUID.randomUUID().toString();
 			
 			@Override
 			public void consume(String line) {
-				jobLogger.log(line, taskId);
+				jobLogger.log(line, sessionId);
 			}
 			
 		};
@@ -196,7 +202,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
 					File hostCacheHome = getCacheHome();
-					FileUtils.createDir(hostCacheHome);
 					
 					jobLogger.log("Allocating job caches...") ;
 					Map<CacheInstance, Date> cacheInstances = getCacheInstances(hostCacheHome);
@@ -574,16 +579,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		File workspaceDir = null;
 		File cacheDir = null;
 
-		Commandline cmd = newDocker();
+		Commandline docker = newDocker();
 		try {
-			workspaceDir = Bootstrap.createTempDir("workspace");
+			workspaceDir = FileUtils.createTempDir("workspace");
 			cacheDir = new File(getCacheHome(), UUID.randomUUID().toString());
 			FileUtils.createDir(cacheDir);
 			
-			cmd.clearArgs();
-			cmd.addArgs("run", "--rm");
+			jobLogger.log("Test running specified docker image...");
+			docker.clearArgs();
+			docker.addArgs("run", "--rm");
 			if (getRunOptions() != null)
-				cmd.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+				docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 			String containerWorkspacePath;
 			String containerCachePath;
 			if (SystemUtils.IS_OS_WINDOWS) {
@@ -593,18 +599,18 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				containerWorkspacePath = "/onedev-build/workspace";
 				containerCachePath = "/onedev-build/cache";
 			}
-			cmd.addArgs("-v", getOuterPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
-			cmd.addArgs("-v", getOuterPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
+			docker.addArgs("-v", getOuterPath(workspaceDir.getAbsolutePath()) + ":" + containerWorkspacePath);
+			docker.addArgs("-v", getOuterPath(cacheDir.getAbsolutePath()) + ":" + containerCachePath);
 			
-			cmd.addArgs("-w", containerWorkspacePath);
-			cmd.addArgs(testData.getDockerImage());
+			docker.addArgs("-w", containerWorkspacePath);
+			docker.addArgs(testData.getDockerImage());
 			
 			if (SystemUtils.IS_OS_WINDOWS) 
-				cmd.addArgs("cmd", "/c", "echo hello from container");
+				docker.addArgs("cmd", "/c", "echo hello from container");
 			else 
-				cmd.addArgs("sh", "-c", "echo hello from container");
+				docker.addArgs("sh", "-c", "echo hello from container");
 			
-			cmd.execute(new LineConsumer() {
+			docker.execute(new LineConsumer() {
 
 				@Override
 				public void consume(String line) {
@@ -627,10 +633,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		}
 		
 		if (!SystemUtils.IS_OS_WINDOWS) {
-			jobLogger.log("Checking busybox...");
-			cmd = newDocker();
-			cmd.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
-			cmd.execute(new LineConsumer() {
+			jobLogger.log("Test running busybox...");
+			docker = newDocker();
+			docker.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
+			docker.execute(new LineConsumer() {
 
 				@Override
 				public void consume(String line) {

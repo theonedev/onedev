@@ -146,7 +146,7 @@ public abstract class TaskButton extends AjaxButton {
 				TaskLogger logger = new TaskLogger() {
 
 					@Override
-					public void log(String message, String taskId) {
+					public void log(String message, String sessionId) {
 						synchronized (messages) {
 							messages.add(JobLogEntryEx.parse(message, new StyleBuilder()));
 						}

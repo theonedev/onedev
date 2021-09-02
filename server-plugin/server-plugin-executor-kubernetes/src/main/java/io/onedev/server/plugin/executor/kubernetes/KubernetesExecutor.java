@@ -199,7 +199,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
-		execute(KubernetesResource.TEST_JOB_TOKEN, jobLogger, testData.getDockerImage());
+		execute(UUID.randomUUID().toString(), jobLogger, testData.getDockerImage());
 	}
 	
 	private Commandline newKubeCtl() {
@@ -1373,7 +1373,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			class Logger extends LineConsumer {
 
-				private final String taskId = UUID.randomUUID().toString();
+				private final String sessionId = UUID.randomUUID().toString();
 				
 				@Override
 				public void consume(String line) {
@@ -1397,12 +1397,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
 							if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
 								lastInstantRef.set(instant);
-							jobLogger.log(StringUtils.substringAfter(line, " "), taskId);
+							jobLogger.log(StringUtils.substringAfter(line, " "), sessionId);
 						} catch (DateTimeParseException e) {
-							jobLogger.log(line, taskId);
+							jobLogger.log(line, sessionId);
 						}
 					} else {
-						jobLogger.log(line, taskId);
+						jobLogger.log(line, sessionId);
 					}
 				}
 				

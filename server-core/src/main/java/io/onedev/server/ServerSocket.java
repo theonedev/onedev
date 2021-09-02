@@ -22,10 +22,12 @@ import io.onedev.agent.MessageType;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.exception.NotReadyException;
+import io.onedev.server.tasklog.JobLogManager;
 
 @WebSocket
 public class ServerSocket {
@@ -125,13 +127,13 @@ public class ServerSocket {
 	    		String dataString = new String(messageData, StandardCharsets.UTF_8);
 	    		String jobToken = StringUtils.substringBefore(dataString, ":");
 	    		String remaining = StringUtils.substringAfter(dataString, ":");
-	    		String taskId = StringUtils.substringBefore(remaining, ":");
-	    		if (taskId.length() == 0)
-	    			taskId = null;
+	    		String sessionId = StringUtils.substringBefore(remaining, ":");
+	    		if (sessionId.length() == 0)
+	    			sessionId = null;
 	    		String logMessage = StringUtils.substringAfter(remaining, ":");
-	    		JobContext jobContext = OneDev.getInstance(JobManager.class).getJobContext(jobToken, false);
-	    		if (jobContext != null)
-	    			jobContext.getLogger().log(logMessage, taskId);
+	    		TaskLogger logger = OneDev.getInstance(JobLogManager.class).getLogger(jobToken);
+	    		if (logger != null)
+	    			logger.log(logMessage, sessionId);
 	    		} catch (Exception e) {
 	    			logger.error("Error processing job log", e);
 	    		}

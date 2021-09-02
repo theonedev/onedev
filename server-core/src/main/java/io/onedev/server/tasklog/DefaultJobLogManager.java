@@ -52,9 +52,9 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
-public class DefaultLogManager implements LogManager {
+public class DefaultJobLogManager implements JobLogManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultLogManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultJobLogManager.class);
 	
 	private static final int MIN_CACHE_ENTRIES = 5000;
 
@@ -74,8 +74,10 @@ public class DefaultLogManager implements LogManager {
 	
 	private final Map<Long, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
+	private final Map<String, TaskLogger> jobLoggers = new ConcurrentHashMap<>();
+	
 	@Inject
-	public DefaultLogManager(StorageManager storageManager, WebSocketManager webSocketManager, 
+	public DefaultJobLogManager(StorageManager storageManager, WebSocketManager webSocketManager, 
 			BuildManager buildManager) {
 		this.storageManager = storageManager;
 		this.webSocketManager = webSocketManager;
@@ -88,7 +90,7 @@ public class DefaultLogManager implements LogManager {
 	}
 	
 	@Override
-	public TaskLogger getLogger(Build build, Collection<String> jobSecretsToMask) {
+	public TaskLogger newLogger(Build build, Collection<String> jobSecretsToMask) {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
@@ -143,14 +145,14 @@ public class DefaultLogManager implements LogManager {
 			}
 			
 			@Override
-			public void log(String message, String taskId) {
+			public void log(String message, String sessionId) {
 				try {
 					StyleBuilder styleBuilder;
-					if (taskId != null) {
-						styleBuilder = styleBuilders.get(taskId);
+					if (sessionId != null) {
+						styleBuilder = styleBuilders.get(sessionId);
 						if (styleBuilder == null) {
 							styleBuilder = new StyleBuilder();
-							styleBuilders.put(taskId, styleBuilder);
+							styleBuilders.put(sessionId, styleBuilder);
 						}
 					} else {
 						styleBuilder = new StyleBuilder();
@@ -503,5 +505,20 @@ public class DefaultLogManager implements LogManager {
 			}
 		}
 				
+	}
+
+	@Override
+	public TaskLogger getLogger(String jobId) {
+		return jobLoggers.get(jobId);
+	}
+
+	@Override
+	public void registerLogger(String jobId, TaskLogger logger) {
+		jobLoggers.put(jobId, logger);
+	}
+
+	@Override
+	public void deregisterLogger(String jobId) {
+		jobLoggers.remove(jobId);
 	}
 }

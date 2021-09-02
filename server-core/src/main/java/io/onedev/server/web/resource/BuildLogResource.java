@@ -21,7 +21,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.tasklog.LogManager;
+import io.onedev.server.tasklog.JobLogManager;
 
 public class BuildLogResource extends AbstractResource {
 
@@ -74,7 +74,7 @@ public class BuildLogResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				try (InputStream is = OneDev.getInstance(LogManager.class).openLogStream(build)) {
+				try (InputStream is = OneDev.getInstance(JobLogManager.class).openLogStream(build)) {
 					IOUtils.copy(is, attributes.getResponse().getOutputStream());
 				}
 			}			

@@ -31,6 +31,9 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Resources;
+
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.command.ErrorCollector;
 import io.onedev.commons.utils.command.ExecutionResult;
 import io.onedev.server.OneDev;
@@ -100,7 +103,7 @@ public class GitFilter implements Filter {
 		String projectName = StringUtils.strip(projectInfo, "/");
 		if (projectName.contains("/"))
 			projectName = StringUtils.substringAfterLast(projectName, "/");
-		
+
 		Project project = projectManager.find(projectName);
 		if (project == null) 
 			throw new GitException(String.format("Unable to find project %s", projectName));
@@ -131,36 +134,44 @@ public class GitFilter implements Filter {
 			String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
 			Project project = getProject(request, response, projectInfo);
 			
-			doNotCache(response);
-			response.setHeader("Content-Type", "application/x-" + service + "-result");			
+			if (project != null) {
+				doNotCache(response);
+				response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-			String serverUrl;
-	        if (serverConfig.getHttpPort() != 0)
-	            serverUrl = "http://localhost:" + serverConfig.getHttpPort();
-	        else 
-	            serverUrl = "https://localhost:" + serverConfig.getHttpsPort();
+				String serverUrl;
+		        if (serverConfig.getHttpPort() != 0)
+		            serverUrl = "http://localhost:" + serverConfig.getHttpPort();
+		        else 
+		            serverUrl = "https://localhost:" + serverConfig.getHttpsPort();
 
-	        environments.put("ONEDEV_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
-			environments.put("ONEDEV_URL", serverUrl);
-			environments.put("ONEDEV_USER_ID", SecurityUtils.getUserId().toString());
-			environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
-			
-			// to be compatible with old repository
-	        environments.put("GITPLEX_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
-			environments.put("GITPLEX_URL", serverUrl);
-			environments.put("GITPLEX_USER_ID", SecurityUtils.getUserId().toString());
-			environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
-			
-			gitDir = storageManager.getProjectGitDir(project.getId());
+		        environments.put("ONEDEV_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
+				environments.put("ONEDEV_URL", serverUrl);
+				environments.put("ONEDEV_USER_ID", SecurityUtils.getUserId().toString());
+				environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
+				
+				// to be compatible with old repository
+		        environments.put("GITPLEX_CURL", settingManager.getSystemSetting().getCurlConfig().getExecutable());
+				environments.put("GITPLEX_URL", serverUrl);
+				environments.put("GITPLEX_USER_ID", SecurityUtils.getUserId().toString());
+				environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
+				
+				gitDir = storageManager.getProjectGitDir(project.getId());
 
-			if (GitSmartHttpTools.isUploadPack(request)) {
-				checkPullPermission(request, project);
-				upload = true;
+				if (GitSmartHttpTools.isUploadPack(request)) {
+					checkPullPermission(request, project);
+					upload = true;
+				} else {
+					if (!SecurityUtils.canWriteCode(project))
+						throw new UnauthorizedException("You do not have permission to push to this project.");
+					upload = false;
+				}			
 			} else {
-				if (!SecurityUtils.canWriteCode(project))
-					throw new UnauthorizedException("You do not have permission to push to this project.");
-				upload = false;
-			}			
+				gitDir = null;
+				if (GitSmartHttpTools.isUploadPack(request)) 
+					upload = true;
+				else 
+					throw new UnsupportedOperationException("Can not push to the example repository");
+			}
 		} finally {
 			sessionManager.closeSession();
 		}
@@ -190,9 +201,23 @@ public class GitFilter implements Filter {
 							}
 							
 						};
-						UploadPackCommand upload = new UploadPackCommand(gitDir, environments);
-						upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
-						ExecutionResult result = upload.call();
+
+						ExecutionResult result;
+						if (gitDir != null) {
+							UploadPackCommand upload = new UploadPackCommand(gitDir, environments);
+							upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
+							result = upload.call();
+						} else {
+							File tempDir = FileUtils.createTempDir();
+							try {
+								populateExampleRepo(tempDir);
+								UploadPackCommand upload = new UploadPackCommand(tempDir, environments);
+								upload.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
+								result = upload.call();
+							} finally {
+								FileUtils.deleteDir(tempDir, 3);
+							}
+						}
 						result.setStderr(stderr.getMessage());
 						
 						if (result.getReturnCode() != 0 && !toleratedErrors.get())
@@ -221,6 +246,7 @@ public class GitFilter implements Filter {
 							}
 							
 						};
+						
 						ReceivePackCommand receive = new ReceivePackCommand(gitDir, environments);
 						receive.stdin(stdin).stdout(stdout).stderr(stderr).statelessRpc(true);
 						ExecutionResult result = receive.call();
@@ -272,25 +298,46 @@ public class GitFilter implements Filter {
 			Project project = getProject(request, response, projectInfo);
 			String service = request.getParameter("service");
 			
-			gitDir = storageManager.getProjectGitDir(project.getId());
-
-			if (service.contains("upload")) {
-				checkPullPermission(request, project);
-				writeInitial(response, service);
-				upload = true;
+			if (project != null) {
+				gitDir = storageManager.getProjectGitDir(project.getId());
+	
+				if (service.contains("upload")) {
+					checkPullPermission(request, project);
+					writeInitial(response, service);
+					upload = true;
+				} else {
+					if (!SecurityUtils.canWriteCode(project))
+						throw new UnauthorizedException("You do not have permission to push to this project.");
+					writeInitial(response, service);
+					upload = false;
+				}
 			} else {
-				if (!SecurityUtils.canWriteCode(project))
-					throw new UnauthorizedException("You do not have permission to push to this project.");
-				writeInitial(response, service);
-				upload = false;
+				gitDir = null;
+				if (service.contains("upload")) {
+					writeInitial(response, service);
+					upload = true;
+				} else {
+					throw new UnsupportedOperationException("Can not push to the example repository");
+				}
 			}
 		} finally {
 			sessionManager.closeSession();
 		}
-		if (upload)
-			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
-		else
+		if (upload) {
+			if (gitDir != null) {
+				new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
+			} else {
+				File tempDir = FileUtils.createTempDir();
+				try {
+					populateExampleRepo(tempDir);
+					new AdvertiseUploadRefsCommand(tempDir).output(response.getOutputStream()).call();
+				} finally {
+					FileUtils.deleteDir(tempDir, 3);
+				}
+			}
+		} else {
 			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();
+		}
 	}
 
 	@Override
@@ -323,6 +370,14 @@ public class GitFilter implements Filter {
 		} catch (GitException|InterruptedException|ExecutionException e) {
 			logger.error("Error serving git request", e);
 			GitSmartHttpTools.sendError(httpRequest, httpResponse, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+	}
+	
+	private static void populateExampleRepo(File dir) {
+		try (InputStream is = Resources.getResource(GitFilter.class, "example-repo.zip").openStream()) {
+			FileUtils.unzip(is, dir);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

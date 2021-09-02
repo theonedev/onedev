@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
-import io.onedev.server.tasklog.LogManager;
+import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.util.criteria.Criteria;
 
 public class LogCriteria extends Criteria<Build> {
@@ -20,7 +20,7 @@ public class LogCriteria extends Criteria<Build> {
 	@Override
 	public boolean matches(Build build) {
 		Pattern pattern = Pattern.compile(value);
-		return OneDev.getInstance(LogManager.class).matches(build, pattern);
+		return OneDev.getInstance(JobLogManager.class).matches(build, pattern);
 	}
 
 	@Override

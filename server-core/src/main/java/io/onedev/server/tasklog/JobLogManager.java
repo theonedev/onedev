@@ -5,13 +5,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.job.log.JobLogEntryEx;
 import io.onedev.server.model.Build;
 
-public interface LogManager {
+public interface JobLogManager {
 	
-	TaskLogger getLogger(Build build, Collection<String> jobSecrets);
+	TaskLogger newLogger(Build build, Collection<String> jobSecrets);
 	
 	/**
 	 * Read specified number of log entries from specified build, starting from specified index 
@@ -45,5 +47,12 @@ public interface LogManager {
 	LogSnippet readLogSnippetReversely(Build build, int count);
 	
 	InputStream openLogStream(Build build);
+	
+	@Nullable
+	TaskLogger getLogger(String jobId);
+	
+	void registerLogger(String jobId, TaskLogger logger);
+	
+	void deregisterLogger(String jobId);
 	
 }

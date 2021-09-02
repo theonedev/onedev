@@ -51,7 +51,7 @@ public class IssueImportSource implements Serializable {
 			Collection<JsonNode> projectNodes = ImportUtils.list(client, apiEndpoint, new TaskLogger() {
 
 				@Override
-				public void log(String message, String taskId) {
+				public void log(String message, String sessionId) {
 					logger.info(message);
 				}
 				
