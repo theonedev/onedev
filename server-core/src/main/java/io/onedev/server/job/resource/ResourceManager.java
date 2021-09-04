@@ -12,4 +12,6 @@ public interface ResourceManager {
 	void run(AgentAwareRunnable runnable, Map<String, Integer> serverResourceRequirements, 
 			AgentQuery agentQuery, Map<String, Integer> agentResourceRequirements, TaskLogger logger);
 	
+	void waitingForAgentResourceToBeReleased(Long agentId);
+	
 }

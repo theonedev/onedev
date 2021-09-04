@@ -1055,7 +1055,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public void run() {
+		boolean waitingForJobFinishLogged = false;
 		while (!jobExecutions.isEmpty() || thread != null) {
+			if (thread == null && !waitingForJobFinishLogged) {
+				logger.info("Waiting for running jobs to finish...");
+				waitingForJobFinishLogged = true;
+			}
 			try {
 				synchronized (this) {
 					transactionManager.run(new Runnable() {

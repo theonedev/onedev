@@ -162,6 +162,7 @@ public class DefaultResourceManager implements ResourceManager {
 		Set<Long> agentIds = agentManager.query(agentQuery, 0, Integer.MAX_VALUE)
 				.stream().map(it->it.getId()).collect(Collectors.toSet());
 		Long agentId = 0L;
+		ResourceHolder agentResourceHolder = null;
 		synchronized(this) {
 			logger.log("Waiting for resources...");
 			String uuid = UUID.randomUUID().toString();
@@ -171,13 +172,14 @@ public class DefaultResourceManager implements ResourceManager {
 					if (serverResourceHolder.getSpareResources(serverResourceRequirements) != 0) {
 						int maxSpareResources = 0;
 						for (Long each: agentIds) {
-							ResourceHolder agentResourceHolder = agentResourceHolders.get(each);
+							ResourceHolder eachAgentResourceHolder = agentResourceHolders.get(each);
 							Boolean paused = agentPaused.get(each);
-							if (agentResourceHolder != null && paused != null && !paused) {
-								int spareResources = agentResourceHolder.getSpareResources(agentResourceRequirements);
+							if (eachAgentResourceHolder != null && paused != null && !paused) {
+								int spareResources = eachAgentResourceHolder.getSpareResources(agentResourceRequirements);
 								if (spareResources > maxSpareResources) {
 									agentId = each;
 									maxSpareResources = spareResources;
+									agentResourceHolder = eachAgentResourceHolder;
 								}
 							}
 						}
@@ -190,7 +192,7 @@ public class DefaultResourceManager implements ResourceManager {
 						throw new RuntimeException(e);
 					}
 				}
-				agentResourceHolders.get(agentId).acquireResources(agentResourceRequirements);
+				agentResourceHolder.acquireResources(agentResourceRequirements);
 				serverResourceHolder.acquireResources(serverResourceRequirements);
 			} finally {
 				queryCaches.remove(uuid);
@@ -207,9 +209,7 @@ public class DefaultResourceManager implements ResourceManager {
 		} finally {
 			synchronized (this) {
 				serverResourceHolder.releaseResources(serverResourceRequirements);
-				ResourceHolder agentResourceHolder = agentResourceHolders.get(agentId);
-				if(agentResourceHolder != null)
-					agentResourceHolder.releaseResources(agentResourceRequirements);
+				agentResourceHolder.releaseResources(agentResourceRequirements);
 				notifyAll();
 			}
 		}	
@@ -227,4 +227,20 @@ public class DefaultResourceManager implements ResourceManager {
 		}
 		
 	}
+
+	@Override
+	public void waitingForAgentResourceToBeReleased(Long agentId) {
+		synchronized (this) {
+			ResourceHolder agentResourceHolder = agentResourceHolders.remove(agentId);
+			if (agentResourceHolder != null) {
+				while (agentResourceHolder.hasUsedResources()) {
+					try {
+						wait();
+					} catch (InterruptedException e) {
+					}
+				}
+			}
+		}
+	}
+	
 }

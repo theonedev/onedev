@@ -91,6 +91,11 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 					IModel<AgentToken> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getValue()));
 			}
+
+			@Override
+			public String getCssClass() {
+				return "text-nowrap align-top font-size-sm text-monospace";
+			}
 			
 		});
 		
@@ -104,6 +109,11 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 					cellItem.add(new Label(componentId, token.getNote()));
 				else
 					cellItem.add(new Label(componentId, "<i>No note</i>").setEscapeModelStrings(false));
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "align-top font-size-sm";
 			}
 			
 		});
@@ -137,6 +147,11 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 				});
 				
 				cellItem.add(fragment);
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "text-nowrap align-top";
 			}
 			
 		});

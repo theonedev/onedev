@@ -84,4 +84,12 @@ public class ResourceHolder {
 		totalResources.put(name, count);
 	}
 	
+	public boolean hasUsedResources() {
+		for (Integer usedCount: usedResources.values()) {
+			if (usedCount != 0)
+				return true;
+		}
+		return false;
+	}
+	
 }

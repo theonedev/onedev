@@ -19,6 +19,7 @@ import io.onedev.agent.AgentData;
 import io.onedev.agent.CallData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageType;
+import io.onedev.agent.WaitingForAgentResourceToBeReleased;
 import io.onedev.agent.WebsocketUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -27,6 +28,7 @@ import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.exception.NotReadyException;
+import io.onedev.server.job.resource.ResourceManager;
 import io.onedev.server.tasklog.JobLogManager;
 
 @WebSocket
@@ -159,7 +161,12 @@ public class ServerSocket {
     
     private Serializable service(Serializable request) {
 		try {
-			throw new ExplicitException("Unknown request: " + request.getClass());
+			if (request instanceof WaitingForAgentResourceToBeReleased) {
+				OneDev.getInstance(ResourceManager.class).waitingForAgentResourceToBeReleased(agentId);
+				return null;
+			} else {
+				throw new ExplicitException("Unknown request: " + request.getClass());
+			}
 		} catch (Exception e) {
 			logger.error("Error servicing websocket request", e);
 			return e;
