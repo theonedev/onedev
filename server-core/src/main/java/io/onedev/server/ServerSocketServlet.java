@@ -43,12 +43,12 @@ public class ServerSocketServlet extends WebSocketServlet {
 		if (bearer != null && bearer.startsWith(Agent.BEARER + " ")) {
 			String tokenValue = bearer.substring(Agent.BEARER.length() + 1);
 			AgentToken token = tokenManager.find(tokenValue);
-			if (token != null)
+			if (token != null) 
 				super.service(request, response);
 			else 
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid agent token");
+				response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid agent token");
 		} else {
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No agent token");
+			response.sendError(HttpServletResponse.SC_FORBIDDEN, "No agent token");
 		}
 	}
 	
