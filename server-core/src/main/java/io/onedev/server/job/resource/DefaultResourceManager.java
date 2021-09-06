@@ -1,6 +1,7 @@
 package io.onedev.server.job.resource;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -200,6 +201,7 @@ public class DefaultResourceManager implements ResourceManager {
 		}
 
 		try {
+			updateLastUsedDate(agentId);
 			Session agentSession = agentManager.getAgentSession(agentId);
 			if (agentSession == null)
 				throw new ExplicitException("Agent goes offline");
@@ -213,6 +215,11 @@ public class DefaultResourceManager implements ResourceManager {
 				notifyAll();
 			}
 		}	
+	}
+	
+	@Transactional
+	protected void updateLastUsedDate(Long agentId) {
+		agentManager.load(agentId).setLastUsedDate(new Date());
 	}
 
 	private static class QueryCache {
