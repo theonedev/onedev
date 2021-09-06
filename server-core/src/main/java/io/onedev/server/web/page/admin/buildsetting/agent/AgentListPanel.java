@@ -835,6 +835,11 @@ class AgentListPanel extends Panel {
 			public String getCssClass() {
 				return "d-none d-lg-table-cell";
 			}
+
+			@Override
+			public Component getHeader(String componentId) {
+				return new Fragment(componentId, "cpuHeaderFrag", AgentListPanel.this);
+			}
 			
 		});
 		
@@ -849,6 +854,11 @@ class AgentListPanel extends Panel {
 			@Override
 			public String getCssClass() {
 				return "d-none d-lg-table-cell";
+			}
+			
+			@Override
+			public Component getHeader(String componentId) {
+				return new Fragment(componentId, "memoryHeaderFrag", AgentListPanel.this);
 			}
 			
 		});

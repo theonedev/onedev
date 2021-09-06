@@ -77,7 +77,27 @@ public class AgentResource extends AbstractResource {
 					props.setProperty("agentToken", token.getValue());
 					
 					try (OutputStream os = new FileOutputStream(new File(agentDir, "agent/conf/agent.properties"))) {
-						props.store(os, "");
+						String comment = String.format(""
+								+ " %s: required property to specify url of OneDev server\n"
+								+ " %s: required property to authenticate to OneDev server.\n"
+								+ "     Will be generated automatically when agent is\n"
+								+ "     downloaded. Can be generated manually from agent\n"
+								+ "     management page if desired\n"
+								+ " %s: optional property to specify name of the agent.\n"
+								+ "     Use host name if omitted\n"
+								+ " %s: optional property to specify cpu capability of the\n"
+								+ "     agent in millis. It is normally (cpu cores)*1000.\n"
+								+ "     Omitted to detect automatically\n"
+								+ " %s: optional property to specify physical memory of the\n"
+								+ "     agent in mega bytes. Omitted to detect automatically\n"
+								+ " %s: optional property to specify path to git command\n"
+								+ "     line. Omitted to search in system path\n"
+								+ " %s: optional property to specify path to docker command\n"
+								+ "     line. Omitted to search in system path\n"
+								+ "", 
+								Agent.SERVER_URL_KEY, Agent.AGENT_TOKEN_KEY, Agent.AGENT_NAME_KEY, 
+								Agent.AGENT_CPU_KEY, Agent.AGENT_MEMORY_KEY, Agent.GIT_PATH_KEY, Agent.DOCKER_PATH_KEY);
+						props.store(os, comment);
 					}
 					
 					try (
