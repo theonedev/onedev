@@ -81,6 +81,7 @@ import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=300, description="This executor runs build jobs as pods in a kubernetes cluster. "
+		+ "No any agents are required."
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "setting as job pods need to access it to download source and artifacts")
 @Horizontal

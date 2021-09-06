@@ -31,7 +31,7 @@ import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
-@Editable(order=210, description="This executor runs build jobs as docker containers on remote machines via agents")
+@Editable(order=210, description="This executor runs build jobs as docker containers on remote machines via <a href='/administration/agents' target='_blank'>agents</a>")
 public class RemoteDockerExecutor extends ServerDockerExecutor implements AgentQueryAware {
 
 	private static final long serialVersionUID = 1L;
