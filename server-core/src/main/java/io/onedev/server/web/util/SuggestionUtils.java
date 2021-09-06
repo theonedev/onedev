@@ -29,6 +29,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
+import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildMetricManager;
@@ -148,7 +149,7 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestVariables(Project project, BuildSpec buildSpec, 
 			@Nullable List<ParamSpec> paramSpecs, String matchWith, boolean withBuildVersion, 
-			boolean withFile) {
+			boolean withDynamicVariables) {
 		String lowerCaseMatchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -167,7 +168,10 @@ public class SuggestionUtils {
 		for (JobSecret secret: project.getBuildSetting().getJobSecrets())
 			variables.put(VariableInterpolator.PREFIX_SECRET + secret.getName(), null);
 
-		if (withFile) {
+		if (withDynamicVariables) {
+			for (String attributeName: OneDev.getInstance(AgentAttributeManager.class).getAttributeNames()) 
+				variables.put(VariableInterpolator.PREFIX_ATTRIBUTE + attributeName, "Use value of specified agent attribute");
+			
 			String filePath;
 			if (lowerCaseMatchWith.startsWith(VariableInterpolator.PREFIX_FILE))
 				filePath = matchWith.substring(VariableInterpolator.PREFIX_FILE.length());

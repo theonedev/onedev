@@ -60,7 +60,7 @@ public class JobDependency implements Serializable {
 
 	@Editable(order=200, name="Job Parameters")
 	@ParamSpecProvider("getParamSpecs")
-	@VariableOption(withBuildVersion=false, withFile=false)
+	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
 	public List<ParamSupply> getJobParams() {
 		return jobParams;

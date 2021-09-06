@@ -39,6 +39,8 @@ public class VariableInterpolator {
 	
 	public static final String PREFIX_FILE = "file:";
 	
+	public static final String PREFIX_ATTRIBUTE = "attribute:";
+	
 	private final EditableStringTransformer beanPropertyTransformer;
 	
 	private final Function<String, String> variableResolver;
@@ -113,6 +115,8 @@ public class VariableInterpolator {
 						return "";
 				} else if (t.startsWith(PREFIX_FILE)) {
 					return PLACEHOLDER_PREFIX + WORKSPACE + "/" + t.substring(PREFIX_FILE.length()) + PLACEHOLDER_SUFFIX;
+				} else if (t.startsWith(PREFIX_ATTRIBUTE)) {
+					return PLACEHOLDER_PREFIX + ATTRIBUTES + "/" + t.substring(PREFIX_ATTRIBUTE.length()) + PLACEHOLDER_SUFFIX;
 				} else {
 					throw new ExplicitException("Unrecognized interpolation variable: " + t);
 				}

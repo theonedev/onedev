@@ -65,7 +65,7 @@ public class UseTemplateStep extends Step {
 
 	@Editable(name="Step Parameters", order=200)
 	@ParamSpecProvider("getParamSpecs")
-	@VariableOption(withBuildVersion=true, withFile=true)
+	@VariableOption(withBuildVersion=true, withDynamicVariables=true)
 	@OmitName
 	@Valid
 	public List<ParamSupply> getParams() {

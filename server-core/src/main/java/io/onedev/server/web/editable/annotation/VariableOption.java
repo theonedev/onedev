@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 public @interface VariableOption {
 	boolean withBuildVersion();
 	
-	boolean withFile();
+	boolean withDynamicVariables();
 }

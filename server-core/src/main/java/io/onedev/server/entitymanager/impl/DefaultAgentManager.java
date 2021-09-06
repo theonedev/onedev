@@ -54,6 +54,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.agent.AgentQuery;
+import io.onedev.server.util.validation.AttributeNameValidator;
 
 @Singleton
 public class DefaultAgentManager extends BaseEntityManager<Agent> implements AgentManager {
@@ -118,8 +119,13 @@ public class DefaultAgentManager extends BaseEntityManager<Agent> implements Age
 	@Override
 	public Long agentConnected(AgentData data, Session session) {
 		for (String attributeName: data.getAttributes().keySet()) {
-			if (Agent.ALL_FIELDS.contains(attributeName)) 
+			if (!AttributeNameValidator.PATTERN.matcher(attributeName).matches()) {
+				throw new ExplicitException("Attribute '" + attributeName + "' should start and end with "
+						+ "alphanumeric or underscore. Only alphanumeric, underscore, dash, space and "
+						+ "dot are allowed in the middle.");
+			} else if (Agent.ALL_FIELDS.contains(attributeName)) { 
 				throw new ExplicitException("Attribute '" + attributeName + "' is reserved");
+			}
 		}
 		
 		AgentToken token = tokenManager.find(data.getToken());

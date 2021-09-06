@@ -59,7 +59,7 @@ public abstract class JobTrigger implements Serializable {
 
 	@Editable(name="Job Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
-	@VariableOption(withBuildVersion=false, withFile=false)
+	@VariableOption(withBuildVersion=false, withDynamicVariables=false)
 	@OmitName
 	@Valid
 	public List<ParamSupply> getParams() {

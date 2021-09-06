@@ -94,7 +94,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 
 			@Override
 			public String getCssClass() {
-				return "text-nowrap align-top font-size-sm text-monospace";
+				return "text-nowrap align-top text-monospace";
 			}
 			
 		});
@@ -113,7 +113,7 @@ public class TokenListPanel extends GenericPanel<List<AgentToken>> {
 			
 			@Override
 			public String getCssClass() {
-				return "align-top font-size-sm";
+				return "align-top";
 			}
 			
 		});

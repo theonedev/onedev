@@ -1,3 +1,10 @@
+/*
+Experiment a naive dark mode
+html {
+  filter: invert(1);
+}
+*/
+
 .pointer {
 	cursor: pointer;
 }

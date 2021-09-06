@@ -70,7 +70,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private final boolean withBuildVersion;
 	
-	private final boolean withFiles;
+	private final boolean withDynamicVariables;
 	
 	private transient Map<String, ParamSpec> paramSpecs;
 	
@@ -91,10 +91,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		VariableOption variableOption = propertyDescriptor.getPropertyGetter().getAnnotation(VariableOption.class);
 		if (variableOption != null) {
 			withBuildVersion = variableOption.withBuildVersion();
-			withFiles = variableOption.withFile();
+			withDynamicVariables = variableOption.withDynamicVariables();
 		} else {
 			withBuildVersion = true;
-			withFiles = true;
+			withDynamicVariables = true;
 		}
 	}
 	
@@ -310,7 +310,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 					@Override
 					protected List<InputSuggestion> suggestVariables(String matchWith) {
-						return BuildSpec.suggestVariables(matchWith, withBuildVersion, withFiles);
+						return BuildSpec.suggestVariables(matchWith, withBuildVersion, withDynamicVariables);
 					}
 					
 					@Override

@@ -58,7 +58,7 @@ public class RunJobAction extends PostBuildAction {
 	
 	@Editable(name="Job Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
-	@VariableOption(withBuildVersion=true, withFile=false)
+	@VariableOption(withBuildVersion=true, withDynamicVariables=false)
 	@OmitName
 	@Valid
 	public List<ParamSupply> getJobParams() {
