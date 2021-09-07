@@ -20,7 +20,7 @@ class AgentDownloadPanel extends Panel {
 		
 		add(new ExternalLink("agent", "/downloads/agent.zip"));
 		add(new BookmarkablePageLink<Void>("systemSetting", SystemSettingPage.class));
-		add(new ExternalLink("installationGuide", OneDev.getInstance().getDocRoot() + "/agent-installation-guide.md"));
+		add(new ExternalLink("agentManagement", OneDev.getInstance().getDocRoot() + "/pages/agent-management.md"));
 	}
 	
 }
