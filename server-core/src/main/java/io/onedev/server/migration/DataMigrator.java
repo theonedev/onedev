@@ -2771,4 +2771,182 @@ public class DataMigrator {
 		}
 	}
 	
+	@SuppressWarnings("restriction")
+	private void migrate62(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							int cpu = Runtime.getRuntime().availableProcessors()*1000;
+							valueElement.addElement("cpu").setText(String.valueOf(cpu));
+							
+							com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
+								     java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+							int memory = (int)(os.getTotalPhysicalMemorySize()/1024/1024);				
+							valueElement.addElement("memory").setText(String.valueOf(memory));
+						}
+					} else if (key.equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							for (Element executorElement: valueElement.elements()) {
+								if (executorElement.getName().contains("DockerExecutor")) {
+									executorElement.setName("io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor");
+									executorElement.element("capacity").detach();
+								}
+							}
+						}						
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element userProjectQueriesElement = element.element("userProjectQueries");
+					if (userProjectQueriesElement != null)
+						userProjectQueriesElement.setName("projectQueries");
+					Element userIssueQueriesElement = element.element("userIssueQueries");
+					if (userIssueQueriesElement != null)
+						userIssueQueriesElement.setName("issueQueries");
+					Element userBuildQueriesElement = element.element("userBuildQueries");
+					if (userBuildQueriesElement != null)
+						userBuildQueriesElement.setName("buildQueries");
+					Element userPullRequestQueriesElement = element.element("userPullRequestQueries");
+					if (userPullRequestQueriesElement != null)
+						userPullRequestQueriesElement.setName("pullRequestQueries");
+					
+					Element issueQueryWatchesElement = element.element("issueQueryWatches");
+					for (Element issueQueryWatchElement: issueQueryWatchesElement.elements()) {
+						Element queryNameElement = issueQueryWatchElement.element("string");
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					}
+					Element userIssueQueryWatchesElement = element.element("userIssueQueryWatches");
+					for (Element userIssueQueryWatchElement: userIssueQueryWatchesElement.elements()) {
+						Element queryNameElement = userIssueQueryWatchElement.element("string");
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						userIssueQueryWatchElement.detach();
+						issueQueryWatchesElement.add(userIssueQueryWatchElement);
+					}
+					userIssueQueryWatchesElement.detach();
+					
+					Element pullRequestQueryWatchesElement = element.element("pullRequestQueryWatches");
+					for (Element pullRequestQueryWatchElement: pullRequestQueryWatchesElement.elements()) {
+						Element queryNameElement = pullRequestQueryWatchElement.element("string");
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					}
+					Element userPullRequestQueryWatchesElement = element.element("userPullRequestQueryWatches");
+					for (Element userPullRequestQueryWatchElement: userPullRequestQueryWatchesElement.elements()) {
+						Element queryNameElement = userPullRequestQueryWatchElement.element("string");
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						userPullRequestQueryWatchElement.detach();
+						pullRequestQueryWatchesElement.add(userPullRequestQueryWatchElement);
+					}
+					userPullRequestQueryWatchesElement.detach();
+					
+					Element buildQuerySubscriptionsElement = element.element("buildQuerySubscriptions");
+					for (Element queryNameElement: buildQuerySubscriptionsElement.elements()) 
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					Element userBuildQuerySubscriptionsElement = element.element("userBuildQuerySubscriptions");
+					for (Element queryNameElement: userBuildQuerySubscriptionsElement.elements()) {
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						queryNameElement.detach();
+						buildQuerySubscriptionsElement.add(queryNameElement);
+					}
+					userBuildQuerySubscriptionsElement.detach();
+				}				 
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueQuerySettings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.IssueQueryPersonalization");
+					element.element("userQueries").setName("queries");
+					Element queryWatchesElement = element.element("queryWatches");
+					for (Element queryWatchElement: queryWatchesElement.elements()) {
+						Element queryNameElement = queryWatchElement.element("string");
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					}
+					Element userQueryWatchesElement = element.element("userQueryWatches");
+					for (Element userQueryWatchElement: userQueryWatchesElement.elements()) {
+						Element queryNameElement = userQueryWatchElement.element("string");
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						userQueryWatchElement.detach();
+						queryWatchesElement.add(userQueryWatchElement);
+					}
+					userQueryWatchesElement.detach();
+				}				
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
+			} else if (file.getName().startsWith("PullRequestQuerySettings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.PullRequestQueryPersonalization");
+					element.element("userQueries").setName("queries");
+					Element queryWatchesElement = element.element("queryWatches");
+					for (Element queryWatchElement: queryWatchesElement.elements()) {
+						Element queryNameElement = queryWatchElement.element("string");
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					}
+					Element userQueryWatchesElement = element.element("userQueryWatches");
+					for (Element userQueryWatchElement: userQueryWatchesElement.elements()) {
+						Element queryNameElement = userQueryWatchElement.element("string");
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						userQueryWatchElement.detach();
+						queryWatchesElement.add(userQueryWatchElement);
+					}
+					userQueryWatchesElement.detach();
+				}				
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
+			} else if (file.getName().startsWith("BuildQuerySettings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.BuildQueryPersonalization");
+					element.element("userQueries").setName("queries");
+					Element querySubscriptionsElement = element.element("querySubscriptions");
+					for (Element queryNameElement: querySubscriptionsElement.elements()) 
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					Element userQuerySubscriptionsElement = element.element("userQuerySubscriptions");
+					for (Element queryNameElement: userQuerySubscriptionsElement.elements()) {
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						queryNameElement.detach();
+						querySubscriptionsElement.add(queryNameElement);
+					}
+					userQuerySubscriptionsElement.detach();
+				}				
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
+			} else if (file.getName().startsWith("CodeCommentQuerySettings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.CodeCommentQueryPersonalization");
+					element.element("userQueries").setName("queries");
+				}				
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
+			} else if (file.getName().startsWith("CommitQuerySettings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.CommitQueryPersonalization");
+					element.element("userQueries").setName("queries");
+					Element querySubscriptionsElement = element.element("projectQuerySubscriptions");
+					querySubscriptionsElement.setName("querySubscriptions");
+					for (Element queryNameElement: querySubscriptionsElement.elements()) 
+						queryNameElement.setText("g:" + queryNameElement.getText());
+					Element userQuerySubscriptionsElement = element.element("userQuerySubscriptions");
+					for (Element queryNameElement: userQuerySubscriptionsElement.elements()) {
+						queryNameElement.setText("p:" + queryNameElement.getText());
+						queryNameElement.detach();
+						querySubscriptionsElement.add(queryNameElement);
+					}
+					userQuerySubscriptionsElement.detach();
+				}				
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(dataDir, file.getName().replace("Settings", "Personalizations")), false);
+			}
+		}
+	}
+	
 }

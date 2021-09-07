@@ -2,6 +2,8 @@ package io.onedev.server.tasklog;
 
 import java.io.Serializable;
 
+import io.onedev.server.buildspec.job.log.Style;
+
 public class StyleBuilder implements Serializable {
 
 	private static final long serialVersionUID = 1L;

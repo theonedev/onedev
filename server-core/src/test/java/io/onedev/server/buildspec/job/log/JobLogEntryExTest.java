@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.tasklog.Style;
 import io.onedev.server.tasklog.StyleBuilder;
 
 public class JobLogEntryExTest {

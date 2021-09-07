@@ -1045,4 +1045,46 @@ public class BuildSpec implements Serializable, Validatable {
 		}			
 	}	
 	
+	@SuppressWarnings("unused")
+	private void migrate10(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specObjectKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specObjectKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (NodeTuple jobTuple: jobNode.getValue()) {
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("cpuRequirement")) {
+							ScalarNode cpuRequirementNode = (ScalarNode) jobTuple.getValueNode();
+							String cpuRequirement = cpuRequirementNode.getValue();
+							cpuRequirementNode.setValue(cpuRequirement.substring(0, cpuRequirement.length()-1));
+						} else if (jobTupleKey.equals("memoryRequirement")) {
+							ScalarNode memoryRequirementNode = (ScalarNode) jobTuple.getValueNode();
+							String memoryRequirement = memoryRequirementNode.getValue();
+							memoryRequirementNode.setValue(memoryRequirement.substring(0, memoryRequirement.length()-1));
+						}
+					}
+				}
+			} else if (specObjectKey.equals("services")) {
+				SequenceNode servicesNode = (SequenceNode) specTuple.getValueNode();
+				for (Node servicesNodeItem: servicesNode.getValue()) {
+					MappingNode serviceNode = (MappingNode) servicesNodeItem;
+					for (NodeTuple serviceTuple: serviceNode.getValue()) {
+						String serviceTupleKey = ((ScalarNode)serviceTuple.getKeyNode()).getValue();
+						if (serviceTupleKey.equals("cpuRequirement")) {
+							ScalarNode cpuRequirementNode = (ScalarNode) serviceTuple.getValueNode();
+							String cpuRequirement = cpuRequirementNode.getValue();
+							cpuRequirementNode.setValue(cpuRequirement.substring(0, cpuRequirement.length()-1));
+						} else if (serviceTupleKey.equals("memoryRequirement")) {
+							ScalarNode memoryRequirementNode = (ScalarNode) serviceTuple.getValueNode();
+							String memoryRequirement = memoryRequirementNode.getValue();
+							memoryRequirementNode.setValue(memoryRequirement.substring(0, memoryRequirement.length()-1));
+						}
+					}
+				}
+			}
+		}			
+	}	
+
 }

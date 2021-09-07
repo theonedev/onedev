@@ -1,4 +1,4 @@
-package io.onedev.server.tasklog;
+package io.onedev.server.buildspec.job.log;
 
 import java.io.Serializable;
 

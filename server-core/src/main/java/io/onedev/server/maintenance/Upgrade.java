@@ -490,6 +490,8 @@ public class Upgrade extends DefaultPersistManager {
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
+			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.commons.launcher.bootstrap.Bootstrap", 
+					"io.onedev.commons.bootstrap.Bootstrap");
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, StandardCharsets.UTF_8);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
