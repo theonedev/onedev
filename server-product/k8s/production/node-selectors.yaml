@@ -6,7 +6,7 @@ spec:
   template:
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -16,4 +16,4 @@ spec:
   template:
     spec:
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
