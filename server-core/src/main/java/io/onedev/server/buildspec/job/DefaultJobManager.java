@@ -1074,6 +1074,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										if (execution.isTimedout())
 											execution.cancel(null);
 									} else if (thread != null) {
+										build.setStatus(Build.Status.PENDING);
 										try {
 											jobExecutions.put(build.getId(), execute(build));
 										} catch (Throwable t) {

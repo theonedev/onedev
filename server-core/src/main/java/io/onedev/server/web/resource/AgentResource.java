@@ -40,9 +40,7 @@ public class AgentResource extends AbstractResource {
 
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType(MimeTypes.OCTET_STREAM);
-		
 		response.disableCaching();
-		
 		response.setFileName("agent.zip");
 		
 		response.setWriteCallback(new WriteCallback() {

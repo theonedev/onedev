@@ -170,7 +170,7 @@ public class DefaultResourceManager implements ResourceManager {
 			queryCaches.put(uuid, new QueryCache(agentQuery, agentIds));
 			try {
 				while (true) {
-					if (serverResourceHolder.getSpareResources(serverResourceRequirements) != 0) {
+					if (serverResourceHolder != null && serverResourceHolder.getSpareResources(serverResourceRequirements) != 0) {
 						int maxSpareResources = 0;
 						for (Long each: agentIds) {
 							ResourceHolder eachAgentResourceHolder = agentResourceHolders.get(each);

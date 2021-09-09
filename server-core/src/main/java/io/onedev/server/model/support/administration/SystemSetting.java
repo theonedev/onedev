@@ -44,8 +44,7 @@ public class SystemSetting implements Serializable, Validatable {
 		memory = (int)(os.getTotalPhysicalMemorySize()/1024/1024);				
 	}
 	
-	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. Build jobs "
-			+ "running in Kubernetes cluster will access this url to download source and artifacts")
+	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
 	@NotEmpty
 	public String getServerUrl() {
 		return serverUrl;

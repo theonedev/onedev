@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>4.10.3</version>
+		<version>4.11.0</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -35,5 +35,6 @@
     <module>server-plugin-import-bitbucketcloud</module>
     <module>server-plugin-import-jiracloud</module>
     <module>server-plugin-executor-remotedocker</module>
+    <module>server-plugin-executor-servershell</module>
   </modules>
 </project>

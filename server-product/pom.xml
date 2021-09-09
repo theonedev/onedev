@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>4.10.3</version>
+		<version>4.11.0</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -48,6 +48,11 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-executor-serverdocker</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-executor-servershell</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

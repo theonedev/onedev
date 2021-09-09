@@ -74,6 +74,20 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
+	public static List<InputSuggestion> suggest(Map<String, String> candidates, String matchWith) {
+		matchWith = matchWith.toLowerCase();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (Map.Entry<String, String> entry: candidates.entrySet()) {
+			LinearRange match = LinearRange.match(entry.getKey(), matchWith);
+			if (match != null) {
+				suggestions.add(new InputSuggestion(entry.getKey(), entry.getValue(), match));
+				if (suggestions.size() >= InputAssistBehavior.MAX_SUGGESTIONS)
+					break;
+			}
+		}
+		return suggestions;
+	}
+	
 	public static List<InputSuggestion> suggestBranches(@Nullable Project project, String matchWith) {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
