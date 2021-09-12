@@ -10,7 +10,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.util.validation.annotation.Path;
 import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -41,7 +40,6 @@ public class CacheSpec implements Serializable {
 			+ "Specify \".\" (without quote) to cache workspace itself. "
 			+ "<span class='text-warning'>Absolute path is not allowed if the job is executed by a shell/batch executor</span>")
 	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestPaths")
-	@Path
 	@NotEmpty
 	public String getPath() {
 		return path;

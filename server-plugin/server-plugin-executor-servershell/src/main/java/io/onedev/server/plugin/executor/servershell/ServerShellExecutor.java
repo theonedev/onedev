@@ -124,6 +124,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 						FileUtils.createDir(workspaceDir);
 					}
 					
+					jobLogger.log("Copying job dependencies...");
+					jobContext.copyDependencies(workspaceDir);
+					
 					File userDir = new File(buildDir, "user");
 					FileUtils.createDir(userDir);
 					Map<String, String> environments = new HashMap<>();
