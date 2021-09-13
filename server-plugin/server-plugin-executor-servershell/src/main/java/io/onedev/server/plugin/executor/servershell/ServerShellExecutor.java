@@ -1,16 +1,15 @@
 package io.onedev.server.plugin.executor.servershell;
 
+import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.getCacheInstances;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
-import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.readPlaceholderValues;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,13 +18,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.SystemUtils;
 
+import static io.onedev.agent.ShellExecutorUtils.*;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
@@ -34,13 +33,11 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecutionResult;
-import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.CheckoutExecutable;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.CommandExecutable;
 import io.onedev.k8shelper.CompositeExecutable;
-import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.k8shelper.LeafExecutable;
 import io.onedev.k8shelper.LeafHandler;
 import io.onedev.k8shelper.ServerExecutable;
@@ -59,7 +56,7 @@ import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=400, name="Server Shell/Batch Executor", description="This executor runs build jobs with shell/batch facility on OneDev server (without docker)")
+@Editable(order=400, name="Server Shell/Batch Executor", description="This executor runs build jobs with OneDev server's shell/batch facility")
 @Horizontal
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 
@@ -172,7 +169,7 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								
 								for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
 									if (!PathUtils.isCurrent(entry.getValue())) {
-										File sourceDir = entry.getKey().getDirectory(getCacheHome());
+										File sourceDir = entry.getKey().getDirectory(cacheHomeDir);
 										File destDir = resolveCachePath(workspaceDir, userDir, entry.getValue());
 										if (destDir.exists())
 											FileUtils.deleteDir(destDir);
@@ -286,81 +283,17 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 		}, jobContext.getResourceRequirements(), jobLogger);
 	}
 
-	private Commandline getShell() {
-		if (SystemUtils.IS_OS_WINDOWS) 
-			return new Commandline("cmd").addArgs("/c");
-		else
-			return new Commandline("sh");
-	}
-	
-	private LineConsumer newInfoLogger(TaskLogger jobLogger) {
-		return new LineConsumer(StandardCharsets.UTF_8.name()) {
-
-			private final String sessionId = UUID.randomUUID().toString();
-			
-			@Override
-			public void consume(String line) {
-				jobLogger.log(line, sessionId);
-			}
-			
-		};
-	}
-	
-	private LineConsumer newErrorLogger(TaskLogger jobLogger) {
-		return new LineConsumer(StandardCharsets.UTF_8.name()) {
-
-			@Override
-			public void consume(String line) {
-				jobLogger.warning(line);
-			}
-			
-		};
-	}
-	
 	@Override
 	public void test(TestData testData, TaskLogger jobLogger) {
 		OneDev.getInstance(ResourceManager.class).run(new Runnable() {
 
 			@Override
 			public void run() {
-				Commandline shell = getShell();
-				File buildDir = FileUtils.createTempDir("onedev-build");
-				try {
-					File jobScriptFile;
-					if (SystemUtils.IS_OS_WINDOWS) { 
-						jobScriptFile = new File(buildDir, "job-commands.bat");
-						FileUtils.writeLines(jobScriptFile, testData.getCommands(), "\r\n");
-					} else { 
-						jobScriptFile = new File(buildDir, "job-commands.sh");
-						FileUtils.writeLines(jobScriptFile, testData.getCommands(), "\n");
-					}
-					File workspaceDir = new File(buildDir, "workspace");
-					FileUtils.createDir(workspaceDir);
-					
-					shell.workingDir(workspaceDir).addArgs(jobScriptFile.getAbsolutePath());
-					
-					shell.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger)).checkReturnCode();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				} finally {
-					FileUtils.deleteDir(buildDir);
-				}
+				testCommands(testData.getCommands(), jobLogger);
 			}
 			
 		}, new HashMap<>(), jobLogger);
 		
-	}
-	
-	protected File resolveCachePath(File workspaceDir, File homeDir, String cachePath) {
-		if (cachePath.startsWith(KubernetesHelper.HOME_PREFIX)) { 
-			return new File(homeDir, cachePath.substring(KubernetesHelper.HOME_PREFIX.length()));
-		} else {
-			File cacheDir = new File(cachePath);
-			if (cacheDir.isAbsolute()) 
-				throw new ExplicitException("Absolute cache path disallowed for shell/batch executor: " + cachePath);
-			else 
-				return new File(workspaceDir, cachePath);
-		}
 	}
 	
 	@Editable(name="Specify Shell/Batch Commands to Test")

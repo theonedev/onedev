@@ -241,10 +241,10 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new DynamicPathPageMapper("administration/settings/sso-connectors", SsoConnectorListPage.class));
 		add(new DynamicPathPageMapper("administration/settings/ssh", SshSettingPage.class));
 
-		add(new DynamicPathPageMapper("administration/settings/agents", AgentListPage.class));
-		add(new DynamicPathPageMapper("administration/settings/agents/${agent}/overview", AgentOverviewPage.class));
-		add(new DynamicPathPageMapper("administration/settings/agents/${agent}/builds", AgentBuildsPage.class));
-		add(new DynamicPathPageMapper("administration/settings/agents/${agent}/log", AgentLogPage.class));
+		add(new DynamicPathPageMapper("administration/agents", AgentListPage.class));
+		add(new DynamicPathPageMapper("administration/agents/${agent}/overview", AgentOverviewPage.class));
+		add(new DynamicPathPageMapper("administration/agents/${agent}/builds", AgentBuildsPage.class));
+		add(new DynamicPathPageMapper("administration/agents/${agent}/log", AgentLogPage.class));
 		add(new DynamicPathPageMapper("administration/settings/job-executors", JobExecutorsPage.class));
 		add(new DynamicPathPageMapper("administration/settings/groovy-scripts", GroovyScriptListPage.class));
 		

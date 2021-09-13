@@ -1,10 +1,8 @@
-package io.onedev.server.plugin.executor.remotedocker;
+package io.onedev.server.plugin.executor.remoteshell;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -14,24 +12,25 @@ import io.onedev.agent.AgentData;
 import io.onedev.agent.Message;
 import io.onedev.agent.MessageType;
 import io.onedev.agent.WebsocketUtils;
-import io.onedev.agent.job.DockerJobData;
-import io.onedev.agent.job.TestDockerJobData;
+import io.onedev.agent.job.ShellJobData;
+import io.onedev.agent.job.TestShellJobData;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.Service;
+import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.job.resource.AgentAwareRunnable;
 import io.onedev.server.job.resource.ResourceManager;
-import io.onedev.server.model.support.RegistryLogin;
-import io.onedev.server.plugin.executor.serverdocker.ServerDockerExecutor;
+import io.onedev.server.plugin.executor.servershell.ServerShellExecutor;
 import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.tasklog.JobLogManager;
-import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
-@Editable(order=210, description="This executor runs build jobs as docker containers on remote machines via <a href='/administration/agents' target='_blank'>agents</a>")
-public class RemoteDockerExecutor extends ServerDockerExecutor {
+@Editable(order=500, name="Remote Shell/Batch Executor", description="This executor runs build jobs with remote machines's shell/batch facility via <a href='/administration/agents' target='_blank'>agents</a>")
+@Horizontal
+public class RemoteShellExecutor extends ServerShellExecutor {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -59,23 +58,17 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				jobLogger.log(String.format("Executing job (executor: %s, agent: %s)...", getName(), agentData.getName()));
 				jobContext.notifyJobRunning(agentId);
 
-				List<Map<String, String>> registryLogins = new ArrayList<>();
-				for (RegistryLogin login: getRegistryLogins()) {
-					registryLogins.add(CollectionUtils.newHashMap(
-							"url", login.getRegistryUrl(), 
-							"userName", login.getUserName(), 
-							"password", login.getPassword()));
+				for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
+					if (new File(cacheSpec.getPath()).isAbsolute()) {
+						throw new ExplicitException("Shell/batch executor does not support "
+								+ "absolute path of cache path: " + cacheSpec.getPath());
+					}
 				}
 				
-				List<Map<String, Serializable>> services = new ArrayList<>();
-				for (Service service: jobContext.getServices())
-					services.add(service.toMap());
-				
 				List<String> trustCertContent = getTrustCertContent();
-				DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectName(), 
+				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectName(), 
 						jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
-						jobContext.getActions(), jobContext.getRetried(), services, registryLogins, 
-						trustCertContent, getRunOptions());
+						jobContext.getActions(), trustCertContent);
 				
 				try {
 					WebsocketUtils.call(agentSession, jobData, 0);
@@ -103,16 +96,7 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 				public void runOn(Long agentId, Session agentSession, AgentData agentData) {
 					jobLogger.log(String.format("Testing on agent '%s'...", agentData.getName()));
 	
-					List<Map<String, String>> registryLogins = new ArrayList<>();
-					for (RegistryLogin login: getRegistryLogins()) {
-						registryLogins.add(CollectionUtils.newHashMap(
-								"url", login.getRegistryUrl(), 
-								"userName", login.getUserName(), 
-								"password", login.getPassword()));
-					}
-					
-					TestDockerJobData jobData = new TestDockerJobData(jobToken, testData.getDockerImage(), 
-							registryLogins, getRunOptions());
+					TestShellJobData jobData = new TestShellJobData(jobToken, testData.getCommands());
 					
 					try {
 						WebsocketUtils.call(agentSession, jobData, 0);
@@ -126,11 +110,6 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 		} finally {
 			logManager.deregisterLogger(jobToken);
 		}
-	}
-
-	@Override
-	public String getDockerExecutable() {
-		return super.getDockerExecutable();
 	}
 
 }

@@ -1,9 +1,16 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
+import static io.onedev.agent.DockerExecutorUtils.cleanDirAsRoot;
+import static io.onedev.agent.DockerExecutorUtils.createNetwork;
+import static io.onedev.agent.DockerExecutorUtils.deleteNetwork;
+import static io.onedev.agent.DockerExecutorUtils.newDockerKiller;
+import static io.onedev.agent.DockerExecutorUtils.newErrorLogger;
+import static io.onedev.agent.DockerExecutorUtils.newInfoLogger;
+import static io.onedev.agent.DockerExecutorUtils.startService;
+import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.getCacheInstances;
 import static io.onedev.k8shelper.KubernetesHelper.installGitCert;
-import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.readPlaceholderValues;
 import static io.onedev.k8shelper.KubernetesHelper.replacePlaceholders;
 import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
@@ -11,7 +18,6 @@ import static io.onedev.k8shelper.KubernetesHelper.stringifyPosition;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
-import io.onedev.agent.DockerUtils;
+import io.onedev.agent.DockerExecutorUtils;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
@@ -137,30 +143,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return file;
 	}
 	
-	private LineConsumer newInfoLogger(TaskLogger jobLogger) {
-		return new LineConsumer(StandardCharsets.UTF_8.name()) {
-
-			private final String sessionId = UUID.randomUUID().toString();
-			
-			@Override
-			public void consume(String line) {
-				jobLogger.log(line, sessionId);
-			}
-			
-		};
-	}
-	
-	private LineConsumer newErrorLogger(TaskLogger jobLogger) {
-		return new LineConsumer(StandardCharsets.UTF_8.name()) {
-
-			@Override
-			public void consume(String line) {
-				jobLogger.warning(line);
-			}
-			
-		};
-	}
-	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
 		File hostBuildHome = FileUtils.createTempDir("onedev-build");
@@ -186,18 +168,18 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 						@Override
 						public void accept(File directory) {
-							DockerUtils.cleanDirAsRoot(directory, newDocker(), Bootstrap.isInDocker());
+							cleanDirAsRoot(directory, newDocker(), Bootstrap.isInDocker());
 						}
 						
 					});
 						
 					login(jobLogger);
 					
-					DockerUtils.createNetwork(newDocker(), network, jobLogger);
+					createNetwork(newDocker(), network, jobLogger);
 					try {
 						for (Service jobService: jobContext.getServices()) {
 							jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
-							DockerUtils.startService(newDocker(), network, jobService.toMap(), jobLogger);
+							startService(newDocker(), network, jobService.toMap(), jobLogger);
 						}
 						
 						AtomicReference<File> workspaceCache = new AtomicReference<>(null);
@@ -317,7 +299,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										docker.addArgs(commandExecutable.getImage());
 										docker.addArgs(containerCommand);
 										
-										ProcessKiller killer = DockerUtils.newDockerKiller(newDocker(), containerName, jobLogger);
+										ProcessKiller killer = newDockerKiller(newDocker(), containerName, jobLogger);
 										ExecutionResult result = docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, killer);
 										if (result.getReturnCode() != 0) {
 											errorMessages.add("Step \"" + stepNames + "\": Command failed with exit code " + result.getReturnCode());
@@ -412,20 +394,20 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								FileUtils.deleteDir(hostAuthInfoHome.get());
 						}
 					} finally {
-						DockerUtils.deleteNetwork(newDocker(), network, jobLogger);
+						deleteNetwork(newDocker(), network, jobLogger);
 					}					
 				}
 				
 			}, jobContext.getResourceRequirements(), jobLogger);
 		} finally {
-			DockerUtils.cleanDirAsRoot(hostBuildHome, newDocker(), Bootstrap.isInDocker());
+			cleanDirAsRoot(hostBuildHome, newDocker(), Bootstrap.isInDocker());
 			FileUtils.deleteDir(hostBuildHome);
 		}
 	}
 
 	private void login(TaskLogger jobLogger) {
 		for (RegistryLogin login: getRegistryLogins()) 
-			DockerUtils.login(newDocker(), login.getRegistryUrl(), login.getUserName(), login.getPassword(), jobLogger);
+			DockerExecutorUtils.login(newDocker(), login.getRegistryUrl(), login.getUserName(), login.getPassword(), jobLogger);
 	}
 	
 	private boolean hasOptions(String[] arguments, String... options) {

@@ -36,5 +36,6 @@
     <module>server-plugin-import-jiracloud</module>
     <module>server-plugin-executor-remotedocker</module>
     <module>server-plugin-executor-servershell</module>
+    <module>server-plugin-executor-remoteshell</module>
   </modules>
 </project>
