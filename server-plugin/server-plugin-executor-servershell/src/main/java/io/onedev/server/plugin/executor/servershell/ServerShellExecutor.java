@@ -56,11 +56,13 @@ import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=400, name="Server Shell/Batch Executor", description="This executor runs build jobs with OneDev server's shell/batch facility")
+@Editable(order=ServerShellExecutor.ORDER, name="Server Shell Executor", description="This executor runs build jobs with OneDev server's shell facility")
 @Horizontal
 public class ServerShellExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
+	
+	static final int ORDER = 400;
 	
 	private static final Object cacheHomeCreationLock = new Object();
 	
@@ -89,8 +91,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					
 					for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
 						if (new File(cacheSpec.getPath()).isAbsolute()) {
-							throw new ExplicitException("Shell/batch executor does not support "
-									+ "absolute path of cache path: " + cacheSpec.getPath());
+							throw new ExplicitException("Shell executor does not support "
+									+ "absolute cache path: " + cacheSpec.getPath());
 						}
 					}
 					jobLogger.log("Allocating job caches...") ;

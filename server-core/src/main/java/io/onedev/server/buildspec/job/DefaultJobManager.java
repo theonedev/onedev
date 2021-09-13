@@ -28,7 +28,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
@@ -126,6 +125,7 @@ import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.EditableStringTransformer;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Singleton
@@ -394,13 +394,28 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	@Nullable
-	private JobExecutor getJobExecutor(Build build) {
-		for (JobExecutor executor: settingManager.getJobExecutors()) {
-			if (executor.isApplicable(build))
-				return executor;
+	private JobExecutor getJobExecutor(Build build, TaskLogger jobLogger) {
+		if (!settingManager.getJobExecutors().isEmpty()) {
+			for (JobExecutor executor: settingManager.getJobExecutors()) {
+				if (executor.isApplicable(build))
+					return executor;
+			}
+			throw new ExplicitException("No applicable job executor");
+		} else {
+			jobLogger.log("No job executor defined, auto-discovering...");
+			List<JobExecutorDiscoverer> discoverers = new ArrayList<>(OneDev.getExtensions(JobExecutorDiscoverer.class));
+			discoverers.sort(Comparator.comparing(JobExecutorDiscoverer::getOrder));
+			for (JobExecutorDiscoverer discoverer: discoverers) {
+				JobExecutor jobExecutor = discoverer.discover(jobLogger);
+				if (jobExecutor != null) {
+					jobLogger.log("Discovered job executor type: " 
+							+ EditableUtils.getDisplayName(jobExecutor.getClass()));
+					jobExecutor.setName("auto-discovered");
+					return jobExecutor;
+				}
+			}
+			throw new ExplicitException("No job executor discovered");
 		}
-		return null;
 	}
 
 	private JobExecution execute(Build build) {
@@ -413,10 +428,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			BuildSpec buildSpec = build.getSpec();
 			Job job = build.getJob();
 			
-			JobExecutor executor = getJobExecutor(build);
+			TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask); 
+			JobExecutor executor = getJobExecutor(build, jobLogger);
 			if (executor != null) {
-				TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask); 
-				
 				ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 				Long buildId = build.getId();
 				Long buildNumber = build.getNumber();

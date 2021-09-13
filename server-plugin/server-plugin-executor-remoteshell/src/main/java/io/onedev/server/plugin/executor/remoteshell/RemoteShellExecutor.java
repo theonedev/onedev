@@ -28,7 +28,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
-@Editable(order=500, name="Remote Shell/Batch Executor", description="This executor runs build jobs with remote machines's shell/batch facility via <a href='/administration/agents' target='_blank'>agents</a>")
+@Editable(order=500, name="Remote Shell Executor", description="This executor runs build jobs with remote machines's shell facility via <a href='/administration/agents' target='_blank'>agents</a>")
 @Horizontal
 public class RemoteShellExecutor extends ServerShellExecutor {
 
@@ -60,8 +60,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 
 				for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
 					if (new File(cacheSpec.getPath()).isAbsolute()) {
-						throw new ExplicitException("Shell/batch executor does not support "
-								+ "absolute path of cache path: " + cacheSpec.getPath());
+						throw new ExplicitException("Shell executor does not support "
+								+ "absolute cache path: " + cacheSpec.getPath());
 					}
 				}
 				

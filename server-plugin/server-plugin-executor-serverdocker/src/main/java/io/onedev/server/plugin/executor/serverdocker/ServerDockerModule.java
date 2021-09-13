@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.loader.AbstractPluginModule;
 import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
@@ -40,7 +41,9 @@ public class ServerDockerModule extends AbstractPluginModule {
 		contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
 
 			@Override
-			public JobExecutor discover() {
+			public JobExecutor discover(TaskLogger jobLogger) {
+				jobLogger.log("Checking if there is docker facility...");
+				
 				Commandline docker = new Commandline("docker");
 				docker.addArgs("version");
 				try {
@@ -65,6 +68,11 @@ public class ServerDockerModule extends AbstractPluginModule {
 					else
 						return null;
 				}
+			}
+
+			@Override
+			public int getOrder() {
+				return ServerDockerExecutor.ORDER;
 			}
 			
 		});

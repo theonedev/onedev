@@ -52,7 +52,6 @@ import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
 import io.onedev.server.model.support.administration.SystemSetting;
-import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
 import io.onedev.server.model.support.administration.notificationtemplate.NotificationTemplateSetting;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.PersistManager;
@@ -200,11 +199,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			settingManager.saveAuthenticator(null);
 		}
 		setting = settingManager.getSetting(Key.JOB_EXECUTORS);
-		if (setting == null) {
-			AutoDiscoveredJobExecutor executor = new AutoDiscoveredJobExecutor();
-			executor.setName("auto-discovered");
-			settingManager.saveJobExecutors(Lists.newArrayList(executor));
-		}
+		if (setting == null) 
+			settingManager.saveJobExecutors(new ArrayList<>());
 		setting = settingManager.getSetting(Key.SSO_CONNECTORS);
 		if (setting == null) {
 			settingManager.saveSsoConnectors(Lists.newArrayList());

@@ -83,10 +83,9 @@ import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AbstractPluginModule;
-import io.onedev.commons.bootstrap.Bootstrap;
-import io.onedev.commons.loader.ImplementationProvider;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
@@ -201,8 +200,6 @@ import io.onedev.server.markdown.MarkdownProcessor;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
-import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
-import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
@@ -420,20 +417,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(EntityReferenceManager.class).to(DefaultEntityReferenceManager.class);
 		
 		bind(WebHookManager.class);
-		
-		contribute(ImplementationProvider.class, new ImplementationProvider() {
-
-			@Override
-			public Class<?> getAbstractClass() {
-				return JobExecutor.class;
-			}
-
-			@Override
-			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(AutoDiscoveredJobExecutor.class);
-			}
-			
-		});
 		
 		contribute(CodePullAuthorizationSource.class, DefaultJobManager.class);
         

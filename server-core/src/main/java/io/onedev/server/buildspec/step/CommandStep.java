@@ -29,7 +29,7 @@ public class CommandStep extends Step {
 	private boolean useTTY;
 	
 	@Editable(order=100, description="Specify docker image to execute commands inside. "
-			+ "<span class='text-warning'>This property will be ignored if the job is executed by a shell/batch executor</span>")
+			+ "<span class='text-warning'>This property will be ignored if the job is executed by a shell executor</span>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -57,7 +57,7 @@ public class CommandStep extends Step {
 			+ "TTY mode to help identifying problems easily. However some commands running in this mode may "
 			+ "wait for user input to cause build hanging. This can normally be fixed by adding extra options "
 			+ "to the command. <span class='text-warning'>This option will be ignored when the job is executed "
-			+ "via a shell/batch executor</span>")
+			+ "via a shell executor</span>")
 	public boolean isUseTTY() {
 		return useTTY;
 	}

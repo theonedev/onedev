@@ -80,7 +80,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=600, description="This executor runs build jobs as pods in a kubernetes cluster. "
+@Editable(order=KubernetesExecutor.ORDER, description="This executor runs build jobs as pods in a kubernetes cluster. "
 		+ "No any agents are required."
 		+ "<b class='text-danger'>Note:</b> Make sure server url is specified correctly in system "
 		+ "setting as job pods need to access it to download source and artifacts")
@@ -88,6 +88,8 @@ import io.onedev.server.web.util.Testable;
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
+
+	static final int ORDER = 100;
 	
 	private static final int POD_WATCH_TIMEOUT = 60;
 	

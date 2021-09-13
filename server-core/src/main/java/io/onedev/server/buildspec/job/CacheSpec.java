@@ -38,7 +38,7 @@ public class CacheSpec implements Serializable {
 	
 	@Editable(order=200, description="Specify path to cache. Non-absolute path is considered to be relative to job workspace. "
 			+ "Specify \".\" (without quote) to cache workspace itself. "
-			+ "<span class='text-warning'>Absolute path is not allowed if the job is executed by a shell/batch executor</span>")
+			+ "<span class='text-warning'>Absolute path is not allowed if the job is executed by a shell executor</span>")
 	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestPaths")
 	@NotEmpty
 	public String getPath() {

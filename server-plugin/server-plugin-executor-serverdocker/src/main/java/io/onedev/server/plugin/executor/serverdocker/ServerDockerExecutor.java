@@ -79,12 +79,14 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=200, name="Server Docker Executor", description="This executor runs build jobs as docker containers on OneDev server")
+@Editable(order=ServerDockerExecutor.ORDER, name="Server Docker Executor", description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
 @Horizontal
 public class ServerDockerExecutor extends JobExecutor implements Testable<TestData>, Validatable {
 
 	private static final long serialVersionUID = 1L;
+	
+	static final int ORDER=200;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerDockerExecutor.class);
 

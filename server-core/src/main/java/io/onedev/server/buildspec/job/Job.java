@@ -184,7 +184,7 @@ public class Job implements NamedElement, Serializable, Validatable {
 	}
 
 	@Editable(order=9114, group="Dependencies & Services", description="Optionally specify services required by this job. "
-			+ "<span class='text-warning'>This property will be ignored if the job is executed by a shell/batch executor</span>")
+			+ "<span class='text-warning'>This property will be ignored if the job is executed by a shell executor</span>")
 	@ChoiceProvider("getServiceChoices")
 	public List<String> getRequiredServices() {
 		return requiredServices;
