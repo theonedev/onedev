@@ -41,6 +41,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 
 import io.onedev.agent.DockerExecutorUtils;
+import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
@@ -221,14 +222,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							jobContext.reportJobWorkspace(containerWorkspace);
 							CompositeExecutable entryExecutable = new CompositeExecutable(jobContext.getActions());
 							
-							List<String> errorMessages = new ArrayList<>();
-							
-							entryExecutable.execute(new LeafHandler() {
+							boolean successful = entryExecutable.execute(new LeafHandler() {
 
 								@Override
 								public boolean execute(LeafExecutable executable, List<Integer> position) {
 									String stepNames = entryExecutable.getNamesAsString(position);
-									jobLogger.log("Running step \"" + stepNames + "\"...");
+									jobLogger.notice("Running step \"" + stepNames + "\"...");
 									
 									if (executable instanceof CommandExecutable) {
 										CommandExecutable commandExecutable = (CommandExecutable) executable;
@@ -304,11 +303,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 										ProcessKiller killer = newDockerKiller(newDocker(), containerName, jobLogger);
 										ExecutionResult result = docker.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger), null, killer);
 										if (result.getReturnCode() != 0) {
-											errorMessages.add("Step \"" + stepNames + "\": Command failed with exit code " + result.getReturnCode());
+											jobLogger.error("Step \"" + stepNames + "\" is failed: Command failed with exit code " + result.getReturnCode());
 											return false;
-										} else {
-											return true;
-										}
+										} 
 									} else if (executable instanceof CheckoutExecutable) {
 										try {
 											CheckoutExecutable checkoutExecutable = (CheckoutExecutable) executable;
@@ -333,10 +330,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
 													cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
 													cloneDepth, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
-											
-											return true;
 										} catch (Exception e) {
-											errorMessages.add("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 											return false;
 										}
 									} else {
@@ -368,26 +363,26 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 															entry.getValue());
 												}
 											}
-											
-											return true;
 										} catch (Exception e) {
-											errorMessages.add("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 											return false;
 										} finally {
 											FileUtils.deleteDir(filesDir);
 										}
 									}
+									jobLogger.success("Step \"" + stepNames + "\" is successful");
+									return true;
 								}
 
 								@Override
 								public void skip(LeafExecutable executable, List<Integer> position) {
-									jobLogger.log("Skipping step \"" + entryExecutable.getNamesAsString(position) + "\"...");
+									jobLogger.notice("Step \"" + entryExecutable.getNamesAsString(position) + "\" is skipped");
 								}
 								
 							}, new ArrayList<>());
 
-							if (!errorMessages.isEmpty())
-								throw new ExplicitException(errorMessages.iterator().next());
+							if (!successful)
+								throw new FailedException();
 							
 							jobLogger.log("Reporting job caches...");
 							jobManager.reportJobCaches(jobToken, getCacheInstances(hostCacheHome).keySet());

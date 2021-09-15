@@ -44,9 +44,7 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> fields = Lists.newArrayList(
-									Build.NAME_LOG, 
-									Build.NAME_ERROR_MESSAGE);
+							List<String> fields = Lists.newArrayList(Build.NAME_LOG);
 							JobAware jobAware = getComponent().findParent(JobAware.class);
 							Job job = jobAware.getJob();
 							fields.addAll(job.getParamSpecMap().keySet());

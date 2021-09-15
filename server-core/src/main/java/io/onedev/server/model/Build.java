@@ -188,8 +188,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String PROP_PULL_REQUEST = "request";
 	
-	public static final String NAME_ERROR_MESSAGE = "Error Message";
-	
 	public static final String NAME_LOG = "Log";
 	
 	public static final String PROP_TRIGGER_ID = "triggerId";
@@ -198,7 +196,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			NAME_PROJECT, NAME_NUMBER, NAME_JOB, NAME_STATUS, NAME_SUBMITTER, NAME_CANCELLER, 
 			NAME_SUBMIT_DATE, NAME_PENDING_DATE, NAME_RUNNING_DATE, NAME_FINISH_DATE,
 			NAME_PULL_REQUEST, NAME_BRANCH, NAME_TAG, NAME_COMMIT, NAME_VERSION, 
-			NAME_ERROR_MESSAGE, NAME_LOG, BuildMetric.NAME_REPORT);
+			NAME_LOG, BuildMetric.NAME_REPORT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			NAME_PROJECT, NAME_JOB, NAME_NUMBER, NAME_BRANCH, NAME_TAG, NAME_VERSION, NAME_PULL_REQUEST, 
@@ -228,8 +226,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	};
 	
 	public static final String ARTIFACTS_DIR = "artifacts";
-	
-	private static final int MAX_ERROR_MESSAGE_LEN = 12000;
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
@@ -311,9 +307,6 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Column(nullable=false, length=1000)
 	private String submitReason;
 	
-	@Column(length=MAX_ERROR_MESSAGE_LEN)
-	private String errorMessage;
-
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<BuildParam> params = new ArrayList<>();
 	
@@ -451,12 +444,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 
 	public void setStatus(Status status) {
-		setStatus(status, null);
-	}
-	
-	public void setStatus(Status status, @Nullable String errorMessage) {
 		this.status = status;
-		setErrorMessage(errorMessage);
 	}
 	
 	public Date getStatusDate() {
@@ -568,19 +556,6 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setDependents(Collection<BuildDependence> dependents) {
 		this.dependents = dependents;
-	}
-
-	public String getErrorMessage() {
-		return errorMessage;
-	}
-
-	public void setErrorMessage(String errorMessage) {
-		if (errorMessage != null) {
-			errorMessage = StringUtils.abbreviate(errorMessage, MAX_ERROR_MESSAGE_LEN);
-			for (String secretValue: getSecretValuesToMask())
-				errorMessage = StringUtils.replace(errorMessage, secretValue, SecretInput.MASK);
-		}
-		this.errorMessage = errorMessage;
 	}
 
 	public String getRefName() {

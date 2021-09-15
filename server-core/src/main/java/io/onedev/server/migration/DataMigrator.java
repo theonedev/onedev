@@ -2966,6 +2966,14 @@ public class DataMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Builds.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element errorMessageElement = element.element("errorMessage");
+					if (errorMessageElement != null)
+						errorMessageElement.detach();
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

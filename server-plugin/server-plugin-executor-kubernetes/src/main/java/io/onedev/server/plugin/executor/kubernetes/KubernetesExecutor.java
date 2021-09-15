@@ -44,6 +44,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import io.onedev.agent.job.FailedException;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.FileUtils;
@@ -700,15 +701,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return map;
 	}
 	
-	private String getContainerDisplayName(CompositeExecutable entryExecutable, String containerName) {
-		if (containerName.startsWith("step-")) {
-			List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
-			return "Step \"" + entryExecutable.getNamesAsString(position) + "\"";
-		} else {
-			return containerName;
-		}
-	}
-	
 	private void execute(String jobToken, TaskLogger jobLogger, Object executionContext) {
 		jobLogger.log("Checking cluster access...");
 		JobContext jobContext;
@@ -1012,7 +1004,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				jobLogger.log("Starting job containers...");
 				
-				List<String> errorMessages = new ArrayList<>();
+				AtomicBoolean failed = new AtomicBoolean(false);
 				
 				for (String containerName: containerNames) {
 					logger.debug("Waiting for start of container (pod: {}, container: {})...", 
@@ -1030,8 +1022,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								 * might contain error details
 								 */
 								if (error.isFatal()) {
-									return new Abort(getContainerDisplayName(entryExecutable, containerName) 
-											+ ": " + error.getMessage());
+									String errorMessage;
+									if (containerName.startsWith("step-")) {
+										List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
+										errorMessage = "Step \"" + entryExecutable.getNamesAsString(position) 
+												+ ": " + error.getMessage();
+									} else {
+										errorMessage = containerName + ": " + error.getMessage();
+									}
+									return new Abort(errorMessage);
 								} else {
 									return new Abort(null);
 								}
@@ -1058,9 +1057,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						public Abort check(String nodeName, Collection<JsonNode> containerStatusNodes) {
 							ContainerError error = getContainerErrors(containerStatusNodes).get(containerName);
 							if (error != null) {
-								String errorMessage = getContainerDisplayName(entryExecutable, containerName) 
-										+ ": " + error.getMessage();
-								errorMessages.add(errorMessage);
+								String errorMessage;
+								if (containerName.startsWith("step-")) {
+									List<Integer> position = KubernetesHelper.parsePosition(containerName.substring("step-".length()));
+									errorMessage = "Step \"" + entryExecutable.getNamesAsString(position) 
+											+ " is failed: " + error.getMessage();
+								} else {
+									errorMessage = containerName + ": " + error.getMessage();
+								}
+								
 								/*
 								 * We abort the watch with an exception for two reasons:
 								 * 
@@ -1069,10 +1074,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								 *    container will wait indefinitely on the successful/failed mark file in 
 								 *    this case, causing log following last indefinitely 
 								 */
-								if (error.isFatal() || containerName.equals("init")) 
+								if (error.isFatal() || containerName.equals("init")) {
 									return new Abort(errorMessage);
-								else 
+								} else { 
+									jobLogger.error(errorMessage);
+									failed.set(true);
 									return new Abort(null);
+								} 
 							} else if (getStoppedContainers(containerStatusNodes).contains(containerName)) {
 								return new Abort(null);
 							} else {
@@ -1083,8 +1091,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					}, jobLogger);
 				}
 				
-				if (!errorMessages.isEmpty())
-					throw new ExplicitException(errorMessages.iterator().next());
+				if (failed.get())
+					throw new FailedException();
 				
 				if (jobContext != null && isCreateCacheLabels()) 
 					updateCacheLabels(nodeName, jobContext, jobLogger);

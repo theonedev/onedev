@@ -375,31 +375,6 @@ public abstract class BuildDetailPage extends ProjectPage
 		
 		add(jobNotFoundContainer);
 		
-		add(new Label("errorMessage", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getBuild().getErrorMessage();
-			}
-			
-		}) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				
-				add(newBuildObserver(getBuild().getId()));
-				setOutputMarkupPlaceholderTag(true);
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getBuild().isFinished() && getBuild().getErrorMessage() != null);
-			}
-			
-		});
-		
 		add(new Tabbable("buildTabs", new LoadableDetachableModel<List<? extends Tab>>() {
 
 			@Override

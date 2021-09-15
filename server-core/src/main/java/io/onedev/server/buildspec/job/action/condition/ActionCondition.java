@@ -127,8 +127,6 @@ public class ActionCondition extends Criteria<Build> {
 					switch (fieldName) {
 					case Build.NAME_LOG:
 						return new LogCriteria(fieldValue);
-					case Build.NAME_ERROR_MESSAGE:
-						return new ErrorMessageCriteria(fieldValue);
 					default:
 						return new ParamCriteria(fieldName, fieldValue);
 					}
@@ -167,7 +165,7 @@ public class ActionCondition extends Criteria<Build> {
 	}
 	
 	public static void checkField(Job job, String fieldName, int operator) {
-		if (fieldName.equals(Build.NAME_ERROR_MESSAGE) || fieldName.equals(Build.NAME_LOG)) {
+		if (fieldName.equals(Build.NAME_LOG)) {
 			if (operator != ActionConditionLexer.Contains)
 				throw newOperatorException(fieldName, operator);
 		} else if (fieldName.equals(Build.NAME_PULL_REQUEST)) {

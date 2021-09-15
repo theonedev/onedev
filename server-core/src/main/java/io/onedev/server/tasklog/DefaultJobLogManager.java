@@ -90,6 +90,11 @@ public class DefaultJobLogManager implements JobLogManager {
 	}
 	
 	@Override
+	public TaskLogger newLogger(Build build) {
+		return newLogger(build, new ArrayList<>());
+	}
+	
+	@Override
 	public TaskLogger newLogger(Build build, Collection<String> jobSecretsToMask) {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();

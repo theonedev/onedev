@@ -107,7 +107,9 @@ public class UseTemplateStep extends Step {
 				VariableInterpolator interpolator = new VariableInterpolator(build, newParamCombination);
 				for (Step step: template.getSteps()) {
 					step = interpolator.interpolateProperties(step);
-					String actionName = step.getName() + " (" + repeat + ")";
+					String actionName = step.getName();
+					if (repeat != 1) 
+						actionName += " (" + repeat + ")";
 					actions.add(step.getAction(actionName, build, jobToken, newParamCombination));
 				}
 			}

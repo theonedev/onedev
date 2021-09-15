@@ -15,6 +15,8 @@ public interface JobLogManager {
 	
 	TaskLogger newLogger(Build build, Collection<String> jobSecrets);
 	
+	TaskLogger newLogger(Build build);
+	
 	/**
 	 * Read specified number of log entries from specified build, starting from specified index 
 	 * 

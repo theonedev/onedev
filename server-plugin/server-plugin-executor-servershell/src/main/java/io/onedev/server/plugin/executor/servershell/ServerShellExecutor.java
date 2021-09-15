@@ -25,6 +25,8 @@ import javax.validation.constraints.Size;
 import org.apache.commons.lang.SystemUtils;
 
 import static io.onedev.agent.ShellExecutorUtils.*;
+
+import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.ExplicitException;
@@ -135,14 +137,12 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 					
 					CompositeExecutable entryExecutable = new CompositeExecutable(jobContext.getActions());
 					
-					List<String> errorMessages = new ArrayList<>();
-					
-					entryExecutable.execute(new LeafHandler() {
+					boolean successful = entryExecutable.execute(new LeafHandler() {
 
 						@Override
 						public boolean execute(LeafExecutable executable, List<Integer> position) {
 							String stepNames = entryExecutable.getNamesAsString(position);
-							jobLogger.log("Running step \"" + stepNames + "\"...");
+							jobLogger.notice("Running step \"" + stepNames + "\"...");
 							
 							if (executable instanceof CommandExecutable) {
 								CommandExecutable commandExecutable = (CommandExecutable) executable;
@@ -191,10 +191,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 								
 								ExecutionResult result = shell.execute(newInfoLogger(jobLogger), newErrorLogger(jobLogger));
 								if (result.getReturnCode() != 0) {
-									errorMessages.add("Step \"" + stepNames + "\": Command failed with exit code " + result.getReturnCode());
+									jobLogger.error("Step \"" + stepNames + "\" is failed: Command failed with exit code " + result.getReturnCode());
 									return false;
-								} else {
-									return true;
 								}
 							} else if (executable instanceof CheckoutExecutable) {
 								try {
@@ -219,10 +217,8 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
 											cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), cloneDepth, 
 											newInfoLogger(jobLogger), newErrorLogger(jobLogger));
-									
-									return true;
 								} catch (Exception e) {
-									errorMessages.add("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+									jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 									return false;
 								}
 							} else {
@@ -254,27 +250,27 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 													entry.getValue());
 										}
 									}
-									
-									return true;
 								} catch (Exception e) {
-									errorMessages.add("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
+									jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 									return false;
 								} finally {
 									FileUtils.deleteDir(filesDir);
 								}
 							}
+							jobLogger.success("Step \"" + stepNames + "\" is successful");
+							return true;
 						}
 
 						@Override
 						public void skip(LeafExecutable executable, List<Integer> position) {
-							jobLogger.log("Skipping step \"" + entryExecutable.getNamesAsString(position) + "\"...");
+							jobLogger.notice("Step \"" + entryExecutable.getNamesAsString(position) + "\" is skipped");
 						}
 						
 					}, new ArrayList<>());
+		
+					if (!successful)
+						throw new FailedException();
 
-					if (!errorMessages.isEmpty())
-						throw new ExplicitException(errorMessages.iterator().next());
-					
 					jobLogger.log("Reporting job caches...");
 					jobManager.reportJobCaches(jobToken, getCacheInstances(cacheHomeDir).keySet());
 				} finally {

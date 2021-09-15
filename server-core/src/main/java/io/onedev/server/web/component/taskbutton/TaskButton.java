@@ -29,8 +29,10 @@ import org.quartz.ScheduleBuilder;
 import org.quartz.SimpleScheduleBuilder;
 import org.unbescape.html.HtmlEscape;
 
+import io.onedev.agent.job.FailedException;
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
@@ -145,32 +147,45 @@ public abstract class TaskButton extends AjaxButton {
 			public TaskResult call() throws Exception {
 				TaskLogger logger = new TaskLogger() {
 
+					private final Map<String, StyleBuilder> styleBuilders = new ConcurrentHashMap<>();
+					
 					@Override
 					public void log(String message, String sessionId) {
 						synchronized (messages) {
-							messages.add(JobLogEntryEx.parse(message, new StyleBuilder()));
+							StyleBuilder styleBuilder;
+							if (sessionId != null) {
+								styleBuilder = styleBuilders.get(sessionId);
+								if (styleBuilder == null) {
+									styleBuilder = new StyleBuilder();
+									styleBuilders.put(sessionId, styleBuilder);
+								}
+							} else {
+								styleBuilder = new StyleBuilder();
+							}
+							messages.add(JobLogEntryEx.parse(message, styleBuilder));
 						}
 					}
 					
 				};				
 				try {
 					String feedback = String.format(
-						"<div class='task-result text-break alert alert-light-info'>%s</div>", 
+						"<div class='task-result alert-notice text-break alert alert-light-info'>%s</div>", 
 						runTask(logger));
 					return new TaskResult(true, feedback);
 				} catch (Exception e) {	
-					logger.error("Error " + title, e);
+					if (ExceptionUtils.find(e, FailedException.class) == null) {
+						ExplicitException explicitException = ExceptionUtils.find(e, ExplicitException.class);
+						if (explicitException != null)
+							logger.error(explicitException.getMessage());
+						else
+							logger.error(null, e);
+					}
 					String suggestedSolution = ExceptionUtils.suggestSolution(e);
 					if (suggestedSolution != null)
 						logger.error("!!! " + suggestedSolution);
-					String feedback;
-					if (e.getMessage() != null)
-						feedback = e.getMessage();
-					else
-						feedback = "Error " + title;
-					feedback = String.format(
-							"<div class='task-result text-break alert alert-light-danger'>%s</div>", 
-							HtmlEscape.escapeHtml5(feedback));					
+					String feedback = String.format(
+							"<div class='task-result text-break alert-notice alert alert-light-danger'>%s</div>", 
+							HtmlEscape.escapeHtml5("Error " + title));					
 					feedback = StringUtils.replace(feedback, "\n", "<br>");
 					return new TaskResult(false, feedback);
 				} 
