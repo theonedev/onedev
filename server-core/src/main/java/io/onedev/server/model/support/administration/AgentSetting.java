@@ -25,6 +25,7 @@ public class AgentSetting implements Serializable {
 		namedQueries.add(new NamedAgentQuery("Linux agents", new AgentQuery(new OsCriteria(AgentOs.LINUX)).toString()));
 		namedQueries.add(new NamedAgentQuery("Windows agents", new AgentQuery(new OsCriteria(AgentOs.WINDOWS)).toString()));
 		namedQueries.add(new NamedAgentQuery("Mac OS X agents", new AgentQuery(new OsCriteria(AgentOs.MACOSX)).toString()));
+		namedQueries.add(new NamedAgentQuery("FreeBSD agents", new AgentQuery(new OsCriteria(AgentOs.FREEBSD)).toString()));
 		namedQueries.add(new NamedAgentQuery("Paused agents", "paused"));
 		namedQueries.add(new NamedAgentQuery("Not used for 1 month", new AgentQuery(new NotUsedSinceCriteria("1 month ago")).toString()));
 	}
