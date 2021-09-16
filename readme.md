@@ -17,13 +17,13 @@ With Git Management, Issue Tracking, and CI/CD. Simple yet Powerful.
 
 ### Docker First Kubernetes Native Build Farm
 
-Out-of-box CI/CD capability with docker. Trivial to scale up to run massive jobs as pods in Kubernetes. Transparent support for Linux and Windows containers. 
+Out-of-box CI/CD capability with docker. Trivial to scale up to run massive jobs as pods in Kubernetes. Transparent support for Linux and Windows containers.
 
 ![Job Executor](doc/images/job-executor.png)
 
 ### Effortless Agent Based Build Farm
 
-In case you do not have Kubernetes cluster to run CI/CD jobs, agents can be installed on remote machines to set up your build farm. OneDev server will push updates to agents automatically if necessary to make agent maintenance effortless
+In case you do not have Kubernetes clusters, or want to run CI/CD jobs  outside docker, agents can be installed on remote machines to set up your build farm. OneDev server will push updates to agents automatically to make agent maintenance effortless
 
 ![agents.png](doc/images/agents.png)
 
