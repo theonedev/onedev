@@ -2977,4 +2977,28 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate64(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element timeoutElement = valueElement.element("timeout");
+							int timeout = Integer.valueOf(timeoutElement.getTextTrim());
+							if (timeout == 0)
+								timeout = 60;
+							else if (timeout < 10)
+								timeout = 10;
+							timeoutElement.setText(String.valueOf(timeout));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+
 }

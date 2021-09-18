@@ -2,6 +2,8 @@ package io.onedev.server.model.support.administration;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Min;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
@@ -103,8 +105,8 @@ public class MailSetting implements Serializable {
 		this.enableStartTLS = enableStartTLS;
 	}
 
-	@Editable(order=600, description="Specify timeout in seconds when communicating with mail server. " +
-			"Use 0 to set an infinite timeout.")
+	@Editable(order=600, description="Specify timeout in seconds when communicating with mail server")
+	@Min(value=10, message="This value should not be less than 10")
 	public int getTimeout() {
 		return timeout;
 	}

@@ -1,6 +1,9 @@
 package io.onedev.server.web.page.admin.mailsetting;
 
 import java.util.UUID;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.mail.Message;
@@ -24,7 +27,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.ReceiveMailSetting;
-import io.onedev.server.notification.InboxMonitor;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.notification.MessageListener;
 import io.onedev.server.security.SecurityUtils;
@@ -105,21 +107,22 @@ public class MailSettingPage extends AdministrationPage {
 				MailSetting mailSetting = mailSettingHolder.getMailSetting();
 				if (mailSetting.getReceiveMailSetting() != null) {
 					String uuid = UUID.randomUUID().toString();
-					AtomicReference<InboxMonitor> monitor = new AtomicReference<>(null);
+					AtomicReference<Future<?>> futureRef = new AtomicReference<>(null);
 					MessageListener listener = new MessageListener() {
 						
 						@Override
 						public void onReceived(Message message) {
 							try {
 								if (message.getSubject().contains(uuid)) 
-									monitor.get().stop();
+									futureRef.get().cancel(true);
 							} catch (Exception e) {
 								logger.error("Error receiving message", e);
 							}
 						}
 						
 					};					
-					monitor.set(mailManager.monitorInbox(mailSetting, listener));
+					futureRef.set(mailManager.monitorInbox(mailSetting.getReceiveMailSetting(), 
+							mailSetting.isEnableStartTLS(), mailSetting.getTimeout(), listener));
 					
 					EmailAddress emailAddress = EmailAddress.parse(mailSetting.getEmailAddress());
 					String subAddressed = emailAddress.getPrefix() + "+" 
@@ -132,8 +135,12 @@ public class MailSettingPage extends AdministrationPage {
 					logger.log("Waiting for test mail to come back...");
 
 					try {
-						monitor.get().waitForFinish();
+						futureRef.get().get();
+					} catch (CancellationException e) {
 					} catch (InterruptedException e) {
+						futureRef.get().cancel(true);
+						throw new RuntimeException(e);
+					} catch (ExecutionException e) {
 						throw new RuntimeException(e);
 					}
 					

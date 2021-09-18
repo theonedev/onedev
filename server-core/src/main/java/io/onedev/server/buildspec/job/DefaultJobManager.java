@@ -1046,9 +1046,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Listen
 	public void on(SystemStopping event) {
-		if (thread != null) {
-			Thread copy = thread;
-			thread = null;
+		Thread copy = thread;
+		thread = null;
+		if (copy != null) {
 			try {
 				copy.join();
 			} catch (InterruptedException e) {
