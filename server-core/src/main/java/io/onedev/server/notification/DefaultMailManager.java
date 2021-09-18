@@ -22,7 +22,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.mail.Folder;
-import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -55,7 +54,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -134,8 +135,6 @@ public class DefaultMailManager implements MailManager {
 	private final UserManager userManager;
 	
 	private final UrlManager urlManager;
-	
-	private volatile boolean stopping;
 	
 	private volatile Thread thread;
 	
@@ -222,9 +221,7 @@ public class DefaultMailManager implements MailManager {
 			}
 			
 	        email.setSocketConnectionTimeout(Bootstrap.SOCKET_CONNECT_TIMEOUT);
-
-	        if (mailSetting.getTimeout() != 0)
-	        	email.setSocketTimeout(mailSetting.getTimeout()*1000);
+	        email.setSocketTimeout(mailSetting.getTimeout()*1000);
 	        
 	        email.setStartTLSEnabled(mailSetting.isEnableStartTLS());
 	        email.setSSLOnConnect(false);
@@ -283,9 +280,9 @@ public class DefaultMailManager implements MailManager {
 
 					@Override
 					public void run() {
-						Thread thread = DefaultMailManager.this.thread;
-						if (thread != null)
-							thread.interrupt();
+						Thread copy = thread;
+						if (copy != null)
+							copy.interrupt();
 					}
 					
 				});
@@ -700,28 +697,44 @@ public class DefaultMailManager implements MailManager {
 
 			@Override
 			public void run() {
-				while (!stopping) {
+				while (thread != null) {
 					try {
 						MailSetting mailSetting = settingManager.getMailSetting();
-						monitorInbox(mailSetting, new MessageListener() {
-	
-							@Override
-							public void onReceived(Message message) {
-								onMessage(mailSetting, message);
+						if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
+							Future<?> future = monitorInbox(mailSetting.getReceiveMailSetting(), mailSetting.isEnableStartTLS(), 
+									mailSetting.getTimeout(), new MessageListener() {
+								
+								@Override
+								public void onReceived(Message message) {
+									onMessage(mailSetting, message);
+								}
+								
+							});
+							try {
+								future.get();
+							} catch (InterruptedException e) {
+								future.cancel(true);
+							} catch (ExecutionException e) {
+								logger.error("Error monitoring inbox", e);
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e2) {
+								}
 							}
-							
-						}).waitForFinish();
+						} else {
+							try {
+								Thread.sleep(60000);
+							} catch (InterruptedException e) {
+							}
+						}
 					} catch (Exception e) {
-						if (ExceptionUtils.find(e, InterruptedException.class) == null)
-							logger.error("Error monitoring inbox", e);
-					} finally {
+						logger.error("Error checking mail setting", e);
 						try {
 							Thread.sleep(5000);
-						} catch (InterruptedException e) {
+						} catch (InterruptedException e2) {
 						}
 					}
 				}
-				thread = null;
 			}
 		});
 		thread.start();
@@ -729,175 +742,107 @@ public class DefaultMailManager implements MailManager {
 	
 	@Listen
 	public void on(SystemStopping event) {
-		stopping = true;
-		while (true) {
-			Thread thread = this.thread;
-			if (thread != null) {
-				thread.interrupt();
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-				}
-			} else {
-				break;
-			}
-		}
-	}
-	
-	private void close(AtomicReference<Store> storeRef, AtomicReference<IMAPFolder> inboxRef) {
-		if (inboxRef.get() != null) {
-			if (inboxRef.get().isOpen()) {
-				try {
-					inboxRef.get().close(false);
-				} catch (Exception e) {
-				}
-			}
-			inboxRef.set(null);
-		}
-		if (storeRef.get() != null) {
+		Thread copy = thread;
+		thread = null;
+		if (copy != null) {
+			copy.interrupt();
 			try {
-				storeRef.get().close();
-			} catch (Exception e) {
+				copy.join();
+			} catch (InterruptedException e) {
 			}
-			storeRef.set(null);
 		}
 	}
 	
 	@Override
-	public InboxMonitor monitorInbox(MailSetting mailSetting, MessageListener listener) {
-		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-			ReceiveMailSetting receiveMailSetting = mailSetting.getReceiveMailSetting();
-			
-	        Properties properties = new Properties();
-	        
-	        properties.setProperty("mail.imap.host", receiveMailSetting.getImapHost());
-	        properties.setProperty("mail.imap.port", String.valueOf(receiveMailSetting.getImapPort()));
-	        properties.setProperty("mail.imap.starttls.enable", String.valueOf(mailSetting.isEnableStartTLS()));        
-	 
-	        properties.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-	        properties.setProperty("mail.imap.socketFactory.fallback", "false");
-	        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(receiveMailSetting.getImapPort()));
-	        
-	        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
-	        if (mailSetting.getTimeout() != 0)
-	        	properties.setProperty("mail.imap.timeout", String.valueOf(mailSetting.getTimeout()*1000));
-			
-	        AtomicReference<IMAPFolder> inboxRef = new AtomicReference<>(null);
-	        AtomicReference<Store> store = new AtomicReference<>(null);
-			try {
-				Session session = Session.getInstance(properties);
-				store.set(session.getStore("imap"));
+	public Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, boolean enableStartTLS, 
+			int timeout, MessageListener listener) {
+		return executorService.submit(new Runnable() {
+
+			@Override
+			public void run() {
+		        Properties properties = new Properties();
+		        
+		        properties.setProperty("mail.imap.host", receiveMailSetting.getImapHost());
+		        properties.setProperty("mail.imap.port", String.valueOf(receiveMailSetting.getImapPort()));
+		        properties.setProperty("mail.imap.starttls.enable", String.valueOf(enableStartTLS));        
+		 
+		        properties.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		        properties.setProperty("mail.imap.socketFactory.fallback", "false");
+		        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(receiveMailSetting.getImapPort()));
+		        
+		        properties.setProperty("mail.imap.connectiontimeout", String.valueOf(Bootstrap.SOCKET_CONNECT_TIMEOUT));
+		        properties.setProperty("mail.imap.timeout", String.valueOf(timeout*1000));
 				
-				store.get().connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
+				Session session = Session.getInstance(properties);
+				Store store = null;
+				IMAPFolder inbox = null;
+				Future<?> future = null;
+				try {
+					store = session.getStore("imap");
+					store.connect(receiveMailSetting.getImapUser(), receiveMailSetting.getImapPassword());
+					inbox = (IMAPFolder) store.getFolder("INBOX");
+					inbox.open(Folder.READ_ONLY);
+					inbox.addMessageCountListener(new MessageCountListener() {
+						
+						@Override
+						public void messagesAdded(MessageCountEvent event) {
+							for (Message message: event.getMessages()) 
+								listener.onReceived(message);
+						}
 
-				inboxRef.set((IMAPFolder) store.get().getFolder("INBOX"));
-				inboxRef.get().open(Folder.READ_ONLY);
-				inboxRef.get().addMessageCountListener(new MessageCountListener() {
-					
-					@Override
-					public void messagesAdded(MessageCountEvent event) {
-						for (Message message: event.getMessages()) 
-							listener.onReceived(message);
-					}
+						@Override
+						public void messagesRemoved(MessageCountEvent e) {
+						}
 
-					@Override
-					public void messagesRemoved(MessageCountEvent e) {
-					}
+					});
 
-				});
+					IMAPFolder inboxCopy = inbox;
+					future = executorService.submit(new Runnable() {
 
-				AtomicReference<RuntimeException> exception = new AtomicReference<>(null);
-				AtomicReference<Boolean> stopping = new AtomicReference<>(false);
-				executorService.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							while (!stopping.get()) {
+						@Override
+						public void run() {
+							while (!Thread.interrupted()) { 
 								try {
-									inboxRef.get().idle();
-								} catch (FolderClosedException e) {
-									Thread.sleep(1000);
+									inboxCopy.idle();
+								} catch (MessagingException e) {
+									throw new RuntimeException(e);
 								}
 							}
-						} catch (Exception e) {
-							exception.set(ExceptionUtils.unchecked(e));
-						} finally {
-							close(store, inboxRef);
 						}
-					}
-					
-				});
-				return new InboxMonitor() {
-
-					@Override
-					public void stop() {
-						IMAPFolder inbox = inboxRef.get();
-						if (inbox != null) {
-							stopping.set(true);
-							try {
-								inbox.close(false);
-							} catch (Exception e) {
-							}
-						} 
-					}
-
-					@Override
-					public void waitForFinish() throws InterruptedException {
-						InterruptedException interruptedException = null;
-						while (inboxRef.get() != null) {
-							try {
-								Thread.sleep(100);
-							} catch (InterruptedException e) {
-								interruptedException = e;
-								stop();
-							}
-						}
-						if (interruptedException != null)
-							throw interruptedException;
 						
-						if (exception.get() != null)
-							throw exception.get();
-					}
+					});
 					
-				};
-			} catch (Exception e) {
-				close(store, inboxRef);
-				throw ExceptionUtils.unchecked(e);
+					while (true) {
+						Thread.sleep(timeout*1000/2);
+		                inbox.doCommand(new IMAPFolder.ProtocolCommand() {
+		                	
+		                    public Object doCommand(IMAPProtocol p) throws ProtocolException {
+		                        p.simpleCommand("NOOP", null);
+		                        return null;
+		                    }
+		                    
+		                });						
+					}
+				} catch (Exception e) {
+					throw ExceptionUtils.unchecked(e);
+				} finally {
+					if (future != null)
+						future.cancel(true);
+					if (inbox != null && inbox.isOpen()) {
+						try {
+							inbox.close(false);
+						} catch (Exception e) {
+						}
+					}
+					if (store != null) {
+						try {
+							store.close();
+						} catch (Exception e) {
+						}
+					}
+				}
 			}
-		} else {
-			Future<?> future = executorService.submit(new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(60000);
-					} catch (InterruptedException e) {
-					}
-				}
-				
-			});
-			return new InboxMonitor() {
-
-				@Override
-				public void stop() {
-					future.cancel(true);
-				}
-
-				@Override
-				public void waitForFinish() throws InterruptedException {
-					try {
-						future.get();
-					} catch (InterruptedException e) {
-						stop();
-						throw e;
-					} catch (ExecutionException e) {
-						throw new RuntimeException(e);
-					}
-				}
-				
-			};
-		}
+		});
 	}
 	
 	@Override

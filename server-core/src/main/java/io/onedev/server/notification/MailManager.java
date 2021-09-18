@@ -1,12 +1,14 @@
 package io.onedev.server.notification;
 
 import java.util.Collection;
+import java.util.concurrent.Future;
 
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.ReceiveMailSetting;
 
 public interface MailManager {
 	
@@ -36,6 +38,7 @@ public interface MailManager {
 	@Nullable
 	public String getUnsubscribeAddress(PullRequest request);
 	
-	InboxMonitor monitorInbox(MailSetting mailSetting, MessageListener listener);
+	Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, boolean enableStartTLS, 
+			int timeout, MessageListener listener);
 	
 }
