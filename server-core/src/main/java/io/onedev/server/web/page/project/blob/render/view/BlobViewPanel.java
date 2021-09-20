@@ -22,6 +22,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -76,7 +77,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			WebMarkupContainer edit = new WebMarkupContainer("edit");
 			changeActions.add(edit);
-			if (isEditSupported()) {
+			if (project.getBlob(context.getBlobIdent(), true).getLfsPointer() == null && isEditSupported()) {
 				String title;
 				if (reviewRequired) 
 					title = "Review required for this change. Submit pull request instead";
@@ -185,7 +186,8 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).getText() != null);
+				Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
+				setVisible(blob.getLfsPointer() == null && blob.getText() != null);
 			}
 			
 		});
@@ -203,12 +205,21 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).getText() != null);
+				Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
+				setVisible(blob.getLfsPointer() == null && blob.getText() != null);
 			}
 			
 		});
 		
-		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getProject().getBlob(context.getBlobIdent(), true).getSize())));
+		long size;
+		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
+		if (blob.getLfsPointer() != null)
+			size = blob.getLfsPointer().getObjectSize();
+		else
+			size = blob.getSize();
+		add(new Label("size", FileUtils.byteCountToDisplaySize(size)));
+		
+		add(new WebMarkupContainer("lfsHint").setVisible(blob.getLfsPointer() != null));
 		
 		add(newFormats("formats"));
 		

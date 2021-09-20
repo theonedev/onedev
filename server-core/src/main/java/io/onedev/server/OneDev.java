@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Provider;
 
+import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.AbstractPlugin;
 import io.onedev.commons.loader.AppLoader;
-import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.commons.loader.ListenerRegistry;
 import io.onedev.commons.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.command.Commandline;
@@ -50,6 +50,7 @@ import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.jetty.JettyLauncher;
 import io.onedev.server.util.schedule.TaskScheduler;
+import oshi.SystemInfo;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
@@ -74,7 +75,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	private final ExecutorService executorService;
 	
 	private volatile InitStage initStage;
-
+	
 	// Some are injected via provider as instantiation might encounter problem during upgrade 
 	@Inject
 	public OneDev(Provider<JettyLauncher> jettyLauncherProvider, PersistManager persistManager, 
@@ -97,6 +98,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Override
 	public void start() {
+		logger.info("cpu: " + new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
+		logger.info("memory: " + new SystemInfo().getHardware().getMemory().getTotal()/1024/1024);
+		
 		SecurityUtils.bindAsSystem();
 
 		System.setProperty("hsqldb.reconfig_logging", "false");

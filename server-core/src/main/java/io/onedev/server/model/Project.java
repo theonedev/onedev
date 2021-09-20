@@ -4,7 +4,10 @@ import static io.onedev.server.model.Project.PROP_NAME;
 import static io.onedev.server.model.Project.PROP_UPDATE_DATE;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -22,6 +25,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -40,6 +44,7 @@ import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.Permission;
+import org.apache.tika.mime.MediaType;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -120,6 +125,7 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.NameAware;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -1588,6 +1594,71 @@ public class Project extends AbstractEntity implements NameAware {
 	public void setContributedSetting(Class<? extends ContributedProjectSetting> settingClass, 
 			@Nullable ContributedProjectSetting setting) {
 		contributedSettings.put(settingClass.getName(), setting);
+	}
+	
+	public File getLfsObjectsDir() {
+		return new File(getGitDir(), "lfs/objects");
+	}
+	
+	public File getLfsObjectFile(String objectId) {
+		File objectDir = new File(getLfsObjectsDir(), objectId.substring(0, 2) + "/" + objectId.substring(2, 4));
+		Lock lock = LockUtils.getLock("lfs-storage:" + getGitDir().getAbsolutePath());
+		lock.lock();
+		try {
+			FileUtils.createDir(objectDir);
+		} finally {
+			lock.unlock();
+		}
+		return new File(objectDir, objectId);
+	}
+	
+	public ReadWriteLock getLfsObjectLock(String objectId) {
+		return LockUtils.getReadWriteLock("lfs-objects:" + objectId);
+	}
+
+	public boolean isLfsObjectExists(String objectId) {
+		Lock readLock = getLfsObjectLock(objectId).readLock();
+		readLock.lock();
+		try {
+			return getLfsObjectFile(objectId).exists();
+		} finally {
+			readLock.unlock();
+		}
+	}
+	
+	public InputStream getLfsObjectInputStream(String objectId) {
+		Lock readLock = getLfsObjectLock(objectId).readLock();
+		readLock.lock();
+		try {
+			return new FilterInputStream(new FileInputStream(getLfsObjectFile(objectId))) {
+
+				@Override
+				public void close() throws IOException {
+					super.close();
+					readLock.unlock();
+				}
+				
+			};
+		} catch (FileNotFoundException e) {
+			readLock.unlock();
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public MediaType detectLfsObjectMediaType(String objectId, String fileName) {
+		try (InputStream is = getLfsObjectInputStream(objectId)) {
+			return ContentDetector.detectMediaType(is, fileName);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public MediaType detectMediaType(BlobIdent blobIdent) {
+		Blob blob = getBlob(blobIdent, true);
+		if (blob.getLfsPointer() != null)
+			return detectLfsObjectMediaType(blob.getLfsPointer().getObjectId(), blobIdent.getName());
+		else
+			return blob.getMediaType();
 	}
 	
 }

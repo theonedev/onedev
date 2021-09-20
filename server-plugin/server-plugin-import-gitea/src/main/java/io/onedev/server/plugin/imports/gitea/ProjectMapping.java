@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.validation.annotation.ProjectName;
+import io.onedev.server.util.validation.annotation.UrlPath;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -20,6 +21,7 @@ public class ProjectMapping implements Serializable {
 	
 	@Editable(order=100, name="Gitea Repository", description="Specify Gitea repository in form of "
 			+ "<tt>organization/repository</tt>")
+	@UrlPath
 	@NotEmpty
 	public String getGiteaRepo() {
 		return giteaRepo;

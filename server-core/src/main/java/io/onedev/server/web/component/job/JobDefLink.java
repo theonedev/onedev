@@ -15,7 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider;
+import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer;
 
 @SuppressWarnings("serial")
 public abstract class JobDefLink extends BookmarkablePageLink<Void> {
@@ -56,7 +56,7 @@ public abstract class JobDefLink extends BookmarkablePageLink<Void> {
 		state.blobIdent = new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()); 
 		if (getProject().getBlob(state.blobIdent, false) == null)
 			state.blobIdent = new BlobIdent(commitId.name(), ".onedev-buildspec", FileMode.REGULAR_FILE.getBits());
-		state.position = BuildSpecRendererProvider.getPosition(Job.SELECTION_PREFIX + jobName);
+		state.position = BuildSpecRenderer.getPosition(Job.SELECTION_PREFIX + jobName);
 		state.requestId = PullRequest.idOf(getPullRequest());
 		return ProjectBlobPage.paramsOf(getProject(), state);
 	}

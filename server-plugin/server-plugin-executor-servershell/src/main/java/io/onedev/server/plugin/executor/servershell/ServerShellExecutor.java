@@ -1,5 +1,10 @@
 package io.onedev.server.plugin.executor.servershell;
 
+import static io.onedev.agent.ShellExecutorUtils.getShell;
+import static io.onedev.agent.ShellExecutorUtils.newErrorLogger;
+import static io.onedev.agent.ShellExecutorUtils.newInfoLogger;
+import static io.onedev.agent.ShellExecutorUtils.resolveCachePath;
+import static io.onedev.agent.ShellExecutorUtils.testCommands;
 import static io.onedev.k8shelper.KubernetesHelper.checkCacheAllocations;
 import static io.onedev.k8shelper.KubernetesHelper.cloneRepository;
 import static io.onedev.k8shelper.KubernetesHelper.getCacheInstances;
@@ -23,8 +28,6 @@ import java.util.function.Consumer;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang.SystemUtils;
-
-import static io.onedev.agent.ShellExecutorUtils.*;
 
 import io.onedev.agent.job.FailedException;
 import io.onedev.commons.bootstrap.Bootstrap;
@@ -215,8 +218,9 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 									int cloneDepth = checkoutExecutable.getCloneDepth();
 									
 									cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
-											cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), cloneDepth, 
-											newInfoLogger(jobLogger), newErrorLogger(jobLogger));
+											cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
+											checkoutExecutable.isWithLfs(), checkoutExecutable.isWithSubmodules(),
+											cloneDepth, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
 								} catch (Exception e) {
 									jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
 									return false;
@@ -287,14 +291,15 @@ public class ServerShellExecutor extends JobExecutor implements Testable<TestDat
 
 			@Override
 			public void run() {
-				testCommands(testData.getCommands(), jobLogger);
+				Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());
+				testCommands(git, testData.getCommands(), jobLogger);
 			}
 			
 		}, new HashMap<>(), jobLogger);
 		
 	}
 	
-	@Editable(name="Specify Shell/Batch Commands to Test")
+	@Editable(name="Specify Shell/Batch Commands to Run")
 	public static class TestData implements Serializable {
 
 		private static final long serialVersionUID = 1L;

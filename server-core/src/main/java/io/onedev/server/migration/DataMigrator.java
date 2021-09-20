@@ -34,6 +34,8 @@ import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Pair;
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -2771,7 +2773,6 @@ public class DataMigrator {
 		}
 	}
 	
-	@SuppressWarnings("restriction")
 	private void migrate62(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Settings.xml")) {
@@ -2781,12 +2782,10 @@ public class DataMigrator {
 					if (key.equals("SYSTEM")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
-							int cpu = Runtime.getRuntime().availableProcessors()*1000;
+							HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
+							int cpu = hardware.getProcessor().getLogicalProcessorCount()*1000;
 							valueElement.addElement("cpu").setText(String.valueOf(cpu));
-							
-							com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
-								     java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-							int memory = (int)(os.getTotalPhysicalMemorySize()/1024/1024);				
+							int memory = (int) (hardware.getMemory().getTotal()/1024/1024);
 							valueElement.addElement("memory").setText(String.valueOf(memory));
 						}
 					} else if (key.equals("JOB_EXECUTORS")) {
@@ -2978,4 +2977,20 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate64(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key");
+					if (key.equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.addElement("maxGitLFSFileSize").setText("4096");
+					}
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
 }

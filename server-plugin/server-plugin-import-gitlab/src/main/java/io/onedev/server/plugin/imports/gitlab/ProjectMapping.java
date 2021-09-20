@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.validation.annotation.ProjectName;
+import io.onedev.server.util.validation.annotation.UrlPath;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -20,6 +21,7 @@ public class ProjectMapping implements Serializable {
 	
 	@Editable(order=100, name="GitLab Project", description="Specify GitLab project in form of "
 			+ "<tt>group/subgroup/project</tt>")
+	@UrlPath
 	@NotEmpty
 	public String getGitLabProject() {
 		return gitLabProejct;

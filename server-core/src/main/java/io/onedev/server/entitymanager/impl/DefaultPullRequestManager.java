@@ -123,10 +123,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.server.util.work.BatchWorkManager;
-import io.onedev.server.util.work.BatchWorker;
 
 @Singleton
 public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> implements PullRequestManager {

@@ -48,7 +48,7 @@ import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
+import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -235,7 +235,7 @@ public class CheckstyleRulesPage extends CheckstyleReportPage {
 						state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 
 								violation.getFile(), FileMode.REGULAR_FILE.getBits());
 						state.problemReport = getReportName();
-						state.position = SourceRendererProvider.getPosition(violation.getRange());
+						state.position = BlobRendererer.getSourcePosition(violation.getRange());
 						PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 						BookmarkablePageLink<Void> rangeLink = new BookmarkablePageLink<Void>("range", 
 								ProjectBlobPage.class, params);

@@ -27,4 +27,14 @@
 			<div wicket:id="content" class="flex-grow-1 d-flex flex-column overflow-hidden"></div>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="binaryFileFrag">
+	<div class="alert alert-notice alert-light-warning m-4">
+		Binary file
+	</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="lfsObjectMissingFrag">
+	<div class="alert alert-notice alert-light-warning m-4">
+		This is a Git LFS object, but the storage file is missing
+	</div>
+	</wicket:fragment>
 </wicket:extend>

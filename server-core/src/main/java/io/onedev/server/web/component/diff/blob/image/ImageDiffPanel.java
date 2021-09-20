@@ -2,15 +2,15 @@ package io.onedev.server.web.component.diff.blob.image;
 
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.Provider;
 import io.onedev.server.web.component.diff.difftitle.BlobDiffTitle;
+import io.onedev.server.web.resource.RawBlobResource;
+import io.onedev.server.web.resource.RawBlobResourceReference;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {
@@ -52,22 +52,8 @@ public class ImageDiffPanel extends Panel {
 	private Image newImage(String id, BlobIdent blobIdent, Provider<Blob> blobProvider) {
 		Image image;
 		if (blobIdent.path != null) {
-			add(image = new Image(id, new DynamicImageResource() {
-				
-				@Override
-				protected void configureResponse(ResourceResponse response, Attributes attributes) {
-					super.configureResponse(response, attributes);
-					if (!ObjectId.isId(blobIdent.revision))
-						response.disableCaching();
-					response.setContentType(blobProvider.get().getMediaType().toString());
-					response.setFileName(blobIdent.getName());
-				}
-
-				@Override
-				protected byte[] getImageData(Attributes attributes) {
-					return blobProvider.get().getBytes();
-				}
-			}));
+			add(image = new Image(id, new RawBlobResourceReference(), 
+					RawBlobResource.paramsOf(change.getProject(), blobIdent)));
 		} else {
 			add(image = new Image(id, new PackageResourceReference(ImageDiffPanel.class, "blank.png")));
 		}

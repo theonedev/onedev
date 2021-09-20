@@ -140,7 +140,6 @@ public class DefaultJobLogManager implements JobLogManager {
 									throw new RuntimeException(e);
 								}
 							}
-							
 							webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId));
 						}
 					}

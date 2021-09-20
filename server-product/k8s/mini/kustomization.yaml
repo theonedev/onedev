@@ -1,8 +1,0 @@
-namespace: onedev
-images:
-- name: 1dev/server
-  newTag: ${buildVersion}
-bases:
-- ../base
-patchesStrategicMerge:
-- disk-settings.yaml

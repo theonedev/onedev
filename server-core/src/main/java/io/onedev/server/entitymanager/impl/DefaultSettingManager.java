@@ -28,6 +28,7 @@ import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.PerformanceSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
@@ -86,6 +87,8 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
     
     private volatile Long contributedSettingsId;
 	
+    private volatile Long performanceSettingId;
+    
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
 		super(dao);
@@ -469,6 +472,32 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
         dao.persist(setting);
     }
 
+	@Sessional
+    @Override
+    public PerformanceSetting getPerformanceSetting() {
+        Setting setting;
+        if (performanceSettingId == null) {
+            setting = getSetting(Key.PERFORMANCE);
+            Preconditions.checkNotNull(setting);
+            performanceSettingId = setting.getId();
+        } else {
+            setting = load(performanceSettingId);
+        }
+        return (PerformanceSetting)setting.getValue();
+    }
+
+    @Transactional
+    @Override
+    public void savePerformanceSetting(PerformanceSetting performanceSetting) {
+        Setting setting = getSetting(Key.PERFORMANCE);
+        if (setting == null) {
+            setting = new Setting();
+            setting.setKey(Key.PERFORMANCE);
+        }
+        setting.setValue(performanceSetting);
+        dao.persist(setting);
+    }
+    
 	@Sessional
 	@SuppressWarnings("unchecked")
 	@Override

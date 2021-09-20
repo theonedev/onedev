@@ -2,6 +2,7 @@ package io.onedev.server.web.component.diff.blob;
 
 import javax.annotation.Nullable;
 
+import org.apache.tika.mime.MediaType;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
@@ -13,6 +14,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
+import io.onedev.server.git.LfsPointer;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.diff.DiffUtils;
@@ -60,7 +62,22 @@ public class BlobDiffPanel extends Panel {
 	}
 	
 	private void showBlob(Blob blob) {
-		if (blob.getText() != null) {
+		Component diffPanel = null;
+		for (DiffRenderer renderer: OneDev.getExtensions(DiffRenderer.class)) {
+			if (blob.getLfsPointer() != null 
+					&& !change.getProject().isLfsObjectExists(blob.getLfsPointer().getObjectId())) {
+				diffPanel = newFragment("Storage file missing", true);
+				break;
+			}
+			MediaType mediaType = change.getProject().detectMediaType(blob.getIdent());
+			diffPanel = renderer.render(CONTENT_ID, mediaType, change, diffMode);
+			if (diffPanel != null)
+				break;
+		}
+		
+		if (diffPanel != null) {
+			add(diffPanel);
+		} else if (blob.getText() != null) {
 			if (blob.getText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
 				add(newFragment("Unable to diff as the file is too large.", true));
 			} else if (change.getAdditions()+change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
@@ -80,19 +97,8 @@ public class BlobDiffPanel extends Panel {
 					
 				});
 			}
-		} else if (blob.isPartial()) {
-			add(newFragment("File is too large to be loaded.", true));
 		} else {
-			Panel diffPanel = null;
-			for (DiffRenderer renderer: OneDev.getExtensions(DiffRenderer.class)) {
-				diffPanel = renderer.render(CONTENT_ID, blob.getMediaType(), change, diffMode);
-				if (diffPanel != null)
-					break;
-			}
-			if (diffPanel != null)
-				add(diffPanel);
-			else
-				add(newFragment("Binary file.", false));
+			add(newFragment("Binary file.", false));
 		}
 	}
 	
@@ -105,38 +111,47 @@ public class BlobDiffPanel extends Panel {
 		} else if (change.getType() == ChangeType.DELETE) {
 			showBlob(change.getOldBlob());
 		} else {
-			if (change.getOldText() != null && change.getNewText() != null) {
-				if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
-					add(newFragment("Unable to diff as the file is too large.", true));
-				} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
-					add(newFragment("Diff is too large to be displayed.", true));
-				} else if (change.getAdditions() + change.getDeletions() == 0) {
-					add(newFragment("Content is identical", false));
-				} else {
-					add(new TextDiffPanel(CONTENT_ID, change, diffMode, blameModel) {
-
-						@Override
-						protected PullRequest getPullRequest() {
-							return BlobDiffPanel.this.getPullRequest();
-						}
-						
-					});
-				}
-			} else if (change.getOldBlob().isPartial() || change.getNewBlob().isPartial()) {
-				add(newFragment("File is too large to be loaded.", true));
-			} else if (change.getOldBlob().getMediaType().equals(change.getNewBlob().getMediaType())) {
-				Panel diffPanel = null;
-				for (DiffRenderer renderer: OneDev.getExtensions(DiffRenderer.class)) {
-					diffPanel = renderer.render(CONTENT_ID, change.getNewBlob().getMediaType(), change, diffMode);
-					if (diffPanel != null)
-						break;
-				}
-				if (diffPanel != null)
-					add(diffPanel);
-				else
-					add(newFragment("Binary file.", false));
+			LfsPointer oldLfsPointer = change.getOldBlob().getLfsPointer();
+			LfsPointer newLfsPointer = change.getNewBlob().getLfsPointer();
+			if (oldLfsPointer != null && !change.getProject().isLfsObjectExists(oldLfsPointer.getObjectId())
+					|| newLfsPointer != null && !change.getProject().isLfsObjectExists(newLfsPointer.getObjectId())) {
+				add(newFragment("Storage file missing", true));
 			} else {
-				add(newFragment("Binary file.", false));
+				MediaType oldMediaType = change.getProject().detectMediaType(change.getOldBlobIdent());
+				MediaType newMediaType = change.getProject().detectMediaType(change.getNewBlobIdent());
+				
+				Component diffPanel = null;
+				
+				if (oldMediaType.equals(newMediaType)) {
+					for (DiffRenderer renderer: OneDev.getExtensions(DiffRenderer.class)) {
+						diffPanel = renderer.render(CONTENT_ID, newMediaType, change, diffMode);
+						if (diffPanel != null)
+							break;
+					}
+				}
+				
+				if (diffPanel != null) {
+					add(diffPanel);
+				} else if (change.getOldText() != null && change.getNewText() != null) {
+					if (change.getOldText().getLines().size() + change.getNewText().getLines().size() > DiffUtils.MAX_DIFF_SIZE) {
+						add(newFragment("Unable to diff as the file is too large.", true));
+					} else if (change.getAdditions() + change.getDeletions() > WebConstants.MAX_SINGLE_DIFF_LINES) {
+						add(newFragment("Diff is too large to be displayed.", true));
+					} else if (change.getAdditions() + change.getDeletions() == 0) {
+						add(newFragment("Content is identical", false));
+					} else {
+						add(new TextDiffPanel(CONTENT_ID, change, diffMode, blameModel) {
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return BlobDiffPanel.this.getPullRequest();
+							}
+							
+						});
+					}
+				} else {
+					add(newFragment("Binary file.", false));
+				}
 			}
 		}
 	}

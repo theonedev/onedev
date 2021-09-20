@@ -14,7 +14,7 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
+import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 
 @SuppressWarnings("serial")
 abstract class TestMessagePanel extends Label {
@@ -46,7 +46,7 @@ abstract class TestMessagePanel extends Label {
 							ProjectBlobPage.State state = new ProjectBlobPage.State();
 							state.blobIdent = blobIdent;
 							PlanarRange range = new PlanarRange(line-1, col-1, line-1, col); 
-							state.position = SourceRendererProvider.getPosition(range);
+							state.position = BlobRendererer.getSourcePosition(range);
 							PageParameters params = ProjectBlobPage.paramsOf(getBuild().getProject(), state);
 							String url = urlFor(ProjectBlobPage.class, params).toString();
 							buffer.append(String.format("(<a onclick='onedev.server.viewState.getFromViewAndSetToHistory();' href='%s'>%s:%d:%d</a>)", 

@@ -8,5 +8,4 @@ images:
   newTag: ${buildVersion}
 patchesStrategicMerge:
 - node-selectors.yaml
-- memory-settings.yaml
 - disk-settings.yaml

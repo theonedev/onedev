@@ -1,7 +1,9 @@
 package io.onedev.server.plugin.executor.kubernetes;
 
+import java.io.File;
 import java.util.Collection;
 
+import org.apache.commons.lang.SystemUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
@@ -45,7 +47,12 @@ public class KubernetesModule extends AbstractPluginModule {
 			@Override
 			public JobExecutor discover(TaskLogger jobLogger) {
 				jobLogger.log("Checking if there is a Kubernetes cluster...");
-				Commandline kubectl = new Commandline("kubectl");
+
+				Commandline kubectl;
+				if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/kubectl").exists())
+					kubectl = new Commandline("/usr/local/bin/kubectl");
+				else
+					kubectl = new Commandline("kubectl");
 				kubectl.addArgs("cluster-info");
 				try {
 					kubectl.execute(new LineConsumer() {

@@ -418,59 +418,211 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	private JobExecution execute(Build build) {
+		Long buildId = build.getId();
+		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+		Long buildNumber = build.getNumber();
+		String projectName = build.getProject().getName();
+		File projectGitDir = build.getProject().getGitDir();
+		BuildSpec buildSpec = build.getSpec();
+		Job job;
+		
 		JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 		Build.push(build);
 		try {
-			String jobToken = UUID.randomUUID().toString();
-			Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
-			TaskLogger jobLogger = logManager.newLogger(build, jobSecretsToMask); 
-			
-			BuildSpec buildSpec = build.getSpec();
-			Job job = build.getJob();
-			
-			JobExecutor executor = getJobExecutor(build, jobLogger);
-			if (executor != null) {
-				ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-				Long buildId = build.getId();
-				Long buildNumber = build.getNumber();
-				String projectName = build.getProject().getName();
-				File projectGitDir = build.getProject().getGitDir();
+			job = build.getJob();
+		} finally {
+			Build.pop();
+			JobSecretAuthorizationContext.pop();
+		}
+		
+		AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
+		executionRef.set(new JobExecution(executorService.submit(new Runnable() {
 
-				AtomicReference<JobExecution> executionRef = new AtomicReference<>(null);
-				executionRef.set(new JobExecution(executorService.submit(new Runnable() {
+			@Override
+			public void run() {
+				String jobToken = UUID.randomUUID().toString();
+				TaskLogger jobLogger = sessionManager.call(new Callable<TaskLogger>() {
 
 					@Override
-					public void run() {
-						AtomicInteger maxRetries = new AtomicInteger(0);
-						AtomicInteger retryDelay = new AtomicInteger(0);
-						List<CacheSpec> caches = new ArrayList<>();
-						List<Service> services = new ArrayList<>();
-						List<Action> actions = new ArrayList<>();
+					public TaskLogger call() throws Exception {
+						Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
+						return logManager.newLogger(buildManager.load(buildId), jobSecretsToMask);
+					}
+					
+				});
+				
+				JobExecutor executor = sessionManager.call(new Callable<JobExecutor>() {
+
+					@Override
+					public JobExecutor call() throws Exception {
+						return getJobExecutor(buildManager.load(buildId), jobLogger);
+					}
+					
+				});
+				
+				if (executor != null) {
+					AtomicInteger maxRetries = new AtomicInteger(0);
+					AtomicInteger retryDelay = new AtomicInteger(0);
+					List<CacheSpec> caches = new ArrayList<>();
+					List<Service> services = new ArrayList<>();
+					List<Action> actions = new ArrayList<>();
+					
+					sessionManager.run(new Runnable() {
+
+						@Override
+						public void run() {
+							Build build = buildManager.load(buildId);
+							JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
+							Build.push(build);
+							try {
+								VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+
+								for (Step step: job.getSteps()) {
+									step = interpolator.interpolateProperties(step);
+									actions.add(step.getAction(build, jobToken, build.getParamCombination()));
+								}
+								
+								for (CacheSpec cache: job.getCaches()) 
+									caches.add(interpolator.interpolateProperties(cache));
+								
+								for (String serviceName: job.getRequiredServices()) {
+									Service service = buildSpec.getServiceMap().get(serviceName);
+									services.add(interpolator.interpolateProperties(service));
+								}
+								maxRetries.set(job.getMaxRetries());
+								retryDelay.set(job.getRetryDelay());
+							} finally {
+								Build.pop();
+								JobSecretAuthorizationContext.pop();
+							}
+						}
 						
-						sessionManager.run(new Runnable() {
+					});
+
+					AtomicInteger retried = new AtomicInteger(0);
+					while (true) {
+						JobContext jobContext = sessionManager.call(new Callable<JobContext> () {
 
 							@Override
-							public void run() {
+							public JobContext call() throws Exception {
 								Build build = buildManager.load(buildId);
-								JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 								Build.push(build);
+								JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 								try {
-									VariableInterpolator interpolator = new VariableInterpolator(build, build.getParamCombination());
+									return new JobContext(projectName, buildNumber, projectGitDir, 
+											actions, job.getCpuRequirement(), job.getMemoryRequirement(), 
+											commitId, caches, executor.getCacheTTL(), retried.get(), 
+											services, jobLogger) {
+										
+										@Override
+										public void notifyJobRunning(Long agentId) {
+											transactionManager.run(new Runnable() {
 
-									for (Step step: job.getSteps()) {
-										step = interpolator.interpolateProperties(step);
-										actions.add(step.getAction(build, jobToken, build.getParamCombination()));
-									}
-									
-									for (CacheSpec cache: job.getCaches()) 
-										caches.add(interpolator.interpolateProperties(cache));
-									
-									for (String serviceName: job.getRequiredServices()) {
-										Service service = buildSpec.getServiceMap().get(serviceName);
-										services.add(interpolator.interpolateProperties(service));
-									}
-									maxRetries.set(job.getMaxRetries());
-									retryDelay.set(job.getRetryDelay());
+												@Override
+												public void run() {
+													Build build = buildManager.load(buildId);
+													build.setStatus(Build.Status.RUNNING);
+													build.setRunningDate(new Date());
+													if (agentId != null)
+														build.setAgent(agentManager.load(agentId));
+													buildManager.save(build);
+													listenerRegistry.post(new BuildRunning(build));
+												}
+												
+											});
+										}
+
+										@Override
+										public void reportJobWorkspace(String jobWorkspace) {
+											transactionManager.run(new Runnable() {
+
+												@Override
+												public void run() {
+													Build build = buildManager.load(buildId);
+													build.setJobWorkspace(jobWorkspace);
+													buildManager.save(build);
+												}
+												
+											});
+										}
+
+										@Override
+										public Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, File filesDir, 
+												Map<String, String> placeholderValues, TaskLogger logger) {
+											return sessionManager.call(new Callable<Map<String, byte[]>>() {
+
+												@Override
+												public Map<String, byte[]> call() {
+													Executable entryExecutable = new CompositeExecutable(getActions());
+													
+													LeafVisitor<LeafExecutable> visitor = new LeafVisitor<LeafExecutable>() {
+
+														@Override
+														public LeafExecutable visit(LeafExecutable executable, List<Integer> position) {
+															if (position.equals(stepPosition))
+																return executable;
+															else
+																return null;
+														}
+														
+													};															
+													
+													ServerExecutable serverExecutable = (ServerExecutable) entryExecutable.traverse(visitor, new ArrayList<>());
+													ServerStep serverStep = (ServerStep) serverExecutable.getStep();
+													
+													serverStep = new EditableStringTransformer(new Function<String, String>() {
+
+														@Override
+														public String apply(String t) {
+															return replacePlaceholders(t, placeholderValues);
+														}
+														
+													}).transformProperties(serverStep, Interpolative.class);
+
+													return serverStep.run(buildManager.load(buildId), filesDir, logger);
+												}
+												
+											});
+										}
+
+										@Override
+										public void copyDependencies(File targetDir) {
+											sessionManager.run(new Runnable() {
+
+												@Override
+												public void run() {
+													Build build = buildManager.load(buildId);
+													for (BuildDependence dependence: build.getDependencies()) {
+														if (dependence.getArtifacts() != null) {
+															Build dependency = dependence.getDependency();
+															LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
+
+																@Override
+																public Void call() throws Exception {
+																	File artifactsDir = dependency.getArtifactsDir();
+																	if (artifactsDir.exists()) {
+																		PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
+																		int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+																		for (File file: patternSet.listFiles(artifactsDir)) {
+																			try {
+																				FileUtils.copyFile(file, new File(targetDir, file.getAbsolutePath().substring(baseLen)));
+																			} catch (IOException e) {
+																				throw new RuntimeException(e);
+																			}
+																		}
+																	}
+																	return null;
+																}
+																
+															});
+														}
+													}
+												}
+												
+											});
+										}
+										
+									};
 								} finally {
 									Build.pop();
 									JobSecretAuthorizationContext.pop();
@@ -478,216 +630,80 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							}
 							
 						});
+						
+						jobContexts.put(jobToken, jobContext);
+						logManager.registerLogger(jobToken, jobLogger);
+						
+						try {
+							executor.execute(jobToken, jobContext);
+							break;
+						} catch (Throwable e) {
+							if (e != null && ExceptionUtils.find(e, InterruptedException.class) != null) {
+								throw e;
+							} else {
+								if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
 
-						AtomicInteger retried = new AtomicInteger(0);
-						while (true) {
-							JobContext jobContext = sessionManager.call(new Callable<JobContext> () {
-
-								@Override
-								public JobContext call() throws Exception {
-									Build build = buildManager.load(buildId);
-									Build.push(build);
-									JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
-									try {
-										return new JobContext(projectName, buildNumber, projectGitDir, 
-												actions, job.getCpuRequirement(), job.getMemoryRequirement(), 
-												commitId, caches, executor.getCacheTTL(), retried.get(), 
-												services, jobLogger) {
-											
-											@Override
-											public void notifyJobRunning(Long agentId) {
-												transactionManager.run(new Runnable() {
-
-													@Override
-													public void run() {
-														Build build = buildManager.load(buildId);
-														build.setStatus(Build.Status.RUNNING);
-														build.setRunningDate(new Date());
-														if (agentId != null)
-															build.setAgent(agentManager.load(agentId));
-														buildManager.save(build);
-														listenerRegistry.post(new BuildRunning(build));
-													}
-													
-												});
-											}
-
-											@Override
-											public void reportJobWorkspace(String jobWorkspace) {
-												transactionManager.run(new Runnable() {
-
-													@Override
-													public void run() {
-														Build build = buildManager.load(buildId);
-														build.setJobWorkspace(jobWorkspace);
-														buildManager.save(build);
-													}
-													
-												});
-											}
-
-											@Override
-											public Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, File filesDir, 
-													Map<String, String> placeholderValues, TaskLogger logger) {
-												return sessionManager.call(new Callable<Map<String, byte[]>>() {
-
-													@Override
-													public Map<String, byte[]> call() {
-														Executable entryExecutable = new CompositeExecutable(getActions());
-														
-														LeafVisitor<LeafExecutable> visitor = new LeafVisitor<LeafExecutable>() {
-
-															@Override
-															public LeafExecutable visit(LeafExecutable executable, List<Integer> position) {
-																if (position.equals(stepPosition))
-																	return executable;
-																else
-																	return null;
-															}
-															
-														};															
-														
-														ServerExecutable serverExecutable = (ServerExecutable) entryExecutable.traverse(visitor, new ArrayList<>());
-														ServerStep serverStep = (ServerStep) serverExecutable.getStep();
-														
-														serverStep = new EditableStringTransformer(new Function<String, String>() {
-
-															@Override
-															public String apply(String t) {
-																return replacePlaceholders(t, placeholderValues);
-															}
-															
-														}).transformProperties(serverStep, Interpolative.class);
-
-														return serverStep.run(buildManager.load(buildId), filesDir, logger);
-													}
-													
-												});
-											}
-
-											@Override
-											public void copyDependencies(File targetDir) {
-												sessionManager.run(new Runnable() {
-
-													@Override
-													public void run() {
-														Build build = buildManager.load(buildId);
-														for (BuildDependence dependence: build.getDependencies()) {
-															if (dependence.getArtifacts() != null) {
-																Build dependency = dependence.getDependency();
-																LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
-
-																	@Override
-																	public Void call() throws Exception {
-																		File artifactsDir = dependency.getArtifactsDir();
-																		if (artifactsDir.exists()) {
-																			PatternSet patternSet = PatternSet.parse(dependence.getArtifacts());
-																			int baseLen = artifactsDir.getAbsolutePath().length() + 1;
-																			for (File file: patternSet.listFiles(artifactsDir)) {
-																				try {
-																					FileUtils.copyFile(file, new File(targetDir, file.getAbsolutePath().substring(baseLen)));
-																				} catch (IOException e) {
-																					throw new RuntimeException(e);
-																				}
-																			}
-																		}
-																		return null;
-																	}
-																	
-																});
-															}
-														}
-													}
-													
-												});
-											}
-											
-										};
-									} finally {
-										Build.pop();
-										JobSecretAuthorizationContext.pop();
+									@Override
+									public Boolean call() {
+										RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
+										return retryCondition.matches(buildManager.load(buildId));
 									}
-								}
-								
-							});
-							
-							jobContexts.put(jobToken, jobContext);
-							logManager.registerLogger(jobToken, jobLogger);
-							
-							try {
-								executor.execute(jobToken, jobContext);
-								break;
-							} catch (Throwable e) {
-								if (e != null && ExceptionUtils.find(e, InterruptedException.class) != null) {
-									throw e;
-								} else {
-									if (retried.getAndIncrement() < maxRetries.get() && sessionManager.call(new Callable<Boolean>() {
+									
+								})) {
+									log(e, jobLogger);
+									jobLogger.warning("Job will be retried after a while...");
+									transactionManager.run(new Runnable() {
 
 										@Override
-										public Boolean call() {
-											RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
-											return retryCondition.matches(buildManager.load(buildId));
+										public void run() {
+											Build build = buildManager.load(buildId);
+											build.setRunningDate(null);
+											build.setPendingDate(null);
+											build.setRetryDate(new Date());
+											build.setStatus(Build.Status.WAITING);
+											listenerRegistry.post(new BuildRetrying(build));
+											buildManager.save(build);
 										}
 										
-									})) {
-										log(e, jobLogger);
-										jobLogger.warning("Job will be retried after a while...");
-										transactionManager.run(new Runnable() {
-
-											@Override
-											public void run() {
-												Build build = buildManager.load(buildId);
-												build.setRunningDate(null);
-												build.setPendingDate(null);
-												build.setRetryDate(new Date());
-												build.setStatus(Build.Status.WAITING);
-												listenerRegistry.post(new BuildRetrying(build));
-												buildManager.save(build);
-											}
-											
-										});
-										try {						
-											Thread.sleep(retryDelay.get() * (long)(Math.pow(2, retried.get())) * 1000L);
-										} catch (InterruptedException e2) {
-											throw new RuntimeException(e2);
-										}
-										transactionManager.run(new Runnable() {
-
-											@Override
-											public void run() {
-												JobExecution execution = executionRef.get();
-												if (execution != null)
-													execution.updateBeginTime();
-												Build build = buildManager.load(buildId);
-												build.setPendingDate(new Date());
-												build.setStatus(Build.Status.PENDING);
-												listenerRegistry.post(new BuildPending(build));
-												buildManager.save(build);
-											}
-											
-										});
-									} else {
-										throw e;
+									});
+									try {						
+										Thread.sleep(retryDelay.get() * (long)(Math.pow(2, retried.get())) * 1000L);
+									} catch (InterruptedException e2) {
+										throw new RuntimeException(e2);
 									}
+									transactionManager.run(new Runnable() {
+
+										@Override
+										public void run() {
+											JobExecution execution = executionRef.get();
+											if (execution != null)
+												execution.updateBeginTime();
+											Build build = buildManager.load(buildId);
+											build.setPendingDate(new Date());
+											build.setStatus(Build.Status.PENDING);
+											listenerRegistry.post(new BuildPending(build));
+											buildManager.save(build);
+										}
+										
+									});
+								} else {
+									throw e;
 								}
-							} finally {
-								jobContexts.remove(jobToken);
-								logManager.deregisterLogger(jobToken);
-								jobContext.onJobFinished();
 							}
+						} finally {
+							jobContexts.remove(jobToken);
+							logManager.deregisterLogger(jobToken);
+							jobContext.onJobFinished();
 						}
-					}
-					
-				}), job.getTimeout() * 1000L));
-				
-				return executionRef.get();
-			} else {
-				throw new ExplicitException("No applicable job executor");
+					}							
+				} else {
+					throw new ExplicitException("No applicable job executor");
+				}
 			}
-		} finally {
-			Build.pop();
-			JobSecretAuthorizationContext.pop();
-		}
+			
+		}), job.getTimeout() * 1000L));
+		
+		return executionRef.get();
 	}
 	
 	private void log(Throwable e, TaskLogger logger) {
@@ -1105,6 +1121,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									try {
 										execution.check();
 										build.setStatus(Build.Status.SUCCESSFUL);
+										jobLogger.log("Job finished");
 									} catch (TimeoutException e) {
 										build.setStatus(Build.Status.TIMED_OUT);
 									} catch (CancellationException e) {
@@ -1124,7 +1141,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									} catch (InterruptedException e) {
 									} finally {
 										build.setFinishDate(new Date());
-										jobLogger.log("Job finished");
 										listenerRegistry.post(new BuildFinished(build));
 									}
 								}

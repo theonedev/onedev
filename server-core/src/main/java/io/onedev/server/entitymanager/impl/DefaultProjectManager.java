@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.Listen;
 import io.onedev.commons.loader.ListenerRegistry;
@@ -283,6 +285,24 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         checkSanity(to);
         commitInfoManager.cloneInfo(from, to);
         avatarManager.copyAvatar(from, to);
+        
+        for (File file: FileUtils.listFiles(from.getLfsObjectsDir(), Sets.newHashSet("**"), Sets.newHashSet())) {
+        	String objectId = file.getName();
+        	Lock lock = from.getLfsObjectLock(objectId).readLock();
+        	lock.lock();
+        	try {
+        		FileUtils.copyFile(file, to.getLfsObjectFile(objectId));
+        	} catch (IOException e) {
+        		throw new RuntimeException(e);
+			} finally {
+        		lock.unlock();
+        	}
+        }
+        try {
+			FileUtils.copyDirectory(from.getLfsObjectsDir(), to.getLfsObjectsDir());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
         
         listenerRegistry.post(new ProjectCreated(to));
 	}

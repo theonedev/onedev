@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,8 +209,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private Commandline newKubeCtl() {
 		String kubectl = getKubeCtlPath();
-		if (kubectl == null)
-			kubectl = "kubectl";
+		if (kubectl == null) {
+			if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/kubectl").exists())
+				kubectl = "/usr/local/bin/kubectl";
+			else
+				kubectl = "kubectl";
+		}
 		Commandline cmdline = new Commandline(kubectl); 
 		if (getConfigFile() != null)
 			cmdline.addArgs("--kubeconfig", getConfigFile());
@@ -306,10 +311,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private String createNamespace(String namespace, @Nullable JobContext jobContext, TaskLogger jobLogger) {
 		AtomicBoolean namespaceExists = new AtomicBoolean(false);
-		Commandline cmd = newKubeCtl();
-		cmd.addArgs("get", "namespaces", "--field-selector", "metadata.name=" + namespace, 
+		Commandline kubectl = newKubeCtl();
+		kubectl.addArgs("get", "namespaces", "--field-selector", "metadata.name=" + namespace, 
 				"-o", "name");
-		cmd.execute(new LineConsumer() {
+		kubectl.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -328,9 +333,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		if (namespaceExists.get())
 			deleteNamespace(namespace, jobLogger);
 		
-		cmd.clearArgs();
-		cmd.addArgs("create", "namespace", namespace);
-		cmd.execute(new LineConsumer() {
+		kubectl = newKubeCtl();
+		kubectl.addArgs("create", "namespace", namespace);
+		kubectl.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -658,7 +663,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 		
 			if (!getStartedContainers(containerStatusNodes).isEmpty()) {
-				kubectl.clearArgs();
+				kubectl = newKubeCtl();
 				kubectl.addArgs("exec", podName, "-n", namespace, "--");
 				if (baselineOsInfo.isLinux())
 					kubectl.addArgs("sh", "-c");
@@ -1181,7 +1186,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		jobLogger.log("Updating cache labels on node...");
 		
 		Commandline kubectl = newKubeCtl();
-		kubectl.clearArgs();
 		StringBuilder nodeJson = new StringBuilder();
 		kubectl.addArgs("get", "node", nodeName, "-o", "json");
 		kubectl.execute(new LineConsumer() {
@@ -1235,7 +1239,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		jobContext.getCacheCounts().clear();
 		
 		for (List<String> partition: Lists.partition(labelUpdates, LABEL_UPDATE_BATCH)) {
-			kubectl.clearArgs();
+			kubectl = newKubeCtl();
 			kubectl.addArgs("label", "node", nodeName, "--overwrite");
 			for (String labelUpdate: partition) 
 				kubectl.addArgs(labelUpdate);

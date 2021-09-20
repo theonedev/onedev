@@ -123,8 +123,11 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 								}
 								
 							};
-							builds.add(getJobManager().submit(getProject(), commitId, job.getName(), 
-									paramMap, reason));
+							Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
+									paramMap, reason);
+							if (build.isFinished())
+								getJobManager().resubmit(build, paramMap, "Resubmitted manually ");
+							builds.add(build);
 						}
 						if (builds.size() == 1)
 							setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(builds.iterator().next()));
@@ -169,6 +172,9 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 				};
 				Build build = getJobManager().submit(getProject(), commitId, job.getName(), 
 						new HashMap<>(), reason);
+				if (build.isFinished()) 
+					getJobManager().resubmit(build, new HashMap<>(), "Resubmitted manually");
+					
 				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build));
 			}
 		} else {

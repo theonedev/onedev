@@ -230,7 +230,7 @@ public class TextDiffPanel extends Panel {
 		PageParameters params = ProjectBlobPage.paramsOf(getProject(), viewState);
 		actions.add(new ViewStateAwarePageLink<Void>("viewFile", ProjectBlobPage.class, params));
 		
-		if (change.getType() != ChangeType.DELETE) {
+		if (change.getType() != ChangeType.DELETE && change.getNewBlob().getLfsPointer() == null) {
 			if (getPullRequest() != null 
 					&& getPullRequest().getSource() != null 
 					&& getPullRequest().getSource().getObjectName(false) != null
@@ -252,7 +252,7 @@ public class TextDiffPanel extends Panel {
 					}
 					
 				};
-				editLink.add(AttributeAppender.append("title", "Edit on source branch"));
+				editLink.add(AttributeAppender.replace("title", "Edit on source branch"));
 				actions.add(editLink);
 			} else if (SecurityUtils.canModify(getProject(), change.getBlobIdent().revision, change.getPath()) 
 					&& getProject().getBranchRef(change.getBlobIdent().revision) != null) {
@@ -270,7 +270,7 @@ public class TextDiffPanel extends Panel {
 					}
 					
 				};
-				editLink.add(AttributeAppender.append("title", "Edit on branch " + change.getBlobIdent().revision));
+				editLink.add(AttributeAppender.replace("title", "Edit on branch " + change.getBlobIdent().revision));
 				actions.add(editLink);
 			} else {
 				actions.add(new WebMarkupContainer("editFile").setVisible(false));

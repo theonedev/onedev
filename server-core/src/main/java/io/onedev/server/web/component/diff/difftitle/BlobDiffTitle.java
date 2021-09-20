@@ -2,6 +2,7 @@ package io.onedev.server.web.component.diff.difftitle;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -29,17 +30,19 @@ public class BlobDiffTitle extends Panel {
 				.setVisible(change.getType() == ChangeType.RENAME));
 		add(new Label("title", change.getPath()));
 
-		String modeChange;
 		if (change.getOldBlobIdent().mode != null && change.getNewBlobIdent().mode != null
 				&& !change.getOldBlobIdent().mode.equals(change.getNewBlobIdent().mode)) {
-			modeChange = Integer.toString(change.getOldBlobIdent().mode, 8) 
+			String modeChange = Integer.toString(change.getOldBlobIdent().mode, 8) 
 					+ " " + SpriteImage.getVersionedHref(IconScope.class, "arrow2") + " " 
 					+ Integer.toString(change.getNewBlobIdent().mode, 8);
+			add(new Label("modeChange", modeChange).setEscapeModelStrings(false));
 		} else {
-			modeChange = null;
+			add(new WebMarkupContainer("modeChange").setVisible(false));
 		}
 
-		add(new Label("modeChange", modeChange).setEscapeModelStrings(false));
+		boolean isLfs = change.getNewBlobIdent().path != null && change.getNewBlob().getLfsPointer() != null
+				|| change.getOldBlobIdent().path != null && change.getOldBlob().getLfsPointer() != null;
+		add(new WebMarkupContainer("lfsHint").setVisible(isLfs));
 	}
 
 	@Override

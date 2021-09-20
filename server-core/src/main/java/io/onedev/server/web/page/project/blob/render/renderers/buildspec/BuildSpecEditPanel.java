@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getActiveNamedElementIndex;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getUrlSegment;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveNamedElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getUrlSegment;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -559,18 +559,18 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	}
 	
 	private void pushState(AjaxRequestTarget target, String selection) {
-		String position = BuildSpecRendererProvider.getPosition(selection);
+		String position = BuildSpecRenderer.getPosition(selection);
 		context.pushState(target, context.getBlobIdent(), position);
 	}
 
 	private void replaceState(AjaxRequestTarget target, String selection) {
-		String position = BuildSpecRendererProvider.getPosition(selection);
+		String position = BuildSpecRenderer.getPosition(selection);
 		context.replaceState(target, context.getBlobIdent(), position);
 	}
 	
 	@Nullable
 	private String getSelection() {
-		return BuildSpecRendererProvider.getSelection(context.getPosition());
+		return BuildSpecRenderer.getSelection(context.getPosition());
 	}
 	
 	@Override

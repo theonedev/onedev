@@ -31,6 +31,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -71,6 +72,7 @@ import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.LfsPointer;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -90,7 +92,6 @@ import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
-import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
@@ -106,8 +107,13 @@ import io.onedev.server.web.component.revisionpicker.RevisionPicker;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
-import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
+import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
+import io.onedev.server.web.page.project.blob.render.folder.FolderViewPanel;
+import io.onedev.server.web.page.project.blob.render.nocommits.NoCommitsPanel;
+import io.onedev.server.web.page.project.blob.render.noname.NoNameEditPanel;
+import io.onedev.server.web.page.project.blob.render.source.SourceEditPanel;
+import io.onedev.server.web.page.project.blob.render.source.SourceViewPanel;
 import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
 import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPanel;
@@ -591,6 +597,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				return menuItems;
 			}
 
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				setVisible(state.mode == Mode.VIEW || state.mode == Mode.BLAME);
+			}
+			
 		});
 		
 		String compareWith = resolvedRevision!=null?resolvedRevision.name():null;
@@ -600,7 +613,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		else
 			query = null;
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class, 
-				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)));
+				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				setVisible(state.mode == Mode.VIEW || state.mode == Mode.BLAME);
+			}
+			
+		});
 		
 		blobOperations.add(new DropdownLink("getCode") {
 
@@ -657,7 +679,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits()); 
-				ProjectBlobPage.this.onSelect(target, selected, SourceRendererProvider.getPosition(hit.getTokenPos()));
+				ProjectBlobPage.this.onSelect(target, selected, BlobRendererer.getSourcePosition(hit.getTokenPos()));
 				modal.close();
 			}
 			
@@ -718,15 +740,47 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	}
 	
 	private void newBlobContent(@Nullable AjaxRequestTarget target) {
-		PrioritizedComponentRenderer mostPrioritizedRenderer = null;
-		for (BlobRendererContribution contribution: OneDev.getExtensions(BlobRendererContribution.class)) {
-			PrioritizedComponentRenderer renderer = contribution.getRenderer(this);
-			if (renderer != null) {
-				if (mostPrioritizedRenderer == null || mostPrioritizedRenderer.getPriority() > renderer.getPriority())
-					mostPrioritizedRenderer = renderer;
+		Component blobContent = null;
+		if (getMode() == Mode.VIEW && getBlobIdent().revision == null) {
+			blobContent = new NoCommitsPanel(BLOB_CONTENT_ID, this);
+		} else if (getMode() == Mode.DELETE) {
+			blobContent = new CommitOptionPanel(BLOB_CONTENT_ID, this, null);
+		} else if (getMode() == Mode.VIEW && getBlobIdent().isTree()) {
+			blobContent = new FolderViewPanel(BLOB_CONTENT_ID, this);
+		} else if (getMode() == Mode.ADD && getNewPath() == null) {
+			blobContent = new NoNameEditPanel(BLOB_CONTENT_ID, this);
+		} else {
+			if (getMode() == Mode.VIEW) {
+				LfsPointer lfsPointer = getProject().getBlob(getBlobIdent(), true).getLfsPointer();
+				if (lfsPointer != null && !getProject().isLfsObjectExists(lfsPointer.getObjectId())) 
+					blobContent = new Fragment(BLOB_CONTENT_ID, "lfsObjectMissingFrag", this);
+			}
+			
+			if (blobContent == null) {
+				for (BlobRendererer contribution: OneDev.getExtensions(BlobRendererer.class)) {
+					blobContent = contribution.render(BLOB_CONTENT_ID, this);
+					if (blobContent != null) 
+						break;
+				}
+			}
+			
+			if (blobContent == null) {
+				if (getMode() == Mode.ADD 
+						|| getMode() == Mode.EDIT 
+								&& getProject().getBlob(getBlobIdent(), true).getText() != null) {
+					blobContent = new SourceEditPanel(BLOB_CONTENT_ID, this);
+				} else if ((getMode() == Mode.VIEW || getMode() == Mode.BLAME) 
+						&& getBlobIdent().isFile() 
+						&& getProject().getBlob(getBlobIdent(), true).getText() != null) {
+					blobContent = new SourceViewPanel(BLOB_CONTENT_ID, this, false);
+				} else {
+					blobContent = new Fragment(BLOB_CONTENT_ID, "binaryFileFrag", this);
+				}		
 			}
 		}
-		Component blobContent = Preconditions.checkNotNull(mostPrioritizedRenderer).render(BLOB_CONTENT_ID);
+		
+		blobContent.setOutputMarkupId(true);
+		
 		if (target != null) {
 			replace(blobContent);
 			target.add(blobContent);
@@ -940,7 +994,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 				FileMode.REGULAR_FILE.getBits());
 		State state = new State(blobIdent);
 		state.commentId = comment.getId();
-		state.position = SourceRendererProvider.getPosition(comment.getMark().getRange());
+		state.position = BlobRendererer.getSourcePosition(comment.getMark().getRange());
 		return state;
 	}	
 	
@@ -1163,7 +1217,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment, PlanarRange range) {
 		state.commentId = comment.getId();
-		state.position = SourceRendererProvider.getPosition(range);
+		state.position = BlobRendererer.getSourcePosition(range);
 		pushState(target);
 	}
 
@@ -1177,7 +1231,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;
-		state.position = SourceRendererProvider.getPosition(range);
+		state.position = BlobRendererer.getSourcePosition(range);
 		pushState(target);
 	}
 	

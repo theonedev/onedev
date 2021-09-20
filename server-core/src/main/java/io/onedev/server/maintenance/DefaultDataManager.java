@@ -48,6 +48,7 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.PerformanceSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.ServiceDeskSetting;
 import io.onedev.server.model.support.administration.SshSetting;
@@ -155,7 +156,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled", "cpu", "memory");
+			Collection<String> excludedProps = Sets.newHashSet("maxGitLFSFileSize", "gravatarEnabled", "cpu", "memory");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add("gitConfig");
 				excludedProps.add("curlConfig");
@@ -193,6 +194,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.ISSUE);
 		if (setting == null) {
 			settingManager.saveIssueSetting(new GlobalIssueSetting());
+		} 
+		setting = settingManager.getSetting(Key.PERFORMANCE);
+		if (setting == null) {
+			settingManager.savePerformanceSetting(new PerformanceSetting());
 		} 
 		setting = settingManager.getSetting(Key.AUTHENTICATOR);
 		if (setting == null) {

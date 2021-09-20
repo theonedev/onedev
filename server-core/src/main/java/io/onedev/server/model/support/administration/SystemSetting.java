@@ -29,20 +29,9 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private CurlConfig curlConfig = new SystemCurl();
 	
+	private int maxGitLFSFileSize = 4096;  
+	
 	private boolean gravatarEnabled;
-	
-	private int cpu;
-	
-	private int memory;
-	
-	@SuppressWarnings("restriction")
-	public SystemSetting() {
-		cpu = Runtime.getRuntime().availableProcessors()*1000;
-		
-		com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean)
-			     java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-		memory = (int)(os.getTotalPhysicalMemorySize()/1024/1024);				
-	}
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
 	@NotEmpty
@@ -54,8 +43,9 @@ public class SystemSetting implements Serializable, Validatable {
 		this.serverUrl = serverUrl;
 	}
 
-	@Editable(order=200, description="OneDev requires git command line to manage repositories. The minimum "
-			+ "required version is 2.11.1")
+	@Editable(order=200, name="Git Command Line", description="OneDev requires git command line to manage repositories. The minimum "
+			+ "required version is 2.11.1. Also make sure that git-lfs is installed if you want to retrieve "
+			+ "LFS files in CI/CD job")
 	@Valid
 	@NotNull(message="may not be empty")
 	public GitConfig getGitConfig() {
@@ -66,7 +56,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.gitConfig = gitConfig;
 	}
 
-	@Editable(order=250, description="OneDev configures git hooks to communicate with itself via curl")
+	@Editable(order=250, name="CURL Command Line", description="OneDev configures git hooks to communicate with itself via curl")
 	@Valid
 	@NotNull(message="may not be empty")
 	public CurlConfig getCurlConfig() {
@@ -77,6 +67,15 @@ public class SystemSetting implements Serializable, Validatable {
 		this.curlConfig = curlConfig;
 	}
 
+	@Editable(order=275, name="Max Git LFS File Size", description="Specify max git LFS file size in mega bytes")
+	public int getMaxGitLFSFileSize() {
+		return maxGitLFSFileSize;
+	}
+
+	public void setMaxGitLFSFileSize(int maxGitLFSFileSize) {
+		this.maxGitLFSFileSize = maxGitLFSFileSize;
+	}
+
 	@Editable(order=300, description="Whether or not to enable user gravatar (https://gravatar.com)")
 	public boolean isGravatarEnabled() {
 		return gravatarEnabled;
@@ -84,27 +83,6 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setGravatarEnabled(boolean gravatarEnabled) {
 		this.gravatarEnabled = gravatarEnabled;
-	}
-
-	@Editable(order=400, name="Server CPU", description="Specify CPU capability in millis available to run builds "
-			+ "on server (via server docker/shell executor). This is normally <i>(CPU cores)*1000</i>, for "
-			+ "instance <i>4000</i> means 4 CPU cores")
-	public int getCpu() {
-		return cpu;
-	}
-
-	public void setCpu(int cpu) {
-		this.cpu = cpu;
-	}
-
-	@Editable(order=500, name="Server Memory", description="Specify physical memory in mega bytes available to run "
-			+ "builds on server (via server docker/shell executor)")
-	public int getMemory() {
-		return memory;
-	}
-
-	public void setMemory(int memory) {
-		this.memory = memory;
 	}
 
 	@Override

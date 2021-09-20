@@ -38,7 +38,7 @@ import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
+import io.onedev.server.web.page.project.blob.render.BlobRendererer;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {
@@ -151,7 +151,7 @@ public abstract class SearchResultPanel extends Panel {
 		
 		BlobIdent selected = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
 				FileMode.REGULAR_FILE.getBits());
-		context.onSelect(target, selected, SourceRendererProvider.getPosition(hit.getTokenPos()));
+		context.onSelect(target, selected, BlobRendererer.getSourcePosition(hit.getTokenPos()));
 	}
 	
 	private String getActiveBlobPath(ActiveIndex activeIndex) {
@@ -515,7 +515,7 @@ public abstract class SearchResultPanel extends Panel {
 								BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
 										FileMode.REGULAR_FILE.getBits());
 								ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-								state.position = SourceRendererProvider.getPosition(hit.getTokenPos());
+								state.position = BlobRendererer.getSourcePosition(hit.getTokenPos());
 								PageParameters params = ProjectBlobPage.paramsOf(context.getProject(), state);
 								CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));

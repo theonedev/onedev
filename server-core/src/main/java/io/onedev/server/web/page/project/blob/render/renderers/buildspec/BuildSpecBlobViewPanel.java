@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getActiveNamedElementIndex;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getPosition;
-import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider.getSelection;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getActiveNamedElementIndex;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getPosition;
+import static io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer.getSelection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -120,7 +120,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 												ProjectBlobPage.State state = new ProjectBlobPage.State();
 												state.blobIdent = new BlobIdent(aImport.getTag(), BuildSpec.BLOB_PATH, 
 														FileMode.REGULAR_FILE.getBits());
-												state.position = BuildSpecRendererProvider.getPosition("properties");
+												state.position = BuildSpecRenderer.getPosition("properties");
 												Project project = aImport.getProject();
 												Link<?> link = new ViewStateAwarePageLink<Void>("imported", ProjectBlobPage.class, 
 														ProjectBlobPage.paramsOf(project, state)) {
@@ -683,8 +683,8 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				ProjectBlobPage.State state = new ProjectBlobPage.State();
 				state.blobIdent = new BlobIdent(aImport.getTag(), BuildSpec.BLOB_PATH, 
 						FileMode.REGULAR_FILE.getBits());
-				String urlSegment = BuildSpecRendererProvider.getUrlSegment(elementClass);
-				state.position = BuildSpecRendererProvider.getPosition(urlSegment+"s/" + elementName);
+				String urlSegment = BuildSpecRenderer.getUrlSegment(elementClass);
+				state.position = BuildSpecRenderer.getPosition(urlSegment+"s/" + elementName);
 				Project project = aImport.getProject();
 				Link<?> link = new ViewStateAwarePageLink<Void>("link", ProjectBlobPage.class, 
 						ProjectBlobPage.paramsOf(project, state)) {

@@ -5,6 +5,13 @@
 			<wicket:svg href="arrow" class="icon"/>
 		</wicket:enclosure>
 		<span wicket:id="title"></span>
-		<span wicket:id="modeChange" class="message"></span>
+		<wicket:enclosure child="modeChange">
+		<span class="text-muted">|</span>
+		<span wicket:id="modeChange" class="text-muted font-size-sm"></span>
+		</wicket:enclosure>
+		<wicket:enclosure child="lfsHint">
+		<span class="text-muted">|</span>
+		<span wicket:id="lfsHint" class="text-muted font-size-sm">Stored with Git LFS</span>
+		</wicket:enclosure>
 	</div>
 </wicket:panel>

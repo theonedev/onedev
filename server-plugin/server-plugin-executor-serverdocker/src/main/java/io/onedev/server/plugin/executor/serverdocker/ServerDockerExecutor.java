@@ -134,6 +134,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	private Commandline newDocker() {
 		if (getDockerExecutable() != null)
 			return new Commandline(getDockerExecutable());
+		else if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
+			return new Commandline("/usr/local/bin/docker");
 		else
 			return new Commandline("docker");
 	}
@@ -329,6 +331,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 											
 											cloneRepository(git, jobContext.getProjectGitDir().getAbsolutePath(), 
 													cloneInfo.getCloneUrl(), jobContext.getCommitId().name(), 
+													checkoutExecutable.isWithLfs(), checkoutExecutable.isWithSubmodules(),
 													cloneDepth, newInfoLogger(jobLogger), newErrorLogger(jobLogger));
 										} catch (Exception e) {
 											jobLogger.error("Step \"" + stepNames + "\" is failed: " + getErrorMessage(e));
@@ -502,7 +505,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			public void run() {
 				login(jobLogger);
 				
-				jobLogger.log("Running container...");
 				File workspaceDir = null;
 				File cacheDir = null;
 
@@ -512,7 +514,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					cacheDir = new File(getCacheHome(), UUID.randomUUID().toString());
 					FileUtils.createDir(cacheDir);
 					
-					jobLogger.log("Test running specified docker image...");
+					jobLogger.log("Testing specified docker image...");
 					docker.clearArgs();
 					docker.addArgs("run", "--rm");
 					if (getRunOptions() != null)
@@ -560,7 +562,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				}
 				
 				if (!SystemUtils.IS_OS_WINDOWS) {
-					jobLogger.log("Test running busybox...");
+					jobLogger.log("Checking busybox availability...");
 					docker = newDocker();
 					docker.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
 					docker.execute(new LineConsumer() {
@@ -579,6 +581,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						
 					}).checkReturnCode();
 				}
+				
+				Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());
+				KubernetesHelper.testGitLfsAvailability(git, jobLogger);
 			}
 			
 		}, new HashMap<>(), jobLogger);

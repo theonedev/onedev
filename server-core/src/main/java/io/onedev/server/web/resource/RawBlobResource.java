@@ -23,13 +23,13 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.ExceptionUtils;
 
 public class RawBlobResource extends AbstractResource {
 
@@ -86,11 +86,15 @@ public class RawBlobResource extends AbstractResource {
 
 		ResourceResponse response = new ResourceResponse();
 		response.setAcceptRange(ContentRangeType.BYTES);
-		response.setContentLength(blob.getSize());
-		response.setContentType(blob.getMediaType().toString());
-		if (response.getContentType().equals(MediaType.TEXT_HTML)) {
+		response.setContentType(project.detectMediaType(blob.getIdent()).toString());
+		
+		if (blob.getLfsPointer() != null) 
+			response.setContentLength(blob.getLfsPointer().getObjectSize());
+		else 
+			response.setContentLength(blob.getSize());
+		
+		if (response.getContentType().equals(MediaType.TEXT_HTML)) 
 			response.setContentType(MediaType.TEXT_PLAIN);
-		}
 
 		if (!ObjectId.isId(revision))
 			response.disableCaching();
@@ -137,8 +141,12 @@ public class RawBlobResource extends AbstractResource {
 
 					if (startByte == null)
 						startByte = 0L;
-					if (endByte == null || endByte == -1)
-						endByte = blob.getSize() - 1;
+					if (endByte == null || endByte == -1) {
+						if (blob.getLfsPointer() != null)
+							endByte = blob.getLfsPointer().getObjectSize() - 1;
+						else
+							endByte = blob.getSize() - 1;
+					}
 					try {
 						copyRange(is, attributes.getResponse().getOutputStream(), startByte, endByte);
 					} catch (Exception e) {
@@ -152,7 +160,9 @@ public class RawBlobResource extends AbstractResource {
 			}
 
 			private InputStream getInputStream(Blob blob) {
-				if (blob.isPartial())
+				if (blob.getLfsPointer() != null)
+					return project.getLfsObjectInputStream(blob.getLfsPointer().getObjectId());
+				else if (blob.isPartial())
 					return project.getInputStream(blob.getIdent());
 				else
 					return new ByteArrayInputStream(blob.getBytes());

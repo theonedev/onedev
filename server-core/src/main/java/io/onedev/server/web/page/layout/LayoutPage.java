@@ -62,6 +62,7 @@ import io.onedev.server.web.page.admin.issuesetting.transitionspec.StateTransiti
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.IssueNotificationTemplatePage;
 import io.onedev.server.web.page.admin.notificationtemplatesetting.PullRequestNotificationTemplatePage;
+import io.onedev.server.web.page.admin.performancesetting.PerformanceSettingPage;
 import io.onedev.server.web.page.admin.pluginsettings.ContributedAdministrationSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
 import io.onedev.server.web.page.admin.role.RoleDetailPage;
@@ -173,10 +174,12 @@ public abstract class LayoutPage extends BasePage {
 					administrationMenuItems.add(new SidebarMenuItem.SubMenu(null, "Notification Templates", 
 							notificationTemplateSettingMenuItems));
 					
+					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Performance Setting", 
+							PerformanceSettingPage.class, new PageParameters()));
+					
 					administrationMenuItems.add(new SidebarMenuItem.Page(null, "Groovy Scripts", 
 							GroovyScriptListPage.class, new PageParameters()));
 					
-
 					for (AdministrationSettingContribution contribution: 
 							OneDev.getExtensions(AdministrationSettingContribution.class)) {
 						for (Class<? extends Serializable> settingClass: contribution.getSettingClasses()) {

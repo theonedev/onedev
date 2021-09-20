@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+unset http_proxy
+unset https_proxy
 IFS=$'\r\n'; 
 lines=($(${ONEDEV_CURL} -k -s -S -f -X POST --data-urlencode "ENV_GIT_ALTERNATE_OBJECT_DIRECTORIES=${GIT_ALTERNATE_OBJECT_DIRECTORIES}" --data-urlencode "ENV_GIT_OBJECT_DIRECTORY=${GIT_OBJECT_DIRECTORY}" --data-urlencode "ENV_GIT_QUARANTINE_PATH=${GIT_QUARANTINE_PATH}" -d @- ${ONEDEV_URL}/%s/${ONEDEV_REPOSITORY_ID}/${ONEDEV_USER_ID} 2>&1))
 

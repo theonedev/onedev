@@ -16,11 +16,12 @@ import org.eclipse.jgit.lib.ObjectReader;
 
 import com.google.common.base.Optional;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.ContentDetector;
 
 public class Blob {
 	
-	public static final int MAX_BLOB_SIZE = 5*1024*1024;
+	private static final int MAX_LOADED_BLOB_SIZE = 5*1024*1024;
 	
 	private final BlobIdent ident;
 	
@@ -32,8 +33,10 @@ public class Blob {
 	
 	private transient MediaType mediaType;
 	
-	private transient Optional<Text> optionalText;
-
+	private transient Optional<Text> text;
+	
+	private transient Optional<LfsPointer> lfsPointer;
+	
 	public Blob(BlobIdent ident, ObjectId blobId, ObjectReader objectReader) {
 		this.ident = ident;
 		this.blobId = blobId;
@@ -44,9 +47,9 @@ public class Blob {
 			throw new RuntimeException(e);
 		}
 		long blobSize = objectLoader.getSize();
-		if (blobSize > MAX_BLOB_SIZE) {
+		if (blobSize > MAX_LOADED_BLOB_SIZE) {
 			try (InputStream is = objectLoader.openStream()) {
-				byte[] bytes = new byte[Blob.MAX_BLOB_SIZE];
+				byte[] bytes = new byte[Blob.MAX_LOADED_BLOB_SIZE];
 				is.read(bytes);
 				size = blobSize;
 				this.bytes = bytes;
@@ -99,7 +102,7 @@ public class Blob {
 		}
 		return mediaType;
 	}
-
+	
 	/**
 	 * Get text representation of this blob.
 	 * 
@@ -108,24 +111,44 @@ public class Blob {
 	 * 			content is binary
 	 */
 	public @Nullable Text getText() {
- 		if (optionalText == null) {
+ 		if (text == null) {
  			if (ident.isGitLink() || ident.isSymbolLink() || ident.isTree()) {
  				Charset charset = StandardCharsets.UTF_8;
- 				optionalText = Optional.of(new Text(charset, new String(bytes, charset)));
+ 				text = Optional.of(new Text(charset, new String(bytes, charset)));
  			} else if (!isPartial()) {
 				if (!ContentDetector.isBinary(bytes, ident.path)) {
 					Charset charset = ContentDetector.detectCharset(bytes);
 					if (charset == null)
 						charset = Charset.defaultCharset();
-					optionalText = Optional.of(new Text(charset, new String(bytes, charset)));
+					text = Optional.of(new Text(charset, new String(bytes, charset)));
 				} else {
-					optionalText = Optional.absent();
+					text = Optional.absent();
 				}
 			} else {
-				optionalText = Optional.absent();
+				text = Optional.absent();
 			}
 		}
-		return optionalText.orNull();
+		return text.orNull();
+	}
+	
+	@Nullable
+	public LfsPointer getLfsPointer() {
+		if (lfsPointer == null) {
+			Text text = getText();
+			if (text != null) {
+				if (!text.getLines().isEmpty() 
+						&& text.getLines().get(0).startsWith("version https://git-lfs.github.com/spec/")) {
+					String objectId = StringUtils.substringAfter(text.getLines().get(1), ":");
+					long objectSize = Long.parseLong(StringUtils.substringAfter(text.getLines().get(2), " ")); 
+					lfsPointer = Optional.of(new LfsPointer(objectId, objectSize));
+				} else {
+					lfsPointer = Optional.absent();
+				}
+			} else {
+				lfsPointer = Optional.absent();
+			}
+		}
+		return lfsPointer.orNull();
 	}
 	
 	public static class Text {

@@ -27,7 +27,9 @@ onedev.server.projectBlob = {
 		 * properly in readonly mode
 		 */
 		$(document).on("keydown", function(e) {
-			if ($(".modal:visible").length == 0 && !onedev.server.util.canInput(e.target)) {
+			if ($(".blob-content>.blob-edit").length == 0 
+					&& $(".modal:visible").length == 0 
+					&& !onedev.server.util.canInput(e.target)) {
 				if (e.keyCode == 84) { // 't'
 					callback("quickSearch");
 				} else if (e.keyCode == 86) { // 'v'

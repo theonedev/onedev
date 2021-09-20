@@ -50,7 +50,7 @@ import io.onedev.server.web.page.admin.buildsetting.agent.AgentOverviewPage;
 import io.onedev.server.web.page.builds.BuildListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider;
+import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRenderer;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -200,7 +200,7 @@ public abstract class BuildSidePanel extends Panel {
 				state.blobIdent = new BlobIdent(getBuild().getBranch(), BuildSpec.BLOB_PATH, 
 						FileMode.REGULAR_FILE.getBits());
 				state.mode = BlobRenderContext.Mode.EDIT;
-				state.position = BuildSpecRendererProvider.getPosition(Job.SELECTION_PREFIX + getBuild().getJobName());
+				state.position = BuildSpecRenderer.getPosition(Job.SELECTION_PREFIX + getBuild().getJobName());
 				state.urlBeforeEdit = urlFor(getPage().getClass(), getPage().getPageParameters()).toString();
 				params = ProjectBlobPage.paramsOf(getProject(), state);
 				general.add(new BookmarkablePageLink<Void>("editJob", ProjectBlobPage.class, params));

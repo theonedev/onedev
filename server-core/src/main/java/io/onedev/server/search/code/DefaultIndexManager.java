@@ -83,9 +83,9 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
+import io.onedev.server.util.concurrent.BatchWorkManager;
+import io.onedev.server.util.concurrent.BatchWorker;
 import io.onedev.server.util.concurrent.Prioritized;
-import io.onedev.server.util.work.BatchWorkManager;
-import io.onedev.server.util.work.BatchWorker;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {

@@ -17,6 +17,10 @@ public class CheckoutStep extends Step {
 
 	private GitCredential cloneCredential = new DefaultCredential();
 	
+	private boolean withLfs;
+	
+	private boolean withSubmodules;
+	
 	private Integer cloneDepth;
 	
 	@Editable(order=100, description="By default code is cloned via an auto-generated credential, "
@@ -31,6 +35,24 @@ public class CheckoutStep extends Step {
 		this.cloneCredential = cloneCredential;
 	}
 
+	@Editable(order=120, name="Retrieve LFS Files", description="Check this to retrieve Git LFS files")
+	public boolean isWithLfs() {
+		return withLfs;
+	}
+
+	public void setWithLfs(boolean withLfs) {
+		this.withLfs = withLfs;
+	}
+
+	@Editable(order=180, name="Retrieve Submodules", description="Check this to retrieve submodules")
+	public boolean isWithSubmodules() {
+		return withSubmodules;
+	}
+
+	public void setWithSubmodules(boolean withSubmodules) {
+		this.withSubmodules = withSubmodules;
+	}
+
 	@Editable(order=200, description="Optionally specify depth for a shallow clone in order "
 			+ "to speed up source retrieval")
 	public Integer getCloneDepth() {
@@ -43,7 +65,8 @@ public class CheckoutStep extends Step {
 
 	@Override
 	public Executable getExecutable(Build build, String jobToken, ParamCombination paramCombination) {
-		return new CheckoutExecutable(cloneDepth!=null?cloneDepth:0, cloneCredential.newCloneInfo(build, jobToken));
+		return new CheckoutExecutable(cloneDepth!=null?cloneDepth:0, withLfs, withSubmodules, 
+				cloneCredential.newCloneInfo(build, jobToken));
 	}
 
 }

@@ -1,6 +1,9 @@
 package io.onedev.server.plugin.executor.serverdocker;
 
+import java.io.File;
 import java.util.Collection;
+
+import org.apache.commons.lang.SystemUtils;
 
 import com.google.common.collect.Sets;
 
@@ -44,7 +47,12 @@ public class ServerDockerModule extends AbstractPluginModule {
 			public JobExecutor discover(TaskLogger jobLogger) {
 				jobLogger.log("Checking if there is docker facility...");
 				
-				Commandline docker = new Commandline("docker");
+				Commandline docker;
+				if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/docker").exists())
+					docker = new Commandline("/usr/local/bin/docker");
+				else
+					docker = new Commandline("docker");
+				
 				docker.addArgs("version");
 				try {
 					docker.execute(new LineConsumer() {

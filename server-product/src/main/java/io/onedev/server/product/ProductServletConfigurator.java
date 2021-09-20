@@ -19,6 +19,7 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import io.onedev.commons.bootstrap.Bootstrap;
 import io.onedev.server.ServerSocketServlet;
 import io.onedev.server.git.GitFilter;
+import io.onedev.server.git.GitLfsFilter;
 import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
 import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
 import io.onedev.server.security.DefaultWebEnvironment;
@@ -38,6 +39,8 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
     private final GitFilter gitFilter;
     
+    private final GitLfsFilter gitLfsFilter;
+    
 	private final GitPreReceiveCallback preReceiveServlet;
 	
 	private final GitPostReceiveCallback postReceiveServlet;
@@ -51,13 +54,15 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	private final ServerSocketServlet serverServlet;
 	
 	@Inject
-	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, GitFilter gitFilter, 
-			GitPreReceiveCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet, 
-			WicketServlet wicketServlet, WebSocketManager webSocketManager, ServletContainer jerseyServlet, 
+	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, 
+			GitFilter gitFilter, GitLfsFilter gitLfsFilter, GitPreReceiveCallback preReceiveServlet, 
+			GitPostReceiveCallback postReceiveServlet, WicketServlet wicketServlet, 
+			WebSocketManager webSocketManager, ServletContainer jerseyServlet, 
 			ServerSocketServlet serverServlet) {
 		this.serverConfig = serverConfig;
 		this.shiroFilter = shiroFilter;
         this.gitFilter = gitFilter;
+        this.gitLfsFilter = gitLfsFilter;
 		this.preReceiveServlet = preReceiveServlet;
 		this.postReceiveServlet = postReceiveServlet;
 		this.wicketServlet = wicketServlet;
@@ -77,6 +82,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		context.addFilter(new FilterHolder(shiroFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
         context.addFilter(new FilterHolder(gitFilter), "/*", EnumSet.allOf(DispatcherType.class));
+        context.addFilter(new FilterHolder(gitLfsFilter), "/*", EnumSet.allOf(DispatcherType.class));
 		
 		context.addServlet(new ServletHolder(preReceiveServlet), GitPreReceiveCallback.PATH + "/*");
         

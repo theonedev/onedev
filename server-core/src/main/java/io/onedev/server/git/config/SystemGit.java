@@ -1,5 +1,9 @@
 package io.onedev.server.git.config;
 
+import java.io.File;
+
+import org.apache.commons.lang3.SystemUtils;
+
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="Use git in System Path", order=100)
@@ -9,7 +13,10 @@ public class SystemGit extends GitConfig {
 
 	@Override
 	public String getExecutable() {
-		return "git";
+		if (SystemUtils.IS_OS_MAC_OSX && new File("/usr/local/bin/git").exists())
+			return "/usr/local/bin/git";
+		else
+			return "git";
 	}
 
 }

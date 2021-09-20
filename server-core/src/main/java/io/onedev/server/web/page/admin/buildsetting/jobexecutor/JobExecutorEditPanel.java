@@ -29,6 +29,7 @@ import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.util.Testable;
 
 @SuppressWarnings("serial")
@@ -169,7 +170,8 @@ abstract class JobExecutorEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				if (editor.isValid()) {
 					if (testData != null) {
-						new BeanEditModalPanel(target, testData, Sets.newHashSet(), true, "Testing Job Executor") {
+						String title = EditableUtils.getDisplayName(testData.getClass());
+						new BeanEditModalPanel(target, testData, Sets.newHashSet(), true, title) {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Serializable bean) {
