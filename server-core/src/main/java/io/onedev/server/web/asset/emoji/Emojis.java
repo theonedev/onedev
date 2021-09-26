@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.markdown.emoji;
+package io.onedev.server.web.asset.emoji;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +17,8 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 
 public class Emojis {
+	
+	private static final Pattern PATTERN = Pattern.compile(":(\\S+?):");
 	
 	private final List<Emoji> emojis;
 	
@@ -64,6 +68,22 @@ public class Emojis {
 	
 	public Collection<String> getAliases() {
 		return unicodes.keySet();
+	}
+	
+	public String apply(String content) {
+		Matcher matcher = PATTERN.matcher(content);
+	    StringBuffer buffer = new StringBuffer();
+	    while (matcher.find()) {
+	    	String alias = matcher.group(1);
+	    	String unicode = getUnicode(alias);
+	    	if (unicode != null)
+	    		matcher.appendReplacement(buffer, unicode);
+	    	else
+	    		matcher.appendReplacement(buffer, matcher.group());
+	    }
+	    matcher.appendTail(buffer);
+	    
+	    return buffer.toString();
 	}
 	
 	public static class Emoji {

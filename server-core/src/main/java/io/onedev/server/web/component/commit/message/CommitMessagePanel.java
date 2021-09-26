@@ -22,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Highlighter;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ReferenceTransformer;
 
@@ -88,7 +89,7 @@ public abstract class CommitMessagePanel extends Panel {
 
 			@Override
 			protected String load() {
-				return highlight(getCommit().getShortMessage(), commitUrl);
+				return Emojis.getInstance().apply(highlight(getCommit().getShortMessage(), commitUrl));
 			}
 			
 		}).setEscapeModelStrings(false));
@@ -97,7 +98,7 @@ public abstract class CommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return highlight(GitUtils.getDetailMessage(getCommit()), null);
+				return Emojis.getInstance().apply(highlight(GitUtils.getDetailMessage(getCommit()), null));
 			}
 			
 		}) {

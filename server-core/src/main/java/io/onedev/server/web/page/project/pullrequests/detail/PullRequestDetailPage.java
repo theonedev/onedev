@@ -78,6 +78,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -181,7 +182,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 			protected String load() {
 				PullRequest request = getPullRequest();
 				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
-				String transformed = transformer.apply(request.getTitle());
+				String transformed = Emojis.getInstance().apply(transformer.apply(request.getTitle()));
 				return "#" + request.getNumber() + " - " + transformed;
 			}
 			

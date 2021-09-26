@@ -62,11 +62,11 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.FilenameUtils;
 import io.onedev.server.util.validation.ProjectNameValidator;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.markdown.emoji.Emojis;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -371,7 +371,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "issue");
 								referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
-								referenceMap.put("referenceTitle", issue.getTitle());
+								referenceMap.put("referenceTitle", Emojis.getInstance().apply(issue.getTitle()));
 								referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
 								referenceList.add(referenceMap);
 							}
@@ -380,7 +380,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "pull request");
 								referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
-								referenceMap.put("referenceTitle", request.getTitle());
+								referenceMap.put("referenceTitle", Emojis.getInstance().apply(request.getTitle()));
 								referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
 								referenceList.add(referenceMap);
 							}

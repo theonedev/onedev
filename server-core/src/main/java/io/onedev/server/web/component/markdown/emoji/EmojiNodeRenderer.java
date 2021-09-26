@@ -11,6 +11,8 @@ import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.html.renderer.NodeRenderingHandler;
 import com.vladsch.flexmark.util.options.DataHolder;
 
+import io.onedev.server.web.asset.emoji.Emojis;
+
 public class EmojiNodeRenderer implements NodeRenderer {
 
     public EmojiNodeRenderer(DataHolder options) {

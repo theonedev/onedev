@@ -17,6 +17,7 @@ import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.link.copytoclipboard.CopyToClipboardLink;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -106,7 +107,8 @@ public abstract class IssueTitlePanel extends Panel {
 			@Override
 			protected String load() {
 				ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), null);
-				return "#" + getIssue().getNumber() + "&nbsp;&nbsp;" + transformer.apply(getIssue().getTitle());
+				return "#" + getIssue().getNumber() + "&nbsp;&nbsp;" 
+						+ Emojis.getInstance().apply(transformer.apply(getIssue().getTitle()));
 			}
 			
 		}).setEscapeModelStrings(false));

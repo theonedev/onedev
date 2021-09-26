@@ -16,6 +16,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
@@ -41,7 +42,7 @@ public class IssueChoiceProvider extends ChoiceProvider<Issue> {
 		writer
 			.key("id").value(choice.getId())
 			.key("number").value(choice.getNumber())
-			.key("title").value(HtmlEscape.escapeHtml5(choice.getTitle()));
+			.key("title").value(Emojis.getInstance().apply(HtmlEscape.escapeHtml5(choice.getTitle())));
 	}
 
 	@Override

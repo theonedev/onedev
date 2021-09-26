@@ -75,6 +75,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
@@ -538,7 +539,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name()); 
 						String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 						ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
-						return transformer.apply(lastCommit.getShortMessage());
+						return Emojis.getInstance().apply(transformer.apply(lastCommit.getShortMessage()));
 					}
 					
 				}).setEscapeModelStrings(false));

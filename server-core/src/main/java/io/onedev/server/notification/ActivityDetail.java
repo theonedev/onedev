@@ -15,6 +15,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.PropertyChange;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.component.codecomment.referencedfrom.ReferencedFromCodeCommentPanel;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
 import io.onedev.server.web.component.pullrequest.referencedfrom.ReferencedFromPullRequestPanel;
@@ -41,7 +42,8 @@ public class ActivityDetail implements Serializable {
 	}
 	
 	public Component render(String componentId) {
-		return new Label(componentId, htmlVersion).setEscapeModelStrings(false);
+		return new Label(componentId, Emojis.getInstance().apply(htmlVersion))
+				.setEscapeModelStrings(false);
 	}
 	
 	private static String compareAsHtml(Map<String, String> oldProperties, Map<String, String> newProperties, 

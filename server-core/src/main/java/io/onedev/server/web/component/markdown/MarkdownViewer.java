@@ -40,6 +40,7 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.asset.lozad.LozadResourceReference;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -170,7 +171,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 					if (issue != null && SecurityUtils.canAccess(issue.getProject())) {
 						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
 						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s')", 
-								JavaScriptEscape.escapeJavaScript(issue.getTitle()), JavaScriptEscape.escapeJavaScript(issue.getState()), 
+								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(issue.getTitle())), 
+								JavaScriptEscape.escapeJavaScript(issue.getState()), 
 								ColorUtils.isLight(color)? "black": "white", color);
 						target.appendJavaScript(script);
 					}
@@ -194,7 +196,8 @@ public class MarkdownViewer extends GenericPanel<String> {
 						}
 						
 						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s')", 
-								JavaScriptEscape.escapeJavaScript(request.getTitle()), status, statusCss);
+								Emojis.getInstance().apply(JavaScriptEscape.escapeJavaScript(request.getTitle())), 
+								status, statusCss);
 						target.appendJavaScript(script);
 					}
 					break;

@@ -68,6 +68,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -557,7 +558,8 @@ public abstract class PullRequestListPanel extends Panel {
 				
 				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
 				
-				fragment.add(new Label("title", transformer.apply(request.getTitle())) {
+				String title = Emojis.getInstance().apply(transformer.apply(request.getTitle()));
+				fragment.add(new Label("title", title) {
 
 					@Override
 					public void renderHead(IHeaderResponse response) {

@@ -331,13 +331,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	private transient Collection<Build> currentBuilds;
 	
-	/**
-	 * Get title of this merge request.
-	 * 
-	 * @return user specified title of this merge request, <tt>null</tt> for
-	 *         auto-created merge request.
-	 */
-	public @Nullable String getTitle() {
+	public String getTitle() {
 		return title;
 	}
 

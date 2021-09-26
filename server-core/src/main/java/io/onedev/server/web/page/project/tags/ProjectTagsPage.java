@@ -59,6 +59,7 @@ import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
@@ -320,7 +321,7 @@ public class ProjectTagsPage extends ProjectPage {
 						annotatedFragment.add(new PersonIdentPanel("author", revTag.getTaggerIdent(), "Tagger", Mode.NAME));
 					else 
 						annotatedFragment.add(new WebMarkupContainer("author").setVisible(false));
-					Label message = new Label("message", revTag.getFullMessage());
+					Label message = new Label("message", Emojis.getInstance().apply(revTag.getFullMessage()));
 					message.setOutputMarkupId(true);
 					annotatedFragment.add(message);
 					String toggleScript = String.format("$('#%s').toggle();", message.getMarkupId());
@@ -342,7 +343,7 @@ public class ProjectTagsPage extends ProjectPage {
 						PageParameters params = CommitDetailPage.paramsOf(getProject(), commit.name());
 						String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 						ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
-						return transformer.apply(commit.getShortMessage());
+						return Emojis.getInstance().apply(transformer.apply(commit.getShortMessage()));
 					}
 					
 				}).setEscapeModelStrings(false));

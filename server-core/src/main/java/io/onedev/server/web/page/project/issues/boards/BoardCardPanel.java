@@ -28,6 +28,7 @@ import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebSession;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -213,7 +214,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 		ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), url);
 		
-		add(new Label("title", transformer.apply(getIssue().getTitle())) {
+		add(new Label("title", Emojis.getInstance().apply(transformer.apply(getIssue().getTitle()))) {
 
 			@Override
 			public void renderHead(IHeaderResponse response) {

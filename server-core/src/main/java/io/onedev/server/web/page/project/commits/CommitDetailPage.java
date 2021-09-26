@@ -74,6 +74,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.JobSecretAuthorizationContextAware;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
@@ -191,8 +192,10 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		Emojis emojis = Emojis.getInstance();
 		ReferenceTransformer transformer = new ReferenceTransformer(getProject(), null);
-		add(new Label("title", transformer.apply(getCommit().getShortMessage())).setEscapeModelStrings(false));
+		String title = emojis.apply(transformer.apply(getCommit().getShortMessage()));
+		add(new Label("title", title).setEscapeModelStrings(false));
 
 		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
@@ -219,10 +222,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		});
 		
 		String message = GitUtils.getDetailMessage(getCommit());
-		if (message != null) 
-			add(new Label("detail", transformer.apply(message)).setEscapeModelStrings(false));
-		else 
+		if (message != null) {
+			add(new Label("detail", emojis.apply(transformer.apply(message)))
+					.setEscapeModelStrings(false));
+		} else { 
 			add(new WebMarkupContainer("detail").setVisible(false));
+		}
 		
 		add(refsContainer = new AjaxLazyLoadPanel("refs") {
 

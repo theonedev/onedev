@@ -23,6 +23,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -76,7 +77,7 @@ class LastCommitsResource extends AbstractResource {
 					String url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 					
 					ReferenceTransformer transformer = new ReferenceTransformer(project, url);
-					info.html = transformer.apply(value.getSummary());
+					info.html = Emojis.getInstance().apply(transformer.apply(value.getSummary()));
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();

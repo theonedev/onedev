@@ -56,6 +56,7 @@ import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.match.PatternApplied;
 import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 
 public class SuggestionUtils {
@@ -248,8 +249,10 @@ public class SuggestionUtils {
 			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
 				if (SecurityUtils.canAccess(project)) {
-					for (Issue issue: OneDev.getInstance(IssueManager.class).query(project, matchWith, count))
-						suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
+					for (Issue issue: OneDev.getInstance(IssueManager.class).query(project, matchWith, count)) {
+						String title = Emojis.getInstance().apply(issue.getTitle());
+						suggestions.add(new InputSuggestion("#" + issue.getNumber(), title, null));
+					}
 				}				
 				return suggestions;
 			}
@@ -265,8 +268,10 @@ public class SuggestionUtils {
 				List<InputSuggestion> suggestions = new ArrayList<>();
 				if (SecurityUtils.canReadCode(project)) {
 					PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-					for (PullRequest request: pullRequestManager.query(project, matchWith, count))
-						suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
+					for (PullRequest request: pullRequestManager.query(project, matchWith, count)) {
+						String title = Emojis.getInstance().apply(request.getTitle());
+						suggestions.add(new InputSuggestion("#" + request.getNumber(), title, null));
+					}
 				}
 				return suggestions;
 			}

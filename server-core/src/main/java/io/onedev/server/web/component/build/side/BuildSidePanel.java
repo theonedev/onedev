@@ -38,6 +38,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.criteria.Criteria;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.reference.ReferencePanel;
@@ -383,7 +384,8 @@ public abstract class BuildSidePanel extends Panel {
 					Link<Void> link = new ViewStateAwarePageLink<Void>("title", 
 							PullRequestActivitiesPage.class, 
 							PullRequestActivitiesPage.paramsOf(request));
-					link.add(new Label("label", "#" + request.getNumber() + " " + request.getTitle()));
+					String title = Emojis.getInstance().apply(request.getTitle());
+					link.add(new Label("label", "#" + request.getNumber() + " " + title));
 					add(link);
 					add(new RequestStatusBadge("status", new AbstractReadOnlyModel<PullRequest>() {
 	

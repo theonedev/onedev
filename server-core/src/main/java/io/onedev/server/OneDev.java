@@ -50,7 +50,6 @@ import io.onedev.server.util.init.InitStage;
 import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.jetty.JettyLauncher;
 import io.onedev.server.util.schedule.TaskScheduler;
-import oshi.SystemInfo;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
@@ -98,9 +97,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Override
 	public void start() {
-		logger.info("cpu: " + new SystemInfo().getHardware().getProcessor().getLogicalProcessorCount());
-		logger.info("memory: " + new SystemInfo().getHardware().getMemory().getTotal()/1024/1024);
-		
 		SecurityUtils.bindAsSystem();
 
 		System.setProperty("hsqldb.reconfig_logging", "false");
@@ -145,7 +141,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
 	public Url guessServerUrl(boolean ssh) {
 	    Url serverUrl = null;
-		
+	    
 		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
 		if (serviceHost != null) { // we are running inside Kubernetes  
 			Commandline kubectl = new Commandline("kubectl");

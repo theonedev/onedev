@@ -12,6 +12,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.asset.titleandstatus.TitleAndStatusCssResourceReference;
 import io.onedev.server.web.component.issue.IssueStateBadge;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -42,11 +43,12 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 		
 		Issue issue = getModelObject();
 		
+		Emojis emojis = Emojis.getInstance();
 		if (SecurityUtils.canAccess(issue.getProject())) {
 			String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 					IssueActivitiesPage.paramsOf(issue)).toString();
 			ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), url);
-			String transformed = transformer.apply(issue.getTitle());
+			String transformed = emojis.apply(transformer.apply(issue.getTitle()));
 			String title;
 			if (issue.getProject().equals(project)) { 
 				title = String.format("<a href='%s'>#%d</a> %s", url, issue.getNumber(), transformed);
@@ -57,7 +59,7 @@ public class ReferencedFromIssuePanel extends GenericPanel<Issue> {
 			add(new Label("title", title).setEscapeModelStrings(false));
 		} else {
 			ReferenceTransformer transformer = new ReferenceTransformer(issue.getProject(), null);
-			String transformed = transformer.apply(issue.getTitle());
+			String transformed = emojis.apply(transformer.apply(issue.getTitle()));
 			String title;
 			if (issue.getProject().equals(project)) 
 				title = "#" + issue.getNumber() + " " + transformed;

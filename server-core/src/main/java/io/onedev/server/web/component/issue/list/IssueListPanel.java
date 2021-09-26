@@ -80,6 +80,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
+import io.onedev.server.web.asset.emoji.Emojis;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.NoRecordsBehavior;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
@@ -1142,7 +1143,7 @@ public abstract class IssueListPanel extends Panel {
 				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 						IssueActivitiesPage.paramsOf(issue)).toString();
 
-				String transformed = new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle());
+				String transformed = Emojis.getInstance().apply(new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle()));
 				fragment.add(new Label("title", transformed) {
 
 					@Override
