@@ -54,7 +54,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.gitConfig = gitConfig;
 	}
 
-	@Editable(order=250, name="CURL Command Line", description="OneDev configures git hooks to communicate with itself via curl")
+	@Editable(order=250, name="curl Command Line", description="OneDev configures git hooks to communicate with itself via curl")
 	@Valid
 	@NotNull(message="may not be empty")
 	public CurlConfig getCurlConfig() {

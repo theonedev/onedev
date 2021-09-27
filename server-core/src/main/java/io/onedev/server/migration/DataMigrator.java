@@ -2977,20 +2977,4 @@ public class DataMigrator {
 		}
 	}
 	
-	private void migrate64(File dataDir, Stack<Integer> versions) {
-		for (File file: dataDir.listFiles()) {
-			if (file.getName().startsWith("Settings.xml")) {
-				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
-				for (Element element: dom.getRootElement().elements()) {
-					String key = element.elementTextTrim("key");
-					if (key.equals("SYSTEM")) {
-						Element valueElement = element.element("value");
-						if (valueElement != null) 
-							valueElement.addElement("maxGitLFSFileSize").setText("4096");
-					}
-				}
-				dom.writeToFile(file, false);
-			}
-		}
-	}
 }

@@ -4,7 +4,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(name="Use Specified git", order=200)
+@Editable(name="Use Specified Git Command Line", order=200)
 public class SpecifiedGit extends GitConfig {
 
 	private static final long serialVersionUID = 1L;
