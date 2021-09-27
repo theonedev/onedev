@@ -36,6 +36,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.Pair;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.common.AbstractHardwareAbstractionLayer;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -2982,7 +2983,6 @@ public class DataMigrator {
 			if (file.getName().startsWith("Settings.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
-					String key = element.elementTextTrim("key");
 					if (element.elementTextTrim("key").equals("MAIL")) {
 						Element valueElement = element.element("value");
 						if (valueElement != null) {
@@ -3001,4 +3001,21 @@ public class DataMigrator {
 		}
 	}
 
+	private void migrate65(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						valueElement.element("cpu").detach();
+						valueElement.element("memory").detach();
+					}
+				}
+				dom.writeToFile(file, false);
+			}				
+		}
+		
+	}
+	
 }
