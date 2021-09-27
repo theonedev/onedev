@@ -602,10 +602,12 @@ public class ImportUtils {
 							List<String> attachments = new ArrayList<>();
 							
 							if (fieldsNode.hasNonNull("attachment")) {
+								long maxUploadFileSize = OneDev.getInstance(SettingManager.class)
+										.getPerformanceSetting().getMaxUploadFileSize()*1L*1024*1024; 
 								for (JsonNode attachmentNode: fieldsNode.get("attachment")) {
 									String attachmentName = attachmentNode.get("filename").asText();
 									int attachmentSize = attachmentNode.get("size").asInt();
-									if (attachmentSize >  Project.MAX_ATTACHMENT_SIZE) {
+									if (attachmentSize >  maxUploadFileSize) {
 										tooLargeAttachments.add(issueKey + ":" + attachmentName);
 									} else {
 										String endpoint = attachmentNode.get("content").asText();

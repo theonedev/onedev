@@ -29,8 +29,6 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private CurlConfig curlConfig = new SystemCurl();
 	
-	private int maxGitLFSFileSize = 4096;  
-	
 	private boolean gravatarEnabled;
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server")
@@ -65,15 +63,6 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setCurlConfig(CurlConfig curlConfig) {
 		this.curlConfig = curlConfig;
-	}
-
-	@Editable(order=275, name="Max Git LFS File Size", description="Specify max git LFS file size in mega bytes")
-	public int getMaxGitLFSFileSize() {
-		return maxGitLFSFileSize;
-	}
-
-	public void setMaxGitLFSFileSize(int maxGitLFSFileSize) {
-		this.maxGitLFSFileSize = maxGitLFSFileSize;
 	}
 
 	@Editable(order=300, description="Whether or not to enable user gravatar (https://gravatar.com)")

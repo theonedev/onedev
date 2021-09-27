@@ -16,6 +16,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.lang.Bytes;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
@@ -43,9 +45,11 @@ public abstract class BlobUploadPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		int maxUploadFileSize = OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxUploadFileSize();
+		
 		Form<?> form = new Form<Void>("form");
 		form.setMultiPart(true);
-		form.setFileMaxSize(Bytes.megabytes(Project.MAX_UPLOAD_SIZE));
+		form.setFileMaxSize(Bytes.megabytes(maxUploadFileSize));
 		add(form);
 		
 		form.add(new AjaxLink<Void>("close") {
@@ -62,7 +66,7 @@ public abstract class BlobUploadPanel extends Panel {
 		form.add(feedback);
 		
 		form.add(new DropzoneField("files", 
-				new PropertyModel<Collection<FileUpload>>(this, "uploads"), null, 0, Project.MAX_UPLOAD_SIZE)
+				new PropertyModel<Collection<FileUpload>>(this, "uploads"), null, 0, maxUploadFileSize)
 				.setRequired(true).setLabel(Model.of("File")));
 		form.add(new AjaxButton("upload") {
 

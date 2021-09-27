@@ -156,7 +156,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
-			Collection<String> excludedProps = Sets.newHashSet("maxGitLFSFileSize", "gravatarEnabled", "cpu", "memory");
+			Collection<String> excludedProps = Sets.newHashSet("gravatarEnabled");
 			if (Bootstrap.isInDocker()) {
 				excludedProps.add("gitConfig");
 				excludedProps.add("curlConfig");

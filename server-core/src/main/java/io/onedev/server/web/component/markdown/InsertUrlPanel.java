@@ -48,6 +48,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.exception.GitException;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
@@ -430,17 +432,18 @@ abstract class InsertUrlPanel extends Panel {
 			
 			fragment.add(form);
 		} else {
+			int maxUploadFileSize = OneDev.getInstance(SettingManager.class).getPerformanceSetting().getMaxUploadFileSize();
 			fragment = new Fragment(CONTENT_ID, "uploadBlobFrag", this);
 			Form<?> form = new Form<Void>("form");
 			form.setMultiPart(true);
-			form.setFileMaxSize(Bytes.megabytes(Project.MAX_UPLOAD_SIZE));
+			form.setFileMaxSize(Bytes.megabytes(maxUploadFileSize));
 			add(form);
 			
 			FencedFeedbackPanel feedback = new FencedFeedbackPanel("feedback", form);
 			feedback.setOutputMarkupPlaceholderTag(true);
 			form.add(feedback);
 			
-			form.add(new DropzoneField("file", model, acceptedFiles, 1, Project.MAX_UPLOAD_SIZE)
+			form.add(new DropzoneField("file", model, acceptedFiles, 1, maxUploadFileSize)
 					.setRequired(true).setLabel(Model.of("Attachment")));
 
 			form.add(new TextField<String>("directory", new IModel<String>() {

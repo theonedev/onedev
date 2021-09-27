@@ -154,8 +154,6 @@ public class Project extends AbstractEntity implements NameAware {
 	
 	public static final int MAX_DESCRIPTION_LEN = 15000;
 	
-	public static final int MAX_ATTACHMENT_SIZE = 25*1024*1024; // mega bytes
-	
 	private static final int BUFFER_SIZE = 1024*64;
 	
 	public static final String NAME_NAME = "Name";
@@ -186,8 +184,6 @@ public class Project extends AbstractEntity implements NameAware {
 			NAME_UPDATE_DATE, PROP_UPDATE_DATE);
 	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
-	
-	public static final int MAX_UPLOAD_SIZE = 10; // In mega bytes
 	
 	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
 
@@ -1540,6 +1536,9 @@ public class Project extends AbstractEntity implements NameAware {
 			index++;
 		}
 		
+		long maxUploadFileSize = OneDev.getInstance(SettingManager.class)
+				.getPerformanceSetting().getMaxUploadFileSize()*1L*1024*1024; 
+				
 		Exception ex = null;
 		File file = new File(attachmentDir, attachmentName);
 		try (OutputStream os = new FileOutputStream(file)) {
@@ -1548,9 +1547,9 @@ public class Project extends AbstractEntity implements NameAware {
 	        int n = 0;
 	        while (-1 != (n = attachmentStream.read(buffer))) {
 	            count += n;
-		        if (count > MAX_ATTACHMENT_SIZE) {
+		        if (count > maxUploadFileSize) {
 		        	throw new AttachmentTooLargeException("Upload must be less than " 
-		        			+ FileUtils.byteCountToDisplaySize(MAX_ATTACHMENT_SIZE));
+		        			+ FileUtils.byteCountToDisplaySize(maxUploadFileSize));
 		        }
 	            os.write(buffer, 0, n);
 	        }

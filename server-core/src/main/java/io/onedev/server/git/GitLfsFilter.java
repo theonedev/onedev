@@ -106,7 +106,7 @@ public class GitLfsFilter implements Filter {
 	}
 	
 	private long getMaxLFSFileSize() {
-		return 1L * settingManager.getSystemSetting().getMaxGitLFSFileSize()*1024*1024;
+		return 1L * settingManager.getPerformanceSetting().getMaxGitLFSFileSize()*1024*1024;
 	}
 	
 	private boolean canReadCode(HttpServletRequest request, Project project) {

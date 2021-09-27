@@ -17,6 +17,10 @@ public class PerformanceSetting implements Serializable {
 	
 	private int serverJobExecutorMemoryQuota;
 	
+	private int maxGitLFSFileSize = 4096;  
+	
+	private int maxUploadFileSize = 20;
+	
 	public PerformanceSetting() {
 		HardwareAbstractionLayer hardware = new SystemInfo().getHardware();
 		cpuIntensiveTaskConcurrency = hardware.getProcessor().getLogicalProcessorCount();
@@ -55,6 +59,26 @@ public class PerformanceSetting implements Serializable {
 
 	public void setServerJobExecutorMemoryQuota(int serverJobExecutorMemoryQuota) {
 		this.serverJobExecutorMemoryQuota = serverJobExecutorMemoryQuota;
+	}
+
+	@Editable(order=600, name="Max Git LFS File Size (MB)", description="Specify max git LFS file size in mega bytes")
+	public int getMaxGitLFSFileSize() {
+		return maxGitLFSFileSize;
+	}
+
+	public void setMaxGitLFSFileSize(int maxGitLFSFileSize) {
+		this.maxGitLFSFileSize = maxGitLFSFileSize;
+	}
+
+	@Editable(order=700, name="Max Upload File Size (MB)", description="Specify max size of uploaded file in mega bytes. "
+			+ "This applies to file uploaded to repository via web interface, as well as file uploaded to markdown content "
+			+ "(issue comment etc)")
+	public int getMaxUploadFileSize() {
+		return maxUploadFileSize;
+	}
+
+	public void setMaxUploadFileSize(int maxUploadFileSize) {
+		this.maxUploadFileSize = maxUploadFileSize;
 	}
 
 }

@@ -108,12 +108,16 @@ public class RawBlobResource extends AbstractResource {
 		response.setWriteCallback(new WriteCallback() {
 
 			private void copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
-
-				long skipped = in.skip(start);
-
-				if (skipped < start) {
-					throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required.");
+				int totalSkipped = 0;
+				while (totalSkipped < start)	 {
+					long skipped = in.skip(start-totalSkipped);
+					if (skipped == 0)
+						break;
+					totalSkipped += skipped;
 				}
+				
+				if (totalSkipped < start) 
+					throw new IOException("Skipped only " + totalSkipped + " bytes out of " + start + " required.");
 
 				long bytesToCopy = end - start + 1;
 

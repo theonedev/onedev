@@ -193,12 +193,14 @@ public class ImportUtils {
 					
 					Map<String, String> unreferencedAttachments = new LinkedHashMap<>();
 					
+					long maxUploadFileSize = OneDev.getInstance(SettingManager.class)
+							.getPerformanceSetting().getMaxUploadFileSize()*1L*1024*1024; 
 					for (JsonNode attachmentNode: attachmentNodes) {
 						String attachmentName = attachmentNode.get("name").asText(null);
 						String attachmentUrl = attachmentNode.get("url").asText(null);
 						long attachmentSize = attachmentNode.get("size").asLong(0);
 						if (attachmentSize != 0 && attachmentName != null && attachmentUrl != null) {
-							if (attachmentSize >  Project.MAX_ATTACHMENT_SIZE) {
+							if (attachmentSize >  maxUploadFileSize) {
 								tooLargeAttachments.add(readableIssueId + ":" + attachmentName);
 							} else {
 								if (!attachmentUrl.startsWith("/api"))
