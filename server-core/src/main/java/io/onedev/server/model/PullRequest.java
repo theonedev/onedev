@@ -931,7 +931,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public boolean isAllReviewsApproved() {
 		for (PullRequestReview review: getReviews()) {
-			if (review.getResult() == null || !review.getResult().isApproved()) 
+			if (review.getResult() == null || !Boolean.TRUE.equals(review.getResult().getApproved())) 
 				return false;
 		}
 		return true;

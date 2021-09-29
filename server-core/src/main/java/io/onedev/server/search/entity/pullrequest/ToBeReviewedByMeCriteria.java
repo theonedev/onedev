@@ -38,7 +38,7 @@ public class ToBeReviewedByMeCriteria extends EntityCriteria<PullRequest> {
 	public boolean matches(PullRequest request) {
 		if (User.get() != null) {
 			PullRequestReview review = request.getReview(User.get());
-			return review != null && review.getResult() == null;
+			return review != null && (review.getResult() == null || review.getResult().getApproved() == null);
 		} else {
 			throw new ExplicitException("Please login to perform this query");
 		}

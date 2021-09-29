@@ -2,6 +2,7 @@ package io.onedev.server.model.support.pullrequest;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -14,7 +15,7 @@ public class ReviewResult implements Serializable {
 	
 	private String commit;
 	
-	private Boolean approved = false;
+	private Boolean approved;
 	
 	@Column(length=15000)
 	private String comment;
@@ -27,7 +28,11 @@ public class ReviewResult implements Serializable {
 		this.commit = commit;
 	}
 
-	public Boolean isApproved() {
+	/**
+	 * @return null if review withdrawed
+	 */
+	@Nullable
+	public Boolean getApproved() {
 		return approved;
 	}
 

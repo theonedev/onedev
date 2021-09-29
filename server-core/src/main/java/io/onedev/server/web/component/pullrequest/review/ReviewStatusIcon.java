@@ -23,10 +23,10 @@ public abstract class ReviewStatusIcon extends WebComponent {
 	public void onComponentTagBody(final MarkupStream markupStream, final ComponentTag openTag) {
 		String icon;
 		String cssClass = "icon review-status review-status-";
-		if (getResult() == null) {
+		if (getResult() == null || getResult().getApproved() == null) {
 			icon = "clock-o";
 			cssClass += "pending";
-		} else if (getResult().isApproved()) {
+		} else if (getResult().getApproved() == true) {
 			icon = "tick-circle-o";
 			cssClass += "approved";
 		} else {
@@ -49,10 +49,10 @@ public abstract class ReviewStatusIcon extends WebComponent {
 			@Override
 			protected String load() {
 				String title;
-				if (getResult() != null) {
-					if (getResult().isApproved())
+				if (getResult() != null && getResult().getApproved() != null) {
+					if (getResult().getApproved() == true)
 						title = "Approved";
-					else
+					else 
 						title = "Request for changes";
 				} else {
 					title = "Pending review";

@@ -660,7 +660,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 	
 	private boolean requestedForChanges() {
 		return getPullRequest().getReviews().stream().anyMatch(
-				it-> it.getResult()!=null && !it.getResult().isApproved());
+				it-> it.getResult()!=null && Boolean.FALSE.equals(it.getResult().getApproved()));
 	}
 	
 	private boolean hasUnsuccessfulRequiredBuilds() {
@@ -1101,7 +1101,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review == null || review.getResult() == null || !review.getResult().isApproved();
+					return review != null && review.getResult() == null;
 				} else {
 					return false;
 				}
@@ -1123,11 +1123,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							User user = SecurityUtils.getUser();
 							PullRequest request = getPullRequest();
 							PullRequestReview review = request.getReview(user);
-							if (review == null) {
-								review = new PullRequestReview();
-								review.setRequest(request);
-								review.setUser(user);
-							}
 							ReviewResult result = new ReviewResult();
 							result.setApproved(true);
 							result.setComment(getComment());
@@ -1161,7 +1156,7 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				PullRequest request = getPullRequest();
 				if (request.isOpen()) {
 					PullRequestReview review = request.getReview(SecurityUtils.getUser());
-					return review == null || review.getResult() == null || review.getResult().isApproved();
+					return review != null && review.getResult() == null;
 				} else {
 					return false;
 				}
@@ -1183,11 +1178,6 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 							User user = SecurityUtils.getUser();
 							PullRequest request = getPullRequest();
 							PullRequestReview review = request.getReview(user);
-							if (review == null) {
-								review = new PullRequestReview();
-								review.setRequest(request);
-								review.setUser(user);
-							}
 							ReviewResult result = new ReviewResult();
 							result.setApproved(false);
 							result.setComment(getComment());
@@ -1204,6 +1194,62 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					@Override
 					protected String getTitle() {
 						return "Confirm Request For Changes";
+					}
+				};
+			}
+			
+		});
+		
+		operationsContainer.add(new ModalLink("withdrawReview") {
+
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+
+			private boolean canOperate() {
+				PullRequest request = getPullRequest();
+				if (request.isOpen()) {
+					PullRequestReview review = request.getReview(SecurityUtils.getUser());
+					return review != null && review.getResult() != null 
+							&& review.getResult().getApproved() != null;
+				} else {
+					return false;
+				}
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(canOperate());
+			}
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new CommentableOperationConfirmPanel(id, modal, latestUpdateId) {
+					
+					@Override
+					protected boolean operate() {
+						if (canOperate()) {
+							User user = SecurityUtils.getUser();
+							PullRequest request = getPullRequest();
+							PullRequestReview review = request.getReview(user);
+							ReviewResult result = new ReviewResult();
+							result.setApproved(null);
+							result.setComment(getComment());
+							result.setCommit(request.getLatestUpdate().getHeadCommitHash());
+							review.setResult(result);							
+							OneDev.getInstance(PullRequestReviewManager.class).review(review);
+							Session.get().success("Review Withdrawed");
+							return true;
+						} else {
+							return false; 
+						}
+					}
+					
+					@Override
+					protected String getTitle() {
+						return "Confirm Withdraw";
 					}
 				};
 			}

@@ -38,7 +38,7 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public boolean matches(PullRequest request) {
 		PullRequestReview review = request.getReview(this.user);
-		return review != null && review.getResult() != null && !review.getResult().isApproved();
+		return review != null && review.getResult() != null && Boolean.FALSE.equals(review.getResult().getApproved());
 	}
 
 	@Override

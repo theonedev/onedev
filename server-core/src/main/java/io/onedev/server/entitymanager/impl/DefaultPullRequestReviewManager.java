@@ -25,6 +25,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewWithdrawData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -59,10 +60,12 @@ public class DefaultPullRequestReviewManager extends BaseEntityManager<PullReque
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(review.getRequest());
-		if (result.isApproved()) 
+		if (Boolean.TRUE.equals(result.getApproved())) 
 			change.setData(new PullRequestApproveData(result.getComment()));
-		else 
+		else if (Boolean.FALSE.equals(result.getApproved()))
 			change.setData(new PullRequestRequestedForChangesData(result.getComment()));
+		else
+			change.setData(new PullRequestReviewWithdrawData(result.getComment()));
 		change.setUser(review.getUser());
 		pullRequestChangeManager.save(change);
 		save(review);

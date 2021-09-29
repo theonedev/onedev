@@ -107,7 +107,7 @@ public abstract class OperationConfirmPanel extends Panel {
 					CharSequence url = RequestCycle.get().urlFor(PullRequestChangesPage.class, 
 							PullRequestChangesPage.paramsOf(request, state));
 					
-					form.warn(String.format("There are <a href='%s'>new changes</a> in this pull request", url));					
+					form.warn(String.format("There are <a href='%s'>new commits</a> in this pull request", url));					
 					
 					target.add(form);
 					latestUpdateId = request.getLatestUpdate().getId();
