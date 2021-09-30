@@ -112,6 +112,13 @@ public abstract class OperationConfirmPanel extends Panel {
 					target.add(form);
 					latestUpdateId = request.getLatestUpdate().getId();
 				}
+				
+				target.prependJavaScript(String.format("$('#%s').data('dirty', $('#%s').hasClass('dirty'))", 
+						OperationConfirmPanel.this.getMarkupId(), form.getMarkupId()));
+				target.appendJavaScript(String.format(""
+						+ "if ($('#%s').data('dirty')) "
+						+ "  onedev.server.form.markDirty($('#%s'))", 
+						OperationConfirmPanel.this.getMarkupId(), form.getMarkupId()));
 			}
 
 			@Override
@@ -121,6 +128,8 @@ public abstract class OperationConfirmPanel extends Panel {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
 	@Override

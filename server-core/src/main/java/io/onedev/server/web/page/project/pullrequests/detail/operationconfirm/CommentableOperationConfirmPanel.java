@@ -63,5 +63,5 @@ public abstract class CommentableOperationConfirmPanel extends OperationConfirmP
 	protected final String getComment() {
 		return comment;
 	}
-	
+
 }
