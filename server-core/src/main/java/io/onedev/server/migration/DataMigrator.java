@@ -3018,4 +3018,53 @@ public class DataMigrator {
 		
 	}
 	
+	private void migrate66(File dataDir, Stack<Integer> versions) {
+		Map<String, Element> compareContexts = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element compareContextElement = element.element("compareContext");
+					Element leftSideElement = compareContextElement.element("leftSide");
+					Element compareCommitHashElement = compareContextElement.element("compareCommitHash");
+					String compareCommitHash = compareCommitHashElement.getTextTrim();
+					String commitHash = element.element("mark").elementTextTrim("commitHash");
+					if (Boolean.parseBoolean(leftSideElement.getTextTrim())) {
+						compareContextElement.addElement("oldCommitHash").setText(compareCommitHash);
+						compareContextElement.addElement("newCommitHash").setText(commitHash);
+					} else {
+						compareContextElement.addElement("newCommitHash").setText(compareCommitHash);
+						compareContextElement.addElement("oldCommitHash").setText(commitHash);
+					}
+					Element requestElement = element.element("request");
+					if (requestElement != null) {
+						compareContextElement.addElement("pullRequest").setText(requestElement.getTextTrim());
+						requestElement.detach();
+					}
+					leftSideElement.detach();
+					compareCommitHashElement.detach();
+					compareContexts.put(element.elementTextTrim("id"), compareContextElement);
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element lastCodeCommentActivityDateElement = element.element("lastCodeCommentActivityDate");
+					if (lastCodeCommentActivityDateElement != null)
+						lastCodeCommentActivityDateElement.detach();
+				}
+			}
+		}
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String elementId = element.elementTextTrim("comment");
+					element.add(compareContexts.get(elementId).createCopy());
+				}
+				dom.writeToFile(file, false);
+			}				
+		}
+	}
+	
 }

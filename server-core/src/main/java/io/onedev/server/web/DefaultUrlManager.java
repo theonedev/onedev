@@ -8,6 +8,7 @@ import javax.inject.Singleton;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Splitter;
 
@@ -25,6 +26,7 @@ import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 
@@ -52,41 +54,72 @@ public class DefaultUrlManager implements UrlManager {
 	}
 	
 	@Override
-	public String urlFor(CodeComment comment, PullRequest request) {
+	public String urlFor(CodeComment comment) {
+		return urlFor(comment, comment.getCompareContext());
+	}
+
+	@Override
+	public String urlFor(CodeCommentReply reply) {
+		return urlFor(reply.getComment(), reply.getCompareContext()) + "#" + reply.getAnchor();
+	}
+
+	private String urlFor(CodeComment comment, CompareContext compareContext) {
+		Project project = comment.getProject();
+		PullRequest request = compareContext.getPullRequest();
 		PageParametersEncoder paramsEncoder = new PageParametersEncoder();
 		if (request != null) {
 			PageParameters params = new PageParameters();
-			PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment));
+			PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment, compareContext));
 			return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
 		} else {
-			CompareContext compareContext = comment.getCompareContext();
-			if (!compareContext.getCompareCommitHash().equals(comment.getMark().getCommitHash())) {
-				String url = urlFor(comment.getProject());
-				PageParameters params = new PageParameters();
-				RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment));
-				return url + "/compare" + paramsEncoder.encodePageParameters(params);
+			if (!compareContext.getOldCommitHash().equals(compareContext.getNewCommitHash())) {
+				RevCommit oldCommit = project.getRevCommit(compareContext.getOldCommitHash(), true);
+				RevCommit newCommit = project.getRevCommit(compareContext.getNewCommitHash(), true);
+				if (isParent(oldCommit, newCommit)) {
+					String url = urlFor(comment.getProject());
+					PageParameters params = new PageParameters();
+					CommitDetailPage.State state = CommitDetailPage.getState(comment, compareContext);
+					
+					// encode path param separately, otherwise it will be encoded as query param
+					state.revision = null;
+					params.set(0, newCommit.name());
+					
+					CommitDetailPage.fillParams(params, state);
+					return url + "/commits/" + paramsEncoder.encodePageParameters(params);
+				} else {				
+					String url = urlFor(comment.getProject());
+					PageParameters params = new PageParameters();
+					RevisionComparePage.fillParams(params, RevisionComparePage.getState(comment, compareContext));
+					return url + "/compare" + paramsEncoder.encodePageParameters(params);
+				}
 			} else {
 				String url = urlFor(comment.getProject());
 				PageParameters params = new PageParameters();
 				ProjectBlobPage.State state = ProjectBlobPage.getState(comment);
+				
+				// encode path param separately, otherwise it will be encoded as query param
 				state.blobIdent.path = null;
 				state.blobIdent.revision = null;
 				params.set(0, comment.getMark().getCommitHash());
 				List<String> pathSegments = Splitter.on("/").splitToList(comment.getMark().getPath());
-				for (int i=0; i<pathSegments.size(); i++) {
+				for (int i=0; i<pathSegments.size(); i++) 
 					params.set(i+1, pathSegments.get(i));
-				}
+				
 				ProjectBlobPage.fillParams(params, state);
+				
 				return url + "/blob/" + paramsEncoder.encodePageParameters(params);
 			}
 		}
 	}
-
-	@Override
-	public String urlFor(CodeCommentReply reply, PullRequest request) {
-		return urlFor(reply.getComment(), request) + "#" + reply.getAnchor();
+	
+	private static boolean isParent(RevCommit parent, RevCommit child) {
+		for (RevCommit each: child.getParents()) {
+			if (each.equals(parent))
+				return true;
+		}
+		return false;
 	}
-
+	
 	@Override
 	public String urlFor(PullRequest request) {
 		return urlFor(request.getTarget().getProject()) + "/pulls/" + request.getNumber();

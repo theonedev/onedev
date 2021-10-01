@@ -127,7 +127,7 @@ public class ActivityDetail implements Serializable {
 	}
 	
 	public static ActivityDetail referencedFrom(CodeComment comment) {
-		String url = OneDev.getInstance(UrlManager.class).urlFor(comment, null);
+		String url = OneDev.getInstance(UrlManager.class).urlFor(comment);
 		String htmlVersion = String.format("<div><a href='%s'>%s</a></div>", 
 				url, HtmlEscape.escapeHtml5(comment.getMark().getPath()));
 		String textVersion = comment.getMark().getPath() + "\n";  

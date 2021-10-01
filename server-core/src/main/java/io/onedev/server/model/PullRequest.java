@@ -245,10 +245,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@Column(nullable=false)
 	private String baseCommitHash;
 	
-	@Column(nullable=true)
-	@OptimisticLock(excluded=true)
-	private Date lastCodeCommentActivityDate;
-
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonIgnore
@@ -310,7 +306,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
-	@OneToMany(mappedBy="request")
+	@OneToMany(mappedBy="compareContext.pullRequest")
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
 	private transient Boolean mergedIntoTarget;
@@ -781,28 +777,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		this.checkError = checkError;
 	}
 
-	public Date getLastCodeCommentActivityDate() {
-		return lastCodeCommentActivityDate;
-	}
-
-	public void setLastCodeCommentActivityDate(Date lastCodeCommentActivityDate) {
-		this.lastCodeCommentActivityDate = lastCodeCommentActivityDate;
-	}
-
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
 			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestVisitDate(user, this);
-			return visitDate != null && visitDate.getTime()>date.getTime();
-		} else {
-			return true;
-		}
-	}
-	
-	public boolean isCodeCommentsVisitedAfter(Date date) {
-		User user = SecurityUtils.getUser();
-		if (user != null) {
-			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

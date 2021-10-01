@@ -869,10 +869,9 @@ public abstract class RevisionDiffPanel extends Panel {
 										CodeComment comment = new CodeComment();
 										comment.setUUID(uuid);
 										comment.setProject(getProject());
-										comment.setRequest(getPullRequest());
 										comment.setUser(SecurityUtils.getUser());
 										comment.setMark(mark);
-										comment.setCompareContext(getCompareContext(mark.getCommitHash()));
+										comment.setCompareContext(getCompareContext());
 										comment.setContent(contentInput.getModelObject());
 										
 										annotationSupport.onSaveComment(comment);
@@ -897,8 +896,13 @@ public abstract class RevisionDiffPanel extends Panel {
 	
 											@Override
 											protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-												reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
+												reply.setCompareContext(getCompareContext());
 												annotationSupport.onSaveCommentReply(reply);
+											}
+
+											@Override
+											protected boolean isContextDifferent(CompareContext compareContext) {
+												return RevisionDiffPanel.this.isContextDifferent(compareContext);
 											}
 	
 										};
@@ -1068,17 +1072,11 @@ public abstract class RevisionDiffPanel extends Panel {
 		};
 	}
 	
-	private CompareContext getCompareContext(String commitHash) {
+	private CompareContext getCompareContext() {
 		CompareContext compareContext = new CompareContext();
-		String oldCommitHash = getOldCommitId().name();
-		String newCommitHash = getNewCommitId().name();
-		if (commitHash.equals(oldCommitHash)) {
-			compareContext.setCompareCommitHash(newCommitHash);
-			compareContext.setLeftSide(false);
-		} else {
-			compareContext.setCompareCommitHash(oldCommitHash);
-			compareContext.setLeftSide(true);
-		}
+		compareContext.setPullRequest(getPullRequest());
+		compareContext.setOldCommitHash(getOldCommitId().name());
+		compareContext.setNewCommitHash(getNewCommitId().name());
 		compareContext.setPathFilter(pathFilterModel.getObject());
 		compareContext.setWhitespaceOption(whitespaceOptionModel.getObject());
 		return compareContext;
@@ -1105,8 +1103,13 @@ public abstract class RevisionDiffPanel extends Panel {
 
 			@Override
 			protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
-				reply.getComment().setCompareContext(getCompareContext(comment.getMark().getCommitHash()));
+				reply.setCompareContext(getCompareContext());
 				annotationSupport.onSaveCommentReply(reply);
+			}
+			
+			@Override
+			protected boolean isContextDifferent(CompareContext compareContext) {
+				return RevisionDiffPanel.this.isContextDifferent(compareContext);
 			}
 			
 		};
@@ -1275,7 +1278,13 @@ public abstract class RevisionDiffPanel extends Panel {
 
 					@Override
 					protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
+						reply.setCompareContext(getCompareContext());
 						annotationSupport.onSaveCommentReply(reply);
+					}
+					
+					@Override
+					protected boolean isContextDifferent(CompareContext compareContext) {
+						return RevisionDiffPanel.this.isContextDifferent(compareContext);
 					}
 					
 				};
@@ -1380,5 +1389,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				CommitIndexed.getWebSocketObservable(getProject().getObjectId(oldRev, true).name()), 
 				CommitIndexed.getWebSocketObservable(getProject().getObjectId(newRev, true).name()));
 	}
+	
+	protected abstract boolean isContextDifferent(CompareContext compareContext);
 	
 }

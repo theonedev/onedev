@@ -28,7 +28,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -37,11 +37,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -54,6 +54,7 @@ import io.onedev.server.search.entity.codecomment.ContentCriteria;
 import io.onedev.server.search.entity.codecomment.PathCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
@@ -66,11 +67,7 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.codecomments.InvalidCodeCommentPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -350,38 +347,12 @@ public abstract class CodeCommentListPanel extends Panel {
 						
 					};
 				} else {
-					if (comment.getRequest() != null) {
-						link = new BookmarkablePageLink<Void>("link", PullRequestChangesPage.class, 
-								PullRequestChangesPage.paramsOf(comment.getRequest(), comment));
-					} else {
-						String compareCommitHash = comment.getCompareContext().getCompareCommitHash();
-						if (!compareCommitHash.equals(comment.getMark().getCommitHash())) {
-							RevCommit markCommit = getProject().getRevCommit(comment.getMark().getCommitHash(), true);
-							RevCommit compareCommit = getProject().getRevCommit(compareCommitHash, true);
-							if (isParent(markCommit, compareCommit) || isParent(compareCommit, markCommit)) {
-								link = new BookmarkablePageLink<Void>("link", CommitDetailPage.class, 
-										CommitDetailPage.paramsOf(comment));
-							} else {
-								link = new BookmarkablePageLink<Void>("link", RevisionComparePage.class, 
-										RevisionComparePage.paramsOf(comment));
-							}
-						} else {
-							link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
-									ProjectBlobPage.paramsOf(comment));
-						}
-					}				
+					String url = OneDev.getInstance(UrlManager.class).urlFor(comment);
+					link = new ExternalLink("link", UrlUtils.makeRelative(url));
 				}
 				link.add(new Label("label", comment.getMark().getPath()));
 				fragment.add(link);
 				cellItem.add(fragment);
-			}
-			
-			private boolean isParent(RevCommit parent, RevCommit child) {
-				for (RevCommit each: child.getParents()) {
-					if (each.equals(parent))
-						return true;
-				}
-				return false;
 			}
 
 			@Override

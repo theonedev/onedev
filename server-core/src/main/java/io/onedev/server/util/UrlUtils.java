@@ -1,8 +1,10 @@
 package io.onedev.server.util;
 
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.wicket.util.encoding.UrlDecoder;
 import org.apache.wicket.util.encoding.UrlEncoder;
 
@@ -51,6 +53,17 @@ public class UrlUtils {
 	
 	public static String decodeQuery(String query) {
 		return UrlDecoder.QUERY_INSTANCE.decode(query, StandardCharsets.UTF_8.name());
+	}
+	
+	public static String makeRelative(String url) {
+		try {
+			URIBuilder builder = new URIBuilder(url);
+			builder.setScheme(null);
+			builder.setHost(null);
+			return builder.build().toString();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

@@ -3,8 +3,9 @@ package io.onedev.server.git.config;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
 
-@Editable(name="Use Specified Git Command Line", order=200)
+@Editable(name="Use Specified Git", order=200)
 public class SpecifiedGit extends GitConfig {
 
 	private static final long serialVersionUID = 1L;
@@ -12,6 +13,7 @@ public class SpecifiedGit extends GitConfig {
 	private String gitPath;
 	
 	@Editable(description="Specify path to git executable, for instance: <tt>/usr/bin/git</tt>")
+	@OmitName
 	@NotEmpty
 	public String getGitPath() {
 		return gitPath;

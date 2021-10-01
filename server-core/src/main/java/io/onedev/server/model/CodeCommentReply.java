@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -13,13 +14,20 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 
+import io.onedev.server.model.support.CompareContext;
+
 @Entity
-@Table(indexes={@Index(columnList="o_comment_id"), @Index(columnList="o_user_id")})
+@Table(indexes={
+		@Index(columnList="o_comment_id"), @Index(columnList="o_user_id"), 
+		@Index(columnList="o_pullRequest_id"),
+})
 public class CodeCommentReply extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_CONTENT_LEN = 14000;
+	
+	public static final String PROP_COMPARE_CONTEXT = "compareContext";
 	
 	public static final String PROP_CONTENT = "content";
 	
@@ -36,6 +44,9 @@ public class CodeCommentReply extends AbstractEntity {
 	
 	@Column(nullable=false, length=MAX_CONTENT_LEN)
 	private String content;
+	
+	@Embedded
+	private CompareContext compareContext;
 	
 	public CodeComment getComment() {
 		return comment;
@@ -72,6 +83,14 @@ public class CodeCommentReply extends AbstractEntity {
 
 	public void setContent(String content) {
 		this.content = StringUtils.abbreviate(content, MAX_CONTENT_LEN);
+	}
+
+	public CompareContext getCompareContext() {
+		return compareContext;
+	}
+
+	public void setCompareContext(CompareContext compareContext) {
+		this.compareContext = compareContext;
 	}
 
 }

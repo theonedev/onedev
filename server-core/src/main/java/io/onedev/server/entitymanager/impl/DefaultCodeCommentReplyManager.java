@@ -37,7 +37,7 @@ public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommen
 			
 			listenerRegistry.post(new CodeCommentReplied(reply));
 
-			PullRequest request = comment.getRequest();
+			PullRequest request = comment.getCompareContext().getPullRequest();
 			if (request != null) {
 				request.setCommentCount(request.getCommentCount()+1);
 				listenerRegistry.post(new PullRequestCodeCommentReplied(request, reply));
@@ -53,7 +53,7 @@ public class DefaultCodeCommentReplyManager extends BaseEntityManager<CodeCommen
 		super.delete(reply);
 		CodeComment comment = reply.getComment();
 		comment.setReplyCount(comment.getReplyCount()-1);
-		PullRequest request = comment.getRequest();
+		PullRequest request = comment.getCompareContext().getPullRequest();
 		if (request != null)
 			request.setCommentCount(request.getCommentCount()-1);
 	}

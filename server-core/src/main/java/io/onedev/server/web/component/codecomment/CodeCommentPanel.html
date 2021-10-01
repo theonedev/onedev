@@ -7,12 +7,11 @@
 	<wicket:fragment wicket:id="viewFrag">
 		<div class="user-avatar"><a wicket:id="userAvatar"></a></div>
 		<div class="detail">
-			<div class="head d-flex align-items-center flex-wrap justify-content-between text-muted mb-1">
-				<span wicket:id="userName" class="user-name mr-3"></span>
-				<span>
-					<span wicket:id="action" class="action"></span>
-					<span wicket:id="date" class="date"></span>
-				</span>
+			<div class="head text-muted mb-1">
+				<span wicket:id="userName" class="user-name"></span>
+				<span wicket:id="action" class="action"></span>
+				<span wicket:id="date" class="date"></span>
+				<a wicket:id="context" class="text-warning"><wicket:svg href="warning-o" class="icon icon-sm"/></a>					
 			</div>
 			<div class="body">
 				<div wicket:id="content"></div>

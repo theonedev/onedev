@@ -50,6 +50,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -92,7 +93,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 
 			listenerRegistry.post(event);
 			
-			PullRequest request = comment.getRequest();
+			PullRequest request = comment.getCompareContext().getPullRequest();
 			if (request != null) {
 				request.setCommentCount(request.getCommentCount() + 1);
 				if (comment.getCreateDate().after(request.getLastUpdate().getDate())) 
@@ -109,7 +110,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 	public void delete(CodeComment comment) {
 		super.delete(comment);
 
-		PullRequest request = comment.getRequest();
+		PullRequest request = comment.getCompareContext().getPullRequest();
 		if (request != null)
 			request.setCommentCount(request.getCommentCount() - comment.getReplyCount() - 1);
 	}
@@ -251,7 +252,7 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 			@Nullable PullRequest request, Root<CodeComment> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) 
-			predicates.add(builder.equal(root.get(CodeComment.PROP_REQUEST), request));
+			predicates.add(builder.equal(CodeCommentQuery.getPath(root, CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST), request));
 		else 
 			predicates.add(builder.equal(root.get(CodeComment.PROP_PROJECT), project));
 		if (criteria != null) 

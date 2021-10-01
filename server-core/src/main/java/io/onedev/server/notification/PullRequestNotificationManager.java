@@ -89,9 +89,9 @@ public class PullRequestNotificationManager extends AbstractNotificationManager 
 		else if (event instanceof PullRequestChangeEvent) 
 			url = urlManager.urlFor(((PullRequestChangeEvent)event).getChange());
 		else if (event instanceof PullRequestCodeCommentCreated)
-			url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), request);
+			url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment());
 		else if (event instanceof PullRequestCodeCommentReplied)
-			url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply(), request);
+			url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply());
 		else 
 			url = urlManager.urlFor(request);
 		

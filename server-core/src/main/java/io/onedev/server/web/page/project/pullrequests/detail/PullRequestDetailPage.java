@@ -63,6 +63,7 @@ import io.onedev.server.entityreference.Referenceable;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
@@ -1508,13 +1509,11 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 
 					@Override
 					protected String load() {
-						PullRequest request = getPullRequest();
-						if (request.getLastCodeCommentActivityDate() != null 
-								&& !request.isCodeCommentsVisitedAfter(request.getLastCodeCommentActivityDate())) {
-							return "new";
-						} else {
-							return "";
+						for (CodeComment comment: getPullRequest().getCodeComments()) {
+							if (!comment.isVisitedAfter(comment.getLastUpdate().getDate())) 
+								return "new";
 						}
+						return "";
 					}
 					
 				}));

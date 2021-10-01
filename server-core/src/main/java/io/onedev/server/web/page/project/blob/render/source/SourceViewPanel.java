@@ -387,6 +387,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 					SourceViewPanel.this.onSaveCommentReply(reply);
 				}
 
+				@Override
+				protected boolean isContextDifferent(CompareContext compareContext) {
+					return SourceViewPanel.this.isContextDifferent(compareContext);
+				}
+
 			};
 			commentContainer.add(commentPanel);
 		} else {
@@ -496,7 +501,6 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 							comment.setContent(contentInput.getModelObject());
 							comment.setUser(SecurityUtils.getUser());
 							comment.setProject(context.getProject());
-							comment.setRequest(context.getPullRequest());
 							comment.setCompareContext(getCompareContext());
 							
 							OneDev.getInstance(CodeCommentManager.class).save(comment);
@@ -522,6 +526,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 								@Override
 								protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 									SourceViewPanel.this.onSaveCommentReply(reply);
+								}
+
+								@Override
+								protected boolean isContextDifferent(CompareContext compareContext) {
+									return SourceViewPanel.this.isContextDifferent(compareContext);
 								}
 
 							};
@@ -569,6 +578,11 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						@Override
 						protected void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply) {
 							SourceViewPanel.this.onSaveCommentReply(reply);
+						}
+
+						@Override
+						protected boolean isContextDifferent(CompareContext compareContext) {
+							return SourceViewPanel.this.isContextDifferent(compareContext);
 						}
 
 					};
@@ -758,7 +772,9 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 	
 	private CompareContext getCompareContext() {
 		CompareContext compareContext = new CompareContext();
-		compareContext.setCompareCommitHash(context.getCommit().name());
+		compareContext.setPullRequest(context.getPullRequest());
+		compareContext.setOldCommitHash(context.getCommit().name());
+		compareContext.setNewCommitHash(context.getCommit().name());
 		if (context.getBlobIdent().path != null)
 			compareContext.setPathFilter(PatternSet.quoteIfNecessary(context.getBlobIdent().path));
 		return compareContext;
@@ -1143,13 +1159,19 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 		return menuItems;
 	}
 
+	private boolean isContextDifferent(CompareContext compareContext) {
+		String commitHash = context.getCommit().name();
+		return !compareContext.getOldCommitHash().equals(commitHash) 
+				|| !compareContext.getNewCommitHash().equals(commitHash);
+	}
+	
 	@Override
 	protected boolean isViewPlainSupported() {
 		return viewPlainMode;
 	}
 	
 	private void onSaveCommentReply(CodeCommentReply reply) {
-		reply.getComment().setCompareContext(getCompareContext());
+		reply.setCompareContext(getCompareContext());
 		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
 	}
 	

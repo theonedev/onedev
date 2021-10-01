@@ -135,21 +135,14 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	
 	private Tabbable tabbable;
 
-	public static RevisionComparePage.State getState(CodeComment comment) {
+	public static RevisionComparePage.State getState(CodeComment comment, CompareContext compareContext) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		state.commentId = comment.getId();
 		state.mark = comment.getMark();
 		state.compareWithMergeBase = false;
-		CompareContext compareContext = comment.getCompareContext();
-		String compareCommit = compareContext.getCompareCommitHash();
 		Project project = comment.getProject();
-		if (compareContext.isLeftSide()) {
-			state.leftSide = new ProjectAndRevision(project, compareCommit);
-			state.rightSide = new ProjectAndRevision(project, comment.getMark().getCommitHash());
-		} else {
-			state.leftSide = new ProjectAndRevision(project, comment.getMark().getCommitHash());
-			state.rightSide = new ProjectAndRevision(project, compareCommit);
-		}
+		state.leftSide = new ProjectAndRevision(project, compareContext.getOldCommitHash());
+		state.rightSide = new ProjectAndRevision(project, compareContext.getNewCommitHash());
 		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = compareContext.getWhitespaceOption();
 		state.pathFilter = compareContext.getPathFilter();
@@ -188,10 +181,6 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 		return params;
 	}
 
-	public static PageParameters paramsOf(CodeComment comment) {
-		return paramsOf(comment.getProject(), getState(comment));
-	}
-	
 	public RevisionComparePage(PageParameters params) {
 		super(params);
 		
@@ -633,6 +622,12 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 				@Override
 				protected Project getProject() {
 					return projectModel.getObject();
+				}
+
+				@Override
+				protected boolean isContextDifferent(CompareContext compareContext) {
+					return !compareContext.getOldCommitHash().equals(leftCommitId.name()) 
+							|| !compareContext.getNewCommitHash().equals(rightCommitId.name());
 				}
 
 			};

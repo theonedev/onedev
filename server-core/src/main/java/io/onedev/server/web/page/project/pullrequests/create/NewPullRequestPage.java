@@ -63,6 +63,7 @@ import io.onedev.server.model.PullRequestAssignment;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.Mark;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -536,6 +537,12 @@ public class NewPullRequestPage extends ProjectPage implements RevisionDiff.Anno
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!NewPullRequestPage.this.getPullRequest().isMerged());
+			}
+
+			@Override
+			protected boolean isContextDifferent(CompareContext compareContext) {
+				return !compareContext.getOldCommitHash().equals(getPullRequest().getBaseCommitHash()) 
+						|| !compareContext.getNewCommitHash().equals(getPullRequest().getLatestUpdate().getHeadCommitHash());
 			}
 			
 		};

@@ -2,12 +2,17 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.diff.WhitespaceOption;
 
 @Embeddable
@@ -15,30 +20,46 @@ public class CompareContext implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@Column(nullable=false)
-	private String compareCommitHash;
+	public static final String PROP_PULL_REQUEST = "pullRequest";
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn
+	private PullRequest pullRequest;
+	
+	@Nullable
+	public PullRequest getPullRequest() {
+		return pullRequest;
+	}
 
-	private boolean leftSide;
+	public void setPullRequest(PullRequest pullRequest) {
+		this.pullRequest = pullRequest;
+	}
+
+	@Column(nullable=false)
+	private String oldCommitHash;
+	
+	@Column(nullable=false)
+	private String newCommitHash;
 	
 	private String pathFilter;
 	
 	@Column(nullable=false)
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 
-	public String getCompareCommitHash() {
-		return compareCommitHash;
+	public String getOldCommitHash() {
+		return oldCommitHash;
 	}
 
-	public void setCompareCommitHash(String compareCommitHash) {
-		this.compareCommitHash = compareCommitHash;
+	public void setOldCommitHash(String oldCommitHash) {
+		this.oldCommitHash = oldCommitHash;
 	}
 
-	public boolean isLeftSide() {
-		return leftSide;
+	public String getNewCommitHash() {
+		return newCommitHash;
 	}
 
-	public void setLeftSide(boolean leftSide) {
-		this.leftSide = leftSide;
+	public void setNewCommitHash(String newCommitHash) {
+		this.newCommitHash = newCommitHash;
 	}
 
 	public String getPathFilter() {
@@ -65,8 +86,9 @@ public class CompareContext implements Serializable {
 			return true;
 		CompareContext otherContext = (CompareContext) other;
 		return new EqualsBuilder()
-				.append(compareCommitHash, otherContext.compareCommitHash)
-				.append(leftSide, otherContext.leftSide)
+				.append(pullRequest, otherContext.pullRequest)
+				.append(oldCommitHash, otherContext.oldCommitHash)
+				.append(newCommitHash, otherContext.newCommitHash)
 				.append(pathFilter, otherContext.pathFilter)
 				.append(whitespaceOption, otherContext.whitespaceOption)
 				.isEquals();
@@ -75,8 +97,9 @@ public class CompareContext implements Serializable {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(compareCommitHash)
-				.append(leftSide)
+				.append(pullRequest)
+				.append(oldCommitHash)
+				.append(newCommitHash)
 				.append(pathFilter)
 				.append(whitespaceOption)
 				.toHashCode();

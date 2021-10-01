@@ -600,6 +600,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					return null;
 			}
 
+			@Override
+			protected boolean isContextDifferent(CompareContext compareContext) {
+				return !compareContext.getOldCommitHash().equals(getCompareWith().name()) 
+						|| !compareContext.getNewCommitHash().equals(resolvedRevision.name());
+			}
+			
 		};
 		revisionDiff.setOutputMarkupId(true);
 		if (target != null) {
@@ -616,23 +622,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 		response.render(JavaScriptHeaderItem.forReference(new CommitDetailResourceReference()));
 	}
 
-	public static PageParameters paramsOf(CodeComment comment) {
-		return paramsOf(comment.getProject(), getState(comment));
-	}
-	
-	private static State getState(CodeComment comment) {
+	public static State getState(CodeComment comment, CompareContext compareContext) {
 		State state = new State();
 		state.commentId = comment.getId();
 		state.mark = comment.getMark();
-		CompareContext compareContext = comment.getCompareContext();
-		String compareCommit = compareContext.getCompareCommitHash();
-		if (compareContext.isLeftSide()) {
-			state.compareWith = compareCommit;
-			state.revision = comment.getMark().getCommitHash();
-		} else {
-			state.compareWith = comment.getMark().getCommitHash();
-			state.revision = compareCommit;
-		}
+		state.revision = compareContext.getNewCommitHash();
+		state.compareWith = compareContext.getOldCommitHash();
 		state.whitespaceOption = compareContext.getWhitespaceOption();
 		state.pathFilter = compareContext.getPathFilter();
 		return state;
@@ -640,7 +635,13 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	
 	public static PageParameters paramsOf(Project project, State state) {
 		PageParameters params = paramsOf(project);
-		params.set(PARAM_REVISION, state.revision);
+		fillParams(params, state);
+		return params;
+	}
+	
+	public static void fillParams(PageParameters params, State state) {
+		if (state.revision != null)
+			params.set(PARAM_REVISION, state.revision);
 		if (state.compareWith != null)
 			params.set(PARAM_COMPARE_WITH, state.compareWith);
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
@@ -655,7 +656,6 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 			params.set(PARAM_MARK, state.mark.toString());
 		if (state.requestId != null)
 			params.set(PARAM_PULL_REQUEST, state.requestId);
-		return params;
 	}
 	
 	public static PageParameters paramsOf(Project project, String revision) {

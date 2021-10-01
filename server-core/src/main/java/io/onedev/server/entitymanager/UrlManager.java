@@ -1,7 +1,5 @@
 package io.onedev.server.entitymanager;
 
-import javax.annotation.Nullable;
-
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Build;
@@ -35,9 +33,9 @@ public interface UrlManager {
 	
 	String urlFor(IssueChange change);
 	
-	String urlFor(CodeComment comment, @Nullable PullRequest request);
+	String urlFor(CodeComment comment);
 
-	String urlFor(CodeCommentReply reply, @Nullable PullRequest request);
+	String urlFor(CodeCommentReply reply);
 	
     String cloneUrlFor(Project project, boolean ssh);
     

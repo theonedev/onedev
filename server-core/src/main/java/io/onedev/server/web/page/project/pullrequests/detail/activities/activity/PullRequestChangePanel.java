@@ -114,6 +114,8 @@ class PullRequestChangePanel extends GenericPanel<PullRequestChange> {
 			});				
 		} else {
 			add(new WebMarkupContainer("comment").setVisible(false));
+			if (detail == null)
+				add(AttributeAppender.append("class", "no-body"));
 		}
 		
 	}

@@ -998,10 +998,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 		return state;
 	}	
 	
-	public static PageParameters paramsOf(CodeComment comment) {
-		return paramsOf(comment.getProject(), getState(comment));
-	}	
-	
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		return paramsOf(project, new State(blobIdent));
 	}

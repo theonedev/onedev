@@ -73,7 +73,6 @@ import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
@@ -82,6 +81,8 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.markdown.MarkdownManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -91,6 +92,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.LastUpdate;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -194,10 +196,19 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		for (PullRequestUpdate update: request.getUpdates())
 			update.deleteRefs();
 		
-    	Query<?> query = getSession().createQuery("update CodeComment set request=null where request=:request");
+    	Query<?> query = getSession().createQuery(String.format(
+    			"update CodeComment set %s=null where %s=:request", 
+    			CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST, 
+    			CodeComment.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
     	query.setParameter("request", request);
     	query.executeUpdate();
 
+    	query = getSession().createQuery(String.format("update CodeCommentReply set %s=null where %s=:request",
+    			CodeCommentReply.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST,
+    			CodeCommentReply.PROP_COMPARE_CONTEXT + "." + CompareContext.PROP_PULL_REQUEST));
+    	query.setParameter("request", request);
+    	query.executeUpdate();
+    	
 		dao.remove(request);
 	}
 
@@ -675,12 +686,6 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 				event.getRequest().setLastUpdate(event.getLastUpdate());
 			}
 		}
-	}
-	
-	@Transactional
-	@Listen
-	public void on(PullRequestCodeCommentEvent event) {
-		event.getRequest().setLastCodeCommentActivityDate(event.getDate());
 	}
 	
 	@Listen

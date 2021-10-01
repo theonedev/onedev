@@ -40,6 +40,7 @@ import io.onedev.server.util.CollectionUtils;
 @Entity
 @Table(indexes={
 		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
+		@Index(columnList="o_pullRequest_id"),
 		@Index(columnList=Mark.PROP_COMMIT_HASH), @Index(columnList=Mark.PROP_PATH), 
 		@Index(columnList=PROP_CREATE_DATE), @Index(columnList=LastUpdate.COLUMN_DATE)})
 public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
@@ -50,7 +51,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	public static final String PROP_PROJECT = "project";
 	
-	public static final String PROP_REQUEST = "request";
+	public static final String PROP_COMPARE_CONTEXT = "compareContext";
 	
 	public static final String NAME_CONTENT = "Content";
 	
@@ -112,9 +113,6 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	@Embedded
 	private CompareContext compareContext;
-
-	@ManyToOne(fetch=FetchType.LAZY)
-	private PullRequest request;
 	
 	@OneToMany(mappedBy="comment", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentReply> replies = new ArrayList<>();
@@ -130,15 +128,6 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 
 	public void setProject(Project project) {
 		this.project = project;
-	}
-
-	@Nullable
-	public PullRequest getRequest() {
-		return request;
-	}
-
-	public void setRequest(PullRequest request) {
-		this.request = request;
 	}
 
 	public User getUser() {
@@ -196,7 +185,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	public void setUUID(String uuid) {
 		this.uuid = uuid;
 	}
-
+	
 	public CompareContext getCompareContext() {
 		return compareContext;
 	}
@@ -226,7 +215,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	public boolean isValid() {
 		try {
 			return project.getRepository().getObjectDatabase().has(ObjectId.fromString(mark.getCommitHash()))
-					&& project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getCompareCommitHash()));
+					&& project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getOldCommitHash()))
+					&& project.getRepository().getObjectDatabase().has(ObjectId.fromString(compareContext.getNewCommitHash()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

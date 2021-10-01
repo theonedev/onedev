@@ -18,12 +18,14 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -40,6 +42,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
@@ -47,8 +50,10 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.UrlUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
@@ -104,6 +109,20 @@ public abstract class CodeCommentPanel extends Panel {
 		commentContainer.add(new Label("action", "commented"));
 		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate()))
 				.add(new AttributeAppender("title", DateUtils.formatDateTime(getComment().getCreateDate()))));
+		if (isContextDifferent(getComment().getCompareContext())) {
+			String url = OneDev.getInstance(UrlManager.class).urlFor(getComment());
+			commentContainer.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.put("title", "Current context is different from the context when this comment is added, click to show the comment context");
+				}
+				
+			});
+		} else {
+			commentContainer.add(new WebMarkupContainer("context").setVisible(false));
+		}
 
 		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -249,11 +268,24 @@ public abstract class CodeCommentPanel extends Panel {
 		
 		replyContainer.add(new UserIdentPanel("userAvatar", reply.getUser(), Mode.AVATAR));
 		replyContainer.add(new Label("userName", reply.getUser().getDisplayName()));
-		
 		replyContainer.add(new Label("action", "replied"));
 		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate()))
 				.add(new AttributeAppender("title", DateUtils.formatDateTime(reply.getDate()))));
+		if (isContextDifferent(reply.getCompareContext())) {
+			String url = OneDev.getInstance(UrlManager.class).urlFor(reply);
+			replyContainer.add(new ExternalLink("context", UrlUtils.makeRelative(url)) {
 
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.put("title", "Current context is different from the context when this reply is added, click to show the reply context");
+				}
+				
+			});
+		} else {
+			replyContainer.add(new WebMarkupContainer("context").setVisible(false));
+		}
+		
 		replyContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
 			@Override
@@ -341,6 +373,7 @@ public abstract class CodeCommentPanel extends Panel {
 						super.onSubmit(target, form);
 
 						CodeCommentReply reply = getReply(replyId);
+						reply.setContent(contentInput.getModelObject());
 						onSaveCommentReply(target, reply);
 						reply.setContent(contentInput.getModelObject());
 						WebMarkupContainer replyContainer = newReplyContainer(componentId, reply);
@@ -459,6 +492,8 @@ public abstract class CodeCommentPanel extends Panel {
 					handler.add(newReplyContainer);
 					prevReplyMarkupId = newReplyContainer.getMarkupId();
 				}
+				
+				OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
 			}
 			
 			@Override
@@ -500,9 +535,6 @@ public abstract class CodeCommentPanel extends Panel {
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) {
-					OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
-				}
 			}
 			
 			@Override
@@ -511,7 +543,10 @@ public abstract class CodeCommentPanel extends Panel {
 			
 			@Override
 			public void onBeginRequest(RequestCycle cycle) {
+				if (SecurityUtils.getUser() != null) 
+					OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
 			}
+			
 		});		
 		
 		setOutputMarkupId(true);
@@ -530,7 +565,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 		String initialContent = "";
 		
-		if (getComment().getRequest() == null) {
+		if (getComment().getCompareContext().getPullRequest() == null) {
 			// automatically adds mentioning if the code comment is not associated with any pull requests, 
 			// as otherwise no one will be aware of our comment
 			List<CodeCommentReply> replies = new ArrayList<>(getComment().getReplies());
@@ -657,5 +692,7 @@ public abstract class CodeCommentPanel extends Panel {
 	protected abstract void onSaveComment(AjaxRequestTarget target, CodeComment comment);
 
 	protected abstract void onSaveCommentReply(AjaxRequestTarget target, CodeCommentReply reply);
+	
+	protected abstract boolean isContextDifferent(CompareContext compareContext);
 	
 }

@@ -39,7 +39,7 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (event.getComment().getRequest() == null) {
+		if (event.getComment().getCompareContext().getPullRequest() == null) {
 			String markdown = event.getMarkdown();
 			String renderedMarkdown = markdownManager.render(markdown);
 			String processedMarkdown = markdownManager.process(renderedMarkdown, event.getProject(), null, true);
@@ -49,9 +49,9 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 				if (user != null) { 
 					String url;
 					if (event instanceof CodeCommentCreated)
-						url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
+						url = urlManager.urlFor(event.getComment());
 					else if (event instanceof CodeCommentReplied)
-						url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), null);
+						url = urlManager.urlFor(((CodeCommentReplied)event).getReply());
 					else 
 						url = null;
 					

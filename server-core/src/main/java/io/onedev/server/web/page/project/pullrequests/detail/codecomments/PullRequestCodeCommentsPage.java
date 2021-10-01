@@ -1,22 +1,21 @@
 package io.onedev.server.web.page.project.pullrequests.detail.codecomments;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
-import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.infomanager.UserInfoManager;
+import com.google.common.collect.Sets;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -102,49 +101,20 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 
 		});
 		
-		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
-			
+		commentList.add(new WebSocketObserver() {
+
 			@Override
-			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(PullRequest.getWebSocketObservable(getPullRequest().getId()));
+			}
+
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler) {
+				handler.add(component);
 			}
 			
-			@Override
-			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
-			}
-			
-			@Override
-			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
-			}
-			
-			@Override
-			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
-				return null;
-			}
-			
-			@Override
-			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) { 
-					OneDev.getInstance(UserInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getUser(), getPullRequest());
-				}
-			}
-			
-			@Override
-			public void onDetach(RequestCycle cycle) {
-			}
-			
-			@Override
-			public void onBeginRequest(RequestCycle cycle) {
-			}
-			
-		});		
+		});
+		
 	}
 
 	@Override

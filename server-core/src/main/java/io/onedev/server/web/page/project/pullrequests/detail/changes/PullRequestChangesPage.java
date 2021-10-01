@@ -593,25 +593,15 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 		return paramsOf(request, state);
 	}
 
-	public static State getState(CodeComment comment) {
+	public static State getState(CodeComment comment, CompareContext compareContext) {
 		PullRequestChangesPage.State state = new PullRequestChangesPage.State();
 		state.commentId = comment.getId();
 		state.mark = comment.getMark();
 		state.pathFilter = comment.getCompareContext().getPathFilter();
 		state.whitespaceOption = comment.getCompareContext().getWhitespaceOption();
-		CompareContext compareContext = comment.getCompareContext();
-		if (compareContext.isLeftSide()) {
-			state.oldCommitHash = compareContext.getCompareCommitHash();
-			state.newCommitHash = comment.getMark().getCommitHash();
-		} else {
-			state.oldCommitHash = comment.getMark().getCommitHash();
-			state.newCommitHash = compareContext.getCompareCommitHash();
-		}
+		state.oldCommitHash = compareContext.getOldCommitHash();
+		state.newCommitHash = compareContext.getNewCommitHash();
 		return state;
-	}
-	
-	public static PageParameters paramsOf(PullRequest request, CodeComment comment) {
-		return paramsOf(request, getState(comment));
 	}
 	
 	public static PageParameters paramsOf(PullRequest request, State state) {
@@ -720,6 +710,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			protected PullRequest getPullRequest() {
 				return requestModel.getObject();
 			}
+
+			@Override
+			protected boolean isContextDifferent(CompareContext compareContext) {
+				return !compareContext.getOldCommitHash().equals(state.oldCommitHash) 
+						|| !compareContext.getNewCommitHash().equals(state.newCommitHash);
+			}
 			
 		};
 		revisionDiff.setOutputMarkupId(true);
@@ -812,30 +808,22 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public void onSaveComment(CodeComment comment) {
 		if (comment.isNew()) {
-			Mark prevMark = comment.getMark();
-			CompareContext prevCompareContext = comment.getCompareContext();
-			try {
-				comment.setMark(Preconditions.checkNotNull(getPermanentMark(prevMark)));
-				if (prevCompareContext.getCompareCommitHash().equals(getComparisonBase().name())) {
-					CompareContext compareContext = new CompareContext();
-					compareContext.setLeftSide(prevCompareContext.isLeftSide());
-					compareContext.setPathFilter(prevCompareContext.getPathFilter());
-					compareContext.setWhitespaceOption(prevCompareContext.getWhitespaceOption());
-					compareContext.setCompareCommitHash(state.oldCommitHash);
-					comment.setCompareContext(compareContext);
-				}
-				OneDev.getInstance(CodeCommentManager.class).save(comment);
-			} finally {
-				comment.setMark(prevMark);
-				comment.setCompareContext(prevCompareContext);
-			}
-		} else {
-			OneDev.getInstance(CodeCommentManager.class).save(comment);
-		}
+			Mark mark = comment.getMark();
+			comment.setMark(Preconditions.checkNotNull(getPermanentMark(mark)));
+			CompareContext compareContext = comment.getCompareContext();
+			compareContext.setOldCommitHash(state.oldCommitHash);
+			compareContext.setNewCommitHash(state.newCommitHash);
+		} 
+		OneDev.getInstance(CodeCommentManager.class).save(comment);
 	}
 	
 	@Override
 	public void onSaveCommentReply(CodeCommentReply reply) {
+		if (reply.isNew()) {
+			CompareContext compareContext = reply.getCompareContext();
+			compareContext.setOldCommitHash(state.oldCommitHash);
+			compareContext.setNewCommitHash(state.newCommitHash);
+		} 
 		OneDev.getInstance(CodeCommentReplyManager.class).save(reply);
 	}
 	
@@ -847,7 +835,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	@Override
 	public PageParameters getParamsAfterEdit() {
 		PageParameters params = getParamsBeforeEdit();
-		params.remove(PARAM_OLD_COMMIT);
+		if (getOpenComment() != null) 
+			params.set(PARAM_OLD_COMMIT, getOpenComment().getMark().getCommitHash());
+		else
+			params.set(PARAM_OLD_COMMIT, state.newCommitHash);
 		params.remove(PARAM_NEW_COMMIT);
 		return params;
 	}
