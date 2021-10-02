@@ -3053,6 +3053,21 @@ public class DataMigrator {
 					if (lastCodeCommentActivityDateElement != null)
 						lastCodeCommentActivityDateElement.detach();
 				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("MAIL")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							String enableStartTLSElement = valueElement.elementTextTrim("enableStartTLS");
+							Element receiveMailSettingElement = valueElement.element("receiveMailSetting");
+							if (receiveMailSettingElement != null)
+								receiveMailSettingElement.addElement("enableSSL").setText(enableStartTLSElement);
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 		for (File file: dataDir.listFiles()) {

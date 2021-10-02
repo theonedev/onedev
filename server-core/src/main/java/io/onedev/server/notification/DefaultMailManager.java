@@ -701,8 +701,8 @@ public class DefaultMailManager implements MailManager {
 					try {
 						MailSetting mailSetting = settingManager.getMailSetting();
 						if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
-							Future<?> future = monitorInbox(mailSetting.getReceiveMailSetting(), mailSetting.isEnableStartTLS(), 
-									mailSetting.getTimeout(), new MessageListener() {
+							Future<?> future = monitorInbox(mailSetting.getReceiveMailSetting(), mailSetting.getTimeout(), 
+									new MessageListener() {
 								
 								@Override
 								public void onReceived(Message message) {
@@ -754,8 +754,7 @@ public class DefaultMailManager implements MailManager {
 	}
 	
 	@Override
-	public Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, boolean enableStartTLS, 
-			int timeout, MessageListener listener) {
+	public Future<?> monitorInbox(ReceiveMailSetting receiveMailSetting, int timeout, MessageListener listener) {
 		return executorService.submit(new Runnable() {
 
 			@Override
@@ -764,7 +763,7 @@ public class DefaultMailManager implements MailManager {
 		        
 		        properties.setProperty("mail.imap.host", receiveMailSetting.getImapHost());
 		        properties.setProperty("mail.imap.port", String.valueOf(receiveMailSetting.getImapPort()));
-		        properties.setProperty("mail.imap.ssl.enable", String.valueOf(enableStartTLS));        
+		        properties.setProperty("mail.imap.ssl.enable", String.valueOf(receiveMailSetting.isEnableSSL()));        
 		 
 		        properties.setProperty("mail.imap.socketFactory.fallback", "false");
 		        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(receiveMailSetting.getImapPort()));

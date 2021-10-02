@@ -122,7 +122,7 @@ public class MailSettingPage extends AdministrationPage {
 						
 					};					
 					futureRef.set(mailManager.monitorInbox(mailSetting.getReceiveMailSetting(), 
-							mailSetting.isEnableStartTLS(), mailSetting.getTimeout(), listener));
+							mailSetting.getTimeout(), listener));
 					
 					EmailAddress emailAddress = EmailAddress.parse(mailSetting.getEmailAddress());
 					String subAddressed = emailAddress.getPrefix() + "+" 

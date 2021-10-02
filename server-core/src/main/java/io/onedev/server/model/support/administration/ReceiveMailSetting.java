@@ -20,6 +20,8 @@ public class ReceiveMailSetting implements Serializable {
 	
 	private String imapPassword;
 	
+	private boolean enableSSL = true;
+	
 	@Editable(order=100, name="IMAP Host")
 	@NotEmpty
 	public String getImapHost() {
@@ -60,6 +62,15 @@ public class ReceiveMailSetting implements Serializable {
 
 	public void setImapPassword(String imapPassword) {
 		this.imapPassword = imapPassword;
+	}
+
+	@Editable(order=700, name="Enable IMAP SSL", description="Whether or not to enable SSL when connect to IMAP server")
+	public boolean isEnableSSL() {
+		return enableSSL;
+	}
+
+	public void setEnableSSL(boolean enableSSL) {
+		this.enableSSL = enableSSL;
 	}
 	
 }

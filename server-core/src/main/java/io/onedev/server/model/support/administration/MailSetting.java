@@ -84,6 +84,16 @@ public class MailSetting implements Serializable {
 		this.emailAddress = emailAddress;
 	}
 
+	@Editable(order=430, name="Enable SMTP StartTLS", description="Whether or not to enable StartTLS "
+			+ "when connect to SMTP server")
+	public boolean isEnableStartTLS() {
+		return enableStartTLS;
+	}
+
+	public void setEnableStartTLS(boolean enableStartTLS) {
+		this.enableStartTLS = enableStartTLS;
+	}
+
 	@Editable(order=450, name="Check Incoming Email", description="Enable this to post issue and pull request comments via email<br>"
 			+ "<b class='text-danger'>NOTE:</b> <a href='https://en.wikipedia.org/wiki/Email_address#Subaddressing' target='_blank'>Sub addressing</a> "
 			+ "needs to be enabled for system email address, as OneDev uses it to track issue and pull request contexts")
@@ -93,16 +103,6 @@ public class MailSetting implements Serializable {
 
 	public void setReceiveMailSetting(ReceiveMailSetting receiveMailSetting) {
 		this.receiveMailSetting = receiveMailSetting;
-	}
-
-	@Editable(order=550, name="Enable SSL/TLS", description="Whether or not to enable SSL/TLS "
-			+ "when interacting with mail server")
-	public boolean isEnableStartTLS() {
-		return enableStartTLS;
-	}
-
-	public void setEnableStartTLS(boolean enableStartTLS) {
-		this.enableStartTLS = enableStartTLS;
 	}
 
 	@Editable(order=600, description="Specify timeout in seconds when communicating with mail server")
