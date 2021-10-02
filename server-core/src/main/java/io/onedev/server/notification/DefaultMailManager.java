@@ -764,9 +764,8 @@ public class DefaultMailManager implements MailManager {
 		        
 		        properties.setProperty("mail.imap.host", receiveMailSetting.getImapHost());
 		        properties.setProperty("mail.imap.port", String.valueOf(receiveMailSetting.getImapPort()));
-		        properties.setProperty("mail.imap.starttls.enable", String.valueOf(enableStartTLS));        
+		        properties.setProperty("mail.imap.ssl.enable", String.valueOf(enableStartTLS));        
 		 
-		        properties.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		        properties.setProperty("mail.imap.socketFactory.fallback", "false");
 		        properties.setProperty("mail.imap.socketFactory.port", String.valueOf(receiveMailSetting.getImapPort()));
 		        

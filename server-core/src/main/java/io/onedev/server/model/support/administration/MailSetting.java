@@ -95,7 +95,7 @@ public class MailSetting implements Serializable {
 		this.receiveMailSetting = receiveMailSetting;
 	}
 
-	@Editable(order=550, name="Enable STARTTLS", description="Whether or not to enable STARTTLS "
+	@Editable(order=550, name="Enable SSL/TLS", description="Whether or not to enable SSL/TLS "
 			+ "when interacting with mail server")
 	public boolean isEnableStartTLS() {
 		return enableStartTLS;
