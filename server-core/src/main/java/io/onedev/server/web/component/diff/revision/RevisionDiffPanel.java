@@ -1245,6 +1245,7 @@ public abstract class RevisionDiffPanel extends Panel {
 				if (blobDiffPanel != null) 
 					blobDiffPanel.onCommentClosed(target);
 				annotationSupport.onCommentClosed(target);
+				target.prependJavaScript("$('body').removeClass('hide-side-info');");
 			}
 			
 		});

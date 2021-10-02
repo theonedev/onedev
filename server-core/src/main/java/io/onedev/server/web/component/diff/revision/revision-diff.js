@@ -18,8 +18,8 @@ onedev.server.revisionDiff = {
 	},
 	initComment: function() {
 		var $comment = $(".revision-diff>.body>.detail>.comment");
-		
 		if ($comment.is(":visible")) {
+			$("body").addClass("hide-side-info");
 			var $commentResizeHandle = $comment.children(".ui-resizable-handle");
 			$comment.resizable({
 				autoHide: false,

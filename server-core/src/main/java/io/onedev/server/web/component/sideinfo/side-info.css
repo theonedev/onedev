@@ -24,7 +24,7 @@ a.side-info {
 	display: none;
 	align-items: center;
 }
-@media(max-width: 1199px) {
+@media(max-width: 1350px) {
 	div.side-info {
 	    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
 		border-left: none;
@@ -48,4 +48,28 @@ a.side-info {
 	a.side-info {
 		display: inline-flex;
 	}
+}
+
+.hide-side-info div.side-info {
+    box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.1);
+	border-left: none;
+	position: fixed;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 1050;
+	margin: 0;
+}
+.hide-side-info div.side-info.closed {
+	right: -360px;
+	box-shadow: none;
+}
+.hide-side-info div.side-info>.header .close {
+	display: flex;
+}
+.hide-side-info div.side-info>.body {
+	overflow: auto;
+}
+.hide-side-info a.side-info {
+	display: inline-flex;
 }
