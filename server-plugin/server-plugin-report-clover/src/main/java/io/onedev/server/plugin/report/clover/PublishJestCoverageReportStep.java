@@ -6,7 +6,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=400, name="Publish Jest Coverage Report")
+@Editable(order=9900, name="Publish Jest Coverage Report")
 public class PublishJestCoverageReportStep extends PublishCloverReportStep {
 
 	private static final long serialVersionUID = 1L;

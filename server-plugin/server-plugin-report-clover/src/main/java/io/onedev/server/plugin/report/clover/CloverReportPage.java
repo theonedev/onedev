@@ -78,16 +78,16 @@ public class CloverReportPage extends BuildReportPage {
 	
 	private WebMarkupContainer itemsContainer;
 	
-	private final IModel<CloverReportData> reportDataModel = new LoadableDetachableModel<CloverReportData>() {
+	private final IModel<CloverReport> reportDataModel = new LoadableDetachableModel<CloverReport>() {
 
 		@Override
-		protected CloverReportData load() {
-			return LockUtils.read(getBuild().getReportCategoryLockKey(PublishCloverReportStep.DIR), new Callable<CloverReportData>() {
+		protected CloverReport load() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(CloverReport.CATEGORY), new Callable<CloverReport>() {
 
 				@Override
-				public CloverReportData call() throws Exception {
-					return CloverReportData.readFrom(new File(
-							getBuild().getReportCategoryDir(PublishCloverReportStep.DIR), getReportName()));
+				public CloverReport call() throws Exception {
+					return CloverReport.readFrom(new File(
+							getBuild().getReportCategoryDir(CloverReport.CATEGORY), getReportName()));
 				}
 				
 			});
@@ -113,7 +113,7 @@ public class CloverReportPage extends BuildReportPage {
 		if (packageName != null)
 			add(new Label("cloverTitle", packageName));
 		else
-			add(new WebMarkupContainer("cloverTitle").setVisible(false));
+			add(new Label("cloverTitle", "Overall"));
 		
 		add(new CoverageInfoPanel<CoverageInfo>("coverages", new LoadableDetachableModel<CoverageInfo>() {
 
@@ -365,7 +365,7 @@ public class CloverReportPage extends BuildReportPage {
 		}
 	}
 	
-	private CloverReportData getReportData() {
+	private CloverReport getReportData() {
 		return reportDataModel.getObject();
 	}
 	

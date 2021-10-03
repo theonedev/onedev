@@ -23,10 +23,6 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DIR = "markdown-reports";
-	
-	public static final String START_PAGE = "$onedev-markdownreport-startpage$";
-	
 	private String startPage;
 	
 	@Editable(order=1100, description="Specify start page of the report relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, for instance: <tt>manual/index.md</tt>")
@@ -47,16 +43,16 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 
 	@Override
 	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(MarkdownReportModule.CATEGORY), getReportName());
 
-		LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<Void>() {
+		LockUtils.write(build.getReportCategoryLockKey(MarkdownReportModule.CATEGORY), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
 				File startPage = new File(filesDir, getStartPage()); 
 				if (startPage.exists()) {
 					FileUtils.createDir(reportDir);
-					File startPageFile = new File(reportDir, START_PAGE);
+					File startPageFile = new File(reportDir, MarkdownReportModule.START_PAGE);
 					FileUtils.writeFile(startPageFile, getStartPage());
 					
 					int baseLen = filesDir.getAbsolutePath().length() + 1;

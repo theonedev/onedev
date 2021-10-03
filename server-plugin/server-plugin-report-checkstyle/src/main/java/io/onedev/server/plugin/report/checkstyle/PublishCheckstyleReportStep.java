@@ -31,12 +31,10 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=310, name="Publish Checkstyle Report")
+@Editable(order=8000, name="Publish Checkstyle Report")
 public class PublishCheckstyleReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String DIR = "checkstyle-reports2";
 	
 	public static final String VIOLATION_FILES = "violation-files";
 	
@@ -64,12 +62,12 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 
 	@Override
 	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(CheckstyleReport.CATEGORY), getReportName());
 		
-		CheckstyleReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CheckstyleReportData>() {
+		CheckstyleReport reportData = LockUtils.write(build.getReportCategoryLockKey(CheckstyleReport.CATEGORY), new Callable<CheckstyleReport>() {
 
 			@Override
-			public CheckstyleReportData call() throws Exception {
+			public CheckstyleReport call() throws Exception {
 				int baseLen = filesDir.getAbsolutePath().length() + 1;
 				SAXReader reader = new SAXReader();
 				
@@ -111,7 +109,7 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 				}
 				
 				if (hasReports)
-					return new CheckstyleReportData(violations);
+					return new CheckstyleReport(violations);
 				else
 					return null;
 			}

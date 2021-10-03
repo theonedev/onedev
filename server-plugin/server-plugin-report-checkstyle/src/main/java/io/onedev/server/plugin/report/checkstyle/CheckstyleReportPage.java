@@ -33,16 +33,16 @@ public class CheckstyleReportPage extends BuildReportPage {
 
 	protected static final int MAX_VIOLATIONS_TO_DISPLAY = 200;
 	
-	private final IModel<CheckstyleReportData> reportDataModel = new LoadableDetachableModel<CheckstyleReportData>() {
+	private final IModel<CheckstyleReport> reportDataModel = new LoadableDetachableModel<CheckstyleReport>() {
 
 		@Override
-		protected CheckstyleReportData load() {
-			return LockUtils.read(getBuild().getReportCategoryLockKey(PublishCheckstyleReportStep.DIR), new Callable<CheckstyleReportData>() {
+		protected CheckstyleReport load() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(CheckstyleReport.CATEGORY), new Callable<CheckstyleReport>() {
 
 				@Override
-				public CheckstyleReportData call() throws Exception {
-					File reportsDir = new File(getBuild().getReportCategoryDir(PublishCheckstyleReportStep.DIR), getReportName());				
-					return CheckstyleReportData.readFrom(reportsDir);
+				public CheckstyleReport call() throws Exception {
+					File reportsDir = new File(getBuild().getReportCategoryDir(CheckstyleReport.CATEGORY), getReportName());				
+					return CheckstyleReport.readFrom(reportsDir);
 				}
 				
 			});
@@ -72,7 +72,7 @@ public class CheckstyleReportPage extends BuildReportPage {
 	}
 	
 	@Nullable
-	protected CheckstyleReportData getReportData() {
+	protected CheckstyleReport getReportData() {
 		return reportDataModel.getObject();
 	}
 

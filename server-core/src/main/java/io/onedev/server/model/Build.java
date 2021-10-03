@@ -317,7 +317,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<JestTestMetric> jestTestMetrics = new ArrayList<>();
+	private Collection<UnitTestMetric> jestTestMetrics = new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<CloverMetric> cloverMetrics = new ArrayList<>();

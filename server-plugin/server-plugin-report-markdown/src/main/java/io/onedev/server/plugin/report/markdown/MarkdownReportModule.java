@@ -30,6 +30,10 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestSummaryP
  */
 public class MarkdownReportModule extends AbstractPluginModule {
 
+	public static final String CATEGORY = "markdown";
+	
+	public static final String START_PAGE = "$onedev-startpage$";
+	
 	@Override
 	protected void configure() {
 		super.configure();
@@ -53,11 +57,11 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(CATEGORY), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						File categoryDir = build.getReportCategoryDir(PublishMarkdownReportStep.DIR);
+						File categoryDir = build.getReportCategoryDir(CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()))
@@ -84,7 +88,7 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			public List<PullRequestSummaryPart> getParts(PullRequest request) {
 				List<PullRequestSummaryPart> parts = new ArrayList<>();
 				for (Build build: request.getCurrentBuilds()) {
-					parts.addAll(LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.DIR), new Callable<List<PullRequestSummaryPart>>() {
+					parts.addAll(LockUtils.read(build.getReportCategoryLockKey(CATEGORY), new Callable<List<PullRequestSummaryPart>>() {
 
 						@Override
 						public List<PullRequestSummaryPart> call() throws Exception {

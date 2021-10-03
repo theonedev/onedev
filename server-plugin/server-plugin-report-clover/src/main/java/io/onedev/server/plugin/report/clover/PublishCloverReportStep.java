@@ -32,14 +32,10 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=410, name="Publish Clover Coverage Report")
+@Editable(order=9910, name="Publish Clover Coverage Report")
 public class PublishCloverReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String DIR = "clover-reports2";
-	
-	public static final String TEST_COUNTS_DIR = "test-count";
 	
 	@Editable(order=100, description="Specify clover coverage xml report file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/site/clover/clover.xml</tt>. "
@@ -65,12 +61,12 @@ public class PublishCloverReportStep extends PublishReportStep {
 
 	@Override
 	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(DIR), getReportName());
+		File reportDir = new File(build.getReportCategoryDir(CloverReport.CATEGORY), getReportName());
 		
-		CloverReportData reportData = LockUtils.write(build.getReportCategoryLockKey(DIR), new Callable<CloverReportData>() {
+		CloverReport reportData = LockUtils.write(build.getReportCategoryLockKey(CloverReport.CATEGORY), new Callable<CloverReport>() {
 
 			@Override
-			public CloverReportData call() throws Exception {
+			public CloverReport call() throws Exception {
 				int baseLen = filesDir.getAbsolutePath().length() + 1;
 				SAXReader reader = new SAXReader();
 				
@@ -156,7 +152,7 @@ public class PublishCloverReportStep extends PublishReportStep {
 									packageTotalLines += fileTotalLines;
 									packageCoveredLines += fileCoveredLines;
 									
-									File testCountFile = new File(reportDir, TEST_COUNTS_DIR + "/" + filePath);
+									File testCountFile = new File(reportDir, CloverReport.TEST_COUNTS_DIR + "/" + filePath);
 									FileUtils.createDir(testCountFile.getParentFile());
 									try (OutputStream os = new FileOutputStream(testCountFile)) {
 										SerializationUtils.serialize((Serializable) lineCoverages, os);
@@ -189,7 +185,7 @@ public class PublishCloverReportStep extends PublishReportStep {
 						new Coverage(totalBranches, coveredBranches), 
 						new Coverage(totalLines, coveredLines));
 				
-				return new CloverReportData(coverageInfo, packageCoverages);
+				return new CloverReport(coverageInfo, packageCoverages);
 			}
 			
 		});

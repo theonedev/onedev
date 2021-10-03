@@ -87,17 +87,17 @@ public class CloverPluginModule extends AbstractPluginModule {
 			
 			@Override
 			public Map<Integer, Integer> getLineCoverages(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportCategoryLockKey(PublishCloverReportStep.DIR), new Callable<Map<Integer, Integer>>() {
+				return LockUtils.read(build.getReportCategoryLockKey(CloverReport.CATEGORY), new Callable<Map<Integer, Integer>>() {
 
 					@Override
 					public Map<Integer, Integer> call() throws Exception {
 						Map<Integer, Integer> coverages = new HashMap<>();
-						File categoryDir = build.getReportCategoryDir(PublishCloverReportStep.DIR);
+						File categoryDir = build.getReportCategoryDir(CloverReport.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
 										&& (reportName == null || reportName.equals(reportDir.getName()))) { 
-									File testCountFile = new File(reportDir, PublishCloverReportStep.TEST_COUNTS_DIR + "/" + blobPath);
+									File testCountFile = new File(reportDir, CloverReport.TEST_COUNTS_DIR + "/" + blobPath);
 									if (testCountFile.exists()) {
 										try (InputStream is = new BufferedInputStream(new FileInputStream(testCountFile))) {
 											@SuppressWarnings("unchecked")
@@ -124,12 +124,12 @@ public class CloverPluginModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(PublishCloverReportStep.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(CloverReport.CATEGORY), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportCategoryDir(PublishCloverReportStep.DIR).exists()) {
-							for (File reportDir: build.getReportCategoryDir(PublishCloverReportStep.DIR).listFiles()) {
+						if (build.getReportCategoryDir(CloverReport.CATEGORY).exists()) {
+							for (File reportDir: build.getReportCategoryDir(CloverReport.CATEGORY).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) { 
 									tabs.add(new BuildReportTab(reportDir.getName(), CloverReportPage.class, 
 											CloverStatsPage.class));

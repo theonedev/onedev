@@ -3082,4 +3082,19 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate67(File dataDir, Stack<Integer> versions) {
+		Map<String, Element> compareContexts = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("JestTestMetric.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.setName("io.onedev.server.model.UnitTestMetric");
+				
+				String newFileName = file.getName().replace("Jest", "Unit");
+				dom.writeToFile(new File(dataDir, newFileName), false);
+				FileUtils.deleteFile(file);
+			}
+		}
+	}
+	
 }

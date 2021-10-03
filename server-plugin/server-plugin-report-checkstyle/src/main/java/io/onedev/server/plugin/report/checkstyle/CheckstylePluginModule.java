@@ -88,13 +88,13 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			
 			@Override
 			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportCategoryLockKey(PublishCheckstyleReportStep.DIR), new Callable<List<CodeProblem>>() {
+				return LockUtils.read(build.getReportCategoryLockKey(CheckstyleReport.CATEGORY), new Callable<List<CodeProblem>>() {
 
 					@SuppressWarnings("unchecked")
 					@Override
 					public List<CodeProblem> call() throws Exception {
 						List<CodeProblem> problems = new ArrayList<>();
-						File categoryDir = build.getReportCategoryDir(PublishCheckstyleReportStep.DIR);
+						File categoryDir = build.getReportCategoryDir(CheckstyleReport.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
@@ -126,12 +126,12 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(PublishCheckstyleReportStep.DIR), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(CheckstyleReport.CATEGORY), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportCategoryDir(PublishCheckstyleReportStep.DIR).exists()) {
-							for (File reportDir: build.getReportCategoryDir(PublishCheckstyleReportStep.DIR).listFiles()) {
+						if (build.getReportCategoryDir(CheckstyleReport.CATEGORY).exists()) {
+							for (File reportDir: build.getReportCategoryDir(CheckstyleReport.CATEGORY).listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
 									tabs.add(new BuildReportTab(reportDir.getName(), CheckstyleFilesPage.class, 
 											CheckstyleRulesPage.class, CheckstyleStatsPage.class));
