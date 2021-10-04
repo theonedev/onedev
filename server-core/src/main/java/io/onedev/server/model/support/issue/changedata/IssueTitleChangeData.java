@@ -52,7 +52,7 @@ public class IssueTitleChangeData extends IssueChangeData {
 		Map<String, String> oldFieldValues = new HashMap<>();
 		oldFieldValues.put("Title", oldTitle);
 		Map<String, String> newFieldValues = new HashMap<>();
-		oldFieldValues.put("Title", newTitle);
+		newFieldValues.put("Title", newTitle);
 		return ActivityDetail.compare(oldFieldValues, newFieldValues, true);
 	}
 	
