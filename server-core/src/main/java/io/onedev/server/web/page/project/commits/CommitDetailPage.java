@@ -53,6 +53,7 @@ import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -845,12 +846,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	}
 
 	@Override
-	public Map<Integer, Integer> getOldCoverages(String blobPath) {
-		Map<Integer, Integer> coverages = new HashMap<>();
+	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
+		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: getBuilds(getCompareWith())) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
-					coverages.merge(key, value, (v1, v2) -> v1+v2);
+					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
 				});
 			}
 		}
@@ -858,12 +859,12 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	}
 
 	@Override
-	public Map<Integer, Integer> getNewCoverages(String blobPath) {
-		Map<Integer, Integer> coverages = new HashMap<>();
+	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
+		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: getBuilds(getCommit())) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
 				contribution.getLineCoverages(build, blobPath, null).forEach((key, value) -> {
-					coverages.merge(key, value, (v1, v2) -> v1+v2);
+					coverages.merge(key, value, (v1, v2) -> v1.mergeWith(v2));
 				});
 			}
 		}

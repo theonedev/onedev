@@ -49,17 +49,23 @@
 .CodeMirror-coverage {
 	margin-right: 2px;
 }
-.CodeMirror-coverage.tested {
+.CodeMirror-coverage.covered {
 	background: var(--success);
 }
-.CodeMirror-coverage.not-tested {
+.CodeMirror-coverage.partially_covered {
 	background: var(--warning);
 }
-.CodeMirror-coverage.tested:hover {
+.CodeMirror-coverage.not_covered {
+	background: var(--danger);
+}
+.CodeMirror-coverage.covered:hover {
 	background: #12827c;
 }
-.CodeMirror-coverage.not-tested:hover {
+.CodeMirror-coverage.partially_covered:hover {
 	background: #b37600;
+}
+.CodeMirror-coverage.not_covered:hover {
+	background: #BF3C4A;
 }
 
 .CodeMirror-comments {

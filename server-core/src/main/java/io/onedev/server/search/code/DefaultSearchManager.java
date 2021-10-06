@@ -51,11 +51,15 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.search.code.query.FileQuery;
+import io.onedev.server.search.code.query.TooGeneralQueryException;
 import io.onedev.server.storage.StorageManager;
 
 @Singleton
 public class DefaultSearchManager implements SearchManager {
 
+	private static final int MAX_BLOB_PATH_QUERY_COUNT = 5;
+	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultSearchManager.class);
 	
 	private final StorageManager storageManager;
@@ -98,7 +102,7 @@ public class DefaultSearchManager implements SearchManager {
 	}
 	
 	@Override
-	public List<QueryHit> search(Project project, ObjectId commit, final BlobQuery query) 
+	public List<QueryHit> search(Project project, ObjectId commitId, final BlobQuery query) 
 			throws InterruptedException {
 		List<QueryHit> hits = new ArrayList<>();
 
@@ -108,7 +112,7 @@ public class DefaultSearchManager implements SearchManager {
 				final IndexSearcher searcher = searcherManager.acquire();
 				try {
 					try (RevWalk revWalk = new RevWalk(project.getRepository())){
-						final RevTree revTree = revWalk.parseCommit(commit).getTree();
+						final RevTree revTree = revWalk.parseCommit(commitId).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
 						searcher.search(query.asLuceneQuery(), new SimpleCollector() {
@@ -270,6 +274,32 @@ public class DefaultSearchManager implements SearchManager {
 			}
 			searcherManagers.clear();
 		}
+	}
+
+	@Override
+	public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+		FileQuery.Builder builder = new FileQuery.Builder();
+		builder.caseSensitive(true);
+		builder.count(MAX_BLOB_PATH_QUERY_COUNT);
+		
+		String blobPath = null;
+		FileQuery query = builder.fileNames(fileName).build();
+		try {
+			for (QueryHit hit: search(project, commit, query)) {
+				if (partialBlobPath == null || hit.getBlobPath().contains(partialBlobPath)) { 
+					if (blobPath == null) {
+						blobPath = hit.getBlobPath();
+					} else {
+						blobPath = null;
+						break;
+					}
+				}
+			}
+		} catch (TooGeneralQueryException e) {
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		return blobPath;
 	}
 
 }

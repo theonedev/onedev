@@ -24,7 +24,7 @@ public interface SearchManager {
 	 * 			TooGeneralQueryException if supplied query term is too general to possibly cause query slow
 	 * 			InterruptedException if the search process is interrupted
 	 */
-	List<QueryHit> search(Project project, ObjectId commit, BlobQuery query) 
+	List<QueryHit> search(Project project, ObjectId commitId, BlobQuery query) 
 			throws InterruptedException, TooGeneralQueryException;
 	
 	@Nullable
@@ -32,5 +32,7 @@ public interface SearchManager {
 	
 	@Nullable
 	List<Symbol> getSymbols(IndexSearcher searcher, ObjectId blobId, String blobPath);
+	
+	String findBlobPath(Project project, ObjectId commit, String fileName, @Nullable String partialBlobPath);
 	
 }

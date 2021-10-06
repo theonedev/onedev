@@ -1,12 +1,9 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.coverage;
 
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
-
-import io.onedev.server.util.Coverage;
-import io.onedev.server.web.component.coveragebar.CoverageBar;
 
 @SuppressWarnings("serial")
  class CoverageInfoPanel<T extends CoverageInfo> extends GenericPanel<T> {

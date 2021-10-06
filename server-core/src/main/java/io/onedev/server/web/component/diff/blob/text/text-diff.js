@@ -867,17 +867,17 @@ onedev.server.textDiff = {
 		
 		$lineNumTd.prepend($trigger);
 	},
-	addCoverateInfo: function($container, leftSide, line, testCount) {
+	addCoverateInfo: function($container, leftSide, line, coverageStatus) {
 		var $lineNumTd = onedev.server.textDiff.getLineNumTd($container, leftSide, line);
-		var cssClass;
+		var cssClass = coverageStatus.toLowerCase();
 		var title;
-		if (testCount > 0) {
-			cssClass = "tested";
-			title = "Tested " + testCount + " times";
-		} else {
-			cssClass = "not-tested";
-			title ="Not covered by any tests";
-		}
+		if (coverageStatus == 'COVERED') 
+			title = "Covered by tests"; 
+		else if (coverageStatus == 'NOT_COVERED')
+			title = "Not covered by any test";
+		else  
+			title = "Partially covered by some tests";
+			
 		$lineNumTd.find(".coverage").addClass(cssClass).attr("title", title);		
 	},
 	addCommentIndicator: function($container, leftSide, line, comments) {

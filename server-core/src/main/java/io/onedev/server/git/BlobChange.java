@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Mark;
@@ -239,9 +240,9 @@ public abstract class BlobChange implements Serializable {
 		
 		Collection<CodeProblem> getNewProblems();
 		
-		Map<Integer, Integer> getOldCoverages();
+		Map<Integer, CoverageStatus> getOldCoverages();
 		
-		Map<Integer, Integer> getNewCoverages();
+		Map<Integer, CoverageStatus> getNewCoverages();
 		
 		DiffPlanarRange getCommentRange(CodeComment comment);
 		

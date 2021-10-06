@@ -95,8 +95,8 @@ public class UnitTestReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test-reports/${report}/test-suites", UnitTestSuitesPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test-reports/${report}/test-cases", UnitTestCasesPage.class));
+				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-suites", UnitTestSuitesPage.class));
+				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/unit-test/${report}/test-cases", UnitTestCasesPage.class));
 				application.mount(new DynamicPathPageMapper("projects/${project}/stats/unit-test", UnitTestStatsPage.class));
 			}
 			

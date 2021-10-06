@@ -154,15 +154,15 @@ public class UnitTestReport implements Serializable {
 		
 		private final String message;
 		
-		private final String sourcePath;
+		private final String blobPath;
 		
 		public TestSuite(String name, Status status, long duration, String message, 
-				@Nullable String sourcePath) {
+				@Nullable String blobPath) {
 			this.name = name;
 			this.status = status;
 			this.duration = duration;
 			this.message = message;
-			this.sourcePath = sourcePath;
+			this.blobPath = blobPath;
 		}
 
 		public String getName() {
@@ -183,8 +183,8 @@ public class UnitTestReport implements Serializable {
 		}
 
 		@Nullable
-		public String getSourcePath() {
-			return sourcePath;
+		public String getBlobPath() {
+			return blobPath;
 		}
 
 		@Nullable

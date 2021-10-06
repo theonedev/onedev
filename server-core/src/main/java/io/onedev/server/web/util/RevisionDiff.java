@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -72,9 +73,9 @@ public class RevisionDiff {
 		
 		Collection<CodeProblem> getNewProblems(String blobPath);
 		
-		Map<Integer, Integer> getOldCoverages(String blobPath);
+		Map<Integer, CoverageStatus> getOldCoverages(String blobPath);
 		
-		Map<Integer, Integer> getNewCoverages(String blobPath);
+		Map<Integer, CoverageStatus> getNewCoverages(String blobPath);
 		
 		void onCommentOpened(AjaxRequestTarget target, CodeComment comment);
 		

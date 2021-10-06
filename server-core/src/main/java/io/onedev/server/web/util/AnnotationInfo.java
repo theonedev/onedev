@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CoverageStatus;
 
 public class AnnotationInfo implements Serializable {
 	
@@ -14,12 +15,12 @@ public class AnnotationInfo implements Serializable {
 	
 	private final Map<Integer, List<CodeProblem>> problems;
 	
-	private final Map<Integer, Integer> coverages;
+	private final Map<Integer, CoverageStatus> coverages;
 	
 	public AnnotationInfo(
 			Map<Integer, List<CodeCommentInfo>> comments, 
 			Map<Integer, List<CodeProblem>> problems,
-			Map<Integer, Integer> coverages) {
+			Map<Integer, CoverageStatus> coverages) {
 		this.comments = comments;
 		this.problems = problems;
 		this.coverages = coverages;
@@ -33,7 +34,7 @@ public class AnnotationInfo implements Serializable {
 		return problems;
 	}
 
-	public Map<Integer, Integer> getCoverages() {
+	public Map<Integer, CoverageStatus> getCoverages() {
 		return coverages;
 	}
 	

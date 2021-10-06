@@ -1,6 +1,9 @@
 package io.onedev.server.plugin.report.junit;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +52,7 @@ public class PublishJUnitReportStep extends PublishUnitTestReportStep {
 	}
 
 	@Override
-	protected UnitTestReport processReports(Build build, File filesDir, TaskLogger logger) {
+	protected UnitTestReport createReport(Build build, File filesDir, TaskLogger logger) {
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 		
@@ -59,9 +62,13 @@ public class PublishJUnitReportStep extends PublishUnitTestReportStep {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing JUnit test report '" + relativePath + "'...");
 			try {
-				testCases.addAll(JUnitReportParser.parse(build, reader.read(file)));
+				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				xml = XmlUtils.stripDoctype(xml);
+				testCases.addAll(JUnitReportParser.parse(build, reader.read(new StringReader(xml))));
 			} catch (DocumentException e) {
 				logger.warning("Ignored test report '" + relativePath + "' as it is not a valid XML");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 		if (!testCases.isEmpty()) 

@@ -49,7 +49,7 @@ public class PublishJestReportStep extends PublishUnitTestReportStep {
 	}
 
 	@Override
-	protected UnitTestReport processReports(Build build, File filesDir, TaskLogger logger) {
+	protected UnitTestReport createReport(Build build, File filesDir, TaskLogger logger) {
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 
 		List<TestCase> testCases = new ArrayList<>();

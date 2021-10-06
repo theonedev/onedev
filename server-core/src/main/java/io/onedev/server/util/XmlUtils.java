@@ -13,5 +13,9 @@ public class XmlUtils {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	public static String stripDoctype(String xml) {
+		return xml.replaceFirst("<!DOCTYPE\\s.*?>", "");
+	}
 
 }

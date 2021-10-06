@@ -48,6 +48,7 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
@@ -939,12 +940,12 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Map<Integer, Integer> getOldCoverages(String blobPath) {
-		Map<Integer, Integer> coverages = new HashMap<>();
+	public Map<Integer, CoverageStatus> getOldCoverages(String blobPath) {
+		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		ObjectId buildCommitId = ObjectId.fromString(state.oldCommitHash);
 		for (Build build: getBuilds(buildCommitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				for (Map.Entry<Integer, Integer> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
+				for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
 					if (!buildCommitId.equals(getComparisonBase())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
 						Integer mappedLine = lineMapping.get(entry.getKey());
@@ -960,7 +961,7 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 	}
 
 	@Override
-	public Map<Integer, Integer> getNewCoverages(String blobPath) {
+	public Map<Integer, CoverageStatus> getNewCoverages(String blobPath) {
 		ObjectId commitId;
 		MergePreview preview = getPullRequest().getMergePreview();
 		if (preview != null && preview.getMergeCommitHash() != null 
@@ -970,10 +971,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 			commitId = ObjectId.fromString(state.newCommitHash);
 		}
 		
-		Map<Integer, Integer> coverages = new HashMap<>();
+		Map<Integer, CoverageStatus> coverages = new HashMap<>();
 		for (Build build: getBuilds(commitId)) {
 			for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) {
-				for (Map.Entry<Integer, Integer> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
+				for (Map.Entry<Integer, CoverageStatus> entry: contribution.getLineCoverages(build, blobPath, null).entrySet()) {
 					if (!state.newCommitHash.equals(commitId.name())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(commitId, 
 								ObjectId.fromString(state.newCommitHash), blobPath);

@@ -372,13 +372,13 @@ public class DefaultIndexManager implements IndexManager {
 	}
 
 	@Override
-	public boolean isIndexed(Project project, ObjectId commit) {
+	public boolean isIndexed(Project project, ObjectId commitId) {
 		File indexDir = storageManager.getProjectIndexDir(project.getId());
 		try (Directory directory = FSDirectory.open(indexDir.toPath())) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
-					return getIndexVersion().equals(getCommitIndexVersion(searcher, commit));
+					return getIndexVersion().equals(getCommitIndexVersion(searcher, commitId));
 				}
 			} else {
 				return false;
@@ -421,13 +421,13 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Sessional
 	@Override
-	public void indexAsync(Project project, ObjectId commit) {
+	public void indexAsync(Project project, ObjectId commitId) {
 		int priority;
 		if (RequestCycle.get() != null)
 			priority = UI_INDEXING_PRIORITY;
 		else
 			priority = BACKEND_INDEXING_PRIORITY;
-		IndexWork work = new IndexWork(priority, commit);
+		IndexWork work = new IndexWork(priority, commitId);
 		batchWorkManager.submit(getBatchWorker(project.getId()), work);
 	}
 	

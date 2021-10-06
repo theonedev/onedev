@@ -108,6 +108,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessBuild;
@@ -166,6 +167,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final TaskScheduler taskScheduler;
 	
+	private final IndexManager indexManager;
+	
 	private final Validator validator;
 	
 	private volatile Thread thread;
@@ -175,7 +178,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
 			PullRequestManager pullRequestManager, ProjectManager projectManager, Validator validator, 
-			TaskScheduler taskScheduler, AgentManager agentManager) {
+			TaskScheduler taskScheduler, AgentManager agentManager, IndexManager indexManager) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -190,6 +193,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
 		this.agentManager = agentManager;
+		this.indexManager = indexManager;
 	}
 
 	private void validateBuildSpec(Project project, ObjectId commitId, BuildSpec buildSpec) {
@@ -579,7 +583,21 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														
 													}).transformProperties(serverStep, Interpolative.class);
 
-													return serverStep.run(buildManager.load(buildId), filesDir, logger);
+													Build build = buildManager.load(buildId);
+
+													// Some steps need the commit to be indexed, for instance various 
+													// report publishing steps need to query the full blob path based 
+													// on a partial path (java package/class etc)
+													indexManager.indexAsync(build.getProject(), build.getCommitId());
+													while (!indexManager.isIndexed(build.getProject(), build.getCommitId())) {
+														try {
+															Thread.sleep(1000);
+														} catch (InterruptedException e) {
+															throw new RuntimeException(e);
+														}
+													}
+													
+													return serverStep.run(build, filesDir, logger);
 												}
 												
 											});

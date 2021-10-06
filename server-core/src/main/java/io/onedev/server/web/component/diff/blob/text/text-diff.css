@@ -36,12 +36,25 @@
 	top: 0;
 	bottom: 0;
 }
-.text-diff>tbody>tr>td.number>.tested {
+.text-diff>tbody>tr>td.number>.covered {
 	background: var(--success);	
 }
-.text-diff>tbody>tr>td.number>.not-tested {
+.text-diff>tbody>tr>td.number>.not_covered {
+	background: var(--danger);	
+}
+.text-diff>tbody>tr>td.number>.partially_covered {
 	background: var(--warning);	
 }
+.text-diff>tbody>tr>td.number>.covered:hover {
+	background: #12827c;	
+}
+.text-diff>tbody>tr>td.number>.not_covered:hover {
+	background: #BF3C4A;	
+}
+.text-diff>tbody>tr>td.number>.partially_covered:hover {
+	background: #b37600;	
+}
+
 
 .text-diff>tbody>tr:not(.expanded)+tr.expanded>td, .text-diff>tbody>tr.expanded+tr:not(.expanded)>td {
 	border-top: 1px solid var(--light-gray);

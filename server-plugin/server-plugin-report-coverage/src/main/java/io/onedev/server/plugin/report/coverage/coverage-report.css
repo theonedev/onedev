@@ -8,7 +8,7 @@
 	color: gray;
 	margin-bottom: 0.3rem;
 }
-.clover-report>.coverages>.coverages>.coverage>.label {
+.coverage-report>.coverages>.coverages>.coverage>.label {
 	font-size: 1rem;
 	color: inherit;
 	margin-bottom: 0.5rem;

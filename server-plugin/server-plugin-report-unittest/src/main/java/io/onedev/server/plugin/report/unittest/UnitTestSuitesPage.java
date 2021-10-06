@@ -300,8 +300,8 @@ public class UnitTestSuitesPage extends UnitTestReportPage {
 						UnitTestCasesPage.class, params);
 				link.add(new Label("label", testSuite.getName()));
 				
-				if (testSuite.getSourcePath() != null) {
-					BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getSourcePath(), 
+				if (testSuite.getBlobPath() != null) {
+					BlobIdent blobIdent = new BlobIdent(getBuild().getCommitHash(), testSuite.getBlobPath(), 
 							FileMode.REGULAR_FILE.getBits());
 					if (SecurityUtils.canReadCode(getProject()) && getProject().getBlob(blobIdent, false) != null) {
 						item.add(new ViewStateAwarePageLink<Void>("viewSource", ProjectBlobPage.class, 

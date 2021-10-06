@@ -64,6 +64,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -146,7 +147,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			Map<CodeComment, PlanarRange> comments = codeCommentManager.queryInHistory(project, commitId, path);
 
 			Set<CodeProblem> problems = new HashSet<>();
-			Map<Integer, Integer> coverages = new HashMap<>();
+			Map<Integer, CoverageStatus> coverages = new HashMap<>();
 			
 			List<String> lines = context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines();
 			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
@@ -157,7 +158,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				}
 				for (LineCoverageContribution contribution: OneDev.getExtensions(LineCoverageContribution.class)) { 
 					contribution.getLineCoverages(build, path, context.getCoverageReport()).forEach((key, value)->{
-						coverages.merge(key, value, (v1, v2)->v1+v2);
+						coverages.merge(key, value, (v1, v2)->v1.mergeWith(v2));
 					});
 				}
 			}

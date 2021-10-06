@@ -3093,6 +3093,14 @@ public class DataMigrator {
 				String newFileName = file.getName().replace("Jest", "Unit");
 				dom.writeToFile(new File(dataDir, newFileName), false);
 				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("CloverMetric.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.setName("io.onedev.server.model.CoverageMetric");
+				
+				String newFileName = file.getName().replace("Clover", "Coverage");
+				dom.writeToFile(new File(dataDir, newFileName), false);
+				FileUtils.deleteFile(file);
 			}
 		}
 	}

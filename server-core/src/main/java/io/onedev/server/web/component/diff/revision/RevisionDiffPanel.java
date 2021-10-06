@@ -65,6 +65,7 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.code.CodeProblem;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
@@ -1018,14 +1019,14 @@ public abstract class RevisionDiffPanel extends Panel {
 								return newProblems;
 							}
 
-							private transient Map<Integer, Integer> oldCoverages;
+							private transient Map<Integer, CoverageStatus> oldCoverages;
 							
 							@Override
-							public Map<Integer, Integer> getOldCoverages() {
+							public Map<Integer, CoverageStatus> getOldCoverages() {
 								if (oldCoverages == null) {
 									oldCoverages = new HashMap<>();
 									if (getOldBlobIdent().path != null) {
-										for (Map.Entry<Integer, Integer> entry: annotationSupport.getOldCoverages(getOldBlobIdent().path).entrySet()) {
+										for (Map.Entry<Integer, CoverageStatus> entry: annotationSupport.getOldCoverages(getOldBlobIdent().path).entrySet()) {
 											if (isVisible(true, entry.getKey()))
 												oldCoverages.put(entry.getKey(), entry.getValue());
 										}
@@ -1034,14 +1035,14 @@ public abstract class RevisionDiffPanel extends Panel {
 								return oldCoverages;
 							}
 
-							private transient Map<Integer, Integer> newCoverages;
+							private transient Map<Integer, CoverageStatus> newCoverages;
 							
 							@Override
-							public Map<Integer, Integer> getNewCoverages() {
+							public Map<Integer, CoverageStatus> getNewCoverages() {
 								if (newCoverages == null) {
 									newCoverages = new HashMap<>();
 									if (getNewBlobIdent().path != null) {
-										for (Map.Entry<Integer, Integer> entry: annotationSupport.getNewCoverages(getNewBlobIdent().path).entrySet()) {
+										for (Map.Entry<Integer, CoverageStatus> entry: annotationSupport.getNewCoverages(getNewBlobIdent().path).entrySet()) {
 											if (isVisible(false, entry.getKey()))
 												newCoverages.put(entry.getKey(), entry.getValue());
 										}

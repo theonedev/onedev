@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.coverage;
 
 import java.io.File;
 import java.io.Serializable;
@@ -58,7 +58,7 @@ import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class CloverReportPage extends BuildReportPage {
+public class CoverageReportPage extends BuildReportPage {
 
 	private static final String PARAM_PACKAGE = "package";
 	
@@ -78,16 +78,16 @@ public class CloverReportPage extends BuildReportPage {
 	
 	private WebMarkupContainer itemsContainer;
 	
-	private final IModel<CloverReport> reportDataModel = new LoadableDetachableModel<CloverReport>() {
+	private final IModel<CoverageReport> reportDataModel = new LoadableDetachableModel<CoverageReport>() {
 
 		@Override
-		protected CloverReport load() {
-			return LockUtils.read(getBuild().getReportCategoryLockKey(CloverReport.CATEGORY), new Callable<CloverReport>() {
+		protected CoverageReport load() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(CoverageReport.CATEGORY), new Callable<CoverageReport>() {
 
 				@Override
-				public CloverReport call() throws Exception {
-					return CloverReport.readFrom(new File(
-							getBuild().getReportCategoryDir(CloverReport.CATEGORY), getReportName()));
+				public CoverageReport call() throws Exception {
+					return CoverageReport.readFrom(new File(
+							getBuild().getReportCategoryDir(CoverageReport.CATEGORY), getReportName()));
 				}
 				
 			});
@@ -96,14 +96,14 @@ public class CloverReportPage extends BuildReportPage {
 		
 	};
 	
-	public CloverReportPage(PageParameters params) {
+	public CoverageReportPage(PageParameters params) {
 		super(params);
 		
 		packageName = params.get(PARAM_PACKAGE).toOptionalString();
 		state.filter = params.get(PARAM_FILTER).toOptionalString();
 		String orderByString = params.get(PARAM_ORDER_BY).toOptionalString();
 		if (orderByString != null)
-			state.orderBy = CloverOrderBy.valueOf(orderByString);
+			state.orderBy = CoverageOrderBy.valueOf(orderByString);
 	}
 	
 	@Override
@@ -111,9 +111,9 @@ public class CloverReportPage extends BuildReportPage {
 		super.onInitialize();
 
 		if (packageName != null)
-			add(new Label("cloverTitle", packageName));
+			add(new Label("coverageTitle", packageName));
 		else
-			add(new Label("cloverTitle", "Overall"));
+			add(new Label("coverageTitle", "Overall"));
 		
 		add(new CoverageInfoPanel<CoverageInfo>("coverages", new LoadableDetachableModel<CoverageInfo>() {
 
@@ -217,7 +217,7 @@ public class CloverReportPage extends BuildReportPage {
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
-				for (CloverOrderBy orderBy: CloverOrderBy.values()) {
+				for (CoverageOrderBy orderBy: CoverageOrderBy.values()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
@@ -328,14 +328,14 @@ public class CloverReportPage extends BuildReportPage {
 				Link<Void> nameLink;
 				if (coverageInfo instanceof PackageCoverageInfo) {
 					State state = new State();
-					state.orderBy = CloverReportPage.this.state.orderBy;
+					state.orderBy = CoverageReportPage.this.state.orderBy;
 					PageParameters params = paramsOf(getBuild(), getReportName(), 
 							coverageInfo.getName(), state);
-					nameLink = new BookmarkablePageLink<Void>("name", CloverReportPage.class, params);
+					nameLink = new BookmarkablePageLink<Void>("name", CoverageReportPage.class, params);
 				} else {
 					ProjectBlobPage.State state = new ProjectBlobPage.State();
 					state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 
-							((FileCoverageInfo) coverageInfo).getPath(), FileMode.REGULAR_FILE.getBits());
+							((FileCoverageInfo) coverageInfo).getBlobPath(), FileMode.REGULAR_FILE.getBits());
 					state.coverageReport = getReportName();
 					PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 					nameLink = new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, params);
@@ -365,7 +365,7 @@ public class CloverReportPage extends BuildReportPage {
 		}
 	}
 	
-	private CloverReport getReportData() {
+	private CoverageReport getReportData() {
 		return reportDataModel.getObject();
 	}
 	
@@ -378,11 +378,11 @@ public class CloverReportPage extends BuildReportPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CloverReportCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new CoverageReportCssResourceReference()));
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		CharSequence url = urlFor(CloverReportPage.class, paramsOf(getBuild(), getReportName(), packageName, state));
+		CharSequence url = urlFor(CoverageReportPage.class, paramsOf(getBuild(), getReportName(), packageName, state));
 		pushState(target, url.toString(), state);
 	}
 	
@@ -412,7 +412,7 @@ public class CloverReportPage extends BuildReportPage {
 		@Nullable
 		public String filter;
 		
-		public CloverOrderBy orderBy = CloverOrderBy.DEFAULT;
+		public CoverageOrderBy orderBy = CoverageOrderBy.DEFAULT;
 		
 	}
 	

@@ -13,14 +13,9 @@ import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestCase;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.TestSuite;
 import io.onedev.server.search.code.SearchManager;
-import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.server.search.code.query.FileQuery;
-import io.onedev.server.search.code.query.TooGeneralQueryException;
 
 public class JUnitReportParser {
 
-	private static final int MAX_QUERY_COUNT = 5;
-	
 	public static List<TestCase> parse(Build build, Document doc) {
 		List<TestCase> testCases = new ArrayList<>();
 		Element testSuiteElement = doc.getRootElement();
@@ -43,36 +38,18 @@ public class JUnitReportParser {
 		else
 			status = Status.PASSED;
 		
-		SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-		FileQuery.Builder builder = new FileQuery.Builder();
-		builder.caseSensitive(true);
-		builder.count(MAX_QUERY_COUNT);
-		
-		String sourcePath = null;
 		String fileName;
 		if (name.contains("."))
 			fileName = StringUtils.substringAfterLast(name, ".") + ".java";
 		else
 			fileName = name + ".java";
 		
-		FileQuery query = builder.fileNames(fileName).build();
-		try {
-			for (QueryHit hit: searchManager.search(build.getProject(), build.getCommitId(), query)) {
-				if (hit.getBlobPath().replace("/", ".").endsWith(fileName)) { 
-					if (sourcePath == null) {
-						sourcePath = hit.getBlobPath();
-					} else {
-						sourcePath = null;
-						break;
-					}
-				}
-			}
-		} catch (TooGeneralQueryException e) {
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+		String partialBlobPath = name.replace('.', '/') + ".java";
+
+		String blobPath = OneDev.getInstance(SearchManager.class)
+				.findBlobPath(build.getProject(), build.getCommitId(), fileName, partialBlobPath);
 		
-		TestSuite testSuite = new TestSuite(name, status, duration, null, sourcePath);
+		TestSuite testSuite = new TestSuite(name, status, duration, null, blobPath);
 		
 		for (Element testCaseElement: testSuiteElement.elements("testcase")) {
 			name = testCaseElement.attributeValue("name");

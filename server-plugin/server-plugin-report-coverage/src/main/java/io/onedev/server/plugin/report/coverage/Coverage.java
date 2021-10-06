@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.plugin.report.coverage;
 
 import java.io.Serializable;
 
@@ -32,7 +32,14 @@ public class Coverage implements Serializable {
 	
 	@Override
 	public String toString() {
-		return covered + "/" + total;
+		if (total != 0)
+			return covered + "/" + total;
+		else
+			return "(no data)";
+	}
+	
+	public Coverage mergeWith(Coverage coverage) {
+		return new Coverage(total + coverage.total, covered + coverage.covered);
 	}
 	
 }

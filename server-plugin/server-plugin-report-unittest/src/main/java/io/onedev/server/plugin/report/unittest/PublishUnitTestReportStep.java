@@ -25,15 +25,15 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(UnitTestReport.CATEGORY), getReportName());
 
-		UnitTestReport reportData = LockUtils.write(build.getReportCategoryLockKey(UnitTestReport.CATEGORY), new Callable<UnitTestReport>() {
+		UnitTestReport report = LockUtils.write(build.getReportCategoryLockKey(UnitTestReport.CATEGORY), new Callable<UnitTestReport>() {
 
 			@Override
 			public UnitTestReport call() throws Exception {
-				UnitTestReport reportData = processReports(build, filesDir, logger);
-				if (reportData != null) {
+				UnitTestReport report = createReport(build, filesDir, logger);
+				if (report != null) {
 					FileUtils.createDir(reportDir);
-					reportData.writeTo(reportDir);
-					return reportData;
+					report.writeTo(reportDir);
+					return report;
 				} else {
 					return null;
 				}
@@ -41,15 +41,15 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 			
 		});
 		
-		if (reportData != null) {
+		if (report != null) {
 			UnitTestMetric metric = new UnitTestMetric();
 			metric.setBuild(build);
 			metric.setReportName(getReportName());
-			metric.setTestCaseSuccessRate(reportData.getTestCaseSuccessRate());
-			metric.setTestSuiteSuccessRate(reportData.getTestSuiteSuccessRate());
-			metric.setNumOfTestCases(reportData.getTestCases().size());
-			metric.setNumOfTestSuites(reportData.getTestSuites().size());
-			metric.setTotalTestDuration(reportData.getTestDuration());
+			metric.setTestCaseSuccessRate(report.getTestCaseSuccessRate());
+			metric.setTestSuiteSuccessRate(report.getTestSuiteSuccessRate());
+			metric.setNumOfTestCases(report.getTestCases().size());
+			metric.setNumOfTestSuites(report.getTestSuites().size());
+			metric.setTotalTestDuration(report.getTestDuration());
 			OneDev.getInstance(Dao.class).persist(metric);
 		}	
 		
@@ -57,6 +57,6 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	}
 
 	@Nullable
-	protected abstract UnitTestReport processReports(Build build, File filesDir, TaskLogger logger);
+	protected abstract UnitTestReport createReport(Build build, File filesDir, TaskLogger logger);
 	
 }

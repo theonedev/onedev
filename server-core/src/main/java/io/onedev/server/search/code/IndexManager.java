@@ -10,9 +10,9 @@ import io.onedev.server.model.Project;
 
 public interface IndexManager {
 	
-	void indexAsync(Project project, ObjectId commit);
+	void indexAsync(Project project, ObjectId commitId);
 	
-	boolean isIndexed(Project project, ObjectId commit);
+	boolean isIndexed(Project project, ObjectId commitId);
 	
 	String getIndexVersion();
 	

@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.coverage;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -13,13 +13,13 @@ import java.util.List;
 
 import org.apache.commons.lang.SerializationUtils;
 
-public class CloverReport implements Serializable {
+public class CoverageReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String CATEGORY = "clover";
+	public static final String CATEGORY = "coverage";
 	
-	public static final String TEST_COUNTS_DIR = "test-count";
+	public static final String LINE_COVERAGES_DIR = "line-coverages";
 	
 	private static final String FILE_NAME = "report.ser";
 	
@@ -27,7 +27,7 @@ public class CloverReport implements Serializable {
 	
 	private final List<PackageCoverageInfo> packageCoverages;
 	
-	public CloverReport(CoverageInfo coverages, List<PackageCoverageInfo> packageCoverages) {
+	public CoverageReport(CoverageInfo coverages, List<PackageCoverageInfo> packageCoverages) {
 		this.coverages = coverages;
 		this.packageCoverages = packageCoverages;
 	}
@@ -40,10 +40,10 @@ public class CloverReport implements Serializable {
 		return packageCoverages;
 	}
 	
-	public static CloverReport readFrom(File reportDir) {
+	public static CoverageReport readFrom(File reportDir) {
 		File dataFile = new File(reportDir, FILE_NAME);
 		try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
-			return (CloverReport) SerializationUtils.deserialize(is);
+			return (CoverageReport) SerializationUtils.deserialize(is);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

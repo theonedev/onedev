@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 
 import io.onedev.commons.jsymbol.Symbol;
@@ -25,7 +24,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.plugin.report.unittest.UnitTestReport;
 import io.onedev.server.plugin.report.unittest.UnitTestReport.Status;
 import io.onedev.server.search.code.SearchManager;
-import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TooGeneralQueryException;
@@ -40,7 +38,7 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 				@Override
 				public List<QueryHit> search(Project project, ObjectId commit, BlobQuery query)
 						throws InterruptedException, TooGeneralQueryException {
-					return Lists.newArrayList(new FileHit("Test.java", null));
+					return null;
 				}
 
 				@Override
@@ -51,6 +49,11 @@ public class JUnitReportParserTest extends AppLoaderMocker {
 				@Override
 				public List<Symbol> getSymbols(IndexSearcher searcher, ObjectId blobId, String blobPath) {
 					return null;
+				}
+
+				@Override
+				public String findBlobPath(Project project, ObjectId commit, String fileName, String partialBlobPath) {
+					return "Test.java";
 				}
 
 			});

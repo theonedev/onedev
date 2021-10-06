@@ -1,12 +1,10 @@
-package io.onedev.server.web.component.coveragebar;
+package io.onedev.server.plugin.report.coverage;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-
-import io.onedev.server.util.Coverage;
 
 @SuppressWarnings("serial")
 public class CoverageBar extends GenericPanel<Coverage> {

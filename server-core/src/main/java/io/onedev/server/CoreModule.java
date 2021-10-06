@@ -94,6 +94,7 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
 import io.onedev.server.code.CodeProblem;
 import io.onedev.server.code.CodeProblemContribution;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.code.LineCoverageContribution;
 import io.onedev.server.entitymanager.AgentAttributeManager;
 import io.onedev.server.entitymanager.AgentManager;
@@ -510,7 +511,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(LineCoverageContribution.class, new LineCoverageContribution() {
 			
 			@Override
-			public Map<Integer, Integer> getLineCoverages(Build build, String blobPath, String reportName) {
+			public Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, String reportName) {
 				return new HashMap<>();
 			}
 			

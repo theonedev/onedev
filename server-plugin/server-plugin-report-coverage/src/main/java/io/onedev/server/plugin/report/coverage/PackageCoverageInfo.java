@@ -1,8 +1,6 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.coverage;
 
 import java.util.List;
-
-import io.onedev.server.util.Coverage;
 
 public class PackageCoverageInfo extends NamedCoverageInfo {
 
@@ -18,6 +16,13 @@ public class PackageCoverageInfo extends NamedCoverageInfo {
 		this.fileCoverages = fileCoverages;
 	}
 
+	public PackageCoverageInfo(String name, CoverageInfo coverageInfo,
+			List<FileCoverageInfo> fileCoverages) {
+		super(name, coverageInfo.getStatementCoverage(), coverageInfo.getMethodCoverage(), 
+				coverageInfo.getBranchCoverage(), coverageInfo.getLineCoverage());
+		this.fileCoverages = fileCoverages;
+	}
+	
 	public List<FileCoverageInfo> getFileCoverages() {
 		return fileCoverages;
 	}

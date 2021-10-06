@@ -1,8 +1,6 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.coverage;
 
 import java.io.Serializable;
-
-import io.onedev.server.util.Coverage;
 
 public class CoverageInfo implements Serializable {
 
@@ -39,6 +37,14 @@ public class CoverageInfo implements Serializable {
 
 	public Coverage getLineCoverage() {
 		return lineCoverage;
+	}
+	
+	public CoverageInfo mergeWith(CoverageInfo coverageInfo) {
+		return new CoverageInfo(
+				statementCoverage.mergeWith(coverageInfo.statementCoverage), 
+				methodCoverage.mergeWith(coverageInfo.methodCoverage), 
+				branchCoverage.mergeWith(coverageInfo.branchCoverage), 
+				lineCoverage.mergeWith(coverageInfo.lineCoverage));
 	}
 	
 }

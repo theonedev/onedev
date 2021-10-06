@@ -320,7 +320,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Collection<UnitTestMetric> jestTestMetrics = new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<CloverMetric> cloverMetrics = new ArrayList<>();
+	private Collection<CoverageMetric> cloverMetrics = new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<CheckstyleMetric> checkstyleMetrics = new ArrayList<>();

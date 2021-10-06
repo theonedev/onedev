@@ -1,39 +1,39 @@
 package io.onedev.server.plugin.report.clover;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.step.PublishReportStep;
+import io.onedev.server.code.CoverageStatus;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.CloverMetric;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.Coverage;
+import io.onedev.server.plugin.report.coverage.Coverage;
+import io.onedev.server.plugin.report.coverage.CoverageInfo;
+import io.onedev.server.plugin.report.coverage.CoverageReport;
+import io.onedev.server.plugin.report.coverage.FileCoverageInfo;
+import io.onedev.server.plugin.report.coverage.PackageCoverageInfo;
+import io.onedev.server.plugin.report.coverage.PublishCoverageReportStep;
+import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable(order=9910, name="Publish Clover Coverage Report")
-public class PublishCloverReportStep extends PublishReportStep {
+public class PublishCloverReportStep extends PublishCoverageReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -60,158 +60,157 @@ public class PublishCloverReportStep extends PublishReportStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(CloverReport.CATEGORY), getReportName());
+	protected CoverageReport createReport(Build build, File filesDir, File reportDir, TaskLogger logger) {
+		int baseLen = filesDir.getAbsolutePath().length() + 1;
+		SAXReader reader = new SAXReader();
+		XmlUtils.disallowDocTypeDecl(reader);
+
+		int totalStatements = 0;
+		int coveredStatements = 0;
+		int totalMethods = 0;
+		int coveredMethods = 0;
+		int totalBranches = 0;
+		int coveredBranches = 0;
+		int totalLines = 0;
+		int coveredLines = 0;
 		
-		CloverReport reportData = LockUtils.write(build.getReportCategoryLockKey(CloverReport.CATEGORY), new Callable<CloverReport>() {
+		List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
+		
+		for (File file: getPatternSet().listFiles(filesDir)) {
+			String relativePath = file.getAbsolutePath().substring(baseLen);
+			logger.log("Processing clover report '" + relativePath + "'...");
+			Document doc;
+			try {
+				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
+				for (Element projectElement: doc.getRootElement().elements("project")) {
+					Element metricsElement = projectElement.element("metrics");
+					
+					totalStatements += Integer.parseInt(metricsElement.attributeValue("statements"));
+					totalMethods += Integer.parseInt(metricsElement.attributeValue("methods"));
+					totalBranches += Integer.parseInt(metricsElement.attributeValue("conditionals"));
+					
+					coveredStatements += Integer.parseInt(metricsElement.attributeValue("coveredstatements"));
+					coveredMethods += Integer.parseInt(metricsElement.attributeValue("coveredmethods"));
+					coveredBranches += Integer.parseInt(metricsElement.attributeValue("coveredconditionals"));
+					
+					for (Element packageElement: projectElement.elements("package")) {
+						String packageName = packageElement.attributeValue("name");
 
-			@Override
-			public CloverReport call() throws Exception {
-				int baseLen = filesDir.getAbsolutePath().length() + 1;
-				SAXReader reader = new SAXReader();
-				
-				// Prevent XXE attack as the xml might be provided by malicious users
-				reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-
-				int totalStatements = 0;
-				int coveredStatements = 0;
-				int totalMethods = 0;
-				int coveredMethods = 0;
-				int totalBranches = 0;
-				int coveredBranches = 0;
-				int totalLines = 0;
-				int coveredLines = 0;
-
-				List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
-				
-				for (File file: getPatternSet().listFiles(filesDir)) {
-					logger.log("Processing clover report: " + file.getAbsolutePath().substring(baseLen));
-					Document doc = reader.read(file);
-					for (Element projectElement: doc.getRootElement().elements("project")) {
-						Element metricsElement = projectElement.element("metrics");
+						metricsElement = packageElement.element("metrics");
 						
-						totalStatements += Integer.parseInt(metricsElement.attributeValue("statements"));
-						totalMethods += Integer.parseInt(metricsElement.attributeValue("methods"));
-						totalBranches += Integer.parseInt(metricsElement.attributeValue("conditionals"));
-						
-						coveredStatements += Integer.parseInt(metricsElement.attributeValue("coveredstatements"));
-						coveredMethods += Integer.parseInt(metricsElement.attributeValue("coveredmethods"));
-						coveredBranches += Integer.parseInt(metricsElement.attributeValue("coveredconditionals"));
-						
-						for (Element packageElement: projectElement.elements("package")) {
-							String packageName = packageElement.attributeValue("name");
+						Coverage packageStatementCoverage = new Coverage(
+								Integer.parseInt(metricsElement.attributeValue("statements")),
+								Integer.parseInt(metricsElement.attributeValue("coveredstatements")));
+						Coverage packageMethodCoverage = new Coverage(
+								Integer.parseInt(metricsElement.attributeValue("methods")),
+								Integer.parseInt(metricsElement.attributeValue("coveredmethods")));
+						Coverage packageBranchCoverage = new Coverage(
+								Integer.parseInt(metricsElement.attributeValue("conditionals")), 
+								Integer.parseInt(metricsElement.attributeValue("coveredconditionals")));
 
-							metricsElement = packageElement.element("metrics");
-							
-							Coverage packageStatementCoverage = new Coverage(
-									Integer.parseInt(metricsElement.attributeValue("statements")),
-									Integer.parseInt(metricsElement.attributeValue("coveredstatements")));
-							Coverage packageMethodCoverage = new Coverage(
-									Integer.parseInt(metricsElement.attributeValue("methods")),
-									Integer.parseInt(metricsElement.attributeValue("coveredmethods")));
-							Coverage packageBranchCoverage = new Coverage(
-									Integer.parseInt(metricsElement.attributeValue("conditionals")), 
-									Integer.parseInt(metricsElement.attributeValue("coveredconditionals")));
+						int packageTotalLines = 0;
+						int packageCoveredLines = 0;
+					
+						List<FileCoverageInfo> fileCoverages = new ArrayList<>();
+						for (Element fileElement: packageElement.elements("file")) {
+							String fileName = fileElement.attributeValue("name");
+							String blobPath = fileElement.attributeValue("path");
+							if (build.getJobWorkspace() != null && blobPath.startsWith(build.getJobWorkspace())) { 
+								blobPath = blobPath.substring(build.getJobWorkspace().length()+1);
 
-							int packageTotalLines = 0;
-							int packageCoveredLines = 0;
-						
-							List<FileCoverageInfo> fileCoverages = new ArrayList<>();
-							for (Element fileElement: packageElement.elements("file")) {
-								String fileName = fileElement.attributeValue("name");
-								String filePath = fileElement.attributeValue("path");
-								if (build.getJobWorkspace() != null && filePath.startsWith(build.getJobWorkspace())) { 
-									filePath = filePath.substring(build.getJobWorkspace().length()+1);
-
-									metricsElement = fileElement.element("metrics");
+								metricsElement = fileElement.element("metrics");
+								
+								Coverage fileStatementCoverage = new Coverage(
+										Integer.parseInt(metricsElement.attributeValue("statements")),
+										Integer.parseInt(metricsElement.attributeValue("coveredstatements")));
+								Coverage fileMethodCoverage = new Coverage(
+										Integer.parseInt(metricsElement.attributeValue("methods")),
+										Integer.parseInt(metricsElement.attributeValue("coveredmethods")));
+								Coverage fileBranchCoverage = new Coverage(
+										Integer.parseInt(metricsElement.attributeValue("conditionals")), 
+										Integer.parseInt(metricsElement.attributeValue("coveredconditionals")));
+								
+								Map<Integer, CoverageStatus> lineCoverages = new HashMap<>();
+								for (Element lineElement: fileElement.elements("line")) {
+									int lineNum = Integer.parseInt(lineElement.attributeValue("num")) - 1;
+									CoverageStatus prevStatus = lineCoverages.get(lineNum);
 									
-									Coverage fileStatementCoverage = new Coverage(
-											Integer.parseInt(metricsElement.attributeValue("statements")),
-											Integer.parseInt(metricsElement.attributeValue("coveredstatements")));
-									Coverage fileMethodCoverage = new Coverage(
-											Integer.parseInt(metricsElement.attributeValue("methods")),
-											Integer.parseInt(metricsElement.attributeValue("coveredmethods")));
-									Coverage fileBranchCoverage = new Coverage(
-											Integer.parseInt(metricsElement.attributeValue("conditionals")), 
-											Integer.parseInt(metricsElement.attributeValue("coveredconditionals")));
+									String countStr = lineElement.attributeValue("count");
+									if (countStr != null)
+										lineCoverages.put(lineNum, getCoverageStatus(prevStatus, countStr));
 									
-									Map<Integer, Integer> lineCoverages = new HashMap<>();
-									for (Element lineElement: fileElement.elements("line")) {
-										int lineNum = Integer.parseInt(lineElement.attributeValue("num")) - 1;
-										String testCountStr = lineElement.attributeValue("count");
-										if (testCountStr != null) {
-											int testCount = Integer.parseInt(testCountStr);
-											lineCoverages.merge(lineNum, testCount, (v1, v2)->v1+v2);
-										}
-									}
-									int fileTotalLines = lineCoverages.size();
-									int fileCoveredLines = (int) lineCoverages.entrySet().stream().filter(it->it.getValue()!=0).count();
+									countStr = lineElement.attributeValue("truecount");
+									if (countStr != null)
+										lineCoverages.put(lineNum, getCoverageStatus(prevStatus, countStr));
 									
-									Coverage fileLineCoverage = new Coverage(fileTotalLines, fileCoveredLines);
-									
-									packageTotalLines += fileTotalLines;
-									packageCoveredLines += fileCoveredLines;
-									
-									File testCountFile = new File(reportDir, CloverReport.TEST_COUNTS_DIR + "/" + filePath);
-									FileUtils.createDir(testCountFile.getParentFile());
-									try (OutputStream os = new FileOutputStream(testCountFile)) {
-										SerializationUtils.serialize((Serializable) lineCoverages, os);
-									} catch (IOException e) {
-										throw new RuntimeException(e);
-									};
-									fileCoverages.add(new FileCoverageInfo(fileName, 
-											fileStatementCoverage, fileMethodCoverage, fileBranchCoverage, fileLineCoverage, 
-											filePath));
+									countStr = lineElement.attributeValue("falsecount");
+									if (countStr != null)
+										lineCoverages.put(lineNum, getCoverageStatus(prevStatus, countStr));
 								}
+								int fileTotalLines = lineCoverages.size();
+								int fileCoveredLines = (int) lineCoverages.entrySet().stream().filter(it->it.getValue()!=CoverageStatus.NOT_COVERED).count();
+								
+								Coverage fileLineCoverage = new Coverage(fileTotalLines, fileCoveredLines);
+								
+								packageTotalLines += fileTotalLines;
+								packageCoveredLines += fileCoveredLines;
+								
+								writeLineCoverages(build, blobPath, lineCoverages);
+								
+								fileCoverages.add(new FileCoverageInfo(fileName, 
+										fileStatementCoverage, fileMethodCoverage, fileBranchCoverage, fileLineCoverage, 
+										blobPath));
 							}
-							
-							Coverage packageLineCoverage = new Coverage(packageTotalLines, packageCoveredLines);
-							
-							packageCoverages.add(new PackageCoverageInfo(
-									packageName,
-									packageStatementCoverage, packageMethodCoverage, 
-									packageBranchCoverage, packageLineCoverage, 
-									fileCoverages));
-							
-							totalLines += packageTotalLines;
-							coveredLines += packageCoveredLines;
 						}
+						
+						Coverage packageLineCoverage = new Coverage(packageTotalLines, packageCoveredLines);
+						
+						packageCoverages.add(new PackageCoverageInfo(
+								packageName, packageStatementCoverage, packageMethodCoverage, 
+								packageBranchCoverage, packageLineCoverage, fileCoverages));
+						
+						totalLines += packageTotalLines;
+						coveredLines += packageCoveredLines;
 					}
 				}
-				
-				CoverageInfo coverageInfo = new CoverageInfo(
-						new Coverage(totalStatements, coveredStatements), 
-						new Coverage(totalMethods, coveredMethods), 
-						new Coverage(totalBranches, coveredBranches), 
-						new Coverage(totalLines, coveredLines));
-				
-				return new CloverReport(coverageInfo, packageCoverages);
+			} catch (DocumentException e) {
+				logger.warning("Ignored clover report '" + relativePath + "' as it is not a valid XML");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			
-		});
-		
-		if (!reportData.getPackageCoverages().isEmpty()) {
-			FileUtils.createDir(reportDir);
-			reportData.writeTo(reportDir);
-			
-			CloverMetric metric = new CloverMetric();
-			metric.setBuild(build);
-			metric.setReportName(getReportName());
-			
-			CoverageInfo coverages = reportData.getOverallCoverages();
-			metric.setBranchCoverage(coverages.getBranchCoverage().getPercent());
-			metric.setLineCoverage(coverages.getLineCoverage().getPercent());
-			metric.setMethodCoverage(coverages.getMethodCoverage().getPercent());
-			metric.setStatementCoverage(coverages.getStatementCoverage().getPercent());
-			metric.setTotalBranches(coverages.getBranchCoverage().getTotal());
-			metric.setTotalLines(coverages.getLineCoverage().getTotal());
-			metric.setTotalMethods(coverages.getMethodCoverage().getTotal());
-			metric.setTotalStatements(coverages.getStatementCoverage().getTotal());
-			
-			OneDev.getInstance(Dao.class).persist(metric);
 		}
 		
-		return null;
+		if (!packageCoverages.isEmpty()) {
+			CoverageInfo coverageInfo = new CoverageInfo(
+					new Coverage(totalStatements, coveredStatements), 
+					new Coverage(totalMethods, coveredMethods), 
+					new Coverage(totalBranches, coveredBranches), 
+					new Coverage(totalLines, coveredLines));
+			
+			return new CoverageReport(coverageInfo, packageCoverages);
+		} else {
+			return null;
+		}
 	}
 
+	private CoverageStatus getCoverageStatus(CoverageStatus prevStatus, String countStr) {
+		int count = Integer.parseInt(countStr);
+		if (count != 0) {
+			if (prevStatus == null)
+				return CoverageStatus.COVERED;
+			else if (prevStatus == CoverageStatus.NOT_COVERED)
+				return CoverageStatus.PARTIALLY_COVERED;
+			else
+				return prevStatus; 
+		} else { 
+			if (prevStatus == null)
+				return CoverageStatus.NOT_COVERED;
+			else if (prevStatus == CoverageStatus.COVERED)
+				return CoverageStatus.PARTIALLY_COVERED;
+			else
+				return prevStatus;
+		}
+	}
+	
 }

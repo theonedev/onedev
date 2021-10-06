@@ -1,8 +1,8 @@
-package io.onedev.server.plugin.report.clover;
+package io.onedev.server.plugin.report.coverage;
 
 import io.onedev.commons.utils.StringUtils;
 
-enum CloverOrderBy {
+enum CoverageOrderBy {
 	DEFAULT {
 
 		@Override

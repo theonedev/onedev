@@ -10,6 +10,6 @@ import io.onedev.server.model.Build;
 @ExtensionPoint
 public interface LineCoverageContribution {
 
-	Map<Integer, Integer> getLineCoverages(Build build, String blobPath, @Nullable String reportName); 
+	Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, @Nullable String reportName); 
 	
 }

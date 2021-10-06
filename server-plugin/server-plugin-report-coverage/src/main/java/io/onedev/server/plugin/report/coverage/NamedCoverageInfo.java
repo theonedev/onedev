@@ -1,6 +1,4 @@
-package io.onedev.server.plugin.report.clover;
-
-import io.onedev.server.util.Coverage;
+package io.onedev.server.plugin.report.coverage;
 
 public class NamedCoverageInfo extends CoverageInfo {
 

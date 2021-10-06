@@ -13,7 +13,7 @@ import io.onedev.server.util.MetricIndicator;
 
 @Entity
 @Table(indexes={@Index(columnList="o_build_id"), @Index(columnList=BuildMetric.PROP_REPORT)})
-public class CloverMetric extends AbstractEntity implements BuildMetric {
+public class CoverageMetric extends AbstractEntity implements BuildMetric {
 
 	private static final long serialVersionUID = 1L;
 	

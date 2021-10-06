@@ -216,19 +216,19 @@ onedev.server.sourceView = {
 		else 
 			onedev.server.codemirror.clearMark(cm);
 	},
-	addCoverageGutter: function(line, testCount) {
+	addCoverageGutter: function(line, coverageStatus) {
+		console.log(coverageStatus);
 		let tooltip;
-		if (testCount > 0)
-			tooltip = `Tested ${testCount} times`;
+		if (coverageStatus == 'COVERED')
+			tooltip = `Covered by tests`;
+		else if (coverageStatus == 'NOT_COVERED')
+			tooltip = "Not covered by any test";
 		else
-			tooltip = "Not covered by any tests";
+			tooltip = "Partially covered by some tests";
 			
 		let $gutter = $(`<a class='CodeMirror-coverage d-block' title='${tooltip}'>&nbsp;</a>`);
 
-		if (testCount > 0) 
-			$gutter.addClass("tested");
-		else
-			$gutter.addClass("not-tested");
+		$gutter.addClass(coverageStatus.toLowerCase());
 			
 		let cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		

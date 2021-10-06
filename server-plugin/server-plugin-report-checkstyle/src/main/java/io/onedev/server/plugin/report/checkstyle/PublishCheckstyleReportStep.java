@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ import io.onedev.server.code.CodeProblem.Severity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CheckstyleMetric;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -70,16 +73,15 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 			public CheckstyleReport call() throws Exception {
 				int baseLen = filesDir.getAbsolutePath().length() + 1;
 				SAXReader reader = new SAXReader();
-				
-				// Prevent XXE attack as the xml might be provided by malicious users
-				reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+				XmlUtils.disallowDocTypeDecl(reader);
 
 				List<CheckstyleViolation> violations = new ArrayList<>();
 				
 				boolean hasReports = false;
 				for (File file: getPatternSet().listFiles(filesDir)) {
 					logger.log("Processing checkstyle report: " + file.getAbsolutePath().substring(baseLen));
-					Document doc = reader.read(file);
+					String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
 					for (Element fileElement: doc.getRootElement().elements("file")) {
 						String filePath = fileElement.attributeValue("name");
 						if (build.getJobWorkspace() != null && filePath.startsWith(build.getJobWorkspace())) { 
