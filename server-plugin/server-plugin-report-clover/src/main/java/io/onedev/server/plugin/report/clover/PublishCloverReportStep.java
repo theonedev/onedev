@@ -19,7 +19,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.code.CoverageStatus;
+import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.coverage.Coverage;
 import io.onedev.server.plugin.report.coverage.CoverageInfo;
@@ -156,7 +156,8 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 								packageTotalLines += fileTotalLines;
 								packageCoveredLines += fileCoveredLines;
 								
-								writeLineCoverages(build, blobPath, lineCoverages);
+								if (!lineCoverages.isEmpty())
+									writeLineCoverages(build, blobPath, lineCoverages);
 								
 								fileCoverages.add(new FileCoverageInfo(fileName, 
 										fileStatementCoverage, fileMethodCoverage, fileBranchCoverage, fileLineCoverage, 

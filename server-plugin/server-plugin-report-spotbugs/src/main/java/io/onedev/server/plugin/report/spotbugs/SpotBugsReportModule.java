@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.checkstyle;
+package io.onedev.server.plugin.report.spotbugs;
 
 import java.util.Collection;
 
@@ -12,14 +12,13 @@ import io.onedev.server.buildspec.step.PublishReportStep;
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
  */
-public class CheckstylePluginModule extends AbstractPluginModule {
+public class SpotBugsReportModule extends AbstractPluginModule {
 
 	@Override
 	protected void configure() {
 		super.configure();
 		
 		// put your guice bindings here
-		
 		contribute(ImplementationProvider.class, new ImplementationProvider() {
 
 			@Override
@@ -29,11 +28,10 @@ public class CheckstylePluginModule extends AbstractPluginModule {
 			
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(PublishESLintReportStep.class, PublishCheckstyleReportStep.class);
+				return Sets.newHashSet(PublishSpotBugsReportStep.class);
 			}
 			
 		});
-		
 	}
 
 }

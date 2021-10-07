@@ -94,8 +94,8 @@ public class UnitTestReport implements Serializable {
 
 	@Nullable
 	public static UnitTestReport readFrom(File reportDir) {
-		File dataFile = new File(reportDir, FILE_NAME);
-		try (InputStream is = new BufferedInputStream(new FileInputStream(dataFile))) {
+		File reportFile = new File(reportDir, FILE_NAME);
+		try (InputStream is = new BufferedInputStream(new FileInputStream(reportFile))) {
 			return (UnitTestReport) SerializationUtils.deserialize(is);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -103,8 +103,8 @@ public class UnitTestReport implements Serializable {
 	}
 	
 	public void writeTo(File reportDir) {
-		File dataFile = new File(reportDir, FILE_NAME);
-		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(dataFile))) {
+		File reportFile = new File(reportDir, FILE_NAME);
+		try (OutputStream os = new BufferedOutputStream(new FileOutputStream(reportFile))) {
 			SerializationUtils.serialize(this, os);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

@@ -42,6 +42,10 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 		this.mode = mode;
 	}
 	
+	public BlobIdent(@Nullable String revision, @Nullable String path) {
+		this(revision, path, FileMode.REGULAR_FILE.getBits());
+	}
+	
 	public BlobIdent() {
 	}
 	

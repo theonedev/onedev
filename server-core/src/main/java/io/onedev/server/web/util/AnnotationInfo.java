@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.CoverageStatus;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CoverageStatus;
 
 public class AnnotationInfo implements Serializable {
 	

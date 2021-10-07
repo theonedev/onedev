@@ -1,10 +1,12 @@
-package io.onedev.server.plugin.report.checkstyle;
+package io.onedev.server.plugin.report.problem;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -17,6 +19,8 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
@@ -26,6 +30,7 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.list.PageableListView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -36,9 +41,12 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PlanarRange;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblem.Severity;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.plugin.report.checkstyle.ViolationFile.Violation;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -47,14 +55,18 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.component.NoRecordsPlaceholder;
 import io.onedev.server.web.component.pagenavigator.OnePagingNavigator;
+import io.onedev.server.web.component.svg.SpriteImage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererer;
+import io.onedev.server.web.page.project.builds.detail.report.BuildReportPage;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class CheckstyleFilesPage extends CheckstyleReportPage {
+public class ProblemReportPage extends BuildReportPage {
 
 	private static final String PARAM_FILE = "file";
+	
+	protected static final int MAX_PROBLEMS_TO_DISPLAY = 200;
 	
 	private String file;
 	
@@ -70,7 +82,24 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 	
 	private Collection<String> expandedFiles = new HashSet<>();
 	
-	public CheckstyleFilesPage(PageParameters params) {
+	private final IModel<ProblemReport> reportModel = new LoadableDetachableModel<ProblemReport>() {
+
+		@Override
+		protected ProblemReport load() {
+			return LockUtils.read(getBuild().getReportCategoryLockKey(ProblemReport.CATEGORY), new Callable<ProblemReport>() {
+
+				@Override
+				public ProblemReport call() throws Exception {
+					File reportsDir = new File(getBuild().getReportCategoryDir(ProblemReport.CATEGORY), getReportName());				
+					return ProblemReport.readFrom(reportsDir);
+				}
+				
+			});
+		}
+		
+	};
+	
+	public ProblemReportPage(PageParameters params) {
 		super(params);
 		
 		file = params.get(PARAM_FILE).toOptionalString();
@@ -80,8 +109,8 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		filePaths = getReportData().getViolationFiles().stream()
-				.map(it->it.getPath())
+		filePaths = getReport().getProblemFiles().stream()
+				.map(it->it.getBlobPath())
 				.collect(Collectors.toList());	
 		
 		form = new Form<Void>("form");
@@ -147,20 +176,20 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 		filesContainer.setOutputMarkupId(true);
 		add(filesContainer);
 		
-		PageableListView<ViolationFile> filesView;
-		filesContainer.add(filesView = new PageableListView<ViolationFile>("files", 
-				new LoadableDetachableModel<List<ViolationFile>>() {
+		PageableListView<ProblemFile> filesView;
+		filesContainer.add(filesView = new PageableListView<ProblemFile>("files", 
+				new LoadableDetachableModel<List<ProblemFile>>() {
 
 			@Override
-			protected List<ViolationFile> load() {
+			protected List<ProblemFile> load() {
 				if (filePatterns != null) {
 					if (filePatterns.isPresent()) {
 						Matcher matcher = new PathMatcher();
-						return getReportData().getViolationFiles().stream()
-								.filter(it->filePatterns.get().matches(matcher, it.getPath()))
+						return getReport().getProblemFiles().stream()
+								.filter(it->filePatterns.get().matches(matcher, it.getBlobPath()))
 								.collect(Collectors.toList());
 					} else {
-						return getReportData().getViolationFiles();
+						return getReport().getProblemFiles();
 					}
 				} else {
 					return new ArrayList<>();
@@ -170,9 +199,9 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 		}, WebConstants.PAGE_SIZE) {
 
 			@Override
-			protected void populateItem(ListItem<ViolationFile> item) {
-				ViolationFile file = item.getModelObject();
-				String filePath = file.getPath();
+			protected void populateItem(ListItem<ProblemFile> item) {
+				ProblemFile file = item.getModelObject();
+				String filePath = file.getBlobPath();
 				
 				AjaxLink<Void> toggleLink = new AjaxLink<Void>("toggle") {
 
@@ -205,61 +234,49 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 				PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 				item.add(new BookmarkablePageLink<Void>("view", ProjectBlobPage.class, params));
 
-				item.add(new Label("numOfErrors", file.getNumOfErrors() + " errors")
-						.setVisible(file.getNumOfErrors() != 0));
-				item.add(new Label("numOfWarnings", file.getNumOfWarnings() + " warnings")
-						.setVisible(file.getNumOfWarnings() != 0));
-				item.add(new Label("numOfInfos", file.getNumOfInfos() + " infos")
-						.setVisible(file.getNumOfInfos() != 0));
+				item.add(new Label("numOfProblems", file.getProblems().size() + " problems"));
 				
-				item.add(new Label("tooManyViolations", 
-						"Too many violations, displaying first " + MAX_VIOLATIONS_TO_DISPLAY) {
+				item.add(new Label("tooManyProblems", 
+						"Too many problems, displaying first " + MAX_PROBLEMS_TO_DISPLAY) {
 
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
 						setVisible(expandedFiles.contains(filePath) 
-								&& item.getModelObject().getViolations().size() > MAX_VIOLATIONS_TO_DISPLAY);
+								&& item.getModelObject().getProblems().size() > MAX_PROBLEMS_TO_DISPLAY);
 					}
 					
 				});
 				
-				item.add(new ListView<Violation>("violations", new LoadableDetachableModel<List<Violation>>() {
+				item.add(new ListView<CodeProblem>("problems", new LoadableDetachableModel<List<CodeProblem>>() {
 
 					@Override
-					protected List<Violation> load() {
-						List<Violation> violations = item.getModelObject().getViolations();
-						if (violations.size() > MAX_VIOLATIONS_TO_DISPLAY)
-							return violations.subList(0, MAX_VIOLATIONS_TO_DISPLAY);
+					protected List<CodeProblem> load() {
+						List<CodeProblem> problems = item.getModelObject().getProblems();
+						if (problems.size() > MAX_PROBLEMS_TO_DISPLAY)
+							return problems.subList(0, MAX_PROBLEMS_TO_DISPLAY);
 						else
-							return violations;
+							return problems;
 					}
 					
 				}) {
 
 					@Override
-					protected void populateItem(ListItem<Violation> item) {
-						Violation violation = item.getModelObject();
-						item.add(newSeverityIcon("icon", violation.getSeverity()));
-						item.add(new Label("message", violation.getMessage()));
+					protected void populateItem(ListItem<CodeProblem> item) {
+						CodeProblem problem = item.getModelObject();
+						item.add(newSeverityIcon("icon", problem.getSeverity()));
+						item.add(new Label("message", problem.getMessage()));
 						
 						ProjectBlobPage.State state = new ProjectBlobPage.State();
 						state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 
 								filePath, FileMode.REGULAR_FILE.getBits());
 						state.problemReport = getReportName();
-						state.position = BlobRendererer.getSourcePosition(violation.getRange());
+						state.position = BlobRendererer.getSourcePosition(problem.getRange());
 						PageParameters params = ProjectBlobPage.paramsOf(getProject(), state);
 						BookmarkablePageLink<Void> rangeLink = new BookmarkablePageLink<Void>("range", 
 								ProjectBlobPage.class, params);
-						rangeLink.add(new Label("label", violation.describePosition()));
+						rangeLink.add(new Label("label", describe(problem.getRange())));
 						item.add(rangeLink);
-						
-						params = CheckstyleRulesPage.paramsOf(
-								getBuild(), getReportName(), violation.getRule());
-						BookmarkablePageLink<Void> ruleLink = new BookmarkablePageLink<Void>("rule", 
-								CheckstyleRulesPage.class, params); 
-						ruleLink.add(new Label("label", "Rule: " + violation.getRule()));
-						item.add(ruleLink);
 					}
 
 					@Override
@@ -274,14 +291,24 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 			
 		});
 		if (!filesView.getModelObject().isEmpty())
-			expandedFiles.add(filesView.getModelObject().iterator().next().getPath());
+			expandedFiles.add(filesView.getModelObject().iterator().next().getBlobPath());
 		
 		filesContainer.add(new OnePagingNavigator("pagingNavigator", filesView, null));
 		filesContainer.add(new NoRecordsPlaceholder("noRecords", filesView));
 	}
 	
+	private ProblemReport getReport() {
+		return reportModel.getObject();
+	}
+	
+	@Override
+	protected void onDetach() {
+		reportModel.detach();
+		super.onDetach();
+	}
+	
 	private void pushState(AjaxRequestTarget target) {
-		CharSequence url = urlFor(CheckstyleFilesPage.class, paramsOf(getBuild(), getReportName(), file));
+		CharSequence url = urlFor(ProblemReportPage.class, paramsOf(getBuild(), getReportName(), file));
 		pushState(target, url.toString(), file);
 	}
 	
@@ -305,6 +332,41 @@ public class CheckstyleFilesPage extends CheckstyleReportPage {
 		} else {
 			filePatterns = Optional.absent();
 		}
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new ProblemReportCssResourceReference()));
+	}
+	
+	protected String describe(PlanarRange range) {
+		if (range.getToRow() == -1)
+			return "Line: " + (range.getFromRow()+1);
+		else
+			return "Line: " + (range.getFromRow()+1) + " - " + (range.getToRow()+1);
+	}
+	
+	protected SpriteImage newSeverityIcon(String componentId, Severity severity) {
+		String iconHref;
+		String iconClass;
+		switch (severity) {
+		case HIGH:
+			iconHref = "times-circle-o";
+			iconClass = "text-danger";
+			break;
+		case MEDIUM:
+			iconHref = "warning-o";
+			iconClass = "text-warning";
+			break;
+		default:
+			iconClass = "text-info";
+			iconHref = "info-circle-o";
+		}
+		
+		SpriteImage icon = new SpriteImage(componentId, iconHref);
+		icon.add(AttributeAppender.append("class", iconClass));
+		return icon;
 	}
 	
 	public static PageParameters paramsOf(Build build, String reportName, @Nullable String file) {

@@ -3101,6 +3101,14 @@ public class DataMigrator {
 				String newFileName = file.getName().replace("Clover", "Coverage");
 				dom.writeToFile(new File(dataDir, newFileName), false);
 				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("CheckstyleMetric.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.setName("io.onedev.server.model.ProblemMetric");
+				
+				String newFileName = file.getName().replace("Checkstyle", "Problem");
+				dom.writeToFile(new File(dataDir, newFileName), false);
+				FileUtils.deleteFile(file);
 			}
 		}
 	}

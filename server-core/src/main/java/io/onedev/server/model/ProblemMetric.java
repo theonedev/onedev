@@ -13,7 +13,7 @@ import io.onedev.server.util.MetricIndicator;
 
 @Entity
 @Table(indexes={@Index(columnList="o_build_id"), @Index(columnList=BuildMetric.PROP_REPORT)})
-public class CheckstyleMetric extends AbstractEntity implements BuildMetric {
+public class ProblemMetric extends AbstractEntity implements BuildMetric {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -24,11 +24,11 @@ public class CheckstyleMetric extends AbstractEntity implements BuildMetric {
 	@Column(nullable=false)
 	private String reportName;
 
-	private int totalErrors;
+	private int highSeverities;
 	
-	private int totalWarnings;
+	private int mediumSeverities;
 	
-	private int totalInfos;
+	private int lowSeverities;
 	
 	@Override
 	public Build getBuild() {
@@ -48,31 +48,31 @@ public class CheckstyleMetric extends AbstractEntity implements BuildMetric {
 		this.reportName = reportName;
 	}
 
-	@MetricIndicator(group="Total Violations", order=100, minValue=0, name="Errors", color="#F64E60")
-	public int getTotalErrors() {
-		return totalErrors;
+	@MetricIndicator(group="Total Problems", order=100, minValue=0, name="High Severity", color="#F64E60")
+	public int getHighSeverities() {
+		return highSeverities;
 	}
 
-	public void setTotalErrors(int totalErrors) {
-		this.totalErrors = totalErrors;
+	public void setHighSeverities(int totalErrors) {
+		this.highSeverities = totalErrors;
 	}
 
-	@MetricIndicator(group="Total Violations", order=200, minValue=0, name="Warnings", color="#FFA800")
-	public int getTotalWarnings() {
-		return totalWarnings;
+	@MetricIndicator(group="Total Problems", order=200, minValue=0, name="Medium Severity", color="#FFA800")
+	public int getMediumSeverities() {
+		return mediumSeverities;
 	}
 
-	public void setTotalWarnings(int totalWarnings) {
-		this.totalWarnings = totalWarnings;
+	public void setMediumSeverities(int mediumSeverities) {
+		this.mediumSeverities = mediumSeverities;
 	}
 
-	@MetricIndicator(group="Total Violations", order=300, minValue=0, name="Infos", color="#8950FC")
-	public int getTotalInfos() {
-		return totalInfos;
+	@MetricIndicator(group="Total Problems", order=300, minValue=0, name="Low Severity", color="#8950FC")
+	public int getLowSeverities() {
+		return lowSeverities;
 	}
 
-	public void setTotalInfos(int totalInfos) {
-		this.totalInfos = totalInfos;
+	public void setLowSeverities(int lowSeverities) {
+		this.lowSeverities = lowSeverities;
 	}
 
 }

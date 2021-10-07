@@ -41,5 +41,7 @@
     <module>server-plugin-report-junit</module>
     <module>server-plugin-report-coverage</module>
     <module>server-plugin-report-jacoco</module>
+    <module>server-plugin-report-problem</module>
+    <module>server-plugin-report-spotbugs</module>
   </modules>
 </project>

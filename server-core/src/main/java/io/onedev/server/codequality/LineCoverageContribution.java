@@ -1,4 +1,4 @@
-package io.onedev.server.code;
+package io.onedev.server.codequality;
 
 import java.util.Map;
 

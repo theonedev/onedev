@@ -323,7 +323,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	private Collection<CoverageMetric> cloverMetrics = new ArrayList<>();
 	
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
-	private Collection<CheckstyleMetric> checkstyleMetrics = new ArrayList<>();
+	private Collection<ProblemMetric> checkstyleMetrics = new ArrayList<>();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	private PullRequest request;

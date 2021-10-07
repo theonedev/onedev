@@ -1,45 +1,40 @@
 package io.onedev.server.plugin.report.checkstyle;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.TaskLogger;
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.buildspec.step.PublishReportStep;
-import io.onedev.server.code.CodeProblem.Severity;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblem.Severity;
+import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.CheckstyleMetric;
-import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.plugin.report.problem.ProblemReport;
+import io.onedev.server.plugin.report.problem.PublishProblemReportStep;
 import io.onedev.server.util.XmlUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable(order=8000, name="Publish Checkstyle Report")
-public class PublishCheckstyleReportStep extends PublishReportStep {
+public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String VIOLATION_FILES = "violation-files";
+	private static final int TAB_WIDTH = 8;
 	
 	@Editable(order=100, description="Specify checkstyle result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
 			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
@@ -62,83 +57,69 @@ public class PublishCheckstyleReportStep extends PublishReportStep {
 	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return BuildSpec.suggestVariables(matchWith, true, true);
 	}
-
+	
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(CheckstyleReport.CATEGORY), getReportName());
-		
-		CheckstyleReport reportData = LockUtils.write(build.getReportCategoryLockKey(CheckstyleReport.CATEGORY), new Callable<CheckstyleReport>() {
+	protected ProblemReport createReport(Build build, File filesDir, File reportDir, TaskLogger logger) {
+		int baseLen = filesDir.getAbsolutePath().length() + 1;
+		SAXReader reader = new SAXReader();
+		XmlUtils.disallowDocTypeDecl(reader);
 
-			@Override
-			public CheckstyleReport call() throws Exception {
-				int baseLen = filesDir.getAbsolutePath().length() + 1;
-				SAXReader reader = new SAXReader();
-				XmlUtils.disallowDocTypeDecl(reader);
-
-				List<CheckstyleViolation> violations = new ArrayList<>();
-				
-				boolean hasReports = false;
-				for (File file: getPatternSet().listFiles(filesDir)) {
-					logger.log("Processing checkstyle report: " + file.getAbsolutePath().substring(baseLen));
-					String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-					Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
-					for (Element fileElement: doc.getRootElement().elements("file")) {
-						String filePath = fileElement.attributeValue("name");
-						if (build.getJobWorkspace() != null && filePath.startsWith(build.getJobWorkspace())) { 
-							filePath = filePath.substring(build.getJobWorkspace().length()+1);
-							List<ViolationFile.Violation> violationsOfFile = new ArrayList<>();
+		List<CodeProblem> problems = new ArrayList<>();
+		for (File file: getPatternSet().listFiles(filesDir)) {
+			String relativePath = file.getAbsolutePath().substring(baseLen);
+			logger.log("Processing checkstyle report '" + relativePath + "'...");
+			try {
+				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
+				for (Element fileElement: doc.getRootElement().elements("file")) {
+					String blobPath = fileElement.attributeValue("name");
+					if (build.getJobWorkspace() != null && blobPath.startsWith(build.getJobWorkspace())) { 
+						blobPath = blobPath.substring(build.getJobWorkspace().length()+1);
+						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
+						if (build.getProject().getBlob(blobIdent, false) != null) {
+							List<CodeProblem> problemsOfFile = new ArrayList<>();
 							for (Element violationElement: fileElement.elements()) {
-								Severity severity = Severity.valueOf(violationElement.attributeValue("severity").toUpperCase());
+								Severity severity;
+								String severityStr = violationElement.attributeValue("severity");
+								if (severityStr.equalsIgnoreCase("error"))
+									severity = Severity.HIGH;
+								else if (severityStr.equalsIgnoreCase("warning"))
+									severity = Severity.MEDIUM;
+								else
+									severity = Severity.LOW;
 								String message = violationElement.attributeValue("message");
 								String rule = violationElement.attributeValue("source");
-								String line = violationElement.attributeValue("line");
+								int lineNo = Integer.parseInt(violationElement.attributeValue("line"))-1;
 								String column = violationElement.attributeValue("column");
-								violationsOfFile.add(new ViolationFile.Violation(severity, message, line, column, rule));
-								violations.add(new CheckstyleViolation(severity, message, line, column, filePath, rule));
-							}
-							if (!violationsOfFile.isEmpty()) {
-								File violationsFile = new File(reportDir, VIOLATION_FILES + "/" + filePath);
-								FileUtils.createDir(violationsFile.getParentFile());
-								try (OutputStream os = new FileOutputStream(violationsFile)) {
-									SerializationUtils.serialize((Serializable) violationsOfFile, os);
-								} catch (IOException e) {
-									throw new RuntimeException(e);
+
+								PlanarRange range;
+								if (column != null) {
+									int columnNo = Integer.parseInt(column)-1;
+									range = new PlanarRange(lineNo, columnNo, lineNo, -1, TAB_WIDTH);
+								} else {
+									range = new PlanarRange(lineNo, -1, lineNo, -1, TAB_WIDTH);
 								}
+								
+								CodeProblem problem = new CodeProblem(severity, rule, blobPath, range, message);
+								problemsOfFile.add(problem);
+								problems.add(problem);
 							}
-						}
+							if (!problemsOfFile.isEmpty())
+								writeFileProblems(build, blobPath, problemsOfFile);
+						}						
 					}
-					hasReports = true;
 				}
-				
-				if (hasReports)
-					return new CheckstyleReport(violations);
-				else
-					return null;
+			} catch (DocumentException e) {
+				logger.warning("Ignored checkstyle report '" + relativePath + "' as it is not a valid XML");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			
-		});
-		
-		if (reportData != null) {
-			FileUtils.createDir(reportDir);
-			reportData.writeTo(reportDir);
-			
-			CheckstyleMetric metric = new CheckstyleMetric();
-			metric.setBuild(build);
-			metric.setReportName(getReportName());
-			metric.setTotalErrors((int) reportData.getViolations().stream()
-					.filter(it->it.getSeverity()==Severity.ERROR)
-					.count());
-			metric.setTotalWarnings((int) reportData.getViolations().stream()
-					.filter(it->it.getSeverity()==Severity.WARNING)
-					.count());
-			metric.setTotalInfos((int) reportData.getViolations().stream()
-					.filter(it->it.getSeverity()==Severity.INFO)
-					.count());
-						
-			OneDev.getInstance(Dao.class).persist(metric);
 		}
-		
-		return null;
+
+		if (!problems.isEmpty())
+			return new ProblemReport(problems);
+		else
+			return null;
 	}
 
 }

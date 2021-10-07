@@ -1,4 +1,4 @@
-package io.onedev.server.code;
+package io.onedev.server.codequality;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,34 +16,48 @@ public class CodeProblem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static enum Severity {ERROR, WARNING, INFO};
-	
-	private final PlanarRange range;
-	
-	private final String content;
-	
+	public static enum Severity {HIGH, MEDIUM, LOW};
+
 	private final Severity severity;
 	
-	public CodeProblem(PlanarRange range, String content, Severity severity) {
-		this.range = range;
-		this.content = content;
+	private final String type;
+	
+	private final String blobPath;
+
+	private final PlanarRange range;
+	
+	private final String message;
+	
+	public CodeProblem(Severity severity, String type, String blobPath, PlanarRange range, String message) {
 		this.severity = severity;
-	}
-
-	public PlanarRange getRange() {
-		return range;
-	}
-
-	public String getContent() {
-		return content;
+		this.type = type;
+		this.blobPath = blobPath;
+		this.range = range;
+		this.message = message;
 	}
 
 	public Severity getSeverity() {
 		return severity;
 	}
 	
+	public String getType() {
+		return type;
+	}
+
+	public String getBlobPath() {
+		return blobPath;
+	}
+
+	public PlanarRange getRange() {
+		return range;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
 	public CodeProblem normalizeRange(List<String> lines) {
-		return new CodeProblem(range.normalize(lines), content, severity);
+		return new CodeProblem(severity, type, blobPath, range.normalize(lines), message);
 	}
 
 	@Override
@@ -54,18 +68,22 @@ public class CodeProblem implements Serializable {
 			return true;
 		CodeProblem otherProblem = (CodeProblem) other;
 		return new EqualsBuilder()
-				.append(range, otherProblem.range)
-				.append(content, otherProblem.content)
 				.append(severity, otherProblem.severity)
+				.append(type, otherProblem.type)
+				.append(blobPath, otherProblem.blobPath)
+				.append(range, otherProblem.range)
+				.append(message, otherProblem.message)
 				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(range)
-				.append(content)
 				.append(severity)
+				.append(type)
+				.append(blobPath)
+				.append(range)
+				.append(message)
 				.toHashCode();
 	}
 	

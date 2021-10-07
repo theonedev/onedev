@@ -20,7 +20,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.code.CoverageStatus;
+import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.Build;
 import io.onedev.server.plugin.report.coverage.Coverage;
 import io.onedev.server.plugin.report.coverage.CoverageInfo;

@@ -33,10 +33,10 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.CodeProblemContribution;
-import io.onedev.server.code.CoverageStatus;
-import io.onedev.server.code.LineCoverageContribution;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.entitymanager.PullRequestManager;

@@ -44,7 +44,7 @@ import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.code.CodeProblem;
+import io.onedev.server.codequality.CodeProblem;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;

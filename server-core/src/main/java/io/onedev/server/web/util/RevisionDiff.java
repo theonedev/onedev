@@ -10,8 +10,8 @@ import javax.annotation.Nullable;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.CoverageStatus;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;

@@ -18,8 +18,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.utils.PlanarRange;
-import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.CoverageStatus;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.Mark;

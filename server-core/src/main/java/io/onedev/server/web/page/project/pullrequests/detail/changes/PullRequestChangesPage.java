@@ -46,10 +46,10 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.code.CodeProblem;
-import io.onedev.server.code.CodeProblemContribution;
-import io.onedev.server.code.CoverageStatus;
-import io.onedev.server.code.LineCoverageContribution;
+import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.codequality.CodeProblemContribution;
+import io.onedev.server.codequality.CoverageStatus;
+import io.onedev.server.codequality.LineCoverageContribution;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
 import io.onedev.server.git.BlobIdent;
@@ -898,8 +898,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 					if (!buildCommitId.equals(getComparisonBase())) {
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, getComparisonBase(), blobPath);
 						PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
-						if (range != null)
-							problems.add(new CodeProblem(range, problem.getContent(), problem.getSeverity()));
+						if (range != null) {
+							problems.add(new CodeProblem(problem.getSeverity(), problem.getType(), 
+									problem.getBlobPath(), range, problem.getMessage()));
+						}
 					} else {
 						problems.add(problem);
 					}
@@ -928,8 +930,10 @@ public class PullRequestChangesPage extends PullRequestDetailPage implements Rev
 						Map<Integer, Integer> lineMapping = getLineMapping(buildCommitId, 
 								ObjectId.fromString(state.newCommitHash), blobPath);
 						PlanarRange range = DiffUtils.mapRange(lineMapping, problem.getRange());
-						if (range != null)
-							problems.add(new CodeProblem(range, problem.getContent(), problem.getSeverity()));
+						if (range != null) {
+							problems.add(new CodeProblem(problem.getSeverity(), problem.getType(), 
+									problem.getBlobPath(), range, problem.getMessage()));
+						}
 					} else {
 						problems.add(problem);
 					}

@@ -18,7 +18,7 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.step.PublishReportStep;
-import io.onedev.server.code.CoverageStatus;
+import io.onedev.server.codequality.CoverageStatus;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CoverageMetric;
 import io.onedev.server.persistence.dao.Dao;
@@ -81,7 +81,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 
 	protected void writeLineCoverages(Build build, String blobPath, Map<Integer, CoverageStatus> lineCoverages) {
 		File reportDir = new File(build.getReportCategoryDir(CoverageReport.CATEGORY), getReportName());
-		File lineCoverageFile = new File(reportDir, CoverageReport.LINE_COVERAGES_DIR + "/" + blobPath);
+		File lineCoverageFile = new File(reportDir, CoverageReport.FILES_DIR + "/" + blobPath);
 		FileUtils.createDir(lineCoverageFile.getParentFile());
 		try (OutputStream os = new FileOutputStream(lineCoverageFile)) {
 			SerializationUtils.serialize((Serializable) lineCoverages, os);
