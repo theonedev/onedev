@@ -20,8 +20,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.bootstrap.Bootstrap;
+import io.onedev.commons.loader.AppLoader;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -237,7 +237,7 @@ public class Upgrade extends DefaultPersistManager {
 					for (File each: upgradeDir.listFiles()) {
 						if (each.isFile()) 
 							FileUtils.copyFileToDirectory(each, programBackup);
-						else if (!each.getName().equals("temp") && !each.getName().equals("site"))
+						else if (!each.getName().equals("temp") && !each.getName().equals("site") && !each.getName().equals("sampledb"))
 							FileUtils.copyDirectoryToDirectory(each, programBackup);
 					}
 				} catch (IOException e) {
@@ -271,22 +271,26 @@ public class Upgrade extends DefaultPersistManager {
 						}).getReturnCode();
 						
 						if (ret == 0) {
-							logger.info("Cleaning database with old program...");
-							ret = buildCommandline(upgradeDir, "clean-db").execute(new LineConsumer() {
-		
-								@Override
-								public void consume(String line) {
-									logger.info(prefixUpgradeTargetLog(line));
-								}
-								
-							}, new LineConsumer() {
-		
-								@Override
-								public void consume(String line) {
-									logger.error(prefixUpgradeTargetLog(line));
-								}
-								
-							}).getReturnCode();
+							if (getDialect().toLowerCase().contains("hsql")) { 
+								FileUtils.deleteDir(new File(upgradeDir, "sampledb"), 3);
+							} else {
+								logger.info("Cleaning database with old program...");
+								ret = buildCommandline(upgradeDir, "clean-db").execute(new LineConsumer() {
+									
+									@Override
+									public void consume(String line) {
+										logger.info(prefixUpgradeTargetLog(line));
+									}
+									
+								}, new LineConsumer() {
+			
+									@Override
+									public void consume(String line) {
+										logger.error(prefixUpgradeTargetLog(line));
+									}
+									
+								}).getReturnCode();
+							}
 						}
 						
 						if (ret == 0) {
@@ -348,7 +352,7 @@ public class Upgrade extends DefaultPersistManager {
 						logger.warn("Please restore manually from \"{}\"", programBackup.getAbsolutePath());
 					}
 					if (dbBackupFile != null) {
-						logger.warn("The database might be in an inconsistent state due to upgrade failure. In that case, "
+						logger.warn("The database might be in inconsistent state due to upgrade failure. In that case, "
 								+ "you need to restore the database by first cleaning it, and then running below command:");
 						if (SystemUtils.IS_OS_WINDOWS) {
 							logger.info(upgradeDir.getAbsolutePath() + File.separator + "bin" + File.separator + "restore-db.bat " + dbBackupFile.getAbsolutePath());
@@ -500,6 +504,11 @@ public class Upgrade extends DefaultPersistManager {
 					"hibernate.hikari.autoCommit=true");
 			hibernateProps = StringUtils.replace(hibernateProps, "GitPlex", "OneDev");
 			hibernateProps = StringUtils.replace(hibernateProps, "TurboDev", "OneDev");
+			
+			if (!hibernateProps.contains("hsqldb.lob_file_scale")) {
+				hibernateProps = StringUtils.replace(hibernateProps, "sampledb/onedev;", 
+						"sampledb/onedev;hsqldb.lob_file_scale=4;");
+			}
 			
 			if (!hibernateProps.contains("hibernate.connection.autocommit=true")) {
 				hibernateProps = StringUtils.replace(hibernateProps, 
