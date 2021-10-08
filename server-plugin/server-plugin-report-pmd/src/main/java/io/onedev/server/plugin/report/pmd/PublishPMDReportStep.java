@@ -1,4 +1,4 @@
-package io.onedev.server.plugin.report.checkstyle;
+package io.onedev.server.plugin.report.pmd;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,17 +30,15 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
-@Editable(order=8000, name="Publish Checkstyle Report")
-public class PublishCheckstyleReportStep extends PublishProblemReportStep {
+@Editable(order=8020, name="Publish PMD Report")
+public class PublishPMDReportStep extends PublishProblemReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
 	private static final int TAB_WIDTH = 8;
 	
-	@Editable(order=100, description="Specify checkstyle result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
-			+ "for instance, <tt>target/checkstyle-result.xml</tt>. "
-			+ "Refer to <a href='https://checkstyle.org/'>checkstyle documentation</a> "
-			+ "on how to generate the result xml file. Use * or ? for pattern match")
+	@Editable(order=100, description="Specify PMD result xml file relative to <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>, "
+			+ "for instance, <tt>target/pmd.xml</tt>. Use * or ? for pattern match")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(path=true)
 	@NotEmpty
@@ -68,50 +66,47 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 		List<CodeProblem> problems = new ArrayList<>();
 		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
-			logger.log("Processing checkstyle report '" + relativePath + "'...");
+			logger.log("Processing PMD report '" + relativePath + "'...");
 			try {
 				String xml = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				Document doc = reader.read(new StringReader(XmlUtils.stripDoctype(xml)));
+
 				for (Element fileElement: doc.getRootElement().elements("file")) {
-					String blobPath = fileElement.attributeValue("name");
-					if (build.getJobWorkspace() != null && blobPath.startsWith(build.getJobWorkspace())) { 
-						blobPath = blobPath.substring(build.getJobWorkspace().length()+1);
+					String filePath = fileElement.attributeValue("name");
+					if (build.getJobWorkspace() != null && filePath.startsWith(build.getJobWorkspace())) {
+						String blobPath = filePath.substring(build.getJobWorkspace().length()+1);
 						BlobIdent blobIdent = new BlobIdent(build.getCommitHash(), blobPath);
 						if (build.getProject().getBlob(blobIdent, false) != null) {
 							List<CodeProblem> problemsOfFile = new ArrayList<>();
-							for (Element violationElement: fileElement.elements()) {
+							for (Element violationElement: fileElement.elements("violation")) {
+								int beginLine = Integer.parseInt(violationElement.attributeValue("beginline"));
+								int endLine = Integer.parseInt(violationElement.attributeValue("endline"));
+								int beginColumn = Integer.parseInt(violationElement.attributeValue("begincolumn"));
+								int endColumn = Integer.parseInt(violationElement.attributeValue("endcolumn"));
+								PlanarRange range = new PlanarRange(beginLine-1, beginColumn-1, endLine-1, endColumn, TAB_WIDTH);
+								
+								String type = violationElement.attributeValue("rule");
+								
 								Severity severity;
-								String severityStr = violationElement.attributeValue("severity");
-								if (severityStr.equalsIgnoreCase("error"))
+								int priority = Integer.parseInt(violationElement.attributeValue("priority"));
+								if (priority <= 2)
 									severity = Severity.HIGH;
-								else if (severityStr.equalsIgnoreCase("warning"))
+								else if (priority <= 3)
 									severity = Severity.MEDIUM;
 								else
 									severity = Severity.LOW;
-								String message = HtmlEscape.escapeHtml5(violationElement.attributeValue("message"));
-								String rule = violationElement.attributeValue("source");
-								int lineNo = Integer.parseInt(violationElement.attributeValue("line"))-1;
-								String column = violationElement.attributeValue("column");
-
-								PlanarRange range;
-								if (column != null) {
-									int columnNo = Integer.parseInt(column)-1;
-									range = new PlanarRange(lineNo, columnNo, lineNo, -1, TAB_WIDTH);
-								} else {
-									range = new PlanarRange(lineNo, -1, lineNo, -1, TAB_WIDTH);
-								}
 								
-								CodeProblem problem = new CodeProblem(severity, rule, blobPath, range, message);
-								problemsOfFile.add(problem);
+								String message = HtmlEscape.escapeHtml5(violationElement.getText());
+								CodeProblem problem = new CodeProblem(severity, type, blobPath, range, message);
 								problems.add(problem);
+								problemsOfFile.add(problem);
 							}
-							if (!problemsOfFile.isEmpty())
-								writeFileProblems(build, blobPath, problemsOfFile);
-						}						
+							writeFileProblems(build, blobPath, problemsOfFile);
+						}
 					}
 				}
 			} catch (DocumentException e) {
-				logger.warning("Ignored checkstyle report '" + relativePath + "' as it is not a valid XML");
+				logger.warning("Ignored SpotBugs report '" + relativePath + "' as it is not a valid XML");
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

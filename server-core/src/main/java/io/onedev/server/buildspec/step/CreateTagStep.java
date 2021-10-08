@@ -58,7 +58,7 @@ public class CreateTagStep extends ServerStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		PersonIdent tagIdent = OneDev.getInstance(UserManager.class).getSystem().asPerson();
 		Project project = build.getProject();
 		String tagName = getTagName();

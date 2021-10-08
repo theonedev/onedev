@@ -17,6 +17,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
@@ -60,13 +61,14 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 	}
 	
 	@Override
-	protected ProblemReport createReport(Build build, File filesDir, File reportDir, TaskLogger logger) {
-		int baseLen = filesDir.getAbsolutePath().length() + 1;
+	protected ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
+		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 
 		List<CodeProblem> problems = new ArrayList<>();
-		for (File file: getPatternSet().listFiles(filesDir)) {
+		Map<String, List<CodeProblem>> problemsByFile = new HashMap<>();
+		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing SpotBugs report '" + relativePath + "'...");
 			try {
@@ -79,7 +81,6 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 					srcPath = srcPath.substring(build.getJobWorkspace().length()+1);
 					if (srcPath.startsWith("/"))
 						srcPath = srcPath.substring(1);
-					Map<String, List<CodeProblem>> problemsByFile = new HashMap<>();
 					for (Element bugElement: doc.getRootElement().elements("BugInstance")) {
 						Element sourceElement = bugElement.element("SourceLine");
 						String blobPath = srcPath + "/" + sourceElement.attributeValue("sourcepath");
@@ -99,6 +100,8 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 							String message = bugElement.elementText("LongMessage");
 							if (StringUtils.isBlank(message))
 								message = bugElement.elementText("ShortMessage");
+							
+							message = HtmlEscape.escapeHtml5(message);
 							
 							PlanarRange range = getRange(bugElement, true);
 
@@ -121,8 +124,6 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 							problemsOfFile.add(problem);
 						}
 					}
-					for (Map.Entry<String, List<CodeProblem>> entry: problemsByFile.entrySet()) 
-						writeFileProblems(build, entry.getKey(), entry.getValue());
 				}
 			} catch (DocumentException e) {
 				logger.warning("Ignored SpotBugs report '" + relativePath + "' as it is not a valid XML");
@@ -131,6 +132,9 @@ public class PublishSpotBugsReportStep extends PublishProblemReportStep {
 			}
 		}
 
+		for (Map.Entry<String, List<CodeProblem>> entry: problemsByFile.entrySet()) 
+			writeFileProblems(build, entry.getKey(), entry.getValue());
+		
 		if (!problems.isEmpty())
 			return new ProblemReport(problems);
 		else

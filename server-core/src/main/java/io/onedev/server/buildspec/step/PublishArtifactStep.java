@@ -49,14 +49,14 @@ public class PublishArtifactStep extends ServerStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger jobLogger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
 		LockUtils.write(build.getArtifactsLockKey(), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
 				File artifactsDir = build.getArtifactsDir();
 				FileUtils.createDir(artifactsDir);
-				FileUtils.copyDirectory(filesDir, artifactsDir);
+				FileUtils.copyDirectory(inputDir, artifactsDir);
 				return null;
 			}
 			

@@ -35,6 +35,6 @@ public interface JobManager {
 	
 	@Nullable
 	Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, TaskLogger logger);
+			File inputDir, Map<String, String> placeholderValues, TaskLogger logger);
 	
 }

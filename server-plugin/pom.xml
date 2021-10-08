@@ -43,5 +43,7 @@
     <module>server-plugin-report-jacoco</module>
     <module>server-plugin-report-problem</module>
     <module>server-plugin-report-spotbugs</module>
+    <module>server-plugin-report-pmd</module>
+    <module>server-plugin-report-cpd</module>
   </modules>
 </project>

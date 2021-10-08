@@ -97,6 +97,16 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-pmd</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-cpd</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-report-spotbugs</artifactId>
 			<version>${project.version}</version>
 		</dependency>

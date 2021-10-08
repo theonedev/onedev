@@ -30,7 +30,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(ProblemReport.CATEGORY), getReportName());
 		
 		ProblemReport report = LockUtils.write(build.getReportCategoryLockKey(ProblemReport.CATEGORY), new Callable<ProblemReport>() {
@@ -39,7 +39,7 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 			public ProblemReport call() throws Exception {
 				FileUtils.createDir(reportDir);
 				try {
-					ProblemReport report = createReport(build, filesDir, reportDir, logger);
+					ProblemReport report = createReport(build, inputDir, reportDir, logger);
 					if (report != null) {
 						report.writeTo(reportDir);
 						return report;
@@ -89,6 +89,6 @@ public abstract class PublishProblemReportStep extends PublishReportStep {
 		}
 	}
 
-	protected abstract ProblemReport createReport(Build build, File filesDir, File reportDir, TaskLogger logger);
+	protected abstract ProblemReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger);
 	
 }

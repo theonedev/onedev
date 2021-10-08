@@ -22,14 +22,14 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(UnitTestReport.CATEGORY), getReportName());
 
 		UnitTestReport report = LockUtils.write(build.getReportCategoryLockKey(UnitTestReport.CATEGORY), new Callable<UnitTestReport>() {
 
 			@Override
 			public UnitTestReport call() throws Exception {
-				UnitTestReport report = createReport(build, filesDir, logger);
+				UnitTestReport report = createReport(build, inputDir, logger);
 				if (report != null) {
 					FileUtils.createDir(reportDir);
 					report.writeTo(reportDir);
@@ -57,6 +57,6 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	}
 
 	@Nullable
-	protected abstract UnitTestReport createReport(Build build, File filesDir, TaskLogger logger);
+	protected abstract UnitTestReport createReport(Build build, File inputDir, TaskLogger logger);
 	
 }

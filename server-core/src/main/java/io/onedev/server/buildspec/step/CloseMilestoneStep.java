@@ -43,7 +43,7 @@ public class CloseMilestoneStep extends ServerStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		OneDev.getInstance(TransactionManager.class).run(new Runnable() {
 
 			@Override

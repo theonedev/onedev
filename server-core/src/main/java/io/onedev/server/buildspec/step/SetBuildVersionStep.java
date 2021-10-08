@@ -46,7 +46,7 @@ public class SetBuildVersionStep extends ServerStep {
 	}
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger jobLogger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger jobLogger) {
 		return OneDev.getInstance(TransactionManager.class).call(new Callable<Map<String, byte[]>>() {
 
 			@Override

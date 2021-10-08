@@ -30,7 +30,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(CoverageReport.CATEGORY), getReportName());
 
 		CoverageReport report = LockUtils.write(build.getReportCategoryLockKey(CoverageReport.CATEGORY), new Callable<CoverageReport>() {
@@ -39,7 +39,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 			public CoverageReport call() throws Exception {
 				FileUtils.createDir(reportDir);
 				try {
-					CoverageReport report = createReport(build, filesDir, reportDir, logger);
+					CoverageReport report = createReport(build, inputDir, reportDir, logger);
 					if (report != null) {
 						report.writeTo(reportDir);
 						return report;
@@ -77,7 +77,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	}
 
 	@Nullable
-	protected abstract CoverageReport createReport(Build build, File filesDir, File reportDir, TaskLogger logger);
+	protected abstract CoverageReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger);
 
 	protected void writeLineCoverages(Build build, String blobPath, Map<Integer, CoverageStatus> lineCoverages) {
 		File reportDir = new File(build.getReportCategoryDir(CoverageReport.CATEGORY), getReportName());

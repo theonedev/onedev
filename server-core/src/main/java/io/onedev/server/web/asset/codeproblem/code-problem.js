@@ -34,7 +34,7 @@ onedev.server.codeProblem = {
 				var iconInfo = onedev.server.codeProblem.getIconInfo(problem);
 				var $content = $("<pre class='problem-content mb-0 font-size-sm'></pre>");
 				$container.append($content);
-				$content.text(problem.message);
+				$content.html(problem.message);
 				
 				$content.prepend(`<svg class='icon icon-sm mr-2 ${iconInfo[2]}'><use xlink:href='${onedev.server.icons}#${iconInfo[0]}'/></svg>`);
 				$content.append("<a title='Add comment' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
@@ -43,7 +43,7 @@ onedev.server.codeProblem = {
 		} else {
 			var $container = $("<div><pre class='problem-content mb-0 font-size-sm'></pre></div>");
 			var $content = $container.children('.problem-content');
-			$content.text(problems[0].message);
+			$content.html(problems[0].message);
 			$content.append("<a title='Add comment' class='add-comment ml-2'><svg class='icon icon-sm mr-2'><use xlink:href='" + onedev.server.icons + "#comment'/></svg></a>");
 			return $container.html();
 		}

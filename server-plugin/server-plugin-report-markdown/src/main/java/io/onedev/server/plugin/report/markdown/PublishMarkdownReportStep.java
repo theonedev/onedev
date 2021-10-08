@@ -42,21 +42,21 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 	}
 
 	@Override
-	public Map<String, byte[]> run(Build build, File filesDir, TaskLogger logger) {
+	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
 		File reportDir = new File(build.getReportCategoryDir(MarkdownReportModule.CATEGORY), getReportName());
 
 		LockUtils.write(build.getReportCategoryLockKey(MarkdownReportModule.CATEGORY), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
-				File startPage = new File(filesDir, getStartPage()); 
+				File startPage = new File(inputDir, getStartPage()); 
 				if (startPage.exists()) {
 					FileUtils.createDir(reportDir);
 					File startPageFile = new File(reportDir, MarkdownReportModule.START_PAGE);
 					FileUtils.writeFile(startPageFile, getStartPage());
 					
-					int baseLen = filesDir.getAbsolutePath().length() + 1;
-					for (File file: getPatternSet().listFiles(filesDir)) {
+					int baseLen = inputDir.getAbsolutePath().length() + 1;
+					for (File file: getPatternSet().listFiles(inputDir)) {
 						try {
 							FileUtils.copyFile(file, new File(reportDir, file.getAbsolutePath().substring(baseLen)));
 						} catch (IOException e) {

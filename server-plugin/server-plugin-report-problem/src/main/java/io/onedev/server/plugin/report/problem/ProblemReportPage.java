@@ -265,7 +265,7 @@ public class ProblemReportPage extends BuildReportPage {
 					protected void populateItem(ListItem<CodeProblem> item) {
 						CodeProblem problem = item.getModelObject();
 						item.add(newSeverityIcon("icon", problem.getSeverity()));
-						item.add(new Label("message", problem.getMessage()));
+						item.add(new Label("message", problem.getMessage()).setEscapeModelStrings(false));
 						
 						ProjectBlobPage.State state = new ProjectBlobPage.State();
 						state.blobIdent = new BlobIdent(getBuild().getCommitHash(), 

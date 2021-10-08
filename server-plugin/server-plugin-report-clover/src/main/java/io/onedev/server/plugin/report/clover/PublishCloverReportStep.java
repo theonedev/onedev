@@ -60,8 +60,8 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 	}
 
 	@Override
-	protected CoverageReport createReport(Build build, File filesDir, File reportDir, TaskLogger logger) {
-		int baseLen = filesDir.getAbsolutePath().length() + 1;
+	protected CoverageReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger) {
+		int baseLen = inputDir.getAbsolutePath().length() + 1;
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 
@@ -76,7 +76,7 @@ public class PublishCloverReportStep extends PublishCoverageReportStep {
 		
 		List<PackageCoverageInfo> packageCoverages = new ArrayList<>();
 		
-		for (File file: getPatternSet().listFiles(filesDir)) {
+		for (File file: getPatternSet().listFiles(inputDir)) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing clover report '" + relativePath + "'...");
 			Document doc;

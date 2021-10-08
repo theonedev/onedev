@@ -551,7 +551,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 										}
 
 										@Override
-										public Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, File filesDir, 
+										public Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, File inputDir, 
 												Map<String, String> placeholderValues, TaskLogger logger) {
 											return sessionManager.call(new Callable<Map<String, byte[]>>() {
 
@@ -597,7 +597,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 														}
 													}
 													
-													return serverStep.run(build, filesDir, logger);
+													return serverStep.run(build, inputDir, logger);
 												}
 												
 											});
@@ -1327,8 +1327,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Override
 	public Map<String, byte[]> runServerStep(String jobToken, List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, TaskLogger logger) {
-		return getJobContext(jobToken, true).runServerStep(stepPosition, filesDir, placeholderValues, logger);
+			File inputDir, Map<String, String> placeholderValues, TaskLogger logger) {
+		return getJobContext(jobToken, true).runServerStep(stepPosition, inputDir, placeholderValues, logger);
 	}
 	
 }

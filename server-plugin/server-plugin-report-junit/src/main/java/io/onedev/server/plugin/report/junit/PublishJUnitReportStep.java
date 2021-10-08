@@ -52,13 +52,13 @@ public class PublishJUnitReportStep extends PublishUnitTestReportStep {
 	}
 
 	@Override
-	protected UnitTestReport createReport(Build build, File filesDir, TaskLogger logger) {
+	protected UnitTestReport createReport(Build build, File inputDir, TaskLogger logger) {
 		SAXReader reader = new SAXReader();
 		XmlUtils.disallowDocTypeDecl(reader);
 		
 		List<TestCase> testCases = new ArrayList<>();
-		int baseLen = filesDir.getAbsolutePath().length()+1;
-		for (File file: FileUtils.listFiles(filesDir, Lists.newArrayList("**"), Lists.newArrayList())) {
+		int baseLen = inputDir.getAbsolutePath().length()+1;
+		for (File file: FileUtils.listFiles(inputDir, Lists.newArrayList("**"), Lists.newArrayList())) {
 			String relativePath = file.getAbsolutePath().substring(baseLen);
 			logger.log("Processing JUnit test report '" + relativePath + "'...");
 			try {

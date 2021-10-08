@@ -49,12 +49,12 @@ public class PublishJestReportStep extends PublishUnitTestReportStep {
 	}
 
 	@Override
-	protected UnitTestReport createReport(Build build, File filesDir, TaskLogger logger) {
+	protected UnitTestReport createReport(Build build, File inputDir, TaskLogger logger) {
 		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 
 		List<TestCase> testCases = new ArrayList<>();
-		int baseLen = filesDir.getAbsolutePath().length()+1;
-		for (File file: FileUtils.listFiles(filesDir, Lists.newArrayList("**"), Lists.newArrayList())) {
+		int baseLen = inputDir.getAbsolutePath().length()+1;
+		for (File file: FileUtils.listFiles(inputDir, Lists.newArrayList("**"), Lists.newArrayList())) {
 			logger.log("Processing Jest test report: " + file.getAbsolutePath().substring(baseLen));
 			try {
 				testCases.addAll(JestReportParser.parse(build, mapper.readTree(file)));

@@ -129,13 +129,13 @@ public abstract class JobContext {
 	public abstract void reportJobWorkspace(String jobWorkspace);
 	
 	public Map<String, byte[]> runServerStep(List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, TaskLogger logger) {
+			File inputDir, Map<String, String> placeholderValues, TaskLogger logger) {
 		Thread thread = Thread.currentThread();
 		synchronized (serverStepThreads) {
 			serverStepThreads.add(thread);
 		}
 		try {
-			return doRunServerStep(stepPosition, filesDir, placeholderValues, logger);
+			return doRunServerStep(stepPosition, inputDir, placeholderValues, logger);
 		} finally {
 			synchronized (serverStepThreads) {
 				serverStepThreads.remove(thread);
@@ -144,7 +144,7 @@ public abstract class JobContext {
 	}
 	
 	protected abstract Map<String, byte[]> doRunServerStep(List<Integer> stepPosition, 
-			File filesDir, Map<String, String> placeholderValues, TaskLogger logger);
+			File inputDir, Map<String, String> placeholderValues, TaskLogger logger);
 	
 	public abstract void copyDependencies(File targetDir);
 	
