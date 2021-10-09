@@ -83,8 +83,6 @@ public class PublishCheckstyleReportStep extends PublishProblemReportStep {
 								Severity severity;
 								String severityStr = violationElement.attributeValue("severity");
 								if (severityStr.equalsIgnoreCase("error"))
-									severity = Severity.HIGH;
-								else if (severityStr.equalsIgnoreCase("warning"))
 									severity = Severity.MEDIUM;
 								else
 									severity = Severity.LOW;
