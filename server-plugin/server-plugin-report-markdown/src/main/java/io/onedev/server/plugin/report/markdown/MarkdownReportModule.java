@@ -115,7 +115,7 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/markdown-reports/${report}/#{path}", MarkdownReportPage.class));
+				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/markdown/${report}/#{path}", MarkdownReportPage.class));
 			}
 			
 		});	
