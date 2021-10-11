@@ -61,8 +61,8 @@ public class MarkdownReportPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		File file = new File(getBuild().getReportCategoryDir(PublishMarkdownReportStep.CATEGORY), 
-				reportName + "/" + filePath);
+		File file = new File(getBuild().getPublishDir(), 
+				PublishMarkdownReportStep.CATEGORY + "/" + reportName + "/" + filePath);
 		try {
 			String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 			add(new MarkdownViewer("markdownReport", Model.of(markdown), null));

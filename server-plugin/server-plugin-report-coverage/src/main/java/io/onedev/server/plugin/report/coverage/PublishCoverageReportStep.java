@@ -31,12 +31,12 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(CoverageReport.CATEGORY), getReportName());
-
-		CoverageReport report = LockUtils.write(build.getReportCategoryLockKey(CoverageReport.CATEGORY), new Callable<CoverageReport>() {
+		CoverageReport report = LockUtils.write(CoverageReport.getReportLockKey(build), new Callable<CoverageReport>() {
 
 			@Override
 			public CoverageReport call() throws Exception {
+				File reportDir = new File(build.getPublishDir(), CoverageReport.CATEGORY + "/" + getReportName());
+
 				FileUtils.createDir(reportDir);
 				try {
 					CoverageReport report = createReport(build, inputDir, reportDir, logger);
@@ -80,7 +80,7 @@ public abstract class PublishCoverageReportStep extends PublishReportStep {
 	protected abstract CoverageReport createReport(Build build, File inputDir, File reportDir, TaskLogger logger);
 
 	protected void writeLineCoverages(Build build, String blobPath, Map<Integer, CoverageStatus> lineCoverages) {
-		File reportDir = new File(build.getReportCategoryDir(CoverageReport.CATEGORY), getReportName());
+		File reportDir = new File(build.getPublishDir(), CoverageReport.CATEGORY + "/" + getReportName());
 		File lineCoverageFile = new File(reportDir, CoverageReport.FILES_DIR + "/" + blobPath);
 		FileUtils.createDir(lineCoverageFile.getParentFile());
 		try (OutputStream os = new FileOutputStream(lineCoverageFile)) {

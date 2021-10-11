@@ -53,11 +53,11 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.CATEGORY), new Callable<Void>() {
+				LockUtils.read(PublishMarkdownReportStep.getReportLockKey(build), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						File categoryDir = build.getReportCategoryDir(PublishMarkdownReportStep.CATEGORY);
+						File categoryDir = new File(build.getPublishDir(), PublishMarkdownReportStep.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()))
@@ -84,12 +84,12 @@ public class MarkdownReportModule extends AbstractPluginModule {
 			public List<PullRequestSummaryPart> getParts(PullRequest request) {
 				List<PullRequestSummaryPart> parts = new ArrayList<>();
 				for (Build build: request.getCurrentBuilds()) {
-					parts.addAll(LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.CATEGORY), new Callable<List<PullRequestSummaryPart>>() {
+					parts.addAll(LockUtils.read(PublishPullRequestMarkdownReportStep.getReportLockKey(build), new Callable<List<PullRequestSummaryPart>>() {
 
 						@Override
 						public List<PullRequestSummaryPart> call() throws Exception {
 							List<PullRequestSummaryPart> parts = new ArrayList<>();
-							File categoryDir = build.getReportCategoryDir(PublishPullRequestMarkdownReportStep.CATEGORY);
+							File categoryDir = new File(build.getPublishDir(), PublishPullRequestMarkdownReportStep.CATEGORY);
 							if (categoryDir.exists()) {
 								for (File reportDir: categoryDir.listFiles()) {
 									if (SecurityUtils.canAccessReport(build, reportDir.getName()))

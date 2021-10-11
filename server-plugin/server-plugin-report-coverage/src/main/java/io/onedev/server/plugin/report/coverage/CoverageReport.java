@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.apache.commons.lang.SerializationUtils;
 
+import io.onedev.server.model.Build;
+
 public class CoverageReport implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -56,6 +58,10 @@ public class CoverageReport implements Serializable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		};
+	}
+
+	public static String getReportLockKey(Build build) {
+		return CoverageReport.class.getName() + ":"	+ build.getId();
 	}
 	
 }

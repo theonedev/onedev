@@ -41,11 +41,11 @@ public class UnitTestReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(UnitTestReport.CATEGORY), new Callable<Void>() {
+				LockUtils.read(UnitTestReport.getReportLockKey(build), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						File categoryDir = build.getReportCategoryDir(UnitTestReport.CATEGORY);
+						File categoryDir = new File(build.getPublishDir(), UnitTestReport.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {

@@ -753,14 +753,6 @@ public class Build extends AbstractEntity implements Referenceable {
 		return new File(getPublishDir(), ARTIFACTS_DIR);
 	}
 	
-	public String getReportCategoryLockKey(String reportCategory) {
-		return "job-report:" + getId() + ":" + reportCategory;
-	}
-	
-	public File getReportCategoryDir(String reportCategory) {
-		return new File(getPublishDir(), reportCategory);
-	}
-	
 	public void publishArtifacts(File workspaceDir, String artifacts) {
 		LockUtils.write(getArtifactsLockKey(), new Callable<Void>() {
 

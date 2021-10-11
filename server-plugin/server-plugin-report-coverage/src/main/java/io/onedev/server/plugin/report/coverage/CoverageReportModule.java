@@ -69,12 +69,12 @@ public class CoverageReportModule extends AbstractPluginModule {
 			
 			@Override
 			public Map<Integer, CoverageStatus> getLineCoverages(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportCategoryLockKey(CoverageReport.CATEGORY), new Callable<Map<Integer, CoverageStatus>>() {
+				return LockUtils.read(CoverageReport.getReportLockKey(build), new Callable<Map<Integer, CoverageStatus>>() {
 
 					@Override
 					public Map<Integer, CoverageStatus> call() throws Exception {
 						Map<Integer, CoverageStatus> coverages = new HashMap<>();
-						File categoryDir = build.getReportCategoryDir(CoverageReport.CATEGORY);
+						File categoryDir = new File(build.getPublishDir(), CoverageReport.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
@@ -106,12 +106,13 @@ public class CoverageReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(CoverageReport.CATEGORY), new Callable<Void>() {
+				LockUtils.read(CoverageReport.getReportLockKey(build), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportCategoryDir(CoverageReport.CATEGORY).exists()) {
-							for (File reportDir: build.getReportCategoryDir(CoverageReport.CATEGORY).listFiles()) {
+						File categoryDir = new File(build.getPublishDir(), CoverageReport.CATEGORY);
+						if (categoryDir.exists()) {
+							for (File reportDir: categoryDir.listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) { 
 									tabs.add(new BuildReportTab(reportDir.getName(), CoverageReportPage.class, 
 											CoverageStatsPage.class));

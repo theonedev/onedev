@@ -30,12 +30,12 @@ public class MarkdownReportTab extends BuildTab {
 			@Override
 			protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
 				BuildDetailPage page = (BuildDetailPage) getPage();
-				String startPage = LockUtils.read(page.getBuild().getReportCategoryLockKey(PublishMarkdownReportStep.CATEGORY), new Callable<String>() {
+				String startPage = LockUtils.read(PublishMarkdownReportStep.getReportLockKey(page.getBuild()), new Callable<String>() {
 
 					@Override
 					public String call() throws Exception {
-						File startPageFile = new File(page.getBuild().getReportCategoryDir(PublishMarkdownReportStep.CATEGORY), 
-								getTitle() + "/" + PublishMarkdownReportStep.START_PAGE);
+						File startPageFile = new File(page.getBuild().getPublishDir(), 
+								PublishMarkdownReportStep.CATEGORY + "/" + getTitle() + "/" + PublishMarkdownReportStep.START_PAGE);
 						return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
 					}
 					

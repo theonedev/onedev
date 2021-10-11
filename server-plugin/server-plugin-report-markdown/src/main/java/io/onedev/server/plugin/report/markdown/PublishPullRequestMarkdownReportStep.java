@@ -24,7 +24,7 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String CATEGORY = "pull-request-markdown-reports";
+	public static final String CATEGORY = "pull-request-markdown";
 	
 	public static final String FILE = "content.md";
 
@@ -54,13 +54,13 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 	@Override
 	public Map<String, byte[]> run(Build build, File workspace, TaskLogger logger) {
 		if (build.getRequest() != null) {
-			LockUtils.write(build.getReportCategoryLockKey(CATEGORY), new Callable<Void>() {
+			LockUtils.write(getReportLockKey(build), new Callable<Void>() {
 
 				@Override
 				public Void call() throws Exception {
 					File file = new File(workspace, getFile()); 
 					if (file.exists()) {
-						File reportDir = new File(build.getReportCategoryDir(CATEGORY), getReportName());
+						File reportDir = new File(build.getPublishDir(), CATEGORY + "/" + getReportName());
 						String markdown = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 						FileUtils.createDir(reportDir);
 						FileUtils.writeFile(new File(reportDir, FILE), markdown, StandardCharsets.UTF_8.name());
@@ -73,6 +73,10 @@ public class PublishPullRequestMarkdownReportStep extends PublishReportStep {
 			});
 		}
 		return null;
+	}
+
+	public static String getReportLockKey(Build build) {
+		return PublishPullRequestMarkdownReportStep.class.getName() + ":" + build.getId();
 	}
 
 }

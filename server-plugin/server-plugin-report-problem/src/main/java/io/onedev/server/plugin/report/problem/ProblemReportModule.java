@@ -68,13 +68,13 @@ public class ProblemReportModule extends AbstractPluginModule {
 			
 			@Override
 			public List<CodeProblem> getCodeProblems(Build build, String blobPath, String reportName) {
-				return LockUtils.read(build.getReportCategoryLockKey(ProblemReport.CATEGORY), new Callable<List<CodeProblem>>() {
+				return LockUtils.read(ProblemReport.getReportLockKey(build), new Callable<List<CodeProblem>>() {
 
 					@SuppressWarnings("unchecked")
 					@Override
 					public List<CodeProblem> call() throws Exception {
 						List<CodeProblem> problems = new ArrayList<>();
-						File categoryDir = build.getReportCategoryDir(ProblemReport.CATEGORY);
+						File categoryDir = new File(build.getPublishDir(), ProblemReport.CATEGORY);
 						if (categoryDir.exists()) {
 							for (File reportDir: categoryDir.listFiles()) {
 								if (SecurityUtils.canAccessReport(build, reportDir.getName()) 
@@ -102,12 +102,13 @@ public class ProblemReportModule extends AbstractPluginModule {
 			@Override
 			public List<BuildTab> getTabs(Build build) {
 				List<BuildTab> tabs = new ArrayList<>();
-				LockUtils.read(build.getReportCategoryLockKey(ProblemReport.CATEGORY), new Callable<Void>() {
+				LockUtils.read(ProblemReport.getReportLockKey(build), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
-						if (build.getReportCategoryDir(ProblemReport.CATEGORY).exists()) {
-							for (File reportDir: build.getReportCategoryDir(ProblemReport.CATEGORY).listFiles()) {
+						File categoryDir = new File(build.getPublishDir(), ProblemReport.CATEGORY);
+						if (categoryDir.exists()) {
+							for (File reportDir: categoryDir.listFiles()) {
 								if (!reportDir.isHidden() && SecurityUtils.canAccessReport(build, reportDir.getName())) {
 									tabs.add(new BuildReportTab(reportDir.getName(), ProblemReportPage.class, 
 											ProblemStatsPage.class));

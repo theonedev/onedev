@@ -47,13 +47,13 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		LockUtils.write(build.getReportCategoryLockKey(CATEGORY), new Callable<Void>() {
+		LockUtils.write(getReportLockKey(build), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
 				File startPage = new File(inputDir, getStartPage()); 
 				if (startPage.exists()) {
-					File reportDir = new File(build.getReportCategoryDir(CATEGORY), getReportName());
+					File reportDir = new File(build.getPublishDir(), CATEGORY + "/" + getReportName());
 
 					FileUtils.createDir(reportDir);
 					File startPageFile = new File(reportDir, START_PAGE);
@@ -79,4 +79,8 @@ public class PublishMarkdownReportStep extends PublishReportStep {
 		return null;
 	}
 
+	public static String getReportLockKey(Build build) {
+		return PublishMarkdownReportStep.class.getName() + ":" + build.getId();
+	}
+	
 }

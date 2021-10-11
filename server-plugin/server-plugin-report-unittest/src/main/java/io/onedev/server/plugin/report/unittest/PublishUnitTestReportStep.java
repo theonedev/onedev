@@ -23,9 +23,9 @@ public abstract class PublishUnitTestReportStep extends PublishReportStep {
 	
 	@Override
 	public Map<String, byte[]> run(Build build, File inputDir, TaskLogger logger) {
-		File reportDir = new File(build.getReportCategoryDir(UnitTestReport.CATEGORY), getReportName());
+		File reportDir = new File(build.getPublishDir(), UnitTestReport.CATEGORY + "/" + getReportName());
 
-		UnitTestReport report = LockUtils.write(build.getReportCategoryLockKey(UnitTestReport.CATEGORY), new Callable<UnitTestReport>() {
+		UnitTestReport report = LockUtils.write(UnitTestReport.getReportLockKey(build), new Callable<UnitTestReport>() {
 
 			@Override
 			public UnitTestReport call() throws Exception {

@@ -32,12 +32,12 @@ public abstract class UnitTestReportPage extends BuildReportPage {
 
 		@Override
 		protected UnitTestReport load() {
-			return LockUtils.read(getBuild().getReportCategoryLockKey(UnitTestReport.CATEGORY), new Callable<UnitTestReport>() {
+			return LockUtils.read(UnitTestReport.getReportLockKey(getBuild()), new Callable<UnitTestReport>() {
 
 				@Override
 				public UnitTestReport call() throws Exception {
-					File reportsDir = new File(getBuild().getReportCategoryDir(UnitTestReport.CATEGORY), getReportName());				
-					return UnitTestReport.readFrom(reportsDir);
+					File reportDir = new File(getBuild().getPublishDir(), UnitTestReport.CATEGORY + "/" + getReportName());				
+					return UnitTestReport.readFrom(reportDir);
 				}
 				
 			});

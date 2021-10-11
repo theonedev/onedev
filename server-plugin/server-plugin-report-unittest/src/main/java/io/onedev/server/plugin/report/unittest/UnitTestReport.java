@@ -250,4 +250,8 @@ public class UnitTestReport implements Serializable {
 		
 	}
 	
+	public static String getReportLockKey(Build build) {
+		return UnitTestReport.class.getName() + ":" + build.getId();
+	}
+	
 }

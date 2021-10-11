@@ -18,6 +18,7 @@ import java.util.Map;
 import org.apache.commons.lang.SerializationUtils;
 
 import io.onedev.server.codequality.CodeProblem;
+import io.onedev.server.model.Build;
 
 public class ProblemReport implements Serializable {
 
@@ -83,6 +84,10 @@ public class ProblemReport implements Serializable {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		};
+	}
+	
+	public static String getReportLockKey(Build build) {
+		return ProblemReport.class.getName() + ":" + build.getId();
 	}
 
 }
