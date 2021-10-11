@@ -133,9 +133,9 @@ public class ProblemReportModule extends AbstractPluginModule {
 			
 			@Override
 			public void configure(WebApplication application) {
-				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/problem-reports/${report}", 
+				application.mount(new DynamicPathPageMapper("projects/${project}/builds/${build}/problem/${report}", 
 						ProblemReportPage.class));
-				application.mount(new DynamicPathPageMapper("projects/${project}/stats/checkstyle", ProblemStatsPage.class));
+				application.mount(new DynamicPathPageMapper("projects/${project}/stats/problem", ProblemStatsPage.class));
 			}
 			
 		});			
