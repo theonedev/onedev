@@ -94,7 +94,7 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 		String markdownPath = Joiner.on("/").join(pathSegments);
 		
 		File buildDir = OneDev.getInstance(StorageManager.class).getBuildDir(project.getId(), build.getNumber());
-		File reportDir = new File(buildDir, MarkdownReportModule.CATEGORY + "/" + reportName);
+		File reportDir = new File(buildDir, PublishMarkdownReportStep.CATEGORY + "/" + reportName);
 		
 		File markdownFile = new File(reportDir, markdownPath);
 		if (!markdownFile.exists() || markdownFile.isDirectory()) {
@@ -121,7 +121,7 @@ public class MarkdownReportDownloadResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				LockUtils.read(build.getReportCategoryLockKey(MarkdownReportModule.CATEGORY), new Callable<Void>() {
+				LockUtils.read(build.getReportCategoryLockKey(PublishMarkdownReportStep.CATEGORY), new Callable<Void>() {
 
 					@Override
 					public Void call() throws Exception {
