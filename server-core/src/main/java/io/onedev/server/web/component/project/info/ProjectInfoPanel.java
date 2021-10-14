@@ -10,6 +10,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -19,13 +20,11 @@ import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.project.path.ProjectPathPanel;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public abstract class ProjectInfoPanel extends Panel {
@@ -41,10 +40,10 @@ public abstract class ProjectInfoPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Label("name", getProject().getName()));
+		add(new ProjectPathPanel("path", projectModel));
 		
 		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
-				+ Criteria.quote(getProject().getName());
+				+ Criteria.quote(getProject().getPath());
 		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
 		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params) {
 
@@ -93,11 +92,14 @@ public abstract class ProjectInfoPanel extends Panel {
 			add(new WebMarkupContainer("description").setVisible(false));
 				
 		if (getProject().getForkedFrom() != null) {
-			Link<Void> forkedFromLink = new ViewStateAwarePageLink<Void>("forkedFrom", 
-					ProjectDashboardPage.class, ProjectBlobPage.paramsOf(getProject().getForkedFrom()));
-			forkedFromLink.add(new Label("label", getProject().getForkedFrom().getName()));
-			forkedFromLink.setVisible(SecurityUtils.canAccess(getProject().getForkedFrom()));
-			add(forkedFromLink);
+			add(new ProjectPathPanel("forkedFrom", new AbstractReadOnlyModel<Project>() {
+
+				@Override
+				public Project getObject() {
+					return getProject().getForkedFrom();
+				}
+				
+			}));
 		} else {
 			WebMarkupContainer forkedFromLink = new WebMarkupContainer("forkedFrom");
 			forkedFromLink.add(new Label("label"));

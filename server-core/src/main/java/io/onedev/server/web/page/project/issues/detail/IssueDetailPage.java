@@ -315,7 +315,7 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 
 	@Override
 	protected String getPageTitle() {
-		return getIssue().getTitle() + " - Issue #" +  getIssue().getNumber() + " - " + getProject().getName();
+		return getIssue().getTitle() + " - Issue #" +  getIssue().getNumber() + " - " + getProject().getPath();
 	}
 	
 }

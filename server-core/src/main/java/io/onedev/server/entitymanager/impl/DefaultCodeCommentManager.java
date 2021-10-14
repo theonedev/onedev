@@ -308,4 +308,11 @@ public class DefaultCodeCommentManager extends BaseEntityManager<CodeComment> im
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
+	@Transactional
+	@Override
+	public void delete(Collection<CodeComment> comments) {
+		for (CodeComment comment: comments)
+			delete(comment);
+	}
+
 }

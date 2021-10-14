@@ -336,7 +336,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	public String getDocRoot() {
 		Version version = new Version(AppLoader.getProduct().getVersion());
-		return "https://code.onedev.io/projects/onedev-manual/blob/" + version.getMajor() + "." + version.getMinor();
+		return "https://code.onedev.io/projects/162/blob/" + version.getMajor() + "." + version.getMinor();
 	}
 	
 }

@@ -21,9 +21,9 @@ public class UserFacade extends EntityFacade {
 	
 	private final List<String> alternateEmails;
 	
-	public UserFacade(Long userId, String name, @Nullable String fullName, String email, 
+	public UserFacade(Long id, String name, @Nullable String fullName, String email, 
 			@Nullable String gitEmail, List<String> alternateEmails) {
-		super(userId);
+		super(id);
 		this.name = name;
 		this.fullName = fullName;
 		this.email = email;

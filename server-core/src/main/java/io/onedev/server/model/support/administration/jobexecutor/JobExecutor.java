@@ -101,17 +101,17 @@ public abstract class JobExecutor implements Serializable {
 		return isEnabled() && io.onedev.server.job.match.JobMatch.parse(jobMatch).matches(build);
 	}
 	
-	public Usage onDeleteProject(String projectName) {
+	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (io.onedev.server.job.match.JobMatch.parse(jobMatch).isUsingProject(projectName))
+		if (io.onedev.server.job.match.JobMatch.parse(jobMatch).isUsingProject(projectPath))
 			usage.add("job match" );
 		return usage;
 	}
 	
-	public void onRenameProject(String oldName, String newName) {
+	public void onRenameProject(String oldPath, String newPath) {
 		io.onedev.server.job.match.JobMatch parsedJobMatch = 
 				io.onedev.server.job.match.JobMatch.parse(this.jobMatch);
-		parsedJobMatch.onRenameProject(oldName, newName);
+		parsedJobMatch.onRenameProject(oldPath, newPath);
 		jobMatch = parsedJobMatch.toString();
 	}
 

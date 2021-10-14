@@ -32,7 +32,7 @@ public class ProjectDependency implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String projectName;
+	private String projectPath;
 
 	private BuildProvider buildProvider = new LastFinishedBuild();
 	
@@ -40,16 +40,16 @@ public class ProjectDependency implements Serializable {
 	
 	private String accessTokenSecret;
 	
-	// change Named("projectName") also if change name of this property 
+	// change Named("projectPath") also if change name of this property 
 	@Editable(order=200, name="Project", description="Specify project to retrieve artifacts from")
 	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
-	public String getProjectName() {
-		return projectName;
+	public String getProjectPath() {
+		return projectPath;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setProjectPath(String projectPath) {
+		this.projectPath = projectPath;
 	}
 
 	@SuppressWarnings("unused")
@@ -58,7 +58,7 @@ public class ProjectDependency implements Serializable {
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
 		for (Project each: OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject())) {
 			if (!each.equals(project))
-				choices.add(each.getName());
+				choices.add(each.getPath());
 		}
 		
 		Collections.sort(choices);
@@ -78,9 +78,9 @@ public class ProjectDependency implements Serializable {
 
 	@Nullable
 	static Project getInputProject(EditContext editContext) {
-		String projectName = (String) editContext.getInputValue("projectName");
-		if (projectName != null) {
-			Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+		String projectPath = (String) editContext.getInputValue("projectPath");
+		if (projectPath != null) {
+			Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
 			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}

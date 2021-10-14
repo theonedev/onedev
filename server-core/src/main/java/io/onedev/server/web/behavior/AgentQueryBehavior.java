@@ -95,7 +95,7 @@ public class AgentQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "quote as literal value";
+						return "value should be quoted";
 					}
 					
 				}.suggest(terminalExpect);

@@ -52,7 +52,7 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 				title = String.format("<a href='%s'>#%d</a> %s", url, request.getNumber(), transformed);
 			} else { 
 				title = String.format("<a href='%s'>%s#%d</a> %s", 
-						url, request.getTargetProject().getName(), request.getNumber(), transformed);
+						url, request.getTargetProject().getPath(), request.getNumber(), transformed);
 			}
 			add(new Label("title", title).setEscapeModelStrings(false));
 		} else {
@@ -62,7 +62,7 @@ public class ReferencedFromPullRequestPanel extends GenericPanel<PullRequest> {
 			if (request.getTargetProject().equals(project)) 
 				title = "#" + request.getNumber() + " " + transformed;
 			else 
-				title = request.getTargetProject().getName() + "#" + request.getNumber() + " " + transformed;
+				title = request.getTargetProject().getPath() + "#" + request.getNumber() + " " + transformed;
 			add(new Label("title", title).setEscapeModelStrings(false));
 		}
 	}

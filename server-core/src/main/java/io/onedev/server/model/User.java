@@ -50,7 +50,6 @@ import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.NameAware;
 import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.util.validation.annotation.EmailList;
 import io.onedev.server.util.validation.annotation.UserName;
@@ -67,7 +66,7 @@ import io.onedev.server.web.editable.annotation.Password;
 		uniqueConstraints={@UniqueConstraint(columnNames={SsoInfo.COLUMN_CONNECTOR, SsoInfo.COLUMN_SUBJECT})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class User extends AbstractEntity implements AuthenticationInfo, NameAware {
+public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -423,7 +422,6 @@ public class User extends AbstractEntity implements AuthenticationInfo, NameAwar
 	@Editable(name="Login Name", order=100)
 	@UserName
 	@NotEmpty
-	@Override
 	public String getName() {
 		return name;
 	}

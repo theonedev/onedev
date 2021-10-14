@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -52,7 +51,6 @@ import io.onedev.server.search.entity.agent.AgentQuery;
 import io.onedev.server.search.entity.agent.NameCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.AgentQueryBehavior;
 import io.onedev.server.web.component.AgentStatusBadge;
 import io.onedev.server.web.component.datatable.OneDataTable;
@@ -138,6 +136,7 @@ class AgentListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		agentsTable.setCurrentPage(0);
 		target.add(body);
+		selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -273,13 +272,14 @@ class AgentListPanel extends Panel {
 									agents.add(each.getObject());
 								OneDev.getInstance(AgentManager.class).pause(agents);
 								target.add(body);
+								selectionColumn.getSelections().clear();
 								Session.get().success("Paused selected agents");
 							}
 							
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 							
 							@Override
@@ -316,13 +316,14 @@ class AgentListPanel extends Panel {
 									agents.add(each.getObject());
 								OneDev.getInstance(AgentManager.class).resume(agents);
 								target.add(body);
+								selectionColumn.getSelections().clear();
 								Session.get().success("Resumed selected agents");
 							}
 							
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 							
 							@Override
@@ -352,26 +353,39 @@ class AgentListPanel extends Panel {
 						return new AjaxLink<Void>(id) {
 
 							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to restart selected agents?"));
-							}
-
-							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Agent> agents = new ArrayList<>();
-								for (IModel<Agent> each: selectionColumn.getSelections())
-									agents.add(each.getObject());
-								OneDev.getInstance(AgentManager.class).restart(agents);
-								target.add(body);
-								Session.get().success("Restart command issued to selected agents");
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Agent> agents = new ArrayList<>();
+										for (IModel<Agent> each: selectionColumn.getSelections())
+											agents.add(each.getObject());
+										OneDev.getInstance(AgentManager.class).restart(agents);
+										target.add(body);
+										selectionColumn.getSelections().clear();
+										Session.get().success("Restart command issued to selected agents");
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to restart selected agents";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
 							}
 							
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 							
 							@Override
@@ -401,25 +415,39 @@ class AgentListPanel extends Panel {
 						return new AjaxLink<Void>(id) {
 
 							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to remove selected agents?"));
-							}
-
-							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Agent> agents = new ArrayList<>();
-								for (IModel<Agent> each: selectionColumn.getSelections())
-									agents.add(each.getObject());
-								OneDev.getInstance(AgentManager.class).delete(agents);
-								target.add(body);
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Agent> agents = new ArrayList<>();
+										for (IModel<Agent> each: selectionColumn.getSelections())
+											agents.add(each.getObject());
+										OneDev.getInstance(AgentManager.class).delete(agents);
+										selectionColumn.getSelections().clear();
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to remove selected agents";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
 							}
 							
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 							
 							@Override
@@ -462,6 +490,7 @@ class AgentListPanel extends Panel {
 											agents.add(it.next());
 										}
 										OneDev.getInstance(AgentManager.class).pause(agents);
+										selectionColumn.getSelections().clear();
 										target.add(body);
 										Session.get().success("Paused all queried agents");
 									}
@@ -527,6 +556,7 @@ class AgentListPanel extends Panel {
 										}
 										OneDev.getInstance(AgentManager.class).resume(agents);
 										target.add(body);
+										selectionColumn.getSelections().clear();
 										Session.get().success("Resumed all queried agents");
 									}
 									
@@ -591,6 +621,7 @@ class AgentListPanel extends Panel {
 										}
 										OneDev.getInstance(AgentManager.class).restart(agents);
 										target.add(body);
+										selectionColumn.getSelections().clear();
 										Session.get().success("Restart command issued to all queried agents");
 									}
 									
@@ -655,6 +686,7 @@ class AgentListPanel extends Panel {
 										}
 										OneDev.getInstance(AgentManager.class).delete(agents);
 										target.add(body);
+										selectionColumn.getSelections().clear();
 									}
 									
 									@Override

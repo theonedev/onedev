@@ -81,12 +81,12 @@ abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAwar
 
 				if (dependencyIndex != -1) { 
 					ProjectDependency oldDependency = dependencies.get(dependencyIndex);
-					if (!dependency.getProjectName().equals(oldDependency.getProjectName()) && getDependency(dependency.getProjectName()) != null) {
-						editor.error(new Path(new PathNode.Named("projectName")),
+					if (!dependency.getProjectPath().equals(oldDependency.getProjectPath()) && getDependency(dependency.getProjectPath()) != null) {
+						editor.error(new Path(new PathNode.Named("projectPath")),
 								"Dependency to this project is already defined");
 					}
-				} else if (getDependency(dependency.getProjectName()) != null) {
-					editor.error(new Path(new PathNode.Named("projectName")),
+				} else if (getDependency(dependency.getProjectPath()) != null) {
+					editor.error(new Path(new PathNode.Named("projectPath")),
 							"Dependency to this project is already defined");
 				}
 
@@ -125,7 +125,7 @@ abstract class ProjectDependencyEditPanel extends Panel implements BuildSpecAwar
 
 	private ProjectDependency getDependency(String projectName) {
 		for (ProjectDependency dependency: dependencies) {
-			if (projectName.equals(dependency.getProjectName()))
+			if (projectName.equals(dependency.getProjectPath()))
 				return dependency;
 		}
 		return null;

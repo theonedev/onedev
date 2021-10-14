@@ -380,7 +380,7 @@ public class MilestoneListPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Milestones - " + getProject().getName();
+		return "Milestones - " + getProject().getPath();
 	}
 	
 }

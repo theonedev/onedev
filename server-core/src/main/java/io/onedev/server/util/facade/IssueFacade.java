@@ -10,8 +10,8 @@ public class IssueFacade extends EntityFacade {
 	
 	private final Long number;
 	
-	public IssueFacade(Long issueId, Long projectId, Long number) {
-		super(issueId);
+	public IssueFacade(Long id, Long projectId, Long number) {
+		super(id);
 		this.projectId = projectId;
 		this.number = number;
 	}

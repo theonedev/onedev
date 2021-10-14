@@ -12,7 +12,7 @@ public interface Referenceable {
 
 	public static String asReference(Referenceable referenceable) {
 		return String.format("%s %s#%d", referenceable.getType(), 
-				referenceable.getProject().getName(), referenceable.getNumber());
+				referenceable.getProject().getPath(), referenceable.getNumber());
 	}
 	
 }

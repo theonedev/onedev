@@ -170,7 +170,7 @@ public class DefaultUserManager extends BaseEntityManager<User> implements UserM
 			for (TagProtection protection: project.getTagProtections()) 
 				usedInProject.add(protection.onDeleteUser(user.getName()));
 			usedInProject.add(project.getIssueSetting().onDeleteUser(user.getName()));
-			usedInProject.prefix("project '" + project.getName() + "': setting");
+			usedInProject.prefix("project '" + project.getPath() + "': setting");
 			usage.add(usedInProject);
 		}
 

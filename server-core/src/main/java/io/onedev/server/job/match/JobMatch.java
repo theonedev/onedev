@@ -148,8 +148,8 @@ public class JobMatch extends Criteria<Build> {
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
-		criteria.onRenameProject(oldName, newName);
+	public void onRenameProject(String oldPath, String newPath) {
+		criteria.onRenameProject(oldPath, newPath);
 	}
 
 	@Override
@@ -158,8 +158,8 @@ public class JobMatch extends Criteria<Build> {
 	}
 
 	@Override
-	public boolean isUsingProject(String projectName) {
-		return criteria.isUsingProject(projectName);
+	public boolean isUsingProject(String projectPath) {
+		return criteria.isUsingProject(projectPath);
 	}
 	
 	public static String getRuleName(int rule) {

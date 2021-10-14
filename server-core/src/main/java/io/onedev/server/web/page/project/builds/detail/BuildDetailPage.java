@@ -580,9 +580,9 @@ public abstract class BuildDetailPage extends ProjectPage
 	@Override
 	protected String getPageTitle() {
 		if (getBuild().getVersion() != null)
-			return getBuild().getVersion() + " - Build #" +  getBuild().getNumber() + " - " + getProject().getName();
+			return getBuild().getVersion() + " - Build #" +  getBuild().getNumber() + " - " + getProject().getPath();
 		else
-			return "Build #" +  getBuild().getNumber() + " - " + getProject().getName();
+			return "Build #" +  getBuild().getNumber() + " - " + getProject().getPath();
 	}
 
 	@Override

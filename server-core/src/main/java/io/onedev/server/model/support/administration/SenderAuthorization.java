@@ -12,8 +12,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.StringMatcher;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -46,9 +45,9 @@ public class SenderAuthorization implements Serializable {
 	}
 
 	@Editable(order=150, description="Specify space-separated projects authorized to senders above. "
-			+ "Use '*' or '?' for wildcard match. Prefix with '-' to exclude. Leave empty to "
+			+ "Use '**' or '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. Prefix with '-' to exclude. Leave empty to "
 			+ "authorize all projects")
-	@Patterns(suggester="suggestProjects")
+	@Patterns(suggester="suggestProjects", path=true)
 	@NameOfEmptyValue("Any project")
 	public String getAuthorizedProjects() {
 		return authorizedProjects;
@@ -82,11 +81,8 @@ public class SenderAuthorization implements Serializable {
 	}
 	
 	public boolean isPermitted(Project project, Permission privilege) {
-		String authorizedProjects = this.authorizedProjects;
-		if (authorizedProjects == null)
-			authorizedProjects = "*";
-		Matcher matcher = new StringMatcher();
-		return PatternSet.parse(authorizedProjects).matches(matcher, project.getName()) 
+		return (authorizedProjects == null 
+					|| PatternSet.parse(authorizedProjects).matches(new PathMatcher(), project.getPath())) 
 				&& getAuthorizedRole().implies(privilege);
 	}
 	

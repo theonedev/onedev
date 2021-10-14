@@ -13,17 +13,20 @@
 				<a wicket:id="addProject" class="btn btn-primary btn-icon flex-shrink-0 ml-3" title="Add project"><wicket:svg href="plus" class="icon"/></a>
 			</div>
 			<div class="operations mb-4">
-				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray mr-4">
+				<a wicket:id="showSavedQueries" class="show-saved-queries text-gray d-inline-block mb-2 mr-4">
 					<wicket:svg href="eye" class="icon"></wicket:svg> Show Saved Queries
 				</a>
-				<a wicket:id="saveQuery" class="save-query text-gray mr-4">
+				<a wicket:id="saveQuery" class="save-query text-gray d-inline-block mb-2 mr-4">
 					<wicket:svg href="save" class="icon"></wicket:svg> Save Query
 				</a>
-				<a wicket:id="orderBy" class="order-by text-gray mr-4">
-					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
+				<a wicket:id="operations" class="operations d-inline-block mb-2 mr-4 text-gray">
+					<wicket:svg href="ellipsis-circle" class="icon"></wicket:svg> Operations
 				</a>
-				<a wicket:id="importProjects" class="import-projects text-gray">
-					<wicket:svg href="import" class="icon"></wicket:svg> Import...
+				<a wicket:id="importProjects" class="import-projects d-inline-block mb-2 mr-4 text-gray">
+					<wicket:svg href="import" class="icon"></wicket:svg> Import
+				</a>
+				<a wicket:id="orderBy" class="order-by text-gray d-inline-block mb-2 mr-4">
+					<wicket:svg href="sort" class="icon"></wicket:svg> Order By
 				</a>
 			</div>
 			<div wicket:id="body">
@@ -33,6 +36,6 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="projectFrag">
-		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="name" class="name"></span></a> 
+		<a wicket:id="link"><img wicket:id="avatar"> <span wicket:id="path" class="path"></span></a> 
 	</wicket:fragment>
 </wicket:panel>

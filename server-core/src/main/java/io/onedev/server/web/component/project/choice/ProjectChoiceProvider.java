@@ -34,7 +34,7 @@ public class ProjectChoiceProvider extends AbstractProjectChoiceProvider {
 
 			@Override
 			public double getMatchScore(Project object) {
-				return MatchScoreUtils.getMatchScore(object.getName(), term);
+				return MatchScoreUtils.getMatchScore(object.getPath(), term);
 			}
 			
 		});

@@ -44,7 +44,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 
 	@Override
 	protected String getPageTitle() {
-		return "Issues - " + getProject().getName();
+		return "Issues - " + getProject().getPath();
 	}
 	
 }

@@ -9,9 +9,9 @@ import io.onedev.commons.utils.LinearRange;
 
 public class WildcardUtils {
 	
-	private static final Matcher PATH_MATCHER = new PathMatcher();
+	private static final PathMatcher PATH_MATCHER = new PathMatcher();
 	
-	private static final Matcher STRING_MATCHER = new StringMatcher();
+	private static final StringMatcher STRING_MATCHER = new StringMatcher();
 	
 	/**
      * Tests whether or not a given path matches a given pattern using of 

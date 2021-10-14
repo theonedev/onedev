@@ -17,8 +17,10 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
 import io.onedev.server.job.match.JobMatch;
 import io.onedev.server.model.Build;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.job.match.JobMatchLexer;
 import io.onedev.server.job.match.JobMatchParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -53,7 +55,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 								Preconditions.checkState(fieldElements.size() == 1);
 								String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
 								if (fieldName.equals(Build.NAME_PROJECT)) {
-									if (!matchWith.contains("*"))
+									if (!matchWith.contains("*") && !matchWith.contains("?"))
 										return SuggestionUtils.suggestProjects(matchWith);
 									else
 										return null;
@@ -65,7 +67,7 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "quote as literal value";
+						return "value should be quoted";
 					}
 					
 				}.suggest(terminalExpect);
@@ -97,9 +99,14 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if ("criteriaValue".equals(spec.getLabel())) {
-				String unmatched = terminalExpect.getUnmatchedText();
-				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) // only when we input criteria value
-					hints.add("Use '*' for wildcard match");
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(Build.NAME_PROJECT))
+						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+					else 
+						hints.add("Use '*' for wildcard match");
+				}
 			}
 		} 
 		return hints;

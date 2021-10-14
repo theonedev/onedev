@@ -483,7 +483,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Tags - " + getProject().getName();
+		return "Tags - " + getProject().getPath();
 	}
 	
 }

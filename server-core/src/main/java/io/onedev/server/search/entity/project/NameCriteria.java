@@ -23,14 +23,12 @@ public class NameCriteria extends EntityCriteria<Project> {
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
 		Path<String> attribute = root.get(Project.PROP_NAME);
-		String normalized = value.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		return builder.like(builder.lower(attribute), value.replace("*", "%"));
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		String name = project.getName();
-		return name != null && WildcardUtils.matchString(value.toLowerCase(), name.toLowerCase());
+		return WildcardUtils.matchString(value, project.getName());
 	}
 
 	@Override

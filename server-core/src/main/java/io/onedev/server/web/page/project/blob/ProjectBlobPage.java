@@ -1572,13 +1572,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext,
 	@Override
 	protected String getPageTitle() {
 		if (state.blobIdent.revision == null)
-			return getProject().getName();
+			return getProject().getPath();
 		else if (state.blobIdent.path == null) 
-			return state.blobIdent.revision + " - " + getProject().getName();
+			return state.blobIdent.revision + " - " + getProject().getPath();
 		else if (state.blobIdent.isFile())
-			return state.blobIdent.getName() + " at " + state.blobIdent.revision + " - " + getProject().getName();
+			return state.blobIdent.getName() + " at " + state.blobIdent.revision + " - " + getProject().getPath();
 		else
-			return state.blobIdent.path + " at " + state.blobIdent.revision + " - " + getProject().getName();
+			return state.blobIdent.path + " at " + state.blobIdent.revision + " - " + getProject().getPath();
 	}
 	
 	@Override

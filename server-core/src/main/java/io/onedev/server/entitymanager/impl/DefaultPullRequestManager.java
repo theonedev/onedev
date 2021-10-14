@@ -500,7 +500,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 														mergePreview = new MergePreview(request.getTarget().getObjectName(), 
 																request.getLatestUpdate().getHeadCommitHash(), request.getMergeStrategy(), null);
 														logger.debug("Calculating merge preview of pull request #{} in project '{}'...", 
-																request.getNumber(), targetProject.getName());
+																request.getNumber(), targetProject.getPath());
 														ObjectId merged = mergePreview.getMergeStrategy().merge(request, "Merge preview of pull request #" + request.getNumber());
 														if (merged != null)
 															mergePreview.setMergeCommitHash(merged.name());
@@ -533,7 +533,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 			request.setCheckError(request.getCheckError() + ", check server log for details");
 				
 			String message = String.format("Error checking pull request (project: %s, number: #%d)", 
-					request.getTargetProject().getName(), request.getNumber());
+					request.getTargetProject().getPath(), request.getNumber());
 			logger.error(message, e);
 		}
 	}

@@ -49,8 +49,8 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.InputStreamWrapper;
 import io.onedev.server.util.OutputStreamWrapper;
 import io.onedev.server.util.ServerConfig;
-import io.onedev.server.util.concurrent.WorkExecutor;
 import io.onedev.server.util.concurrent.PrioritizedRunnable;
+import io.onedev.server.util.concurrent.WorkExecutor;
 
 @Singleton
 public class GitFilter implements Filter {
@@ -98,13 +98,11 @@ public class GitFilter implements Filter {
 	
 	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
-		String projectName = StringUtils.strip(projectInfo, "/");
-		if (projectName.contains("/"))
-			projectName = StringUtils.substringAfterLast(projectName, "/");
+		String projectPath = StringUtils.strip(projectInfo, "/");
 
-		Project project = projectManager.find(projectName);
+		Project project = projectManager.find(projectPath);
 		if (project == null) 
-			throw new GitException(String.format("Unable to find project %s", projectName));
+			throw new GitException(String.format("Unable to find project '%s'", projectPath));
 		return project;
 	}
 	

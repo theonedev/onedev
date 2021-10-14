@@ -104,7 +104,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 				document = new SAXReader().read(new StringReader(blob.getText().getContent()));
 			} catch (DocumentException e) {
 				logger.debug("Error parsing pom.xml (project: {}, commit: {})",
-						project.getName(), commitId.getName(), e);
+						project.getPath(), commitId.getName(), e);
 				return null;
 			}
 	

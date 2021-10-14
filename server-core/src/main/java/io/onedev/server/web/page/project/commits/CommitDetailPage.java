@@ -315,7 +315,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 					}
 				} catch (Exception e) {
 					logger.error("Error retrieving build spec (project: {}, commit: {})", 
-							getProject().getName(), getCommit().name(), e);
+							getProject().getPath(), getCommit().name(), e);
 				}
 				return jobs;
 			}
@@ -875,7 +875,7 @@ public class CommitDetailPage extends ProjectPage implements RevisionDiff.Annota
 	protected String getPageTitle() {
 		return getCommit().getShortMessage() 
 				+ " - Commit " +  GitUtils.abbreviateSHA(getCommit().getName()) 
-				+ " - " + getProject().getName();
+				+ " - " + getProject().getPath();
 	}
 	
 	@Nullable

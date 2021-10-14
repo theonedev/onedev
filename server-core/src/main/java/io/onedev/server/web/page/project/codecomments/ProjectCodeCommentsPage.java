@@ -240,7 +240,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Code Comments - " + getProject().getName();
+		return "Code Comments - " + getProject().getPath();
 	}
 	
 }

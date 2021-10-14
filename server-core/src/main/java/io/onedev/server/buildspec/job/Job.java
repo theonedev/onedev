@@ -332,9 +332,9 @@ public class Job implements NamedElement, Serializable, Validatable {
 		
 		Set<String> dependencyProjectNames = new HashSet<>();
 		for (ProjectDependency dependency: projectDependencies) {
-			if (!dependencyProjectNames.add(dependency.getProjectName())) {
+			if (!dependencyProjectNames.add(dependency.getProjectPath())) {
 				isValid = false;
-				context.buildConstraintViolationWithTemplate("Duplicate dependency (" + dependency.getProjectName() + ")")
+				context.buildConstraintViolationWithTemplate("Duplicate dependency (" + dependency.getProjectPath() + ")")
 						.addPropertyNode("projectDependencies").addConstraintViolation();
 			}
 		}

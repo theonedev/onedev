@@ -55,7 +55,7 @@ public abstract class CommitStatusPanel extends Panel {
 					jobs.addAll(buildSpec.getJobMap().values());
 			} catch (Exception e) {
 				logger.error("Error retrieving build spec (project: {}, commit: {})", 
-						getProject().getName(), commitId.name(), e);
+						getProject().getPath(), commitId.name(), e);
 			} finally {
 				JobSecretAuthorizationContext.pop();
 			}

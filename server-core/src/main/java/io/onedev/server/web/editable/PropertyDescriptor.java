@@ -17,10 +17,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.ParentChoice;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
 public class PropertyDescriptor implements Serializable {
@@ -108,11 +110,15 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyRequired() {
-		Size size;
-		return getPropertyGetter().getReturnType().isPrimitive()
-				|| findAnnotation(NotNull.class) != null 
-				|| findAnnotation(NotEmpty.class) != null
-				|| (size = findAnnotation(Size.class)) != null && size.min()>=1;
+		if (getPropertyGetter().getAnnotation(ParentChoice.class) != null) {
+			return !SecurityUtils.canCreateRootProjects();
+		} else {
+			Size size;
+			return getPropertyGetter().getReturnType().isPrimitive()
+					|| findAnnotation(NotNull.class) != null 
+					|| findAnnotation(NotEmpty.class) != null
+					|| (size = findAnnotation(Size.class)) != null && size.min()>=1;
+		}
 	}
 
 	@Nullable

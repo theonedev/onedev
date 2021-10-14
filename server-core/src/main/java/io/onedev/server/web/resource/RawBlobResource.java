@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityNotFoundException;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,14 +48,8 @@ public class RawBlobResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String projectName = params.get(PARAM_PROJECT).toString();
-		if (StringUtils.isBlank(projectName))
-			throw new IllegalArgumentException("project name has to be specified");
-
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-
-		if (project == null)
-			throw new EntityNotFoundException("Unable to find project: " + projectName);
+		Long projectId = params.get(PARAM_PROJECT).toLong();
+		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		String segment = params.get(PARAM_REVISION).toString();
@@ -179,7 +172,7 @@ public class RawBlobResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getName());
+		params.set(PARAM_PROJECT, project.getId());
 		params.set(PARAM_REVISION, blobIdent.revision);
 		params.set(PARAM_PATH, blobIdent.path);
 

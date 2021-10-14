@@ -175,9 +175,9 @@ public class BuildSpec implements Serializable, Validatable {
 		if (importedBuildSpecs == null) {
 			importedBuildSpecs = new ArrayList<>();
 			for (Import aImport: getImports()) { 
-				if (!projectChain.contains(aImport.getProjectName())) {
+				if (!projectChain.contains(aImport.getProjectPath())) {
 					Collection<String> newProjectChain = new HashSet<>(projectChain);
-					newProjectChain.add(aImport.getProjectName());
+					newProjectChain.add(aImport.getProjectPath());
 					try {
 						BuildSpec importedBuildSpec = aImport.getBuildSpec();
 						RevCommit commit = aImport.getProject().getRevCommit(aImport.getTag(), true);
@@ -334,8 +334,8 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 		Set<String> importProjectNames = new HashSet<>();
 		for (Import aImport: imports) {
-			if (!importProjectNames.add(aImport.getProjectName())) {
-				context.buildConstraintViolationWithTemplate("Duplicate import (" + aImport.getProjectName() + ")")
+			if (!importProjectNames.add(aImport.getProjectPath())) {
+				context.buildConstraintViolationWithTemplate("Duplicate import (" + aImport.getProjectPath() + ")")
 						.addPropertyNode(PROP_IMPORTS).addConstraintViolation();
 				isValid = false;
 			}

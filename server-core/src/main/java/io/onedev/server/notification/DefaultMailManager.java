@@ -295,7 +295,7 @@ public class DefaultMailManager implements MailManager {
 		if ((user == null || !user.asSubject().isPermitted(new ProjectPermission(project, privilege))) 
 				&& (authorization == null || !authorization.isPermitted(project, privilege))) {
 			String errorMessage = String.format("Permission denied (project: %s, sender: %s, permission: %s)", 
-					project.getName(), sender.getAddress(), privilege.getClass().getName());
+					project.getPath(), sender.getAddress(), privilege.getClass().getName());
 			throw new UnauthorizedException(errorMessage);
 		}
 	}
@@ -848,7 +848,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + issue.getProject().getName() + "~issue" + issue.getNumber()
+			return systemAddress.getPrefix() + "+" + issue.getProject().getPath() + "~issue" + issue.getNumber()
 					+ "@" + systemAddress.getDomain(); 
 		} else {
 			return null;
@@ -860,7 +860,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + request.getProject().getName() + "~pullrequest" + request.getNumber()
+			return systemAddress.getPrefix() + "+" + request.getProject().getPath() + "~pullrequest" + request.getNumber()
 					+ "@" + systemAddress.getDomain(); 
 		} else {
 			return null;
@@ -872,7 +872,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + issue.getProject().getName() + "~issue" + issue.getNumber() + "~unsubscribe"
+			return systemAddress.getPrefix() + "+" + issue.getProject().getPath() + "~issue" + issue.getNumber() + "~unsubscribe"
 					+ "@" + systemAddress.getDomain(); 
 		} else {
 			return null;
@@ -884,7 +884,7 @@ public class DefaultMailManager implements MailManager {
 		MailSetting mailSetting = settingManager.getMailSetting();
 		if (mailSetting != null && mailSetting.getReceiveMailSetting() != null) {
 			EmailAddress systemAddress = EmailAddress.parse(mailSetting.getEmailAddress());
-			return systemAddress.getPrefix() + "+" + request.getProject().getName() + "~pullrequest" + request.getNumber() + "~unsubscribe"
+			return systemAddress.getPrefix() + "+" + request.getProject().getPath() + "~pullrequest" + request.getNumber() + "~unsubscribe"
 					+ "@" + systemAddress.getDomain(); 
 		} else {
 			return null;

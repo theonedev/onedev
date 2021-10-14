@@ -25,7 +25,7 @@ public class ProjectQueryEditor extends PropertyEditor<String> {
 		super.onInitialize();
     	
     	input = new TextField<String>("input", getModel());
-        input.add(new ProjectQueryBehavior());
+        input.add(new ProjectQueryBehavior(false));
         
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

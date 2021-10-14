@@ -3,7 +3,6 @@ package io.onedev.server.web.page.admin.user.membership;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,8 +15,10 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -44,8 +45,12 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.OneDataTable;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.groupchoice.AbstractGroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupChoiceResourceReference;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
@@ -65,6 +70,8 @@ public class UserMembershipsPage extends UserPage {
 	private DataTable<Membership, Void> membershipsTable;
 	
 	private SelectionColumn<Membership, Void> selectionColumn;
+	
+	private SortableDataProvider<Membership, Void> dataProvider ;	
 	
 	public UserMembershipsPage(PageParameters params) {
 		super(params);
@@ -99,6 +106,8 @@ public class UserMembershipsPage extends UserPage {
 				if (StringUtils.isBlank(query))
 					query = null;
 				target.add(membershipsTable);
+				if (selectionColumn != null) 
+					selectionColumn.getSelections().clear();
 			}
 			
 		});
@@ -143,6 +152,8 @@ public class UserMembershipsPage extends UserPage {
 				membership.setGroup(OneDev.getInstance(GroupManager.class).load(selection.getId()));
 				OneDev.getInstance(MembershipManager.class).save(membership);
 				target.add(membershipsTable);
+				if (selectionColumn != null)
+					selectionColumn.getSelections().clear();
 				Session.get().success("Group added");
 			}
 			
@@ -155,43 +166,151 @@ public class UserMembershipsPage extends UserPage {
 			
 		}.setVisible(!getUser().isMembershipExternalManaged()));			
 		
-		AjaxLink<Void> deleteSelected = new AjaxLink<Void>("deleteSelected") {
+		add(new MenuLink("delete") {
 
 			@Override
-			public void onClick(AjaxRequestTarget target) {
-				Collection<Membership> membershipsToDelete = new HashSet<>();
-				for (IModel<Membership> model: selectionColumn.getSelections()) {
-					membershipsToDelete.add(model.getObject());
-				}
-				OneDev.getInstance(MembershipManager.class).delete(membershipsToDelete);
-				target.add(membershipsTable);
-				selectionColumn.getSelections().clear();
-				target.add(this);
-			}
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
 
+					@Override
+					public String getLabel() {
+						return "Delete Selected Memberships";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Membership> memberships = new ArrayList<>();
+										for (IModel<Membership> each: selectionColumn.getSelections())
+											memberships.add(each.getObject());
+										OneDev.getInstance(MembershipManager.class).delete(memberships);
+										selectionColumn.getSelections().clear();
+										target.add(membershipsTable);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete selected memberships";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select memberships to delete");
+								}
+							}
+							
+						};
+						
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete All Queried Memberships";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Membership> memberships = new ArrayList<>();
+										for (Iterator<Membership> it = (Iterator<Membership>) dataProvider.iterator(0, membershipsTable.getItemCount()); it.hasNext();) 
+											memberships.add(it.next());
+										OneDev.getInstance(MembershipManager.class).delete(memberships);
+										selectionColumn.getSelections().clear();
+										target.add(membershipsTable);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete all queried memberships";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(membershipsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No memberships to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				return menuItems;
+			}
+			
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+				setVisible(!getUser().isMembershipExternalManaged());
 			}
 			
-		};
-		deleteSelected.setOutputMarkupPlaceholderTag(true);
-		add(deleteSelected);
+		});
 
 		List<IColumn<Membership, Void>> columns = new ArrayList<>();
 		
-		if (!getUser().isMembershipExternalManaged()) {
-			selectionColumn = new SelectionColumn<Membership, Void>() {
-				
-				@Override
-				protected void onSelectionChange(AjaxRequestTarget target) {
-					target.add(deleteSelected);
-				}
-				
-			};
-			columns.add(selectionColumn);
-		}
+		if (!getUser().isMembershipExternalManaged())
+			columns.add(selectionColumn = new SelectionColumn<Membership, Void>());
 		
 		columns.add(new AbstractColumn<Membership, Void>(Model.of("Name")) {
 
@@ -223,7 +342,7 @@ public class UserMembershipsPage extends UserPage {
 			}
 		});
 		
-		SortableDataProvider<Membership, Void> dataProvider = new SortableDataProvider<Membership, Void>() {
+		dataProvider = new SortableDataProvider<Membership, Void>() {
 
 			@Override
 			public Iterator<? extends Membership> iterator(long first, long count) {

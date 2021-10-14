@@ -89,6 +89,7 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.Cursor;
@@ -180,6 +181,7 @@ public abstract class PullRequestListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		requestsTable.setCurrentPage(0);
 		target.add(body);
+		selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -241,11 +243,86 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		add(new MenuLink("delete") {
+		BasePage page = (BasePage) getPage();
+		
+		add(new MenuLink("operations") {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Discard Selected Pull Requests";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (IModel<PullRequest> each: selectionColumn.getSelections()) {
+									PullRequest request = each.getObject();
+									if (!request.isOpen()) {
+										errorMessage = "Pull request #" + request.getNumber() + " already closed";
+										break;
+									}
+								}
+								
+								if (errorMessage != null) {
+									page.alert(target, errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											for (IModel<PullRequest> each: selectionColumn.getSelections())
+												OneDev.getInstance(PullRequestManager.class).discard(each.getObject(), null);
+											target.add(body);
+											selectionColumn.getSelections().clear();
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to discard selected pull requests";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select pull requests to discard");
+								}
+							}
+							
+						};
+					}
+					
+				});
 				
 				menuItems.add(new MenuItem() {
 
@@ -272,12 +349,13 @@ public abstract class PullRequestListPanel extends Panel {
 									requests.add(each.getObject());
 								OneDev.getInstance(PullRequestManager.class).delete(requests);
 								target.add(body);
+								selectionColumn.getSelections().clear();
 							}
 							
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 							
 							@Override
@@ -287,6 +365,80 @@ public abstract class PullRequestListPanel extends Panel {
 								if (!isEnabled()) {
 									tag.put("disabled", "disabled");
 									tag.put("title", "Please select pull requests to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Discard All Queried Pull Requests";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+
+								String errorMessage = null;
+								for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
+									PullRequest request = it.next();
+									if (!request.isOpen()) {
+										errorMessage = "Pull request #" + request.getNumber() + " already closed";
+										break;
+									}
+								}
+								
+								if (errorMessage != null) {
+									page.alert(target, errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
+												OneDev.getInstance(PullRequestManager.class).discard(it.next(), null);
+											target.add(body);
+											selectionColumn.getSelections().clear();
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to discard all queried pull requests";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(requestsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No pull requests to discard");
 								}
 							}
 							
@@ -316,11 +468,11 @@ public abstract class PullRequestListPanel extends Panel {
 									@Override
 									protected void onConfirm(AjaxRequestTarget target) {
 										Collection<PullRequest> requests = new ArrayList<>();
-										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();) {
+										for (Iterator<PullRequest> it = (Iterator<PullRequest>) dataProvider.iterator(0, requestsTable.getItemCount()); it.hasNext();)
 											requests.add(it.next());
-										}
 										OneDev.getInstance(PullRequestManager.class).delete(requests);
 										target.add(body);
+										selectionColumn.getSelections().clear();
 									}
 									
 									@Override
@@ -469,7 +621,7 @@ public abstract class PullRequestListPanel extends Panel {
 	
 								@Override
 								public int compare(Project o1, Project o2) {
-									return o1.getName().compareTo(o2.getName());
+									return o1.getPath().compareTo(o2.getPath());
 								}
 								
 							});
@@ -529,7 +681,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 				String label;
 				if (getProject() == null)
-					label = request.getTargetProject().getName() + "#" + request.getNumber();
+					label = request.getTargetProject().getPath() + "#" + request.getNumber();
 				else
 					label = "#" + request.getNumber();
 					

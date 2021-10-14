@@ -31,7 +31,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 	private String paths;
 	
 	@Editable(name="Branches", order=100, description="Optionally specify space-separated branches "
-			+ "to check. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
+			+ "to check. Use '**' or '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all branches")
 	@Patterns(suggester = "suggestBranches", path=true)
 	@NameOfEmptyValue("Any branch")

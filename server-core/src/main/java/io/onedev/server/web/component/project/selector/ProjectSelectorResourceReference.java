@@ -24,7 +24,8 @@ public class ProjectSelectorResourceReference extends BaseDependentResourceRefer
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(ProjectSelectorResourceReference.class, "project-selector.css")));
+		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(
+				ProjectSelectorResourceReference.class, "project-selector.css")));
 		return dependencies;
 	}
 

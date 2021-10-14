@@ -1,12 +1,10 @@
 <wicket:extend>
 	<div class="card">
 		<div class="card-body">
-			<div class="alert alert-notice alert-light-info mb-4">
-				<wicket:svg href="bulb" class="icon mr-2"/> <span wicket:id="help"></span>
-			</div>
 			<form wicket:id="form" class="leave-confirm">
 				<div wicket:id="editor"></div>
 				<div wicket:id="defaultRoleEditor" class="mb-4"></div>
+				<div wicket:id="parentEditor" class="mb-4"></div>
 				<div class="d-flex">
 					<input class="btn btn-primary dirty-aware mr-1" value="Update" type="submit">
 					<a wicket:id="delete" class="delete btn btn-light-danger ml-auto">Delete</a>

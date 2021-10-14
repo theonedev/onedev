@@ -22,7 +22,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.validation.ProjectNameValidator;
+import io.onedev.server.util.validation.ProjectPathValidator;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -36,11 +36,11 @@ public class IssueUtils {
     private static final Pattern ISSUE_FIX_PATTERN;
     
     static {
-    	StringBuilder builder = new StringBuilder("(^|\\W+)(");
+    	StringBuilder builder = new StringBuilder("(^|[\\W|/]+)(");
     	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
     	builder.append(")\\s+issue\\s+(");
-    	builder.append(JavaEscape.unescapeJava(ProjectNameValidator.PATTERN.pattern()));
-    	builder.append(")?#(\\d+)(?=$|\\W+)");
+    	builder.append(JavaEscape.unescapeJava(ProjectPathValidator.PATTERN.pattern()));
+    	builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
     	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
     }
     
@@ -120,8 +120,8 @@ public class IssueUtils {
 			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
 			
 			while (matcher.find()) {
-				String projectName = matcher.group(3);
-				if (projectName == null || projectName.equalsIgnoreCase(project.getName()))
+				String projectPath = matcher.group(3);
+				if (projectPath == null || projectPath.equals(project.getPath()))
 					issueNumbers.add(Long.parseLong(matcher.group(matcher.groupCount())));
 			}
 		}

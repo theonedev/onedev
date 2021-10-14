@@ -91,10 +91,10 @@ abstract class GitSshCommand implements Command, ServerSessionAware {
         SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
         sessionManager.openSession(); 
         try {
-			String projectName = StringUtils.stripEnd(StringUtils.substringAfterLast(command, "/"), "'");   
-            Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+			String projectPath = StringUtils.stripEnd(command, "'");   
+            Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
             if (project == null) {
-                onExit(-1, "Unable to find project " + projectName);
+                onExit(-1, "Unable to find project '" + projectPath + "'");
                 return;
             } 
             

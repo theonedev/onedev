@@ -14,13 +14,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.NameAware;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Group extends AbstractEntity implements NameAware {
+public class Group extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,6 +30,8 @@ public class Group extends AbstractEntity implements NameAware {
 	private String description;
 	
 	private boolean administrator;
+	
+	private boolean createRootProjects;
 	
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -43,7 +45,6 @@ public class Group extends AbstractEntity implements NameAware {
 	
 	@Editable(order=100)
 	@NotEmpty
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -74,7 +75,17 @@ public class Group extends AbstractEntity implements NameAware {
 	private static boolean isAdministratorDisabled() {
 		return !(boolean) EditContext.get().getInputValue("administrator");
 	}
-	
+
+	@Editable(order=300, description="Whether or not to allow creating root projects (project without parent)")
+	@ShowCondition("isAdministratorDisabled")
+	public boolean isCreateRootProjects() {
+		return createRootProjects;
+	}
+
+	public void setCreateRootProjects(boolean createRootProjects) {
+		this.createRootProjects = createRootProjects;
+	}
+
 	public Collection<GroupAuthorization> getAuthorizations() {
 		return authorizations;
 	}

@@ -121,9 +121,9 @@ public class GitLfsFilter implements Filter {
 		}
 	}
 
-	private String getObjectUrl(HttpServletRequest request, String projectName, String objectId) {
+	private String getObjectUrl(HttpServletRequest request, String projectPath, String objectId) {
 		try {
-			String path = projectName + ".git/lfs/objects/" + objectId;
+			String path = projectPath + ".git/lfs/objects/" + objectId;
 			return new URIBuilder(request.getRequestURL().toString())
 					.setPath(path)
 					.addParameter("lfs-objects", "true")
@@ -134,9 +134,8 @@ public class GitLfsFilter implements Filter {
 		}
 	}
 
-	private String getProjectName(String pathInfo) {
-		String projectName = StringUtils.substringBefore(pathInfo, "/");
-		return projectName.substring(0, projectName.length() - ".git".length());
+	private String getProjectPath(String pathInfo) {
+		return StringUtils.substringBeforeLast(pathInfo, ".git/");
 	}
 	
 	@Override
@@ -152,7 +151,7 @@ public class GitLfsFilter implements Filter {
 				LfsObjectAccess lfsObjectAccess = null;
 				sessionManager.openSession();
 				try {
-					Project project = Preconditions.checkNotNull(projectManager.find(getProjectName(pathInfo)));
+					Project project = Preconditions.checkNotNull(projectManager.find(getProjectPath(pathInfo)));
 					String objectId = StringUtils.substringAfterLast(pathInfo, "/");
 					if (canReadCode(httpRequest, project))  
 						lfsObjectAccess = new LfsObjectAccess(project.getLfsObjectFile(objectId), project.getLfsObjectLock(objectId).readLock());
@@ -178,7 +177,7 @@ public class GitLfsFilter implements Filter {
 				LfsObjectAccess lfsObjectAccess = null;
 				sessionManager.openSession();
 				try {
-					Project project = Preconditions.checkNotNull(projectManager.find(getProjectName(pathInfo)));
+					Project project = Preconditions.checkNotNull(projectManager.find(getProjectPath(pathInfo)));
 					if (SecurityUtils.canWriteCode(project))  
 						lfsObjectAccess = new LfsObjectAccess(project.getLfsObjectFile(objectId), project.getLfsObjectLock(objectId).writeLock());
 					else 
@@ -212,11 +211,11 @@ public class GitLfsFilter implements Filter {
 					&& httpRequest.getHeader("Accept").startsWith(CONTENT_TYPE)) {
 			sessionManager.openSession();
 			try {
-				String projectName = getProjectName(pathInfo);
-				Project project = projectManager.find(projectName);
+				String projectPath = getProjectPath(pathInfo);
+				Project project = projectManager.find(projectPath);
 				if (project == null) {
 					sendBatchError(httpResponse, SC_NOT_FOUND, 
-							"Project not found: " + projectName);
+							"Project not found: " + projectPath);
 				} else {
 					httpResponse.setContentType(CONTENT_TYPE);
 					if (pathInfo.endsWith("/batch")) {
@@ -470,7 +469,7 @@ public class GitLfsFilter implements Filter {
 
 	private Map<Object, Object> getActionResponse(HttpServletRequest request, Project project, String objectId) {
 		Map<Object, Object> actionResponse = newHashMap(
-				"href", getObjectUrl(request, project.getName(), objectId));
+				"href", getObjectUrl(request, project.getPath(), objectId));
 		User user = SecurityUtils.getUser();
 		if (user != null)
 			actionResponse.put(

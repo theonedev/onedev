@@ -13,19 +13,19 @@ public class AuthorizationBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String projectName;
+	private String projectPath;
 	
 	private String roleName;
 
 	@Editable(order=100, name="Project")
 	@ProjectChoice
 	@NotEmpty
-	public String getProjectName() {
-		return projectName;
+	public String getProjectPath() {
+		return projectPath;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setProjectPath(String projectPath) {
+		this.projectPath = projectPath;
 	}
 
 	@Editable(order=200, name="Role")

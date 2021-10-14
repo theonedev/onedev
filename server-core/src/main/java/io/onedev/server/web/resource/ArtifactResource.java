@@ -14,7 +14,6 @@ import java.util.concurrent.Callable;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -46,14 +45,8 @@ public class ArtifactResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String projectName = params.get(PARAM_PROJECT).toString();
-		if (StringUtils.isBlank(projectName))
-			throw new IllegalArgumentException("project name has to be specified");
-		
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-		
-		if (project == null) 
-			throw new EntityNotFoundException("Unable to find project: " + projectName);
+		Long projectId = params.get(PARAM_PROJECT).toLong();
+		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		
 		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
 		
@@ -64,7 +57,7 @@ public class ArtifactResource extends AbstractResource {
 
 		if (build == null) {
 			String message = String.format("Unable to find build (project: %s, build number: %d)", 
-					project.getName(), buildNumber);
+					project.getPath(), buildNumber);
 			throw new EntityNotFoundException(message);
 		}
 		
@@ -90,7 +83,7 @@ public class ArtifactResource extends AbstractResource {
 		File artifactFile = new File(artifactsDir, artifactPath);
 		if (!artifactFile.exists() || artifactFile.isDirectory()) {
 			String message = String.format("Specified artifact path does not exist or is a directory (project: %s, build number: %d, path: %s)", 
-					project.getName(), build.getNumber(), artifactPath);
+					project.getPath(), build.getNumber(), artifactPath);
 			throw new ExplicitException(message);
 		}
 			
@@ -135,7 +128,7 @@ public class ArtifactResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Project project, Long buildNumber, String path) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getName());
+		params.set(PARAM_PROJECT, project.getId());
 		params.set(PARAM_BUILD, buildNumber);
 		params.set(PARAM_PATH, path);
 		return params;

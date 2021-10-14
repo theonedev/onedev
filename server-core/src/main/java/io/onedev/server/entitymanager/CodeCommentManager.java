@@ -30,4 +30,6 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	int count(Project project, @Nullable PullRequest request, 
 			EntityCriteria<CodeComment> commentCriteria);
 
+	void delete(Collection<CodeComment> comments);
+	
 }

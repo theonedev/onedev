@@ -70,13 +70,13 @@ public class JobSecretAuthorizationContext {
 					} else {
 						throw new ExplicitException(String.format(
 								"Job secret not authorized (project: %s, job secret: %s)", 
-								project.getName(), secretName));
+								project.getPath(), secretName));
 					}
 				}
 			}
 			throw new ExplicitException(String.format(
 					"Job secret not found (project: %s, job secret: %s)", 
-					project.getName(), secretName));
+					project.getPath(), secretName));
 		}
 	}
 	
@@ -94,7 +94,7 @@ public class JobSecretAuthorizationContext {
 			if (secret == null) {
 				throw new ExplicitException(String.format(
 						"Job secret not found (project: %s, job secret: %s)", 
-						project.getName(), secretName));
+						project.getPath(), secretName));
 			}
 
 			String authorizedBranches = secret.getAuthorizedBranches();
@@ -106,7 +106,7 @@ public class JobSecretAuthorizationContext {
 			if (!patternSet.matches(matcher, branchName)) {
 				throw new ExplicitException(String.format(
 						"Job secret not authorized (project: %s, job secret: %s)", 
-						project.getName(), secretName));
+						project.getPath(), secretName));
 			}
 			return secret.getValue();
 		}

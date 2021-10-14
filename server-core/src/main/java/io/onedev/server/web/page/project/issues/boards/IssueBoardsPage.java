@@ -1001,7 +1001,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Issue Boards - " + getProject().getName();
+		return "Issue Boards - " + getProject().getPath();
 	}
 	
 }

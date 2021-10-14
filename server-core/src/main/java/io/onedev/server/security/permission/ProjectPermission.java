@@ -19,7 +19,8 @@ public class ProjectPermission implements Permission {
 	public boolean implies(Permission p) {
 		if (p instanceof ProjectPermission) {
 			ProjectPermission projectPermission = (ProjectPermission) p;
-			return project.equals(projectPermission.project) && privilege.implies(projectPermission.privilege);
+			return project.isSelfOrAncestorOf(projectPermission.project) 
+					&& privilege.implies(projectPermission.privilege);
 		} else {
 			return false;
 		}

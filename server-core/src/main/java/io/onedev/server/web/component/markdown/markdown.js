@@ -16,7 +16,7 @@ onedev.server.markdown = {
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentUploadUrl, 
 			attachmentMaxSize, canMentionUser, canReferenceEntity, 
-			projectNamePattern, autosaveKey) {
+			projectPathPattern, autosaveKey) {
 		var $container = $("#" + containerId);
 		$container.data("callback", callback);		
 		$container.data("autosaveKey", autosaveKey);
@@ -369,7 +369,7 @@ onedev.server.markdown = {
 		    });	
 	    } 
 
-		var referencePattern = "(^|\\W+)((pull\\s*request|issue|build)\\s+)?(" + projectNamePattern + ")?#(\\S*)$";
+		var referencePattern = "(^|[\\W|/]+)((pull\\s*request|issue|build)\\s+)?(" + projectPathPattern + ")?#(\\S*)$";
 		
 	    if (canReferenceEntity) {
 	    	function matchReference() {

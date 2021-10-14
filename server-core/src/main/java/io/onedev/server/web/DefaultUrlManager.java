@@ -42,15 +42,15 @@ public class DefaultUrlManager implements UrlManager {
 	
 	@Override
 	public String urlFor(Project project) {
-		return settingManager.getSystemSetting().getServerUrl() + "/projects/" + project.getName();
+		return settingManager.getSystemSetting().getServerUrl() + "/projects/" + project.getId();
 	}
 
 	@Override
 	public String cloneUrlFor(Project project, boolean ssh) {
 		if (ssh)
-			return settingManager.getSshSetting().getServerUrl() + "/" + project.getName();
+			return settingManager.getSshSetting().getServerUrl() + "/" + project.getPath();
 		else
-			return settingManager.getSystemSetting().getServerUrl() + "/" + project.getName();
+			return settingManager.getSystemSetting().getServerUrl() + "/" + project.getPath();
 	}
 	
 	@Override

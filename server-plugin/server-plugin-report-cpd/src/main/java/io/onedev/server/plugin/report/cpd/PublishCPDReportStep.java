@@ -121,7 +121,7 @@ public class PublishCPDReportStep extends PublishProblemReportStep {
 							ProjectBlobPage.fillParams(params, state);
 							
 							PageParametersEncoder paramsEncoder = new PageParametersEncoder();
-							String url  = "/projects/" + build.getProject().getName() + "/blob/" + paramsEncoder.encodePageParameters(params);
+							String url  = "/projects/" + build.getProject().getId() + "/blob/" + paramsEncoder.encodePageParameters(params);
 							String message = String.format(""
 									+ "Duplicated with '%s' at <a href='%s'>line %s - %s</a>", 
 									HtmlEscape.escapeHtml5(duplicateWith.blobPath), url, duplicateWith.range.getFromRow()+1, 

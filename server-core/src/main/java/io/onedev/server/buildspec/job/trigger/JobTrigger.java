@@ -18,7 +18,7 @@ import io.onedev.server.buildspec.param.supply.ParamSupply;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.StringMatcher;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -40,9 +40,9 @@ public abstract class JobTrigger implements Serializable {
 
 	@Editable(name="Applicable Projects", order=900, description="Optionally specify space-separated projects "
 			+ "applicable for this trigger. This is useful for instance when you want to prevent "
-			+ "the job from being triggered in forked projects. Use '*' or '?' for wildcard match. "
+			+ "the job from being triggered in forked projects. Use '**', '*' or '?' for <a href='$docRoot/pages/path-wildcard.md' target='_blank'>path wildcard match</a>. "
 			+ "Prefix with '-' to exclude. Leave empty to match all projects")
-	@Patterns(suggester="suggestProjects")
+	@Patterns(suggester="suggestProjects", path=true)
 	@NameOfEmptyValue("Any project")
 	public String getProjects() {
 		return projects;
@@ -84,9 +84,9 @@ public abstract class JobTrigger implements Serializable {
 	
 	@Nullable
 	public SubmitReason matches(ProjectEvent event, Job job) {
-		String projectName = event.getProject().getName();
-		Matcher matcher = new StringMatcher();
-		if (projects == null || PatternSet.parse(projects).matches(matcher, projectName)) 
+		String projectPath = event.getProject().getPath();
+		Matcher matcher = new PathMatcher();
+		if (projects == null || PatternSet.parse(projects).matches(matcher, projectPath)) 
 			return triggerMatches(event, job);
 		else 
 			return null;

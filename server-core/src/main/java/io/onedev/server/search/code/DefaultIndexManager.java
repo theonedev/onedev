@@ -325,7 +325,7 @@ public class DefaultIndexManager implements IndexManager {
 		writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		try (IndexWriter writer = new IndexWriter(directory, writerConfig)) {
 			try {
-				logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
+				logger.debug("Indexing commit (project: {}, commit: {})", project.getPath(), commit.getName());
 				IndexResult indexResult = index(project.getRepository(), commit, writer, searcher);
 				writer.commit();
 				return indexResult;

@@ -20,8 +20,8 @@ public abstract class AbstractProjectChoiceProvider extends ChoiceProvider<Proje
 	@Override
 	public void toJson(Project choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId());
-		writer.key("name");
-		writer.value(HtmlEscape.escapeHtml5(choice.getName()));
+		writer.key("path");
+		writer.value(HtmlEscape.escapeHtml5(choice.getPath()));
 		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(choice);
 		writer.key("avatar").value(avatarUrl);
 	}
@@ -29,10 +29,10 @@ public abstract class AbstractProjectChoiceProvider extends ChoiceProvider<Proje
 	@Override
 	public Collection<Project> toChoices(Collection<String> ids) {
 		return ids.stream()
-				.map(it-> {
-					Project project = OneDev.getInstance(ProjectManager.class).load(Long.valueOf(it));
-					Hibernate.initialize(project);
-					return project;
+				.map(it -> {
+						Project project = OneDev.getInstance(ProjectManager.class).load(Long.valueOf(it));
+						Hibernate.initialize(project);
+						return project;
 					}
 				).collect(Collectors.toList());
 	}

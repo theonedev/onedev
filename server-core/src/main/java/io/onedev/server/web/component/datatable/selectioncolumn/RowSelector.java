@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.datatable.selectioncolumn;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.wicket.Component;
@@ -36,7 +37,7 @@ abstract class RowSelector<T> extends Panel {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				if (getSelections().contains(getModel()))
+				if (getSelections().stream().anyMatch(it->it.getObject().equals(getModel().getObject())))
 					tag.put("checked", "true");
 			}
 
@@ -51,10 +52,12 @@ abstract class RowSelector<T> extends Panel {
 						.getPostParameters()
 						.getParameterValue("checked")
 						.toBoolean();
+				for (Iterator<IModel<T>> it = getSelections().iterator(); it.hasNext();) {
+					if (it.next().getObject().equals(getModel().getObject()))
+						it.remove();
+				}
 				if (checked)
 					getSelections().add(getModel());
-				else
-					getSelections().remove(getModel());
 
 				findParent(DataTable.class).visitChildren(
 						HeaderSelector.class,

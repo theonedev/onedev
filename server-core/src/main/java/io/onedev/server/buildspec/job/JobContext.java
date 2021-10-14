@@ -20,7 +20,9 @@ import io.onedev.server.job.resource.ResourceHolder;
 
 public abstract class JobContext {
 	
-	private final String projectName;
+	private final String projectPath;
+	
+	private final Long projectId;
 	
 	private final Long buildNumber;
 	
@@ -50,11 +52,12 @@ public abstract class JobContext {
 	
 	protected final Collection<Thread> serverStepThreads = new ArrayList<>();
 	
-	public JobContext(String projectName, Long buildNumber, File projectGitDir, 
+	public JobContext(String projectPath, Long projectId, Long buildNumber, File projectGitDir, 
 			List<Action> actions, int cpuRequirement, int memoryRequirement, ObjectId commitId, 
 			Collection<CacheSpec> caches, int cacheTTL, int retried, List<Service> services, 
 			TaskLogger logger) {
-		this.projectName = projectName;
+		this.projectPath = projectPath;
+		this.projectId = projectId;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
 		this.actions = actions;
@@ -68,8 +71,12 @@ public abstract class JobContext {
 		this.logger = logger;
 	}
 	
-	public String getProjectName() {
-		return projectName;
+	public String getProjectPath() {
+		return projectPath;
+	}
+
+	public Long getProjectId() {
+		return projectId;
 	}
 
 	public Long getBuildNumber() {

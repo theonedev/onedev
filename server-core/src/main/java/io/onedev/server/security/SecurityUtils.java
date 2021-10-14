@@ -2,8 +2,8 @@ package io.onedev.server.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
@@ -43,6 +44,8 @@ import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.CreateChildren;
+import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
@@ -66,23 +69,9 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static Collection<User> getAuthorizedUsers(Project project, Permission permission) {
 		UserManager userManager = OneDev.getInstance(UserManager.class);
-		Collection<User> authorizedUsers = new HashSet<>();
-		authorizedUsers.add(userManager.getRoot());
-		for (GroupAuthorization authorization: project.getGroupAuthorizations()) {
-			Group group = authorization.getGroup();
-			if (group.isAdministrator() || authorization.getRole().implies(permission)) 
-				authorizedUsers.addAll(group.getMembers());
-		}
-
-		for (UserAuthorization authorization: project.getUserAuthorizations()) {
-			if (authorization.getRole().implies(permission))
-				authorizedUsers.add(authorization.getUser());
-		}
-		
-		if (project.getDefaultRole() != null && project.getDefaultRole().implies(permission))
-			authorizedUsers.addAll(userManager.query());
-		
-		return authorizedUsers;
+		return userManager.query().stream()
+				.filter(it->it.asSubject().isPermitted(new ProjectPermission(project, permission)))
+				.collect(Collectors.toList());
 	}
 
 	@Nullable
@@ -98,6 +87,19 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
         Object principal = SecurityUtils.getSubject().getPrincipal();
         Preconditions.checkNotNull(principal);
         return (Long) principal;
+	}
+	
+	public static boolean canCreateRootProjects() {
+		return SecurityUtils.getSubject().isPermitted(new CreateRootProjects());
+	}
+	
+	public static boolean canCreateProjects() {
+		if (canCreateRootProjects()) {
+			return true;
+		} else {
+			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+			return !projectManager.getPermittedProjects(new CreateChildren()).isEmpty();
+		}
 	}
 	
 	public static boolean canDeleteBranch(Project project, String branchName) {
@@ -156,17 +158,19 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			User user = getUser();
 			if (user != null) {
 				for (UserAuthorization authorization: user.getAuthorizations()) {
-					if (project.equals(authorization.getProject()) && authorization.getRole().equals(role))
+					Project authorizedProject = authorization.getProject();
+					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
 						return true;
 				}
 				for (Group group: user.getGroups()) {
 					for (GroupAuthorization authorization: group.getAuthorizations()) {
-						if (project.equals(authorization.getProject()) && authorization.getRole().equals(role))
+						Project authorizedProject = authorization.getProject();
+						if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
 							return true;
 					}
 				}
 			} 
-			return role.getDefaultProjects().contains(project);
+			return role.getDefaultProjects().stream().anyMatch(it->it.isSelfOrAncestorOf(project));
 		} else {
 			logger.error("Undefined role: " + roleName);
 			return false;
@@ -175,6 +179,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canAccess(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new AccessProject()));
+	}
+	
+	public static boolean canCreateChildren(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new CreateChildren()));
 	}
 	
 	public static boolean canReadCode(Project project) {

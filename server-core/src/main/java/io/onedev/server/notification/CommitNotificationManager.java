@@ -93,7 +93,7 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 					} catch (Exception e) {
 						String message = String.format("Error processing commit subscription "
 								+ "(user: %s, project: %s, commit: %s, query: %s)", 
-								user.getName(), project.getName(), event.getNewCommitId().name(), queryString);
+								user.getName(), project.getPath(), event.getNewCommitId().name(), queryString);
 						logger.error(message, e);
 					} finally {
 						User.pop();
@@ -111,7 +111,7 @@ public class CommitNotificationManager extends AbstractNotificationManager {
 				}
 				
 				String subject = String.format("[Commit %s:%s] (%s) %s", 
-						project.getName(), GitUtils.abbreviateSHA(commit.name()), target, commit.getShortMessage());
+						project.getPath(), GitUtils.abbreviateSHA(commit.name()), target, commit.getShortMessage());
 
 				String url = urlManager.urlFor(project, commit);
 				String summary = String.format("Authored by %s", commit.getAuthorIdent().getName());

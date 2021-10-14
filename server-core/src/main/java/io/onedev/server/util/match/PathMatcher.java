@@ -82,7 +82,7 @@ public class PathMatcher implements Matcher {
     }
 
 
-    public boolean isPattern(String path) {
+    public static boolean isPattern(String path) {
         return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
     }
 

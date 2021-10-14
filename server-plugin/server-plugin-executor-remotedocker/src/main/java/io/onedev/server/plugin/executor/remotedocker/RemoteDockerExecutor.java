@@ -72,8 +72,8 @@ public class RemoteDockerExecutor extends ServerDockerExecutor {
 					services.add(service.toMap());
 				
 				List<String> trustCertContent = getTrustCertContent();
-				DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectName(), 
-						jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
+				DockerJobData jobData = new DockerJobData(jobToken, getName(), jobContext.getProjectPath(), 
+						jobContext.getProjectId(), jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
 						jobContext.getActions(), jobContext.getRetried(), services, registryLogins, 
 						trustCertContent, getRunOptions());
 				

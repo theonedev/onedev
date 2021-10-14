@@ -123,7 +123,7 @@ public abstract class ProjectSelector extends Panel {
 
 					@Override
 					public double getMatchScore(Project object) {
-						return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+						return MatchScoreUtils.getMatchScore(object.getPath(), searchInput);
 					}
 					
 				};
@@ -155,7 +155,7 @@ public abstract class ProjectSelector extends Panel {
 				if (project.equals(getCurrent())) 
 					link.add(AttributeAppender.append("class", " current"));
 				link.add(new ProjectAvatar("avatar", project));
-				link.add(new Label("name", project.getName()));
+				link.add(new Label("path", project.getPath()));
 				item.add(link);
 				
 				if (item.getIndex() == 0)

@@ -10,6 +10,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
 @SuppressWarnings("serial")
@@ -19,10 +20,12 @@ public class ProjectDashboardPage extends ProjectPage {
 		super(params);
 		
 		PageProvider pageProvider;
-		if (SecurityUtils.canReadCode(getProject()))
+		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject()))
 			pageProvider = new PageProvider(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
-		else 
+		else if (getProject().isIssueManagementEnabled()) 
 			pageProvider = new PageProvider(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
+		else
+			pageProvider = new PageProvider(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject()));
 		throw new RestartResponseException(pageProvider, RedirectPolicy.NEVER_REDIRECT);
 	}
 

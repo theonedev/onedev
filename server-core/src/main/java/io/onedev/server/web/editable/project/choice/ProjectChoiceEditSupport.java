@@ -35,9 +35,9 @@ public class ProjectChoiceEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<String> projectNames = model.getObject();
-						        if (projectNames != null && !projectNames.isEmpty()) {
-						            return new Label(id, StringUtils.join(projectNames, ", " ));
+						        List<String> projectPaths = model.getObject();
+						        if (projectPaths != null && !projectPaths.isEmpty()) {
+						            return new Label(id, StringUtils.join(projectPaths, ", " ));
 						        } else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }

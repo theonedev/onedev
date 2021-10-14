@@ -201,7 +201,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		try {
 	    	for (ConstraintViolation<?> violation: validator.validate(buildSpec)) {
 	    		String message = String.format("Error validating build spec (project: %s, commit: %s, location: %s, message: %s)", 
-	    				project.getName(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
+	    				project.getPath(), commitId.name(), violation.getPropertyPath(), violation.getMessage());
 	    		throw new ExplicitException(message);
 	    	}
 		} finally {
@@ -232,7 +232,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         	if (buildSpec == null) {
         		throw new ExplicitException(String.format(
         				"Build spec not defined (project: %s, commit: %s)", 
-        				project.getName(), commitId.name()));
+        				project.getPath(), commitId.name()));
         	}
 
         	validateBuildSpec(project, commitId, buildSpec);
@@ -240,7 +240,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
         	if (!buildSpec.getJobMap().containsKey(jobName)) {
         		throw new ExplicitException(String.format(
         				"Job not found (project: %s, commit: %s, job: %s)", 
-        				project.getName(), commitId.name(), jobName));
+        				project.getPath(), commitId.name(), jobName));
         	}
         	
 			return doSubmit(project, commitId, jobName, paramMap, reason); 
@@ -348,9 +348,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				
 				for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
 					dependency = interpolator.interpolateProperties(dependency);
-					Project dependencyProject = projectManager.find(dependency.getProjectName());
+					Project dependencyProject = projectManager.find(dependency.getProjectPath());
 					if (dependencyProject == null)
-						throw new ExplicitException("Unable to find dependency project: " + dependency.getProjectName());
+						throw new ExplicitException("Unable to find dependency project: " + dependency.getProjectPath());
 	
 					Subject subject;
 					if (dependency.getAccessTokenSecret() != null) {
@@ -358,7 +358,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						User user = userManager.findByAccessToken(accessToken);
 						if (user == null) {
 							throw new ExplicitException("Unable to access dependency project '" 
-									+ dependency.getProjectName() + "': invalid access token");
+									+ dependency.getProjectPath() + "': invalid access token");
 						}
 						subject = user.asSubject();
 					} else {
@@ -368,7 +368,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					Build dependencyBuild = dependency.getBuildProvider().getBuild(dependencyProject);
 					if (dependencyBuild == null) {
 						String errorMessage = String.format("Unable to find dependency build in project '" 
-								+ dependencyProject.getName() + "'");
+								+ dependencyProject.getPath() + "'");
 						throw new ExplicitException(errorMessage);
 					}
 					
@@ -425,7 +425,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		Long buildId = build.getId();
 		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 		Long buildNumber = build.getNumber();
-		String projectName = build.getProject().getName();
+		String projectPath = build.getProject().getPath();
+		Long projectId = build.getProject().getId();
 		File projectGitDir = build.getProject().getGitDir();
 		BuildSpec buildSpec = build.getSpec();
 		Job job;
@@ -513,7 +514,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								Build.push(build);
 								JobSecretAuthorizationContext.push(build.getJobSecretAuthorizationContext());
 								try {
-									return new JobContext(projectName, buildNumber, projectGitDir, 
+									return new JobContext(projectPath, projectId, buildNumber, projectGitDir, 
 											actions, job.getCpuRequirement(), job.getMemoryRequirement(), 
 											commitId, caches, executor.getCacheTTL(), retried.get(), 
 											services, jobLogger) {
@@ -791,7 +792,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 													}.run();
 												} catch (Throwable e) {
 													String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
-															project.getName(), commitId.name(), job.getName());
+															project.getPath(), commitId.name(), job.getName());
 													logger.error(message, e);
 												}
 											}
@@ -805,7 +806,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					}
 				} catch (Throwable e) {
 					String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
-							event.getProject().getName(), commitId.name());
+							event.getProject().getPath(), commitId.name());
 					logger.error(message, e);
 				} finally {
 					ScriptIdentity.pop();
@@ -826,7 +827,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				if (buildSpec == null) {
 	        		throw new ExplicitException(String.format(
 	        				"Build spec not defined (project: %s, commit: %s)", 
-	        				build.getProject().getName(), build.getCommitHash()));
+	        				build.getProject().getPath(), build.getCommitHash()));
 	        	}
 
 	        	validateBuildSpec(build.getProject(), build.getCommitId(), buildSpec);
@@ -834,7 +835,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	        	if (!buildSpec.getJobMap().containsKey(build.getJobName())) {
 	        		throw new ExplicitException(String.format(
 	        				"Job not found (project: %s, commit: %s, job: %s)", 
-	        				build.getProject().getName(), build.getCommitId().name(), build.getJobName()));
+	        				build.getProject().getPath(), build.getCommitId().name(), build.getJobName()));
 	        	}
 				
 				build.setStatus(Build.Status.WAITING);
@@ -1017,7 +1018,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Error scheduling project '" + project.getName() + "'", e);
+			logger.error("Error scheduling project '" + project.getPath() + "'", e);
 		} finally {
 			tasksOfProject = scheduledTasks.put(project.getId(), tasksOfProject);
 			if (tasksOfProject != null)
@@ -1213,7 +1214,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							}
 						} catch (Throwable e) {
 							String message = String.format("Error processing post build actions (project: %s, commit: %s, job: %s)", 
-									build.getProject().getName(), build.getCommitHash(), build.getJobName());
+									build.getProject().getPath(), build.getCommitHash(), build.getJobName());
 							logger.error(message, e);
 						} finally {
 							Build.pop();
@@ -1232,7 +1233,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		if (jobToken != null) {
 			JobContext context = getJobContext(jobToken, false);					
 			if (context != null)
-				return context.getProjectName().equals(project.getName());
+				return context.getProjectPath().equals(project.getPath());
 		}
 		return false;
 	}

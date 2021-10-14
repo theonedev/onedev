@@ -656,31 +656,31 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	}
 
 	@Override
-	public void onRenameProject(String oldName, String newName) {
+	public void onRenameProject(String oldPath, String newPath) {
     	for (JobExecutor jobExecutor: getJobExecutors())
-    		jobExecutor.onRenameProject(oldName, newName);
+    		jobExecutor.onRenameProject(oldPath, newPath);
     	for (GroovyScript groovyScript: getGroovyScripts())
-    		groovyScript.onRenameProject(oldName, newName);
+    		groovyScript.onRenameProject(oldPath, newPath);
     	if (getServiceDeskSetting() != null)
-    		getServiceDeskSetting().onRenameProject(oldName, newName);
+    		getServiceDeskSetting().onRenameProject(oldPath, newPath);
 	}
 
 	@Override
-	public Usage onDeleteProject(String projectName) {
+	public Usage onDeleteProject(String projectPath) {
     	Usage usage = new Usage();
-    	int index = 0;
+    	int index = 1;
     	for (JobExecutor jobExecutor: getJobExecutors()) {
-    		usage.add(jobExecutor.onDeleteProject(projectName).prefix("job executor #" + index));
+    		usage.add(jobExecutor.onDeleteProject(projectPath).prefix("job executor #" + index));
     		index++;
     	}
     	
-    	index = 0;
+    	index = 1;
     	for (GroovyScript groovyScript: getGroovyScripts()) {
-    		usage.add(groovyScript.onDeleteProject(projectName).prefix("groovy script #" + index));
+    		usage.add(groovyScript.onDeleteProject(projectPath).prefix("groovy script #" + index));
     		index++;
     	}
     	if (getServiceDeskSetting() != null)
-    		usage.add(getServiceDeskSetting().onDeleteProject(projectName));
+    		usage.add(getServiceDeskSetting().onDeleteProject(projectPath));
 		
 		return usage.prefix("administration");
 	}
@@ -717,7 +717,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		
-    	int index = 0;
+    	int index = 1;
     	for (JobExecutor jobExecutor: getJobExecutors()) {
     		usage.add(jobExecutor.onDeleteUser(userName).prefix("job executor #" + index));
     		index++;

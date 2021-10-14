@@ -16,8 +16,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.StringMatcher;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -89,11 +88,8 @@ public class IssueCreationSetting implements Serializable {
 	}
 	
 	public boolean isProjectAuthorized(Project project) {
-		String authorizedProjects = this.applicableProjects;
-		if (authorizedProjects == null)
-			authorizedProjects = "*";
-		Matcher matcher = new StringMatcher();
-		return PatternSet.parse(authorizedProjects).matches(matcher, project.getName());
+		return applicableProjects == null 
+				|| PatternSet.parse(applicableProjects).matches(new PathMatcher(), project.getPath());
 	}
 	
 	public Set<String> getUndefinedFields() {

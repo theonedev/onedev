@@ -7,12 +7,15 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -20,11 +23,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
@@ -42,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.loader.Listen;
@@ -58,15 +64,15 @@ import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.ProjectCreated;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -86,6 +92,9 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
 import io.onedev.server.util.schedule.TaskScheduler;
@@ -125,6 +134,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Date> updateDates = new ConcurrentHashMap<>();
+	
+	private final Map<Long, ProjectFacade> cache = new HashMap<>();
+	
+	private final ReadWriteLock cacheLock = new ReentrantReadWriteLock();
 	
 	private String taskId;
 	
@@ -185,17 +198,26 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Transactional
     @Override
-    public void save(Project project, String oldName) {
+    public void save(Project project, String oldPath) {
     	dao.persist(project);
-    	if (oldName != null && !oldName.equals(project.getName())) {
-    		settingManager.onRenameProject(oldName, project.getName());
-        	jobManager.schedule(project);
+    	if (oldPath != null && !oldPath.equals(project.getPath())) {
+    		settingManager.onRenameProject(oldPath, project.getPath());
+    		scheduleTree(project);
     	}
+    }
+    
+    private void scheduleTree(Project project) {
+    	jobManager.schedule(project);
+    	for (Project child: project.getChildren()) 
+    		scheduleTree(child);
     }
     
     @Transactional
     @Override
     public void create(Project project) {
+    	Project parent = project.getParent();
+    	if (parent != null && parent.isNew())
+    		create(parent);
     	dao.persist(project);
        	checkSanity(project);
        	UserAuthorization authorization = new UserAuthorization();
@@ -207,12 +229,58 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     }
     
     @Transactional
+    @Listen
+    public void on(EntityRemoved event) {
+    	if (event.getEntity() instanceof Project) {
+    		Project project = (Project) event.getEntity();
+    		Long projectId = project.getId();
+    		transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					cacheLock.writeLock().lock();
+					try {
+						cache.remove(projectId);
+					} finally {
+						cacheLock.writeLock().unlock();
+					}
+				}
+    			
+    		});
+    	}
+    }
+    
+    @Transactional
+    @Listen
+    public void on(EntityPersisted event) {
+    	if (event.getEntity() instanceof Project) {
+    		ProjectFacade facade = ((Project) event.getEntity()).getFacade();
+    		transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					cacheLock.writeLock().lock();
+					try {
+						cache.put(facade.getId(), facade);
+					} finally {
+						cacheLock.writeLock().unlock();
+					}
+				}
+    			
+    		});
+    	}
+    }
+    
+    @Transactional
     @Override
     public void delete(Project project) {
-    	Usage usage = new Usage();
-    	usage.add(settingManager.onDeleteProject(project.getName()));
+    	for (Project child: project.getChildren())
+    		delete(child);
     	
-    	usage.checkInUse("Project '" + project.getName() + "'");
+    	Usage usage = new Usage();
+    	usage.add(settingManager.onDeleteProject(project.getPath()));
+    	
+    	usage.checkInUse("Project '" + project.getPath() + "'");
 
     	for (Project fork: project.getForks()) {
     		Collection<Project> descendants = fork.getForkChildren();
@@ -262,13 +330,55 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     @Sessional
     @Override
-    public Project find(String projectName) {
+    public Project find(String path) {
+    	List<String> names = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(path);
+    	Project project = null;
+    	for (String name: names) 
+    		project = find(project, name);
+    	return project;
+    }
+
+    @Sessional
+    @Override
+    public Project initialize(String path) {
+    	List<String> names = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(path);
+    	Project project = null;
+    	for (String name: names) { 
+    		Project child;
+    		if (project == null || !project.isNew()) {
+    			child = find(project, name);
+    			if (child == null) {
+	    			if (project == null && !SecurityUtils.canCreateRootProjects())
+	    				throw new UnauthorizedException("Not authorized to create root project '" + name + "'");
+	    			if (project != null && !SecurityUtils.canCreateChildren(project))
+	    				throw new UnauthorizedException("Not authorized to create project '" + name + "' under '" + project.getPath() + "'");
+	    			child = new Project();
+	    			child.setName(name);
+	    			child.setParent(project); 
+    			}
+    		} else {
+    			child = new Project();
+    			child.setName(name);
+    			child.setParent(project);
+    		}
+    		project = child;
+    	}
+    	return project;
+    }
+    
+    @Sessional
+    @Override
+    public Project find(Project parent, String name) {
 		EntityCriteria<Project> criteria = newCriteria();
-		criteria.add(Restrictions.ilike("name", projectName));
+		if (parent != null)
+			criteria.add(Restrictions.eq(Project.PROP_PARENT, parent));
+		else
+			criteria.add(Restrictions.isNull(Project.PROP_PARENT));
+		criteria.add(Restrictions.ilike(Project.PROP_NAME, name));
 		criteria.setCacheable(true);
 		return find(criteria);
     }
-
+    
     @Transactional
 	@Override
 	public void fork(Project from, Project to) {
@@ -286,23 +396,20 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         commitInfoManager.cloneInfo(from, to);
         avatarManager.copyAvatar(from, to);
         
-        for (File file: FileUtils.listFiles(from.getLfsObjectsDir(), Sets.newHashSet("**"), Sets.newHashSet())) {
-        	String objectId = file.getName();
-        	Lock lock = from.getLfsObjectLock(objectId).readLock();
-        	lock.lock();
-        	try {
-        		FileUtils.copyFile(file, to.getLfsObjectFile(objectId));
-        	} catch (IOException e) {
-        		throw new RuntimeException(e);
-			} finally {
-        		lock.unlock();
-        	}
+        if (from.getLfsObjectsDir().exists()) {
+            for (File file: FileUtils.listFiles(from.getLfsObjectsDir(), Sets.newHashSet("**"), Sets.newHashSet())) {
+            	String objectId = file.getName();
+            	Lock lock = from.getLfsObjectLock(objectId).readLock();
+            	lock.lock();
+            	try {
+            		FileUtils.copyFile(file, to.getLfsObjectFile(objectId));
+            	} catch (IOException e) {
+            		throw new RuntimeException(e);
+    			} finally {
+            		lock.unlock();
+            	}
+            }
         }
-        try {
-			FileUtils.copyDirectory(from.getLfsObjectsDir(), to.getLfsObjectsDir());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
         
         listenerRegistry.post(new ProjectCreated(to));
 	}
@@ -310,6 +417,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Transactional
     @Override
     public void clone(Project project, String repositoryUrl) {
+    	Project parent = project.getParent();
+    	if (parent != null && parent.isNew())
+    		create(parent);
+    	
     	dao.persist(project);
     	
     	User user = SecurityUtils.getUser();
@@ -419,8 +530,15 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Listen
 	public void on(SystemStarted event) {
 		logger.info("Checking projects...");
-		for (Project project: query())
-			checkSanity(project);
+		cacheLock.writeLock().lock();
+		try {
+			for (Project project: query()) {
+				cache.put(project.getId(), project.getFacade());
+				checkSanity(project);
+			}
+		} finally {
+			cacheLock.writeLock().unlock();
+		}
 		taskId = taskScheduler.schedule(this);
 	}
 
@@ -530,31 +648,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Sessional
 	@Override
 	public Collection<Project> getPermittedProjects(Permission permission) {
-		Collection<Project> projects = new HashSet<>();
-		
-		if (SecurityUtils.isAdministrator()) {
-			projects.addAll(query());
-		} else {
-			User user = SecurityUtils.getUser();
-			if (user != null) {
-				for (Membership membership: user.getMemberships()) {
-					for (GroupAuthorization authorization: membership.getGroup().getAuthorizations()) {
-						if (authorization.getRole().implies(permission))
-							projects.add(authorization.getProject());
-					}
-				}
-				for (UserAuthorization authorization: user.getAuthorizations()) { 
-					if (authorization.getRole().implies(permission))
-						projects.add(authorization.getProject());
-				}
-			}
-			for (Project project: query()) {
-				if (project.getDefaultRole() != null && project.getDefaultRole().implies(permission))
-					projects.add(project);
-			}
-		}
-		
-		return projects;
+		return query().stream()
+				.filter(it->SecurityUtils.getSubject().isPermitted(new ProjectPermission(it, permission)))
+				.collect(Collectors.toList());
 	}
 
 	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
@@ -647,6 +743,61 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return SimpleScheduleBuilder.repeatMinutelyForever();
+	}
+	
+	private String getPath(Long id) {
+		ProjectFacade facade = cache.get(id);
+		if (facade != null) {
+			if (facade.getParentId() != null) {
+				String parentPath = getPath(facade.getParentId());
+				if (parentPath != null)
+					return parentPath + "/" + facade.getName();
+				else
+					return null;
+			} else {
+				return facade.getName();
+			}
+		} else {
+			return null;
+		}
+	}
+
+	private Collection<Long> getMatchingIds(String pathPattern) {
+		Collection<Long> ids = new HashSet<>();
+		for (Long id: cache.keySet()) {
+			String path = getPath(id);
+			if (path != null && WildcardUtils.matchPath(pathPattern, path))
+				ids.add(id);
+		}
+		return ids;
+	}
+
+	@Override
+	public Predicate getPathMatchCriteria(CriteriaBuilder builder, Path<Project> project, String pathPattern) {
+		cacheLock.readLock().lock();
+		try {
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, project.get(Project.PROP_ID), 
+					getMatchingIds(pathPattern), cache.keySet());		
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+
+	@Transactional
+	@Override
+	public void move(Collection<Project> projects, Project parent) {
+		for (Project project: projects) { 
+			String oldPath = project.getPath();
+			project.setParent(parent);
+			save(project, oldPath);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void delete(Collection<Project> projects) {
+		for (Project project: projects)
+			delete(project);
 	}
 	
 }

@@ -767,21 +767,23 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			attachmentInfos.add(new Pair<>(issue.getAttachmentProject(), issue.getAttachmentGroup()));
 			if (issue.getDescription() != null) {
 				issue.setDescription(issue.getDescription().replace(
-						issue.getAttachmentProject().getName() + "/attachment/" + issue.getAttachmentGroup(), 
-						targetProject.getName() + "/attachment/" + issue.getAttachmentGroup()));
+						issue.getAttachmentProject().getId() + "/attachment/" + issue.getAttachmentGroup(), 
+						targetProject.getId() + "/attachment/" + issue.getAttachmentGroup()));
 			}
 			for (IssueComment comment: issue.getComments()) {
 				comment.setContent(comment.getContent().replace(
-						issue.getAttachmentProject().getName() + "/attachment/" + issue.getAttachmentGroup(), 
-						targetProject.getName() + "/attachment/" + issue.getAttachmentGroup()));
+						issue.getAttachmentProject().getId() + "/attachment/" + issue.getAttachmentGroup(), 
+						targetProject.getId() + "/attachment/" + issue.getAttachmentGroup()));
 			}
-			
+
+			Project numberScope = targetProject.getForkRoot();
+			Long nextNumber = getNextNumber(numberScope);
 			issue.setProject(targetProject);
 			issue.setMilestone(null);
-			issue.setNumberScope(targetProject.getForkRoot());
+			issue.setNumberScope(numberScope);
 			Long oldNumber = issue.getNumber();
-			issue.setNumber(getNextNumber(issue.getNumberScope()));
-			numberMapping.put(oldNumber, issue.getNumber());
+			issue.setNumber(nextNumber);
+			numberMapping.put(oldNumber, nextNumber);
 		}
 		
 		for (Issue issue: issueList) {

@@ -250,7 +250,7 @@ public class ProjectBuildsPage extends ProjectPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Builds - " + getProject().getName();
+		return "Builds - " + getProject().getPath();
 	}
 	
 }

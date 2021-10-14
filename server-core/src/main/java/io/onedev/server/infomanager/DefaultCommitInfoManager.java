@@ -313,7 +313,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 	
 	private void doCollect(Project project, ObjectId commitId, String refName) {
-		logger.debug("Collecting commit information (project: {}, ref: {})...", project.getName(), refName);
+		logger.debug("Collecting commit information (project: {}, ref: {})...", project.getPath(), refName);
 		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -578,7 +578,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			collectContribs(project, commitId);
 		}		
 		
-		logger.debug("Collected commit information (project: {}, ref: {})", project.getName(), refName);
+		logger.debug("Collected commit information (project: {}, ref: {})", project.getPath(), refName);
 	}
 
 	private void collectContribs(Project project, ObjectId commitId) {

@@ -49,10 +49,10 @@ public class ProjectDesignation implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		List<String> projectNames = OneDev.getInstance(ProjectManager.class)
-				.query().stream().map(it->it.getName()).collect(Collectors.toList());
-		Collections.sort(projectNames);
-		return projectNames;
+		List<String> projectPaths = OneDev.getInstance(ProjectManager.class)
+				.query().stream().map(it->it.getPath()).collect(Collectors.toList());
+		Collections.sort(projectPaths);
+		return projectPaths;
 	}
 		
 }

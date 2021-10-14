@@ -19,6 +19,7 @@ import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -127,7 +128,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "quote as literal value";
+						return "value should be quoted";
 					}
 					
 				}.suggest(terminalExpect);
@@ -163,12 +164,13 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 					if (fieldName.equals(PullRequest.NAME_TARGET_PROJECT)
-							|| fieldName.equals(PullRequest.NAME_TARGET_BRANCH) 
-							|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT) 
-							|| fieldName.equals(PullRequest.NAME_SOURCE_BRANCH) 
-							|| fieldName.equals(PullRequest.NAME_TITLE) 
+							|| fieldName.equals(PullRequest.NAME_TARGET_BRANCH)) {
+						hints.add("Use '**', '*', or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+					} else if (fieldName.equals(PullRequest.NAME_TITLE) 
 							|| fieldName.equals(PullRequest.NAME_DESCRIPTION)
-							|| fieldName.equals(PullRequest.NAME_COMMENT)) {
+							|| fieldName.equals(PullRequest.NAME_COMMENT)
+							|| fieldName.equals(PullRequest.NAME_SOURCE_PROJECT) 
+							|| fieldName.equals(PullRequest.NAME_SOURCE_BRANCH)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

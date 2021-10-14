@@ -28,7 +28,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Settings - " + getProject().getName();
+		return "Settings - " + getProject().getPath();
 	}
 	
 }

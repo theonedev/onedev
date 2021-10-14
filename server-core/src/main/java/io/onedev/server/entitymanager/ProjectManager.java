@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 
 import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
@@ -15,7 +18,13 @@ import io.onedev.server.search.entity.EntityQuery;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
-	@Nullable Project find(String projectName);
+	@Nullable 
+	Project find(String path);
+	
+	Project initialize(String path);
+	
+	@Nullable
+	Project find(@Nullable Project parent, String name);
 
 	void fork(Project from, Project to);
 	
@@ -53,5 +62,11 @@ public interface ProjectManager extends EntityManager<Project> {
 	List<Project> query(EntityQuery<Project> projecQuery, int firstResult, int maxResults);
 	
 	int count(EntityCriteria<Project> projectCriteria);
+
+	Predicate getPathMatchCriteria(CriteriaBuilder builder, Path<Project> project, String pathPattern);
+	
+	void move(Collection<Project> projects, @Nullable Project parent);
+
+	void delete(Collection<Project> projects);
 	
 }

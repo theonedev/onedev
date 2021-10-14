@@ -234,7 +234,7 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	@Override
 	protected String getPageTitle() {
-		return "Commits - " + getProject().getName();
+		return "Commits - " + getProject().getPath();
 	}
 	
 }

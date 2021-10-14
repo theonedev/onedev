@@ -26,6 +26,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitContribution;
@@ -203,6 +204,7 @@ public class ProjectResource {
     	return commitInfoManager.getTopContributors(project, count, type, sinceDay.getValue(), untilDay.getValue());
     }
 	
+
 	@SuppressWarnings("unused")
 	private static String getDateExample() {
 		return DateUtils.formatISO8601Date(new Date());
@@ -211,6 +213,25 @@ public class ProjectResource {
 	@Api(order=800, description="Update project of specified id in request body, or create new if id property not provided")
     @POST
     public Long createOrUpdate(@NotNull Project project) {
+		Project parent = project.getParent();
+		if (parent != null && !SecurityUtils.canCreateChildren(parent))
+			throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
+		if (parent == null && !SecurityUtils.canCreateRootProjects()) 
+			throw new UnauthorizedException("Not authorized to create root project");
+	
+		if (parent != null && project.isSelfOrAncestorOf(parent)) 
+			throw new ExplicitException("Can not use current or descendent project as parent");
+		
+		Project projectWithSameName = projectManager.find(parent, project.getName());
+		if (projectWithSameName != null) {
+			if (parent != null) {
+				throw new ExplicitException("Name '" + project.getName() + "' is already used by another project under '" 
+						+ parent.getPath() + "'");
+			} else {
+				throw new ExplicitException("Name '" + project.getName() + "' is already used by another root project");
+			}
+		}
+		
     	if (project.isNew()) 
     		projectManager.create(project);
     	else if (!SecurityUtils.canManage(project))

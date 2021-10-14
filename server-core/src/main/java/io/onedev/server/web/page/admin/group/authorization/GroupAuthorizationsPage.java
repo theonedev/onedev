@@ -34,7 +34,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
 		for (GroupAuthorization authorization: getGroup().getAuthorizations()) {
 			AuthorizationBean authorizationBean = new AuthorizationBean();
-			authorizationBean.setProjectName(authorization.getProject().getName());
+			authorizationBean.setProjectPath(authorization.getProject().getPath());
 			authorizationBean.setRoleName(authorization.getRole().getName());
 			authorizationsBean.getAuthorizations().add(authorizationBean);
 		}
@@ -45,17 +45,17 @@ public class GroupAuthorizationsPage extends GroupPage {
 			protected void onSubmit() {
 				super.onSubmit();
 
-				Set<String> projectNames = new HashSet<>();
+				Set<String> projectPaths = new HashSet<>();
 				Collection<GroupAuthorization> authorizations = new ArrayList<>();
 				for (AuthorizationBean authorizationBean: authorizationsBean.getAuthorizations()) {
-					if (projectNames.contains(authorizationBean.getProjectName())) {
-						error("Duplicate authorizations found: " + authorizationBean.getProjectName());
+					if (projectPaths.contains(authorizationBean.getProjectPath())) {
+						error("Duplicate authorizations found: " + authorizationBean.getProjectPath());
 						return;
 					} else {
-						projectNames.add(authorizationBean.getProjectName());
+						projectPaths.add(authorizationBean.getProjectPath());
 						GroupAuthorization authorization = new GroupAuthorization();
 						authorization.setGroup(getGroup());
-						authorization.setProject(OneDev.getInstance(ProjectManager.class).find(authorizationBean.getProjectName()));
+						authorization.setProject(OneDev.getInstance(ProjectManager.class).find(authorizationBean.getProjectPath()));
 						authorization.setRole(OneDev.getInstance(RoleManager.class).find(authorizationBean.getRoleName()));
 						authorizations.add(authorization);
 					}

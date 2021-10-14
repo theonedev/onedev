@@ -234,7 +234,7 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 	
 	@Override
 	protected String getPageTitle() {
-		return "Milestone " +  getMilestone().getName() + " - " + getProject().getName();
+		return "Milestone " +  getMilestone().getName() + " - " + getProject().getPath();
 	}
 	
 }

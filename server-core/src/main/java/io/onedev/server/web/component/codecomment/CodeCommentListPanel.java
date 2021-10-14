@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.codecomment;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -59,9 +60,13 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
 import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -100,6 +105,10 @@ public abstract class CodeCommentListPanel extends Panel {
 	
 	private DataTable<CodeComment, Void> commentsTable;
 	
+	private SortableDataProvider<CodeComment, Void> dataProvider;
+	
+	private SelectionColumn<CodeComment, Void> selectionColumn;
+	
 	private TextField<String> queryInput;
 	
 	private Component saveQueryLink;
@@ -120,6 +129,7 @@ public abstract class CodeCommentListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		commentsTable.setCurrentPage(0);
 		target.add(body);
+		selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -180,6 +190,146 @@ public abstract class CodeCommentListPanel extends Panel {
 			}		
 			
 		}.setOutputMarkupPlaceholderTag(true));
+		
+		add(new MenuLink("delete") {
+
+			@Override
+			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete Selected Comments";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<CodeComment> comments = new ArrayList<>();
+										for (IModel<CodeComment> each: selectionColumn.getSelections())
+											comments.add(each.getObject());
+										OneDev.getInstance(CodeCommentManager.class).delete(comments);
+										selectionColumn.getSelections().clear();
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete selected issues";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select issues to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete All Queried Comments";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<CodeComment> comments = new ArrayList<>();
+										for (Iterator<CodeComment> it = (Iterator<CodeComment>) dataProvider.iterator(0, commentsTable.getItemCount()); it.hasNext();) 
+											comments.add(it.next());
+										OneDev.getInstance(CodeCommentManager.class).delete(comments);
+										selectionColumn.getSelections().clear();
+										target.add(body);
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete all queried comments";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(commentsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No comments to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				return menuItems;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getProject() != null && SecurityUtils.canManageCodeComments(getProject()));
+			}
+
+		});
 		
 		add(new DropdownLink("orderBy") {
 
@@ -270,7 +420,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 		body.add(new FencedFeedbackPanel("feedback", this));
 
-		SortableDataProvider<CodeComment, Void> dataProvider = new LoadableDetachableDataProvider<CodeComment, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<CodeComment, Void>() {
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
@@ -312,6 +462,9 @@ public abstract class CodeCommentListPanel extends Panel {
 		};
 		
 		List<IColumn<CodeComment, Void>> columns = new ArrayList<>();
+		
+		if (getProject() != null && SecurityUtils.canManageCodeComments(getProject())) 
+			columns.add(selectionColumn = new SelectionColumn<CodeComment, Void>());
 		
 		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("")) {
 

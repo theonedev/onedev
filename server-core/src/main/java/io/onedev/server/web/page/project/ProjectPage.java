@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -21,7 +21,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -30,8 +29,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.info.ProjectInfoPanel;
+import io.onedev.server.web.component.project.path.ProjectPathPanel;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.SidebarMenu;
@@ -41,11 +40,11 @@ import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.builds.detail.InvalidBuildPage;
+import io.onedev.server.web.page.project.children.ProjectChildrenPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
@@ -87,23 +86,16 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	public static PageParameters paramsOf(Project project) {
 		PageParameters params = new PageParameters();
-		params.add(PARAM_PROJECT, project.getName());
+		params.add(PARAM_PROJECT, project.getId());
 		return params;
 	}
 	
 	public ProjectPage(PageParameters params) {
 		super(params);
 		
-		String projectName = params.get(PARAM_PROJECT).toString();
-		if (StringUtils.isBlank(projectName))
+		Long projectId = params.get(PARAM_PROJECT).toOptionalLong();
+		if (projectId == null)
 			throw new RestartResponseException(ProjectListPage.class);
-		
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-		
-		if (project == null) 
-			throw new ExplicitException("Unable to find project " + projectName);
-		
-		Long projectId = project.getId();
 		
 		projectModel = new LoadableDetachableModel<Project>() {
 
@@ -122,9 +114,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			}
 			
 		};
-		
-		// we do not need to reload the project this time as we already have that object on hand
-		projectModel.setObject(project);
 	}
 	
 	protected Map<String, ObjectId> getObjectIdCache() {
@@ -152,7 +141,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		List<SidebarMenuItem> menuItems = new ArrayList<>();
 		
-		if (SecurityUtils.canReadCode(getProject())) {
+		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject())) {
 			menuItems.add(new SidebarMenuItem.Page("files", "Files", 
 					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject())));
 			menuItems.add(new SidebarMenuItem.Page("commit", "Commits", 
@@ -178,20 +167,26 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					Lists.newArrayList(NewMilestonePage.class, MilestoneDetailPage.class, MilestoneEditPage.class)));
 			
 		}
-		menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
-				ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
-				Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
 		
-		if (SecurityUtils.canReadCode(getProject())) {
-			menuItems.add(new SidebarMenuItem.Page("comments", "Code Comments", 
-					ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
-			menuItems.add(new SidebarMenuItem.Page("diff", "Code Compare", 
-					RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
+		if (getProject().isCodeManagementEnabled()) {
+			menuItems.add(new SidebarMenuItem.Page("play-circle", "Builds", 
+					ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), 0), 
+					Lists.newArrayList(BuildDetailPage.class, InvalidBuildPage.class)));
+			
+			if (SecurityUtils.canReadCode(getProject())) {
+				menuItems.add(new SidebarMenuItem.Page("comments", "Code Comments", 
+						ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), 0)));
+				menuItems.add(new SidebarMenuItem.Page("diff", "Code Compare", 
+						RevisionComparePage.class, RevisionComparePage.paramsOf(getProject())));
+			}
 		}
-
+		
+		menuItems.add(new SidebarMenuItem.Page("tree", "Child Projects", 
+				ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(getProject(), null, 0)));
+		
 		List<SidebarMenuItem> statsMenuItems = new ArrayList<>();
 		
-		if (SecurityUtils.canReadCode(getProject())) {
+		if (getProject().isCodeManagementEnabled() && SecurityUtils.canReadCode(getProject())) {
 			statsMenuItems.add(new SidebarMenuItem.Page(null, "Contributions", 
 					ProjectContribsPage.class, ProjectContribsPage.paramsOf(getProject())));
 			statsMenuItems.add(new SidebarMenuItem.Page(null, "Source Lines", 
@@ -206,7 +201,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		if (!statsMenuItems.isEmpty())
 			menuItems.add(new SidebarMenuItem.SubMenu("statistics", "Statistics", statsMenuItems));
-			
 		
 		if (SecurityUtils.canManage(getProject())) {
 			List<SidebarMenuItem> settingMenuItems = new ArrayList<>();
@@ -280,11 +274,14 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		Fragment fragment = new Fragment(componentId, "topbarTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("projects", ProjectListPage.class));
 		
-		ViewStateAwarePageLink<?> link = new ViewStateAwarePageLink<Void>("projectLink", 
-				ProjectDashboardPage.class, ProjectDashboardPage.paramsOf(getProject()));
-		link.add(new Label("label", getProject().getName()));
-		
-		fragment.add(link);
+		fragment.add(new ProjectPathPanel("projectPath", projectModel) {
+
+			@Override
+			protected Component newSeparator(String componentId) {
+				return new Label(componentId).add(AttributeAppender.append("class", "dot"));
+			}
+			
+		});
 		
 		fragment.add(newProjectTitle("projectTitle"));
 		return fragment;
@@ -292,7 +289,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	@Override
 	protected String getPageTitle() {
-		return getProject().getName();
+		return getProject().getPath();
 	}
 	
 	protected abstract Component newProjectTitle(String componentId);

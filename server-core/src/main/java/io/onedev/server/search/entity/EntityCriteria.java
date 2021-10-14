@@ -23,7 +23,7 @@ public abstract class EntityCriteria<T extends AbstractEntity> extends Criteria<
 	
 	public abstract Predicate getPredicate(Root<T> root, CriteriaBuilder builder);
 
-	protected Predicate inManyValues(CriteriaBuilder builder, Path<Long> attribute, Collection<Long> inValues, 
+	public static Predicate inManyValues(CriteriaBuilder builder, Path<Long> attribute, Collection<Long> inValues, 
 			Collection<Long> allValues) {
 		List<Long> listOfInValues = new ArrayList<>(inValues);
 		Collections.sort(listOfInValues);

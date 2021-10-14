@@ -32,6 +32,7 @@ import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.permission.AccessBuildLog;
+import io.onedev.server.security.permission.CreateRootProjects;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
@@ -79,6 +80,8 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 					permissions.add(new ProjectPermission(project, new JobPermission("*", new AccessBuildLog())));
 				}
 			}
+		} else if (group.isCreateRootProjects() && user != null) {
+			permissions.add(new CreateRootProjects());
 		}
 		for (GroupAuthorization authorization: group.getAuthorizations()) 
 			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));

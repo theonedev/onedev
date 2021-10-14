@@ -258,7 +258,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Pull Requests - " + getProject().getName();
+		return "Pull Requests - " + getProject().getPath();
 	}
 	
 }

@@ -8,6 +8,7 @@ import javax.ws.rs.client.Client;
 import org.apache.http.client.utils.URIBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -38,8 +39,10 @@ public class BitbucketProjectImporter extends ProjectImporter<ImportServer, Proj
 				
 				String apiEndpoint = where.getApiEndpoint("/repositories/" + projectMapping.getBitbucketRepo());
 				JsonNode repoNode = JerseyUtils.get(client, apiEndpoint, logger);
-				Project project = new Project();
-				project.setName(projectMapping.getOneDevProject());
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);                               
+				Project project = projectManager.initialize(projectMapping.getOneDevProject());
+				Preconditions.checkState(project.isNew());				
+				
 				project.setDescription(repoNode.get("description").asText(null));
 				
 				boolean isPrivate = repoNode.get("is_private").asBoolean();
@@ -61,7 +64,7 @@ public class BitbucketProjectImporter extends ProjectImporter<ImportServer, Proj
 					builder.setUserInfo(where.getUserName(), where.getAppPassword());
 				
 				if (!dryRun) {
-					OneDev.getInstance(ProjectManager.class).clone(project, builder.build().toString());
+					projectManager.clone(project, builder.build().toString());
 					projectIds.add(project.getId());
 				}
 			}
@@ -86,7 +89,7 @@ public class BitbucketProjectImporter extends ProjectImporter<ImportServer, Proj
 				String fullName = repoNode.get("full_name").asText();
 				ProjectMapping projectMapping = new ProjectMapping();
 				projectMapping.setBitbucketRepo(fullName);
-				projectMapping.setOneDevProject(fullName.replace("/", "-"));
+				projectMapping.setOneDevProject(fullName);
 				importSource.getProjectMappings().add(projectMapping);
 			}					
 		} finally {

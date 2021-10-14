@@ -662,7 +662,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			@Override
 			public void run() {
 				for (Project project: projectManager.query()) {
-					logger.debug("Populating preserved build ids of project '" + project.getName() + "'...");
+					logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
 					List<BuildPreservation> preservations = project.getBuildSetting().getBuildPreservations();
 					if (preservations.isEmpty()) {
 						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
@@ -678,7 +678,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 								idsToPreserve.addAll(queryIds(project, query, 0, count));
 							} catch (Exception e) {
 								String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
-										project.getName(), preservation.getCondition());
+										project.getPath(), preservation.getCondition());
 								logger.error(message, e);
 								idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
 							}

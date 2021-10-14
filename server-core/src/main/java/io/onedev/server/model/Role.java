@@ -31,6 +31,7 @@ import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageBuilds;
@@ -44,7 +45,6 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.NameAware;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -56,7 +56,7 @@ import io.onedev.server.web.editable.annotation.ShowCondition;
 @Table(indexes={@Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
-public class Role extends AbstractEntity implements Permission, NameAware {
+public class Role extends AbstractEntity implements Permission {
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,6 +66,8 @@ public class Role extends AbstractEntity implements Permission, NameAware {
 	private String name;
 	
 	private boolean manageProject;
+	
+	private boolean createChildren;
 	
 	private boolean managePullRequests;
 	
@@ -98,7 +100,6 @@ public class Role extends AbstractEntity implements Permission, NameAware {
 	
 	@Editable(order=100)
 	@NotEmpty
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -120,6 +121,16 @@ public class Role extends AbstractEntity implements Permission, NameAware {
 		this.manageProject = manageProject;
 	}
 	
+	@Editable(order=210, name="Create Child Projects")
+	@ShowCondition("isManageProjectDisabled")
+	public boolean isCreateChildren() {
+		return createChildren;
+	}
+
+	public void setCreateChildren(boolean createChildren) {
+		this.createChildren = createChildren;
+	}
+
 	@SuppressWarnings("unused")
 	private static boolean isManageProjectDisabled() {
 		return !(boolean)EditContext.get().getInputValue("manageProject");
@@ -267,6 +278,8 @@ public class Role extends AbstractEntity implements Permission, NameAware {
 		if (SecurityUtils.getUser() != null) {
 			if (manageProject) 
 				permissions.add(new ManageProject());
+			if (createChildren)
+				permissions.add(new CreateChildren());
 			if (manageCodeComments)
 				permissions.add(new ManageCodeComments());
 			if (managePullRequests)

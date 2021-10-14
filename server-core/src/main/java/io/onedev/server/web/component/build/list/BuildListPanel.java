@@ -11,8 +11,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -48,6 +48,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -72,7 +73,6 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
-import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.build.ParamValuesLabel;
@@ -94,6 +94,7 @@ import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -196,6 +197,7 @@ public abstract class BuildListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		buildsTable.setCurrentPage(0);
 		target.add(body);
+		selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -257,11 +259,85 @@ public abstract class BuildListPanel extends Panel {
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		add(new MenuLink("delete") {
+		BasePage page = (BasePage) getPage();
+		
+		add(new MenuLink("operations") {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
 				List<MenuItem> menuItems = new ArrayList<>();
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Cancel Selected Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (IModel<Build> each: selectionColumn.getSelections()) {
+									Build build = each.getObject();
+									if (build.isFinished()) {
+										errorMessage = "Build #" + build.getNumber() + " already finished";
+										break;
+									} 
+								}
+								
+								if (errorMessage != null) {
+									page.alert(target, errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											for (IModel<Build> each: selectionColumn.getSelections()) 
+												OneDev.getInstance(JobManager.class).cancel(each.getObject());
+											Session.get().success("Cancel request submitted");
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to cancel selected builds";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes"; 
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select builds to cancel");
+								}
+							}
+							
+						};
+					}
+					
+				});
 				
 				menuItems.add(new MenuItem() {
 
@@ -275,25 +351,39 @@ public abstract class BuildListPanel extends Panel {
 						return new AjaxLink<Void>(id) {
 
 							@Override
-							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-								super.updateAjaxAttributes(attributes);
-								attributes.getAjaxCallListeners().add(new ConfirmClickListener("Do you really want to delete selected builds?"));
-							}
-
-							@Override
 							public void onClick(AjaxRequestTarget target) {
 								dropdown.close();
-								Collection<Build> builds = new ArrayList<>();
-								for (IModel<Build> each: selectionColumn.getSelections())
-									builds.add(each.getObject());
-								OneDev.getInstance(BuildManager.class).delete(builds);
-								target.add(body);
+								
+								new ConfirmModalPanel(target) {
+									
+									@Override
+									protected void onConfirm(AjaxRequestTarget target) {
+										Collection<Build> builds = new ArrayList<>();
+										for (IModel<Build> each: selectionColumn.getSelections())
+											builds.add(each.getObject());
+										OneDev.getInstance(BuildManager.class).delete(builds);
+										target.add(body);
+										selectionColumn.getSelections().clear();
+									}
+									
+									@Override
+									protected String getConfirmMessage() {
+										return "Type <code>yes</code> below to delete selected builds";
+									}
+									
+									@Override
+									protected String getConfirmInput() {
+										return "yes";
+									}
+									
+								};
+								
 							}
 							
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setEnabled(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+								setEnabled(!selectionColumn.getSelections().isEmpty());
 							}
 							
 							@Override
@@ -311,6 +401,79 @@ public abstract class BuildListPanel extends Panel {
 					
 				});
 				
+				menuItems.add(new MenuItem() {
+					
+					@Override
+					public String getLabel() {
+						return "Cancel All Queried Builds";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) { 
+									Build build = it.next();
+									if (build.isFinished()) {
+										errorMessage = "Build #" + build.getNumber() + " already finished";
+										break;
+									}
+								}
+								
+								if (errorMessage != null) {
+									page.alert(target, errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											for (Iterator<Build> it = (Iterator<Build>) dataProvider.iterator(0, buildsTable.getItemCount()); it.hasNext();) 
+												OneDev.getInstance(JobManager.class).cancel(it.next());
+											Session.get().success("Cancel request submitted");
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to cancel all queried builds";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(buildsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No builds to cancel");
+								}
+							}
+							
+						};
+					}
+					
+				});
+
 				menuItems.add(new MenuItem() {
 
 					@Override
@@ -337,6 +500,7 @@ public abstract class BuildListPanel extends Panel {
 										}
 										OneDev.getInstance(BuildManager.class).delete(builds);
 										target.add(body);
+										selectionColumn.getSelections().clear();
 									}
 									
 									@Override
@@ -668,7 +832,7 @@ public abstract class BuildListPanel extends Panel {
 						Build build = rowModel.getObject();
 						StringBuilder builder = new StringBuilder();
 						if (getProject() == null)
-							builder.append(build.getProject().getName());
+							builder.append(build.getProject().getPath());
 						builder.append("#" + build.getNumber());
 						if (build.getVersion() != null)
 							builder.append(" (" + build.getVersion() + ")");

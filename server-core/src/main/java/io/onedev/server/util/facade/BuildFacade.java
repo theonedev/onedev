@@ -8,8 +8,8 @@ public class BuildFacade extends EntityFacade {
 	
 	private final String commitHash;
 	
-	public BuildFacade(Long buildId, Long projectId, String commitHash) {
-		super(buildId);
+	public BuildFacade(Long id, Long projectId, String commitHash) {
+		super(id);
 		this.projectId = projectId;
 		this.commitHash = commitHash;
 	}
@@ -18,7 +18,7 @@ public class BuildFacade extends EntityFacade {
 		return projectId;
 	}
 
-	public String getCommitHash() {
+	public String getCommitHash() {	
 		return commitHash;
 	}
 

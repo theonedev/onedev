@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.validation.annotation.ProjectName;
+import io.onedev.server.util.validation.annotation.ProjectPath;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.util.WicketUtils;
@@ -35,7 +35,7 @@ public class ProjectMapping implements Serializable {
 
 	@Editable(order=200, name="OneDev Project", description="Specify OneDev project to be created as "
 			+ "result of importing")
-	@ProjectName
+	@ProjectPath
 	@NotEmpty
 	public String getOneDevProject() {
 		return oneDevProject;

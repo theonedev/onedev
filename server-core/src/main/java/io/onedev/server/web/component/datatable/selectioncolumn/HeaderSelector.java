@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.datatable.selectioncolumn;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.wicket.Component;
@@ -47,7 +48,7 @@ abstract class HeaderSelector<T> extends Panel {
 						new IVisitor<RowSelector<T>, Void>() {
 
 							public void component(RowSelector<T> component, IVisit<Void> visit) {
-								if (!getSelections().contains(component.getModel())) 
+								if (!getSelections().stream().anyMatch(it->it.getObject().equals(component.getModel().getObject()))) 
 									allChecked = false;
 								else 
 									noneChecked = false;
@@ -90,13 +91,15 @@ abstract class HeaderSelector<T> extends Panel {
 						RowSelector.class,
 						new IVisitor<RowSelector<T>, Void>() {
 
-							public void component(RowSelector<T> component,
-									IVisit<Void> visit) {
+							public void component(RowSelector<T> component, IVisit<Void> visit) {
+								for (Iterator<IModel<T>> it = getSelections().iterator(); it.hasNext();) {
+									if (it.next().getObject().equals(component.getModel().getObject()))
+										it.remove();
+								}
 								if (checked)
 									getSelections().add(component.getModel());
-								else
-									getSelections().remove(component.getModel());
 							}
+							
 						});
 
 				onSelectionChange(target);

@@ -351,7 +351,7 @@ public abstract class BuildSidePanel extends Panel {
 		WebMarkupContainer dependencesContainer = new WebMarkupContainer("dependences");
 		add(dependencesContainer);
 		
-		String query = "depends on " + Criteria.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
+		String query = "depends on " + Criteria.quote(getBuild().getProject().getPath() + "#" + getBuild().getNumber());
 		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0, getBuild().getDependents().size()));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
@@ -359,7 +359,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		dependencesContainer.add(dependentsLink);
 		
-		query = "dependencies of " + Criteria.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
+		query = "dependencies of " + Criteria.quote(getBuild().getProject().getPath() + "#" + getBuild().getNumber());
 		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
 				BuildListPage.paramsOf(query, 0, getBuild().getDependencies().size()));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());

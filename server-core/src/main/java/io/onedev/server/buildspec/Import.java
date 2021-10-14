@@ -50,7 +50,7 @@ public class Import implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String projectName;
+	private String projectPath;
 	
 	private String tag;
 	
@@ -67,17 +67,17 @@ public class Import implements Serializable, Validatable {
 		
 	};
 	
-	// change Named("projectName") also if change name of this property 
+	// change Named("projectPath") also if change name of this property 
 	@Editable(order=100, name="Project", description="Specify project to import build spec from. "
 			+ "Default role of this project should have <tt>read code</tt> permission")
 	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
-	public String getProjectName() {
-		return projectName;
+	public String getProjectPath() {
+		return projectPath;
 	}
 
-	public void setProjectName(String projectName) {
-		this.projectName = projectName;
+	public void setProjectPath(String projectPath) {
+		this.projectPath = projectPath;
 	}
 
 	@SuppressWarnings("unused")
@@ -86,7 +86,7 @@ public class Import implements Serializable, Validatable {
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
 		for (Project each: OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject())) {
 			if (!each.equals(project))
-				choices.add(each.getName());
+				choices.add(each.getPath());
 		}
 		
 		Collections.sort(choices);
@@ -173,7 +173,7 @@ public class Import implements Serializable, Validatable {
 				if (user == null) {
 					throw new ExplicitException(String.format(
 							"Unable to import build spec as access token is invalid (import project: %s, access token: %s)", 
-							projectName, accessToken));
+							projectPath, accessToken));
 				}
 				subject = user.asSubject();
 			} else {
@@ -183,7 +183,7 @@ public class Import implements Serializable, Validatable {
 					&& !project.isPermittedByLoginUser(new ReadCode())) {
 				String errorMessage = String.format(
 						"Code read permission is required to import build spec (import project: %s)", 
-						projectName);
+						projectPath);
 				throw new ExplicitException(errorMessage);
 			}
 			
@@ -192,12 +192,12 @@ public class Import implements Serializable, Validatable {
 				buildSpec = project.getBuildSpec(commit);
 			} catch (BuildSpecParseException e) {
 				String errorMessage = String.format("Malformed build spec (import project: %s, tag: %s)", 
-						projectName, tag);
+						projectPath, tag);
 				throw new ExplicitException(errorMessage);
 			}
 			if (buildSpec == null) {
 				String errorMessage = String.format("Build spec not defined (import project: %s, tag: %s)", 
-						projectName, tag);
+						projectPath, tag);
 				throw new ExplicitException(errorMessage);
 			}
 			
@@ -207,15 +207,15 @@ public class Import implements Serializable, Validatable {
 	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
-		if (importChain.get().contains(projectName)) {
+		if (importChain.get().contains(projectPath)) {
 			List<String> circular = new ArrayList<>(importChain.get());
-			circular.add(projectName);
+			circular.add(projectPath);
 			String errorMessage = "Circular build spec imports (" + circular + ")";
 			context.disableDefaultConstraintViolation();
 			context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
 			return false;
 		} else {
-			importChain.get().push(projectName);
+			importChain.get().push(projectPath);
 			try {
 				Validator validator = OneDev.getInstance(Validator.class);
 				BuildSpec buildSpec = getBuildSpec();
@@ -228,7 +228,7 @@ public class Import implements Serializable, Validatable {
 							if (violation.getPropertyPath().toString().length() != 0)
 								location += "." + violation.getPropertyPath();
 				    		String message = String.format("Error validating imported build spec (import project: %s, location: %s, message: %s)", 
-				    				projectName, location, violation.getMessage());
+				    				projectPath, location, violation.getMessage());
 				    		throw new ValidationException(message);
 						}
 					}
@@ -247,9 +247,9 @@ public class Import implements Serializable, Validatable {
 	}
 	
 	public Project getProject() {
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+		Project project = OneDev.getInstance(ProjectManager.class).find(projectPath);
 		if (project == null) 
-			throw new ExplicitException("Unable to find project to import build spec: " + projectName);
+			throw new ExplicitException("Unable to find project to import build spec: " + projectPath);
 		else 
 			return project;
 	}
@@ -258,7 +258,7 @@ public class Import implements Serializable, Validatable {
 		RevCommit commit = getProject().getRevCommit(tag, false);
 		if (commit == null) {
 			String errorMessage = String.format("Unable to find tag to import build spec (import project: %s, tag: %s)", 
-					projectName, tag);
+					projectPath, tag);
 			throw new ExplicitException(errorMessage);
 		}
 		return commit;

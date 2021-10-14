@@ -233,7 +233,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "quote as literal value";
+						return "value should be quoted";
 					}
 					
 				}.suggest(terminalExpect);
@@ -273,12 +273,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+			if ("criteriaValue".equals(spec.getLabel())) {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Issue.NAME_PROJECT)
-							|| fieldName.equals(Issue.NAME_TITLE) 
+					if (fieldName.equals(Issue.NAME_PROJECT)) {
+						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+					} else if (fieldName.equals(Issue.NAME_TITLE) 
 							|| fieldName.equals(Issue.NAME_DESCRIPTION)
 							|| fieldName.equals(Issue.NAME_COMMENT)
 							|| fieldName.equals(Issue.NAME_MILESTONE)) {

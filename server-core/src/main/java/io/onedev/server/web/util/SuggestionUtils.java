@@ -145,12 +145,12 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestProjects(String matchWith) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		List<String> projectNames = projectManager.getPermittedProjects(new AccessProject())
+		List<String> projectPaths = projectManager.getPermittedProjects(new AccessProject())
 				.stream()
-				.map(it->it.getName())
+				.map(it->it.getPath())
 				.sorted()
 				.collect(Collectors.toList());
-		return suggest(projectNames, matchWith);
+		return suggest(projectPaths, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestAgents(String matchWith) {
@@ -330,20 +330,20 @@ public class SuggestionUtils {
 							LinearRange match = suggestion.getMatch();
 							if (suggestion.getContent().startsWith(scopeSeparator)) {
 								if (match != null) {
-									int length = project.getName().length();
+									int length = project.getPath().length();
 									match = new LinearRange(match.getFrom() + length, match.getTo() + length);
 								}
 								suggestions.add(new InputSuggestion(
-										project.getName() + suggestion.getContent(), 
+										project.getPath() + suggestion.getContent(), 
 										suggestion.getDescription(), 
 										match));
 							} else {
 								if (match != null) {
-									int length = project.getName().length() + scopeSeparator.length();
+									int length = project.getPath().length() + scopeSeparator.length();
 									match = new LinearRange(match.getFrom() + length, match.getTo() + length);
 								}
 								suggestions.add(new InputSuggestion(
-										project.getName() + scopeSeparator + suggestion.getContent(), 
+										project.getPath() + scopeSeparator + suggestion.getContent(), 
 										suggestion.getDescription(), 
 										match));
 							}
@@ -358,11 +358,11 @@ public class SuggestionUtils {
 			} else {
 				List<InputSuggestion> suggestions = new ArrayList<>();
 				for (Project each: projectManager.getPermittedProjects(new AccessProject())) {
-					LinearRange match = LinearRange.match(each.getName() + scopeSeparator, matchWith);
+					LinearRange match = LinearRange.match(each.getPath() + scopeSeparator, matchWith);
 					if (match != null) {
 						suggestions.add(new InputSuggestion(
-								each.getName() + scopeSeparator, 
-								each.getName().length() + scopeSeparator.length(), 
+								each.getPath() + scopeSeparator, 
+								each.getPath().length() + scopeSeparator.length(), 
 								"select project first", 
 								match));
 						if (suggestions.size() >= InputAssistBehavior.MAX_SUGGESTIONS)

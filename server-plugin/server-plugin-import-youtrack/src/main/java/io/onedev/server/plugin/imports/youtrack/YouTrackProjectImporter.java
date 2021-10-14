@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.ExplicitException;
@@ -58,13 +59,14 @@ public class YouTrackProjectImporter extends ProjectImporter<ImportServer, Proje
 				if (youTrackProjectId == null)
 					throw new ExplicitException("Unable to find YouTrack project: " + projectMapping.getYouTrackProject());
 				
-				Project project = new Project();
-				project.setName(projectMapping.getOneDevProject());
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
+				Project project = projectManager.initialize(projectMapping.getOneDevProject());
+				Preconditions.checkState(project.isNew());
 				project.setDescription(youTrackProjectDescriptions.get(projectMapping.getYouTrackProject()));
 				project.setIssueManagementEnabled(true);
 				
 		       	if (!dryRun) {
-					OneDev.getInstance(ProjectManager.class).create(project);
+					projectManager.create(project);
 					projectIds.add(project.getId());
 		       	}
 

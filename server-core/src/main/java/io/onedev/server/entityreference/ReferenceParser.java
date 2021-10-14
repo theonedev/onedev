@@ -23,7 +23,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.HtmlUtils;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.TextNodeVisitor;
-import io.onedev.server.util.validation.ProjectNameValidator;
+import io.onedev.server.util.validation.ProjectPathValidator;
 
 public class ReferenceParser {
 	
@@ -40,8 +40,8 @@ public class ReferenceParser {
 		for (int i=0; i<words.length-1; i++) 
 			builder.append(words[i]).append("\\s*");
 		builder.append(words[words.length-1]).append("\\s+)(");
-		builder.append(ProjectNameValidator.PATTERN.pattern());
-		builder.append(")?#(\\d+)(?=$|\\W+)");
+		builder.append(ProjectPathValidator.PATTERN.pattern());
+		builder.append(")?#(\\d+)(?=$|[\\W|/]+)");
 		pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
 	}
 	

@@ -40,6 +40,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -126,9 +127,9 @@ import io.onedev.server.util.AttachmentTooLargeException;
 import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.ContentDetector;
-import io.onedev.server.util.NameAware;
 import io.onedev.server.util.StatusInfo;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -142,13 +143,18 @@ import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 
 @Entity
-@Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList=PROP_NAME), 
-		@Index(columnList=PROP_UPDATE_DATE)})
+@Table(
+		indexes={
+				@Index(columnList="o_parent_id"), @Index(columnList="o_forkedFrom_id"), 
+				@Index(columnList=PROP_NAME), @Index(columnList=PROP_UPDATE_DATE)
+		}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_parent_id", PROP_NAME})}
+)
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 //use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate 
 @Editable
-public class Project extends AbstractEntity implements NameAware {
+public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -159,6 +165,8 @@ public class Project extends AbstractEntity implements NameAware {
 	public static final String NAME_NAME = "Name";
 	
 	public static final String PROP_NAME = "name";
+	
+	public static final String NAME_PATH = "Path";
 	
 	public static final String NAME_UPDATE_DATE = "Update Date";
 	
@@ -172,12 +180,18 @@ public class Project extends AbstractEntity implements NameAware {
 	
 	public static final String PROP_FORKED_FROM = "forkedFrom";
 	
+	public static final String PROP_PARENT = "parent";
+	
 	public static final String PROP_USER_AUTHORIZATIONS = "userAuthorizations";
 	
 	public static final String PROP_GROUP_AUTHORIZATIONS = "groupAuthorizations";
 	
+	public static final String PROP_CODE_MANAGEMENT_ENABLED = "codeManagementEnabled";
+	
+	public static final String PROP_ISSUE_MANAGEMENT_ENABLED = "issueManagementEnabled";
+	
 	public static final List<String> QUERY_FIELDS = 
-			Lists.newArrayList(NAME_NAME, NAME_DESCRIPTION, NAME_UPDATE_DATE);
+			Lists.newArrayList(NAME_NAME, NAME_PATH, NAME_DESCRIPTION, NAME_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			NAME_NAME, PROP_NAME, 
@@ -208,7 +222,12 @@ public class Project extends AbstractEntity implements NameAware {
 			+ "the project is not a fork when create/update the project")
 	private Project forkedFrom;
 	
-	@Column(nullable=false, unique=true)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=true)
+	@Api(description="Represents the parent project. Remove this property if the project does not have a parent project")
+	private Project parent;
+	
+	@Column(nullable=false)
 	private String name;
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
@@ -249,6 +268,10 @@ public class Project extends AbstractEntity implements NameAware {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Issue> issues = new ArrayList<>();
 	
+    @OneToMany(mappedBy="parent")
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+	private Collection<Project> children = new ArrayList<>();
+    
     @OneToMany(mappedBy="forkedFrom")
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Project> forks = new ArrayList<>();
@@ -287,6 +310,8 @@ public class Project extends AbstractEntity implements NameAware {
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
+	
+	private boolean codeManagementEnabled = true;
 	
 	private boolean issueManagementEnabled = true;
 	
@@ -353,7 +378,6 @@ public class Project extends AbstractEntity implements NameAware {
 	@Editable(order=100)
 	@ProjectName
 	@NotEmpty
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -454,6 +478,23 @@ public class Project extends AbstractEntity implements NameAware {
 		this.forkedFrom = forkedFrom;
 	}
 
+	@Nullable
+	public Project getParent() {
+		return parent;
+	}
+
+	public void setParent(Project parent) {
+		this.parent = parent;
+	}
+
+	public Collection<Project> getChildren() {
+		return children;
+	}
+
+	public void setChildren(Collection<Project> children) {
+		this.children = children;
+	}
+
 	public Collection<Project> getForks() {
 		return forks;
 	}
@@ -548,7 +589,7 @@ public class Project extends AbstractEntity implements NameAware {
 	}
 	
 	public String getUrl() {
-		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl() + "/projects/" + getName();
+		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl() + "/projects/" + getId();
 	}
 	
 	@Nullable
@@ -587,6 +628,10 @@ public class Project extends AbstractEntity implements NameAware {
 			}
 		}
 		return blobCache;
+	}
+	
+	public ProjectFacade getFacade() {
+		return new ProjectFacade(getId(), getName(), getParent()!=null? getParent().getId(): null);
 	}
 	
 	/**
@@ -1058,6 +1103,15 @@ public class Project extends AbstractEntity implements NameAware {
 		this.codeComments = codeComments;
 	}
 	
+	@Editable(order=200, name="Code Management", description="Whether or not to enable code management for the project")
+	public boolean isCodeManagementEnabled() {
+		return codeManagementEnabled;
+	}
+
+	public void setCodeManagementEnabled(boolean codeManagementEnabled) {
+		this.codeManagementEnabled = codeManagementEnabled;
+	}
+
 	@Editable(order=300, name="Issue management", description="Whether or not to enable issue management for the project")
 	public boolean isIssueManagementEnabled() {
 		return issueManagementEnabled;
@@ -1310,7 +1364,7 @@ public class Project extends AbstractEntity implements NameAware {
 
 	@Override
 	public String toString() {
-		return getName();
+		return getPath();
 	}
 
 	public List<User> getAuthors(String filePath, ObjectId commitId, @Nullable LinearRange range) {
@@ -1516,7 +1570,7 @@ public class Project extends AbstractEntity implements NameAware {
 	}
 	
 	public String getAttachmentUrlPath(String attachmentGroup, String attachmentName) {
-		return String.format("/projects/%s/attachment/%s/%s", getName(), attachmentGroup, attachmentName);
+		return String.format("/projects/%s/attachment/%s/%s", getId(), attachmentGroup, attachmentName);
 	}
 	
 	public String saveAttachment(String attachmentGroup, String suggestedAttachmentName, InputStream attachmentStream) {
@@ -1658,6 +1712,22 @@ public class Project extends AbstractEntity implements NameAware {
 			return detectLfsObjectMediaType(blob.getLfsPointer().getObjectId(), blobIdent.getName());
 		else
 			return blob.getMediaType();
+	}
+
+	public String getPath() {
+		if (getParent() != null)
+			return getParent().getPath() + "/" + getName();
+		else
+			return getName();
+	}
+	
+	public boolean isSelfOrAncestorOf(Project project) {
+		if (this.equals(project)) 
+			return true;
+		else if (project.getParent() != null) 
+			return isSelfOrAncestorOf(project.getParent());
+		else 
+			return false;
 	}
 	
 }

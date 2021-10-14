@@ -14,12 +14,14 @@ import javax.validation.ConstraintValidatorContext;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.field.supply.FieldSupply;
 import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usage.Usage;
@@ -72,10 +74,10 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getProjectChoices() {
-		List<String> projectNames = OneDev.getInstance(ProjectManager.class)
-				.query().stream().map(it->it.getName()).collect(Collectors.toList());
-		Collections.sort(projectNames);
-		return projectNames;
+		List<String> projectPaths = OneDev.getInstance(ProjectManager.class)
+				.query().stream().map(it->it.getPath()).collect(Collectors.toList());
+		Collections.sort(projectPaths);
+		return projectPaths;
 	}
 	
 	@Editable(order=300, description="Specify issue creation settings. For a particular sender and project, "
@@ -121,7 +123,6 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 	}
 	
 	public List<FieldSupply> getIssueCreationSetting(String senderAddress, Project project) {
-		Matcher matcher = new StringMatcher();
 		for (IssueCreationSetting setting: issueCreationSettings) {
 			String senderPatterns = setting.getSenderEmails();
 			if (senderPatterns == null)
@@ -130,14 +131,16 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 			
 			String projectPatterns = setting.getApplicableProjects();
 			if (projectPatterns == null)
-				projectPatterns = "*";
+				projectPatterns = "**";
 			PatternSet projectPatternSet = PatternSet.parse(projectPatterns);
 			
-			if (senderPatternSet.matches(matcher, senderAddress) && projectPatternSet.matches(matcher, project.getName()))
+			if (senderPatternSet.matches(new StringMatcher(), senderAddress) 
+					&& projectPatternSet.matches(new PathMatcher(), project.getPath())) {
 				return setting.getIssueFields();
+			}
 		}
 		String errorMessage = String.format("No issue creation setting (sender: %s, project: %s)", 
-				senderAddress, project.getName());
+				senderAddress, project.getPath());
 		throw new ExplicitException(errorMessage);
 	}
 	
@@ -150,7 +153,7 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 	
 	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
-		int index = 0;
+		int index = 1;
 		for (SenderAuthorization authorization: getSenderAuthorizations()) {
 			if (authorization.getAuthorizedRoleName().equals(roleName))
 				usage.add("sender authorization #" + index + ": authorized role");
@@ -159,56 +162,64 @@ public class ServiceDeskSetting implements Serializable, Validatable {
 		return usage;
 	}
 	
-	public void onRenameProject(String oldName, String newName) {
+	public void onRenameProject(String oldPath, String newPath) {
 		for (SenderAuthorization authorization: getSenderAuthorizations()) {
 			PatternSet patternSet = PatternSet.parse(authorization.getAuthorizedProjects());
-			if (patternSet.getIncludes().remove(oldName))
-				patternSet.getIncludes().add(newName);
-			if (patternSet.getExcludes().remove(oldName))
-				patternSet.getExcludes().add(newName);
-			authorization.setAuthorizedProjects(patternSet.toString());
+			Set<String> substitutedIncludes = patternSet.getIncludes().stream()
+					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
+					.collect(Collectors.toSet());
+			Set<String> substitutedExcludes = patternSet.getExcludes().stream()
+					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
+					.collect(Collectors.toSet());
+			authorization.setAuthorizedProjects(new PatternSet(substitutedIncludes, substitutedExcludes).toString());
 			if (authorization.getAuthorizedProjects().length() == 0)
 				authorization.setAuthorizedProjects(null);
 		}
 		for (ProjectDesignation designation: getProjectDesignations()) {
-			if (designation.getProject().equals(oldName))
-				designation.setProject(newName);
+			designation.setProject(PathUtils.substituteSelfOrAncestor(
+					designation.getProject(), oldPath, newPath));
 		}
 		for (IssueCreationSetting setting: getIssueCreationSettings()) {
 			PatternSet patternSet = PatternSet.parse(setting.getApplicableProjects());
-			if (patternSet.getIncludes().remove(oldName))
-				patternSet.getIncludes().add(newName);
-			if (patternSet.getExcludes().remove(oldName))
-				patternSet.getExcludes().add(newName);
-			setting.setApplicableProjects(patternSet.toString());
+			Set<String> substitutedIncludes = patternSet.getIncludes().stream()
+					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
+					.collect(Collectors.toSet());
+			Set<String> substitutedExcludes = patternSet.getExcludes().stream()
+					.map(it->PathUtils.substituteSelfOrAncestor(it, oldPath, newPath))
+					.collect(Collectors.toSet());
+			setting.setApplicableProjects(new PatternSet(substitutedIncludes, substitutedExcludes).toString());
 			if (setting.getApplicableProjects().length() == 0)
 				setting.setApplicableProjects(null);
 		}
 	}
 	
-	public Usage onDeleteProject(String projectName) {
+	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
 		
-		int index = 0;
+		int index = 1;
 		for (SenderAuthorization authorization: getSenderAuthorizations()) {
 			PatternSet patternSet = PatternSet.parse(authorization.getAuthorizedProjects());
-			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
+			if (patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it)) 
+					|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it))) {
 				usage.add("sender authorization #" + index + ": authorized projects");
+			}
 			index++;
 		}
 		
-		index = 0;
+		index = 1;
 		for (ProjectDesignation senderProject: getProjectDesignations()) {
-			if (senderProject.getProject().equals(projectName))
+			if (PathUtils.isSelfOrAncestor(projectPath, senderProject.getProject()))
 				usage.add("sender project #" + index + ": project");
 			index++;
 		}
 		
-		index = 0;
+		index = 1;
 		for (IssueCreationSetting setting: getIssueCreationSettings()) {
 			PatternSet patternSet = PatternSet.parse(setting.getApplicableProjects());
-			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
+			if (patternSet.getIncludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it)) 
+					|| patternSet.getExcludes().stream().anyMatch(it->PathUtils.isSelfOrAncestor(projectPath, it))) {
 				usage.add("issue creation setting #" + index + ": applicable projects");
+			}
 			index++;
 		}
 		return usage.prefix("service desk setting");

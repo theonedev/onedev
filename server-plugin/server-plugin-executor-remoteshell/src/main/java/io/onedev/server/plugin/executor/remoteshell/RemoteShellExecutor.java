@@ -66,8 +66,8 @@ public class RemoteShellExecutor extends ServerShellExecutor {
 				}
 				
 				List<String> trustCertContent = getTrustCertContent();
-				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectName(), 
-						jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
+				ShellJobData jobData = new ShellJobData(jobToken, getName(), jobContext.getProjectPath(), 
+						jobContext.getProjectId(), jobContext.getCommitId().name(), jobContext.getBuildNumber(), 
 						jobContext.getActions(), trustCertContent);
 				
 				try {

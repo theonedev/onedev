@@ -930,7 +930,7 @@ public class RevisionComparePage extends ProjectPage implements RevisionDiff.Ann
 	
 	@Override
 	protected String getPageTitle() {
-		return "Code Compare - " + getProject().getName();
+		return "Code Compare - " + getProject().getPath();
 	}
 	
 }

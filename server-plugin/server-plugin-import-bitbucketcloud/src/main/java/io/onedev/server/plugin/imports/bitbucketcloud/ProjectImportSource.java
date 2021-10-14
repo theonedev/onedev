@@ -7,8 +7,11 @@ import java.util.List;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
+import org.apache.shiro.authz.UnauthorizedException;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -36,8 +39,16 @@ public class ProjectImportSource implements Serializable, Validatable {
 		boolean isValid = true;
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		for (int i=0; i<projectMappings.size(); i++) {
-			if (projectManager.find(projectMappings.get(i).getOneDevProject()) != null) {
-				context.buildConstraintViolationWithTemplate("Project name already used")
+			String errorMessage = null;
+			try {
+				Project project = projectManager.initialize(projectMappings.get(i).getOneDevProject());
+				if (!project.isNew()) 
+					errorMessage = "Project already exists";
+			} catch (UnauthorizedException e) {
+				errorMessage = e.getMessage();
+			}
+			if (errorMessage != null) {
+				context.buildConstraintViolationWithTemplate(errorMessage)
 						.addPropertyNode("projectMappings")
 						.addPropertyNode(ProjectMapping.PROP_ONEDEV_PROJECT)
 						.inIterable().atIndex(i).addConstraintViolation();
@@ -45,7 +56,7 @@ public class ProjectImportSource implements Serializable, Validatable {
 			} else {
 				for (int j=0; j<projectMappings.size(); j++) {
 					if (j != i && projectMappings.get(j).getOneDevProject().equals(projectMappings.get(i).getOneDevProject())) {
-						context.buildConstraintViolationWithTemplate("Duplicate project name")
+						context.buildConstraintViolationWithTemplate("Duplicate project")
 								.addPropertyNode("projectMappings")
 								.addPropertyNode(ProjectMapping.PROP_ONEDEV_PROJECT)
 								.inIterable().atIndex(i).addConstraintViolation();

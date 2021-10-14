@@ -5,8 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;
@@ -41,14 +39,8 @@ public class ArchiveResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String projectName = params.get(PARAM_PROJECT).toString();
-		if (StringUtils.isBlank(projectName))
-			throw new IllegalArgumentException("project name has to be specified");
-		
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-		
-		if (project == null) 
-			throw new EntityNotFoundException("Unable to find project: " + projectName);
+		Long projectId = params.get(PARAM_PROJECT).toLong();
+		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		
 		String revision = params.get(PARAM_REVISION).toString();
 		if (StringUtils.isBlank(revision))
@@ -104,7 +96,7 @@ public class ArchiveResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Project project, String revision, String format) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getName());
+		params.set(PARAM_PROJECT, project.getId());
 		params.set(PARAM_REVISION, revision);
 		params.set(PARAM_FORMAT, format);
 		

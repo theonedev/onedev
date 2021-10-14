@@ -97,7 +97,7 @@ public class ProjectAndRevision implements Serializable {
 	}
 
 	public String getFQN() {
-		return getProject().getName() + SEPARATOR + revision;		
+		return getProject().getPath() + SEPARATOR + revision;		
 	}
 	
 	public boolean isDefault() {

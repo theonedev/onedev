@@ -40,6 +40,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
@@ -47,26 +48,31 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.imports.ProjectImporter;
 import io.onedev.server.imports.ProjectImporterContribution;
 import io.onedev.server.model.Project;
-import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.OrEntityCriteria;
+import io.onedev.server.search.entity.project.ChildrenOfCriteria;
 import io.onedev.server.search.entity.project.NameCriteria;
+import io.onedev.server.search.entity.project.PathCriteria;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.CreateChildren;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
 import io.onedev.server.web.component.datatable.OneDataTable;
+import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.orderedit.OrderEditPanel;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.imports.ProjectImportPage;
@@ -85,23 +91,21 @@ public class ProjectListPanel extends Panel {
 
 		@Override
 		protected ProjectQuery load() {
-			String queryString = queryStringModel.getObject();
-			try {
-				return ProjectQuery.parse(queryString);
-			} catch (ExplicitException e) {
-				error(e.getMessage());
-				return null;
-			} catch (Exception e) {
-				warn("Not a valid formal query, performing fuzzy query");
-				List<EntityCriteria<Project>> criterias = new ArrayList<>();
-				criterias.add(new NameCriteria("*" + queryString + "*"));
-				return new ProjectQuery(new OrEntityCriteria<Project>(criterias));
-			}
+			ProjectQuery baseQuery;
+			if (getParentProject() != null)
+				baseQuery = new ProjectQuery(new ChildrenOfCriteria(getParentProject()));
+			else
+				baseQuery = new ProjectQuery();
+			return parse(queryStringModel.getObject(), baseQuery);
 		}
 		
 	};
 	
-	private DataTable<Project, Void> dataTable;	
+	private DataTable<Project, Void> projectsTable;	
+	
+	private SelectionColumn<Project, Void> selectionColumn;
+	
+	private SortableDataProvider<Project, Void> dataProvider;	
 	
 	private WebMarkupContainer body;
 	
@@ -139,8 +143,9 @@ public class ProjectListPanel extends Panel {
 	}
 
 	private void doQuery(AjaxRequestTarget target) {
-		dataTable.setCurrentPage(0);
+		projectsTable.setCurrentPage(0);
 		target.add(body);
+		selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -214,7 +219,7 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public List<EntitySort> getObject() {
-						ProjectQuery query = queryModel.getObject();
+						ProjectQuery query = parse(queryStringModel.getObject(), new ProjectQuery());
 						ProjectListPanel.this.getFeedbackMessages().clear();
 						if (query != null) 
 							return query.getSorts();
@@ -224,13 +229,12 @@ public class ProjectListPanel extends Panel {
 
 					@Override
 					public void setObject(List<EntitySort> object) {
-						ProjectQuery query = queryModel.getObject();
+						ProjectQuery query = parse(queryStringModel.getObject(), new ProjectQuery());
 						ProjectListPanel.this.getFeedbackMessages().clear();
 						if (query == null)
 							query = new ProjectQuery();
 						query.getSorts().clear();
 						query.getSorts().addAll(object);
-						queryModel.setObject(query);
 						queryStringModel.setObject(query.toString());
 						AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class); 
 						target.add(queryInput);
@@ -242,50 +246,588 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		add(new MenuLink("importProjects") {
+		boolean canCreateProjects;
+		if (getParentProject() != null)
+			canCreateProjects = SecurityUtils.canCreateChildren(getParentProject());
+		else
+			canCreateProjects = SecurityUtils.canCreateProjects();
+		
+		BasePage page = (BasePage) getPage();
+		
+		add(new MenuLink("operations") {
 
 			@Override
 			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				Collection<ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
-				List<ProjectImporterContribution> contributions = 
-						new ArrayList<>(OneDev.getExtensions(ProjectImporterContribution.class));
-				Collections.sort(contributions, new Comparator<ProjectImporterContribution>() {
+				List<MenuItem> menuItems = new ArrayList<>();
+				menuItems.add(new MenuItem() {
 
 					@Override
-					public int compare(ProjectImporterContribution o1, ProjectImporterContribution o2) {
-						return o1.getOrder() - o2.getOrder();
+					public String getLabel() {
+						return "Move Selected Projects To...";
+					}
+
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new DropdownLink(id) {
+
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+				
+									@Override
+									protected Collection<Project> load() {
+										return getTargetProjects();
+									}
+									
+								}) {
+				
+									@Override
+									protected void onSelect(AjaxRequestTarget target, Project project) {
+										dropdown.close();
+										dropdown2.close();
+										
+										Long projectId = project.getId();
+										String errorMessage = null;
+										for (IModel<Project> each: selectionColumn.getSelections()) {
+											Project eachProject = each.getObject();
+											if (!SecurityUtils.canManage(eachProject)) {
+												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
+												break;
+											} else if (eachProject.isSelfOrAncestorOf(project)) {
+												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendents";
+												break;
+											} 
+										}
+										
+										if (errorMessage != null) {
+											page.alert(target, errorMessage);
+										} else {
+											new ConfirmModalPanel(target) {
+												
+												private Project getTargetProject() {
+													return OneDev.getInstance(ProjectManager.class).load(projectId);
+												}
+												
+												@Override
+												protected void onConfirm(AjaxRequestTarget target) {
+													Collection<Project> projects = new ArrayList<>();
+													for (IModel<Project> each: selectionColumn.getSelections()) 
+														projects.add(each.getObject());
+													OneDev.getInstance(ProjectManager.class).move(projects, getTargetProject());
+													target.add(body);
+													selectionColumn.getSelections().clear();
+												}
+												
+												@Override
+												protected String getConfirmMessage() {
+													return "Type <code>yes</code> below to move selected projects to be under '" + getTargetProject() + "'";
+												}
+												
+												@Override
+												protected String getConfirmInput() {
+													return "yes";
+												}
+												
+											};
+										}
+									}
+				
+								}.add(AttributeAppender.append("class", "no-current"));
+							}
+						
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select projects to move");
+								}
+							}
+							
+						};	
 					}
 					
 				});
 				
-				for (ProjectImporterContribution contribution: contributions)
-					importers.addAll(contribution.getImporters());
+				if (SecurityUtils.canCreateRootProjects()) {
+					menuItems.add(new MenuItem() {
+	
+						@Override
+						public String getLabel() {
+							return "Set Selected As Root Projects";
+						}
+	
+						@Override
+						public WebMarkupContainer newLink(String id) {
+							return new AjaxLink<Void>(id) {
+	
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									
+									String errorMessage = null;
+									for (IModel<Project> each: selectionColumn.getSelections()) {
+										Project eachProject = each.getObject();
+										if (!SecurityUtils.canManage(eachProject)) {
+											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
+											break;
+										} 
+									}
+									
+									if (errorMessage != null) {
+										page.alert(target, errorMessage);
+									} else {
+										new ConfirmModalPanel(target) {
+											
+											@Override
+											protected void onConfirm(AjaxRequestTarget target) {
+												Collection<Project> projects = new ArrayList<>();
+												for (IModel<Project> each: selectionColumn.getSelections()) 
+													projects.add(each.getObject());
+												OneDev.getInstance(ProjectManager.class).move(projects, null);
+												target.add(body);
+												selectionColumn.getSelections().clear();
+											}
+											
+											@Override
+											protected String getConfirmMessage() {
+												return "Type <code>yes</code> below to set selected as root projects";
+											}
+											
+											@Override
+											protected String getConfirmInput() {
+												return "yes";
+											}
+											
+										};
+									}
+								}
+								
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(!selectionColumn.getSelections().isEmpty());
+								}
+	
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "Please select projects to modify");
+									}
+								}
+								
+							};
+						}
+					});
+				}
 				
-				List<MenuItem> menuItems = new ArrayList<>();
-				for (ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete Selected Projects";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (IModel<Project> each: selectionColumn.getSelections()) { 
+									Project eachProject = each.getObject();
+									if (!SecurityUtils.canManage(eachProject)) {
+										errorMessage = "Project manage privilege required to delete '" + eachProject + "'";
+										break;
+									}
+								}
+								if (errorMessage != null) {
+									page.alert(target, errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<Project> projects = new ArrayList<>();
+											for (IModel<Project> each: selectionColumn.getSelections())  
+												projects.add(each.getObject());
+											OneDev.getInstance(ProjectManager.class).delete(projects);
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to delete selected projects";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
+								}
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(!selectionColumn.getSelections().isEmpty());
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "Please select projects to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Move All Queried Projects To...";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new DropdownLink(id) {
+
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown2) {
+								return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+				
+									@Override
+									protected Collection<Project> load() {
+										return getTargetProjects();
+									}
+									
+								}) {
+				
+									@SuppressWarnings("unchecked")
+									@Override
+									protected void onSelect(AjaxRequestTarget target, Project project) {
+										dropdown.close();
+										dropdown2.close();
+										
+										Long projectId = project.getId();
+										String errorMessage = null;
+										for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
+											Project eachProject = it.next();
+											if (!SecurityUtils.canManage(eachProject)) {
+												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
+												break;
+											} else if (eachProject.isSelfOrAncestorOf(project)) {
+												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendents";
+												break;
+											} 
+										}
+										
+										if (errorMessage != null) {
+											page.alert(target, errorMessage);
+										} else {
+											new ConfirmModalPanel(target) {
+												
+												private Project getTargetProject() {
+													return OneDev.getInstance(ProjectManager.class).load(projectId);
+												}
+												
+												@Override
+												protected void onConfirm(AjaxRequestTarget target) {
+													Collection<Project> projects = new ArrayList<>();
+													for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
+														projects.add(it.next());
+													OneDev.getInstance(ProjectManager.class).move(projects, getTargetProject());
+													target.add(body);
+													selectionColumn.getSelections().clear();
+												}
+												
+												@Override
+												protected String getConfirmMessage() {
+													return "Type <code>yes</code> below to move all queried projects to be under '" + getTargetProject() + "'";
+												}
+												
+												@Override
+												protected String getConfirmInput() {
+													return "yes";
+												}
+												
+											};
+										}
+									}
+				
+								}.add(AttributeAppender.append("class", "no-current"));
+							}
+						
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(projectsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No projects to move");
+								}
+							}
+							
+						};	
+					}
+					
+				});
+				
+				if (SecurityUtils.canCreateRootProjects()) {
 					menuItems.add(new MenuItem() {
 
 						@Override
 						public String getLabel() {
-							return "From " + importer.getName();
+							return "Set All Queried As Root Projects";
 						}
-
+						
 						@Override
 						public WebMarkupContainer newLink(String id) {
-							return new BookmarkablePageLink<Void>(id, ProjectImportPage.class, 
-									ProjectImportPage.paramsOf(importer.getName()));
+							return new AjaxLink<Void>(id) {
+
+								@SuppressWarnings("unchecked")
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									dropdown.close();
+									String errorMessage = null;
+									for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
+										Project eachProject = it.next();
+										if (!SecurityUtils.canManage(eachProject)) {
+											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
+											break;
+										} 
+									}
+									
+									if (errorMessage != null) {
+										page.alert(target, errorMessage);
+									} else {
+										new ConfirmModalPanel(target) {
+											
+											@Override
+											protected void onConfirm(AjaxRequestTarget target) {
+												Collection<Project> projects = new ArrayList<>();
+												for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
+													projects.add(it.next());
+												OneDev.getInstance(ProjectManager.class).move(projects, null);
+												target.add(body);
+												selectionColumn.getSelections().clear();
+											}
+											
+											@Override
+											protected String getConfirmMessage() {
+												return "Type <code>yes</code> below to set all queried as root projects";
+											}
+											
+											@Override
+											protected String getConfirmInput() {
+												return "yes";
+											}
+											
+										};	
+									}
+								}
+								
+								@Override
+								protected void onConfigure() {
+									super.onConfigure();
+									setEnabled(projectsTable.getItemCount() != 0);
+								}
+								
+								@Override
+								protected void onComponentTag(ComponentTag tag) {
+									super.onComponentTag(tag);
+									configure();
+									if (!isEnabled()) {
+										tag.put("disabled", "disabled");
+										tag.put("title", "No projects to modify");
+									}
+								}
+								
+							};
 						}
 						
 					});
 				}
+				
+				menuItems.add(new MenuItem() {
+
+					@Override
+					public String getLabel() {
+						return "Delete All Queried Projects";
+					}
+					
+					@Override
+					public WebMarkupContainer newLink(String id) {
+						return new AjaxLink<Void>(id) {
+
+							@SuppressWarnings("unchecked")
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								dropdown.close();
+								
+								String errorMessage = null;
+								for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) {
+									Project eachProject = it.next();
+									if (!SecurityUtils.canManage(eachProject)) {
+										errorMessage = "Project manage privilege required to delete '" + eachProject + "'";
+										break;
+									}
+								}
+								
+								if (errorMessage != null) {
+									page.alert(target, errorMessage);
+								} else {
+									new ConfirmModalPanel(target) {
+										
+										@Override
+										protected void onConfirm(AjaxRequestTarget target) {
+											Collection<Project> projects = new ArrayList<>();
+											for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
+												projects.add(it.next());
+											OneDev.getInstance(ProjectManager.class).delete(projects);
+											selectionColumn.getSelections().clear();
+											target.add(body);
+										}
+										
+										@Override
+										protected String getConfirmMessage() {
+											return "Type <code>yes</code> below to delete all queried projects";
+										}
+										
+										@Override
+										protected String getConfirmInput() {
+											return "yes";
+										}
+										
+									};
+								}
+								
+							}
+							
+							@Override
+							protected void onConfigure() {
+								super.onConfigure();
+								setEnabled(projectsTable.getItemCount() != 0);
+							}
+							
+							@Override
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
+								configure();
+								if (!isEnabled()) {
+									tag.put("disabled", "disabled");
+									tag.put("title", "No projects to delete");
+								}
+							}
+							
+						};
+					}
+					
+				});
+				
 				return menuItems;
+			}
+			
+			private Collection<Project> getTargetProjects() {
+				List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
+						.getPermittedProjects(new CreateChildren()));
+				
+				Collections.sort(projects, new Comparator<Project>() {
+
+					@Override
+					public int compare(Project o1, Project o2) {
+						return o1.getPath().compareTo(o2.getPath());
+					}
+					
+				});
+				return projects;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.getUser() != null);
 			}
 			
 		});
 		
+		if (getParentProject() == null && canCreateProjects) {
+			add(new MenuLink("importProjects") {
+	
+				@Override
+				protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+					Collection<ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable>> importers = new ArrayList<>();
+					List<ProjectImporterContribution> contributions = 
+							new ArrayList<>(OneDev.getExtensions(ProjectImporterContribution.class));
+					Collections.sort(contributions, new Comparator<ProjectImporterContribution>() {
+	
+						@Override
+						public int compare(ProjectImporterContribution o1, ProjectImporterContribution o2) {
+							return o1.getOrder() - o2.getOrder();
+						}
+						
+					});
+					
+					for (ProjectImporterContribution contribution: contributions)
+						importers.addAll(contribution.getImporters());
+					
+					List<MenuItem> menuItems = new ArrayList<>();
+					for (ProjectImporter<? extends Serializable, ? extends Serializable, ? extends Serializable> importer: importers) {
+						menuItems.add(new MenuItem() {
+	
+							@Override
+							public String getLabel() {
+								return "From " + importer.getName();
+							}
+	
+							@Override
+							public WebMarkupContainer newLink(String id) {
+								return new BookmarkablePageLink<Void>(id, ProjectImportPage.class, 
+										ProjectImportPage.paramsOf(importer.getName()));
+							}
+							
+						});
+					}
+					return menuItems;
+				}
+				
+			});
+		} else {
+			add(new WebMarkupContainer("importProjects").setVisible(false));
+		}
+		
 		queryInput = new TextField<String>("input", queryStringModel);
 		queryInput.setOutputMarkupId(true);
-		queryInput.add(new ProjectQueryBehavior() {
+		queryInput.add(new ProjectQueryBehavior(getParentProject() != null) {
 
 			@Override
 			protected void onInput(AjaxRequestTarget target, String inputContent) {
@@ -319,9 +861,17 @@ public class ProjectListPanel extends Panel {
 		});
 		add(queryForm);
 		
-		add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class));
+		if (getParentProject() != null) {
+			PageParameters params = NewProjectPage.paramsOf(getParentProject());
+			add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class, params)
+					.add(AttributeAppender.replace("title", "Add child project"))
+					.setVisible(canCreateProjects));
+		} else {
+			add(new BookmarkablePageLink<Void>("addProject", NewProjectPage.class)
+					.setVisible(canCreateProjects));
+		}
 		
-		SortableDataProvider<Project, Void> dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
+		dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
 
 			@Override
 			public Iterator<? extends Project> iterator(long first, long count) {
@@ -371,6 +921,9 @@ public class ProjectListPanel extends Panel {
 		
 		List<IColumn<Project, Void>> columns = new ArrayList<>();
 		
+		if (SecurityUtils.getUser() != null)
+			columns.add(selectionColumn = new SelectionColumn<Project, Void>());
+		
 		columns.add(new AbstractColumn<Project, Void>(Model.of("Project")) {
 
 			@Override
@@ -396,10 +949,14 @@ public class ProjectListPanel extends Panel {
 				};
 				
 				link.add(new ProjectAvatar("avatar", project));
-				link.add(new Label("name", project.getName()));
+				if (getParentProject() != null)
+					link.add(new Label("path", project.getPath().substring(getParentProject().getPath().length()+1)));
+				else
+					link.add(new Label("path", project.getPath()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
+			
 		});
 		
 		columns.add(new AbstractColumn<Project, Void>(Model.of("Last Update")) {
@@ -419,10 +976,31 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(dataTable = new OneDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(projectsTable = new OneDataTable<Project, Void>("projects", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);
+	}
+	
+	@Nullable
+	private ProjectQuery parse(@Nullable String queryString, ProjectQuery baseQuery) {
+		try {
+			return ProjectQuery.merge(baseQuery, ProjectQuery.parse(queryString));
+		} catch (ExplicitException e) {
+			error(e.getMessage());
+			return null;
+		} catch (Exception e) {
+			warn("Not a valid formal query, performing fuzzy query");
+			if (getParentProject() != null)
+				return ProjectQuery.merge(baseQuery, new ProjectQuery(new NameCriteria("*" + queryString + "*")));
+			else
+				return ProjectQuery.merge(baseQuery, new ProjectQuery(new PathCriteria(queryString)));
+		}
+	}
+	
+	@Nullable
+	protected Project getParentProject() {
+		return null;
 	}
 
 	@Override

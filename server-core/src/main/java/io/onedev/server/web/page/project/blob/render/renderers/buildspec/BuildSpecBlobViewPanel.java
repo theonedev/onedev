@@ -134,7 +134,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 													
 												};
 												link.add(AttributeAppender.append("title", 
-														"This property is imported from " + aImport.getProjectName()));
+														"This property is imported from " + aImport.getProjectPath()));
 												link.setEnabled(SecurityUtils.canReadCode(project));
 												item.add(link);
 											} else {
@@ -699,7 +699,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				};
 				link.setEnabled(SecurityUtils.canReadCode(project));
 				add(link);
-				link.add(new Label("label", project.getName()));
+				link.add(new Label("label", project.getPath()));
 			} else {
 				WebMarkupContainer link = new WebMarkupContainer("link");
 				link.add(new WebMarkupContainer("label"));

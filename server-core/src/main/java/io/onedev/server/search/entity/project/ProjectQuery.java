@@ -90,7 +90,9 @@ public class ProjectQuery extends EntityQuery<Project> {
 
 					@Override
 					public EntityCriteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
-						if (ctx.operator.getType() == ProjectQueryLexer.OwnedByMe)
+						if (ctx.operator.getType() == ProjectQueryLexer.Roots)
+							return new RootsCriteria();
+						else if (ctx.operator.getType() == ProjectQueryLexer.OwnedByMe)
 							return new OwnedByMeCriteria();
 						else
 							return new OwnedByNoneCriteria();
@@ -98,8 +100,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 					
 					public EntityCriteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
-							return new ForksOfCriteria(value);
+						if (ctx.operator.getType() == ProjectQueryLexer.ChildrenOf)
+							return new ChildrenOfCriteria(getProject(value));
+						else if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
+							return new ForksOfCriteria(getProject(value));
 						else
 							return new OwnedByCriteria(getUser(value));
 					}
@@ -118,7 +122,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 						
 						switch (operator) {
 						case ProjectQueryLexer.Is:
-							return new NameCriteria(value);
+							if (fieldName.equals(Project.NAME_NAME))
+								return new NameCriteria(value);
+							else
+								return new PathCriteria(value);
 						case ProjectQueryLexer.Contains:
 							return new DescriptionCriteria(value);
 						case ProjectQueryLexer.IsUntil:
@@ -189,7 +196,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.Is:
-			if (!fieldName.equals(Project.NAME_NAME)) 
+			if (!fieldName.equals(Project.NAME_NAME) && !fieldName.equals(Project.NAME_PATH)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.IsUntil:
@@ -198,6 +205,18 @@ public class ProjectQuery extends EntityQuery<Project> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		}
+	}
+	
+	public static ProjectQuery merge(ProjectQuery query1, ProjectQuery query2) {
+		List<EntityCriteria<Project>> criterias = new ArrayList<>();
+		if (query1.getCriteria() != null)
+			criterias.add(query1.getCriteria());
+		if (query2.getCriteria() != null)
+			criterias.add(query2.getCriteria());
+		List<EntitySort> sorts = new ArrayList<>();
+		sorts.addAll(query1.getSorts());
+		sorts.addAll(query2.getSorts());
+		return new ProjectQuery(EntityCriteria.andCriterias(criterias), sorts);
 	}
 	
 	@Override

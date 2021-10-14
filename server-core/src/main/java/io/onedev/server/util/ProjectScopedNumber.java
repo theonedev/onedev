@@ -68,6 +68,6 @@ public class ProjectScopedNumber {
 	
 	@Override
 	public String toString() {
-		return getProject().getName() + "#" + getNumber();
+		return getProject().getPath() + "#" + getNumber();
 	}
 }

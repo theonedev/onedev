@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -42,14 +40,8 @@ public class AttachmentResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 		
-		String projectName = params.get(PARAM_PROJECT).toString();
-		if (StringUtils.isBlank(projectName))
-			throw new IllegalArgumentException("project name has to be specified");
-		
-		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-		
-		if (project == null) 
-			throw new EntityNotFoundException("Unable to find project: " + projectName);
+		Long projectId = params.get(PARAM_PROJECT).toLong();
+		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		
 		String group = params.get(PARAM_GROUP).toString();
 		if (StringUtils.isBlank(group))
@@ -103,7 +95,7 @@ public class AttachmentResource extends AbstractResource {
 	
 	public static PageParameters paramsOf(Project project, String group, String attachment) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getName());
+		params.set(PARAM_PROJECT, project.getId());
 		params.set(PARAM_GROUP, group);
 		params.set(PARAM_ATTACHMENT, attachment);
 		

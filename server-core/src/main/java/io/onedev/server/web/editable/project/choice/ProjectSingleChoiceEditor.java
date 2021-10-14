@@ -32,7 +32,7 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 		super.onInitialize();
 
 		List<Project> projects = OneDev.getInstance(ProjectManager.class).query();
-		projects.sort(Comparator.comparing(Project::getName));
+		projects.sort(Comparator.comparing(Project::getPath));
 		
 		Project project;
 		if (getModelObject() != null)
@@ -75,7 +75,7 @@ public class ProjectSingleChoiceEditor extends PropertyEditor<String> {
 	protected String convertInputToValue() throws ConversionException {
 		Project project = input.getConvertedInput();
 		if (project != null)
-			return project.getName();
+			return project.getPath();
 		else
 			return null;
 	}

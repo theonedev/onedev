@@ -17,6 +17,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
@@ -81,8 +82,9 @@ public class GitLabProjectImporter extends ProjectImporter<ImportServer, Project
 				
 				String apiEndpoint = where.getApiEndpoint("/projects/" + projectMapping.getGitLabProject().replace("/", "%2F"));
 				JsonNode projectNode = JerseyUtils.get(client, apiEndpoint, logger);
-				Project project = new Project();
-				project.setName(projectMapping.getOneDevProject());
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
+				Project project = projectManager.initialize(projectMapping.getOneDevProject());
+				Preconditions.checkState(project.isNew());
 				project.setDescription(projectNode.get("description").asText(null));
 				project.setIssueManagementEnabled(projectNode.get("issues_enabled").asBoolean());
 				
@@ -95,7 +97,7 @@ public class GitLabProjectImporter extends ProjectImporter<ImportServer, Project
 					builder.setUserInfo("git", where.getAccessToken());
 				
 				if (!dryRun) {
-					OneDev.getInstance(ProjectManager.class).clone(project, builder.build().toString());
+					projectManager.clone(project, builder.build().toString());
 					projectIds.add(project.getId());
 				}
 
@@ -150,7 +152,7 @@ public class GitLabProjectImporter extends ProjectImporter<ImportServer, Project
 				String pathWithNamespace = projectNode.get("path_with_namespace").asText();
 				ProjectMapping projectMapping = new ProjectMapping();
 				projectMapping.setGitLabProject(pathWithNamespace);
-				projectMapping.setOneDevProject(pathWithNamespace.replace('/', '-'));
+				projectMapping.setOneDevProject(pathWithNamespace);
 				importSource.getProjectMappings().add(projectMapping);
 			}					
 		} finally {

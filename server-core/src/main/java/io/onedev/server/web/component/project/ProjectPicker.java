@@ -60,7 +60,7 @@ public abstract class ProjectPicker extends DropdownLink {
 				+ "  <svg class='icon rotate-90'><use xlink:href='%s'/></svg>"
 				+ "</span>", 
 				SpriteImage.getVersionedHref(IconScope.class, "project"),
-				HtmlEscape.escapeHtml5(getCurrent().getName()), 
+				HtmlEscape.escapeHtml5(getCurrent().getPath()), 
 				SpriteImage.getVersionedHref(IconScope.class, "arrow")));
 	}
 

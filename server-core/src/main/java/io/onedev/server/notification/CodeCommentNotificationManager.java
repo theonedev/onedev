@@ -57,10 +57,10 @@ public class CodeCommentNotificationManager extends AbstractNotificationManager 
 					
 					if (url != null) {
 						String subject = String.format("[Code Comment] (Mentioned You) %s:%s", 
-								event.getProject().getName(), event.getComment().getMark().getPath());
+								event.getProject().getPath(), event.getComment().getMark().getPath());
 						String summary = String.format("%s added code comment", 
 								event.getUser().getDisplayName());
-						String threadingReferences = "<" + event.getComment().getProject().getName() 
+						String threadingReferences = "<" + event.getComment().getProject().getPath() 
 								+ "-codecomment-" + event.getComment().getId() + "@onedev>";
 
 						mailManager.sendMailAsync(Sets.newHashSet(user.getEmail()), Lists.newArrayList(), 

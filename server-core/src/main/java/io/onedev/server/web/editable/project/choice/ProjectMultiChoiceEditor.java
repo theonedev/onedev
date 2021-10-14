@@ -51,8 +51,8 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 		List<Project> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-			for (String projectName: getModelObject()) {
-				Project project = projectManager.find(projectName);
+			for (String projectPath: getModelObject()) {
+				Project project = projectManager.find(projectPath);
 				if (project != null && choicesModel.getObject().contains(project))
 					selections.add(project);
 			}
@@ -84,13 +84,13 @@ public class ProjectMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> projectNames = new ArrayList<>();
+		List<String> projectPaths = new ArrayList<>();
 		Collection<Project> projects = input.getConvertedInput();
 		if (projects != null) {
 			for (Project project: projects)
-				projectNames.add(project.getName());
+				projectPaths.add(project.getPath());
 		} 
-		return projectNames;
+		return projectPaths;
 	}
 
 }

@@ -155,7 +155,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 					
 					@Override
 					protected String getFencingDescription() {
-						return "quote as literal value";
+						return "value should be quoted";
 					}
 					
 				}.suggest(terminalExpect);
@@ -202,12 +202,13 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel()) && BuildQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+			if ("criteriaValue".equals(spec.getLabel())) {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(Build.NAME_PROJECT) || fieldName.equals(Build.NAME_VERSION)
-							|| fieldName.equals(Build.NAME_JOB)) {
+					if (fieldName.equals(Build.NAME_PROJECT)) {
+						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+					} else if (fieldName.equals(Build.NAME_VERSION) || fieldName.equals(Build.NAME_JOB)) {
 						hints.add("Use '*' for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					} else if (fieldName.equals(Build.NAME_BRANCH) || fieldName.equals(Build.NAME_TAG)) {

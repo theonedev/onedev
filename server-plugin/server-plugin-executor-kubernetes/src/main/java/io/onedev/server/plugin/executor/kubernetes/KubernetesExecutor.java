@@ -734,7 +734,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		String namespace ;
 		if (jobContext != null) {
-			namespace = getName() + "-" + jobContext.getProjectName().replace('.', '-').replace('_', '-') + "-" 
+			namespace = getName() + "-" + jobContext.getProjectId() + "-" 
 					+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
 		} else {
 			namespace = getName() + "-executor-test";

@@ -15,8 +15,11 @@ import com.fasterxml.jackson.databind.deser.impl.PropertyValue;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Role;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.NameAware;
 
 @SuppressWarnings("serial")
 public class EntityDeserializer extends BeanDeserializer {
@@ -54,10 +57,15 @@ public class EntityDeserializer extends BeanDeserializer {
             	if (property.getName().equals("id") && value != null) {
         			jp.nextToken();
         			AbstractEntity entity = dao.load(entityClass, (Long)value);
-        			if (entity instanceof NameAware) {
-        				String oldName = ((NameAware) entity).getName();
-        				entity.setCustomData(oldName);
-        			}
+        			if (entity instanceof Project) 
+        				entity.setCustomData(((Project) entity).getPath());
+        			else if (entity instanceof User) 
+        				entity.setCustomData(((User) entity).getName());
+        			else if (entity instanceof Group) 
+        				entity.setCustomData(((Group) entity).getName());
+        			else if (entity instanceof Role) 
+        				entity.setCustomData(((Role) entity).getName());
+        			
         			Object bean;
         			if (entity instanceof HibernateProxy) 
         				bean = ((HibernateProxy) entity).getHibernateLazyInitializer().getImplementation();

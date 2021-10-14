@@ -157,7 +157,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 				@Override
 				public void run() {
-					String network = getName() + "-" + jobContext.getProjectName() + "-" 
+					String network = getName() + "-" + jobContext.getProjectId() + "-" 
 							+ jobContext.getBuildNumber() + "-" + jobContext.getRetried();
 
 					jobLogger.log(String.format("Executing job (executor: %s, network: %s)...", getName(), network));

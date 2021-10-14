@@ -32,7 +32,7 @@ public abstract class ProjectStatsPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Statistics - " + getProject().getName();
+		return "Statistics - " + getProject().getPath();
 	}
 	
 }

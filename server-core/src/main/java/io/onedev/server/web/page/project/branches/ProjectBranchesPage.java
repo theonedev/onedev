@@ -885,7 +885,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 	@Override
 	protected String getPageTitle() {
-		return "Branches - " + getProject().getName();
+		return "Branches - " + getProject().getPath();
 	}
 	
 }

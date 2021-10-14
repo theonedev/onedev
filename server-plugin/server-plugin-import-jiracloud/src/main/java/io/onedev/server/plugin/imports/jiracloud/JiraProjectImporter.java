@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.commons.utils.TaskLogger;
@@ -73,12 +74,16 @@ public class JiraProjectImporter extends ProjectImporter<ImportServer, ProjectIm
 				// Get more detail project information
 				projectNode = JerseyUtils.get(client, apiEndpoint, logger);
 				
-				Project project = new Project();
-				project.setName(projectMapping.getOneDevProject());
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
+				Project project = projectManager.initialize(projectMapping.getOneDevProject());
+				Preconditions.checkState(project.isNew());
+				
 				project.setDescription(projectNode.get("description").asText(null));
 				
-				if (!dryRun)
-					OneDev.getInstance(ProjectManager.class).save(project);
+				if (!dryRun) {
+					OneDev.getInstance(ProjectManager.class).create(project);
+					projectIds.add(project.getId());
+				}
 				
 				logger.log("Importing issues from project " + jiraProject + "...");
 				ImportResult currentResult = ImportUtils.importIssues(where, projectNode, 

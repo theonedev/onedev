@@ -19,6 +19,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.TaskLogger;
 import io.onedev.server.OneDev;
@@ -52,8 +53,9 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 				
 				String apiEndpoint = where.getApiEndpoint("/repos/" + projectMapping.getGitHubRepo());
 				JsonNode repoNode = get(client, apiEndpoint, logger);
-				Project project = new Project();
-				project.setName(projectMapping.getOneDevProject());
+				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);				
+				Project project = projectManager.initialize(projectMapping.getOneDevProject());
+				Preconditions.checkState(project.isNew());
 				project.setDescription(repoNode.get("description").asText(null));
 				project.setIssueManagementEnabled(repoNode.get("has_issues").asBoolean());
 				
@@ -66,7 +68,7 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 					builder.setUserInfo("git", where.getAccessToken());
 				
 				if (!dryRun) {
-					OneDev.getInstance(ProjectManager.class).clone(project, builder.build().toString());
+					projectManager.clone(project, builder.build().toString());
 					projectIds.add(project.getId());
 				}
 
@@ -124,7 +126,7 @@ public class GitHubProjectImporter extends ProjectImporter<ImportServer, Project
 				String ownerName = repoNode.get("owner").get("login").asText();
 				ProjectMapping projectMapping = new ProjectMapping();
 				projectMapping.setGitHubRepo(ownerName + "/" + repoName);
-				projectMapping.setOneDevProject(ownerName + "-" + repoName);
+				projectMapping.setOneDevProject(ownerName + "/" + repoName);
 				importSource.getProjectMappings().add(projectMapping);
 			}					
 		} finally {
