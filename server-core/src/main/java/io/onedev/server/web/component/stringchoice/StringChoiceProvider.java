@@ -23,8 +23,11 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 	
 	private final IModel<Map<String, String>> choicesModel;
 	
-	public StringChoiceProvider(IModel<Map<String, String>> choicesModel) {
+	private final boolean tagsMode;
+	
+	public StringChoiceProvider(IModel<Map<String, String>> choicesModel, boolean tagsMode) {
 		this.choicesModel = choicesModel;
+		this.tagsMode = tagsMode;
 	}
 	
 	@Override
@@ -44,7 +47,8 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 	@Override
 	public Collection<String> toChoices(Collection<String> ids) {
 		Collection<String> choices = new ArrayList<>(ids);
-		choices.retainAll(choicesModel.getObject().keySet());
+		if (!tagsMode)
+			choices.retainAll(choicesModel.getObject().keySet());
 		return choices;
 	}
 
@@ -57,6 +61,8 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 				if (entry.getValue().toLowerCase().contains(term.toLowerCase())) 
 					matched.add(entry.getKey());
 			}
+			if (tagsMode && !matched.contains(term))
+				matched.add(term);
 		} else {
 			matched = new ArrayList<>(choicesModel.getObject().keySet());
 		}

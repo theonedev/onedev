@@ -63,7 +63,7 @@ public class JobSecretAuthorizationContext {
 		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
 			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
 		} else {
-			for (JobSecret secret: project.getBuildSetting().getJobSecrets()) {
+			for (JobSecret secret: project.getHierarchyJobSecrets()) {
 				if (secret.getName().equals(secretName)) {
 					if (isOnBranches(secret.getAuthorizedBranches())) {			
 						return secret.getValue();
@@ -85,7 +85,7 @@ public class JobSecretAuthorizationContext {
 			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
 		} else {
 			JobSecret secret = null;
-			for (JobSecret each: project.getBuildSetting().getJobSecrets()) {
+			for (JobSecret each: project.getHierarchyJobSecrets()) {
 				if (each.getName().equals(secretName)) { 
 					secret = each;
 					break;

@@ -198,7 +198,8 @@ public abstract class IssueListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		issuesTable.setCurrentPage(0);
 		target.add(body);
-		selectionColumn.getSelections().clear();
+		if (selectionColumn != null)
+			selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);
@@ -475,7 +476,7 @@ public abstract class IssueListPanel extends Panel {
 						return choices;
 					}
 					
-				}));
+				}, false));
 				
 				form.add(new AjaxLink<Void>("close") {
 

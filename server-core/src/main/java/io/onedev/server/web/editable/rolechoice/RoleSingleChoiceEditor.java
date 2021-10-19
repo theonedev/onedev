@@ -38,7 +38,7 @@ public class RoleSingleChoiceEditor extends PropertyEditor<String> {
 		if (!roleNames.containsKey(selection))
 			selection = null;
 		
-    	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(roleNames)) {
+    	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(roleNames), false) {
 
 			@Override
 			protected void onInitialize() {

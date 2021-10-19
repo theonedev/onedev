@@ -234,7 +234,7 @@ public class ProjectTagsPage extends ProjectPage {
 							editor.error(new Path(new PathNode.Named("name")), 
 									"Tag '" + tagName + "' already exists, please choose a different name.");
 							target.add(form);
-						} else if (getProject().getTagProtection(tagName, user).isPreventCreation()) {
+						} else if (getProject().getHierarchyTagProtection(tagName, user).isPreventCreation()) {
 							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected tag"); 
 							target.add(form);
 						} else {
@@ -389,7 +389,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 						Project project = getProject();
 						if (SecurityUtils.canWriteCode(project)) 
-							setEnabled(!project.getTagProtection(tagName, getLoginUser()).isPreventDeletion());
+							setEnabled(!project.getHierarchyTagProtection(tagName, getLoginUser()).isPreventDeletion());
 						else 
 							setVisible(false);
 					}

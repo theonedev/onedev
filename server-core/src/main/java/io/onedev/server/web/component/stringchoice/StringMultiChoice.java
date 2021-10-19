@@ -10,8 +10,9 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 @SuppressWarnings("serial")
 public class StringMultiChoice extends Select2MultiChoice<String> {
 
-	public StringMultiChoice(String id, IModel<Collection<String>> selectionsModel, IModel<Map<String, String>> choicesModel) {
-		super(id, selectionsModel, new StringChoiceProvider(choicesModel));
+	public StringMultiChoice(String id, IModel<Collection<String>> selectionsModel, 
+			IModel<Map<String, String>> choicesModel, boolean tagsMode) {
+		super(id, selectionsModel, new StringChoiceProvider(choicesModel, tagsMode));
 	}
 
 	@Override

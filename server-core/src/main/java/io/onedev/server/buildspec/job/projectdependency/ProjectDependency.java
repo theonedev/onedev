@@ -120,7 +120,7 @@ public class ProjectDependency implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getAccessTokenSecretChoices() {
-		return Project.get().getBuildSetting().getJobSecrets()
+		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	

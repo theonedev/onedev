@@ -663,7 +663,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 			public void run() {
 				for (Project project: projectManager.query()) {
 					logger.debug("Populating preserved build ids of project '" + project.getPath() + "'...");
-					List<BuildPreservation> preservations = project.getBuildSetting().getBuildPreservations();
+					List<BuildPreservation> preservations = project.getHierarchyBuildPreservations();
 					if (preservations.isEmpty()) {
 						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
 					} else {

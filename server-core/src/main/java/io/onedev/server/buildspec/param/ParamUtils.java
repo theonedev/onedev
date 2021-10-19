@@ -74,7 +74,7 @@ public class ParamUtils {
 			Object object = paramSpec.convertToObject(paramValue);
 			if (paramSpec instanceof SecretParam && object != null 
 					&& !((String)object).startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
-				if (!Project.get().getBuildSetting().getJobSecrets().stream()
+				if (!Project.get().getHierarchyJobSecrets().stream()
 						.anyMatch(it->it.getName().equals(object))) {
 					throw new ValidationException("Secret not found");
 				}

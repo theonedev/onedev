@@ -360,7 +360,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				return branches;
 			}
 			
-		}));
+		}, false));
 		
 		baseChoice.setRequired(true);
 		
@@ -444,7 +444,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							editor.error(new Path(new PathNode.Named("name")), 
 									"Branch '" + branchName + "' already exists, please choose a different name");
 							target.add(form);
-						} else if (getProject().getBranchProtection(branchName, user).isPreventCreation()) {
+						} else if (getProject().getHierarchyBranchProtection(branchName, user).isPreventCreation()) {
 							editor.error(new Path(new PathNode.Named("name")), "Unable to create protected branch");
 							target.add(form);
 						} else {
@@ -654,7 +654,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							if (project.getDefaultBranch().equals(branch)) 
 								setEnabled(false);
 							else 
-								setEnabled(!project.getBranchProtection(branch, getLoginUser()).isPreventDeletion());
+								setEnabled(!project.getHierarchyBranchProtection(branch, getLoginUser()).isPreventDeletion());
 						} else {
 							setVisible(false);
 						}

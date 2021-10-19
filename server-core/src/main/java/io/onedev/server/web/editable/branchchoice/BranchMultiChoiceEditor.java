@@ -12,12 +12,15 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.branch.choice.BranchMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.BranchChoice;
 
 @SuppressWarnings("serial")
 public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -40,15 +43,16 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 			}
 		}
 
+		BranchChoice branchChoice = Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(BranchChoice.class));
     	Collection<String> selections = new ArrayList<>();
 		if (getModelObject() != null) {
 			for (String selection: getModelObject()) {
-				if (choices.containsKey(selection))
+				if (branchChoice.tagsMode() || choices.containsKey(selection))
 					selections.add(selection);
 			}
 		}
 		
-		input = new BranchMultiChoice("input", Model.of(selections), Model.ofMap(choices)) {
+		input = new BranchMultiChoice("input", Model.of(selections), Model.ofMap(choices), branchChoice.tagsMode()) {
 
 			@Override
 			protected void onInitialize() {

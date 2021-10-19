@@ -21,6 +21,7 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 
 @SuppressWarnings("serial")
 public class MultiChoiceEditor extends PropertyEditor<List<String>> {
@@ -31,6 +32,10 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
+	private ChoiceProvider getChoiceProvider() {
+		return Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class));
+	}
+	
 	@SuppressWarnings({"unchecked"})
 	@Override
 	protected void onInitialize() {
@@ -46,11 +51,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 				
 				ComponentContext.push(componentContext);
 				try {
-					io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
-							descriptor.getPropertyGetter().getAnnotation(
-									io.onedev.server.web.editable.annotation.ChoiceProvider.class);
-					Preconditions.checkNotNull(choiceProvider);
-					Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
+					Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().value());
 					if (result instanceof List) {
 						choices = new LinkedHashMap<>();
 						for (String each: (List<String>)result) 
@@ -82,7 +83,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 		*/
 		if (selections == null) 
 			selections = new ArrayList<>();
-		input = new StringMultiChoice("input", Model.of(selections), choicesModel) {
+		input = new StringMultiChoice("input", Model.of(selections), choicesModel, getChoiceProvider().tagsMode()) {
 
 			@Override
 			protected void onInitialize() {

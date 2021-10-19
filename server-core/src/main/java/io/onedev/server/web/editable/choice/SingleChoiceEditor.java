@@ -19,6 +19,7 @@ import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 
 @SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {
@@ -29,6 +30,10 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
+	private ChoiceProvider getChoiceProvider() {
+		return Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(ChoiceProvider.class));
+	}
+	
 	@SuppressWarnings({"unchecked"})
 	@Override
 	protected void onInitialize() {
@@ -44,11 +49,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 				
 				ComponentContext.push(componentContext);
 				try {
-					io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
-							descriptor.getPropertyGetter().getAnnotation(
-									io.onedev.server.web.editable.annotation.ChoiceProvider.class);
-					Preconditions.checkNotNull(choiceProvider);
-					Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
+					Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), getChoiceProvider().value());
 					if (result instanceof List) {
 						choices = new LinkedHashMap<>();
 						for (String each: (List<String>)result) 
@@ -75,7 +76,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		if (!choicesModel.getObject().containsKey(selection))
 			selection = null;
 		*/
-		input = new StringSingleChoice("input", Model.of(selection), choicesModel) {
+		input = new StringSingleChoice("input", Model.of(selection), choicesModel, getChoiceProvider().tagsMode()) {
 
 			@Override
 			protected void onInitialize() {

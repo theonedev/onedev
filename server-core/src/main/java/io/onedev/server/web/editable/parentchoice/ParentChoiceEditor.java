@@ -48,7 +48,7 @@ public class ParentChoiceEditor extends PropertyEditor<String> {
     		selection = null;
     	}
     	
-    	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(projectPaths)) {
+    	input = new StringSingleChoice("input", Model.of(selection), Model.ofMap(projectPaths), false) {
 
 			@Override
 			protected void onInitialize() {

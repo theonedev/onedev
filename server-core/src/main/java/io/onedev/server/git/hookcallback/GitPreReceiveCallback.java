@@ -139,7 +139,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		} else if (refName.startsWith(Constants.R_HEADS)) {
 	    			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
 	    			List<String> errorMessages = new ArrayList<>();
-	    			BranchProtection protection = project.getBranchProtection(branchName, user);
+	    			BranchProtection protection = project.getHierarchyBranchProtection(branchName, user);
 					if (oldObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventCreation())
 							errorMessages.add("Can not create this branch according to branch protection setting");
@@ -170,7 +170,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		} else if (refName.startsWith(Constants.R_TAGS)) {
 	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
 	    			List<String> errorMessages = new ArrayList<>();
-	    			TagProtection protection = project.getTagProtection(tagName, user);
+	    			TagProtection protection = project.getHierarchyTagProtection(tagName, user);
 					if (oldObjectId.equals(ObjectId.zeroId())) {
 						if (protection.isPreventCreation())
 							errorMessages.add("Can not create this tag according to tag protection setting");

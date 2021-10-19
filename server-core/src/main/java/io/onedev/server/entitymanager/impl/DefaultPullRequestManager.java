@@ -754,7 +754,7 @@ public class DefaultPullRequestManager extends BaseEntityManager<PullRequest> im
 		unpreferableReviewers = new ArrayList<>(unpreferableReviewers);
 		unpreferableReviewers.remove(request.getSubmitter());
 		unpreferableReviewers.add(request.getSubmitter());
-		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(
+		BranchProtection branchProtection = request.getTargetProject().getHierarchyBranchProtection(
 				request.getTargetBranch(), request.getSubmitter());
 		
 		ReviewRequirement reviewRequirement = branchProtection.getParsedReviewRequirement();

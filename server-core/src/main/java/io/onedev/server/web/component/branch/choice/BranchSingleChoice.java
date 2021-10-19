@@ -12,8 +12,9 @@ import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 @SuppressWarnings("serial")
 public class BranchSingleChoice extends Select2Choice<String> {
 
-	public BranchSingleChoice(String id, IModel<String> model, IModel<Map<String, String>> choicesModel) {
-		super(id, model, new StringChoiceProvider(choicesModel));
+	public BranchSingleChoice(String id, IModel<String> model, 
+			IModel<Map<String, String>> choicesModel, boolean tagsMode) {
+		super(id, model, new StringChoiceProvider(choicesModel, tagsMode));
 	}
 
 	@Override

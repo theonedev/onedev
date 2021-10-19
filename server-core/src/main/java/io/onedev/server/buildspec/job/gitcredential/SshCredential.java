@@ -43,7 +43,7 @@ public class SshCredential implements GitCredential, Validatable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getKeySecretChoices() {
-		return Project.get().getBuildSetting().getJobSecrets()
+		return Project.get().getHierarchyJobSecrets()
 				.stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 
@@ -62,7 +62,7 @@ public class SshCredential implements GitCredential, Validatable {
 
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
-		if (!Project.get().getBuildSetting().getJobSecrets().stream()
+		if (!Project.get().getHierarchyJobSecrets().stream()
 				.anyMatch(it->it.getName().equals(keySecret))) {
 			context.disableDefaultConstraintViolation();
 			context.buildConstraintViolationWithTemplate("Secret not found (" + keySecret + ")")

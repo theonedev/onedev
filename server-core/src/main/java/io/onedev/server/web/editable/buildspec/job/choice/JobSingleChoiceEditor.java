@@ -7,10 +7,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.job.JobSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.JobChoice;
 
 @SuppressWarnings("serial")
 public class JobSingleChoiceEditor extends PropertyEditor<String> {
@@ -29,11 +32,13 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 		for (String jobName: Project.get().getJobNames())
 			choices.put(jobName, jobName);
 		
+		JobChoice jobChoice = Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(JobChoice.class));
+		
 		String selection = getModelObject();
-		if (!choices.containsKey(selection))
+		if (!jobChoice.tagsMode() && !choices.containsKey(selection))
 			selection = null;
 		
-		input = new JobSingleChoice("input", Model.of(selection), Model.ofMap(choices)) {
+		input = new JobSingleChoice("input", Model.of(selection), Model.ofMap(choices), jobChoice.tagsMode()) {
 			
 			@Override
 			protected void onInitialize() {

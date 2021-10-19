@@ -690,7 +690,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
-		for (JobSecret secret: getProject().getBuildSetting().getJobSecrets()) {
+		for (JobSecret secret: getProject().getHierarchyJobSecrets()) {
 			if (getJobSecretAuthorizationContext().isOnBranches(secret.getAuthorizedBranches()))
 				secretValuesToMask.add(secret.getValue());
 		}
@@ -840,7 +840,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public boolean canCreateTag(String tagName) {
-		for (ActionAuthorization authorization: getProject().getBuildSetting().getActionAuthorizations()) {
+		for (ActionAuthorization authorization: getProject().getHierarchyActionAuthorizations()) {
 			if (getJobSecretAuthorizationContext().isOnBranches(authorization.getAuthorizedBranches())) {
 				if (authorization instanceof CreateTagAuthorization) {
 					CreateTagAuthorization createTagAuthorization = (CreateTagAuthorization) authorization;
@@ -854,7 +854,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public boolean canCloseMilestone(String milestoneName) {
-		for (ActionAuthorization authorization: getProject().getBuildSetting().getActionAuthorizations()) {
+		for (ActionAuthorization authorization: getProject().getHierarchyActionAuthorizations()) {
 			if (getJobSecretAuthorizationContext().isOnBranches(authorization.getAuthorizedBranches())) {
 				if (authorization instanceof CloseMilestoneAuthorization) {
 					CloseMilestoneAuthorization closeMilestoneAuthorization = (CloseMilestoneAuthorization) authorization;

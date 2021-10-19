@@ -1054,7 +1054,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		if (requiredJobs == null) {
 			MergePreview preview = getMergePreview();
 			if (preview != null && preview.getMergeCommitHash() != null) {
-				BranchProtection protection = getTargetProject().getBranchProtection(getTargetBranch(), getSubmitter());
+				BranchProtection protection = getTargetProject().getHierarchyBranchProtection(getTargetBranch(), getSubmitter());
 				ObjectId targetCommitId = getTarget().getObjectId(false);
 				ObjectId mergeCommitId = getTargetProject().getObjectId(preview.getMergeCommitHash(), false);
 				if (targetCommitId != null && mergeCommitId != null) {

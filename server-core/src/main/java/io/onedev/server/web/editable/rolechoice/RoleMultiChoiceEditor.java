@@ -43,7 +43,7 @@ public class RoleMultiChoiceEditor extends PropertyEditor<List<String>> {
 		
 		selections.retainAll(roleNames.keySet());
 		
-		input = new StringMultiChoice("input", Model.of(selections), Model.ofMap(roleNames)) {
+		input = new StringMultiChoice("input", Model.of(selections), Model.ofMap(roleNames), false) {
 
 			@Override
 			protected void onInitialize() {

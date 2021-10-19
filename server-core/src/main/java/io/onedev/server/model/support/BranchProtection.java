@@ -148,7 +148,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
-	@JobChoice
+	@JobChoice(tagsMode=true)
 	@NameOfEmptyValue("No any")
 	public List<String> getJobNames() {
 		return jobNames;

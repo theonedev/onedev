@@ -45,7 +45,10 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 		super.onInitialize();
 
 		String note = String.format("<svg class='icon mr-2'><use xlink:href='%s'/></svg> "
-				+ "Define job secrets to be used in build spec. Secret value less "
+				+ "Define job secrets to be used in build spec. Secrets defined in parent "
+				+ "project will also be availalbe for use. If secret of same name is defined "
+				+ "in both parent and child project, the one defined in child project will "
+				+ "take effect. Note that Secret value less "
 				+ "than %d characters will not be masked in build log", 
 				SpriteImage.getVersionedHref("bulb"), SecretInput.MASK.length());
 		add(new Label("secretsNote", note).setEscapeModelStrings(false));
@@ -208,8 +211,7 @@ public class JobSecretsPage extends ProjectBuildSettingPage {
 			}
 		};
 		
-		add(secretsTable = new OneDataTable<>("secrets", columns, dataProvider, 
-				Integer.MAX_VALUE, null));		
+		add(secretsTable = new OneDataTable<>("secrets", columns, dataProvider, Integer.MAX_VALUE, null));		
 		secretsTable.setOutputMarkupId(true);
 	}
 

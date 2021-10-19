@@ -56,7 +56,7 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 		        return choices;
 			}
 			
-		}) {
+		}, false) {
 
 			@Override
 			protected void onInitialize() {

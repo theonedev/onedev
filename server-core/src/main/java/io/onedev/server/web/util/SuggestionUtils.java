@@ -180,7 +180,7 @@ public class SuggestionUtils {
 		}
 		for (String propertyName: buildSpec.getPropertyMap().keySet())
 			variables.put(VariableInterpolator.PREFIX_PROPERTY + propertyName, null);
-		for (JobSecret secret: project.getBuildSetting().getJobSecrets())
+		for (JobSecret secret: project.getHierarchyJobSecrets())
 			variables.put(VariableInterpolator.PREFIX_SECRET + secret.getName(), null);
 
 		if (withDynamicVariables) {

@@ -12,8 +12,8 @@ public class JobMultiChoice extends Select2MultiChoice<String> {
 
 	private static final long serialVersionUID = 1L;
 
-	public JobMultiChoice(String id, IModel<Collection<String>> model, IModel<Map<String, String>> choicesModel) {
-		super(id, model, new StringChoiceProvider(choicesModel));
+	public JobMultiChoice(String id, IModel<Collection<String>> model, IModel<Map<String, String>> choicesModel, boolean tagsMode) {
+		super(id, model, new StringChoiceProvider(choicesModel, tagsMode));
 	}
 
 	@Override

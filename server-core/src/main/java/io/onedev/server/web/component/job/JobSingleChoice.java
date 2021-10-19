@@ -11,8 +11,8 @@ public class JobSingleChoice extends Select2Choice<String> {
 
 	private static final long serialVersionUID = 1L;
 
-	public JobSingleChoice(String id, IModel<String> model, IModel<Map<String, String>> choicesModel) {
-		super(id, model, new StringChoiceProvider(choicesModel));
+	public JobSingleChoice(String id, IModel<String> model, IModel<Map<String, String>> choicesModel, boolean tagsMode) {
+		super(id, model, new StringChoiceProvider(choicesModel, tagsMode));
 	}
 
 	@Override

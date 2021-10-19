@@ -181,7 +181,8 @@ public abstract class PullRequestListPanel extends Panel {
 	private void doQuery(AjaxRequestTarget target) {
 		requestsTable.setCurrentPage(0);
 		target.add(body);
-		selectionColumn.getSelections().clear();
+		if (selectionColumn != null)
+			selectionColumn.getSelections().clear();
 		querySubmitted = true;
 		if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
 			target.add(saveQueryLink);

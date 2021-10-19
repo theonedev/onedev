@@ -56,7 +56,7 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 		if (!choicesModel.getObject().containsKey(selection))
 			selection = null;
 		
-		input = new StringSingleChoice("input", Model.of(selection), choicesModel) {
+		input = new StringSingleChoice("input", Model.of(selection), choicesModel, false) {
 
 			@Override
 			protected void onInitialize() {
