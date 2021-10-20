@@ -63,10 +63,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		return getModelObject();
 	}
 	
-	private Project getProject() {
-		return getIssue().getProject();
-	}
-	
 	private IssueActivitiesPanel newActivitiesPanel() {
 		IssueActivitiesPanel activities = new IssueActivitiesPanel(TAB_CONTENT_ID) {
 
@@ -89,6 +85,11 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			@Override
 			protected Issue getIssue() {
 				return CardDetailPanel.this.getIssue();
+			}
+
+			@Override
+			protected Project getProject() {
+				return CardDetailPanel.this.getProject();
 			}
 
 		});
@@ -122,7 +123,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		});
 		
 		if (!getIssue().getCommits().isEmpty()) {
-			if (SecurityUtils.canReadCode(getProject())) {
+			if (SecurityUtils.canReadCode(getIssue().getProject())) {
 				tabs.add(new AjaxActionTab(Model.of("Fixing Commits")) {
 
 					@Override
@@ -220,8 +221,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 				return new EntityNavPanel<Issue>(componentId) {
 
 					@Override
-					protected EntityQuery<Issue> parse(String queryString, boolean inProject) {
-						return IssueQuery.parse(inProject?getProject():null, queryString, true, true, false, false, false);
+					protected EntityQuery<Issue> parse(String queryString, Project project) {
+						return IssueQuery.parse(project, queryString, true, true, false, false, false);
 					}
 
 					@Override
@@ -230,9 +231,9 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 					}
 
 					@Override
-					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
 						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-						return issueManager.query(inProject?getProject():null, query, offset, count, false);
+						return issueManager.query(project, true, query, offset, count, false);
 					}
 
 					@Override
@@ -318,6 +319,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	public InputSpec getInputSpec(String inputName) {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
+
+	protected abstract Project getProject();
 	
 	protected abstract void onClose(AjaxRequestTarget target);
 	

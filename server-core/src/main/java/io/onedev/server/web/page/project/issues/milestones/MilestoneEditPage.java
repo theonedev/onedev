@@ -59,16 +59,16 @@ public class MilestoneEditPage extends ProjectPage {
 				super.onSubmit();
 
 				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
-				Milestone milestoneWithSameName = milestoneManager.find(getProject(), milestone.getName());
+				Milestone milestoneWithSameName = milestoneManager.findInHierarchy(getProject(), milestone.getName());
 				if (milestoneWithSameName != null && !milestoneWithSameName.equals(milestone)) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another milestone in the project");
+							"This name has already been used by another milestone in the project hierarchy");
 				} 
 				if (editor.isValid()){
 					editor.getDescriptor().copyProperties(milestone, getMilestone());
 					milestoneManager.save(getMilestone());
 					Session.get().success("Milestone saved");
-					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone(), null));
+					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone().getProject(), getMilestone(), null));
 				}
 				
 			}
@@ -101,7 +101,7 @@ public class MilestoneEditPage extends ProjectPage {
 		fragment.add(new BookmarkablePageLink<Void>("milestones", MilestoneListPage.class, 
 				MilestoneListPage.paramsOf(getProject())));
 		Link<Void> link = new BookmarkablePageLink<Void>("milestone", MilestoneDetailPage.class, 
-				MilestoneDetailPage.paramsOf(getMilestone(), null));
+				MilestoneDetailPage.paramsOf(getMilestone().getProject(), getMilestone(), null));
 		link.add(new Label("name", getMilestone().getName()));
 		fragment.add(link);
 		return fragment;

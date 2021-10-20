@@ -30,6 +30,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.search.entity.EntityQuery;
@@ -99,6 +100,11 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 			@Override
 			protected Issue getIssue() {
 				return IssueDetailPage.this.getIssue();
+			}
+
+			@Override
+			protected Project getProject() {
+				return getIssue().getProject();
 			}
 
 		});
@@ -175,8 +181,8 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 				return new EntityNavPanel<Issue>(componentId) {
 
 					@Override
-					protected EntityQuery<Issue> parse(String queryString, boolean inProject) {
-						return IssueQuery.parse(inProject?getProject():null, queryString, true, true, false, false, false);
+					protected EntityQuery<Issue> parse(String queryString, Project project) {
+						return IssueQuery.parse(project, queryString, true, true, false, false, false);
 					}
 
 					@Override
@@ -185,9 +191,12 @@ public abstract class IssueDetailPage extends ProjectIssuesPage implements Input
 					}
 
 					@Override
-					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, boolean inProject) {
+					protected List<Issue> query(EntityQuery<Issue> query, int offset, int count, Project project) {
 						IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-						return issueManager.query(inProject?getProject():null, query, offset, count, false);
+						if (project != null)
+							return issueManager.query(project, true, query, offset, count, false);
+						else
+							return issueManager.query(query, offset, count, false);
 					}
 
 					@Override

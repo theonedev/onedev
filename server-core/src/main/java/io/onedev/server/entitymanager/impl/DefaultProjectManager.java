@@ -57,6 +57,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -73,6 +74,7 @@ import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -119,6 +121,8 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     
     private final TransactionManager transactionManager;
     
+    private final IssueManager issueManager;
+    
     private final JobManager jobManager;
     
     private final TaskScheduler taskScheduler;
@@ -147,7 +151,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		SettingManager settingManager, TransactionManager transactionManager, 
     		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
     		TaskScheduler taskScheduler, UserAuthorizationManager userAuthorizationManager, 
-    		RoleManager roleManager, JobManager jobManager) {
+    		RoleManager roleManager, JobManager jobManager, IssueManager issueManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -161,6 +165,7 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
         this.userAuthorizationManager = userAuthorizationManager;
         this.roleManager = roleManager;
         this.jobManager = jobManager;
+        this.issueManager = issueManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -201,6 +206,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     public void save(Project project, String oldPath) {
     	dao.persist(project);
     	if (oldPath != null && !oldPath.equals(project.getPath())) {
+    		Collection<Milestone> milestones = new ArrayList<>();
+    		for (Milestone milestone: issueManager.queryUsedMilestones(project)) {
+    			if (!project.isSelfOrAncestorOf(milestone.getProject()) 
+    					&& !milestone.getProject().isSelfOrAncestorOf(project)) {
+    				milestones.add(milestone);
+    			}
+    		}
+    		issueManager.clearMilestones(project, milestones);
     		settingManager.onRenameProject(oldPath, project.getPath());
     		scheduleTree(project);
     	}
@@ -772,12 +785,31 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 		return ids;
 	}
 
+	private Collection<Long> getTreeIds(Long treeRootId) {
+		Collection<Long> treeIds = Sets.newHashSet(treeRootId);
+		for (ProjectFacade facade: cache.values()) {
+			if (treeRootId.equals(facade.getParentId()))
+				treeIds.addAll(getTreeIds(facade.getId()));
+		}
+		return treeIds;
+	}
+	
 	@Override
-	public Predicate getPathMatchCriteria(CriteriaBuilder builder, Path<Project> project, String pathPattern) {
+	public Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> bean, String pathPattern) {
 		cacheLock.readLock().lock();
 		try {
-			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, project.get(Project.PROP_ID), 
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, bean.get(Project.PROP_ID), 
 					getMatchingIds(pathPattern), cache.keySet());		
+		} finally {
+			cacheLock.readLock().unlock();
+		}
+	}
+	
+	public Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> bean, Project treeRoot) {
+		cacheLock.readLock().lock();
+		try {
+			return io.onedev.server.search.entity.EntityCriteria.inManyValues(builder, bean.get(Project.PROP_ID), 
+					getTreeIds(treeRoot.getId()), cache.keySet());		
 		} finally {
 			cacheLock.readLock().unlock();
 		}
@@ -796,8 +828,18 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
 	@Transactional
 	@Override
 	public void delete(Collection<Project> projects) {
-		for (Project project: projects)
-			delete(project);
+		Collection<Project> independents = new HashSet<>(projects);
+		for (Iterator<Project> it = independents.iterator(); it.hasNext();) {
+			Project independent = it.next();
+			for (Project each: independents) {
+				if (!each.equals(independent) && each.isSelfOrAncestorOf(independent)) {
+					it.remove();
+					break;
+				}
+			}
+		}
+		for (Project independent: independents)
+			delete(independent);
 	}
 	
 }

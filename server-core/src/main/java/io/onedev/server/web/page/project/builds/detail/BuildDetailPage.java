@@ -68,7 +68,6 @@ import io.onedev.server.web.component.job.joblist.JobListPanel;
 import io.onedev.server.web.component.link.BuildSpecLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.modal.confirm.ConfirmModalPanel;
 import io.onedev.server.web.component.sideinfo.SideInfoLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTabHead;
@@ -266,24 +265,7 @@ public abstract class BuildDetailPage extends ProjectPage
 						
 					};
 				} else {
-					new ConfirmModalPanel(target) {
-						
-						@Override
-						protected void onConfirm(AjaxRequestTarget target) {
-							resubmit(paramBean);
-						}
-						
-						@Override
-						protected String getConfirmMessage() {
-							return "Do you really want to rerun this build?";
-						}
-						
-						@Override
-						protected String getConfirmInput() {
-							return null;
-						}
-						
-					};
+					resubmit(paramBean);
 				}
 				target.focusComponent(null);
 			}
@@ -485,8 +467,8 @@ public abstract class BuildDetailPage extends ProjectPage
 				return new EntityNavPanel<Build>(componentId) {
 
 					@Override
-					protected EntityQuery<Build> parse(String queryString, boolean inProject) {
-						return BuildQuery.parse(inProject?getProject():null, queryString, true, true);
+					protected EntityQuery<Build> parse(String queryString, Project project) {
+						return BuildQuery.parse(project, queryString, true, true);
 					}
 
 					@Override
@@ -495,9 +477,9 @@ public abstract class BuildDetailPage extends ProjectPage
 					}
 
 					@Override
-					protected List<Build> query(EntityQuery<Build> query, int offset, int count, boolean inProject) {
+					protected List<Build> query(EntityQuery<Build> query, int offset, int count, Project project) {
 						BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-						return buildManager.query(inProject?getProject():null, query, offset, count);
+						return buildManager.query(project, query, offset, count);
 					}
 
 					@Override

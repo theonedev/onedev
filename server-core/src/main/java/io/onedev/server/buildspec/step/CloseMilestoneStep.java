@@ -51,7 +51,7 @@ public class CloseMilestoneStep extends ServerStep {
 				Project project = build.getProject();
 				String milestoneName = getMilestoneName();
 				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
-				Milestone milestone = milestoneManager.find(project, milestoneName);
+				Milestone milestone = milestoneManager.findInHierarchy(project, milestoneName);
 				if (milestone != null) {
 					if (build.canCloseMilestone(milestoneName)) {
 						milestone.setClosed(true);

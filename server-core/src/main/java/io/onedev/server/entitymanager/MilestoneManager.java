@@ -9,10 +9,10 @@ import io.onedev.server.persistence.dao.EntityManager;
 public interface MilestoneManager extends EntityManager<Milestone> {
 	
 	@Nullable
-	Milestone find(Project project, String name);
+	Milestone findInHierarchy(Project project, String name);
 	
 	void delete(Milestone milestone);
 
-	Milestone find(String milestoneFQN);
+	Milestone findInHierarchy(String milestoneFQN);
 	
 }

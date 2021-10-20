@@ -26,7 +26,7 @@ public class TargetProjectCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Project> project = root.join(PullRequest.PROP_TARGET_PROJECT, JoinType.INNER);
-		return OneDev.getInstance(ProjectManager.class).getPathMatchCriteria(builder, project, projectPath);
+		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, project, projectPath);
 	}
 
 	@Override

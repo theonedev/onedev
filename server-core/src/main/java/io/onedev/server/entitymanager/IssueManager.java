@@ -37,10 +37,15 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	Long getNextNumber(Project numberScope);
 	
-	List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
+	List<Issue> query(EntityQuery<Issue> issueQuery, int firstResult, int maxResults, 
+			boolean loadFields);
+	
+	int count(@Nullable IssueCriteria issueCriteria);
+	
+	List<Issue> query(Project project, boolean inTree, EntityQuery<Issue> issueQuery, 
 			int firstResult, int maxResults, boolean loadFields);
 	
-	int count(@Nullable Project project, @Nullable IssueCriteria issueCriteria);
+	int count(Project project, boolean inTree, @Nullable IssueCriteria issueCriteria);
 	
 	List<Issue> query(Project project, String term, int count);
 
@@ -70,4 +75,9 @@ public interface IssueManager extends EntityManager<Issue> {
 	void delete(Collection<Issue> issues);
 	
 	Collection<MilestoneAndState> queryMilestoneAndStates(Project project, Collection<Milestone> milestones);
+	
+	Collection<Milestone> queryUsedMilestones(Project project);
+
+	void clearMilestones(Project project, Collection<Milestone> milestones);
+	
 }

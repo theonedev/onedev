@@ -63,7 +63,9 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	int count(EntityCriteria<Project> projectCriteria);
 
-	Predicate getPathMatchCriteria(CriteriaBuilder builder, Path<Project> project, String pathPattern);
+	Predicate getPathMatchPredicate(CriteriaBuilder builder, Path<Project> bean, String pathPattern);
+	
+	Predicate getTreePredicate(CriteriaBuilder builder, Path<Project> bean, Project treeRoot);
 	
 	void move(Collection<Project> projects, @Nullable Project parent);
 

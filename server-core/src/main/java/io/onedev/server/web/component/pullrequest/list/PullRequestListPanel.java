@@ -678,7 +678,7 @@ public abstract class PullRequestListPanel extends Panel {
 				
 				Item<?> row = cellItem.findParent(Item.class);
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
-						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
+						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 
 				String label;
 				if (getProject() == null)

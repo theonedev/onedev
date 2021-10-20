@@ -97,6 +97,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		if (projectId == null)
 			throw new RestartResponseException(ProjectListPage.class);
 		
+		Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 		projectModel = new LoadableDetachableModel<Project>() {
 
 			@Override
@@ -114,6 +115,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			}
 			
 		};
+		projectModel.setObject(project);
 	}
 	
 	protected Map<String, ObjectId> getObjectIdCache() {

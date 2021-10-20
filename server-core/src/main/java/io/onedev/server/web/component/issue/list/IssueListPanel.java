@@ -1026,8 +1026,12 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
 				try {
-					return getIssueManager().query(getProject(), queryModel.getObject(), 
-							(int)first, (int)count, true).iterator();
+					if (getProject() != null) {
+						return getIssueManager().query(getProject(), true, queryModel.getObject(), 
+								(int)first, (int)count, true).iterator();
+					} else {
+						return getIssueManager().query(queryModel.getObject(), (int)first, (int)count, true).iterator();
+					}
 				} catch (ExplicitException e) {
 					error(e.getMessage());
 					return new ArrayList<Issue>().iterator();
@@ -1039,7 +1043,10 @@ public abstract class IssueListPanel extends Panel {
 				IssueQuery query = queryModel.getObject();
 				if (query != null) {
 					try {
-						return getIssueManager().count(getProject(), query.getCriteria());
+						if (getProject() != null) 
+							return getIssueManager().count(getProject(), true, query.getCriteria());
+						else
+							return getIssueManager().count(query.getCriteria());
 					} catch (ExplicitException e) {
 						error(e.getMessage());
 					}
@@ -1096,13 +1103,15 @@ public abstract class IssueListPanel extends Panel {
 				Item<?> row = cellItem.findParent(Item.class);
 				
 				Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
-						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
+						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 				
 				String label;
 				if (getProject() == null)
 					label = issue.getProject() + "#" + issue.getNumber();
-				else
+				else if (getProject().equals(issue.getProject()))
 					label = "#" + issue.getNumber();
+				else 
+					label = issue.getProject().getPath().substring(getProject().getPath().length()+1) + "#" + issue.getNumber();
 				
 				ActionablePageLink<Void> numberLink;
 				fragment.add(numberLink = new ActionablePageLink<Void>("number", 

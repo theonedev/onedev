@@ -343,11 +343,12 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.submitDate = submitDate;
 	}
 
+	@Nullable
 	public Milestone getMilestone() {
 		return milestone;
 	}
 
-	public void setMilestone(Milestone milestone) {
+	public void setMilestone(@Nullable Milestone milestone) {
 		this.milestone = milestone;
 	}
 

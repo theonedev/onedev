@@ -62,11 +62,16 @@ abstract class CardListPanel extends Panel {
 					protected Cursor getCursor() {
 						IssueQuery query = getQuery();
 						if (query != null)
-							return new Cursor(query.toString(), getCardCount(), cardOffset, true);
+							return new Cursor(query.toString(), getCardCount(), cardOffset, getProject());
 						else
 							return null;
 					}
 	
+					@Override
+					protected Project getProject() {
+						return CardListPanel.this.getProject();
+					}
+					
 				});
 				index++;
 			}
@@ -103,11 +108,16 @@ abstract class CardListPanel extends Panel {
 						protected Cursor getCursor() {
 							IssueQuery query = getQuery();
 							if (query != null)
-								return new Cursor(query.toString(), getCardCount(), cardOffset, true);
+								return new Cursor(query.toString(), getCardCount(), cardOffset, getProject());
 							else
 								return null;
 						}
 
+						@Override
+						protected Project getProject() {
+							return CardListPanel.this.getProject();
+						}
+						
 					};
 					cardsView.add(card);
 					String script = String.format("$('#%s').append('<div id=\"%s\"></div>');", 
@@ -141,11 +151,10 @@ abstract class CardListPanel extends Panel {
 	}
 
 	private List<Issue> queryIssues(int offset, int count) {
-		if (getQuery() != null) {
-			return getIssueManager().query(getProject(), getQuery(), offset, count, true);
-		} else { 
+		if (getQuery() != null) 
+			return getIssueManager().query(getProject(), true, getQuery(), offset, count, true);
+		else 
 			return new ArrayList<>();
-		}
 	}
 	
 	protected abstract Project getProject();

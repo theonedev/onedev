@@ -252,7 +252,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						
 						Optional<Milestone> milestone;
 						if (selectedFields.contains(Issue.NAME_MILESTONE))
-							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
+							milestone = Optional.fromNullable(getProject().getHierarchyMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
 						

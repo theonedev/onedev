@@ -14,6 +14,7 @@ import org.apache.wicket.protocol.http.WebSession;
 
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.util.Cursor;
@@ -59,14 +60,14 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				EntityQuery<T> query = parse(getCursor().getQuery(), getCursor().isInProject());
+				EntityQuery<T> query = parse(getCursor().getQuery(), getCursor().getProject());
 				int count = getCursor().getCount();
 				int offset = getCursor().getOffset() - 1;
-				List<T> entities = query(query, offset, 1, getCursor().isInProject());
+				List<T> entities = query(query, offset, 1, getCursor().getProject());
 				if (!entities.isEmpty()) {
 					if (!query.matches(getEntity()))
 						count--;
-					Cursor prevCursor = new Cursor(getCursor().getQuery(), count, offset, getCursor().isInProject());
+					Cursor prevCursor = new Cursor(getCursor().getQuery(), count, offset, getCursor().getProject());
 					getCursorSupport().navTo(target, entities.get(0), prevCursor);
 				} else {
 					WebSession.get().warn("No more " + entityName + "s");
@@ -92,7 +93,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				EntityQuery<T> query = parse(getCursor().getQuery(), getCursor().isInProject());
+				EntityQuery<T> query = parse(getCursor().getQuery(), getCursor().getProject());
 				int offset = getCursor().getOffset();
 				int count = getCursor().getCount();
 				if (query.matches(getEntity())) 
@@ -100,9 +101,9 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				else
 					count--;
 				
-				List<T> entities = query(query, offset, 1, getCursor().isInProject());
+				List<T> entities = query(query, offset, 1, getCursor().getProject());
 				if (!entities.isEmpty()) {
-					Cursor nextCursor = new Cursor(getCursor().getQuery(), count, offset, getCursor().isInProject());
+					Cursor nextCursor = new Cursor(getCursor().getQuery(), count, offset, getCursor().getProject());
 					getCursorSupport().navTo(target, entities.get(0), nextCursor);
 				} else {
 					WebSession.get().warn("No more " + entityName + "s");
@@ -124,13 +125,13 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 		}));
 	}
 
-	protected abstract EntityQuery<T> parse(String queryString, boolean inProject);
+	protected abstract EntityQuery<T> parse(String queryString, @Nullable Project project);
 	
 	protected abstract T getEntity();
 	
 	@Nullable
 	protected abstract CursorSupport<T> getCursorSupport();
 	
-	protected abstract List<T> query(EntityQuery<T> query, int offset, int count, boolean inProject);
+	protected abstract List<T> query(EntityQuery<T> query, int offset, int count, @Nullable Project project);
 	
 }

@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -297,7 +298,13 @@ public class ProjectListPanel extends Panel {
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
 												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendents";
 												break;
-											} 
+											} else {
+												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
+												if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
+													errorMessage = "A child project with name '" + eachProject.getName() + "' already exists under '" + project.getPath() + "'";
+													break;
+												}
+											}
 										}
 										
 										if (errorMessage != null) {
@@ -306,7 +313,7 @@ public class ProjectListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 												
 												private Project getTargetProject() {
-													return OneDev.getInstance(ProjectManager.class).load(projectId);
+													return getProjectManager().load(projectId);
 												}
 												
 												@Override
@@ -314,9 +321,10 @@ public class ProjectListPanel extends Panel {
 													Collection<Project> projects = new ArrayList<>();
 													for (IModel<Project> each: selectionColumn.getSelections()) 
 														projects.add(each.getObject());
-													OneDev.getInstance(ProjectManager.class).move(projects, getTargetProject());
+													getProjectManager().move(projects, getTargetProject());
 													target.add(body);
 													selectionColumn.getSelections().clear();
+													Session.get().success("Projects moved");
 												}
 												
 												@Override
@@ -379,7 +387,13 @@ public class ProjectListPanel extends Panel {
 										if (!SecurityUtils.canManage(eachProject)) {
 											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
 											break;
-										} 
+										} else {
+											Project projectWithSameName = getProjectManager().find(eachProject.getName());
+											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
+												errorMessage = "A root project with name '" + eachProject.getName() + "' already exists";
+												break;
+											}
+										}
 									}
 									
 									if (errorMessage != null) {
@@ -392,9 +406,10 @@ public class ProjectListPanel extends Panel {
 												Collection<Project> projects = new ArrayList<>();
 												for (IModel<Project> each: selectionColumn.getSelections()) 
 													projects.add(each.getObject());
-												OneDev.getInstance(ProjectManager.class).move(projects, null);
+												getProjectManager().move(projects, null);
 												target.add(body);
 												selectionColumn.getSelections().clear();
+												Session.get().success("Projects modified");
 											}
 											
 											@Override
@@ -465,7 +480,7 @@ public class ProjectListPanel extends Panel {
 											Collection<Project> projects = new ArrayList<>();
 											for (IModel<Project> each: selectionColumn.getSelections())  
 												projects.add(each.getObject());
-											OneDev.getInstance(ProjectManager.class).delete(projects);
+											getProjectManager().delete(projects);
 											selectionColumn.getSelections().clear();
 											target.add(body);
 										}
@@ -543,7 +558,13 @@ public class ProjectListPanel extends Panel {
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
 												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendents";
 												break;
-											} 
+											} else {
+												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
+												if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
+													errorMessage = "A child project with name '" + eachProject.getName() + "' already exists under '" + project.getPath() + "'";
+													break;
+												}
+											}
 										}
 										
 										if (errorMessage != null) {
@@ -552,7 +573,7 @@ public class ProjectListPanel extends Panel {
 											new ConfirmModalPanel(target) {
 												
 												private Project getTargetProject() {
-													return OneDev.getInstance(ProjectManager.class).load(projectId);
+													return getProjectManager().load(projectId);
 												}
 												
 												@Override
@@ -560,9 +581,10 @@ public class ProjectListPanel extends Panel {
 													Collection<Project> projects = new ArrayList<>();
 													for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 														projects.add(it.next());
-													OneDev.getInstance(ProjectManager.class).move(projects, getTargetProject());
+													getProjectManager().move(projects, getTargetProject());
 													target.add(body);
 													selectionColumn.getSelections().clear();
+													Session.get().success("Projects moved");
 												}
 												
 												@Override
@@ -625,7 +647,13 @@ public class ProjectListPanel extends Panel {
 										if (!SecurityUtils.canManage(eachProject)) {
 											errorMessage = "Project manage privilege required to modify '" + eachProject + "'";
 											break;
-										} 
+										} else {
+											Project projectWithSameName = getProjectManager().find(eachProject.getName());
+											if (projectWithSameName != null && !projectWithSameName.equals(eachProject)) {
+												errorMessage = "A root project with name '" + eachProject.getName() + "' already exists";
+												break;
+											}
+										}
 									}
 									
 									if (errorMessage != null) {
@@ -638,9 +666,10 @@ public class ProjectListPanel extends Panel {
 												Collection<Project> projects = new ArrayList<>();
 												for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 													projects.add(it.next());
-												OneDev.getInstance(ProjectManager.class).move(projects, null);
+												getProjectManager().move(projects, null);
 												target.add(body);
 												selectionColumn.getSelections().clear();
+												Session.get().success("Projects modified");
 											}
 											
 											@Override
@@ -714,7 +743,7 @@ public class ProjectListPanel extends Panel {
 											Collection<Project> projects = new ArrayList<>();
 											for (Iterator<Project> it = (Iterator<Project>) dataProvider.iterator(0, projectsTable.getItemCount()); it.hasNext();) 
 												projects.add(it.next());
-											OneDev.getInstance(ProjectManager.class).delete(projects);
+											getProjectManager().delete(projects);
 											selectionColumn.getSelections().clear();
 											target.add(body);
 										}
@@ -759,8 +788,7 @@ public class ProjectListPanel extends Panel {
 			}
 			
 			private Collection<Project> getTargetProjects() {
-				List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
-						.getPermittedProjects(new CreateChildren()));
+				List<Project> projects = new ArrayList<>(getProjectManager().getPermittedProjects(new CreateChildren()));
 				
 				Collections.sort(projects, new Comparator<Project>() {
 

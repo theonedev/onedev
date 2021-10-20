@@ -23,7 +23,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.wicket.util.lang.Objects;
-import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -230,34 +229,9 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		});
 	}
 
-	private Predicate[] getPredicates(@Nullable Project project, 
-			@Nullable io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Root<Issue> root, 
-			CriteriaBuilder builder) {
-		List<Predicate> predicates = new ArrayList<>();
-		if (project != null) {
-			predicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
-		} else if (!SecurityUtils.isAdministrator()) {
-			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
-			if (!projects.isEmpty())
-				predicates.add(root.get(Issue.PROP_PROJECT).in(projects));
-			else
-				predicates.add(builder.disjunction());
-		}
-		if (criteria != null)
-			predicates.add(criteria.getPredicate(root, builder));
-		return predicates.toArray(new Predicate[0]);
-	}
-	
-	private CriteriaQuery<Issue> buildCriteriaQuery(@Nullable Project project, 
-			Session session, EntityQuery<Issue> issueQuery) {
-		CriteriaBuilder builder = session.getCriteriaBuilder();
-		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
-		Root<Issue> root = query.from(Issue.class);
-		
-		query.where(getPredicates(project, issueQuery.getCriteria(), root, builder));
-
+	private List<javax.persistence.criteria.Order> getOrders(List<EntitySort> sorts, CriteriaBuilder builder, Root<Issue> root) {
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: issueQuery.getSorts()) {
+		for (EntitySort sort: sorts) {
 			if (Issue.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
 					orders.add(builder.asc(IssueQuery.getPath(root, Issue.ORDER_FIELDS.get(sort.getField()))));
@@ -276,9 +250,7 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		if (orders.isEmpty()) {
 			orders.add(builder.desc(IssueQuery.getPath(root, Issue.PROP_LAST_UPDATE + "." + LastUpdate.PROP_DATE)));
 		}
-		query.orderBy(orders);
-		
-		return query;
+		return orders;
 	}
 	
 	private GlobalIssueSetting getIssueSetting() {
@@ -287,9 +259,36 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 
 	@Sessional
 	@Override
-	public List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
+	public List<Issue> query(EntityQuery<Issue> issueQuery,  int firstResult, int maxResults, 
+			boolean loadFields) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		
+		criteriaQuery.where(getPredicates(issueQuery.getCriteria(), builder, root));
+		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
+		
+		Query<Issue> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		List<Issue> issues = query.getResultList();
+		if (loadFields && !issues.isEmpty())
+			issueFieldManager.populateFields(issues);
+		
+		return issues;
+	}
+	
+	@Sessional
+	@Override
+	public List<Issue> query(Project project, boolean inTree, EntityQuery<Issue> issueQuery, 
 			int firstResult, int maxResults, boolean loadFields) {
-		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(project, getSession(), issueQuery);
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		
+		criteriaQuery.where(getPredicates(project, inTree, issueQuery.getCriteria(), builder, root));
+		criteriaQuery.orderBy(getOrders(issueQuery.getSorts(), builder, root));
+		
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -316,17 +315,59 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	
 	@Sessional
 	@Override
-	public int count(@Nullable Project project,IssueCriteria issueCriteria) {
+	public int count(IssueCriteria issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
-
-		criteriaQuery.where(getPredicates(project, issueCriteria, root, builder));
-
+		
+		criteriaQuery.where(getPredicates(issueCriteria, builder, root));
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
+	@Sessional
+	@Override
+	public int count(Project project, boolean inTree, IssueCriteria issueCriteria) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+
+		criteriaQuery.where(getPredicates(project, inTree, issueCriteria, builder, root));
+
+		criteriaQuery.select(builder.count(root));
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+	
+	private Predicate[] getPredicates(Project project, boolean inTree, @Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
+			CriteriaBuilder builder, Root<Issue> root) {
+		List<Predicate> predicates = new ArrayList<>();
+		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);		
+		if (inTree)
+			predicates.add(projectManager.getTreePredicate(builder, join, project));
+		else
+			predicates.add(builder.equal(root.get(Issue.PROP_PROJECT), project));
+		if (issueCriteria != null)
+			predicates.add(issueCriteria.getPredicate(root, builder));
+
+		return predicates.toArray(new Predicate[predicates.size()]);
+	}
+	
+	private Predicate[] getPredicates(@Nullable io.onedev.server.search.entity.EntityCriteria<Issue> issueCriteria, 
+			CriteriaBuilder builder, Root<Issue> root) {
+		List<Predicate> predicates = new ArrayList<>();
+		if (!SecurityUtils.isAdministrator()) {
+			Collection<Project> projects = projectManager.getPermittedProjects(new AccessProject()); 
+			if (!projects.isEmpty())
+				predicates.add(root.get(Issue.PROP_PROJECT).in(projects));
+			else
+				predicates.add(builder.disjunction());
+		}
+		if (issueCriteria != null)
+			predicates.add(issueCriteria.getPredicate(root, builder));
+
+		return predicates.toArray(new Predicate[predicates.size()]);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
@@ -749,13 +790,28 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Milestone milestone: milestones) 
 			milestonePredicates.add(builder.equal(root.get(Issue.PROP_MILESTONE), milestone));
 		
+		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);
 		criteriaQuery.where(builder.and(
-				builder.equal(root.get(Issue.PROP_PROJECT), project),
+				projectManager.getTreePredicate(builder, join, project),
 				builder.or(milestonePredicates.toArray(new Predicate[0]))));
 		
 		return getSession().createQuery(criteriaQuery).getResultList();
 	}
-
+	
+	@Sessional
+	@Override
+	public Collection<Milestone> queryUsedMilestones(Project project) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Milestone> criteriaQuery = builder.createQuery(Milestone.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+		criteriaQuery.select(root.get(Issue.PROP_MILESTONE));
+		
+		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);
+		criteriaQuery.where(projectManager.getTreePredicate(builder, join, project));
+		
+		return getSession().createQuery(criteriaQuery).getResultList();
+	}
+	
 	@Transactional
 	@Override
 	public void move(Project targetProject, Collection<Issue> issues) {
@@ -779,11 +835,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 			Project numberScope = targetProject.getForkRoot();
 			Long nextNumber = getNextNumber(numberScope);
 			issue.setProject(targetProject);
-			issue.setMilestone(null);
 			issue.setNumberScope(numberScope);
 			Long oldNumber = issue.getNumber();
 			issue.setNumber(nextNumber);
 			numberMapping.put(oldNumber, nextNumber);
+			
+			if (issue.getMilestone() != null 
+					&& !issue.getMilestone().getProject().isSelfOrAncestorOf(targetProject)) {
+				issue.setMilestone(null);
+			}
 		}
 		
 		for (Issue issue: issueList) {
@@ -827,6 +887,26 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 	public void delete(Collection<Issue> issues) {
 		for (Issue issue: issues)
 			delete(issue);
+	}
+	
+	@Transactional
+	@Override
+	public void clearMilestones(Project project, Collection<Milestone> milestones) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Issue> criteriaQuery = builder.createQuery(Issue.class);
+		Root<Issue> root = criteriaQuery.from(Issue.class);
+
+		List<Predicate> milestonePredicates = new ArrayList<>();
+		for (Milestone milestone: milestones) 
+			milestonePredicates.add(builder.equal(root.get(Issue.PROP_MILESTONE), milestone));
+		
+		Join<Project, Project> join = root.join(Issue.PROP_PROJECT, JoinType.INNER);
+		criteriaQuery.where(builder.and(
+				projectManager.getTreePredicate(builder, join, project),
+				builder.or(milestonePredicates.toArray(new Predicate[0]))));
+		
+		for (Issue issue: getSession().createQuery(criteriaQuery).getResultList()) 
+			issue.setMilestone(null);
 	}
 	
 }

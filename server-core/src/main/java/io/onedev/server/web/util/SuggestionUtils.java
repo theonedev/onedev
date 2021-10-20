@@ -410,7 +410,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestMilestones(Project project, String matchWith) {
-		List<String> milestoneNames = project.getMilestones()
+		List<String> milestoneNames = project.getHierarchyMilestones()
 				.stream()
 				.map(it->it.getName())
 				.sorted()

@@ -23,6 +23,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.security.SecurityUtils;
@@ -179,6 +180,11 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 						super.onAfterRender();
 					}
 
+					@Override
+					protected Project getProject() {
+						return BoardCardPanel.this.getProject();
+					}
+
 				};
 			}
 			
@@ -195,7 +201,13 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			public IModel<?> getBody() {
-				return Model.of("#" + getIssue().getNumber());
+				String prefix;
+				if (getProject().equals(getIssue().getProject()))
+					prefix = "";
+				else
+					prefix = getIssue().getProject().getPath().substring(getProject().getPath().length()+1);
+				
+				return Model.of(prefix + "#" + getIssue().getNumber());
 			}
 
 			@Override
@@ -265,5 +277,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 	}
 
 	protected abstract Cursor getCursor();
+	
+	protected abstract Project getProject();
 	
 }

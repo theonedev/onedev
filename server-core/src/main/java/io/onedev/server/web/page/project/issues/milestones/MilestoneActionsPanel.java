@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.issues.milestones;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
@@ -16,11 +15,8 @@ import io.onedev.server.web.ajaxlistener.ConfirmClickListener;
 @SuppressWarnings("serial")
 abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 
-	private final boolean withMilestoneCreation;
-	
-	public MilestoneActionsPanel(String id, IModel<Milestone> model, boolean withMilestoneCreation) {
+	public MilestoneActionsPanel(String id, IModel<Milestone> model) {
 		super(id, model);
-		this.withMilestoneCreation = withMilestoneCreation;
 	}
 
 	private Milestone getMilestone() {
@@ -90,13 +86,6 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 			}
 
 		});		
-		
-		if (withMilestoneCreation) {
-			add(new BookmarkablePageLink<Void>("create", NewMilestonePage.class, 
-					NewMilestonePage.paramsOf(getMilestone().getProject())));
-		} else {
-			add(new WebMarkupContainer("create").setVisible(false));
-		}
 		
 		setOutputMarkupId(true);
 	}

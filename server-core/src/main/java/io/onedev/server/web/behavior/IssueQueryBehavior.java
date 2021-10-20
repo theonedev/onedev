@@ -123,8 +123,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(Issue.QUERY_FIELDS);
-							if (getProject() != null)
-								candidates.remove(Issue.NAME_PROJECT);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
 							return SuggestionUtils.suggest(candidates, matchWith);

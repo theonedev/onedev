@@ -42,10 +42,10 @@ abstract class NewMilestonePanel extends Panel {
 				super.onSubmit(target, form);
 
 				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
-				Milestone milestoneWithSameName = milestoneManager.find(getProject(), milestone.getName());
+				Milestone milestoneWithSameName = milestoneManager.findInHierarchy(getProject(), milestone.getName());
 				if (milestoneWithSameName != null) {
 					editor.error(new Path(new PathNode.Named("name")),
-							"This name has already been used by another milestone in the project");
+							"This name has already been used by another milestone in the project hierarchy");
 				} 
 				if (editor.isValid()){
 					milestone.setProject(getProject());

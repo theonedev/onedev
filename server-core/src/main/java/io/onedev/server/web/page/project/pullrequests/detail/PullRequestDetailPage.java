@@ -854,8 +854,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 				return new EntityNavPanel<PullRequest>(componentId) {
 
 					@Override
-					protected EntityQuery<PullRequest> parse(String queryString, boolean inProject) {
-						return PullRequestQuery.parse(inProject?getProject():null, queryString);
+					protected EntityQuery<PullRequest> parse(String queryString, Project project) {
+						return PullRequestQuery.parse(project, queryString);
 					}
 
 					@Override
@@ -864,8 +864,8 @@ public abstract class PullRequestDetailPage extends ProjectPage implements PullR
 					}
 
 					@Override
-					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, boolean inProject) {
-						return getPullRequestManager().query(inProject?getProject():null, query, offset, count, false, false);
+					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count, Project project) {
+						return getPullRequestManager().query(project, query, offset, count, false, false);
 					}
 
 					@Override

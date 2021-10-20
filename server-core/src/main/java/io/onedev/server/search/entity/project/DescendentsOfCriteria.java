@@ -9,33 +9,32 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.criteria.Criteria;
-import io.onedev.server.util.match.WildcardUtils;
 
-public class PathCriteria extends EntityCriteria<Project> {
+public class DescendentsOfCriteria extends EntityCriteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String value;
+	private final Project project;
 	
-	public PathCriteria(String value) {
-		this.value = value;
+	public DescendentsOfCriteria(Project project) {
+		this.project = project;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(builder, root, value);
+		return builder.and(
+				OneDev.getInstance(ProjectManager.class).getTreePredicate(builder, root, project),
+				builder.notEqual(root, project));
 	}
 
 	@Override
 	public boolean matches(Project project) {
-		return WildcardUtils.matchPath(value, project.getPath());
+		return !this.project.equals(project) && this.project.isSelfOrAncestorOf(project);
 	}
 
 	@Override
 	public String toStringWithoutParens() {
-		return Criteria.quote(Project.NAME_PATH) + " " 
-				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
-				+ Criteria.quote(value);
+		return ProjectQuery.getRuleName(ProjectQueryLexer.DescendentsOf) + " " + Criteria.quote(project.getPath());
 	}
 
 }

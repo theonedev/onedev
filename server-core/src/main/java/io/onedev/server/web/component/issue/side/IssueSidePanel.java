@@ -285,13 +285,13 @@ public abstract class IssueSidePanel extends Panel {
 		Fragment fragment = new Fragment("milestone", "milestoneViewFrag", this);
 		if (getIssue().getMilestone() != null) {
 			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
-					MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
+					MilestoneDetailPage.paramsOf(getProject(), getIssue().getMilestone(), null));
 			link.add(new Label("label", getIssue().getMilestone().getName()));
 			fragment.add(new StateStatsBar("progress", new AbstractReadOnlyModel<Map<String, Integer>>() {
 
 				@Override
 				public Map<String, Integer> getObject() {
-					return getIssue().getMilestone().getStateStats();
+					return getIssue().getMilestone().getStateStats(getProject());
 				}
 				
 			}) {
@@ -299,7 +299,7 @@ public abstract class IssueSidePanel extends Panel {
 				@Override
 				protected Link<Void> newStateLink(String componentId, String state) {
 					String query = new IssueQuery(new StateCriteria(state)).toString();
-					PageParameters params = MilestoneDetailPage.paramsOf(getIssue().getMilestone(), query);
+					PageParameters params = MilestoneDetailPage.paramsOf(getProject(), getIssue().getMilestone(), query);
 					return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
 				}
 				
@@ -342,7 +342,7 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected Collection<Milestone> load() {
-						return getProject().getSortedMilestones();
+						return getProject().getSortedHierarchyMilestones();
 					}
 					
 				});

@@ -23,14 +23,14 @@ public class MilestoneCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<String> attribute = root.join(Issue.PROP_MILESTONE, JoinType.LEFT).get(Milestone.PROP_NAME);
-		String normalized = milestoneName.toLowerCase().replace("*", "%");
-		return builder.like(builder.lower(attribute), normalized);
+		String normalized = milestoneName.replace("*", "%");
+		return builder.like(attribute, normalized);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		if (issue.getMilestone() != null)
-			return WildcardUtils.matchString(milestoneName.toLowerCase(), issue.getMilestone().getName().toLowerCase());
+			return WildcardUtils.matchString(milestoneName, issue.getMilestone().getName());
 		else 
 			return false;
 	}
@@ -44,7 +44,7 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public void fill(Issue issue) {
-		issue.setMilestone(issue.getProject().getMilestone(milestoneName));
+		issue.setMilestone(issue.getProject().getHierarchyMilestone(milestoneName));
 	}
 
 }

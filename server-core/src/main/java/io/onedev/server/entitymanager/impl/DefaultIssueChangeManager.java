@@ -171,7 +171,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 			change.setIssue(issue);
 			change.setDate(new Date());
 			change.setUser(SecurityUtils.getUser());
-			change.setData(new IssueMilestoneChangeData(prevMilestone, issue.getMilestone()));
+			change.setData(new IssueMilestoneChangeData(prevMilestone, milestone));
 			save(change);
 		}
 	}
@@ -294,7 +294,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 														Build.push(build);
 														try {
-															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
+															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																changeState(issue, transition.getToState(), new HashMap<>(), 
 																		transition.getRemoveFields(), null);
 															}
@@ -359,7 +359,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 														query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 														PullRequest.push(request);
 														try {
-															for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
+															for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																changeState(issue, transition.getToState(), new HashMap<>(), 
 																		transition.getRemoveFields(), null);
 															}
@@ -494,7 +494,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 																
 															});
 															try {
-																for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE, true)) {
+																for (Issue issue: issueManager.query(project, false, query, 0, Integer.MAX_VALUE, true)) {
 																	changeState(issue, transition.getToState(), new HashMap<>(), 
 																			transition.getRemoveFields(), null);
 																}
@@ -545,7 +545,7 @@ public class DefaultIssueChangeManager extends BaseEntityManager<IssueChange>
 				
 				query = new IssueQuery(IssueCriteria.and(criterias), new ArrayList<>());
 				
-				for (Issue issue: issueManager.query(null, query, 0, Integer.MAX_VALUE, true)) {
+				for (Issue issue: issueManager.query(query, 0, Integer.MAX_VALUE, true)) {
 					changeState(issue, transition.getToState(), new HashMap<>(), 
 							transition.getRemoveFields(), null);
 				}

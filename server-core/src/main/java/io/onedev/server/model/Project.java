@@ -1320,20 +1320,27 @@ public class Project extends AbstractEntity {
 	public Collection<Milestone> getMilestones() {
 		return milestones;
 	}
+	
+	public Collection<Milestone> getHierarchyMilestones() {
+		Collection<Milestone> milestones = new ArrayList<>(getMilestones());
+		if (getParent() != null)
+			milestones.addAll(getParent().getHierarchyMilestones());
+		return milestones;
+	}
 
 	public void setMilestones(Collection<Milestone> milestones) {
 		this.milestones = milestones;
 	}
 
-	public List<Milestone> getSortedMilestones() {
+	public List<Milestone> getSortedHierarchyMilestones() {
 		if (sortedMilestones == null) {
 			sortedMilestones = new ArrayList<>();
-			List<Milestone> open = getMilestones().stream()
+			List<Milestone> open = getHierarchyMilestones().stream()
 					.filter(it->!it.isClosed())
 					.sorted(new Milestone.DueDateComparator())
 					.collect(Collectors.toList());
 			sortedMilestones.addAll(open);
-			List<Milestone> closed = getMilestones().stream()
+			List<Milestone> closed = getHierarchyMilestones().stream()
 					.filter(it->it.isClosed())
 					.sorted(new Milestone.DueDateComparator())
 					.collect(Collectors.toList());
@@ -1533,14 +1540,14 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Nullable
-	public Milestone getMilestone(@Nullable String milestoneName) {
-		for (Milestone milestone: milestones) {
+	public Milestone getHierarchyMilestone(@Nullable String milestoneName) {
+		for (Milestone milestone: getHierarchyMilestones()) {
 			if (milestone.getName().equals(milestoneName))
 				return milestone;
 		}
 		return null;
 	}
-
+	
 	public boolean isCommitOnBranches(@Nullable ObjectId commitId, String branches) {
 		Matcher matcher = new PathMatcher();
 		if (commitId != null) {
@@ -1778,6 +1785,16 @@ public class Project extends AbstractEntity {
 			return isSelfOrAncestorOf(project.getParent());
 		else 
 			return false;
+	}
+	
+	public Collection<Project> getSelfAndAncestors() {
+		Collection<Project> selfAndAncestors = Lists.newArrayList(this);
+		Project parent = getParent();
+		while (parent != null) {
+			selfAndAncestors.add(parent);
+			parent = parent.getParent();
+		}
+		return selfAndAncestors;
 	}
 	
 }

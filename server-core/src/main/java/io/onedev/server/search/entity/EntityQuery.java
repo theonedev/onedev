@@ -168,7 +168,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	public static Milestone getMilestone(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":")) 
 			value = project.getPath() + ":" + value;
-		Milestone milestone = OneDev.getInstance(MilestoneManager.class).find(value);
+		Milestone milestone = OneDev.getInstance(MilestoneManager.class).findInHierarchy(value);
 		if (milestone != null)
 			return milestone;
 		else

@@ -187,11 +187,11 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 		Milestone milestone;
 		String milestoneName = params.get(PARAM_MILESTONE).toString();
 		if (milestoneName != null) {
-			milestone = getProject().getMilestone(milestoneName);
+			milestone = getProject().getHierarchyMilestone(milestoneName);
 			if (milestone == null)
 				throw new ExplicitException("Can not find milestone: " + milestoneName);
-		} else if (!getProject().getSortedMilestones().isEmpty()) {
-			milestone = getProject().getSortedMilestones().iterator().next();
+		} else if (!getProject().getSortedHierarchyMilestones().isEmpty()) {
+			milestone = getProject().getSortedHierarchyMilestones().iterator().next();
 		} else {
 			milestone = null;
 		}
@@ -454,9 +454,9 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 							@Override
 							protected List<Milestone> load() {
-								List<Milestone> milestones = getProject().getSortedMilestones().stream().filter(it->!it.isClosed()).collect(Collectors.toList());
+								List<Milestone> milestones = getProject().getSortedHierarchyMilestones().stream().filter(it->!it.isClosed()).collect(Collectors.toList());
 								if (getMilestone().isClosed() || showClosed) {
-									List<Milestone> closedMilestones = getProject().getSortedMilestones().stream().filter(it->it.isClosed()).collect(Collectors.toList());
+									List<Milestone> closedMilestones = getProject().getSortedHierarchyMilestones().stream().filter(it->it.isClosed()).collect(Collectors.toList());
 									milestones.addAll(closedMilestones);
 								}
 								return milestones;
@@ -487,81 +487,90 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								Link<Void> link = new BookmarkablePageLink<Void>("select", IssueBoardsPage.class, params);
 								link.add(new Label("name", milestone.getName()));
 								item.add(link);
+								item.add(new WebMarkupContainer("inherited") {
+									
+									@Override
+									protected void onConfigure() {
+										super.onConfigure();
+										setVisible(!item.getModelObject().getProject().equals(getProject()));
+									}
+									
+								});
 								
 								item.add(new MilestoneStatusLabel("status", item.getModel()));
 								item.add(new MilestoneDueLabel("dueDate", item.getModel()));
-								WebMarkupContainer actions = new WebMarkupContainer("actions") {
 
-									@Override
-									protected void onConfigure() {
-										super.onConfigure();
-										setVisible(SecurityUtils.canManageIssues(getProject()));
-									}
+								if (SecurityUtils.canManageIssues(getProject()) 
+										&& item.getModelObject().getProject().equals(getProject())) {
+									Fragment fragment = new Fragment("actions", "milestoneActionsFrag", IssueBoardsPage.this);
 									
-								};
-								item.add(actions);
-								
-								actions.add(new AjaxLink<Void>("close") {
+									fragment.add(new AjaxLink<Void>("close") {
 
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										toggleClose(item.getModelObject());
-									}
-
-									@Override
-									protected void onConfigure() {
-										super.onConfigure();
-										setVisible(!item.getModelObject().isClosed());
-									}
-									
-								});
-								actions.add(new AjaxLink<Void>("reopen") {
-
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										toggleClose(item.getModelObject());
-									}
-
-									@Override
-									protected void onConfigure() {
-										super.onConfigure();
-										setVisible(item.getModelObject().isClosed());
-									}
-									
-								});
-								actions.add(new MilestoneEditLink("edit", item.getModelObject().getId()) {
-
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										super.onClick(target);
-										dropdown.close();
-									}
-
-								});
-								actions.add(new AjaxLink<Void>("delete") {
-
-									@Override
-									protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-										super.updateAjaxAttributes(attributes);
-										attributes.getAjaxCallListeners().add(new ConfirmClickListener(
-												"Do you really want to delete milestone '" + item.getModelObject().getName() + "'?"));
-									}
-									
-									@Override
-									public void onClick(AjaxRequestTarget target) {
-										dropdown.close();
-										Milestone milestone = item.getModelObject();
-										if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
-											getMilestoneManager().delete(milestone);
-											setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
-													getProject(), getBoard(), null, backlog, queryString, backlogQueryString));
-										} else {
-											getMilestoneManager().delete(milestone);
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											toggleClose(item.getModelObject());
 										}
-										Session.get().success("Milestone '" + milestone.getName() + "' deleted");
-									}
 
-								});
+										@Override
+										protected void onConfigure() {
+											super.onConfigure();
+											setVisible(!item.getModelObject().isClosed());
+										}
+										
+									});
+									fragment.add(new AjaxLink<Void>("reopen") {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											toggleClose(item.getModelObject());
+										}
+
+										@Override
+										protected void onConfigure() {
+											super.onConfigure();
+											setVisible(item.getModelObject().isClosed());
+										}
+										
+									});
+									fragment.add(new MilestoneEditLink("edit", item.getModelObject().getId()) {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											super.onClick(target);
+											dropdown.close();
+										}
+
+									});
+									fragment.add(new AjaxLink<Void>("delete") {
+
+										@Override
+										protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+											super.updateAjaxAttributes(attributes);
+											attributes.getAjaxCallListeners().add(new ConfirmClickListener(
+													"Do you really want to delete milestone '" + item.getModelObject().getName() + "'?"));
+										}
+										
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											dropdown.close();
+											Milestone milestone = item.getModelObject();
+											if (milestone.equals(IssueBoardsPage.this.getMilestone())) {
+												getMilestoneManager().delete(milestone);
+												setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
+														getProject(), getBoard(), null, backlog, queryString, backlogQueryString));
+											} else {
+												getMilestoneManager().delete(milestone);
+											}
+											Session.get().success("Milestone '" + milestone.getName() + "' deleted");
+										}
+
+									});
+									
+									item.add(fragment);
+								} else {
+									item.add(new Label("actions", "&nbsp;").setEscapeModelStrings(false));
+								}
+								
 							}
 							
 						});

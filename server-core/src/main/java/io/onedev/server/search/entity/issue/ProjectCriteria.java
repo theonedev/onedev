@@ -22,7 +22,7 @@ public class ProjectCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchCriteria(
+		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
 				builder, root.join(Issue.PROP_PROJECT, JoinType.INNER), projectPath);
 	}
 

@@ -58,10 +58,13 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = ProjectQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == ProjectQueryLexer.ForksOf || operator == ProjectQueryLexer.ChildrenOf)
+								if (operator == ProjectQueryLexer.ForksOf 
+										|| operator == ProjectQueryLexer.ChildrenOf 
+										|| operator == ProjectQueryLexer.DescendentsOf) {
 									return SuggestionUtils.suggestProjects(matchWith);
-								else 
+								} else { 
 									return SuggestionUtils.suggestUsers(matchWith);
+								}
 							} else {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
@@ -99,6 +102,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (childQuery) {
 			if (suggestedLiteral.equals(getRuleName(ProjectQueryParser.ChildrenOf))
+					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.DescendentsOf))
 					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.Roots))) { 
 				return null;
 			}

@@ -59,7 +59,7 @@ public class BoardSpec implements Serializable {
 	private List<String> displayFields = Lists.newArrayList(Issue.NAME_STATE);
 	
 	private List<String> editColumns;
-
+	
 	@Editable(order=100)
 	@NotEmpty
 	public String getName() {
@@ -127,7 +127,7 @@ public class BoardSpec implements Serializable {
 	public void setEditColumns(List<String> editColumns) {
 		this.editColumns = editColumns;
 	}
-	
+
 	public List<String> getDisplayColumns() {
 		List<String> displayColumns = new ArrayList<>();
 		for (String column: getColumns()) {

@@ -102,7 +102,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		protected Integer load() {
 			if (getQuery() != null) {
 				try {
-					return OneDev.getInstance(IssueManager.class).count(getProject(), getQuery().getCriteria());
+					return OneDev.getInstance(IssueManager.class).count(getProject(), true, getQuery().getCriteria());
 				} catch(ExplicitException e) {
 					return 0;
 				}

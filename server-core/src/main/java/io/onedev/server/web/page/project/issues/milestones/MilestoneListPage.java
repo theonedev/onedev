@@ -88,7 +88,7 @@ public class MilestoneListPage extends ProjectPage {
 	
 	private EntityCriteria<Milestone> getCriteria(boolean closed) {
 		EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
-		criteria.add(Restrictions.eq("project", getProject()));
+		criteria.add(Restrictions.in("project", getProject().getSelfAndAncestors()));
 		criteria.add(Restrictions.eq("closed", closed));
 		return criteria;
 	}
@@ -190,7 +190,7 @@ public class MilestoneListPage extends ProjectPage {
 				Milestone milestone = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", MilestoneListPage.this);
 				WebMarkupContainer link = new ActionablePageLink<Void>("link", MilestoneDetailPage.class, 
-						MilestoneDetailPage.paramsOf(milestone, null)) {
+						MilestoneDetailPage.paramsOf(getProject(), milestone, null)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
@@ -202,6 +202,15 @@ public class MilestoneListPage extends ProjectPage {
 				};
 				link.add(new Label("label", milestone.getName()));
 				fragment.add(link);
+				fragment.add(new WebMarkupContainer("inherited") {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!rowModel.getObject().getProject().equals(getProject()));
+					}
+					
+				});
 				cellItem.add(fragment);
 			}
 			
@@ -263,7 +272,7 @@ public class MilestoneListPage extends ProjectPage {
 							@Override
 							protected Link<Void> newStateLink(String componentId, String state) {
 								String query = new IssueQuery(new StateCriteria(state)).toString();
-								PageParameters params = MilestoneDetailPage.paramsOf(rowModel.getObject(), query);
+								PageParameters params = MilestoneDetailPage.paramsOf(getProject(), rowModel.getObject(), query);
 								return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
 							}
 							
@@ -279,28 +288,32 @@ public class MilestoneListPage extends ProjectPage {
 		
 		if (SecurityUtils.canManageIssues(getProject())) {
 			columns.add(new AbstractColumn<Milestone, Void>(Model.of("")) {
-
+	
 				@Override
 				public String getCssClass() {
 					return "d-none d-lg-table-cell actions align-middle";
 				}
-
+	
 				@Override
 				public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 						IModel<Milestone> rowModel) {
-					cellItem.add(new MilestoneActionsPanel(componentId, rowModel, false) {
-
-						@Override
-						protected void onUpdated(AjaxRequestTarget target) {
-							target.add(milestonesTable);
-						}
-
-						@Override
-						protected void onDeleted(AjaxRequestTarget target) {
-							target.add(milestonesTable);
-						}
-						
-					});
+					if (rowModel.getObject().getProject().equals(getProject())) {
+						cellItem.add(new MilestoneActionsPanel(componentId, rowModel) {
+	
+							@Override
+							protected void onUpdated(AjaxRequestTarget target) {
+								target.add(milestonesTable);
+							}
+	
+							@Override
+							protected void onDeleted(AjaxRequestTarget target) {
+								target.add(milestonesTable);
+							}
+							
+						});
+					} else {
+						cellItem.add(new Label(componentId, "&nbsp;").setEscapeModelStrings(false));
+					}
 				}
 				
 			});

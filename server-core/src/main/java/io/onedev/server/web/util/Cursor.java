@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.web.WebConstants;
 
 public class Cursor implements Serializable {
@@ -16,13 +19,13 @@ public class Cursor implements Serializable {
 	
 	private final int offset;
 	
-	private final boolean inProject;
+	private final Long projectId;
 	
-	public Cursor(String query, int count, int offset, boolean inProject) {
+	public Cursor(String query, int count, int offset, @Nullable Project project) {
 		this.query = query;
 		this.count = count;
 		this.offset = offset;
-		this.inProject = inProject;
+		projectId = Project.idOf(project);
 	}
 	
 	public String getQuery() {
@@ -37,10 +40,14 @@ public class Cursor implements Serializable {
 		return count;
 	}
 
-	public boolean isInProject() {
-		return inProject;
+	@Nullable
+	public Project getProject() {
+		if (projectId != null)
+			return OneDev.getInstance(ProjectManager.class).load(projectId);
+		else
+			return null;
 	}
-
+	
 	@Nullable
 	public static String getQuery(@Nullable Cursor cursor) {
 		if (cursor != null)

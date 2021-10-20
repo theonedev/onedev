@@ -809,7 +809,7 @@ public abstract class BuildListPanel extends Panel {
 					protected void doBeforeNav(AjaxRequestTarget target) {
 						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
 						Cursor cursor = new Cursor(queryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
-								(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject() != null);
+								(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex(), getProject());
 						WebSession.get().setBuildCursor(cursor);								
 
 						String directUrlAfterDelete = RequestCycle.get().urlFor(

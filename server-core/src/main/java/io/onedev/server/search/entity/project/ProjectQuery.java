@@ -102,6 +102,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.operator.getType() == ProjectQueryLexer.ChildrenOf)
 							return new ChildrenOfCriteria(getProject(value));
+						else if (ctx.operator.getType() == ProjectQueryLexer.DescendentsOf)
+							return new DescendentsOfCriteria(getProject(value));
 						else if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
 							return new ForksOfCriteria(getProject(value));
 						else

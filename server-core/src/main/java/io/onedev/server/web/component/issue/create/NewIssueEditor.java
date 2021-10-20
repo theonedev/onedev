@@ -115,7 +115,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 			@Override
 			protected Collection<Milestone> load() {
-				return getProject().getSortedMilestones();
+				return getProject().getSortedHierarchyMilestones();
 			}
 			
 		});

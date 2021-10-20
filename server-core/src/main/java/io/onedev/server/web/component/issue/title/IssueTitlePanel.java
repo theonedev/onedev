@@ -107,7 +107,13 @@ public abstract class IssueTitlePanel extends Panel {
 			@Override
 			protected String load() {
 				ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), null);
-				return "#" + getIssue().getNumber() + "&nbsp;&nbsp;" 
+				String prefix;
+				if (getIssue().getProject().equals(getProject()))
+					prefix = "";
+				else
+					prefix = getIssue().getProject().getPath().substring(getProject().getPath().length()+1);
+				
+				return prefix + "#" + getIssue().getNumber() + "&nbsp;&nbsp;" 
 						+ Emojis.getInstance().apply(transformer.apply(getIssue().getTitle()));
 			}
 			
@@ -145,5 +151,7 @@ public abstract class IssueTitlePanel extends Panel {
 	}
 	
 	protected abstract Issue getIssue();
+	
+	protected abstract Project getProject();
 	
 }

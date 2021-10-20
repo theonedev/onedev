@@ -69,7 +69,7 @@
 			<table class="milestones table">
 				<tr wicket:id="milestones" class="milestone">
 					<td class="name">
-						<a wicket:id="select"><span wicket:id="name"></span></a>
+						<a wicket:id="select"><span wicket:id="name"></span></a> <span wicket:id="inherited" class="ml-2 badge badge-info badge-sm">Inherited</span>
 					</td>
 					<td class="status">
 						<span wicket:id="status"></span>
@@ -77,16 +77,21 @@
 					<td class="due-date">
 						<span wicket:id="dueDate"></span>
 					</td>
-					<td wicket:id="actions" class="actions text-right">
-						<a wicket:id="close" class="action">close</a>
-						<a wicket:id="reopen" class="action ml-2">reopen</a>
-						<a wicket:id="edit" class="action ml-2">edit</a>
-						<a wicket:id="delete" class="action ml-2">delete</a>
+					<td class="actions text-right">
+						 <div wicket:id="actions" class="d-inline-flex align-items-center"></div> 
 					</td>
 				</tr>
 			</table>
 			<a wicket:id="showClosed" class="show-closed btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="double-arrow" class="icon rotate-90 mr-2"></wicket:svg> Show Closed</a>
 			<a wicket:id="newMilestone" class="new-milestone btn btn-block btn-light btn-hover-primary btn-sm"><wicket:svg href="plus" class="icon mr-2"></wicket:svg> Add New Milestone</a>
 		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="milestoneActionsFrag">
+		<a wicket:id="close" class="action">Close</a>
+		<a wicket:id="reopen" class="action">Reopen</a>
+		<span class="dot mx-2"></span>
+		<a wicket:id="edit" class="action">Edit</a>
+		<span class="dot mx-2"></span>
+		<a wicket:id="delete" class="action">Delete</a>
 	</wicket:fragment>
 </wicket:extend>

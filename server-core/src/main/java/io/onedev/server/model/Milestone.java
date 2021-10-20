@@ -123,15 +123,17 @@ public class Milestone extends AbstractEntity {
 		this.issues = issues;
 	}
 	
-	public Map<String, Integer> getStateStats() {
+	public Map<String, Integer> getStateStats(Project tree) {
 		Map<String, Integer> stateStats = new HashMap<>();
 		for (Issue issue: getIssues()) {
-			Integer count = stateStats.get(issue.getState());
-			if (count != null)
-				count++;
-			else
-				count = 1;
-			stateStats.put(issue.getState(), count);
+			if (tree.isSelfOrAncestorOf(issue.getProject())) {
+				Integer count = stateStats.get(issue.getState());
+				if (count != null)
+					count++;
+				else
+					count = 1;
+				stateStats.put(issue.getState(), count);
+			}
 		}
 		return stateStats;
 	}

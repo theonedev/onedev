@@ -23,7 +23,7 @@ public class ProjectCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		return OneDev.getInstance(ProjectManager.class).getPathMatchCriteria(
+		return OneDev.getInstance(ProjectManager.class).getPathMatchPredicate(
 				builder, root.join(Build.PROP_PROJECT, JoinType.INNER), projectPath);
 	}
 

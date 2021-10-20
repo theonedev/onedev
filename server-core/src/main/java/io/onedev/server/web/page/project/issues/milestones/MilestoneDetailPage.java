@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -90,7 +91,7 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 		
 		add(new MilestoneDueLabel("due", milestoneModel));
 		
-		add(new MilestoneActionsPanel("actions", milestoneModel, true) {
+		add(new MilestoneActionsPanel("actions", milestoneModel) {
 
 			@Override
 			protected void onDeleted(AjaxRequestTarget target) {
@@ -103,15 +104,27 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 
 			@Override
 			protected void onUpdated(AjaxRequestTarget target) {
-				setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone(), query));
+				setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getProject(), getMilestone(), query));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManageIssues(getProject()));
+				setVisible(SecurityUtils.canManageIssues(getProject()) && getProject().equals(getMilestone().getProject()));
 			}
 
+		});
+		add(new BookmarkablePageLink<Void>("create", NewMilestonePage.class, 
+				NewMilestonePage.paramsOf(getProject())));
+		
+		add(new WebMarkupContainer("inherited") {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getProject().equals(getMilestone().getProject()));
+			}
+			
 		});
 		
 		add(new MultilineLabel("description", getMilestone().getDescription()) {
@@ -128,7 +141,7 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 
 			@Override
 			protected Map<String, Integer> load() {
-				return getMilestone().getStateStats();
+				return getMilestone().getStateStats(getProject());
 			}
 			
 		}) {
@@ -136,7 +149,7 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 			@Override
 			protected Link<Void> newStateLink(String componentId, String state) {
 				String query = new IssueQuery(new StateCriteria(state)).toString();
-				PageParameters params = MilestoneDetailPage.paramsOf(getMilestone(), query);
+				PageParameters params = MilestoneDetailPage.paramsOf(getProject(), getMilestone(), query);
 				return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
 			}
 			
@@ -176,7 +189,7 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 				
 				@Override
 				public PageParameters newPageParameters(int currentPage) {
-					PageParameters params = paramsOf(getMilestone(), query);
+					PageParameters params = paramsOf(getProject(), getMilestone(), query);
 					params.add(PARAM_PAGE, currentPage+1);
 					return params;
 				}
@@ -215,8 +228,8 @@ public class MilestoneDetailPage extends ProjectPage implements ScriptIdentityAw
 		return new SiteAdministrator();
 	}
 	
-	public static PageParameters paramsOf(Milestone milestone, @Nullable String query) {
-		PageParameters params = paramsOf(milestone.getProject());
+	public static PageParameters paramsOf(Project project, Milestone milestone, @Nullable String query) {
+		PageParameters params = paramsOf(project);
 		params.add(PARAM_MILESTONE, milestone.getId());
 		if (query != null)
 			params.add(PARAM_QUERY, query);

@@ -179,7 +179,7 @@ public class IssueResource {
 			throw new InvalidParamException("Error parsing query", e);
 		}
     	
-    	return issueManager.query(null, parsedQuery, offset, count, false);
+    	return issueManager.query(parsedQuery, offset, count, false);
     }
 	
 	@Api(order=1000)

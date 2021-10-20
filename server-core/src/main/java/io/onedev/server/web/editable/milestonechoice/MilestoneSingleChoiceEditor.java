@@ -46,7 +46,7 @@ public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {
 				choices.addAll((List<Milestone>)ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), milestoneChoice.value()));
 			} else {
-				choices.addAll(Project.get().getSortedMilestones());
+				choices.addAll(Project.get().getSortedHierarchyMilestones());
 			}
 		} finally {
 			ComponentContext.pop();
@@ -54,7 +54,7 @@ public class MilestoneSingleChoiceEditor extends PropertyEditor<String> {
 		
 		Milestone selection;
 		if (getModelObject() != null)
-			selection = Project.get().getMilestone(getModelObject());
+			selection = Project.get().getHierarchyMilestone(getModelObject());
 		else
 			selection = null;
 		

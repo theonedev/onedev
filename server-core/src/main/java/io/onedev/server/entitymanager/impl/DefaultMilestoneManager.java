@@ -32,13 +32,19 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 
 	@Sessional
 	@Override
-	public Milestone find(String milestoneFQN) {
+	public Milestone findInHierarchy(String milestoneFQN) {
 		String projectName = StringUtils.substringBefore(milestoneFQN, ":");
 		Project project = projectManager.find(projectName);
-		if (project != null) 
-			return find(project, StringUtils.substringAfter(milestoneFQN, ":"));
-		else 
+		if (project != null) { 
+			String milestoneName = StringUtils.substringAfter(milestoneFQN, ":");
+			EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
+			criteria.add(Restrictions.in("project", project.getSelfAndAncestors()));
+			criteria.add(Restrictions.eq("name", milestoneName));
+			criteria.setCacheable(true);
+			return find(criteria);
+		} else { 
 			return null;
+		}
 	}
 	
 	@Transactional
@@ -52,10 +58,10 @@ public class DefaultMilestoneManager extends BaseEntityManager<Milestone> implem
 	
 	@Sessional
 	@Override
-	public Milestone find(Project project, String name) {
+	public Milestone findInHierarchy(Project project, String name) {
 		EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
-		criteria.add(Restrictions.eq("project", project));
-		criteria.add(Restrictions.ilike("name", name));
+		criteria.add(Restrictions.in("project", project.getSelfAndAncestors()));
+		criteria.add(Restrictions.eq("name", name));
 		criteria.setCacheable(true);
 		return find(criteria);
 	}
