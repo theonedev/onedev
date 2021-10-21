@@ -6,19 +6,19 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.behavior.JobMatchBehavior;
-import io.onedev.server.web.editable.annotation.JobMatch;
+import io.onedev.server.web.behavior.JobRequirementBehavior;
+import io.onedev.server.web.editable.annotation.JobRequirement;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 
 @SuppressWarnings("serial")
-public class JobMatchEditSupport implements EditSupport {
+public class JobRequirementEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(JobMatch.class) != null) {
+        if (propertyGetter.getAnnotation(JobRequirement.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
-	    		throw new RuntimeException("Annotation 'JobMatch' should be applied to property "
+	    		throw new RuntimeException("Annotation 'JobRequirement' should be applied to property "
 	    				+ "with type 'String'");
         	}
     		return new PropertyContext<String>(descriptor) {
@@ -29,9 +29,9 @@ public class JobMatchEditSupport implements EditSupport {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-					        String jobMatch = model.getObject();
-					        if (jobMatch != null)
-					        	return new Label(id, jobMatch);
+					        String jobRequirement = model.getObject();
+					        if (jobRequirement != null)
+					        	return new Label(id, jobRequirement);
 					        else
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						}
@@ -42,7 +42,7 @@ public class JobMatchEditSupport implements EditSupport {
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
 		        	return new StringPropertyEditor(componentId, descriptor, model)
-		        			.setInputAssist(new JobMatchBehavior());
+		        			.setInputAssist(new JobRequirementBehavior());
 				}
     			
     		};

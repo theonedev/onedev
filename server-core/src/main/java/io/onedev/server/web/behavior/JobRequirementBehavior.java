@@ -18,19 +18,19 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.ExplicitException;
 import io.onedev.server.OneDev;
-import io.onedev.server.job.match.JobMatch;
+import io.onedev.server.job.requirement.JobRequirementLexer;
+import io.onedev.server.job.requirement.JobRequirementParser;
+import io.onedev.server.job.requirement.JobRequirement;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.job.match.JobMatchLexer;
-import io.onedev.server.job.match.JobMatchParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class JobMatchBehavior extends ANTLRAssistBehavior {
+public class JobRequirementBehavior extends ANTLRAssistBehavior {
 
-	public JobMatchBehavior() {
-		super(JobMatchParser.class, "jobMatch", false);
+	public JobRequirementBehavior() {
+		super(JobRequirementParser.class, "jobRequirement", false);
 	}
 
 	@Override
@@ -43,17 +43,17 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> fields = Lists.newArrayList(Build.NAME_PROJECT, Build.NAME_JOB);
+							List<String> fields = Lists.newArrayList(Build.NAME_PROJECT);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							int operator = AntlrUtils.getLexerRule(JobMatchLexer.ruleNames, operatorName);							
-							if (operator == JobMatchLexer.Is) {
+							int operator = AntlrUtils.getLexerRule(JobRequirementLexer.ruleNames, operatorName);							
+							if (operator == JobRequirementLexer.Is) {
 								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 								Preconditions.checkState(fieldElements.size() == 1);
-								String fieldName = JobMatch.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = JobRequirement.getValue(fieldElements.get(0).getMatchedText());
 								if (fieldName.equals(Build.NAME_PROJECT)) {
 									if (!matchWith.contains("*") && !matchWith.contains("?"))
 										return SuggestionUtils.suggestProjects(matchWith);
@@ -82,9 +82,9 @@ public class JobMatchBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = JobMatch.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = JobRequirement.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					JobMatch.checkField(fieldName, AntlrUtils.getLexerRule(JobMatchLexer.ruleNames, suggestedLiteral));
+					JobRequirement.checkField(fieldName, AntlrUtils.getLexerRule(JobRequirementLexer.ruleNames, suggestedLiteral));
 				} catch (ExplicitException e) {
 					return null;
 				}

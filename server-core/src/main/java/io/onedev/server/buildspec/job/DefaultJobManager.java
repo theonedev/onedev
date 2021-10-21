@@ -96,6 +96,9 @@ import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
+import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.job.requirement.JobRequirement;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -118,6 +121,7 @@ import io.onedev.server.tasklog.JobLogManager;
 import io.onedev.server.util.CommitAware;
 import io.onedev.server.util.JobSecretAuthorizationContext;
 import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.interpolative.VariableInterpolator;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.schedule.SchedulableTask;
@@ -397,27 +401,67 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private JobExecutor getJobExecutor(Build build, TaskLogger jobLogger) {
-		if (!settingManager.getJobExecutors().isEmpty()) {
-			for (JobExecutor executor: settingManager.getJobExecutors()) {
-				if (executor.isApplicable(build))
-					return executor;
-			}
-			throw new ExplicitException("No applicable job executor");
-		} else {
-			jobLogger.log("No job executor defined, auto-discovering...");
-			List<JobExecutorDiscoverer> discoverers = new ArrayList<>(OneDev.getExtensions(JobExecutorDiscoverer.class));
-			discoverers.sort(Comparator.comparing(JobExecutorDiscoverer::getOrder));
-			for (JobExecutorDiscoverer discoverer: discoverers) {
-				JobExecutor jobExecutor = discoverer.discover(jobLogger);
-				if (jobExecutor != null) {
-					jobLogger.log("Discovered job executor type: " 
-							+ EditableUtils.getDisplayName(jobExecutor.getClass()));
-					jobExecutor.setName("auto-discovered");
-					return jobExecutor;
+	private boolean isApplicable(JobExecutor executor, Build build) {
+		if (executor.getJobRequirement() != null) {
+			JobRequirement requirement = JobRequirement.parse(executor.getJobRequirement());
+			Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
+					.getDescendants(build.getProject(), Sets.newHashSet(build.getCommitId()));
+			descendants.add(build.getCommitId());
+		
+			for (RefInfo ref: build.getProject().getBranchRefInfos()) {
+				if (descendants.contains(ref.getPeeledObj())) {
+					String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+					if (requirement.matches(new ProjectAndBranch(build.getProject(), branchName))) 
+						return true;
 				}
 			}
-			throw new ExplicitException("No job executor discovered");
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	private JobExecutor getJobExecutor(Build build, TaskLogger jobLogger) {
+		if (build.getJob().getJobExecutor() != null) {
+			JobExecutor jobExecutor = null;
+			for (JobExecutor each: settingManager.getJobExecutors()) {
+				if (each.getName().equals(build.getJob().getJobExecutor())) {
+					jobExecutor = each;
+					break;
+				} 
+			}
+			if (jobExecutor != null) {
+				if (!jobExecutor.isEnabled())
+					throw new ExplicitException("Specified job executor '" + jobExecutor.getName() + "' is disabled");
+				else if (!isApplicable(jobExecutor, build))
+					throw new ExplicitException("Specified job executor '" + jobExecutor.getName() + "' is not applicable for current job");
+				else
+					return jobExecutor;
+			} else {
+				throw new ExplicitException("Unable to find specified job executor '" + build.getJob().getJobExecutor() + "'");
+			}
+		} else {
+			if (!settingManager.getJobExecutors().isEmpty()) { 
+				for (JobExecutor executor: settingManager.getJobExecutors()) {
+					if (executor.isEnabled() && isApplicable(executor, build))
+						return executor;
+				}
+				throw new ExplicitException("No applicable job executor");
+			} else {
+				jobLogger.log("No job executor defined, auto-discovering...");
+				List<JobExecutorDiscoverer> discoverers = new ArrayList<>(OneDev.getExtensions(JobExecutorDiscoverer.class));
+				discoverers.sort(Comparator.comparing(JobExecutorDiscoverer::getOrder));
+				for (JobExecutorDiscoverer discoverer: discoverers) {
+					JobExecutor jobExecutor = discoverer.discover(jobLogger);
+					if (jobExecutor != null) {
+						jobLogger.log("Discovered job executor type: " 
+								+ EditableUtils.getDisplayName(jobExecutor.getClass()));
+						jobExecutor.setName("auto-discovered");
+						return jobExecutor;
+					}
+				}
+				throw new ExplicitException("No job executor discovered");
+			}
 		}
 	}
 

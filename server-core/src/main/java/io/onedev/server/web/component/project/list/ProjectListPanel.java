@@ -296,7 +296,7 @@ public class ProjectListPanel extends Panel {
 												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
-												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendents";
+												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendants";
 												break;
 											} else {
 												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());
@@ -556,7 +556,7 @@ public class ProjectListPanel extends Panel {
 												errorMessage = "Project manage privilege required to move '" + eachProject + "'";
 												break;
 											} else if (eachProject.isSelfOrAncestorOf(project)) {
-												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendents";
+												errorMessage = "Can not move project '" + eachProject + "' to be under itself or its descendants";
 												break;
 											} else {
 												Project projectWithSameName = getProjectManager().find(project, eachProject.getName());

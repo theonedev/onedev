@@ -1,7 +1,7 @@
-grammar JobMatch;
+grammar JobRequirement;
 
-jobMatch
-    : WS* (criteria|All) WS* EOF
+jobRequirement
+    : WS* criteria WS* EOF
     ;
 
 criteria
@@ -12,10 +12,6 @@ criteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
     | LParens WS* criteria WS* RParens #ParensCriteria
     ;
-
-All
-	: 'all'
-	;
 
 OnBranch
 	: 'on' WS+ 'branch'

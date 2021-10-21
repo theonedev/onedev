@@ -8,12 +8,12 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.util.validation.JobMatchValidator;
+import io.onedev.server.util.validation.JobRequirementValidator;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=JobMatchValidator.class) 
-public @interface JobMatch {
+@Constraint(validatedBy=JobRequirementValidator.class) 
+public @interface JobRequirement {
 	
     String message() default "";
 

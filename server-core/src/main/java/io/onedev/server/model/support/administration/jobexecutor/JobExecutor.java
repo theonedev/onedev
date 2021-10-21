@@ -14,22 +14,18 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.loader.ExtensionPoint;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.JobContext;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.util.ExceptionUtils;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.usage.Usage;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobMatch;
-import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.editable.annotation.JobRequirement;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @ExtensionPoint
 @Editable
@@ -41,7 +37,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String name;
 	
-	private String jobMatch = "all";
+	private String jobRequirement;
 	
 	private int cacheTTL = 7;
 	
@@ -64,23 +60,16 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, name="Job Match Condition", description="Jobs applicable for this executor must match "
-			+ "condition specified here")
-	@JobMatch
-	@NotEmpty
-	public String getJobMatch() {
-		return jobMatch;
+	@Editable(order=10000, name="Job Requirement", description="Optionally specify job requirement of this executor. "
+			+ "Only satisfied jobs can use this executor")
+	@JobRequirement
+	@NameOfEmptyValue("Can be used by any jobs")
+	public String getJobRequirement() {
+		return jobRequirement;
 	}
 
-	public void setJobMatch(String jobMatch) {
-		this.jobMatch = jobMatch;
-	}
-
-	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestJobNames(String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
-		Collections.sort(jobNames);
-		return SuggestionUtils.suggest(jobNames, matchWith);
+	public void setJobRequirement(String jobRequirement) {
+		this.jobRequirement = jobRequirement;
 	}
 
 	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. "
@@ -96,37 +85,33 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	public abstract void execute(String jobToken, JobContext context);
-
-	public final boolean isApplicable(Build build) {
-		return isEnabled() && io.onedev.server.job.match.JobMatch.parse(jobMatch).matches(build);
-	}
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (io.onedev.server.job.match.JobMatch.parse(jobMatch).isUsingProject(projectPath))
+		if (io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingProject(projectPath))
 			usage.add("job match" );
 		return usage;
 	}
 	
 	public void onRenameProject(String oldPath, String newPath) {
-		io.onedev.server.job.match.JobMatch parsedJobMatch = 
-				io.onedev.server.job.match.JobMatch.parse(this.jobMatch);
-		parsedJobMatch.onRenameProject(oldPath, newPath);
-		jobMatch = parsedJobMatch.toString();
+		io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
+				io.onedev.server.job.requirement.JobRequirement.parse(this.jobRequirement);
+		parsedJobRequirement.onRenameProject(oldPath, newPath);
+		jobRequirement = parsedJobRequirement.toString();
 	}
 
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (io.onedev.server.job.match.JobMatch.parse(jobMatch).isUsingUser(userName))
-			usage.add("job match" );
+		if (io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingUser(userName))
+			usage.add("job requirement" );
 		return usage;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		io.onedev.server.job.match.JobMatch parsedJobMatch = 
-				io.onedev.server.job.match.JobMatch.parse(this.jobMatch);
-		parsedJobMatch.onRenameUser(oldName, newName);
-		jobMatch = parsedJobMatch.toString();
+		io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
+				io.onedev.server.job.requirement.JobRequirement.parse(this.jobRequirement);
+		parsedJobRequirement.onRenameUser(oldName, newName);
+		jobRequirement = parsedJobRequirement.toString();
 	}
 	
 	protected List<String> getTrustCertContent() {

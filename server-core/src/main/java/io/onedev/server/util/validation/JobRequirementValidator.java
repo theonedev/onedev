@@ -4,14 +4,14 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.web.editable.annotation.JobMatch;
+import io.onedev.server.web.editable.annotation.JobRequirement;
 
-public class JobMatchValidator implements ConstraintValidator<JobMatch, String> {
+public class JobRequirementValidator implements ConstraintValidator<JobRequirement, String> {
 
 	private String message;
 	
 	@Override
-	public void initialize(JobMatch constaintAnnotation) {
+	public void initialize(JobRequirement constaintAnnotation) {
 		message = constaintAnnotation.message();
 	}
 
@@ -21,7 +21,7 @@ public class JobMatchValidator implements ConstraintValidator<JobMatch, String> 
 			return true;
 		} else {
 			try {
-				io.onedev.server.job.match.JobMatch.parse(value);
+				io.onedev.server.job.requirement.JobRequirement.parse(value);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();
@@ -30,7 +30,7 @@ public class JobMatchValidator implements ConstraintValidator<JobMatch, String> 
 					if (StringUtils.isNotBlank(e.getMessage()))
 						message = e.getMessage();
 					else
-						message = "Malformed job match";
+						message = "Malformed job requirement";
 				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();

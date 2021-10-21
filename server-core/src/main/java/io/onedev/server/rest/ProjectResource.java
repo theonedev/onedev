@@ -220,7 +220,7 @@ public class ProjectResource {
 			throw new UnauthorizedException("Not authorized to create root project");
 	
 		if (parent != null && project.isSelfOrAncestorOf(parent)) 
-			throw new ExplicitException("Can not use current or descendent project as parent");
+			throw new ExplicitException("Can not use current or descendant project as parent");
 		
 		Project projectWithSameName = projectManager.find(parent, project.getName());
 		if (projectWithSameName != null) {

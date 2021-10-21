@@ -101,7 +101,7 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 				Project project = getProject();
 				if (parent != null && project.isSelfOrAncestorOf(parent)) {
 					parentEditor.error(new Path(new PathNode.Named("parentPath")), 
-							"Can not use current or descendent project as parent");
+							"Can not use current or descendant project as parent");
 				} else {
 					project.setParent(parent);
 					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);

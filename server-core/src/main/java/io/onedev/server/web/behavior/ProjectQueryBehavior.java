@@ -60,7 +60,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							if (fieldElements.isEmpty()) {
 								if (operator == ProjectQueryLexer.ForksOf 
 										|| operator == ProjectQueryLexer.ChildrenOf 
-										|| operator == ProjectQueryLexer.DescendentsOf) {
+										|| operator == ProjectQueryLexer.DescendantsOf) {
 									return SuggestionUtils.suggestProjects(matchWith);
 								} else { 
 									return SuggestionUtils.suggestUsers(matchWith);
@@ -102,7 +102,7 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (childQuery) {
 			if (suggestedLiteral.equals(getRuleName(ProjectQueryParser.ChildrenOf))
-					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.DescendentsOf))
+					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.DescendantsOf))
 					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.Roots))) { 
 				return null;
 			}

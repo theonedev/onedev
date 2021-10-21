@@ -48,11 +48,11 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 		Path<Long> attribute = root.get(Build.PROP_ID);
 		Project project = issue.getProject();
 		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());
-		Collection<String> descendents = new HashSet<>();
+		Collection<String> descendants = new HashSet<>();
 		for (ObjectId each: getCommitInfoManager().getDescendants(project, fixCommits))
-			descendents.add(each.name());
+			descendants.add(each.name());
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendents);
+		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendants);
 		return builder.and(
 				builder.equal(root.get(Build.PROP_PROJECT), issue.getProject()),
 				inManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));

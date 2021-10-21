@@ -34,6 +34,7 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.k8shelper.CloneInfo;
 import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
 import io.onedev.server.buildspec.NamedElement;
@@ -43,17 +44,23 @@ import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.buildspec.param.ParamUtils;
 import io.onedev.server.buildspec.param.spec.ParamSpec;
 import io.onedev.server.buildspec.step.Step;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.job.requirement.JobRequirement;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.criteria.Criteria;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.RetryCondition;
 import io.onedev.server.web.editable.annotation.SuggestionProvider;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -77,6 +84,8 @@ public class Job implements NamedElement, Serializable, Validatable {
 	public static final String PROP_POST_BUILD_ACTIONS = "postBuildActions";
 	
 	private String name;
+	
+	private String jobExecutor;
 	
 	private List<Step> steps = new ArrayList<>();
 	
@@ -131,6 +140,36 @@ public class Job implements NamedElement, Serializable, Validatable {
 		return new ArrayList<>();
 	}
 
+	@Editable(order=200, description="Optionally specify executor to execute this job. Leave empty to "
+			+ "use any executor as long as its job requirement is satisfied")
+	@ChoiceProvider("getJobExecutorChoices")
+	@NameOfEmptyValue("Use Any Applicable Executor")
+	public String getJobExecutor() {
+		return jobExecutor;
+	}
+
+	public void setJobExecutor(String jobExecutor) {
+		this.jobExecutor = jobExecutor;
+	}
+
+	@SuppressWarnings("unused")
+	private static List<String> getJobExecutorChoices() {
+		List<String> applicableJobExecutors = new ArrayList<>();
+		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+		ProjectAndBranch projectAndBranch = new ProjectAndBranch(page.getProject(), page.getBlobIdent().revision);
+		for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
+			if (executor.isEnabled()) {
+				if (executor.getJobRequirement() == null) {
+					applicableJobExecutors.add(executor.getName());
+				} else {
+					if (JobRequirement.parse(executor.getJobRequirement()).matches(projectAndBranch))
+						applicableJobExecutors.add(executor.getName());
+				}
+			}
+		}
+		return applicableJobExecutors;
+	}
+	
 	@Editable(order=200, description="Steps will be executed serially on same node, sharing the same <a href='$docRoot/pages/concepts.md#job-workspace'>job workspace</a>")
 	@Size(min=1, max=1000, message="At least one step needs to be configured")
 	public List<Step> getSteps() {

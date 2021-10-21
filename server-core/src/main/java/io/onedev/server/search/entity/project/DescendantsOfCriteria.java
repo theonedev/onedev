@@ -10,13 +10,13 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.criteria.Criteria;
 
-public class DescendentsOfCriteria extends EntityCriteria<Project> {
+public class DescendantsOfCriteria extends EntityCriteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final Project project;
 	
-	public DescendentsOfCriteria(Project project) {
+	public DescendantsOfCriteria(Project project) {
 		this.project = project;
 	}
 
@@ -34,7 +34,7 @@ public class DescendentsOfCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public String toStringWithoutParens() {
-		return ProjectQuery.getRuleName(ProjectQueryLexer.DescendentsOf) + " " + Criteria.quote(project.getPath());
+		return ProjectQuery.getRuleName(ProjectQueryLexer.DescendantsOf) + " " + Criteria.quote(project.getPath());
 	}
 
 }
