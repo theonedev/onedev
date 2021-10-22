@@ -1,3 +1,8 @@
+# 5.2.0
+
+1. Job variable *@project_name@* should be replaced by *@project_path@*
+2. Job match condition in job executor is renamed as job requirement, and the criteria to match job name is no longer valid. Executor can now be specified when define the job.
+
 # 4.3.0
 
 1. Service definition is separated from job definition. Previous service defined in job will be moved out of job and take the name _\<job name\>-\<service name\>_ to avoid possible name conflicts. You either need to change it back to use original name in case there is no conflicts, or change your build script to use the new service name. 

@@ -98,3 +98,9 @@ The ability to submit and discuss issues over email makes OneDev a perfect custo
 Define permission schemes best suiting your development workflow. For instance, you may specify who can change particular source folder, who can assign issues, who can run release builds, or who can access build log, etc.
 
 ![Role](doc/images/role.png)
+
+### Project Hierarchy and Setting Inheritance
+
+Projects can be organized in a tree structure, and settings of parent project can be inherited by children. This saves a lot of efforts when manage a lot of projects with some common settings.
+
+![Child Projects](doc/images/child-projects.png)
