@@ -3183,6 +3183,16 @@ public class DataMigrator {
 				for (Element element: dom.getRootElement().elements())
 					migrateAttachmentLinks(element.element("content"), projectIds);
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					migrateAttachmentLinks(element.element("data").element("comment"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					migrateAttachmentLinks(element.element("data").element("comment"), projectIds);
+				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Groups.xml")) {
 				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
 				for (Element element: dom.getRootElement().elements())

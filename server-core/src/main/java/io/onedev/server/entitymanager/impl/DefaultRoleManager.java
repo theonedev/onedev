@@ -99,13 +99,27 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 	
 	@Transactional
 	public void setupDefaults() {
+		Role childCreator = new Role();
+		childCreator.setName("Child Creator");
+		childCreator.setCreateChildren(true);
+		childCreator.setCodePrivilege(CodePrivilege.READ);
+		ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+		allfieldsExcept.getExcludeFields().add("Assignees");
+		childCreator.setEditableIssueFields(allfieldsExcept);
+		
+		JobPrivilege jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		childCreator.getJobPrivileges().add(jobPrivilege);
+		
+		save(childCreator, null);
+		
 		Role codeWriter = new Role();
 		codeWriter.setName("Code Writer");
 		codeWriter.setCodePrivilege(CodePrivilege.WRITE);
 		codeWriter.setScheduleIssues(true);
 		codeWriter.setEditableIssueFields(new AllIssueFields());
 		
-		JobPrivilege jobPrivilege = new JobPrivilege();
+		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
 		jobPrivilege.setRunJob(true);
 		codeWriter.getJobPrivileges().add(jobPrivilege);
@@ -115,12 +129,12 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role codeReader = new Role();
 		codeReader.setName("Code Reader");
 		codeReader.setCodePrivilege(CodePrivilege.READ);
-		codeReader.setScheduleIssues(true);
-		codeReader.setEditableIssueFields(new AllIssueFields());
+		allfieldsExcept = new ExcludeIssueFields();
+		allfieldsExcept.getExcludeFields().add("Assignees");
+		codeReader.setEditableIssueFields(allfieldsExcept);
 		
 		jobPrivilege = new JobPrivilege();
 		jobPrivilege.setJobNames("*");
-		jobPrivilege.setAccessLog(true);
 		codeReader.getJobPrivileges().add(jobPrivilege);
 		
 		save(codeReader, null);
@@ -128,7 +142,7 @@ public class DefaultRoleManager extends BaseEntityManager<Role> implements RoleM
 		Role issueReporter = new Role();
 		issueReporter.setName("Issue Reporter");
 		issueReporter.setCodePrivilege(CodePrivilege.NONE);
-		ExcludeIssueFields allfieldsExcept = new ExcludeIssueFields();
+		allfieldsExcept = new ExcludeIssueFields();
 		allfieldsExcept.getExcludeFields().add("Assignees");
 		issueReporter.setEditableIssueFields(allfieldsExcept);
 		

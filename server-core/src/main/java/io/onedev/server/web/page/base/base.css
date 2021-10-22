@@ -595,3 +595,11 @@ table>thead>tr>th.minimum:last-child, table>tbody>tr>td.minimum:last-child {
     left: 1px;
     top: 1px;
 }
+
+.modal-backdrop ~ .modal-backdrop {
+	z-index: 1060;
+}
+
+.modal ~ .modal {
+	z-index: 1070;
+}

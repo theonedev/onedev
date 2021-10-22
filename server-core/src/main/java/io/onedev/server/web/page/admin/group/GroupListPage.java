@@ -178,12 +178,22 @@ public class GroupListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Is Admin")) {
+		columns.add(new AbstractColumn<Group, Void>(Model.of("Is Site Admin")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
 					IModel<Group> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().isAdministrator()));
+			}
+			
+		});
+		
+		columns.add(new AbstractColumn<Group, Void>(Model.of("Can Create Root Projects")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
+					IModel<Group> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().isCreateRootProjects()));
 			}
 			
 		});

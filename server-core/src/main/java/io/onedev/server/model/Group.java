@@ -62,7 +62,7 @@ public class Group extends AbstractEntity {
 		this.description = description;
 	}
 
-	@Editable(order=300, name="Site Administrator")
+	@Editable(order=300, name="Is Site Admin")
 	public boolean isAdministrator() {
 		return administrator;
 	}
@@ -76,7 +76,7 @@ public class Group extends AbstractEntity {
 		return !(boolean) EditContext.get().getInputValue("administrator");
 	}
 
-	@Editable(order=300, description="Whether or not to allow creating root projects (project without parent)")
+	@Editable(order=300, name="Can Create Root Projects", description="Whether or not to allow creating root projects (project without parent)")
 	@ShowCondition("isAdministratorDisabled")
 	public boolean isCreateRootProjects() {
 		return createRootProjects;
