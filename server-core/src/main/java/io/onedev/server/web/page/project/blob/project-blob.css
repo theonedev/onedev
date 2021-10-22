@@ -37,7 +37,7 @@
 }
 
 .floating.get-code {
-	max-width: 480px !important;
+	width: 480px !important;
 }
 .floating.get-code .download {
 	padding: 0 2.25rem 2rem 2.25rem; 

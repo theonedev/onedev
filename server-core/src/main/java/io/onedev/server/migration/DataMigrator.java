@@ -17,7 +17,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
@@ -3109,6 +3112,102 @@ public class DataMigrator {
 				String newFileName = file.getName().replace("Checkstyle", "Problem");
 				dom.writeToFile(new File(dataDir, newFileName), false);
 				FileUtils.deleteFile(file);
+			}
+		}
+	}
+	
+	private void migrateAttachmentLinks(@Nullable Element element, Map<String, String> projectIds) {
+		if (element != null) {
+			String content = element.getText();
+			Pattern pattern = Pattern.compile("/projects/([\\w-\\.]+)/attachment/");
+			Matcher matcher = pattern.matcher(content);
+			StringBuffer buffer = new StringBuffer();
+			
+			while (matcher.find()) {
+				String projectName = matcher.group(1);
+				String projectId = projectIds.get(projectName);
+				if (projectId != null) 
+					matcher.appendReplacement(buffer, "/projects/" + projectId + "/attachment/");
+				else
+					matcher.appendReplacement(buffer, matcher.group());
+			}
+			
+			matcher.appendTail(buffer);
+			element.setText(buffer.toString());
+		}
+	}
+	
+	private void migrate68(File dataDir, Stack<Integer> versions) {
+		Map<String, String> projectIds = new HashMap<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					projectIds.put(element.elementTextTrim("name"), element.elementTextTrim("id"));
+			}
+		}
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.addElement("codeManagementEnabled").setText("true");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					migrateAttachmentLinks(element.element("description"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					migrateAttachmentLinks(element.element("content"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					migrateAttachmentLinks(element.element("description"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					migrateAttachmentLinks(element.element("content"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					migrateAttachmentLinks(element.element("content"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					migrateAttachmentLinks(element.element("content"), projectIds);
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Groups.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.addElement("createRootProjects").setText("false");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Roles.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.addElement("createChildren").setText("false");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedXmlDoc dom = VersionedXmlDoc.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("JOB_EXECUTORS")) {
+						Element valueElement = element.element("value");
+						for (Element executorElement: valueElement.elements()) {
+							Element jobMatchElement = executorElement.element("jobMatch");
+							if (jobMatchElement.getTextTrim().equals("all"))
+								jobMatchElement.detach();
+							else 
+								jobMatchElement.setName("jobRequirement");
+						}
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}

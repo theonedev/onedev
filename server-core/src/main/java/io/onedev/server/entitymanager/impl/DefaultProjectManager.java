@@ -346,8 +346,11 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     public Project find(String path) {
     	List<String> names = Splitter.on("/").omitEmptyStrings().trimResults().splitToList(path);
     	Project project = null;
-    	for (String name: names) 
+    	for (String name: names) {
     		project = find(project, name);
+    		if (project == null)
+    			break;
+    	}
     	return project;
     }
 

@@ -1175,4 +1175,45 @@ public class BuildSpec implements Serializable, Validatable {
 		}			
 	}	
 	
+	@SuppressWarnings("unused")
+	private void migrate13(VersionedYamlDoc doc, Stack<Integer> versions) {
+		for (NodeTuple specTuple: doc.getValue()) {
+			String specTupleKey = ((ScalarNode)specTuple.getKeyNode()).getValue();
+			if (specTupleKey.equals("jobs")) {
+				SequenceNode jobsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node jobsNodeItem: jobsNode.getValue()) {
+					MappingNode jobNode = (MappingNode) jobsNodeItem;
+					for (Iterator<NodeTuple> itJobTuple = jobNode.getValue().iterator(); itJobTuple.hasNext();) {
+						NodeTuple jobTuple = itJobTuple.next();
+						String jobTupleKey = ((ScalarNode)jobTuple.getKeyNode()).getValue();
+						if (jobTupleKey.equals("projectDependencies")) {
+							SequenceNode projectDependenciesNode = (SequenceNode) jobTuple.getValueNode();
+							for (Node projectDependenciesItem: projectDependenciesNode.getValue()) {
+								MappingNode projectDependencyNode = (MappingNode) projectDependenciesItem;
+								for (Iterator<NodeTuple> itProjectDependencyTuple = projectDependencyNode.getValue().iterator(); 
+										itProjectDependencyTuple.hasNext();) {
+									NodeTuple projectDependencyTuple = itProjectDependencyTuple.next();
+									ScalarNode projectDependencyTupleKeyNode = ((ScalarNode)projectDependencyTuple.getKeyNode());
+									if (projectDependencyTupleKeyNode.getValue().equals("projectName"))
+										projectDependencyTupleKeyNode.setValue("projectPath");
+								}								
+							}
+						}
+					}
+				}
+			} else if (specTupleKey.equals("imports")) {
+				SequenceNode importsNode = (SequenceNode) specTuple.getValueNode();
+				for (Node importsNodeItem: importsNode.getValue()) {
+					MappingNode importNode = (MappingNode) importsNodeItem;
+					for (Iterator<NodeTuple> itImportTuple = importNode.getValue().iterator(); itImportTuple.hasNext();) {
+						NodeTuple importTuple = itImportTuple.next();
+						ScalarNode importTupleKeyNode = (ScalarNode)importTuple.getKeyNode();
+						if (importTupleKeyNode.getValue().equals("projectName"))
+							importTupleKeyNode.setValue("projectPath");
+					}
+				}
+			}
+		}
+	}
+	
 }
