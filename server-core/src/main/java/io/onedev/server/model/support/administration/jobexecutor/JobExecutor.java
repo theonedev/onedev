@@ -94,10 +94,12 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	public void onRenameProject(String oldPath, String newPath) {
-		io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
-				io.onedev.server.job.requirement.JobRequirement.parse(this.jobRequirement);
-		parsedJobRequirement.onRenameProject(oldPath, newPath);
-		jobRequirement = parsedJobRequirement.toString();
+		if (jobRequirement != null) {
+			io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
+					io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement);
+			parsedJobRequirement.onRenameProject(oldPath, newPath);
+			jobRequirement = parsedJobRequirement.toString();
+		}
 	}
 
 	public Usage onDeleteUser(String userName) {
