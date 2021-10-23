@@ -19,9 +19,6 @@ import io.onedev.server.model.support.build.actionauthorization.ActionAuthorizat
 import io.onedev.server.model.support.build.actionauthorization.CloseMilestoneAuthorization;
 import io.onedev.server.model.support.build.actionauthorization.CreateTagAuthorization;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.match.Matcher;
-import io.onedev.server.util.match.StringMatcher;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValuesResolution;
@@ -119,16 +116,6 @@ public class ProjectBuildSetting implements Serializable {
 		for (NamedBuildQuery namedQuery: getNamedQueries(true)) {
 			if (namedQuery.getName().equals(name))
 				return namedQuery;
-		}
-		return null;
-	}
-	
-	@Nullable
-	public String getDefaultFixedIssueQuery(String jobName) {
-		Matcher matcher = new StringMatcher();
-		for (DefaultFixedIssueFilter each: getDefaultFixedIssueFilters()) {
-			if (PatternSet.parse(each.getJobNames()).matches(matcher, jobName))
-				return each.getIssueQuery();
 		}
 		return null;
 	}

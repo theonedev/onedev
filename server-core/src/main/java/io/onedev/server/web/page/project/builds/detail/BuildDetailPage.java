@@ -46,7 +46,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
@@ -394,10 +393,9 @@ public abstract class BuildDetailPage extends ProjectPage
 
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								ProjectBuildSetting buildSetting = getProject().getBuildSetting();
 								return new ViewStateAwarePageLink<Void>(
 										linkId, pageClass, FixedIssuesPage.paramsOf(getBuild(), 
-										buildSetting.getDefaultFixedIssueQuery(getBuild().getJobName())));
+										getProject().getHierarchyDefaultFixedIssueQuery(getBuild().getJobName())));
 							}
 							
 						};

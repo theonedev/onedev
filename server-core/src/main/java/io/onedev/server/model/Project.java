@@ -115,6 +115,7 @@ import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.BuildPreservation;
+import io.onedev.server.model.support.build.DefaultFixedIssueFilter;
 import io.onedev.server.model.support.build.JobSecret;
 import io.onedev.server.model.support.build.ProjectBuildSetting;
 import io.onedev.server.model.support.build.actionauthorization.ActionAuthorization;
@@ -135,6 +136,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
+import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatch.UserMatch;
@@ -1173,11 +1175,28 @@ public class Project extends AbstractEntity {
 		return actionAuthorizations;
 	}
 	
+	public List<DefaultFixedIssueFilter> getHierarchyDefaultFixedIssueFilters() {
+		List<DefaultFixedIssueFilter> defaultFixedIssueFilters = new ArrayList<>(getBuildSetting().getDefaultFixedIssueFilters());
+		if (getParent() != null)
+			defaultFixedIssueFilters.addAll(getParent().getHierarchyDefaultFixedIssueFilters());
+		return defaultFixedIssueFilters;
+	}
+	
 	public List<BuildPreservation> getHierarchyBuildPreservations() {
 		List<BuildPreservation> buildPreservations = new ArrayList<>(getBuildSetting().getBuildPreservations());
 		if (getParent() != null)
 			buildPreservations.addAll(getParent().getHierarchyBuildPreservations());
 		return buildPreservations;
+	}
+	
+	@Nullable
+	public String getHierarchyDefaultFixedIssueQuery(String jobName) {
+		Matcher matcher = new StringMatcher();
+		for (DefaultFixedIssueFilter each: getHierarchyDefaultFixedIssueFilters()) {
+			if (PatternSet.parse(each.getJobNames()).matches(matcher, jobName))
+				return each.getIssueQuery();
+		}
+		return null;
 	}
 	
 	public ProjectPullRequestSetting getPullRequestSetting() {
