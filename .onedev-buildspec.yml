@@ -1,10 +1,12 @@
-version: 9
+version: 13
 jobs:
 - name: CI
   steps:
   - !CheckoutStep
     name: checkout
     cloneCredential: !DefaultCredential {}
+    withLfs: false
+    withSubmodules: true
     cloneDepth: 1
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
@@ -35,8 +37,8 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  cpuRequirement: 250m
-  memoryRequirement: 128m
+  cpuRequirement: 250
+  memoryRequirement: 128
   caches:
   - key: maven-cache
     path: /root/.m2/repository
@@ -47,6 +49,8 @@ jobs:
     name: checkout
     cloneCredential: !HttpCredential
       accessTokenSecret: onedev-token
+    withLfs: false
+    withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: 'detect build version '
@@ -122,9 +126,9 @@ jobs:
       | jq '.id')
     - ''
     - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
-      Downloads\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/artifacts\n\n##
-      Change Log\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
-      Incompatibilities\n\nhttps://code.onedev.io/projects/onedev-server/builds/@build_number@/markdown-reports/Incompatibilities/doc/incompatibilities.md\"}"
+      Downloads\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/artifacts\n\n##
+      Change Log\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
+      Incompatibilities\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/markdown-reports/Incompatibilities/doc/incompatibilities.md\"}"
     - ''
     - 'acceptHeader="Accept: application/vnd.github.v3+json"'
     - if [ "$releaseId" == "null" ]; then
@@ -156,8 +160,8 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  cpuRequirement: 250m
-  memoryRequirement: 128m
+  cpuRequirement: 250
+  memoryRequirement: 128
   caches:
   - key: maven-cache
     path: /root/.m2/repository
@@ -167,6 +171,8 @@ jobs:
   - !CheckoutStep
     name: 'checkout '
     cloneCredential: !DefaultCredential {}
+    withLfs: false
+    withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
     name: sync
@@ -184,6 +190,6 @@ jobs:
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
-  cpuRequirement: 250m
-  memoryRequirement: 128m
+  cpuRequirement: 250
+  memoryRequirement: 128
   timeout: 3600
