@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Splitter;
@@ -63,6 +65,7 @@ public abstract class JobExecutor implements Serializable {
 	@Editable(order=10000, name="Job Requirement", description="Optionally specify job requirement of this executor. "
 			+ "Only satisfied jobs can use this executor")
 	@JobRequirement
+	@Nullable
 	@NameOfEmptyValue("Can be used by any jobs")
 	public String getJobRequirement() {
 		return jobRequirement;
@@ -88,8 +91,10 @@ public abstract class JobExecutor implements Serializable {
 	
 	public Usage onDeleteProject(String projectPath) {
 		Usage usage = new Usage();
-		if (io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingProject(projectPath))
-			usage.add("job match" );
+		if (jobRequirement != null 
+				&& io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingProject(projectPath)) {
+			usage.add("job requirement" );
+		}
 		return usage;
 	}
 	
@@ -104,16 +109,20 @@ public abstract class JobExecutor implements Serializable {
 
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingUser(userName))
+		if (jobRequirement != null 
+				&& io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement).isUsingUser(userName)) {
 			usage.add("job requirement" );
+		}
 		return usage;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
-				io.onedev.server.job.requirement.JobRequirement.parse(this.jobRequirement);
-		parsedJobRequirement.onRenameUser(oldName, newName);
-		jobRequirement = parsedJobRequirement.toString();
+		if (jobRequirement != null) {
+			io.onedev.server.job.requirement.JobRequirement parsedJobRequirement = 
+					io.onedev.server.job.requirement.JobRequirement.parse(jobRequirement);
+			parsedJobRequirement.onRenameUser(oldName, newName);
+			jobRequirement = parsedJobRequirement.toString();
+		}
 	}
 	
 	protected List<String> getTrustCertContent() {

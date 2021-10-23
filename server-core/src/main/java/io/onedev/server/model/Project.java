@@ -1122,7 +1122,7 @@ public class Project extends AbstractEntity {
 		this.codeComments = codeComments;
 	}
 	
-	@Editable(order=200, name="Code Management", description="Whether or not to enable code management for the project")
+	@Editable(order=250, name="Code Management", description="Whether or not to enable code management for the project")
 	public boolean isCodeManagementEnabled() {
 		return codeManagementEnabled;
 	}
