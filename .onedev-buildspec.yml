@@ -186,7 +186,7 @@ jobs:
   triggers:
   - !BranchUpdateTrigger
     branches: main
-    projects: onedev-server
+    projects: onedev/server
   retryCondition: never
   maxRetries: 3
   retryDelay: 30
