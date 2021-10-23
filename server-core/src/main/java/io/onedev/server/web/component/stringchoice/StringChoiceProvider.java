@@ -10,6 +10,8 @@ import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.Response;
@@ -56,11 +58,16 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 	public void query(String term, int page, Response<String> response) {
 		List<String> matched;
 		if (StringUtils.isNotBlank(term)) {
-			matched = new ArrayList<>();
-			for (Map.Entry<String, String> entry: choicesModel.getObject().entrySet()) {
-				if (entry.getValue().toLowerCase().contains(term.toLowerCase())) 
-					matched.add(entry.getKey());
-			}
+			Map<String, String> choices = choicesModel.getObject();
+			matched =  MatchScoreUtils.filterAndSort(choices.keySet(), new MatchScoreProvider<String>() {
+
+				@Override
+				public double getMatchScore(String object) {
+					return MatchScoreUtils.getMatchScore(choices.get(object), term);
+				}
+				
+			});
+			
 			if (tagsMode && !matched.contains(term))
 				matched.add(term);
 		} else {

@@ -41,6 +41,10 @@ abstract class ForkOptionPanel extends Panel {
 		super(id);
 		this.projectModel = projectModel;
 	}
+	
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
 
 	@Override
 	protected void onInitialize() {
@@ -50,11 +54,25 @@ abstract class ForkOptionPanel extends Panel {
 		project.setForkedFrom(getProject());
 		project.setName(getProject().getName());
 		project.setIssueManagementEnabled(false);
+
+		ParentBean parentBean = new ParentBean();
+		
+		String userName = SecurityUtils.getUser().getName();
+		Project parent = getProjectManager().find(userName);
+		if (parent != null) {
+			if (SecurityUtils.canCreateChildren(parent))
+				parentBean.setParent(parent);
+		} else if (SecurityUtils.canCreateRootProjects()) {
+			parent = new Project();
+			parent.setName(userName);
+			parent.setCodeManagementEnabled(false);
+			parent.setIssueManagementEnabled(false);
+			getProjectManager().create(parent);
+			parentBean.setParent(parent);
+		}
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
-		
-		ParentBean parentBean = new ParentBean();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
 				PROP_CODE_MANAGEMENT_ENABLED, PROP_ISSUE_MANAGEMENT_ENABLED);

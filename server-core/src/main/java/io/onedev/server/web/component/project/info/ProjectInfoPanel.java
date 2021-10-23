@@ -58,7 +58,6 @@ public abstract class ProjectInfoPanel extends Panel {
 		forksLink.add(new Label("label", getProject().getForks().size() + " forks"));
 		add(forksLink);
 		
-		boolean canReadCode = SecurityUtils.canReadCode(getProject());
         add(new ModalLink("forkNow") {
 			
 			@Override
@@ -84,7 +83,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(canReadCode));
+		}.setVisible(SecurityUtils.canReadCode(getProject()) && SecurityUtils.canCreateProjects()));
 		
 		if (getProject().getDescription() != null)
 			add(new MarkdownViewer("description", Model.of(getProject().getDescription()), null));

@@ -379,6 +379,14 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     		}
     		project = child;
     	}
+    	
+    	Project parent = project.getParent();
+    	while (parent != null && parent.isNew()) {
+    		parent.setCodeManagementEnabled(false);
+    		parent.setIssueManagementEnabled(false);
+    		parent = parent.getParent();
+    	}
+    	
     	return project;
     }
     
