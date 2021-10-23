@@ -1,8 +1,9 @@
 # 5.2.0
 
 1. User by default is not able to create/fork projects now. To allow it, add the user to a group with *create root projects* permission or grant the user *create children* permission for desired projects. 
-2. Job variable *@project_name@* should be replaced by *@project_path@*.
-3. Job match condition in job executor is renamed as job requirement, and the criteria to match job name is no longer valid. Executor can now be specified when define the job.
+2. URL of project is changed from *http(s)://\<onedev-server\>/projects/\<project name\>* to *http(s)://\<onedev-server\>/projects/\<project id\>*. This only affects web UI, clone url and REStful api url is not changed.
+3. Job variable *@project_name@* should be replaced by *@project_path@*.
+4. Job match condition in job executor is renamed as job requirement, and the criteria to match job name is no longer valid. Executor can now be specified when define the job.
 
 # 4.3.0
 
