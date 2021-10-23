@@ -1,4 +1,4 @@
-> :warning: **NOTE:** We develop OneDev at <a href="https://code.onedev.io/projects/onedev-server">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there
+> :warning: **NOTE:** We develop OneDev at <a href="https://code.onedev.io/projects/160">code.onedev.io</a> for sake of dogfooding. All issues and pull requests should be created there
 
 <div align="center">
 <h1>All-In-One DevOps Platform</h1>
@@ -6,10 +6,10 @@
 With Git Management, Issue Tracking, and CI/CD. Simple yet Powerful.
 
 <div style="font-size: 18px;">
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/quickstart.md">5-minute Quickstart</a> 
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/installation-guide.md">Installation Guide</a> 
-| <a href="https://code.onedev.io/projects/onedev-manual/blob/main/pages/tutorials.md">Tutorials</a>
-| <a href="https://code.onedev.io/projects/onedev-manual/blob">All Documentations</a> |
+| <a href="https://code.onedev.io/projects/162/blob/main/pages/quickstart.md">5-minute Quickstart</a> 
+| <a href="https://code.onedev.io/projects/162/blob/main/pages/installation-guide.md">Installation Guide</a> 
+| <a href="https://code.onedev.io/projects/162/blob/main/pages/tutorials.md">Tutorials</a>
+| <a href="https://code.onedev.io/projects/162/blob">All Documentations</a> |
 </div>
 
 <p style="margin-bottom: 20px;">
