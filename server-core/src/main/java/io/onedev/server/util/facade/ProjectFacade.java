@@ -20,6 +20,7 @@ public class ProjectFacade extends EntityFacade {
 		return name;
 	}
 
+	@Nullable
 	public Long getParentId() {
 		return parentId;
 	}

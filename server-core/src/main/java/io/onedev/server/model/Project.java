@@ -650,7 +650,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ProjectFacade getFacade() {
-		return new ProjectFacade(getId(), getName(), getParent()!=null? getParent().getId(): null);
+		return new ProjectFacade(getId(), getName(), Project.idOf(getParent()));
 	}
 	
 	/**

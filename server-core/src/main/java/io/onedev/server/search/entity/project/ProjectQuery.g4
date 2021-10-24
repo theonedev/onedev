@@ -7,8 +7,8 @@ query
     ;
 
 criteria
-	: operator=(Roots|OwnedByMe|OwnedByNone) #OperatorCriteria
-	| operator=(OwnedBy|ForksOf|ChildrenOf|DescendantsOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	: operator=(Roots|ForkRoots|OwnedByMe|OwnedByNone) #OperatorCriteria
+	| operator=(OwnedBy|ForksOf|ChildrenOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|Contains|IsUntil|IsSince) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -60,12 +60,12 @@ Roots
 	: 'roots'
 	;
 	
-ChildrenOf
-	: 'children' WS+ 'of'
+ForkRoots
+	: 'fork' WS+ 'roots'
 	;
 	
-DescendantsOf
-	: 'descendants' WS+ 'of'
+ChildrenOf
+	: 'children' WS+ 'of'
 	;
 	
 And

@@ -92,6 +92,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 					public EntityCriteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						if (ctx.operator.getType() == ProjectQueryLexer.Roots)
 							return new RootsCriteria();
+						else if (ctx.operator.getType() == ProjectQueryLexer.ForkRoots)
+							return new ForkRootsCriteria();
 						else if (ctx.operator.getType() == ProjectQueryLexer.OwnedByMe)
 							return new OwnedByMeCriteria();
 						else
@@ -101,11 +103,9 @@ public class ProjectQuery extends EntityQuery<Project> {
 					public EntityCriteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.operator.getType() == ProjectQueryLexer.ChildrenOf)
-							return new ChildrenOfCriteria(getProject(value));
-						else if (ctx.operator.getType() == ProjectQueryLexer.DescendantsOf)
-							return new DescendantsOfCriteria(getProject(value));
+							return new ChildrenOfCriteria(value);
 						else if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
-							return new ForksOfCriteria(getProject(value));
+							return new ForksOfCriteria(value);
 						else
 							return new OwnedByCriteria(getUser(value));
 					}

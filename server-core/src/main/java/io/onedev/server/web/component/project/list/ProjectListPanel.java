@@ -94,7 +94,7 @@ public class ProjectListPanel extends Panel {
 		protected ProjectQuery load() {
 			ProjectQuery baseQuery;
 			if (getParentProject() != null)
-				baseQuery = new ProjectQuery(new ChildrenOfCriteria(getParentProject()));
+				baseQuery = new ProjectQuery(new ChildrenOfCriteria(getParentProject().getPath()));
 			else
 				baseQuery = new ProjectQuery();
 			return parse(queryStringModel.getObject(), baseQuery);

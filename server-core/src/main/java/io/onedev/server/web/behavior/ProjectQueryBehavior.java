@@ -58,10 +58,11 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = ProjectQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == ProjectQueryLexer.ForksOf 
-										|| operator == ProjectQueryLexer.ChildrenOf 
-										|| operator == ProjectQueryLexer.DescendantsOf) {
-									return SuggestionUtils.suggestProjects(matchWith);
+								if (operator == ProjectQueryLexer.ForksOf || operator == ProjectQueryLexer.ChildrenOf) {
+									if (!matchWith.contains("*"))
+										return SuggestionUtils.suggestProjects(matchWith);
+									else
+										return null;
 								} else { 
 									return SuggestionUtils.suggestUsers(matchWith);
 								}
@@ -102,7 +103,6 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (childQuery) {
 			if (suggestedLiteral.equals(getRuleName(ProjectQueryParser.ChildrenOf))
-					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.DescendantsOf))
 					|| suggestedLiteral.equals(getRuleName(ProjectQueryParser.Roots))) { 
 				return null;
 			}
@@ -140,7 +140,13 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
 					}
 				} else {
-					hints.add("Use '\\' to escape quotes");
+					Element operatorElement = terminalExpect.getState()
+							.findMatchedElementsByLabel("operator", true).iterator().next();
+					int type = operatorElement.getMatchedTokens().iterator().next().getType();
+					if (type == ProjectQueryLexer.ForksOf || type == ProjectQueryLexer.ChildrenOf) 
+						hints.add("Use '**', '*' or '?' for <a href='" + OneDev.getInstance().getDocRoot() + "/pages/path-wildcard.md' target='_blank'>path wildcard match</a>");
+					else
+						hints.add("Use '\\' to escape quotes");
 				}
 			}
 		} 
