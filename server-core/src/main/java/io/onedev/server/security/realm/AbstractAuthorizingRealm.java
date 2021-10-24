@@ -15,8 +15,6 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -35,8 +33,6 @@ import io.onedev.server.security.permission.UserAdministration;
 
 public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractAuthorizingRealm.class);
-	
     protected final UserManager userManager;
     
     protected final GroupManager groupManager;
@@ -87,14 +83,9 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 		        	permissions.add(new UserAdministration(user));
 		           	for (Group group: user.getGroups())
 		           		permissions.addAll(getGroupPermissions(group, user));
-		           	String defaultGroupName = settingManager.getSecuritySetting().getDefaultLoginGroup();
-		           	if (defaultGroupName != null) {
-		           		Group group = groupManager.find(defaultGroupName);
-		           		if (group == null) 
-		           			logger.error("Unable to find default group for sign-in user: " + defaultGroupName);
-		           		else
-		           			permissions.addAll(getGroupPermissions(group, user));
-		           	}
+		           	Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+	           		if (defaultLoginGroup != null) 
+	           			permissions.addAll(getGroupPermissions(defaultLoginGroup, user));
 		           	
 		        	for (UserAuthorization authorization: user.getAuthorizations()) 
     					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));

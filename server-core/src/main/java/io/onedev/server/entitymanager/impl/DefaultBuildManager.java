@@ -50,6 +50,7 @@ import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
@@ -111,6 +112,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	
 	private final TransactionManager transactionManager;
 	
+	private final SettingManager settingManager;
+	
 	private final Map<Long, BuildFacade> builds = new HashMap<>();
 	
 	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
@@ -125,7 +128,8 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
 			StorageManager storageManager, ProjectManager projectManager, 
-			SessionManager sessionManager, TransactionManager transactionManager) {
+			SessionManager sessionManager, TransactionManager transactionManager, 
+			SettingManager settingManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -134,6 +138,7 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		this.taskScheduler = taskScheduler;
 		this.sessionManager = sessionManager;
 		this.transactionManager = transactionManager;
+		this.settingManager = settingManager;
 	}
 
 	@Transactional
@@ -891,23 +896,6 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		}
 	}
 	
-	private void populateAccessibleJobNames(Map<Project, Collection<String>> accessibleJobNames, 
-			Map<Long, Collection<String>> availableJobNames, Project project, Role role) {
-		Collection<String> availableJobNamesOfProject = availableJobNames.get(project.getId());
-		if (availableJobNamesOfProject != null) {
-			for (String jobName: availableJobNamesOfProject) {
-				if (role.implies(new JobPermission(jobName, new AccessBuild()))) {
-					Collection<String> accessibleJobNamesOfProject = accessibleJobNames.get(project);
-					if (accessibleJobNamesOfProject == null) {
-						accessibleJobNamesOfProject = new HashSet<>();
-						accessibleJobNames.put(project, accessibleJobNamesOfProject);
-					}
-					accessibleJobNamesOfProject.add(jobName);
-				}
-			}
-		}
-	}
-	
 	private void populateAccessibleJobNames(Collection<String> accessibleJobNames, 
 			Collection<String> availableJobNames, Role role) {
 		for (String jobName: availableJobNames) {
@@ -921,28 +909,11 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 		jobNamesLock.readLock().lock();
 		try {
 			Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
-			User user = SecurityUtils.getUser();
-			
-			if (SecurityUtils.isAdministrator()) {
-				for (Map.Entry<Long, Collection<String>> entry: jobNames.entrySet())
-					accessibleJobNames.put(projectManager.load(entry.getKey()), new HashSet<>(entry.getValue()));
-			} else {
-				if (user != null) {
-					for (UserAuthorization authorization: user.getAuthorizations()) {
-						populateAccessibleJobNames(accessibleJobNames, jobNames, 
-								authorization.getProject(), authorization.getRole());
-					}
-					for (Group group: user.getGroups()) {
-						for (GroupAuthorization authorization: group.getAuthorizations()) {
-							populateAccessibleJobNames(accessibleJobNames, jobNames, 
-									authorization.getProject(), authorization.getRole());
-						}
-					}
-				}
-				for (Project project: projectManager.query()) {
-					if (project.getDefaultRole() != null)
-						populateAccessibleJobNames(accessibleJobNames, jobNames, project, project.getDefaultRole());
-				}
+			for (Long projectId: jobNames.keySet()) {
+				Project project = projectManager.load(projectId);
+				Collection<String> accessibleJobNamsOfProject = getAccessibleJobNames(project);
+				if (!accessibleJobNamsOfProject.isEmpty())
+					accessibleJobNames.put(project, accessibleJobNamsOfProject); 
 			}
 			return accessibleJobNames;
 		} finally {
@@ -963,22 +934,34 @@ public class DefaultBuildManager extends BaseEntityManager<Build> implements Bui
 					User user = SecurityUtils.getUser();
 					if (user != null) {
 						for (UserAuthorization authorization: user.getAuthorizations()) {
-							if (project.equals(authorization.getProject())) {
+							if (authorization.getProject().isSelfOrAncestorOf(project)) {
 								populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
 										authorization.getRole());
 							}
 						}
-						for (Group group: user.getGroups()) {
+						
+						Set<Group> groups = new HashSet<>(user.getGroups());
+						Group defaultLoginGroup = settingManager.getSecuritySetting().getDefaultLoginGroup();
+						if (defaultLoginGroup != null) 
+							groups.add(defaultLoginGroup);
+						
+						for (Group group: groups) {
 							for (GroupAuthorization authorization: group.getAuthorizations()) {
-								if (project.equals(authorization.getProject())) {
+								if (authorization.getProject().isSelfOrAncestorOf(project)) {
 									populateAccessibleJobNames(accessibleJobNames, availableJobNames, 
 											authorization.getRole());
 								}
 							}
 						}
 					}
-					if (project.getDefaultRole() != null)
-						populateAccessibleJobNames(accessibleJobNames, availableJobNames, project.getDefaultRole());
+					
+					Project current = project;
+					do {
+						Role defaultRole = current.getDefaultRole();
+						if (defaultRole != null)
+							populateAccessibleJobNames(accessibleJobNames, availableJobNames, defaultRole);
+						current = current.getParent();
+					} while (current != null);
 				}
 			}
 			return accessibleJobNames;

@@ -2,6 +2,8 @@ package io.onedev.server.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,7 @@ import io.onedev.commons.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
@@ -162,7 +165,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 					if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
 						return true;
 				}
-				for (Group group: user.getGroups()) {
+				
+				Set<Group> groups = new HashSet<>(user.getGroups());
+				Group defaultLoginGroup = OneDev.getInstance(SettingManager.class)
+						.getSecuritySetting().getDefaultLoginGroup();
+				if (defaultLoginGroup != null)
+					groups.add(defaultLoginGroup);
+				
+				for (Group group: groups) {
 					for (GroupAuthorization authorization: group.getAuthorizations()) {
 						Project authorizedProject = authorization.getProject();
 						if (authorization.getRole().equals(role) && authorizedProject.isSelfOrAncestorOf(project)) 
