@@ -129,7 +129,7 @@ jobs:
     - releaseJson="{\"name\":\"$buildVersion\",\"tag_name\":\"v$buildVersion\",\"body\":\"##
       Downloads\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/artifacts\n\n##
       Change Log\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/fixed-issues?query=%22State%22+is+%22Released%22+order+by+%22Type%22+asc+and+%22Priority%22+desc\n\n##
-      Incompatibilities\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/markdown-reports/Incompatibilities/doc/incompatibilities.md\"}"
+      Incompatibilities\n\nhttps://code.onedev.io/projects/160/builds/@build_number@/markdown/Incompatibilities/doc/incompatibilities.md\"}"
     - ''
     - 'acceptHeader="Accept: application/vnd.github.v3+json"'
     - if [ "$releaseId" == "null" ]; then
