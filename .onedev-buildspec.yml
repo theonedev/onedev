@@ -110,11 +110,12 @@ jobs:
     - git push -f https://robin:@secrets:github-token@@@github.com/theonedev/onedev
       v$buildVersion:v$buildVersion
     - ''
-    - echo "Creating release branch in onedev-manual..."
+    - echo "Creating release branch in onedev/manual..."
     - ''
     - cd /onedev-build
     - branch=${buildVersion%.*}
-    - git clone https://robin:@secrets:onedev-token@@@code.onedev.io/onedev-manual
+    - git clone https://robin:@secrets:onedev-token@@@code.onedev.io/onedev/manual
+      onedev-manual
     - cd onedev-manual
     - if [ "$(git branch -a|grep -c /$branch$)" -eq 0 ]; then
     - '  git push origin main:$branch'
