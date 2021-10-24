@@ -691,6 +691,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		if (authenticator != null) 
 			authenticator.onRenameGroup(oldName, newName);
 		getIssueSetting().onRenameGroup(oldName, newName);
+		getSecuritySetting().onRenameGroup(oldName, newName);
 	}
 
 	@Override
@@ -698,6 +699,7 @@ public class DefaultSettingManager extends BaseEntityManager<Setting> implements
 		Usage usage = new Usage();
 		
 		usage.add(getIssueSetting().onDeleteGroup(groupName));
+		usage.add(getSecuritySetting().onDeleteGroup(groupName));
 
 		Authenticator authenticator = getAuthenticator();
 		if (authenticator != null)

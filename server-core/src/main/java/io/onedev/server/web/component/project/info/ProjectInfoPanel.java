@@ -42,6 +42,10 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		add(new ProjectPathPanel("path", projectModel));
 		
+		WebMarkupContainer forkInfo = new WebMarkupContainer("forkInfo");
+		forkInfo.setVisible(getProject().isCodeManagementEnabled());
+		add(forkInfo);
+		
 		String query = ProjectQuery.getRuleName(ProjectQueryLexer.ForksOf) + " " 
 				+ Criteria.quote(getProject().getPath());
 		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
@@ -56,9 +60,10 @@ public abstract class ProjectInfoPanel extends Panel {
 			
 		};
 		forksLink.add(new Label("label", getProject().getForks().size() + " forks"));
-		add(forksLink);
+		forksLink.setVisible(getProject().isCodeManagementEnabled());
+		forkInfo.add(forksLink);
 		
-        add(new ModalLink("forkNow") {
+        forkInfo.add(new ModalLink("forkNow") {
 			
 			@Override
 			protected String getModalCssClass() {

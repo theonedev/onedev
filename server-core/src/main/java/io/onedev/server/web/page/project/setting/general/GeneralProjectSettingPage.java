@@ -8,7 +8,6 @@ import static io.onedev.server.model.Project.PROP_NAME;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,6 +18,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
@@ -56,7 +56,8 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		defaultRoleBean.setRole(getProject().getDefaultRole());
 		
 		ParentBean parentBean = new ParentBean();
-		parentBean.setParent(getProject().getParent());
+		if (getProject().getParent() != null)
+			parentBean.setParentPath(getProject().getParent().getPath());
 		
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
@@ -92,35 +93,46 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				Project parent = parentBean.getParent();
-				if (parent != null && !SecurityUtils.canCreateChildren(parent) 
-						|| parent == null && !SecurityUtils.canCreateRootProjects()) {
-					throw new UnauthorizedException();
+				Project project = getProject();
+				String prevParentPath;
+				if (project.getParent() != null)
+					prevParentPath = project.getParent().getPath();
+				else
+					prevParentPath = null;
+
+				String parentError = null;
+				if (!Objects.equal(prevParentPath, parentBean.getParentPath())) {
+					if (parentBean.getParentPath() != null) {
+						Project parent = getProjectManager().find(parentBean.getParentPath());
+						if (parent == null) 
+							parentError = "Parent project not found";
+						else if (project.isSelfOrAncestorOf(parent)) 
+							parentError = "Can not use current or descendant project as parent";
+						else if (!SecurityUtils.canCreateChildren(parent)) 
+							parentError = "Not authorized to move project under this parent";
+						project.setParent(parent);
+					} else if (!SecurityUtils.canCreateRootProjects()) {
+						parentError = "Not authorized to move project under root";
+					} else {
+						project.setParent(null);
+					}
 				}
 				
-				Project project = getProject();
-				if (parent != null && project.isSelfOrAncestorOf(parent)) {
-					parentEditor.error(new Path(new PathNode.Named("parentPath")), 
-							"Can not use current or descendant project as parent");
+				if (parentError != null) {
+					parentEditor.error(new Path(new PathNode.Named("parentPath")), parentError);
 				} else {
-					project.setParent(parent);
-					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-					Project projectWithSameName = projectManager.find(parent, project.getName());
+					Project projectWithSameName = getProjectManager().find(project.getParent(), project.getName());
 					if (projectWithSameName != null && !projectWithSameName.equals(project)) {
-						if (parent != null) {
-							editor.error(new Path(new PathNode.Named("name")),
-									"This name has already been used by another child project");
-						} else {
-							editor.error(new Path(new PathNode.Named("name")),
-									"This name has already been used by another root project");
-						}
+						editor.error(new Path(new PathNode.Named("name")),
+								"This name has already been used by another project");
 					} else {
 						project.setDefaultRole(defaultRoleBean.getRole());
-						projectManager.save(project, oldPath);
+						getProjectManager().save(project, oldPath);
 						Session.get().success("General setting has been updated");
 						setResponsePage(GeneralProjectSettingPage.class, paramsOf(project));
 					}
 				}
+				
 			}
 			
 		};
@@ -156,6 +168,10 @@ public class GeneralProjectSettingPage extends ProjectSettingPage {
 		add(form);
 	}
 
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
+	
 	@Override
 	protected Component newProjectTitle(String componentId) {
 		return new Label(componentId, "<span class='text-truncate'>General Setting</span>").setEscapeModelStrings(false);

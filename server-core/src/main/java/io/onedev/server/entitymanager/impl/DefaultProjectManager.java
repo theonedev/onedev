@@ -365,9 +365,9 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     			child = find(project, name);
     			if (child == null) {
 	    			if (project == null && !SecurityUtils.canCreateRootProjects())
-	    				throw new UnauthorizedException("Not authorized to create root project '" + name + "'");
+	    				throw new UnauthorizedException("Not authorized to create project under root");
 	    			if (project != null && !SecurityUtils.canCreateChildren(project))
-	    				throw new UnauthorizedException("Not authorized to create project '" + name + "' under '" + project.getPath() + "'");
+	    				throw new UnauthorizedException("Not authorized to create project under '" + project.getPath() + "'");
 	    			child = new Project();
 	    			child.setName(name);
 	    			child.setParent(project); 
@@ -406,6 +406,10 @@ public class DefaultProjectManager extends BaseEntityManager<Project>
     @Transactional
 	@Override
 	public void fork(Project from, Project to) {
+    	Project parent = to.getParent();
+    	if (parent != null && parent.isNew())
+    		create(parent);
+    	
     	dao.persist(to);
     	
        	UserAuthorization authorization = new UserAuthorization();

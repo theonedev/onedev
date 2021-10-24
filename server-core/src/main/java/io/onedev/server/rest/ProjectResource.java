@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,6 +28,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.ExplicitException;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitContribution;
@@ -214,10 +216,20 @@ public class ProjectResource {
     @POST
     public Long createOrUpdate(@NotNull Project project) {
 		Project parent = project.getParent();
-		if (parent != null && !SecurityUtils.canCreateChildren(parent))
-			throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
-		if (parent == null && !SecurityUtils.canCreateRootProjects()) 
-			throw new UnauthorizedException("Not authorized to create root project");
+		String customData = (String) project.getCustomData();
+		
+		Long prevParentId;
+		if (customData != null && customData.contains(":"))
+			prevParentId = Long.valueOf(StringUtils.substringBefore(customData, ":"));
+		else
+			prevParentId = null;
+
+		if (project.isNew() || !Objects.equals(prevParentId, Project.idOf(parent))) {
+			if (parent != null && !SecurityUtils.canCreateChildren(parent))
+				throw new UnauthorizedException("Not authorized to create project under '" + parent.getPath() + "'");
+			if (parent == null && !SecurityUtils.canCreateRootProjects()) 
+				throw new UnauthorizedException("Not authorized to create root project");
+		}
 	
 		if (parent != null && project.isSelfOrAncestorOf(parent)) 
 			throw new ExplicitException("Can not use current or descendant project as parent");
@@ -232,12 +244,16 @@ public class ProjectResource {
 			}
 		}
 		
-    	if (project.isNew()) 
+    	if (project.isNew()) { 
     		projectManager.create(project);
-    	else if (!SecurityUtils.canManage(project))
+    	} else if (!SecurityUtils.canManage(project)) {
 			throw new UnauthorizedException();
-    	else
-    		projectManager.save(project, (String) project.getCustomData());
+    	} else {
+    		String oldPath = customData;
+    		if (oldPath.contains(":"))
+    			oldPath = StringUtils.substringAfter(oldPath, ":");
+    		projectManager.save(project, oldPath);
+    	}
     	
     	return project.getId();
     }

@@ -1,11 +1,15 @@
 package io.onedev.server.web.page.project;
 
+import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_DESCRIPTION;
+import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT_ENABLED;
+import static io.onedev.server.model.Project.PROP_NAME;
+
 import java.util.Collection;
 
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -15,7 +19,6 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import static io.onedev.server.model.Project.*;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Path;
 import io.onedev.server.util.PathNode;
@@ -44,15 +47,20 @@ public class NewProjectPage extends LayoutPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Project project = new Project();
+		Project editProject = new Project();
 		
 		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
 				PROP_CODE_MANAGEMENT_ENABLED, PROP_ISSUE_MANAGEMENT_ENABLED);
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		ParentBean parentBean = new ParentBean();
+		if (parentId != null)
+			parentBean.setParentPath(getProjectManager().load(parentId).getPath());
 		
-		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
+		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
+		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
+		if (parentId != null)
+			parentEditor.setVisible(false);
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -60,53 +68,50 @@ public class NewProjectPage extends LayoutPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				Project parent;
-				if (parentId != null) {
-					parent = projectManager.load(parentId); 
-				} else {
-					parent = parentBean.getParent();
-					if (parent != null && !SecurityUtils.canCreateChildren(parent) 
-							|| parent == null && !SecurityUtils.canCreateRootProjects()) {
-						throw new UnauthorizedException();
-					}
-				}
-				project.setParent(parent);
-				Project projectWithSameName = projectManager.find(parent, project.getName());
-				if (projectWithSameName != null) {
-					if (parent != null) {
+				try {
+					String projectPath = editProject.getName();
+					if (parentBean.getParentPath() != null)
+						projectPath = parentBean.getParentPath() + "/" + projectPath;
+					Project newProject = getProjectManager().initialize(projectPath);
+					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another child project");
+								"This name has already been used by another project");
 					} else {
-						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another root project");
+						newProject.setDescription(editProject.getDescription());
+						newProject.setCodeManagementEnabled(editProject.isCodeManagementEnabled());
+						newProject.setIssueManagementEnabled(editProject.isIssueManagementEnabled());
+						newProject.setDefaultRole(defaultRoleBean.getRole());
+						
+						getProjectManager().create(newProject);
+						
+						Session.get().success("New project created");
+						if (newProject.isCodeManagementEnabled())
+							setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
+						else if (newProject.isIssueManagementEnabled())
+							setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(newProject));
+						else
+							setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(newProject));
 					}
-				} else {
-					project.setDefaultRole(defaultRoleBean.getRole());
-					projectManager.create(project);
-					Session.get().success("New project created");
-					if (project.isCodeManagementEnabled())
-						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
-					else if (project.isIssueManagementEnabled())
-						setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project));
+				} catch (UnauthorizedException e) {
+					if (parentEditor.isVisible())
+						parentEditor.error(new Path(new PathNode.Named("parentPath")), e.getMessage());
 					else
-						setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(project));
+						throw e;
 				}
 			}
 			
 		};
 		form.add(editor);
-		
 		form.add(BeanContext.edit("defaultRoleEditor", defaultRoleBean));
-		
-		if (parentId != null)
-			form.add(new WebMarkupContainer("parentEditor").setVisible(false));
-		else
-			form.add(BeanContext.edit("parentEditor", parentBean));			
+		form.add(parentEditor);
 		
 		add(form);
 	}
 
+	private ProjectManager getProjectManager() {
+		return OneDev.getInstance(ProjectManager.class);
+	}
+	
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.getUser() != null;
@@ -114,7 +119,10 @@ public class NewProjectPage extends LayoutPage {
 
 	@Override
 	protected Component newTopbarTitle(String componentId) {
-		return new Label(componentId, "Create Project");
+		if (parentId != null)
+			return new Label(componentId, "Create Child Project");
+		else
+			return new Label(componentId, "Create Project");
 	}
 	
 	public static PageParameters paramsOf(Project parent) {

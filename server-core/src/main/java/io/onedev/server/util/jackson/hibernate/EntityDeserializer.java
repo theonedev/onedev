@@ -57,14 +57,19 @@ public class EntityDeserializer extends BeanDeserializer {
             	if (property.getName().equals("id") && value != null) {
         			jp.nextToken();
         			AbstractEntity entity = dao.load(entityClass, (Long)value);
-        			if (entity instanceof Project) 
-        				entity.setCustomData(((Project) entity).getPath());
-        			else if (entity instanceof User) 
+        			if (entity instanceof Project) { 
+        				Project project = (Project) entity;
+        				if (project.getParent() != null)
+        					entity.setCustomData(project.getParent().getId() + ":" + project.getPath());
+        				else
+        					entity.setCustomData(project.getPath());
+        			} else if (entity instanceof User) { 
         				entity.setCustomData(((User) entity).getName());
-        			else if (entity instanceof Group) 
+        			} else if (entity instanceof Group) { 
         				entity.setCustomData(((Group) entity).getName());
-        			else if (entity instanceof Role) 
+        			} else if (entity instanceof Role) { 
         				entity.setCustomData(((Role) entity).getName());
+        			}
         			
         			Object bean;
         			if (entity instanceof HibernateProxy) 

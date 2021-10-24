@@ -193,7 +193,8 @@ public class GroupListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
 					IModel<Group> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().isCreateRootProjects()));
+				Group group = rowModel.getObject();
+				cellItem.add(new Label(componentId, group.isAdministrator() || group.isCreateRootProjects()));
 			}
 			
 		});

@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.project.info;
 
-import static io.onedev.server.model.Project.PROP_CODE_MANAGEMENT_ENABLED;
 import static io.onedev.server.model.Project.PROP_DESCRIPTION;
 import static io.onedev.server.model.Project.PROP_ISSUE_MANAGEMENT_ENABLED;
 import static io.onedev.server.model.Project.PROP_NAME;
@@ -27,8 +26,6 @@ import io.onedev.server.util.PathNode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.children.ProjectChildrenPage;
-import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.setting.general.DefaultRoleBean;
 import io.onedev.server.web.page.project.setting.general.ParentBean;
 
@@ -50,10 +47,8 @@ abstract class ForkOptionPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Project project = new Project();
-		project.setForkedFrom(getProject());
-		project.setName(getProject().getName());
-		project.setIssueManagementEnabled(false);
+		Project editProject = new Project();
+		editProject.setName(getProject().getName());
 
 		ParentBean parentBean = new ParentBean();
 		
@@ -61,23 +56,17 @@ abstract class ForkOptionPanel extends Panel {
 		Project parent = getProjectManager().find(userName);
 		if (parent != null) {
 			if (SecurityUtils.canCreateChildren(parent))
-				parentBean.setParent(parent);
+				parentBean.setParentPath(parent.getPath());
 		} else if (SecurityUtils.canCreateRootProjects()) {
-			parent = new Project();
-			parent.setName(userName);
-			parent.setCodeManagementEnabled(false);
-			parent.setIssueManagementEnabled(false);
-			getProjectManager().create(parent);
-			parentBean.setParent(parent);
+			parentBean.setParentPath(userName);
 		}
 		
 		DefaultRoleBean defaultRoleBean = new DefaultRoleBean();
 		defaultRoleBean.setRole(getProject().getDefaultRole());
 		
-		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, 
-				PROP_CODE_MANAGEMENT_ENABLED, PROP_ISSUE_MANAGEMENT_ENABLED);
+		Collection<String> properties = Sets.newHashSet(PROP_NAME, PROP_DESCRIPTION, PROP_ISSUE_MANAGEMENT_ENABLED);
 		
-		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
+		BeanEditor editor = BeanContext.edit("editor", editProject, properties, false);
 		BeanEditor defaultRoleEditor = BeanContext.edit("defaultRoleEditor", defaultRoleBean);
 		BeanEditor parentEditor = BeanContext.edit("parentEditor", parentBean);
 		
@@ -94,34 +83,27 @@ abstract class ForkOptionPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				Project parent = parentBean.getParent();
-				if (parent != null && !SecurityUtils.canCreateChildren(parent) 
-						|| parent == null && !SecurityUtils.canCreateRootProjects()) {
-					throw new UnauthorizedException();
-				}
-				
-				project.setParent(parent);
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				Project projectWithSameName = projectManager.find(parent, project.getName());
-				if (projectWithSameName != null) {
-					if (parent != null) {
+				try {
+					String projectPath = editProject.getName();
+					if (parentBean.getParentPath() != null)
+						projectPath = parentBean.getParentPath() + "/" + projectPath;
+					Project newProject = getProjectManager().initialize(projectPath);
+					if (!newProject.isNew()) {
 						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another child project");
+								"This name has already been used by another project");
+						target.add(form);
 					} else {
-						editor.error(new Path(new PathNode.Named("name")),
-								"This name has already been used by another root project");
+						newProject.setForkedFrom(getProject());
+						newProject.setDescription(editProject.getDescription());
+						newProject.setIssueManagementEnabled(editProject.isIssueManagementEnabled());
+						newProject.setDefaultRole(defaultRoleBean.getRole());
+						getProjectManager().fork(getProject(), newProject);
+						Session.get().success("Project forked");
+						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(newProject));
 					}
+				} catch (UnauthorizedException e) {
+					parentEditor.error(new Path(new PathNode.Named("parentPath")), e.getMessage());
 					target.add(form);
-				} else {
-					project.setDefaultRole(defaultRoleBean.getRole());
-					projectManager.fork(getProject(), project);
-					Session.get().success("Project forked");
-					if (project.isCodeManagementEnabled())
-						setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
-					else if (project.isIssueManagementEnabled())
-						setResponsePage(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(project));
-					else
-						setResponsePage(ProjectChildrenPage.class, ProjectChildrenPage.paramsOf(project));
 				}
 			}
 

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.shiro.authz.AuthorizationInfo;
@@ -16,10 +15,9 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.wicket.MetaDataKey;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -29,19 +27,16 @@ import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.issue.field.spec.FieldSpec;
 import io.onedev.server.persistence.SessionManager;
-import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.CreateRootProjects;
-import io.onedev.server.security.permission.EditIssueField;
-import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
 
 public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 
+	private static final Logger logger = LoggerFactory.getLogger(AbstractAuthorizingRealm.class);
+	
     protected final UserManager userManager;
     
     protected final GroupManager groupManager;
@@ -67,22 +62,12 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
     	this.settingManager = settingManager;
     }
 
-	private Collection<Permission> getGroupPermissions(Group group, @Nullable User user) {
+	private Collection<Permission> getGroupPermissions(Group group, User user) {
 		Collection<Permission> permissions = new ArrayList<>();
-		if (group.isAdministrator()) {
-			if (user != null) {
-				permissions.add(new SystemAdministration());
-			} else {
-				for (Project project: projectManager.query()) {
-					permissions.add(new ProjectPermission(project, new ReadCode()));
-					for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs())
-						permissions.add(new ProjectPermission(project, new EditIssueField(Sets.newHashSet(field.getName()))));
-					permissions.add(new ProjectPermission(project, new JobPermission("*", new AccessBuildLog())));
-				}
-			}
-		} else if (group.isCreateRootProjects() && user != null) {
+		if (group.isAdministrator()) 
+			permissions.add(new SystemAdministration());
+		else if (group.isCreateRootProjects()) 
 			permissions.add(new CreateRootProjects());
-		}
 		for (GroupAuthorization authorization: group.getAuthorizations()) 
 			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 		return permissions;
@@ -102,6 +87,15 @@ public abstract class AbstractAuthorizingRealm extends AuthorizingRealm {
 		        	permissions.add(new UserAdministration(user));
 		           	for (Group group: user.getGroups())
 		           		permissions.addAll(getGroupPermissions(group, user));
+		           	String defaultGroupName = settingManager.getSecuritySetting().getDefaultLoginGroup();
+		           	if (defaultGroupName != null) {
+		           		Group group = groupManager.find(defaultGroupName);
+		           		if (group == null) 
+		           			logger.error("Unable to find default group for sign-in user: " + defaultGroupName);
+		           		else
+		           			permissions.addAll(getGroupPermissions(group, user));
+		           	}
+		           	
 		        	for (UserAuthorization authorization: user.getAuthorizations()) 
     					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 		        } 
