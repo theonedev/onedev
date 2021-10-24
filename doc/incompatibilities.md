@@ -1,4 +1,4 @@
-# 5.2.0
+# 5.2.1
 
 1. User by default is not able to create/fork projects now. To allow it, specify default login group with appropriate project create permissions in security setting.
 2. URL of project is changed from *http(s)://\<onedev-server\>/projects/\<project name\>* to *http(s)://\<onedev-server\>/projects/\<project id\>*. This only affects web UI, clone url and REStful api url is not changed.
