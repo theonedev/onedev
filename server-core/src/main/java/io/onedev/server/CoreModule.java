@@ -183,8 +183,10 @@ import io.onedev.server.git.hookcallback.GitPostReceiveCallback;
 import io.onedev.server.git.hookcallback.GitPreReceiveCallback;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.infomanager.DefaultCommitInfoManager;
+import io.onedev.server.infomanager.DefaultIssueInfoManager;
 import io.onedev.server.infomanager.DefaultPullRequestInfoManager;
 import io.onedev.server.infomanager.DefaultUserInfoManager;
+import io.onedev.server.infomanager.IssueInfoManager;
 import io.onedev.server.infomanager.PullRequestInfoManager;
 import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.job.resource.DefaultResourceManager;
@@ -386,6 +388,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestWatchManager.class).to(DefaultPullRequestWatchManager.class);
 		bind(RoleManager.class).to(DefaultRoleManager.class);
 		bind(CommitInfoManager.class).to(DefaultCommitInfoManager.class);
+		bind(IssueInfoManager.class).to(DefaultIssueInfoManager.class);
 		bind(UserInfoManager.class).to(DefaultUserInfoManager.class);
 		bind(BatchWorkManager.class).to(DefaultBatchWorkManager.class);
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);

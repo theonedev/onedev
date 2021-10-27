@@ -68,7 +68,8 @@ public class MilestoneEditPage extends ProjectPage {
 					editor.getDescriptor().copyProperties(milestone, getMilestone());
 					milestoneManager.save(getMilestone());
 					Session.get().success("Milestone saved");
-					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone().getProject(), getMilestone(), null));
+					setResponsePage(MilestoneIssuesPage.class, 
+							MilestoneIssuesPage.paramsOf(getMilestone().getProject(), getMilestone(), null));
 				}
 				
 			}
@@ -100,8 +101,8 @@ public class MilestoneEditPage extends ProjectPage {
 		Fragment fragment = new Fragment(componentId, "projectTitleFrag", this);
 		fragment.add(new BookmarkablePageLink<Void>("milestones", MilestoneListPage.class, 
 				MilestoneListPage.paramsOf(getProject())));
-		Link<Void> link = new BookmarkablePageLink<Void>("milestone", MilestoneDetailPage.class, 
-				MilestoneDetailPage.paramsOf(getMilestone().getProject(), getMilestone(), null));
+		Link<Void> link = new BookmarkablePageLink<Void>("milestone", MilestoneIssuesPage.class, 
+				MilestoneIssuesPage.paramsOf(getMilestone().getProject(), getMilestone(), null));
 		link.add(new Label("name", getMilestone().getName()));
 		fragment.add(link);
 		return fragment;

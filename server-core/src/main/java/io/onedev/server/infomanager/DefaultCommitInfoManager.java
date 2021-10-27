@@ -86,7 +86,7 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultCommitInfoManager extends AbstractEnvironmentManager implements CommitInfoManager {
+public class DefaultCommitInfoManager extends AbstractMultiEnvironmentManager implements CommitInfoManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultCommitInfoManager.class);
 	
@@ -1147,7 +1147,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	@Listen
 	public void on(SystemStarted event) {
 		for (Project project: projectManager.query()) {
-			checkVersion(project.getId().toString());
+			checkVersion(getEnvDir(project.getId().toString()));
 			collect(project);
 		}
 	}
@@ -1233,7 +1233,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			} finally {
 				backupStrategy.afterBackup();
 			}
-			writeVersion(target.getId().toString());
+			writeVersion(getEnvDir(target.getId().toString()));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

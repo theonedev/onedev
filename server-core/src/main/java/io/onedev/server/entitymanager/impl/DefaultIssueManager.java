@@ -908,5 +908,15 @@ public class DefaultIssueManager extends BaseEntityManager<Issue> implements Iss
 		for (Issue issue: getSession().createQuery(criteriaQuery).getResultList()) 
 			issue.setMilestone(null);
 	}
+
+	@Sessional
+	@Override
+	public List<Issue> queryAfter(Long afterIssueId, int count) {
+		EntityCriteria<Issue> criteria = newCriteria();
+		criteria.addOrder(Order.asc("id"));
+		if (afterIssueId != null) 
+			criteria.add(Restrictions.gt("id", afterIssueId));
+		return query(criteria, 0, count);
+	}
 	
 }

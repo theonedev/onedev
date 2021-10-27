@@ -538,6 +538,30 @@ onedev.server = {
 		},
 	},
 	util: {
+		formatWorkingPeriod: function(minutes) {
+			var weeks = Math.floor(minutes/(60*8*5));
+			minutes = minutes%(60*8*5);
+			var days = Math.floor(minutes/(60*8));
+			minutes = minutes%(60*8);
+			var hours = Math.floor(minutes/60);
+			minutes = minutes%60;
+			
+			var formatted = "";
+			if (weeks != 0)
+				formatted = formatted + weeks + "w ";
+			if (days != 0)
+				formatted = formatted + days + "d ";
+			if (hours != 0)
+				formatted = formatted + hours + "h ";
+			if (minutes != 0)
+				formatted = formatted + minutes + "m";
+			
+			formatted = formatted.trim();
+			if (formatted.length == 0)
+				return "0m";
+			else
+				return formatted;
+		},
 		isObjEmpty: function(obj) {
     		for(var key in obj) {
         		if(obj.hasOwnProperty(key))

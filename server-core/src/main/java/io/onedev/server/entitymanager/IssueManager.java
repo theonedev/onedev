@@ -80,4 +80,6 @@ public interface IssueManager extends EntityManager<Issue> {
 
 	void clearMilestones(Project project, Collection<Milestone> milestones);
 	
+	List<Issue> queryAfter(@Nullable Long afterIssueId, int count);
+	
 }

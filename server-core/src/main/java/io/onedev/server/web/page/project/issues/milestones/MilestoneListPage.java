@@ -51,7 +51,7 @@ import io.onedev.server.web.component.link.ActionablePageLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.milestone.MilestoneDueLabel;
+import io.onedev.server.web.component.milestone.MilestoneDateLabel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.LoadableDetachableDataProvider;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -189,8 +189,8 @@ public class MilestoneListPage extends ProjectPage {
 					IModel<Milestone> rowModel) {
 				Milestone milestone = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", MilestoneListPage.this);
-				WebMarkupContainer link = new ActionablePageLink<Void>("link", MilestoneDetailPage.class, 
-						MilestoneDetailPage.paramsOf(getProject(), milestone, null)) {
+				WebMarkupContainer link = new ActionablePageLink<Void>("link", MilestoneIssuesPage.class, 
+						MilestoneIssuesPage.paramsOf(getProject(), milestone, null)) {
 
 					@Override
 					protected void doBeforeNav(AjaxRequestTarget target) {
@@ -226,7 +226,7 @@ public class MilestoneListPage extends ProjectPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Milestone>> cellItem, String componentId,
 					IModel<Milestone> rowModel) {
-				cellItem.add(new MilestoneDueLabel(componentId, rowModel));
+				cellItem.add(new MilestoneDateLabel(componentId, rowModel));
 			}
 			
 		});
@@ -272,8 +272,8 @@ public class MilestoneListPage extends ProjectPage {
 							@Override
 							protected Link<Void> newStateLink(String componentId, String state) {
 								String query = new IssueQuery(new StateCriteria(state)).toString();
-								PageParameters params = MilestoneDetailPage.paramsOf(getProject(), rowModel.getObject(), query);
-								return new ViewStateAwarePageLink<Void>(componentId, MilestoneDetailPage.class, params);
+								PageParameters params = MilestoneIssuesPage.paramsOf(getProject(), rowModel.getObject(), query);
+								return new ViewStateAwarePageLink<Void>(componentId, MilestoneIssuesPage.class, params);
 							}
 							
 						});								

@@ -47,7 +47,7 @@ public class NewMilestonePage extends ProjectPage {
 					milestone.setProject(getProject());
 					milestoneManager.save(milestone);
 					Session.get().success("New milestone created");
-					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getProject(), milestone, null));
+					setResponsePage(MilestoneIssuesPage.class, MilestoneIssuesPage.paramsOf(getProject(), milestone, null));
 				}
 				
 			}

@@ -49,6 +49,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.ExplicitException;
@@ -429,7 +430,8 @@ public abstract class IssueListPanel extends Panel {
 	
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Project project) {
-							setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(project));
+							PageParameters params = NewIssuePage.paramsOf(project, getBaseQuery().toString());
+							setResponsePage(NewIssuePage.class, params);
 						}
 	
 					}.add(AttributeAppender.append("class", "no-current"));
@@ -437,7 +439,8 @@ public abstract class IssueListPanel extends Panel {
 			
 			});	
 		} else {
-			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject())));
+			PageParameters params = NewIssuePage.paramsOf(getProject(), getBaseQuery().toString());
+			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, params));
 		}
 		
 		add(new ModalLink("listFields") {

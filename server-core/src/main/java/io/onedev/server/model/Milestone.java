@@ -44,6 +44,8 @@ public class Milestone extends AbstractEntity {
 	
 	public static final String PROP_NAME = "name";
 	
+	public static final String PROP_START_DATE = "startDate";
+	
 	public static final String PROP_DUE_DATE = "dueDate";
 	
 	public static final String PROP_CLOSED = "closed";
@@ -57,6 +59,8 @@ public class Milestone extends AbstractEntity {
 	
 	@Column(length=MAX_DESCRIPTION_LEN)
 	private String description;
+	
+	private Date startDate;
 	
 	private Date dueDate;
 	
@@ -91,6 +95,16 @@ public class Milestone extends AbstractEntity {
 
 	public void setDescription(String description) {
 		this.description = StringUtils.abbreviate(description, MAX_DESCRIPTION_LEN);
+	}
+
+	@Editable(order=250, description="Optionally specify start date of the milestone")
+	@Nullable
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
 	}
 
 	@Editable(order=300, description="Optionally specify due date of the milestone")
@@ -138,20 +152,31 @@ public class Milestone extends AbstractEntity {
 		return stateStats;
 	}
 	
-	public static class DueDateComparator implements Comparator<Milestone> {
+	public static class DatesComparator implements Comparator<Milestone> {
 
 		@Override
 		public int compare(Milestone o1, Milestone o2) {
-			if (o1.getDueDate() != null) {
-				if (o2.getDueDate() != null)
-					return o1.getDueDate().compareTo(o2.getDueDate());
+			if (o1.getStartDate() != null) {
+				if (o2.getStartDate() != null)
+					return o1.getStartDate().compareTo(o2.getStartDate());
 				else
 					return -1;
 			} else {
-				if (o2.getDueDate() != null)
+				if (o2.getStartDate() != null) {
 					return 1;
-				else
-					return o1.getName().compareTo(o2.getName());
+				} else {
+					if (o1.getDueDate() != null) {
+						if (o2.getDueDate() != null)
+							return o1.getDueDate().compareTo(o2.getDueDate());
+						else
+							return -1;
+					} else {
+						if (o2.getDueDate() != null)
+							return 1;
+						else
+							return o1.getName().compareTo(o2.getName());
+					}
+				}
 			}
 		}
 		

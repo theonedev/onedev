@@ -28,6 +28,8 @@ public interface StorageManager {
      */
     File getProjectInfoDir(Long projectId);
     
+    File getInfoDir();
+    
     /**
      * Get directory to store attachments of specified project
      * 

@@ -43,6 +43,7 @@ import io.onedev.server.util.Pair;
 import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.BuildMetricQueryBehavior;
+import io.onedev.server.web.component.chart.line.Line;
 import io.onedev.server.web.component.chart.line.LineChartPanel;
 import io.onedev.server.web.component.chart.line.LineSeries;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -210,17 +211,6 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 						if (valueFormatter.length() == 0)
 							valueFormatter = null;
 						
-						List<String> lineNames = new ArrayList<>();
-						List<String> lineColors = new ArrayList<>();
-						for (Method getter: group) {
-							indicator = getter.getAnnotation(MetricIndicator.class);
-							String name = indicator.name();
-							if (name.length() == 0) 
-								name = BeanUtils.getDisplayName(getter);
-							lineNames.add(name);
-							lineColors.add(indicator.color());
-						}
-						
 						Map<Integer, List<Integer>> discreteValues = new HashMap<>();
 						for (Map.Entry<Integer, T> entry: stats.entrySet()) {
 							List<Integer> lineValues = new ArrayList<>();
@@ -253,8 +243,24 @@ public abstract class BuildMetricStatsPage<T extends AbstractEntity> extends Pro
 								currentDayValue = new Day(currentDay.getDate().plusDays(1)).getValue();
 							}
 						} 
-						serieses.add(new LineSeries(groupName, lineNames, completeValues, valueFormatter, 
-								minValue, maxValue, lineColors));
+						
+						List<String> xAxisValues = new ArrayList<>(completeValues.keySet());
+						List<Line> lines = new ArrayList<>();
+						
+						int lineIndex = 0;
+						for (Method getter: group) {
+							indicator = getter.getAnnotation(MetricIndicator.class);
+							String name = indicator.name();
+							if (name.length() == 0) 
+								name = BeanUtils.getDisplayName(getter);
+							Map<String, Integer> yAxisValues = new HashMap<>();
+							for (String xAxisValue: xAxisValues) 
+								yAxisValues.put(xAxisValue, completeValues.get(xAxisValue).get(lineIndex));
+							lines.add(new Line(name, yAxisValues, indicator.color(), null, null));
+							lineIndex++;
+						}
+						
+						serieses.add(new LineSeries(groupName, xAxisValues, lines, valueFormatter, minValue, maxValue));
 					}
 				} 
 				return serieses;

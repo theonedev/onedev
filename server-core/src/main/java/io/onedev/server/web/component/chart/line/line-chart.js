@@ -1,5 +1,5 @@
 onedev.server.lineChart = {
-	onDomReady: function(containerId, lineSeries, valueFormatter) {
+	onDomReady: function(containerId, lineSeries, yAxisValueFormatter) {
 		var $chart = $("#" + containerId + ">.line-chart");
 		
 		if (lineSeries) {
@@ -21,14 +21,14 @@ onedev.server.lineChart = {
 				},
 				series: []
 			};
-			if (lineSeries.lineNames.length > 1) {
+			if (lineSeries.lines.length > 1) {
 				option.legend = {
 					show: true, 
 					x: "center",
 					data: []
 				}
-				for (const i in lineSeries.lineNames) 
-					option.legend.data.push(lineSeries.lineNames[i]);
+				for (const i in lineSeries.lines) 
+					option.legend.data.push(lineSeries.lines[i].name);
 				if (lineSeries.seriesName) {
 					option.grid = {
 						top: 80
@@ -40,7 +40,7 @@ onedev.server.lineChart = {
 					option.legend.top = 30;
 				} 
 			} else {
-				let title = lineSeries.lineNames[0];
+				let title = lineSeries.lines[0].name;
 				if (lineSeries.seriesName) 
 					title = lineSeries.seriesName + " / " + title;
 				option.title = {
@@ -49,45 +49,57 @@ onedev.server.lineChart = {
 				}
 			} 
 			
-			for (const i in lineSeries.lineNames) {
+			for (const i in lineSeries.lines) {
 				option.series.push({
-					name: lineSeries.lineNames[i],
+					name: lineSeries.lines[i].name,
 					data: [],
 					type: 'line',
-					smooth: true, 
+					smooth: false, 
 					animation: false,
+					connectNulls: true,
 					lineStyle: {
-						color: lineSeries.lineColors[i]
+						color: lineSeries.lines[i].color,
+						type: lineSeries.lines[i].style?lineSeries.lines[i].style:"solid"
 					},
 					itemStyle: {
-						color: lineSeries.lineColors[i]
+						color: lineSeries.lines[i].color
 					}
 				});
 			}
-			for (const key in lineSeries.lineValues) {
-				option.xAxis.data.push(key);
-				for (const i in lineSeries.lineNames) 
-					option.series[i].data.push(lineSeries.lineValues[key][i]);
+			for (const i in lineSeries.lines) {
+				var stack = lineSeries.lines[i].stack;
+				if (stack) {
+					option.series[i].stack = stack;
+					option.series[i].areaStyle = {};
+				}
+			}
+			for (const i in lineSeries.xAxisValues) {
+				let xAxisValue = lineSeries.xAxisValues[i];
+				option.xAxis.data.push(xAxisValue);
+				for (const j in lineSeries.lines) {
+					console.log(lineSeries.lines[j].yAxisValues[xAxisValue]);
+					option.series[j].data.push(lineSeries.lines[j].yAxisValues[xAxisValue]);
+				}
 			};
-			if (valueFormatter) {
+			if (yAxisValueFormatter) {
 				option.yAxis.axisLabel = {
-	        		formatter: valueFormatter
+	        		formatter: yAxisValueFormatter
 	    		}
 				option.tooltip.formatter = function(params) {
 					if (params.length != 0) {
 						let tooltip = params[0].axisValueLabel;
 						for(var i in params) {
 							var circle = `<span style='margin-right: 8px; border-radius: 50%; display: inline-block; width: 10px; height: 10px; background: ${params[i].color}'></span>`;
-							tooltip += "<br>" + circle + params[i].seriesName + ": " + valueFormatter(params[i].data);
+							tooltip += "<br>" + circle + params[i].seriesName + ": " + yAxisValueFormatter(params[i].data);
 						}
 						return tooltip;												
 					} 
 				}
 			}
-			if (lineSeries.minValue) 
-				option.yAxis.min = lineSeries.minValue;
-			if (lineSeries.maxValue) 
-				option.yAxis.max = lineSeries.maxValue;
+			if (lineSeries.minYAxisValue) 
+				option.yAxis.min = lineSeries.minYAxisValue;
+			if (lineSeries.maxYAxisValue) 
+				option.yAxis.max = lineSeries.maxYAxisValue;
 
 			chart.setOption(option);
 			
