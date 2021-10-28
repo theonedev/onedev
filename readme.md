@@ -104,3 +104,11 @@ Define permission schemes best suiting your development workflow. For instance, 
 Projects can be organized in a tree structure, and settings of parent project can be inherited by children. This saves a lot of efforts when manage a lot of projects with some common settings.
 
 ![Child Projects](doc/images/child-projects.png)
+
+----
+
+# Special Thanks
+
+![yourkit](https://www.yourkit.com/images/yklogo.png) 
+
+[YourKit](https://yourkit.com) supports this project by providing a free open source license of YourKit Java profiler
