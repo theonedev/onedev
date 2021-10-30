@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-plugin</artifactId>
-		<version>5.2.2</version>
+		<version>5.3.0</version>
 	</parent>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.imports.jiracloud.JiraPluginModule</moduleClass>
