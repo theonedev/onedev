@@ -216,7 +216,10 @@ public class MilestoneBurndownPage extends MilestoneDetailPage {
 								yAxisValues.put(getXAxisValue(day), weight);
 							}
 						}
-						initialIssueWeight += yAxisValues.get(getXAxisValue(new Day(startDayValue)));
+						Integer stateWeight = yAxisValues.get(getXAxisValue(new Day(startDayValue)));
+						if (stateWeight == null)
+							stateWeight = 0;
+						initialIssueWeight += stateWeight;
 						lines.add(new Line(spec.getName(), yAxisValues, spec.getColor(), "States", null));
 					}
 

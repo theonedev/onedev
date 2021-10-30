@@ -26,31 +26,6 @@ public class TestPage extends BasePage {
 			}
 			
 		});
-
-		/*
-		List<String> xAxisValues = new ArrayList<>();
-		for (int i=1; i<=100; i++) {
-			String xAxisValue = String.valueOf(i);
-			xAxisValues.add(xAxisValue);
-		}
-		Map<String, Integer> redValues = new HashMap<>();
-		Map<String, Integer> greenValues = new HashMap<>();
-		Map<String, Integer> blueValues = new HashMap<>();
-		for (int i=1; i<=50; i++) {
-			String xAxisValue = String.valueOf(i);
-			redValues.put(xAxisValue, RandomUtils.nextInt(10)+20);
-			greenValues.put(xAxisValue, RandomUtils.nextInt(10)+40);
-			blueValues.put(xAxisValue, RandomUtils.nextInt(10)+60);
-		}
-		
-		List<Line> lines = new ArrayList<>();
-		lines.add(new Line("red", redValues, "red", "redgreen"));
-		lines.add(new Line("green", greenValues, "green", "redgreen"));
-		lines.add(new Line("blue", blueValues, "blue", "redgreen"));
-		
-		LineSeries series = new LineSeries("chart", xAxisValues, lines, null, null, null);
-		add(new LineChartPanel("chart", Model.of(series)));
-		*/
 	}
 	
 	@Override

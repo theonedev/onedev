@@ -110,6 +110,7 @@ public class SpriteImage extends WebComponent {
 		}
 		
 		String spriteUrl = urlFor(new SvgSpriteResourceReference(scope), new PageParameters()).toString();
+		
 		replaceComponentTagBody(markupStream, openTag, 
 				"<use xlink:href='" + spriteUrl + "#" + symbol + "'></use>");
 	}
