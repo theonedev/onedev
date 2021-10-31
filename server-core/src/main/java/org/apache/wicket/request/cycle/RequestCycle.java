@@ -16,8 +16,11 @@
  */
 package org.apache.wicket.request.cycle;
 
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.wicket.Application;
 import org.apache.wicket.MetaDataEntry;
 import org.apache.wicket.MetaDataKey;
@@ -52,8 +55,6 @@ import org.apache.wicket.util.lang.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.util.Pair;
-
 /**
  * {@link RequestCycle} consists of two steps:
  * <ol>
@@ -74,19 +75,23 @@ public class RequestCycle implements IRequestCycle, IEventSink
 {
 	private static final Logger log = LoggerFactory.getLogger(RequestCycle.class);
 	
-	private static MetaDataKey<ConcurrentHashMap<Pair<ResourceReference, PageParameters>, CharSequence>> resourceUrlCacheKey = 
-			new MetaDataKey<ConcurrentHashMap<Pair<ResourceReference, PageParameters>, CharSequence>>(){
+	private static MetaDataKey<ConcurrentHashMap<ResourceUrlCacheKey, CharSequence>> resourceUrlCacheKey = 
+			new MetaDataKey<ConcurrentHashMap<ResourceUrlCacheKey, CharSequence>>(){
 
 		private static final long serialVersionUID = 1L;
 		
 	};
 
-	private static MetaDataKey<ConcurrentHashMap<Pair<Class<?>, PageParameters>, CharSequence>> pageUrlCacheKey = 
-			new MetaDataKey<ConcurrentHashMap<Pair<Class<?>, PageParameters>, CharSequence>>(){
+	private static MetaDataKey<ConcurrentHashMap<PageUrlCacheKey, CharSequence>> pageUrlCacheKey = 
+			new MetaDataKey<ConcurrentHashMap<PageUrlCacheKey, CharSequence>>(){
 
 		private static final long serialVersionUID = 1L;
 		
 	};
+	
+	private ConcurrentHashMap<ResourceUrlCacheKey, CharSequence> resourceUrlCache = new ConcurrentHashMap<>();
+	
+	private ConcurrentHashMap<PageUrlCacheKey, CharSequence> pageUrlCache = new ConcurrentHashMap<>();
 	
 	/**
 	 * An additional logger which is used to log extra information.
@@ -510,14 +515,19 @@ public class RequestCycle implements IRequestCycle, IEventSink
 	 */
 	public final CharSequence urlFor(ResourceReference reference, PageParameters params)
 	{
-		ConcurrentHashMap<Pair<ResourceReference, PageParameters>, CharSequence> resourceUrlCache = 
-				Session.get().getMetaData(resourceUrlCacheKey);
-		if (resourceUrlCache == null) {
-			resourceUrlCache = new ConcurrentHashMap<>();
-			Session.get().setMetaData(resourceUrlCacheKey, resourceUrlCache);
+		ConcurrentHashMap<ResourceUrlCacheKey, CharSequence> resourceUrlCache;
+		Session session = ThreadContext.getSession();
+		if (session != null) {
+			resourceUrlCache = session.getMetaData(resourceUrlCacheKey);
+			if (resourceUrlCache == null) {
+				resourceUrlCache = new ConcurrentHashMap<>();
+				session.setMetaData(resourceUrlCacheKey, resourceUrlCache);
+			}
+		} else {
+			resourceUrlCache = this.resourceUrlCache;
 		}
 		
-		Pair<ResourceReference, PageParameters> key = new Pair<>(reference, params);
+		ResourceUrlCacheKey key = new ResourceUrlCacheKey(reference, params);
 		CharSequence url = resourceUrlCache.get(key);
 		if (url == null) {
 			ResourceReferenceRequestHandler handler = new ResourceReferenceRequestHandler(
@@ -544,14 +554,19 @@ public class RequestCycle implements IRequestCycle, IEventSink
 	public final <C extends Page> CharSequence urlFor(final Class<C> pageClass,
 		final PageParameters parameters)
 	{
-		ConcurrentHashMap<Pair<Class<?>, PageParameters>, CharSequence> pageUrlCache = 
-				Session.get().getMetaData(pageUrlCacheKey);
-		if (pageUrlCache == null) {
-			pageUrlCache = new ConcurrentHashMap<>();
-			Session.get().setMetaData(pageUrlCacheKey, pageUrlCache);
+		ConcurrentHashMap<PageUrlCacheKey, CharSequence> pageUrlCache;
+		Session session = ThreadContext.getSession();
+		if (session != null) {
+			pageUrlCache = session.getMetaData(pageUrlCacheKey);
+			if (pageUrlCache == null) {
+				pageUrlCache = new ConcurrentHashMap<>();
+				session.setMetaData(pageUrlCacheKey, pageUrlCache);
+			}
+		} else {
+			pageUrlCache = this.pageUrlCache;
 		}
 		
-		Pair<Class<?>, PageParameters> key = new Pair<>(pageClass, parameters);
+		PageUrlCacheKey key = new PageUrlCacheKey(pageClass, parameters);
 		CharSequence url = pageUrlCache.get(key);
 		if (url == null) {
 			IRequestHandler handler = new BookmarkablePageRequestHandler(
@@ -953,4 +968,76 @@ public class RequestCycle implements IRequestCycle, IEventSink
 
 	}
 
+	private static class ResourceUrlCacheKey implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final ResourceReference resourceReference;
+		
+		private final PageParameters params;
+		
+		public ResourceUrlCacheKey(ResourceReference resourceReference, PageParameters params) {
+			this.resourceReference = resourceReference;
+			this.params = params;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof ResourceUrlCacheKey)) 
+				return false;
+			if (this == other)
+				return true;
+			ResourceUrlCacheKey otherKey = (ResourceUrlCacheKey) other;
+			return new EqualsBuilder()
+				.append(resourceReference, otherKey.resourceReference)
+				.append(params, otherKey.params)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(resourceReference)
+				.append(params)
+				.toHashCode();
+		}		
+		
+	}
+	
+	private static class PageUrlCacheKey implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
+		private final Class<?> pageClass;
+		
+		private final PageParameters params;
+		
+		public PageUrlCacheKey(Class<?> pageClass, PageParameters params) {
+			this.pageClass = pageClass;
+			this.params = params;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof PageUrlCacheKey)) 
+				return false;
+			if (this == other)
+				return true;
+			PageUrlCacheKey otherKey = (PageUrlCacheKey) other;
+			return new EqualsBuilder()
+				.append(pageClass, otherKey.pageClass)
+				.append(params, otherKey.params)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(pageClass)
+				.append(params)
+				.toHashCode();
+		}		
+		
+	}
+	
 }
